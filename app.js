@@ -39,7 +39,6 @@ function escapeHtml(value="") {
   return value.replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[c]));
 }
 
-
 function mvNow(){return new Date();}
 function mvMinutes(d=mvNow()){return d.getHours()*60+d.getMinutes();}
 function mvDow(d=mvNow()){return d.getDay();}
@@ -79,7 +78,7 @@ function renderMeuDia(){
 }
 
 function render() {
-  const route = (location.hash || '#pendencias').slice(1) || 'meu-dia';
+  const route = (location.hash || '#pendencias').slice(1) || 'pendencias';
   state.route = route;
   if(route === 'meu-dia'){ document.getElementById('app').innerHTML=renderMeuDia(); return; }
 
@@ -247,7 +246,6 @@ function toggleDone(id) {
   renderPendencias();
 }
 
-
 const IDEAS_KEY = "minha-vida.ideias.v1";
 let ideaFilter = "todas";
 
@@ -339,7 +337,7 @@ function bindIdeaCards() {
 }
 
 function openIdeaModal(id=null) {
-  const p = id ? loadIdeias().find(x => x.id===id) : null;
+  const p = id ? loadIdeias().find(x=>x.id===id) : null;
   const title = p ? "Editar registro" : "Nova ideia";
   const type = p?.type || "ideia";
   const body = `
@@ -403,7 +401,6 @@ function openIdeaModal(id=null) {
   });
   setTimeout(() => d.querySelector("#ideaTitle").focus(), 50);
 }
-
 
 const RITUAIS_KEY = "minha-vida.rituais.v1";
 const RITUAL_CAPILAR_KEY = "minha-vida.ritual-capilar.v1";
@@ -555,7 +552,6 @@ function openRitualModal(id=null) {
   });
 }
 
-
 const ESTUDOS_KEY = "minha-vida.estudos.v1";
 
 function loadEstudos() {
@@ -682,7 +678,6 @@ function openStudyModal(type, id=null) {
     saveEstudos(data); dlg.close(); dlg.remove(); renderEstudos();
   });
 }
-
 
 const FIN_KEY = "minha-vida.financeiro.v1";
 const FIN_BASE = {
@@ -844,44 +839,666 @@ function openExercisePlan(){
  dlg.querySelector("#exForm").addEventListener("submit",e=>{e.preventDefault();d.plans.push({id:uid(),name:dlg.querySelector("#eName").value.trim(),type:dlg.querySelector("#eType").value.trim(),target:dlg.querySelector("#eTarget").value.trim(),days:[],active:true});saveEx(d);dlg.close();dlg.remove();renderExercicios();});
 }
 
-const FOOD_KEY="minha-vida.alimentacao.v1";
+const FOOD_KEY="minha-vida.alimentacao.v2";
+
 const FOOD_BASE={
- week:1,
- breakfasts:[
-  ["Segunda","Pão frito + café com leite"],["Terça","Crepioca de cottage"],["Quarta","Waffle de queijo"],["Quinta","Panqueca"],["Sexta","Pão frito"],["Sábado","Cuscuz + queijo"],["Domingo","Panquecas + café com leite"]
- ],
- dinners:[
-  ["Segunda","Frango assado com batatas + arroz + salada","terça"],
-  ["Terça","Strogonoff de frango + arroz + batata palha + salada","quarta"],
-  ["Quarta","Bife de alcatra acebolado + purê + brócolis","quinta"],
-  ["Quinta","Ragu de carne + arroz + legumes","sexta"],
-  ["Sexta","Hambúrguer caseiro + batata assada + salada",""],
-  ["Sábado","Pizza caseira / noite de pizza",""],
-  ["Domingo","Carne de panela com músculo + arroz + feijão + legumes",""]
- ],
- lunchbox:true,
- shoppingWeekly:true,
- cookingDone:false
+  meals:[
+    {id:"seg-cafe",day:"Segunda",type:"Café da manhã",name:"Pão frito + café com leite",note:""},
+    {id:"ter-cafe",day:"Terça",type:"Café da manhã",name:"Crepioca de cottage",note:""},
+    {id:"qua-cafe",day:"Quarta",type:"Café da manhã",name:"Waffle de queijo",note:""},
+    {id:"qui-cafe",day:"Quinta",type:"Café da manhã",name:"Panqueca",note:""},
+    {id:"sex-cafe",day:"Sexta",type:"Café da manhã",name:"Pão frito",note:""},
+    {id:"sab-cafe",day:"Sábado",type:"Café da manhã",name:"Cuscuz + queijo",note:""},
+    {id:"dom-cafe",day:"Domingo",type:"Café da manhã",name:"Panquecas + café com leite",note:""},
+
+    {id:"seg-jantar",day:"Segunda",type:"Jantar",name:"Frango assado com batatas + arroz + salada",note:"Marmita → terça"},
+    {id:"ter-jantar",day:"Terça",type:"Jantar",name:"Strogonoff de frango + arroz + batata palha + salada",note:"Marmita → quarta"},
+    {id:"qua-jantar",day:"Quarta",type:"Jantar",name:"Bife de alcatra acebolado + purê + brócolis",note:"Marmita → quinta"},
+    {id:"qui-jantar",day:"Quinta",type:"Jantar",name:"Ragu de carne + arroz + legumes",note:"Marmita → sexta"},
+    {id:"sex-jantar",day:"Sexta",type:"Jantar",name:"Hambúrguer caseiro + batata assada + salada",note:""},
+    {id:"sab-jantar",day:"Sábado",type:"Jantar",name:"Pizza caseira / noite de pizza",note:""},
+    {id:"dom-jantar",day:"Domingo",type:"Jantar",name:"Carne de panela com músculo + arroz + feijão + legumes",note:""}
+  ],
+  prep:[
+    {id:"prep1",name:"Cozinha quinzenal",done:false},
+    {id:"prep2",name:"Produzir bases",done:false},
+    {id:"prep3",name:"Porcionar",done:false},
+    {id:"prep4",name:"Etiquetar",done:false},
+    {id:"prep5",name:"Congelar",done:false},
+    {id:"prep6",name:"Deixar alimentação de amanhã encaminhada",done:false}
+  ],
+  shopping:[
+    {id:"shop1",name:"Frutas",qty:"",done:false},
+    {id:"shop2",name:"Verduras e folhas",qty:"",done:false},
+    {id:"shop3",name:"Pão",qty:"",done:false},
+    {id:"shop4",name:"Iogurtes",qty:"",done:false},
+    {id:"shop5",name:"Cottage / frios",qty:"",done:false}
+  ]
 };
-function loadFood(){try{const d=JSON.parse(localStorage.getItem(FOOD_KEY));if(d)return {...FOOD_BASE,...d};}catch{}return JSON.parse(JSON.stringify(FOOD_BASE));}
-function saveFood(d){localStorage.setItem(FOOD_KEY,JSON.stringify(d));}
+
+const FOOD_DAYS=[
+  "Segunda","Terça","Quarta","Quinta","Sexta","Sábado","Domingo"
+];
+
+const FOOD_TYPES=[
+  "Café da manhã",
+  "Almoço",
+  "Lanche",
+  "Jantar"
+];
+
+function loadFood(){
+  try{
+    const d=JSON.parse(localStorage.getItem(FOOD_KEY));
+    if(d && Array.isArray(d.meals)){
+      return {
+        ...FOOD_BASE,
+        ...d,
+        meals:Array.isArray(d.meals)?d.meals:[],
+        prep:Array.isArray(d.prep)?d.prep:[],
+        shopping:Array.isArray(d.shopping)?d.shopping:[]
+      };
+    }
+  }catch{}
+  return JSON.parse(JSON.stringify(FOOD_BASE));
+}
+
+function saveFood(d){
+  localStorage.setItem(FOOD_KEY,JSON.stringify(d));
+}
+
 function renderAlimentacao(){
- const d=loadFood();
- app.innerHTML=`<section class="hero"><h2>🍽️ Alimentação</h2><p>Comer bem com menos decisões: cardápio definido, cozinha quinzenal e finalizações simples.</p></section>
- <div class="food-principle card"><span class="eyebrow">SISTEMA DA CASA</span><strong>Jantar → marmita do dia seguinte</strong><p>O planejamento foi construído para 3 pessoas e, de segunda a quinta, uma porção extra para a marmita. fileciteturn1file0L12-L23</p></div>
- <div class="section-title">SEMANA 1 · CARDÁPIO</div>
- <div class="list"><div class="card"><div class="panel-head"><h3>☀️ Café da manhã</h3><span class="pill">7 dias</span></div>${d.breakfasts.map(x=>`<div class="food-row"><span>${x[0]}</span><strong>${escapeHtml(x[1])}</strong></div>`).join("")}</div>
- <div class="card"><div class="panel-head"><h3>🌙 Jantar + marmita</h3><span class="pill">3 pessoas</span></div>${d.dinners.map(x=>`<div class="food-row"><span>${x[0]}</span><strong>${escapeHtml(x[1])}</strong>${x[2]?`<small>marmita → ${x[2]}</small>`:""}</div>`).join("")}</div></div>
- <div class="section-title">ROTINA DE PREPARO</div>
- <div class="card food-checklist">
-  <label><input type="checkbox" id="foodCook" ${d.cookingDone?"checked":""}><span><strong>Cozinha quinzenal</strong><small>Produzir bases, porcionar, etiquetar e congelar.</small></span></label>
-  <div class="food-rule"><b>Compra mensal</b><span>Carnes, arroz, feijão, grãos, massas, flocão, tapioca, Rap10, biscoitos, azeite, manteiga, café e itens de boa validade.</span></div>
-  <div class="food-rule"><b>Compra semanal</b><span>Frutas, verduras, folhas, pão, iogurtes, cottage, frios e demais perecíveis.</span></div>
- </div>
- <div class="section-title">AMANHÃ</div>
- <div class="card tomorrow-food"><span class="eyebrow">ANTES DE DORMIR</span><strong>Preparar alimentação de amanhã</strong><p>Deixar encaminhados café da manhã, lancheira e marmita. De manhã, apenas finalizar o que for necessário.</p></div>
- <div class="card food-note"><span class="eyebrow">FREEZER</span><p>As etiquetas seguem: <strong>NOME • DATA • Nº DE PORÇÕES • FINALIZAÇÃO</strong>. Arroz e feijão podem ser congelados; folhas, salada e itens crocantes ficam frescos. fileciteturn1file0L24-L43</p></div>`;
- document.querySelector("#foodCook").onchange=e=>{const x=loadFood();x.cookingDone=e.target.checked;saveFood(x);};
+
+  const d=loadFood();
+
+  app.innerHTML=`
+    <section class="hero">
+      <h2>🍽️ Alimentação</h2>
+      <p>
+        Comer bem com menos decisões: cardápio definido,
+        preparo organizado e finalizações simples.
+      </p>
+    </section>
+
+    <div class="food-principle card">
+      <span class="eyebrow">SISTEMA DA CASA</span>
+      <strong>Jantar → marmita do dia seguinte</strong>
+      <p>
+        A alimentação deve facilitar a rotina, não ocupar espaço
+        mental todos os dias.
+      </p>
+    </div>
+
+    <div class="section-title">CARDÁPIO DA SEMANA</div>
+
+    <div class="food-toolbar">
+      <button class="primary" id="addMeal">＋ Adicionar refeição</button>
+    </div>
+
+    <div class="list">
+      ${FOOD_DAYS.map(day=>{
+
+        const meals=d.meals.filter(x=>x.day===day);
+
+        return `
+          <div class="card food-day">
+
+            <div class="panel-head">
+              <h3>${day}</h3>
+              <span class="pill">${meals.length}</span>
+            </div>
+
+            ${
+              meals.length
+              ?
+              meals.map(meal=>`
+                <div class="food-row editable-food" data-meal="${meal.id}">
+
+                  <div>
+                    <span class="eyebrow">${escapeHtml(meal.type)}</span>
+                    <strong>${escapeHtml(meal.name)}</strong>
+
+                    ${
+                      meal.note
+                      ?
+                      `<small>${escapeHtml(meal.note)}</small>`
+                      :
+                      ""
+                    }
+
+                  </div>
+
+                  <button
+                    class="more"
+                    data-edit-meal="${meal.id}"
+                    aria-label="Editar"
+                  >
+                    •••
+                  </button>
+
+                </div>
+              `).join("")
+              :
+              `
+                <div class="empty compact">
+                  <strong>Nenhuma refeição planejada.</strong>
+                  <span>Esse espaço pode permanecer vazio.</span>
+                </div>
+              `
+            }
+
+          </div>
+        `;
+
+      }).join("")}
+    </div>
+
+    <div class="section-title">🧊 PREPARO</div>
+
+    <div class="card food-checklist">
+
+      ${d.prep.map(item=>`
+        <label class="home-task ${item.done?"done":""}">
+          <input
+            type="checkbox"
+            data-food-prep="${item.id}"
+            ${item.done?"checked":""}
+          >
+          <span>
+            <strong>${escapeHtml(item.name)}</strong>
+          </span>
+        </label>
+      `).join("")}
+
+      <button class="secondary" id="addPrep">
+        ＋ Adicionar preparo
+      </button>
+
+    </div>
+
+    <div class="section-title">🛒 LISTA DE COMPRAS</div>
+
+    <div class="card food-shopping">
+
+      ${
+        d.shopping.length
+        ?
+        d.shopping.map(item=>`
+          <div class="shopping-row">
+
+            <label>
+              <input
+                type="checkbox"
+                data-food-shop="${item.id}"
+                ${item.done?"checked":""}
+              >
+
+              <span>
+                <strong class="${item.done?"done-text":""}">
+                  ${escapeHtml(item.name)}
+                </strong>
+
+                ${
+                  item.qty
+                  ?
+                  `<small>${escapeHtml(item.qty)}</small>`
+                  :
+                  ""
+                }
+              </span>
+
+            </label>
+
+            <button
+              class="more"
+              data-delete-shop="${item.id}"
+            >
+              ×
+            </button>
+
+          </div>
+        `).join("")
+        :
+        `
+          <div class="empty compact">
+            <strong>Lista vazia.</strong>
+            <span>Adicione apenas o que realmente precisa ser comprado.</span>
+          </div>
+        `
+      }
+
+      <button class="secondary" id="addShopping">
+        ＋ Adicionar item
+      </button>
+
+    </div>
+
+    <div class="section-title">🌙 AMANHÃ</div>
+
+    <div class="card tomorrow-food">
+      <span class="eyebrow">ANTES DE DORMIR</span>
+      <strong>Preparar alimentação de amanhã</strong>
+      <p>
+        Deixar encaminhados café da manhã, lancheira e marmita.
+        De manhã, apenas finalizar o necessário.
+      </p>
+    </div>
+
+    <div class="card food-note">
+      <span class="eyebrow">FREEZER</span>
+      <p>
+        Etiquetas:
+        <strong>NOME • DATA • Nº DE PORÇÕES • FINALIZAÇÃO</strong>.
+      </p>
+    </div>
+  `;
+
+  document.querySelector("#addMeal").onclick=()=>openFoodMealModal();
+
+  document.querySelectorAll("[data-edit-meal]").forEach(b=>{
+    b.onclick=()=>openFoodMealModal(b.dataset.editMeal);
+  });
+
+  document.querySelectorAll("[data-food-prep]").forEach(el=>{
+    el.onchange=()=>{
+      const x=loadFood();
+      const item=x.prep.find(p=>p.id===el.dataset.foodPrep);
+
+      if(item){
+        item.done=el.checked;
+        saveFood(x);
+      }
+
+      renderAlimentacao();
+    };
+  });
+
+  document.querySelector("#addPrep").onclick=()=>openFoodPrepModal();
+
+  document.querySelectorAll("[data-food-shop]").forEach(el=>{
+    el.onchange=()=>{
+      const x=loadFood();
+      const item=x.shopping.find(p=>p.id===el.dataset.foodShop);
+
+      if(item){
+        item.done=el.checked;
+        saveFood(x);
+      }
+
+      renderAlimentacao();
+    };
+  });
+
+  document.querySelectorAll("[data-delete-shop]").forEach(b=>{
+    b.onclick=()=>{
+      const x=loadFood();
+
+      x.shopping=x.shopping.filter(
+        p=>p.id!==b.dataset.deleteShop
+      );
+
+      saveFood(x);
+      renderAlimentacao();
+    };
+  });
+
+  document.querySelector("#addShopping").onclick=()=>openFoodShoppingModal();
+}
+
+function openFoodMealModal(id=null){
+
+  const d=loadFood();
+
+  const existing=id
+    ? d.meals.find(x=>x.id===id)
+    : null;
+
+  const dlg=document.createElement("dialog");
+
+  dlg.innerHTML=`
+    <form method="dialog" class="modal-card" id="foodMealForm">
+
+      <div class="modal-head">
+        <div>
+          <div class="eyebrow">🍽️ ALIMENTAÇÃO</div>
+          <h2>${existing?"Editar refeição":"Nova refeição"}</h2>
+        </div>
+
+        <button class="icon-btn" value="cancel">×</button>
+      </div>
+
+      <label>
+        Dia
+        <select id="foodDay">
+          ${FOOD_DAYS.map(day=>`
+            <option
+              value="${day}"
+              ${existing?.day===day?"selected":""}
+            >
+              ${day}
+            </option>
+          `).join("")}
+        </select>
+      </label>
+
+      <label>
+        Refeição
+        <select id="foodType">
+          ${FOOD_TYPES.map(type=>`
+            <option
+              value="${type}"
+              ${existing?.type===type?"selected":""}
+            >
+              ${type}
+            </option>
+          `).join("")}
+        </select>
+      </label>
+
+      <label>
+        O que vamos comer?
+        <input
+          id="foodName"
+          required
+          maxlength="150"
+          value="${escapeHtml(existing?.name||"")}"
+          placeholder="Ex.: Frango com arroz e salada"
+        >
+      </label>
+
+      <label>
+        Observação
+        <span class="muted">(opcional)</span>
+        <textarea
+          id="foodNote"
+          rows="3"
+          maxlength="250"
+          placeholder="Marmita, finalização, preparo..."
+        >${escapeHtml(existing?.note||"")}</textarea>
+      </label>
+
+      <div class="modal-actions">
+
+        ${
+          existing
+          ?
+          `<button
+            type="button"
+            class="secondary"
+            id="deleteFoodMeal"
+          >
+            Excluir
+          </button>`
+          :
+          ""
+        }
+
+        <div class="grow"></div>
+
+        <button
+          type="button"
+          class="secondary"
+          id="cancelFoodMeal"
+        >
+          Cancelar
+        </button>
+
+        <button class="primary" value="default">
+          Salvar
+        </button>
+
+      </div>
+
+    </form>
+  `;
+
+  document.body.appendChild(dlg);
+  dlg.showModal();
+
+  dlg.querySelector("#cancelFoodMeal").onclick=()=>{
+    dlg.close();
+    dlg.remove();
+  };
+
+  if(existing){
+
+    dlg.querySelector("#deleteFoodMeal").onclick=()=>{
+
+      if(confirm("Excluir esta refeição?")){
+
+        d.meals=d.meals.filter(
+          x=>x.id!==existing.id
+        );
+
+        saveFood(d);
+
+        dlg.close();
+        dlg.remove();
+
+        renderAlimentacao();
+      }
+    };
+  }
+
+  dlg.querySelector("#foodMealForm").addEventListener(
+    "submit",
+    e=>{
+
+      e.preventDefault();
+
+      const obj={
+        id:existing?.id||uid(),
+        day:dlg.querySelector("#foodDay").value,
+        type:dlg.querySelector("#foodType").value,
+        name:dlg.querySelector("#foodName").value.trim(),
+        note:dlg.querySelector("#foodNote").value.trim()
+      };
+
+      if(!obj.name)return;
+
+      if(existing){
+
+        const i=d.meals.findIndex(
+          x=>x.id===existing.id
+        );
+
+        d.meals[i]={
+          ...d.meals[i],
+          ...obj
+        };
+
+      }else{
+
+        d.meals.push(obj);
+
+      }
+
+      saveFood(d);
+
+      dlg.close();
+      dlg.remove();
+
+      renderAlimentacao();
+    }
+  );
+}
+
+function openFoodPrepModal(){
+
+  const d=loadFood();
+
+  const dlg=document.createElement("dialog");
+
+  dlg.innerHTML=`
+    <form method="dialog" class="modal-card" id="prepForm">
+
+      <div class="modal-head">
+        <div>
+          <div class="eyebrow">🧊 PREPARO</div>
+          <h2>Novo preparo</h2>
+        </div>
+
+        <button class="icon-btn" value="cancel">×</button>
+      </div>
+
+      <label>
+        O que precisa ser preparado?
+        <input
+          id="prepName"
+          required
+          maxlength="120"
+          placeholder="Ex.: Separar marmitas"
+        >
+      </label>
+
+      <div class="modal-actions">
+
+        <div class="grow"></div>
+
+        <button
+          type="button"
+          class="secondary"
+          id="cancelPrep"
+        >
+          Cancelar
+        </button>
+
+        <button class="primary" value="default">
+          Salvar
+        </button>
+
+      </div>
+
+    </form>
+  `;
+
+  document.body.appendChild(dlg);
+  dlg.showModal();
+
+  dlg.querySelector("#cancelPrep").onclick=()=>{
+    dlg.close();
+    dlg.remove();
+  };
+
+  dlg.querySelector("#prepForm").addEventListener(
+    "submit",
+    e=>{
+
+      e.preventDefault();
+
+      const name=dlg.querySelector("#prepName").value.trim();
+
+      if(!name)return;
+
+      d.prep.push({
+        id:uid(),
+        name,
+        done:false
+      });
+
+      saveFood(d);
+
+      dlg.close();
+      dlg.remove();
+
+      renderAlimentacao();
+    }
+  );
+}
+
+function openFoodShoppingModal(){
+
+  const d=loadFood();
+
+  const dlg=document.createElement("dialog");
+
+  dlg.innerHTML=`
+    <form method="dialog" class="modal-card" id="shoppingForm">
+
+      <div class="modal-head">
+        <div>
+          <div class="eyebrow">🛒 COMPRAS</div>
+          <h2>Novo item</h2>
+        </div>
+
+        <button class="icon-btn" value="cancel">×</button>
+      </div>
+
+      <label>
+        Item
+        <input
+          id="shopName"
+          required
+          maxlength="100"
+          placeholder="Ex.: Ovos"
+        >
+      </label>
+
+      <label>
+        Quantidade
+        <span class="muted">(opcional)</span>
+        <input
+          id="shopQty"
+          maxlength="50"
+          placeholder="Ex.: 30 unidades"
+        >
+      </label>
+
+      <div class="modal-actions">
+
+        <div class="grow"></div>
+
+        <button
+          type="button"
+          class="secondary"
+          id="cancelShopping"
+        >
+          Cancelar
+        </button>
+
+        <button class="primary" value="default">
+          Salvar
+        </button>
+
+      </div>
+
+    </form>
+  `;
+
+  document.body.appendChild(dlg);
+  dlg.showModal();
+
+  dlg.querySelector("#cancelShopping").onclick=()=>{
+    dlg.close();
+    dlg.remove();
+  };
+
+  dlg.querySelector("#shoppingForm").addEventListener(
+    "submit",
+    e=>{
+
+      e.preventDefault();
+
+      const name=dlg.querySelector("#shopName").value.trim();
+      const qty=dlg.querySelector("#shopQty").value.trim();
+
+      if(!name)return;
+
+      d.shopping.push({
+        id:uid(),
+        name,
+        qty,
+        done:false
+      });
+
+      saveFood(d);
+
+      dlg.close();
+      dlg.remove();
+
+      renderAlimentacao();
+    }
+  );
 }
 
 const REC_KEY="minha-vida.receitas.v1";
@@ -916,10 +1533,10 @@ function saveRec(d){localStorage.setItem(REC_KEY,JSON.stringify(d));}
 function renderReceitas(){
  const d=loadRec();
  app.innerHTML=`<section class="hero"><h2>📖 Receitas</h2><p>O livro da casa: receitas organizadas para cozinhar uma vez e facilitar muitos dias.</p></section>
- <div class="recipe-principle card"><span class="eyebrow">COMO USAR</span><strong>Receita → produção → freezer → finalização</strong><p>As receitas fazem parte do sistema de alimentação quinzenal, não são uma lista para decidir o que cozinhar todos os dias. fileciteturn1file0L16-L23</p></div>
+ <div class="recipe-principle card"><span class="eyebrow">COMO USAR</span><strong>Receita → produção → freezer → finalização</strong><p>As receitas fazem parte do sistema de alimentação quinzenal, não são uma lista para decidir o que cozinhar todos os dias.</p></div>
  <div class="recipe-filters"><input id="recipeSearch" placeholder="Buscar receita…"><select id="recipeCat"><option value="">Todas</option>${[...new Set(RECIPES.map(r=>r.cat))].map(c=>`<option>${c}</option>`).join("")}</select></div>
  <div class="list" id="recipeList">${recipeCards(RECIPES,d)}</div>
- <div class="card freezer-rule"><span class="eyebrow">❄️ FREEZER</span><p>Identificar cada preparo com <strong>NOME • DATA • Nº DE PORÇÕES • FINALIZAÇÃO</strong>. Preparações refrigeradas: referência doméstica de 3–4 dias; congelados, preferencialmente ao longo da quinzena. fileciteturn1file0L39-L43</p></div>`;
+ <div class="card freezer-rule"><span class="eyebrow">❄️ FREEZER</span><p>Identificar cada preparo com <strong>NOME • DATA • Nº DE PORÇÕES • FINALIZAÇÃO</strong>. Preparações refrigeradas: referência doméstica de 3–4 dias; congelados, preferencialmente ao longo da quinzena.</p></div>`;
  const update=()=>{const q=document.querySelector("#recipeSearch").value.toLowerCase(),c=document.querySelector("#recipeCat").value;document.querySelector("#recipeList").innerHTML=recipeCards(RECIPES.filter(r=>(!q||r.name.toLowerCase().includes(q))&&(!c||r.cat===c)),loadRec());};
  document.querySelector("#recipeSearch").oninput=update;document.querySelector("#recipeCat").onchange=update;
  document.querySelectorAll("[data-fav]").forEach(b=>b.onclick=()=>{const x=loadRec(),id=b.dataset.fav;x.favorites=x.favorites.includes(id)?x.favorites.filter(v=>v!==id):[...x.favorites,id];saveRec(x);update();});
@@ -945,9 +1562,25 @@ function renderPlaceholder() {
   document.querySelectorAll("[data-route]").forEach(b => b.onclick = () => { state.route=b.dataset.route; render(); });
 }
 
-document.querySelector("#homeBtn").onclick = () => { state.route="pendencias"; state.filter="abertas"; state.search=""; render(); };
-document.querySelector("#backBtn").onclick = () => { state.route="pendencias"; render(); };
-document.querySelectorAll(".nav-item").forEach(b => b.onclick = () => { state.route=b.dataset.route; render(); });
+document.querySelector("#homeBtn").onclick = () => {
+  state.route="pendencias";
+  state.filter="abertas";
+  state.search="";
+  location.hash="pendencias";
+  render();
+};
+document.querySelector("#backBtn").onclick = () => {
+  state.route="pendencias";
+  location.hash="pendencias";
+  render();
+};
+document.querySelectorAll(".nav-item").forEach(b => b.onclick = () => {
+  state.route=b.dataset.route;
+  location.hash=state.route;
+  render();
+});
+
+window.addEventListener("hashchange", render);
 
 if ("serviceWorker" in navigator) window.addEventListener("load", () => navigator.serviceWorker.register("sw.js").catch(console.warn));
 
