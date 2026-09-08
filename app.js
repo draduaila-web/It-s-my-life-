@@ -73,6 +73,7 @@ function renderMeuDia(){
  <div><b>08:00–14:00</b><span>Trabalho oficial</span></div>
  ${(w===1||w===3)?'<div><b>14:40–16:10</b><span>Janela estratégica</span></div>':''}
  <div><b>${ho}</b><span>Home office</span></div><div><b>19:00+</b><span>Noite protegida · descanso primeiro</span></div></div></section>
+ ${renderRituaisHojeV13()}
  ${p.length?`<section class="day-section"><div class="section-head"><h2>Pendências que merecem aparecer</h2><a href="#pendencias">ver todas</a></div>${p.map(x=>`<div class="compact-item"><strong>${x.title||x.name||'Pendência'}</strong>${x.dueDate?`<small>${x.dueDate}</small>`:''}</div>`).join('')}</section>`:''}
  <section class="quick-grid"><a href="#rituais">✨<span>Rituais</span></a><a href="#exercicios">🏃<span>Exercícios</span></a><a href="#alimentacao">🍽️<span>Alimentação</span></a><a href="#receitas">📖<span>Receitas</span></a><a href="#cabelo">💇‍♀️<span>Cabelo</span></a><a href="#casa">🏠<span>Casa</span></a><a href="#financeiro">💰<span>Financeiro</span></a></section>
  <section class="free-space"><div>☁️</div><strong>Espaço livre também faz parte do dia.</strong><p>Se nada precisa ser resolvido agora, não resolva.</p></section>`;
@@ -82,6 +83,82 @@ function renderMeuDia(){
    O hash é usado para navegação quando existir; sem hash, a página inicial
    agora é Pendências. A rota Meu Dia continua disponível em #meu-dia.
 */
+/* ===== RITUAIS DE HOJE + AUTOCUIDADO V13 ===== */
+const SELFCARE_KEY_V13="minha-vida.selfcare.v3";
+const SELFCARE_BASE_V13=[
+["MEZZO BIOSCULPT","✦","20 min",["Limpeza facial","Mezzo — 20 min","Hidratação"],"mezzo"],
+["DEPILAÇÃO","◦","20–30 min",["Banho morno","Pernas + axilas","Virilha","Hidratação"],"depilacao"],
+["MÁSCARA FACIAL","✦","20–30 min",["Higienizar pele","Máscara calmante","Retirar","Sérum + hidratação"],"mascara"],
+["MANUTENÇÃO","◦","10 min",["Óleo cutículas","Creme mãos","Creme pés","Conferir soft gel"],"manutencao"],
+["DIA DAS UNHAS","♡","≈ 3 horas",["Remover soft gel","Preparar unhas","Aplicar soft gel","Fazer os pés","Hidratar"],"unhas"],
+["LIVRE","✧","Variável",["Cronograma capilar","Hidratação corporal","Cutículas","Desacelerar"],"livre"],
+["RESET","☾","10–15 min",["Hidratar mãos","Óleo cutículas","Creme pés","Skincare noturno"],"reset"],
+["MEZZO BIOSCULPT","✦","20 min",["Limpeza facial","Mezzo — 20 min","Hidratação"],"mezzo"],
+["DEPILAÇÃO","◦","20–30 min",["Banho morno","Pernas + axilas","Virilha","Hidratação"],"depilacao"],
+["BUÇO + SOBRANCELHAS","✧","15 min",["Aparelho no buço","Pinça","Tesoura","Hidratação"],"sobrancelhas"],
+["MÁSCARA FACIAL","✦","20–30 min",["Higienizar pele","Máscara antioxidante","Retirar","Sérum + hidratação"],"mascara"],
+["SPA CORPORAL","♡","30–40 min",["Banho","Esfoliação","Depilação localizada","Hidratação","Creme nos pés"],"spa"],
+["MEZZO + RELAXAMENTO","☾","20–30 min",["Mezzo — 20 min","Skincare","Hidratação corporal","Relaxar"],"mezzo-relax"],
+["RESET","☾","10–15 min",["Hidratar mãos","Óleo cutículas","Creme pés","Skincare noturno"],"reset"]
+];
+const SELFCARE_HOW_V13={
+mezzo:["Limpeza facial","Mezzo — 20 min","Hidratação"],
+depilacao:["Banho morno","Realizar depilação programada","Hidratar a pele"],
+mascara:["Higienizar a pele","Aplicar a máscara indicada","Retirar","Sérum + hidratação"],
+manutencao:["Óleo nas cutículas","Creme nas mãos","Creme nos pés","Conferir soft gel"],
+unhas:["Remover soft gel","Preparar unhas","Aplicar soft gel","Fazer os pés","Hidratar"],
+livre:["Escolher o cuidado previsto","Hidratação corporal ou cutículas","Se envolver cabelo, abrir o COMO do Ritual Capilar","Desacelerar"],
+reset:["Hidratar mãos","Óleo nas cutículas","Creme nos pés","Skincare noturno"],
+sobrancelhas:["Aparelho no buço","Pinça nas sobrancelhas","Tesoura se necessário","Hidratação"],
+spa:["Banho","Esfoliação","Depilação localizada se prevista","Hidratação","Creme nos pés"],
+"mezzo-relax":["Mezzo — 20 min","Skincare","Hidratação corporal","Relaxar"]
+};
+function selfcareLoadV13(){
+ try{const x=JSON.parse(localStorage.getItem(SELFCARE_KEY_V13)||"null");if(x&&Array.isArray(x.days)&&x.days.length===14)return x;}catch(e){}
+ const days=SELFCARE_BASE_V13.map(x=>({titulo:x[0],icone:x[1],duracao:x[2],tarefas:[...x[3]],id:x[4]}));
+ const x={cycleStart:"2026-08-30",days,overrides:{}};localStorage.setItem(SELFCARE_KEY_V13,JSON.stringify(x));return x;
+}
+function selfcareDateKeyV13(d){return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,"0")}-${String(d.getDate()).padStart(2,"0")}`;}
+function selfcareIndexV13(d=new Date()){
+ const x=selfcareLoadV13(),a=x.cycleStart.split("-").map(Number),start=new Date(a[0],a[1]-1,a[2]),cur=new Date(d.getFullYear(),d.getMonth(),d.getDate());
+ return ((Math.floor((cur-start)/86400000)%14)+14)%14;
+}
+function selfcareTodayV13(d=new Date()){
+ const x=selfcareLoadV13(),k=selfcareDateKeyV13(d),i=selfcareIndexV13(d);return {index:i,items:[x.days[i],...(x.overrides[k]||[])]};
+}
+function selfcareDoneV13(item,d=new Date()){return localStorage.getItem(`minha-vida.selfcare.done.${selfcareDateKeyV13(d)}.${item.id||item.titulo}`)==="1";}
+function selfcareToggleV13(item){const k=`minha-vida.selfcare.done.${selfcareDateKeyV13(new Date())}.${item.id||item.titulo}`;if(localStorage.getItem(k)==="1")localStorage.removeItem(k);else localStorage.setItem(k,"1");render();}
+function selfcareHowV13(item){
+ const steps=SELFCARE_HOW_V13[item.id]||item.tarefas||[],o=document.createElement("div");o.className="mv-how-overlay";
+ o.innerHTML=`<div class="mv-how"><button class="mv-how-x" onclick="this.closest('.mv-how-overlay').remove()">×</button><div class="eyebrow">COMO FAZER</div><h2>${item.icone||"✦"} ${escapeHtml(item.titulo||"Ritual")}</h2><ol>${steps.map(s=>`<li>${escapeHtml(s)}</li>`).join("")}</ol><p>Você poderá editar este passo a passo pelo próprio app.</p></div>`;document.body.appendChild(o);
+}
+function renderAutocuidadoV13(){
+ const x=selfcareLoadV13(),t=selfcareTodayV13();
+ app.innerHTML=`<section class="hero selfcare-v13-hero"><div class="backline"><button class="back-inline" onclick="location.hash='rituais';renderRituais()">‹ Rituais</button></div><div class="eyebrow">🌸 RITUAIS</div><h2>Autocuidado</h2><p>Ciclo de 14 dias em looping contínuo. Você pode editar e acrescentar cuidados em datas específicas.</p></section>
+ <section class="selfcare-v13-today"><div class="selfcare-v13-head"><strong>✨ Hoje • Dia ${t.index+1}/14</strong><button class="secondary" onclick="openSelfcareEditV13()">Editar ciclo</button></div>
+ ${t.items.map(it=>`<article class="selfcare-v13-card"><span class="sc-icon">${it.icone||"✦"}</span><div><b>${escapeHtml(it.titulo)}</b><small>⏱ ${escapeHtml(it.duracao||"Variável")}</small><div class="sc-actions"><button onclick='selfcareHowV13(${JSON.stringify(it).replace(/'/g,"&#39;")})'>COMO FAZER →</button><button onclick='selfcareToggleV13(${JSON.stringify(it).replace(/'/g,"&#39;")})'>${selfcareDoneV13(it)?"↩ Feito":"✓ Marcar feito"}</button></div></div></article>`).join("")}</section>
+ <section class="selfcare-v13-add"><button onclick="openSelfcareDateV13()">＋ Adicionar ritual em uma data</button><p>Para cadastrar plasma, botox e tratamentos profundos quando as datas forem definidas.</p></section>
+ <section class="selfcare-v13-cycle"><strong>📅 Ciclo contínuo</strong><div class="sc-cycle-grid">${x.days.map((it,i)=>`<button onclick="openSelfcareDayV13(${i})"><b>${i+1}</b><span>${escapeHtml(it.titulo)}</span></button>`).join("")}</div></section>`;
+}
+function openSelfcareDayV13(i){
+ const x=selfcareLoadV13(),it=x.days[i],o=document.createElement("div");o.className="mv-how-overlay";
+ o.innerHTML=`<div class="mv-how"><button class="mv-how-x" onclick="this.closest('.mv-how-overlay').remove()">×</button><div class="eyebrow">EDITAR CICLO</div><h2>Dia ${i+1}/14</h2><label>Título<input id="scv13t" value="${escapeHtml(it.titulo)}"></label><label>Duração<input id="scv13d" value="${escapeHtml(it.duracao||"Variável")}"></label><label>Checklist<textarea id="scv13s">${escapeHtml((it.tarefas||[]).join("\n"))}</textarea></label><button class="primary" onclick="saveSelfcareDayV13(${i})">Salvar</button></div>`;document.body.appendChild(o);
+}
+function saveSelfcareDayV13(i){const x=selfcareLoadV13(),it=x.days[i];it.titulo=document.getElementById("scv13t").value.trim()||"Ritual";it.duracao=document.getElementById("scv13d").value.trim()||"Variável";it.tarefas=document.getElementById("scv13s").value.split("\n").map(x=>x.trim()).filter(Boolean);selfcareSaveV13(x);document.querySelector(".mv-how-overlay")?.remove();render();}
+function selfcareSaveV13(x){localStorage.setItem(SELFCARE_KEY_V13,JSON.stringify(x));}
+function openSelfcareDateV13(){const o=document.createElement("div");o.className="mv-how-overlay";o.innerHTML=`<div class="mv-how"><button class="mv-how-x" onclick="this.closest('.mv-how-overlay').remove()">×</button><div class="eyebrow">NOVO RITUAL</div><h2>＋ Adicionar data</h2><label>Data<input id="scv13date" type="date" value="${selfcareDateKeyV13(new Date())}"></label><label>Ritual<input id="scv13new" placeholder="Ex.: Plasma facial"></label><label>Duração<input id="scv13dur" value="30 min"></label><label>Como fazer / checklist<textarea id="scv13tasks" placeholder="Um passo por linha"></textarea></label><button class="primary" onclick="saveSelfcareDateV13()">Adicionar</button></div>`;document.body.appendChild(o);}
+function saveSelfcareDateV13(){const x=selfcareLoadV13(),k=document.getElementById("scv13date").value;if(!k)return;x.overrides[k]=x.overrides[k]||[];x.overrides[k].push({id:"custom-"+Date.now(),titulo:document.getElementById("scv13new").value.trim()||"Novo ritual",icone:"✦",duracao:document.getElementById("scv13dur").value.trim()||"Variável",tarefas:document.getElementById("scv13tasks").value.split("\n").map(x=>x.trim()).filter(Boolean)});selfcareSaveV13(x);document.querySelector(".mv-how-overlay")?.remove();render();}
+function openSelfcareEditV13(){openSelfcareDayV13(selfcareIndexV13(new Date()));}
+function ritualsTodayV13(){
+ const arr=[];let h=null;try{if(typeof hairTodayData==="function")h=hairTodayData();}catch(e){}
+ if(h)arr.push({type:"hair",title:"Ritual Capilar",sub:hairTypeLabel(h.kind),icon:"💇‍♀️"});
+ const s=selfcareTodayV13();s.items.forEach(it=>arr.push({type:"selfcare",item:it,title:it.titulo,sub:`${it.duracao||"Variável"} • Dia ${s.index+1}/14`,icon:it.icone||"🌸"}));return arr;
+}
+function renderRituaisHojeV13(){
+ const arr=ritualsTodayV13();if(!arr.length)return "";
+ return `<section class="mv-rh-v13"><div class="mv-rh-v13-head"><h2>✨ Rituais de hoje</h2><span>${arr.length} ${arr.length===1?"ritual":"rituais"}</span></div>${arr.map(x=>`<article class="mv-rh-v13-card"><span>${x.icon}</span><div><b>${escapeHtml(x.title)}</b><small>${escapeHtml(x.sub)}</small><div><button onclick='${x.type==="hair"?"location.hash=\"cabelo\";renderCabelo()":"selfcareHowV13("+JSON.stringify(x.item).replace(/'/g,"&#39;")+")"}'>COMO FAZER →</button><button onclick='${x.type==="hair"?"location.hash=\"cabelo\";renderCabelo()":"selfcareToggleV13("+JSON.stringify(x.item).replace(/'/g,"&#39;")+")"}'>${x.type==="hair"?"Abrir":(selfcareDoneV13(x.item)?"↩ Feito":"✓ Feito")}</button></div></div></article>`).join("")}</section>`;
+}
+
 function render() {
   const hash = (location.hash || "").replace("#", "").trim();
   const route = hash || state.route || "pendencias";
@@ -94,6 +171,7 @@ function render() {
       route === "meu-dia" ? "💜 Meu Dia" :
       route === "ideias" ? "💡 Criação & Ideias" :
       route === "rituais" ? "✨ Rituais" :
+      route === "autocuidado" ? "🌸 Autocuidado" :
       route === "estudos" ? "📚 Estudos" :
       route === "financeiro" ? "💰 Financeiro" :
       route === "casa" ? "🏠 Casa" :
@@ -109,6 +187,10 @@ function render() {
 
   if (route === "meu-dia") {
     app.innerHTML = renderMeuDia();
+    return;
+  }
+  if (route === "autocuidado") {
+    renderAutocuidadoV13();
     return;
   }
 
@@ -475,6 +557,11 @@ function renderRituais() {
         <div><strong>Ritual Capilar</strong><span>Lavagem · tratamento · finalização · day after</span></div>
         <b>›</b>
       </button>
+      <button class="ritual-card featured" id="autocuidadoBtn">
+        <span class="ritual-icon">🌸</span>
+        <div><strong>Ritual de Autocuidado</strong><span>Unhas · depilação · pele · tratamentos</span></div>
+        <b>›</b>
+      </button>
       <button class="ritual-card" id="newRitualBtn">
         <span class="ritual-icon">＋</span>
         <div><strong>Novo ritual</strong><span>Crie outro ritual quando fizer sentido.</span></div>
@@ -489,6 +576,7 @@ function renderRituais() {
   `;
 
   document.querySelector("#capilarBtn").onclick = () => { location.hash = "cabelo"; renderCabelo(); };
+  document.querySelector("#autocuidadoBtn").onclick = () => { location.hash = "autocuidado"; renderAutocuidadoV13(); };
   document.querySelector("#newRitualBtn").onclick = () => openRitualModal();
   document.querySelectorAll("[data-ritual-id]").forEach(x => x.onclick = () => openRitualModal(x.dataset.ritualId));
 }
