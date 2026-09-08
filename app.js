@@ -39,6 +39,7 @@ function escapeHtml(value="") {
   return value.replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[c]));
 }
 
+
 function mvNow(){return new Date();}
 function mvMinutes(d=mvNow()){return d.getHours()*60+d.getMinutes();}
 function mvDow(d=mvNow()){return d.getDay();}
@@ -77,35 +78,53 @@ function renderMeuDia(){
  <section class="free-space"><div>☁️</div><strong>Espaço livre também faz parte do dia.</strong><p>Se nada precisa ser resolvido agora, não resolva.</p></section>`;
 }
 
+/* CORREÇÃO PRINCIPAL:
+   O hash é usado para navegação quando existir; sem hash, a página inicial
+   agora é Pendências. A rota Meu Dia continua disponível em #meu-dia.
+*/
 function render() {
-  const route = (location.hash || '#pendencias').slice(1) || 'pendencias';
+  const hash = (location.hash || "").replace("#", "").trim();
+  const route = hash || state.route || "pendencias";
   state.route = route;
-  if(route === 'meu-dia'){ document.getElementById('app').innerHTML=renderMeuDia(); return; }
 
-  document.querySelector("#pageTitle").textContent =
-    state.route === "pendencias" ? "📝 Pendências" :
-    state.route === "ideias" ? "💡 Criação & Ideias" :
-    state.route === "rituais" ? "✨ Rituais" :
-    state.route === "estudos" ? "📚 Estudos" :
-    state.route === "financeiro" ? "💰 Financeiro" :
-    state.route === "casa" ? "🏠 Casa" :
-    state.route === "exercicios" ? "🏃 Exercícios" :
-    state.route === "alimentacao" ? "🍽️ Alimentação" :
-    state.route === "receitas" ? "📖 Receitas" : "Minha Vida";
+  const pageTitle = document.querySelector("#pageTitle");
+  if (pageTitle) {
+    pageTitle.textContent =
+      route === "pendencias" ? "📝 Pendências" :
+      route === "meu-dia" ? "💜 Meu Dia" :
+      route === "ideias" ? "💡 Criação & Ideias" :
+      route === "rituais" ? "✨ Rituais" :
+      route === "estudos" ? "📚 Estudos" :
+      route === "financeiro" ? "💰 Financeiro" :
+      route === "casa" ? "🏠 Casa" :
+      route === "exercicios" ? "🏃 Exercícios" :
+      route === "alimentacao" ? "🍽️ Alimentação" :
+      route === "receitas" ? "📖 Receitas" :
+      "Minha Vida";
+  }
 
-  document.querySelectorAll(".nav-item").forEach(b => b.classList.toggle("active", b.dataset.route === state.route));
+  document.querySelectorAll(".nav-item").forEach(b =>
+    b.classList.toggle("active", b.dataset.route === route)
+  );
 
-  if (state.route === "pendencias") renderPendencias();
-  else if (state.route === "ideias") renderIdeias();
-  else if (state.route === "rituais") renderRituais();
-  else if (state.route === "estudos") renderEstudos();
-  else if (state.route === "financeiro") renderFinanceiro();
-  else if (state.route === "casa") renderCasa();
-  else if (state.route === "exercicios") renderExercicios();
-  else if (state.route === "alimentacao") renderAlimentacao();
-  else if (state.route === "receitas") renderReceitas();
+  if (route === "meu-dia") {
+    app.innerHTML = renderMeuDia();
+    return;
+  }
+
+  if (route === "pendencias") renderPendencias();
+  else if (route === "ideias") renderIdeias();
+  else if (route === "rituais") renderRituais();
+  else if (route === "estudos") renderEstudos();
+  else if (route === "financeiro") renderFinanceiro();
+  else if (route === "casa") renderCasa();
+  else if (route === "exercicios") renderExercicios();
+  else if (route === "alimentacao") renderAlimentacao();
+  else if (route === "receitas") renderReceitas();
   else renderPlaceholder();
 }
+
+window.addEventListener("hashchange", render);
 
 function renderPendencias() {
   const all = loadPendencias();
@@ -246,6 +265,11 @@ function toggleDone(id) {
   renderPendencias();
 }
 
+
+/* =========================================================
+   IDEIAS
+========================================================= */
+
 const IDEAS_KEY = "minha-vida.ideias.v1";
 let ideaFilter = "todas";
 
@@ -337,7 +361,7 @@ function bindIdeaCards() {
 }
 
 function openIdeaModal(id=null) {
-  const p = id ? loadIdeias().find(x=>x.id===id) : null;
+  const p = id ? loadIdeias().find(x => x.id===id) : null;
   const title = p ? "Editar registro" : "Nova ideia";
   const type = p?.type || "ideia";
   const body = `
@@ -401,6 +425,11 @@ function openIdeaModal(id=null) {
   });
   setTimeout(() => d.querySelector("#ideaTitle").focus(), 50);
 }
+
+
+/* =========================================================
+   RITUAIS
+========================================================= */
 
 const RITUAIS_KEY = "minha-vida.rituais.v1";
 const RITUAL_CAPILAR_KEY = "minha-vida.ritual-capilar.v1";
@@ -552,6 +581,11 @@ function openRitualModal(id=null) {
   });
 }
 
+
+/* =========================================================
+   ESTUDOS
+========================================================= */
+
 const ESTUDOS_KEY = "minha-vida.estudos.v1";
 
 function loadEstudos() {
@@ -679,8 +713,9 @@ function openStudyModal(type, id=null) {
   });
 }
 
-const FIN_KEY = "minha-vida.financeiro.v1";
-const FIN_BASE = {
+
+const FIN_KEY="minha-vida.financeiro.v1";
+const FIN_BASE={
   income: 19172.96,
   expenses: [
     {id:"aluguel",name:"Aluguel da casa",value:9503.50,category:"Casa",payer:"Usuária",status:"confirmado"},
@@ -839,666 +874,223 @@ function openExercisePlan(){
  dlg.querySelector("#exForm").addEventListener("submit",e=>{e.preventDefault();d.plans.push({id:uid(),name:dlg.querySelector("#eName").value.trim(),type:dlg.querySelector("#eType").value.trim(),target:dlg.querySelector("#eTarget").value.trim(),days:[],active:true});saveEx(d);dlg.close();dlg.remove();renderExercicios();});
 }
 
-const FOOD_KEY="minha-vida.alimentacao.v2";
-
-const FOOD_BASE={
-  meals:[
-    {id:"seg-cafe",day:"Segunda",type:"Café da manhã",name:"Pão frito + café com leite",note:""},
-    {id:"ter-cafe",day:"Terça",type:"Café da manhã",name:"Crepioca de cottage",note:""},
-    {id:"qua-cafe",day:"Quarta",type:"Café da manhã",name:"Waffle de queijo",note:""},
-    {id:"qui-cafe",day:"Quinta",type:"Café da manhã",name:"Panqueca",note:""},
-    {id:"sex-cafe",day:"Sexta",type:"Café da manhã",name:"Pão frito",note:""},
-    {id:"sab-cafe",day:"Sábado",type:"Café da manhã",name:"Cuscuz + queijo",note:""},
-    {id:"dom-cafe",day:"Domingo",type:"Café da manhã",name:"Panquecas + café com leite",note:""},
-
-    {id:"seg-jantar",day:"Segunda",type:"Jantar",name:"Frango assado com batatas + arroz + salada",note:"Marmita → terça"},
-    {id:"ter-jantar",day:"Terça",type:"Jantar",name:"Strogonoff de frango + arroz + batata palha + salada",note:"Marmita → quarta"},
-    {id:"qua-jantar",day:"Quarta",type:"Jantar",name:"Bife de alcatra acebolado + purê + brócolis",note:"Marmita → quinta"},
-    {id:"qui-jantar",day:"Quinta",type:"Jantar",name:"Ragu de carne + arroz + legumes",note:"Marmita → sexta"},
-    {id:"sex-jantar",day:"Sexta",type:"Jantar",name:"Hambúrguer caseiro + batata assada + salada",note:""},
-    {id:"sab-jantar",day:"Sábado",type:"Jantar",name:"Pizza caseira / noite de pizza",note:""},
-    {id:"dom-jantar",day:"Domingo",type:"Jantar",name:"Carne de panela com músculo + arroz + feijão + legumes",note:""}
-  ],
-  prep:[
-    {id:"prep1",name:"Cozinha quinzenal",done:false},
-    {id:"prep2",name:"Produzir bases",done:false},
-    {id:"prep3",name:"Porcionar",done:false},
-    {id:"prep4",name:"Etiquetar",done:false},
-    {id:"prep5",name:"Congelar",done:false},
-    {id:"prep6",name:"Deixar alimentação de amanhã encaminhada",done:false}
-  ],
-  shopping:[
-    {id:"shop1",name:"Frutas",qty:"",done:false},
-    {id:"shop2",name:"Verduras e folhas",qty:"",done:false},
-    {id:"shop3",name:"Pão",qty:"",done:false},
-    {id:"shop4",name:"Iogurtes",qty:"",done:false},
-    {id:"shop5",name:"Cottage / frios",qty:"",done:false}
-  ]
+const FOOD_KEY="minha-vida.alimentacao.v3";
+const FOOD_DAYS=["Segunda","Terça","Quarta","Quinta","Sexta","Sábado","Domingo"];
+const FOOD_MONTHS=[
+ {id:"2026-09",label:"Setembro",defined:true},
+ {id:"2026-10",label:"Outubro",defined:false},
+ {id:"2026-11",label:"Novembro",defined:false},
+ {id:"2026-12",label:"Dezembro",defined:false}
+];
+const FOOD_WEEKS=[
+ {id:1,title:"Semana 1",pico:"Morango cremoso + coco",meals:[
+  ["Segunda","Pão frito + café com leite","Frango assado com batatas + arroz + salada","frango, batata, arroz, folhas, tomate"],
+  ["Terça","Crepioca de cottage","Strogonoff de frango + arroz + batata palha + salada","frango, creme, tomate, arroz, batata"],
+  ["Quarta","Waffle de queijo","Bife de alcatra acebolado + purê + brócolis","alcatra, cebola, batata, brócolis"],
+  ["Quinta","Panqueca","Ragu de carne + arroz + legumes","carne moída, tomate, arroz, legumes"],
+  ["Sexta","Pão frito","Hambúrguer caseiro + batata assada + salada","carne moída, batata, folhas, tomate"],
+  ["Sábado","Cuscuz + queijo","Pizza caseira / noite de pizza","massa, queijo, tomate"],
+  ["Domingo","Panquecas + café com leite","Carne de panela com músculo + arroz + feijão + legumes","músculo, arroz, feijão, legumes"]
+ ]},
+ {id:2,title:"Semana 2",pico:"Maracujá cremoso + banana com canela",meals:[
+  ["Segunda","Crepioca","Carne de panela desfiada + arroz + legumes","músculo, arroz, legumes"],
+  ["Terça","Waffle de queijo","Panquecas salgadas de carne e queijo + salada","carne moída, queijo, farinha, folhas"],
+  ["Quarta","Pão frito","Filé de frango grelhado + arroz + feijão + legumes","filé de frango, arroz, feijão, legumes"],
+  ["Quinta","Panquecas","Frango desfiado cremoso + Rap10 + salada","frango, Rap10, creme, folhas"],
+  ["Sexta","Cuscuz + queijo","Hambúrguer caseiro + batata rústica","carne moída, batata, queijo"],
+  ["Sábado","Waffle + café com leite","Risoto de frango/carne + salada","arroz, frango ou carne, queijo, folhas"],
+  ["Domingo","Panquecas","Lagarto assado + arroz + feijão + farofa + salada","lagarto, arroz, feijão, farinha, folhas"]
+ ]},
+ {id:3,title:"Semana 3",pico:"Manga + abacaxi com coco",meals:[
+  ["Segunda","Pão frito","Porco assado + arroz + feijão + salada","carne suína, arroz, feijão, folhas"],
+  ["Terça","Crepioca de cottage","Carne moída com legumes + arroz + feijão","carne moída, legumes, arroz, feijão"],
+  ["Quarta","Waffle de queijo","Frango gratinado com queijo + batata + salada","frango, queijo, batata, folhas"],
+  ["Quinta","Panquecas","Almôndegas ao molho + arroz + legumes","carne moída, tomate, arroz, legumes"],
+  ["Sexta","Pão frito","Rap10 de carne/frango + queijo + salada","Rap10, carne ou frango, queijo, folhas"],
+  ["Sábado","Cuscuz","Lanche caseiro / hambúrguer / batata","carne moída, pão, batata, queijo"],
+  ["Domingo","Panquecas","Coxa e sobrecoxa assada + arroz + feijão + farofa + salada","coxa/sobrecoxa, arroz, feijão, farinha, folhas"]
+ ]},
+ {id:4,title:"Semana 4",pico:"Morango com leite + doce de leite",meals:[
+  ["Segunda","Crepioca","Coxa/sobrecoxa desfiada + arroz + legumes","frango, arroz, legumes"],
+  ["Terça","Waffle de queijo","Bife acebolado + batata + salada","alcatra, cebola, batata, folhas"],
+  ["Quarta","Pão frito","Ragu de carne + massa + salada","carne moída, tomate, massa, folhas"],
+  ["Quinta","Panquecas","Frango desfiado + arroz de forno + salada","frango, arroz, queijo, folhas"],
+  ["Sexta","Cuscuz + queijo","Pizza caseira / noite de lanche","massa, queijo, tomate"],
+  ["Sábado","Waffle + café com leite","Porco desfiado + Rap10 + acompanhamentos","carne suína, Rap10, queijo, salada"],
+  ["Domingo","Panquecas","Churrasco de fraldinha + arroz + farofa + vinagrete + salada","fraldinha, arroz, farinha, tomate, cebola, folhas"]
+ ]}
+];
+const FOOD_PREP=["Cozinha quinzenal","Produzir proteínas e bases","Porcionar e etiquetar","Congelar o que tolera freezer","Deixar amanhã encaminhado"];
+const FOOD_RECIPE_IDS={
+ "Frango assado com batatas":"frango-assado","Strogonoff de frango":"strogonoff","Bife de alcatra acebolado":"alcatra","Ragu de carne":"ragu","Hambúrguer caseiro":"hamburguer","Carne de panela com músculo":"musculo","Carne de panela desfiada":"musculo","Panquecas salgadas de carne e queijo":"panquecas","Filé de frango grelhado":"frango-grelhado","Frango desfiado cremoso":"frango-desfiado","Frango desfiado cremoso para Rap10":"frango-desfiado","Risoto de frango/carne":"risoto","Porco assado":"porco","Carne moída com legumes":"carne-legumes","Frango gratinado com queijo":"frango-gratinado","Almôndegas ao molho":"almondegas","Coxa e sobrecoxa assada":"coxa-sobrecoxa","Coxa/sobrecoxa desfiada":"coxa-sobrecoxa","Arroz de forno":"arroz-forno","Porco desfiado":"porco-rap10","Porco desfiado + Rap10":"porco-rap10","Churrasco de fraldinha":"fraldinha","Crepioca":"crepioca","Crepioca de cottage":"crepioca","Cuscuz + queijo":"cuscuz","Picolé de morango cremoso":"pico-morango","Picolé de coco":"pico-coco","Picolé de maracujá cremoso":"pico-maracuja","Picolé de banana com canela":"pico-banana"
 };
-
-const FOOD_DAYS=[
-  "Segunda","Terça","Quarta","Quinta","Sexta","Sábado","Domingo"
+/* Ingredientes usados para gerar a lista. Quando a receita é oficial, os valores vêm do Livro de Receitas; acompanhamentos comuns entram como itens de apoio. */
+const FOOD_ING={
+ "frango-assado":[["Coxa/sobrecoxa ou filé de frango","800 g","Carnes"],["Batata","700 g","Hortifruti"],["Alho","3 dentes","Hortifruti"],["Cebola","1/2 un.","Hortifruti"],["Azeite","2 colheres (sopa)","Cozinha"],["Limão","1 un.","Hortifruti"]],
+ "strogonoff":[["Frango","800 g","Carnes"],["Cebola","1 un. pequena","Hortifruti"],["Alho","2 dentes","Hortifruti"],["Manteiga ou azeite","1 colher (sopa)","Cozinha"],["Creme de leite","200 g","Laticínios"],["Molho de tomate","3–4 colheres (sopa)","Despensa"],["Mostarda","a gosto","Despensa"],["Batata palha","1 pacote","Despensa"]],
+ "alcatra":[["Alcatra","700–800 g","Carnes"],["Cebola","1–2 un.","Hortifruti"],["Alho","2 dentes","Hortifruti"],["Azeite","1 colher (sopa)","Cozinha"],["Batata para purê","1 kg","Hortifruti"],["Brócolis","1 maço","Hortifruti"]],
+ "ragu":[["Carne moída","800 g","Carnes"],["Molho de tomate","700–800 ml","Despensa"],["Cebola","1 un.","Hortifruti"],["Alho","3 dentes","Hortifruti"],["Azeite","1 colher (sopa)","Cozinha"],["Macarrão","400–500 g","Despensa"]],
+ "hamburguer":[["Carne moída","1 kg","Carnes"],["Batata","1 kg","Hortifruti"],["Pão de hambúrguer","1 pacote","Padaria"],["Folhas para salada","1 maço","Hortifruti"],["Tomate","3–4 un.","Hortifruti"]],
+ "musculo":[["Músculo","1,2 kg","Carnes"],["Cebola","2 un.","Hortifruti"],["Alho","4 dentes","Hortifruti"],["Tomate ou tomate pelado","2 un. ou 200 ml","Hortifruti/Despensa"],["Azeite","2 colheres (sopa)","Cozinha"],["Arroz","500 g","Despensa"],["Feijão","500 g","Despensa"],["Legumes variados","1 kg","Hortifruti"]],
+ "panquecas":[["Carne moída","600 g","Carnes"],["Muçarela","200 g","Laticínios"],["Molho de tomate","400–500 ml","Despensa"],["Discos de panqueca","8 un.","Despensa"]],
+ "frango-grelhado":[["Filé de frango","700–800 g","Carnes"],["Alho","2 dentes","Hortifruti"],["Azeite","1 colher (sopa)","Cozinha"],["Limão","1 un.","Hortifruti"],["Arroz","500 g","Despensa"],["Feijão","500 g","Despensa"],["Legumes variados","1 kg","Hortifruti"]],
+ "frango-desfiado":[["Frango desfiado","500–600 g","Carnes"],["Cottage ou cream cheese","150 g","Laticínios"],["Cebola","1/2 un.","Hortifruti"],["Tomate ou molho","a gosto","Hortifruti/Despensa"],["Rap10","4–8 un.","Despensa"],["Folhas para salada","1 maço","Hortifruti"]],
+ "risoto":[["Arroz para risoto","300 g","Despensa"],["Frango desfiado","300–400 g","Carnes"],["Cebola","1/2 un.","Hortifruti"],["Manteiga","1 colher (sopa)","Cozinha"],["Queijo","50–80 g","Laticínios"],["Folhas para salada","1 maço","Hortifruti"]],
+ "porco":[["Carne suína","1,2–1,4 kg","Carnes"],["Alho","4 dentes","Hortifruti"],["Cebola","1 un.","Hortifruti"],["Azeite","2 colheres (sopa)","Cozinha"],["Limão","1 un.","Hortifruti"],["Arroz","500 g","Despensa"],["Feijão","500 g","Despensa"]],
+ "carne-legumes":[["Carne moída","700 g","Carnes"],["Cenoura","1 un.","Hortifruti"],["Abobrinha","1 un. pequena","Hortifruti"],["Cebola","1/2 un.","Hortifruti"],["Alho","2 dentes","Hortifruti"],["Azeite","1 colher (sopa)","Cozinha"],["Arroz","500 g","Despensa"],["Feijão","500 g","Despensa"]],
+ "frango-gratinado":[["Filé de frango","800 g","Carnes"],["Muçarela","200 g","Laticínios"],["Cottage/cream cheese ou molho leve","150–200 g","Laticínios"],["Alho","2 dentes","Hortifruti"],["Batata","1 kg","Hortifruti"],["Folhas para salada","1 maço","Hortifruti"]],
+ "almondegas":[["Carne moída","700 g","Carnes"],["Molho de tomate","600–700 ml","Despensa"],["Cebola","1 un.","Hortifruti"],["Alho","2 dentes","Hortifruti"],["Arroz","500 g","Despensa"],["Legumes variados","1 kg","Hortifruti"]],
+ "coxa-sobrecoxa":[["Coxa/sobrecoxa","1,5 kg","Carnes"],["Alho","3 dentes","Hortifruti"],["Cebola","1 un.","Hortifruti"],["Batata","700 g","Hortifruti"],["Arroz","500 g","Despensa"],["Feijão","500 g","Despensa"],["Farofa/farinha","250 g","Despensa"],["Folhas para salada","1 maço","Hortifruti"]],
+ "arroz-forno":[["Frango desfiado","500–600 g","Carnes"],["Arroz cozido","500–600 g","Despensa"],["Muçarela","150 g","Laticínios"],["Milho/ervilha","1/2 xícara","Despensa"],["Cottage/cream cheese ou molho","150 g","Laticínios"]],
+ "porco-rap10":[["Porco desfiado","400–500 g","Carnes"],["Rap10","6–8 un.","Despensa"],["Queijo","150 g","Laticínios"],["Folhas/vinagrete","a gosto","Hortifruti"]],
+ "fraldinha":[["Fraldinha","1,0–1,2 kg","Carnes"],["Sal grosso/parrilla","a gosto","Despensa"],["Arroz","500 g","Despensa"],["Farofa/farinha","250 g","Despensa"],["Tomate","3–4 un.","Hortifruti"],["Cebola roxa","1 un.","Hortifruti"],["Folhas para salada","1 maço","Hortifruti"]],
+ "crepioca":[["Ovos","1 un.","Café/receitas"],["Tapioca","2 colheres (sopa)","Despensa"],["Cottage","2 colheres (sopa)","Laticínios"]],
+ "cuscuz":[["Flocão de milho","1/2 xícara por pessoa","Despensa"],["Queijo","a gosto","Laticínios"],["Manteiga","a gosto","Cozinha"]],
+ "lagarto":[["Lagarto","1,0–1,2 kg","Carnes"],["Alho","3 dentes","Hortifruti"],["Cebola","1 un.","Hortifruti"],["Arroz","500 g","Despensa"],["Feijão","500 g","Despensa"],["Farofa/farinha","250 g","Despensa"],["Folhas para salada","1 maço","Hortifruti"]],
+ "pizza":[["Massa para pizza","2–3 un.","Padaria"],["Muçarela","400–500 g","Laticínios"],["Molho de tomate","300–400 ml","Despensa"],["Tomate","3–4 un.","Hortifruti"]]
+};
+const FOOD_BREAKFAST_ING={
+ "Pão frito + café com leite":[["Pão","1 pacote","Padaria"],["Manteiga","a gosto","Cozinha"],["Leite","500 ml","Laticínios"],["Café","a gosto","Café/receitas"]],
+ "Pão frito":[["Pão","1 pacote","Padaria"],["Manteiga","a gosto","Cozinha"]],
+ "Crepioca de cottage":[...FOOD_ING.crepioca],
+ "Crepioca":[...FOOD_ING.crepioca],
+ "Waffle de queijo":[["Ovos","a conferir na receita","Café/receitas"],["Muçarela","a conferir na receita","Laticínios"],["Farinha","a conferir na receita","Despensa"]],
+ "Waffle + café com leite":[["Ovos","a conferir na receita","Café/receitas"],["Muçarela","a conferir na receita","Laticínios"],["Farinha","a conferir na receita","Despensa"],["Leite","500 ml","Laticínios"],["Café","a gosto","Café/receitas"]],
+ "Panqueca":[["Ovos","a conferir na receita","Café/receitas"],["Farinha de trigo","a conferir na receita","Despensa"],["Leite","a conferir na receita","Laticínios"]],
+ "Panquecas + café com leite":[["Ovos","a conferir na receita","Café/receitas"],["Farinha de trigo","a conferir na receita","Despensa"],["Leite","500 ml + receita","Laticínios"],["Café","a gosto","Café/receitas"]],
+ "Cuscuz + queijo":[...FOOD_ING.cuscuz],
+ "Cuscuz":[...FOOD_ING.cuscuz]
+};
+const FOOD_LUNCHBOX=[
+ ["Segunda","sanduíche + maçã + biscoito + suco"],["Terça","pão de queijo + tangerina + biscoito + Chamyto"],["Quarta","sanduíche + banana + biscoito + Toddynho com menos açúcar"],["Quinta","pão de queijo + maçã + biscoito + iogurte"],["Sexta","Rap10/sanduíche + laranja + biscoito + suco"]
 ];
-
-const FOOD_TYPES=[
-  "Café da manhã",
-  "Almoço",
-  "Lanche",
-  "Jantar"
+const FOOD_LUNCH_ING=[
+ ["Pão/sanduíche","1 pacote","Lancheira"],["Pão de queijo","1 pacote","Lancheira"],["Rap10","1 pacote","Lancheira"],["Biscoitos variados","4–8 pacotes","Lancheira"],["Maçã","4–5 un.","Hortifruti"],["Banana","4–5 un.","Hortifruti"],["Tangerina","3–5 un.","Hortifruti"],["Laranja","3–5 un.","Hortifruti"],["Suco","2–3 unidades","Lancheira"],["Chamyto","1–2 unidades","Laticínios"],["Toddynho com menos açúcar","1–2 unidades","Lancheira"],["Iogurte","1–2 unidades","Laticínios"]
 ];
-
+function foodDefaultMonth(){return {month:"2026-09",week:1,overrides:{},customMonths:{},shoppingDone:{},prepDone:[]};}
 function loadFood(){
-  try{
-    const d=JSON.parse(localStorage.getItem(FOOD_KEY));
-    if(d && Array.isArray(d.meals)){
-      return {
-        ...FOOD_BASE,
-        ...d,
-        meals:Array.isArray(d.meals)?d.meals:[],
-        prep:Array.isArray(d.prep)?d.prep:[],
-        shopping:Array.isArray(d.shopping)?d.shopping:[]
-      };
-    }
-  }catch{}
-  return JSON.parse(JSON.stringify(FOOD_BASE));
+ try{
+  const raw=JSON.parse(localStorage.getItem(FOOD_KEY));
+  if(raw)return {...foodDefaultMonth(),...raw,overrides:raw.overrides||{},customMonths:raw.customMonths||{},shoppingDone:raw.shoppingDone||{},prepDone:raw.prepDone||[]};
+ }catch{}
+ return foodDefaultMonth();
 }
-
-function saveFood(d){
-  localStorage.setItem(FOOD_KEY,JSON.stringify(d));
+function saveFood(d){localStorage.setItem(FOOD_KEY,JSON.stringify(d));}
+function foodInternetUrl(query){return "https://www.google.com/search?q="+encodeURIComponent("receita "+query);}
+function foodBaseMeal(week,day,type){
+ const m=week.meals.find(x=>x[0]===day); if(!m)return {name:"",recipeId:"",ingredients:""};
+ const name=type==="breakfast"?m[1]:m[2];
+ const key=Object.keys(FOOD_RECIPE_IDS).find(k=>name===k || name.startsWith(k+" ") || name.includes(k));
+ return {name,recipeId:key?FOOD_RECIPE_IDS[key]:"",ingredients:""};
 }
-
-function renderAlimentacao(){
-
-  const d=loadFood();
-
-  app.innerHTML=`
-    <section class="hero">
-      <h2>🍽️ Alimentação</h2>
-      <p>
-        Comer bem com menos decisões: cardápio definido,
-        preparo organizado e finalizações simples.
-      </p>
-    </section>
-
-    <div class="food-principle card">
-      <span class="eyebrow">SISTEMA DA CASA</span>
-      <strong>Jantar → marmita do dia seguinte</strong>
-      <p>
-        A alimentação deve facilitar a rotina, não ocupar espaço
-        mental todos os dias.
-      </p>
-    </div>
-
-    <div class="section-title">CARDÁPIO DA SEMANA</div>
-
-    <div class="food-toolbar">
-      <button class="primary" id="addMeal">＋ Adicionar refeição</button>
-    </div>
-
-    <div class="list">
-      ${FOOD_DAYS.map(day=>{
-
-        const meals=d.meals.filter(x=>x.day===day);
-
-        return `
-          <div class="card food-day">
-
-            <div class="panel-head">
-              <h3>${day}</h3>
-              <span class="pill">${meals.length}</span>
-            </div>
-
-            ${
-              meals.length
-              ?
-              meals.map(meal=>`
-                <div class="food-row editable-food" data-meal="${meal.id}">
-
-                  <div>
-                    <span class="eyebrow">${escapeHtml(meal.type)}</span>
-                    <strong>${escapeHtml(meal.name)}</strong>
-
-                    ${
-                      meal.note
-                      ?
-                      `<small>${escapeHtml(meal.note)}</small>`
-                      :
-                      ""
-                    }
-
-                  </div>
-
-                  <button
-                    class="more"
-                    data-edit-meal="${meal.id}"
-                    aria-label="Editar"
-                  >
-                    •••
-                  </button>
-
-                </div>
-              `).join("")
-              :
-              `
-                <div class="empty compact">
-                  <strong>Nenhuma refeição planejada.</strong>
-                  <span>Esse espaço pode permanecer vazio.</span>
-                </div>
-              `
-            }
-
-          </div>
-        `;
-
-      }).join("")}
-    </div>
-
-    <div class="section-title">🧊 PREPARO</div>
-
-    <div class="card food-checklist">
-
-      ${d.prep.map(item=>`
-        <label class="home-task ${item.done?"done":""}">
-          <input
-            type="checkbox"
-            data-food-prep="${item.id}"
-            ${item.done?"checked":""}
-          >
-          <span>
-            <strong>${escapeHtml(item.name)}</strong>
-          </span>
-        </label>
-      `).join("")}
-
-      <button class="secondary" id="addPrep">
-        ＋ Adicionar preparo
-      </button>
-
-    </div>
-
-    <div class="section-title">🛒 LISTA DE COMPRAS</div>
-
-    <div class="card food-shopping">
-
-      ${
-        d.shopping.length
-        ?
-        d.shopping.map(item=>`
-          <div class="shopping-row">
-
-            <label>
-              <input
-                type="checkbox"
-                data-food-shop="${item.id}"
-                ${item.done?"checked":""}
-              >
-
-              <span>
-                <strong class="${item.done?"done-text":""}">
-                  ${escapeHtml(item.name)}
-                </strong>
-
-                ${
-                  item.qty
-                  ?
-                  `<small>${escapeHtml(item.qty)}</small>`
-                  :
-                  ""
-                }
-              </span>
-
-            </label>
-
-            <button
-              class="more"
-              data-delete-shop="${item.id}"
-            >
-              ×
-            </button>
-
-          </div>
-        `).join("")
-        :
-        `
-          <div class="empty compact">
-            <strong>Lista vazia.</strong>
-            <span>Adicione apenas o que realmente precisa ser comprado.</span>
-          </div>
-        `
-      }
-
-      <button class="secondary" id="addShopping">
-        ＋ Adicionar item
-      </button>
-
-    </div>
-
-    <div class="section-title">🌙 AMANHÃ</div>
-
-    <div class="card tomorrow-food">
-      <span class="eyebrow">ANTES DE DORMIR</span>
-      <strong>Preparar alimentação de amanhã</strong>
-      <p>
-        Deixar encaminhados café da manhã, lancheira e marmita.
-        De manhã, apenas finalizar o necessário.
-      </p>
-    </div>
-
-    <div class="card food-note">
-      <span class="eyebrow">FREEZER</span>
-      <p>
-        Etiquetas:
-        <strong>NOME • DATA • Nº DE PORÇÕES • FINALIZAÇÃO</strong>.
-      </p>
-    </div>
-  `;
-
-  document.querySelector("#addMeal").onclick=()=>openFoodMealModal();
-
-  document.querySelectorAll("[data-edit-meal]").forEach(b=>{
-    b.onclick=()=>openFoodMealModal(b.dataset.editMeal);
-  });
-
-  document.querySelectorAll("[data-food-prep]").forEach(el=>{
-    el.onchange=()=>{
-      const x=loadFood();
-      const item=x.prep.find(p=>p.id===el.dataset.foodPrep);
-
-      if(item){
-        item.done=el.checked;
-        saveFood(x);
-      }
-
-      renderAlimentacao();
-    };
-  });
-
-  document.querySelector("#addPrep").onclick=()=>openFoodPrepModal();
-
-  document.querySelectorAll("[data-food-shop]").forEach(el=>{
-    el.onchange=()=>{
-      const x=loadFood();
-      const item=x.shopping.find(p=>p.id===el.dataset.foodShop);
-
-      if(item){
-        item.done=el.checked;
-        saveFood(x);
-      }
-
-      renderAlimentacao();
-    };
-  });
-
-  document.querySelectorAll("[data-delete-shop]").forEach(b=>{
-    b.onclick=()=>{
-      const x=loadFood();
-
-      x.shopping=x.shopping.filter(
-        p=>p.id!==b.dataset.deleteShop
-      );
-
-      saveFood(x);
-      renderAlimentacao();
-    };
-  });
-
-  document.querySelector("#addShopping").onclick=()=>openFoodShoppingModal();
+function foodMeal(d,week,day,type){
+ const ov=d.overrides?.[week.id]?.[day]?.[type];
+ if(ov)return ov;
+ return foodBaseMeal(week,day,type);
 }
-
-function openFoodMealModal(id=null){
-
-  const d=loadFood();
-
-  const existing=id
-    ? d.meals.find(x=>x.id===id)
-    : null;
-
-  const dlg=document.createElement("dialog");
-
-  dlg.innerHTML=`
-    <form method="dialog" class="modal-card" id="foodMealForm">
-
-      <div class="modal-head">
-        <div>
-          <div class="eyebrow">🍽️ ALIMENTAÇÃO</div>
-          <h2>${existing?"Editar refeição":"Nova refeição"}</h2>
-        </div>
-
-        <button class="icon-btn" value="cancel">×</button>
-      </div>
-
-      <label>
-        Dia
-        <select id="foodDay">
-          ${FOOD_DAYS.map(day=>`
-            <option
-              value="${day}"
-              ${existing?.day===day?"selected":""}
-            >
-              ${day}
-            </option>
-          `).join("")}
-        </select>
-      </label>
-
-      <label>
-        Refeição
-        <select id="foodType">
-          ${FOOD_TYPES.map(type=>`
-            <option
-              value="${type}"
-              ${existing?.type===type?"selected":""}
-            >
-              ${type}
-            </option>
-          `).join("")}
-        </select>
-      </label>
-
-      <label>
-        O que vamos comer?
-        <input
-          id="foodName"
-          required
-          maxlength="150"
-          value="${escapeHtml(existing?.name||"")}"
-          placeholder="Ex.: Frango com arroz e salada"
-        >
-      </label>
-
-      <label>
-        Observação
-        <span class="muted">(opcional)</span>
-        <textarea
-          id="foodNote"
-          rows="3"
-          maxlength="250"
-          placeholder="Marmita, finalização, preparo..."
-        >${escapeHtml(existing?.note||"")}</textarea>
-      </label>
-
-      <div class="modal-actions">
-
-        ${
-          existing
-          ?
-          `<button
-            type="button"
-            class="secondary"
-            id="deleteFoodMeal"
-          >
-            Excluir
-          </button>`
-          :
-          ""
-        }
-
-        <div class="grow"></div>
-
-        <button
-          type="button"
-          class="secondary"
-          id="cancelFoodMeal"
-        >
-          Cancelar
-        </button>
-
-        <button class="primary" value="default">
-          Salvar
-        </button>
-
-      </div>
-
-    </form>
-  `;
-
-  document.body.appendChild(dlg);
-  dlg.showModal();
-
-  dlg.querySelector("#cancelFoodMeal").onclick=()=>{
-    dlg.close();
-    dlg.remove();
-  };
-
-  if(existing){
-
-    dlg.querySelector("#deleteFoodMeal").onclick=()=>{
-
-      if(confirm("Excluir esta refeição?")){
-
-        d.meals=d.meals.filter(
-          x=>x.id!==existing.id
-        );
-
-        saveFood(d);
-
-        dlg.close();
-        dlg.remove();
-
-        renderAlimentacao();
-      }
-    };
+function foodAllMeals(d){
+ const weekList=FOOD_WEEKS;
+ const out=[];
+ weekList.forEach(w=>FOOD_DAYS.forEach(day=>["breakfast","dinner"].forEach(type=>out.push(foodMeal(d,w,day,type)))));
+ return out;
+}
+function foodAddIngredient(map,item){
+ const [name,qty,cat]=item; const key=name.toLowerCase();
+ if(!map[key])map[key]={name,qtys:[],cat:cat||"Outros"};
+ if(qty && !map[key].qtys.includes(qty))map[key].qtys.push(qty);
+}
+function foodShoppingItems(d){
+ const map={};
+ const weeks=foodMonthWeeks(d);
+ weeks.forEach(w=>FOOD_DAYS.forEach(day=>{
+  ["breakfast","dinner"].forEach(type=>{
+   const meal=foodMeal(d,w,day,type);
+   if(meal.recipeId && FOOD_ING[meal.recipeId]) FOOD_ING[meal.recipeId].forEach(x=>foodAddIngredient(map,x));
+   else if(type==="breakfast" && FOOD_BREAKFAST_ING[meal.name]) FOOD_BREAKFAST_ING[meal.name].forEach(x=>foodAddIngredient(map,x));
+   else if(meal.ingredients) meal.ingredients.split(/[,;\n]+/).map(x=>x.trim()).filter(Boolean).forEach(x=>foodAddIngredient(map,[x,"quantidade a definir","Personalizados"]));
+   else if(meal.name) foodAddIngredient(map,[meal.name,"conferir receita","A definir"]);
+  });
+ }));
+ FOOD_LUNCH_ING.forEach(x=>foodAddIngredient(map,x));
+ return Object.values(map).sort((a,b)=>a.cat.localeCompare(b.cat)||a.name.localeCompare(b.name));
+}
+function foodShoppingHash(items){return items.map(x=>x.name.toLowerCase()).join("|");}
+function foodMonthLabel(id){return FOOD_MONTHS.find(m=>m.id===id)?.label||id;}
+function foodMonthWeeks(d){
+ if(d.month==="2026-09")return FOOD_WEEKS;
+ const custom=d.customMonths?.[d.month];
+ if(custom?.weeks)return custom.weeks;
+ return [];
+}
+function foodMonthIsDefined(d){return d.month==="2026-09" || !!d.customMonths?.[d.month]?.weeks;}
+function foodRecipeOptions(){
+ return RECIPES.map(r=>`<option value="${r.id}">${escapeHtml(r.name)}</option>`).join("");
+}
+function openFoodMealEditor(weekId,day,type){
+ const d=loadFood(); const sourceWeeks=foodMonthWeeks(d); const week=sourceWeeks.find(w=>w.id===weekId)||FOOD_WEEKS.find(w=>w.id===weekId)||FOOD_WEEKS[0]; const current=foodMeal(d,week,day,type);
+ const dlg=document.createElement("dialog");
+ dlg.innerHTML=`<form method="dialog" class="modal-card" id="foodMealForm"><div class="modal-head"><div><div class="eyebrow">🍽️ ${day.toUpperCase()}</div><h2>Alterar ${type==="breakfast"?"café da manhã":"jantar"}</h2></div><button class="icon-btn" value="cancel">×</button></div>
+ <label>Escolher uma receita da casa<select id="foodRecipe"><option value="">— escolher —</option>${foodRecipeOptions()}</select></label>
+ <label>Nome da refeição<input id="foodName" required maxlength="100" value="${escapeHtml(current.name)}" placeholder="Ex.: Frango com legumes"></label>
+ <label>Se for uma opção nova, ingredientes para a lista de mercado<textarea id="foodIngredients" rows="4" placeholder="Ex.: 600 g frango, 2 tomates, 1 abobrinha">${escapeHtml(current.ingredients||"")}</textarea></label>
+ <div class="food-modal-note">📖 Se você escolher uma receita do livro, o app usa os ingredientes cadastrados dela. Se criar uma opção nova, informe os ingredientes para que ela entre na lista de mercado.</div>
+ <div class="modal-actions"><button type="button" class="secondary" id="foodCancel">Cancelar</button><button type="button" class="secondary" id="foodReset">Voltar ao cardápio-base</button><button class="primary" value="default">Salvar</button></div></form>`;
+ document.body.appendChild(dlg); dlg.showModal();
+ const sel=dlg.querySelector("#foodRecipe"); if(current.recipeId)sel.value=current.recipeId;
+ sel.onchange=()=>{const r=RECIPES.find(x=>x.id===sel.value);if(r){dlg.querySelector("#foodName").value=r.name;dlg.querySelector("#foodIngredients").value="";}};
+ dlg.querySelector("#foodCancel").onclick=()=>{dlg.close();dlg.remove()};
+ dlg.querySelector("#foodReset").onclick=()=>{const x=loadFood();if(x.overrides?.[weekId]?.[day]?.[type])delete x.overrides[weekId][day][type];saveFood(x);dlg.close();dlg.remove();renderAlimentacao();};
+ dlg.querySelector("#foodMealForm").addEventListener("submit",e=>{e.preventDefault();const x=loadFood();x.overrides=x.overrides||{};x.overrides[weekId]=x.overrides[weekId]||{};x.overrides[weekId][day]=x.overrides[weekId][day]||{};x.overrides[weekId][day][type]={name:dlg.querySelector("#foodName").value.trim(),recipeId:sel.value,ingredients:dlg.querySelector("#foodIngredients").value.trim()};saveFood(x);dlg.close();dlg.remove();renderAlimentacao();});
+}
+function openFoodMonthCreator(monthId){
+ const d=loadFood(); const prev=FOOD_MONTHS[FOOD_MONTHS.findIndex(m=>m.id===monthId)-1];
+ const dlg=document.createElement("dialog");
+ dlg.innerHTML=`<form method="dialog" class="modal-card" id="foodMonthForm"><div class="modal-head"><div><div class="eyebrow">🗓️ ${foodMonthLabel(monthId).toUpperCase()}</div><h2>Definir cardápio</h2></div><button class="icon-btn" value="cancel">×</button></div>
+ <p>Este mês ainda não tem um cardápio definido. Você pode deixá-lo em aberto ou criar uma cópia do mês anterior para editar refeição por refeição.</p>
+ <div class="modal-actions"><button type="button" class="secondary" id="foodMonthCancel">Cancelar</button><button type="button" class="primary" id="foodCopyMonth">Copiar mês anterior</button></div></form>`;
+ document.body.appendChild(dlg);dlg.showModal();
+ dlg.querySelector("#foodMonthCancel").onclick=()=>{dlg.close();dlg.remove()};
+ dlg.querySelector("#foodCopyMonth").onclick=()=>{
+  if(monthId!=="2026-09"){
+   const source=monthId==="2026-10"?FOOD_WEEKS:((d.customMonths?.["2026-10"]?.weeks)||FOOD_WEEKS);
+   d.customMonths=d.customMonths||{};d.customMonths[monthId]={weeks:JSON.parse(JSON.stringify(source))};d.month=monthId;d.week=1;saveFood(d);dlg.close();dlg.remove();renderAlimentacao();
   }
-
-  dlg.querySelector("#foodMealForm").addEventListener(
-    "submit",
-    e=>{
-
-      e.preventDefault();
-
-      const obj={
-        id:existing?.id||uid(),
-        day:dlg.querySelector("#foodDay").value,
-        type:dlg.querySelector("#foodType").value,
-        name:dlg.querySelector("#foodName").value.trim(),
-        note:dlg.querySelector("#foodNote").value.trim()
-      };
-
-      if(!obj.name)return;
-
-      if(existing){
-
-        const i=d.meals.findIndex(
-          x=>x.id===existing.id
-        );
-
-        d.meals[i]={
-          ...d.meals[i],
-          ...obj
-        };
-
-      }else{
-
-        d.meals.push(obj);
-
-      }
-
-      saveFood(d);
-
-      dlg.close();
-      dlg.remove();
-
-      renderAlimentacao();
-    }
-  );
+ };
 }
-
-function openFoodPrepModal(){
-
-  const d=loadFood();
-
-  const dlg=document.createElement("dialog");
-
-  dlg.innerHTML=`
-    <form method="dialog" class="modal-card" id="prepForm">
-
-      <div class="modal-head">
-        <div>
-          <div class="eyebrow">🧊 PREPARO</div>
-          <h2>Novo preparo</h2>
-        </div>
-
-        <button class="icon-btn" value="cancel">×</button>
-      </div>
-
-      <label>
-        O que precisa ser preparado?
-        <input
-          id="prepName"
-          required
-          maxlength="120"
-          placeholder="Ex.: Separar marmitas"
-        >
-      </label>
-
-      <div class="modal-actions">
-
-        <div class="grow"></div>
-
-        <button
-          type="button"
-          class="secondary"
-          id="cancelPrep"
-        >
-          Cancelar
-        </button>
-
-        <button class="primary" value="default">
-          Salvar
-        </button>
-
-      </div>
-
-    </form>
-  `;
-
-  document.body.appendChild(dlg);
-  dlg.showModal();
-
-  dlg.querySelector("#cancelPrep").onclick=()=>{
-    dlg.close();
-    dlg.remove();
-  };
-
-  dlg.querySelector("#prepForm").addEventListener(
-    "submit",
-    e=>{
-
-      e.preventDefault();
-
-      const name=dlg.querySelector("#prepName").value.trim();
-
-      if(!name)return;
-
-      d.prep.push({
-        id:uid(),
-        name,
-        done:false
-      });
-
-      saveFood(d);
-
-      dlg.close();
-      dlg.remove();
-
-      renderAlimentacao();
-    }
-  );
+function renderFoodShopping(d){
+ const items=foodShoppingItems(d),done=d.shoppingDone||{},hash=foodShoppingHash(items);
+ return `<div class="food-shopping-head"><div><span class="eyebrow">AUTOMÁTICA</span><strong>Lista gerada pelo cardápio</strong><p>Se você alterar uma refeição, a lista é recalculada.</p></div><span class="food-count">${items.filter(x=>done[x.name]).length}/${items.length}</span></div><div class="food-shopping-list">${items.map((x,i)=>{const checked=!!done[x.name];return `<label class="food-shop-item ${checked?'done':''}"><input type="checkbox" data-food-shopping-item="${escapeHtml(x.name)}" ${checked?'checked':''}><span><b>${escapeHtml(x.name)}</b><small>${escapeHtml(x.qtys.join(" + "))} · ${escapeHtml(x.cat)}</small></span></label>`}).join("")}</div><div class="food-shopping-foot">💡 A lista é uma estimativa baseada nas receitas cadastradas e no cardápio do mês. Confira o estoque antes de comprar.</div>`;
 }
-
-function openFoodShoppingModal(){
-
-  const d=loadFood();
-
-  const dlg=document.createElement("dialog");
-
-  dlg.innerHTML=`
-    <form method="dialog" class="modal-card" id="shoppingForm">
-
-      <div class="modal-head">
-        <div>
-          <div class="eyebrow">🛒 COMPRAS</div>
-          <h2>Novo item</h2>
-        </div>
-
-        <button class="icon-btn" value="cancel">×</button>
-      </div>
-
-      <label>
-        Item
-        <input
-          id="shopName"
-          required
-          maxlength="100"
-          placeholder="Ex.: Ovos"
-        >
-      </label>
-
-      <label>
-        Quantidade
-        <span class="muted">(opcional)</span>
-        <input
-          id="shopQty"
-          maxlength="50"
-          placeholder="Ex.: 30 unidades"
-        >
-      </label>
-
-      <div class="modal-actions">
-
-        <div class="grow"></div>
-
-        <button
-          type="button"
-          class="secondary"
-          id="cancelShopping"
-        >
-          Cancelar
-        </button>
-
-        <button class="primary" value="default">
-          Salvar
-        </button>
-
-      </div>
-
-    </form>
-  `;
-
-  document.body.appendChild(dlg);
-  dlg.showModal();
-
-  dlg.querySelector("#cancelShopping").onclick=()=>{
-    dlg.close();
-    dlg.remove();
-  };
-
-  dlg.querySelector("#shoppingForm").addEventListener(
-    "submit",
-    e=>{
-
-      e.preventDefault();
-
-      const name=dlg.querySelector("#shopName").value.trim();
-      const qty=dlg.querySelector("#shopQty").value.trim();
-
-      if(!name)return;
-
-      d.shopping.push({
-        id:uid(),
-        name,
-        qty,
-        done:false
-      });
-
-      saveFood(d);
-
-      dlg.close();
-      dlg.remove();
-
-      renderAlimentacao();
-    }
-  );
+function renderAlimentacao(){
+ const d=loadFood();
+ const month=foodMonthLabel(d.month),defined=foodMonthIsDefined(d);
+ const weeks=foodMonthWeeks(d); const week=weeks.find(w=>w.id===Number(d.week))||weeks[0];
+ const today=FOOD_DAYS[(new Date().getDay()+6)%7];
+ const todayMeal=week?.meals?.find(m=>m[0]===today);
+ const prepDone=new Set(d.prepDone||[]);
+ const todayHtml=defined&&todayMeal?`<div class="food-today"><span class="eyebrow">🍽️ HOJE · ${today.toUpperCase()}</span><strong>${escapeHtml(foodMeal(d,week,today,"dinner").name)}</strong><small>${escapeHtml(foodMeal(d,week,today,"dinner").ingredients||todayMeal[3])}</small><div class="food-link-row"><a class="food-link pink" href="#receitas">📖 Minhas receitas</a><a class="food-link blue" target="_blank" rel="noopener" href="${foodInternetUrl(foodMeal(d,week,today,"dinner").name)}">🔎 Mais opções na internet</a></div></div>`:`<div class="food-today"><strong>Esse mês ainda está em construção.</strong><small>Defina o cardápio quando quiser; a lista de mercado será criada a partir dele.</small></div>`;
+ const monthTabs=FOOD_MONTHS.map(m=>`<button class="food-month-tab ${m.id===d.month?'active':''}" data-food-month="${m.id}">${m.label}</button>`).join("");
+ const weekTabs=defined?weeks.map(w=>`<button class="food-week-tab ${w.id===week?.id?'active':''}" data-food-week="${w.id}">${w.title}</button>`).join(""):"";
+ const menuHtml=defined&&week?`<div class="food-menu-grid">${week.meals.map((m,i)=>{const b=foodMeal(d,week,m[0],"breakfast"),dn=foodMeal(d,week,m[0],"dinner");return `<article class="food-meal-card food-tone-${i%6} ${m[0]===today?'today':''}"><div class="food-meal-head"><span>${m[0]}</span>${m[0]===today?'<b>HOJE</b>':''}</div><div class="food-meal-line"><small>☀️ ${escapeHtml(b.name)}</small><button class="food-edit" data-food-edit="${week.id}|${m[0]}|breakfast">Alterar</button></div><div class="food-meal-line"><strong>🌙 ${escapeHtml(dn.name)}</strong><button class="food-edit" data-food-edit="${week.id}|${m[0]}|dinner">Alterar</button></div><em>${escapeHtml(dn.ingredients||m[3])}</em><div class="food-meal-actions"><a href="#receitas">📖 Minhas receitas</a><a target="_blank" rel="noopener" href="${foodInternetUrl(dn.name)}">🔎 Outras receitas</a></div></article>`}).join("")}</div>`:`<div class="food-empty-month card"><div class="food-empty-icon">🗓️</div><strong>${month} ainda não tem cardápio definido</strong><p>O sistema já está pronto até dezembro. Quando o cardápio do mês for definido, a lista de mercado passa a nascer dele automaticamente.</p><button class="primary" id="foodDefineMonth">＋ Definir este mês</button></div>`;
+ app.innerHTML=`
+ <section class="hero food-hero"><div class="eyebrow">🍽️ MINHA VIDA · ${month.toUpperCase()}</div><h2>Alimentação</h2><p>Cardápio → receitas → preparo → lista de mercado. Tudo se ajusta quando você muda uma refeição.</p></section>
+ <div class="food-month-tabs">${monthTabs}</div>
+ ${todayHtml}
+ ${defined?`<div class="food-week-tabs">${weekTabs}</div>`:""}
+ ${defined?`<div class="section-title">${week.title.toUpperCase()} · CARDÁPIO</div>`:""}
+ ${menuHtml}
+ ${defined?`<div class="food-control-row"><a class="food-big-link pink" href="#receitas">📖 Minhas receitas</a><button class="food-big-link blue" id="foodMarketJump">🛒 Lista de mercado</button></div>`:""}
+ ${defined?`<div class="section-title">🛒 LISTA DE MERCADO</div><div class="card food-shopping-card" id="foodShoppingCard">${renderFoodShopping(d)}</div>`:""}
+ ${defined?`<div class="section-title">🎒 LANCHEIRA DO HENRIQUE</div><div class="card food-lunchbox"><p><strong>Base:</strong> 1 salgado + 1 crocante + 1 fruta + 1 bebida.</p>${FOOD_LUNCHBOX.map(x=>`<div>${x[0]} · ${x[1]}</div>`).join("")}</div>`:""}
+ ${defined?`<div class="section-title">🧊 COZINHA QUINZENAL</div><div class="card food-checklist">${FOOD_PREP.map((x,i)=>`<label class="food-check-row ${prepDone.has(String(i))?'done':''}"><input type="checkbox" data-food-prep="${i}" ${prepDone.has(String(i))?'checked':''}><span>${x}</span></label>`).join("")}<div class="food-rule"><b>Quinzena 1</b><span>Abastecer Semanas 1 e 2 com proteínas, arroz, feijão e bases.</span></div><div class="food-rule"><b>Quinzena 2</b><span>Abastecer Semanas 3 e 4, renovar coringas e deixar compras ajustadas.</span></div></div>`:""}
+ <div class="card food-note"><span class="eyebrow">⚙️ COMO FUNCIONA</span><p><strong>Você muda o cardápio → o app muda a lista.</strong> Receitas da casa usam os ingredientes cadastrados do livro; uma receita nova entra na lista quando você informar seus ingredientes.</p></div>`;
+ document.querySelectorAll("[data-food-month]").forEach(b=>b.onclick=()=>{const x=loadFood();x.month=b.dataset.foodMonth;x.week=1;saveFood(x);renderAlimentacao();});
+ document.querySelectorAll("[data-food-week]").forEach(b=>b.onclick=()=>{const x=loadFood();x.week=Number(b.dataset.foodWeek);saveFood(x);renderAlimentacao();});
+ document.querySelectorAll("[data-food-edit]").forEach(b=>b.onclick=()=>{const [wid,day,type]=b.dataset.foodEdit.split("|");openFoodMealEditor(Number(wid),day,type);});
+ document.querySelectorAll("[data-food-prep]").forEach(el=>el.onchange=()=>{const x=loadFood();const a=new Set(x.prepDone||[]);el.checked?a.add(el.dataset.foodPrep):a.delete(el.dataset.foodPrep);x.prepDone=[...a];saveFood(x);renderAlimentacao();});
+ document.querySelectorAll("[data-food-shopping-item]").forEach(el=>el.onchange=()=>{const x=loadFood();x.shoppingDone=x.shoppingDone||{};el.checked?x.shoppingDone[el.dataset.foodShoppingItem]=true:delete x.shoppingDone[el.dataset.foodShoppingItem];saveFood(x);renderAlimentacao();});
+ document.querySelector("#foodDefineMonth")?.addEventListener("click",()=>openFoodMonthCreator(d.month));
+ document.querySelector("#foodMarketJump")?.addEventListener("click",()=>document.querySelector("#foodShoppingCard")?.scrollIntoView({behavior:"smooth",block:"start"}));
 }
 
 const REC_KEY="minha-vida.receitas.v1";
@@ -1559,29 +1151,39 @@ function renderPlaceholder() {
       <button class="module" data-route="rituais"><span class="emoji">✨</span><strong>Rituais</strong><span>Rotinas que viram cuidado.</span></button>
       <button class="module" data-route="mais"><span class="emoji">＋</span><strong>Próximos módulos</strong><span>Construídos um por vez.</span></button>
     </div>`;
-  document.querySelectorAll("[data-route]").forEach(b => b.onclick = () => { state.route=b.dataset.route; render(); });
+  document.querySelectorAll("[data-route]").forEach(b => b.onclick = () => {
+    state.route=b.dataset.route;
+    location.hash = state.route;
+    render();
+  });
 }
 
 document.querySelector("#homeBtn").onclick = () => {
   state.route="pendencias";
   state.filter="abertas";
   state.search="";
-  location.hash="pendencias";
+  location.hash = "pendencias";
   render();
 };
+
 document.querySelector("#backBtn").onclick = () => {
   state.route="pendencias";
-  location.hash="pendencias";
+  location.hash = "pendencias";
   render();
 };
-document.querySelectorAll(".nav-item").forEach(b => b.onclick = () => {
-  state.route=b.dataset.route;
-  location.hash=state.route;
-  render();
+
+document.querySelectorAll(".nav-item").forEach(b => {
+  b.onclick = () => {
+    state.route=b.dataset.route;
+    location.hash = state.route;
+    render();
+  };
 });
 
-window.addEventListener("hashchange", render);
-
-if ("serviceWorker" in navigator) window.addEventListener("load", () => navigator.serviceWorker.register("sw.js").catch(console.warn));
+if ("serviceWorker" in navigator) {
+  window.addEventListener("load", () =>
+    navigator.serviceWorker.register("sw.js").catch(console.warn)
+  );
+}
 
 render();
