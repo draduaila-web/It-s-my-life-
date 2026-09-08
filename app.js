@@ -1,6 +1,6 @@
 const STORAGE_KEY = "minha-vida.pendencias.v1";
 const state = {
-  route: "pendencias",
+  route: "meu-dia",
   filter: "abertas",
   editingId: null,
   search: ""
@@ -161,7 +161,7 @@ function renderRituaisHojeV13(){
 
 function render() {
   const hash = (location.hash || "").replace("#", "").trim();
-  const route = hash || state.route || "pendencias";
+  const route = hash || state.route || "meu-dia";
   state.route = route;
 
   const pageTitle = document.querySelector("#pageTitle");
@@ -552,6 +552,7 @@ function renderRituais() {
     </section>
 
     <div class="ritual-grid">
+      <div class="ritual-today-hint">✨ <strong>Rituais de hoje</strong><span>Os rituais programados aparecem automaticamente no Meu Dia.</span></div>
       <button class="ritual-card featured" id="capilarBtn">
         <span class="ritual-icon">✦</span>
         <div><strong>Ritual Capilar</strong><span>Lavagem · tratamento · finalização · day after</span></div>
@@ -1339,16 +1340,16 @@ function renderPlaceholder() {
 }
 
 document.querySelector("#homeBtn").onclick = () => {
-  state.route="pendencias";
+  state.route="meu-dia";
   state.filter="abertas";
   state.search="";
-  location.hash = "pendencias";
+  location.hash = "meu-dia";
   render();
 };
 
 document.querySelector("#backBtn").onclick = () => {
-  state.route="pendencias";
-  location.hash = "pendencias";
+  state.route="meu-dia";
+  location.hash = "meu-dia";
   render();
 };
 
