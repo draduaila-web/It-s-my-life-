@@ -923,45 +923,59 @@ function openCasaMaintenance(){
  dlg.querySelector("#casaForm").addEventListener("submit",e=>{e.preventDefault();d.maintenance.push({id:uid(),name:dlg.querySelector("#mName").value.trim(),note:dlg.querySelector("#mNote").value.trim(),createdAt:Date.now()});saveCasa(d);dlg.close();dlg.remove();renderCasa();});
 }
 
-const EX_KEY="minha-vida.exercicios.v1";
-const EX_BASE={
-  plans:[
-    {id:"treino1",name:"Esteira",type:"Cardio",target:"20 min",days:["Seg","Ter","Qua","Qui","Sex"],active:true},
-    {id:"treino2",name:"Treino de força",type:"Força",target:"Conforme treino",days:[],active:true}
-  ],
-  sessions:[],
-  notes:""
+const EX_KEY="minha-vida.exercicios.v2";
+const EX_SCHEDULE=[
+  {day:0,label:"Domingo",tone:"peach",morning:{name:"Esteira",meta:"10–20 min",icon:"🚶‍♀️"},afternoon:{name:"Descanso + alongamento",meta:"8–12 min · opcional",icon:"🌿"}},
+  {day:1,label:"Segunda",tone:"pink",morning:{name:"Esteira",meta:"10–20 min",icon:"🚶‍♀️"},afternoon:{name:"Bumbum · vídeo",meta:"20 min",icon:"🍑"}},
+  {day:2,label:"Terça",tone:"blue",morning:{name:"Esteira",meta:"10–20 min",icon:"🚶‍♀️"},afternoon:{name:"Escada + socos",meta:"10–15 min + 5–10 min",icon:"🥊"}},
+  {day:3,label:"Quarta",tone:"mint",morning:{name:"Esteira",meta:"10–20 min",icon:"🚶‍♀️"},afternoon:{name:"Força · pesos + elásticos",meta:"20–25 min",icon:"🏋️‍♀️"}},
+  {day:4,label:"Quinta",tone:"lavender",morning:{name:"Esteira",meta:"10–20 min",icon:"🚶‍♀️"},afternoon:{name:"Bumbum · vídeo",meta:"20 min",icon:"🍑"}},
+  {day:5,label:"Sexta",tone:"yellow",morning:{name:"Esteira",meta:"10–20 min",icon:"🚶‍♀️"},afternoon:{name:"Escada + socos",meta:"10–15 min + 5–10 min",icon:"🥊"}},
+  {day:6,label:"Sábado",tone:"peach",morning:{name:"Esteira",meta:"10–20 min · se quiser",icon:"🚶‍♀️"},afternoon:{name:"Prancha de Pilates + alongamento",meta:"15–20 min",icon:"🧘‍♀️"}}
+];
+const EX_MOVES={
+ "Esteira":["Começar leve por 2–3 min","Manter caminhada confortável ou acelerar conforme disposição","Fechar com 1–2 min leves"],
+ "Bumbum · vídeo":["Abrir o treino de 20 minutos escolhido","Fazer no seu ritmo, sem transformar em prova","Finalizar com água e 3–5 min de alongamento leve"],
+ "Escada + socos":["Escada ergométrica — 10–15 min","Disco de socos — 5–10 min em blocos confortáveis","Alongar pernas, ombros e braços"],
+ "Força · pesos + elásticos":["Escolher 3–5 movimentos simples","Fazer séries confortáveis com pesos/elásticos","Finalizar com alongamento leve"],
+ "Prancha de Pilates + alongamento":["Prancha de Pilates — 8–12 min","Mobilidade de quadril e coluna","Alongamento leve de pernas, costas e braços"],
+ "Descanso + alongamento":["Respirar e soltar o corpo","Alongar sem forçar","Encerrar quando o corpo disser que chega"]
 };
-function loadEx(){try{const d=JSON.parse(localStorage.getItem(EX_KEY));if(d)return {...EX_BASE,...d};}catch{}return JSON.parse(JSON.stringify(EX_BASE));}
+function exDateKey(d=new Date()){return new Intl.DateTimeFormat('en-CA').format(d)}
+function loadEx(){
+ try{
+  const old=JSON.parse(localStorage.getItem(EX_KEY));
+  if(old)return {...old,logs:Array.isArray(old.logs)?old.logs:[]};
+ }catch{}
+ const fresh={logs:[],custom:[]}; localStorage.setItem(EX_KEY,JSON.stringify(fresh)); return fresh;
+}
 function saveEx(d){localStorage.setItem(EX_KEY,JSON.stringify(d));}
+function exTodayPlan(){return EX_SCHEDULE[new Date().getDay()]}
+function exDone(name,date=exDateKey()){return loadEx().logs.some(x=>x.date===date&&x.name===name)}
+function exToggle(name){
+ const d=loadEx(),date=exDateKey(),i=d.logs.findIndex(x=>x.date===date&&x.name===name);
+ if(i>=0)d.logs.splice(i,1);else d.logs.push({id:uid(),name,date,createdAt:Date.now()});
+ saveEx(d);renderExercicios();
+}
+function exHow(name){
+ const steps=EX_MOVES[name]||["Fazer o treino no seu ritmo","Respeitar os limites do corpo","Alongar e encerrar o movimento com calma"];
+ const o=document.createElement('div');o.className='mv-how-overlay';o.innerHTML=`<div class="mv-how"><button class="mv-how-x" onclick="this.closest('.mv-how-overlay').remove()">×</button><div class="eyebrow">COMO FAZER</div><h2>🏃 ${escapeHtml(name)}</h2><ol>${steps.map(x=>`<li>${escapeHtml(x)}</li>`).join('')}</ol><p>O objetivo é consistência, não intensidade perfeita.</p></div>`;document.body.appendChild(o);
+}
 function renderExercicios(){
- const d=loadEx(), today=new Date().toISOString().slice(0,10);
- const sessions=d.sessions.slice().reverse();
- app.innerHTML=`<section class="hero"><h2>🏃 Exercícios</h2><p>Movimento como parte da rotina — sem transformar treino em cobrança.</p></section>
- <div class="exercise-focus card"><span class="eyebrow">HOJE</span><strong>05:35–05:55 · Esteira</strong><p>20 minutos. O objetivo é manter o ritual da manhã, não buscar perfeição.</p><button class="primary" id="quickExercise">✓ Registrar treino de hoje</button></div>
- <div class="section-title">ROTINA DE MOVIMENTO</div>
- <div class="list">${d.plans.map(p=>`<div class="card exercise-plan"><div><strong>${escapeHtml(p.name)}</strong><span>${escapeHtml(p.type)} · ${escapeHtml(p.target)}</span>${p.days.length?`<small>${p.days.join(" · ")}</small>`:""}</div><span class="pill">${p.active?"Ativo":"Pausado"}</span></div>`).join("")}</div>
- <button class="secondary add-full" id="addPlan">＋ Adicionar treino</button>
- <div class="section-title">REGISTRO</div>
- <div class="list">${sessions.slice(0,12).map(s=>`<div class="card exercise-session"><div><strong>${escapeHtml(s.name)}</strong><span>${formatDate(s.date)} · ${escapeHtml(s.duration||"")} ${s.note?`· ${escapeHtml(s.note)}`:""}</span></div><button class="more" data-ex="${s.id}">×</button></div>`).join("")||`<div class="empty compact"><strong>Nenhum treino registrado ainda.</strong><span>Comece pelo ritual de esteira da manhã.</span></div>`}</div>
- <div class="card exercise-note"><span class="eyebrow">REGRA</span><p>Se o dia apertar, o treino pode ser reduzido. Se estiver cansada, descanso não é falha — é parte do sistema.</p></div>`;
- document.querySelector("#quickExercise").onclick=()=>addExerciseSession("Esteira","20 min",today);
- document.querySelector("#addPlan").onclick=()=>openExercisePlan();
- document.querySelectorAll("[data-ex]").forEach(b=>b.onclick=()=>{const x=loadEx();x.sessions=x.sessions.filter(s=>s.id!==b.dataset.ex);saveEx(x);renderExercicios();});
-}
-function addExerciseSession(name,duration,date){
- const d=loadEx();
- if(d.sessions.some(s=>s.date===date&&s.name===name)){alert("Esse treino já foi registrado hoje.");return;}
- d.sessions.push({id:uid(),name,duration,date,note:"",createdAt:Date.now()});saveEx(d);renderExercicios();
-}
-function openExercisePlan(){
- const d=loadEx(),dlg=document.createElement("dialog");
- dlg.innerHTML=`<form method="dialog" class="modal-card" id="exForm"><div class="modal-head"><div><div class="eyebrow">🏃 EXERCÍCIOS</div><h2>Novo treino</h2></div><button class="icon-btn" value="cancel">×</button></div>
- <label>Nome<input id="eName" required maxlength="70" placeholder="Ex.: Pilates"></label>
- <div class="form-grid"><label>Tipo<input id="eType" value="Treino"></label><label>Duração/meta<input id="eTarget" placeholder="Ex.: 30 min"></label></div>
- <div class="modal-actions"><div class="grow"></div><button type="button" class="secondary" id="cancelEx">Cancelar</button><button class="primary" value="default">Salvar</button></div></form>`;
- document.body.appendChild(dlg);dlg.showModal();dlg.querySelector("#cancelEx").onclick=()=>{dlg.close();dlg.remove()};
- dlg.querySelector("#exForm").addEventListener("submit",e=>{e.preventDefault();d.plans.push({id:uid(),name:dlg.querySelector("#eName").value.trim(),type:dlg.querySelector("#eType").value.trim(),target:dlg.querySelector("#eTarget").value.trim(),days:[],active:true});saveEx(d);dlg.close();dlg.remove();renderExercicios();});
+ const d=loadEx(),today=exTodayPlan(),date=exDateKey(),todayLogs=d.logs.filter(x=>x.date===date),week=EX_SCHEDULE;
+ const doneCount=todayLogs.length;
+ app.innerHTML=`<section class="hero exercise-hero"><div class="eyebrow">🏃 MOVIMENTO</div><h2>Exercícios</h2><p>Um corpo em movimento, sem transformar treino em mais uma cobrança.</p></section>
+ <section class="exercise-today ${today.tone}"><div class="exercise-day"><span class="eyebrow">HOJE · ${today.label.toUpperCase()}</span><strong>Seu movimento cabe no seu dia.</strong></div>
+ <div class="exercise-stack">
+  <div class="exercise-slot"><span class="exercise-icon">${today.morning.icon}</span><div><small>MANHÃ</small><strong>${escapeHtml(today.morning.name)}</strong><span>${escapeHtml(today.morning.meta)}</span></div><div class="exercise-actions"><button class="mini-how" data-how="${escapeHtml(today.morning.name)}">Como</button><button class="mini-done ${exDone(today.morning.name)?'is-done':''}" data-done="${escapeHtml(today.morning.name)}">${exDone(today.morning.name)?'✓ Feito':'Feito'}</button></div></div>
+  <div class="exercise-slot"><span class="exercise-icon">${today.afternoon.icon}</span><div><small>TARDE</small><strong>${escapeHtml(today.afternoon.name)}</strong><span>${escapeHtml(today.afternoon.meta)}</span></div><div class="exercise-actions"><button class="mini-how" data-how="${escapeHtml(today.afternoon.name)}">Como</button><button class="mini-done ${exDone(today.afternoon.name)?'is-done':''}" data-done="${escapeHtml(today.afternoon.name)}">${exDone(today.afternoon.name)?'✓ Feito':'Feito'}</button></div></div>
+ </div><div class="exercise-counter">${doneCount}/2 movimentos registrados hoje</div></section>
+ <section class="exercise-week"><div class="section-head"><h2>✨ Minha semana</h2><span class="soft-count">7 dias</span></div>${week.map(x=>`<div class="week-move ${x.day===new Date().getDay()?'today':''}"><div class="week-day">${x.label.slice(0,3)}</div><div class="week-main"><strong>${x.morning.icon} ${escapeHtml(x.morning.name)}</strong><span>${escapeHtml(x.morning.meta)} · ${x.afternoon.icon} ${escapeHtml(x.afternoon.name)} · ${escapeHtml(x.afternoon.meta)}</span></div>${x.day===new Date().getDay()?'<b>HOJE</b>':''}</div>`).join('')}</section>
+ <section class="exercise-toolkit"><div class="section-head"><h2>🧰 O que você tem</h2></div><div class="tool-pills"><span>Esteira</span><span>Escada ergométrica</span><span>Disco de socos</span><span>Prancha de Pilates</span><span>Pesos</span><span>Elásticos</span><span>Treino de bumbum</span></div></section>
+ <section class="exercise-rule"><strong>💜 Regra do movimento</strong><p>10 minutos contam. 20 minutos contam. Um dia mais leve também conta. O plano é voltar amanhã.</p></section>
+ <section class="exercise-history"><div class="section-head"><h2>Registro</h2><span class="soft-count">${d.logs.length}</span></div>${d.logs.slice().reverse().slice(0,10).map(x=>`<div class="exercise-log"><span>✓</span><div><strong>${escapeHtml(x.name)}</strong><small>${formatDate(x.date)}</small></div></div>`).join('')||'<div class="empty compact"><strong>Ainda sem registros.</strong><span>Comece pelo movimento de hoje.</span></div>'}</section>`;
+ document.querySelectorAll('[data-how]').forEach(b=>b.onclick=()=>exHow(b.dataset.how));
+ document.querySelectorAll('[data-done]').forEach(b=>b.onclick=()=>exToggle(b.dataset.done));
 }
 
 const FOOD_KEY="minha-vida.alimentacao.v3";
