@@ -270,3 +270,115 @@ h2 { margin:0; font-size:22px; letter-spacing:-.02em; }
 .bottom-nav a:nth-child(2), .bottom-nav button:nth-child(2) { color:#806f9d; }
 .bottom-nav a:nth-child(3), .bottom-nav button:nth-child(3) { color:#6e9b88; }
 .bottom-nav a:nth-child(4), .bottom-nav button:nth-child(4) { color:#6f92b2; }
+
+/* MINHA VIDA V4 — candy colors distribution */
+:root {
+  --bg: #fff8f1;
+  --surface: rgba(255,255,255,.96);
+  --surface-strong: #fffdfa;
+  --ink: #3f3745;
+  --muted: #827781;
+  --line: #eadfe0;
+  --lavender: #c7a8df;
+  --lavender-dark: #79558e;
+  --lavender-pale: #eee4f7;
+  --success: #78b69c;
+  --danger: #d88799;
+  --rose: #e9a0b7;
+  --rose-pale: #fae5ec;
+  --pink-soft: #f8dbe6;
+  --pink-strong: #d47f9f;
+  --lilac-soft: #eee2f8;
+  --mint-soft: #dff1e8;
+  --mint-strong: #6fa58e;
+  --blue-soft: #deedf8;
+  --blue-strong: #7198bc;
+  --yellow-soft: #fff0c8;
+  --yellow-strong: #c39b55;
+  --peach-soft: #fbe1d5;
+  --peach-strong: #d58a6f;
+  --beige-soft: #f4e8da;
+}
+
+/* The interface background stays calm; candy colors appear in purposeful accents. */
+.topbar { background:linear-gradient(var(--bg) 78%, transparent); }
+.icon-btn { color:var(--lavender-dark); }
+
+/* Primary actions are pink, not purple. */
+.primary {
+  background:linear-gradient(135deg,#e59ab3,#d47f9f);
+  box-shadow:0 8px 20px rgba(212,127,159,.20);
+}
+.secondary { background:var(--lilac-soft); color:var(--lavender-dark); }
+.search:focus, input:focus, select:focus, textarea:focus {
+  border-color:#e1aec0;
+  box-shadow:0 0 0 3px rgba(233,160,183,.18);
+}
+
+/* Pending tabs: open = lilac/pink, completed = mint. */
+.tabs .tab:nth-child(1).active { background:var(--pink-soft); color:#a45e7b; }
+.tabs .tab:nth-child(2).active { background:var(--mint-soft); color:#5e8e78; }
+
+/* Small information chips rotate through the candy palette. */
+.pill { background:var(--beige-soft); color:#826d62; }
+.pill.today { background:var(--blue-soft); color:#6688a7; }
+.pill.overdue { background:var(--pink-soft); color:#c06d8b; }
+
+/* Module cards become visibly multicolor while sharing the same structure. */
+.module-grid .module:nth-child(6n+1) { background:linear-gradient(145deg,#fffdfa,var(--pink-soft)); border-color:#efd6e0; }
+.module-grid .module:nth-child(6n+2) { background:linear-gradient(145deg,#fffdfa,var(--lilac-soft)); border-color:#e3d4ee; }
+.module-grid .module:nth-child(6n+3) { background:linear-gradient(145deg,#fffdfa,var(--mint-soft)); border-color:#d2e8dc; }
+.module-grid .module:nth-child(6n+4) { background:linear-gradient(145deg,#fffdfa,var(--yellow-soft)); border-color:#f0dfb7; }
+.module-grid .module:nth-child(6n+5) { background:linear-gradient(145deg,#fffdfa,var(--blue-soft)); border-color:#d3e4f1; }
+.module-grid .module:nth-child(6n+6) { background:linear-gradient(145deg,#fffdfa,var(--peach-soft)); border-color:#f0d5c8; }
+
+/* Repeated cards inside modules get gentle color anchors too. */
+.food-principle { background:linear-gradient(135deg,var(--peach-soft),var(--yellow-soft)); }
+.tomorrow-food { background:linear-gradient(135deg,var(--mint-soft),var(--blue-soft)); }
+.recipe-principle { background:linear-gradient(135deg,var(--yellow-soft),var(--peach-soft)); }
+.exercise-focus { background:linear-gradient(135deg,var(--blue-soft),var(--lilac-soft)); }
+.home-principle { background:linear-gradient(135deg,var(--mint-soft),var(--blue-soft)); }
+.money-hero { background:linear-gradient(135deg,var(--blue-soft),var(--pink-soft)); }
+.ritual-card.featured { background:linear-gradient(135deg,var(--pink-soft),var(--lilac-soft)); }
+
+/* Meu Dia: each quick action has its own pastel identity. */
+.quick-grid a:nth-child(1) { background:var(--pink-soft); border-color:#efd4df; }
+.quick-grid a:nth-child(2) { background:var(--lilac-soft); border-color:#e3d5ed; }
+.quick-grid a:nth-child(3) { background:var(--mint-soft); border-color:#d3e8dd; }
+.quick-grid a:nth-child(4) { background:var(--yellow-soft); border-color:#f0dfb8; }
+.quick-grid a:nth-child(5) { background:var(--blue-soft); border-color:#d3e4f0; }
+.quick-grid a:nth-child(6) { background:var(--peach-soft); border-color:#f0d5c8; }
+
+/* Gentle color rhythm for the daily timeline. */
+.timeline { border-left-color:rgba(121,85,142,.14); }
+.focus-dot { background:var(--yellow-soft); }
+.now-card { border-color:rgba(212,127,159,.14); }
+.now-card.rest { background:var(--mint-soft); }
+.now-card.protected { background:var(--lilac-soft); }
+
+/* Bottom navigation is warm and neutral; active state supplies the color. */
+.bottom-nav { background:rgba(255,248,241,.95); border-color:rgba(220,201,207,.78); }
+.bottom-nav a,.bottom-nav button { color:#8d7f8a; }
+.bottom-nav a.active,.bottom-nav button.active { color:var(--pink-strong); }
+
+/* Home/module sheet follows the same beige + candy language. */
+.module-sheet { background:#fff8f1; }
+.module-links a:nth-child(6n+1) { background:var(--pink-soft); }
+.module-links a:nth-child(6n+2) { background:var(--lilac-soft); }
+.module-links a:nth-child(6n+3) { background:var(--mint-soft); }
+.module-links a:nth-child(6n+4) { background:var(--yellow-soft); }
+.module-links a:nth-child(6n+5) { background:var(--blue-soft); }
+.module-links a:nth-child(6n+6) { background:var(--peach-soft); }
+
+/* Checkboxes use pink for completion, with mint reserved for completed/system states. */
+.check.done { background:var(--pink-strong); border-color:var(--pink-strong); }
+.home-task input, .food-checklist input { accent-color:var(--pink-strong); }
+
+/* Study summary uses blue / lilac / mint as a visual trio. */
+.study-summary .summary-card:nth-child(1) { background:var(--blue-soft); }
+.study-summary .summary-card:nth-child(2) { background:var(--lilac-soft); }
+.study-summary .summary-card:nth-child(3) { background:var(--mint-soft); }
+
+/* Capilar/ritual details: pink + lilac, never heavy purple. */
+.capilar-step > span { background:var(--pink-soft); color:#a45e7b; }
+.ritual-icon { color:var(--pink-strong); }
