@@ -80,6 +80,7 @@ function renderMeuDia(){
 
 function render() {
   const route = (location.hash || '#pendencias').slice(1) || 'meu-dia';
+  state.route = route;
   if(route === 'meu-dia'){ document.getElementById('app').innerHTML=renderMeuDia(); return; }
 
   document.querySelector("#pageTitle").textContent =
