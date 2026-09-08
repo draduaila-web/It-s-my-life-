@@ -79,7 +79,7 @@ function renderMeuDia(){
 }
 
 function render() {
-  const route = (location.hash || '#meu-dia').slice(1) || 'meu-dia';
+  const route = (location.hash || '#pendencias').slice(1) || 'meu-dia';
   if(route === 'meu-dia'){ document.getElementById('app').innerHTML=renderMeuDia(); return; }
 
   document.querySelector("#pageTitle").textContent =
