@@ -487,7 +487,7 @@ function renderRituais() {
     </div>
   `;
 
-  document.querySelector("#capilarBtn").onclick = renderCapilar;
+  document.querySelector("#capilarBtn").onclick = renderCabelo;
   document.querySelector("#newRitualBtn").onclick = () => openRitualModal();
   document.querySelectorAll("[data-ritual-id]").forEach(x => x.onclick = () => openRitualModal(x.dataset.ritualId));
 }
