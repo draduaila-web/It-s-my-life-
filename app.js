@@ -121,6 +121,7 @@ function render() {
   else if (route === "exercicios") renderExercicios();
   else if (route === "alimentacao") renderAlimentacao();
   else if (route === "receitas") renderReceitas();
+  else if (route === "cabelo") renderCabelo();
   else renderPlaceholder();
 }
 
@@ -487,7 +488,7 @@ function renderRituais() {
     </div>
   `;
 
-  document.querySelector("#capilarBtn").onclick = renderCabelo;
+  document.querySelector("#capilarBtn").onclick = () => { location.hash = "cabelo"; renderCabelo(); };
   document.querySelector("#newRitualBtn").onclick = () => openRitualModal();
   document.querySelectorAll("[data-ritual-id]").forEach(x => x.onclick = () => openRitualModal(x.dataset.ritualId));
 }
@@ -1200,10 +1201,17 @@ function hairTypeLabel(k){return k==="wash"?"Lavagem":k==="color"?"Coloração":
 function renderCabelo(){
  const info=hairTodayData(), steps=hairStepRows(info), done=hairLoad().done||{};
  const todayKey=info.key||hairDateKey(info.date);
- app.innerHTML=`<section class="hair-hero"><div class="eyebrow">💇‍♀️ COMO FAZER</div><h2>Ritual Capilar</h2><p>Seu cronograma de 45 dias, transformado em um caminho simples dentro do MINHA VIDA.</p></section>
- <section class="hair-today"><div class="hair-kicker">HOJE • ${hairDateBR(info.date)}</div><div class="hair-title">${hairTypeLabel(info.kind)}</div><div class="hair-steps">${steps.map((x,i)=>`<div class="hair-step"><span>${i+1}</span><div>${escapeHtml(x).replace(/\n/g,"<br>")}</div></div>`).join("")}</div><button class="hair-complete" id="hairComplete">${done[todayKey]?"✓ Feito hoje":"Marcar como feito"}</button></section>
+ const nextWash=Object.entries(HAIR_WASH).filter(([k])=>{
+   const [dd,mm]=k.split("/").map(Number);
+   const y=mm<8?2027:2026;
+   return new Date(y,mm-1,dd)>=hairDay(new Date());
+ }).slice(0,5);
+ const doneToday=!!done[todayKey];
+ app.innerHTML=`<section class="hair-hero"><div class="backline"><button class="back-inline" id="hairBack">‹ Rituais</button></div><div class="eyebrow">💇‍♀️ COMO FAZER</div><h2>Ritual Capilar</h2><p>Seu cronograma de 45 dias, transformado em um caminho simples dentro do MINHA VIDA.</p></section>
+ <section class="hair-today"><div class="hair-kicker">HOJE • ${hairDateBR(info.date)} • DIA ${Math.max(1,Math.min(45,hairDayNumber(info.date)))}/45</div><div class="hair-title">${hairTypeLabel(info.kind)}</div><div class="hair-steps">${steps.map((x,i)=>`<div class="hair-step"><span>${i+1}</span><div>${escapeHtml(x).replace(/\n/g,"<br>")}</div></div>`).join("")}</div><button class="hair-complete" id="hairComplete">${doneToday?"✓ Feito hoje":"Marcar como feito"}</button></section>
  <section class="hair-section"><div class="section-head"><h2>Seu caminho</h2><span class="soft-count">45 dias</span></div><div class="hair-links"><button data-hair-view="cronograma">📅 Ver cronograma</button><button data-hair-view="dayafter">✨ Como fazer o day after</button><button data-hair-view="night">🌙 Como preservar à noite</button></div></section>
- <section class="hair-section"><div class="section-head"><h2>Próximas lavagens</h2></div><div class="hair-list">${Object.entries(HAIR_WASH).filter(([k])=>{const [dd,mm]=k.split("/").map(Number);const y=mm<8?2027:2026;return new Date(y,mm-1,dd)>=hairDay(new Date())}).slice(0,4).map(([k,r])=>`<button class="hair-list-item" data-hair-date="${k}"><strong>${k}</strong><span>${escapeHtml(r.tratamento.split("\\n")[0])}</span><small>${escapeHtml(r.shampoo)}</small></button>`).join("")}</div></section>`;
+ <section class="hair-section"><div class="section-head"><h2>Próximas lavagens</h2></div><div class="hair-list">${nextWash.map(([k,r])=>`<button class="hair-list-item" data-hair-date="${k}"><strong>${k}</strong><span>${escapeHtml(r.tratamento.split("\n")[0])}</span><small>${escapeHtml(r.shampoo)}</small></button>`).join("")||`<div class="empty compact"><strong>Nenhuma lavagem futura no cronograma.</strong></div>`}</div></section>`;
+ document.querySelector("#hairBack").onclick=()=>{location.hash="rituais";renderRituais()};
  document.querySelector("#hairComplete").onclick=()=>{const x=hairLoad();x.done=x.done||{};x.done[todayKey]=!x.done[todayKey];hairSave(x);renderCabelo()};
  document.querySelectorAll("[data-hair-view]").forEach(b=>b.onclick=()=>openHairInfo(b.dataset.hairView));
  document.querySelectorAll("[data-hair-date]").forEach(b=>b.onclick=()=>openHairWash(b.dataset.hairDate));
