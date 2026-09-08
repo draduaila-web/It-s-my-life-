@@ -1,0 +1,953 @@
+const STORAGE_KEY = "minha-vida.pendencias.v1";
+const state = {
+  route: "pendencias",
+  filter: "abertas",
+  editingId: null,
+  search: ""
+};
+
+const app = document.querySelector("#app");
+const dialog = document.querySelector("#pendingDialog");
+const form = document.querySelector("#pendingForm");
+
+function loadPendencias() {
+  try { return JSON.parse(localStorage.getItem(STORAGE_KEY)) || []; }
+  catch { return []; }
+}
+function savePendencias(items) {
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(items));
+}
+function uid() {
+  return `${Date.now()}-${Math.random().toString(16).slice(2)}`;
+}
+function todayISO() {
+  const d = new Date();
+  const local = new Date(d.getTime() - d.getTimezoneOffset()*60000);
+  return local.toISOString().slice(0,10);
+}
+function formatDate(value) {
+  if (!value) return "";
+  return new Intl.DateTimeFormat("pt-BR", {day:"2-digit", month:"2-digit"}).format(new Date(value+"T12:00:00"));
+}
+function dueClass(value) {
+  if (!value) return "";
+  if (value < todayISO()) return "overdue";
+  if (value === todayISO()) return "today";
+  return "";
+}
+function escapeHtml(value="") {
+  return value.replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[c]));
+}
+
+
+function mvNow(){return new Date();}
+function mvMinutes(d=mvNow()){return d.getHours()*60+d.getMinutes();}
+function mvDow(d=mvNow()){return d.getDay();}
+function mvDate(){return new Intl.DateTimeFormat('pt-BR',{weekday:'long',day:'numeric',month:'long'}).format(mvNow());}
+function mvRead(k){try{return JSON.parse(localStorage.getItem(k)||'[]')}catch(e){return[]}}
+function mvPending(){
+ const a=mvRead('minha-vida.pendencias.v1'), t=new Date(); t.setHours(0,0,0,0);
+ return a.filter(x=>!x.completed&&!x.done&&(!x.dueDate||new Date(x.dueDate+'T00:00:00')<=t)).slice(0,5);
+}
+function mvCurrentBlock(){
+ const d=mvNow(), m=mvMinutes(d), w=mvDow(d);
+ if(m>=320&&m<455)return ['Manhã protegida','05:20–07:35','Seu ritual de manhã. Sem tarefas domésticas.','protected'];
+ if(m>=480&&m<840)return ['Trabalho CREFITO-11','08:00–14:00','Bloco oficial de trabalho.','work'];
+ if((w===1||w===3)&&m>=880&&m<970)return ['Janela estratégica','14:40–16:10','Espaço para decisões e prioridades estratégicas.','strategy'];
+ const ho={1:['16:40','18:40'],2:['15:40','17:40'],3:['16:40','18:40'],4:['15:40','17:40'],5:['15:40','17:40']}[w];
+ if(ho){const s=+ho[0].slice(0,2)*60+ +ho[0].slice(3),e=+ho[1].slice(0,2)*60+ +ho[1].slice(3);if(m>=s&&m<e)return ['Home office',ho.join('–'),'Bloco obrigatório de trabalho em casa.','office'];}
+ if(m>=1140)return ['Noite protegida','após 19:00','Agora é espaço para desacelerar. O sistema não vai encher sua noite.','rest'];
+ return ['Espaço livre','agora','Você não precisa preencher cada minuto.','free'];
+}
+function renderMeuDia(){
+ const d=mvNow(), h=d.getHours(), greet=h<12?'Bom dia':h<18?'Boa tarde':'Boa noite', b=mvCurrentBlock(), p=mvPending();
+ const focus=b[3]==='rest'?[['Desacelerar','Nada urgente precisa entrar aqui.']]:p.slice(0,3).map(x=>[x.title||x.name||'Pendência',x.note||'Pendência para hoje']);
+ if(!focus.length)focus.push(['Seu essencial está em dia','Use este espaço para viver, descansar ou escolher o que importa.']);
+ const w=mvDow(d), ho={1:'16:40–18:40',2:'15:40–17:40',3:'16:40–18:40',4:'15:40–17:40',5:'15:40–17:40'}[w]||'—';
+ return `<section class="day-hero"><div class="eyebrow">💜 MEU DIA</div><h1>${greet}, Duaila.</h1><p class="day-date">${mvDate()}</p></section>
+ <section class="now-card ${b[3]}"><div class="card-kicker">AGORA</div><div class="now-title">${b[0]}</div><div class="now-time">${b[1]}</div><p>${b[2]}</p></section>
+ <section class="day-section"><div class="section-head"><h2>O que importa hoje</h2><span class="soft-count">${focus.length}</span></div>
+ ${focus.map((x,i)=>`<div class="focus-row"><span class="focus-dot">${i+1}</span><div><strong>${x[0]}</strong><small>${x[1]}</small></div></div>`).join('')}</section>
+ <section class="day-section"><div class="section-head"><h2>Seu dia, sem excesso</h2></div><div class="timeline">
+ <div><b>05:20–07:35</b><span>Manhã protegida · movimento + café + se arrumar</span></div>
+ <div><b>08:00–14:00</b><span>Trabalho oficial</span></div>
+ ${(w===1||w===3)?'<div><b>14:40–16:10</b><span>Janela estratégica</span></div>':''}
+ <div><b>${ho}</b><span>Home office</span></div><div><b>19:00+</b><span>Noite protegida · descanso primeiro</span></div></div></section>
+ ${p.length?`<section class="day-section"><div class="section-head"><h2>Pendências que merecem aparecer</h2><a href="#pendencias">ver todas</a></div>${p.map(x=>`<div class="compact-item"><strong>${x.title||x.name||'Pendência'}</strong>${x.dueDate?`<small>${x.dueDate}</small>`:''}</div>`).join('')}</section>`:''}
+ <section class="quick-grid"><a href="#rituais">✨<span>Rituais</span></a><a href="#exercicios">🏃<span>Exercícios</span></a><a href="#alimentacao">🍽️<span>Alimentação</span></a><a href="#receitas">📖<span>Receitas</span></a><a href="#casa">🏠<span>Casa</span></a><a href="#financeiro">💰<span>Financeiro</span></a></section>
+ <section class="free-space"><div>☁️</div><strong>Espaço livre também faz parte do dia.</strong><p>Se nada precisa ser resolvido agora, não resolva.</p></section>`;
+}
+
+function render() {
+  const route = (location.hash || '#meu-dia').slice(1) || 'meu-dia';
+  if(route === 'meu-dia'){ document.getElementById('app').innerHTML=renderMeuDia(); return; }
+
+  document.querySelector("#pageTitle").textContent =
+    state.route === "pendencias" ? "📝 Pendências" :
+    state.route === "ideias" ? "💡 Criação & Ideias" :
+    state.route === "rituais" ? "✨ Rituais" :
+    state.route === "estudos" ? "📚 Estudos" :
+    state.route === "financeiro" ? "💰 Financeiro" :
+    state.route === "casa" ? "🏠 Casa" :
+    state.route === "exercicios" ? "🏃 Exercícios" :
+    state.route === "alimentacao" ? "🍽️ Alimentação" :
+    state.route === "receitas" ? "📖 Receitas" : "Minha Vida";
+
+  document.querySelectorAll(".nav-item").forEach(b => b.classList.toggle("active", b.dataset.route === state.route));
+
+  if (state.route === "pendencias") renderPendencias();
+  else if (state.route === "ideias") renderIdeias();
+  else if (state.route === "rituais") renderRituais();
+  else if (state.route === "estudos") renderEstudos();
+  else if (state.route === "financeiro") renderFinanceiro();
+  else if (state.route === "casa") renderCasa();
+  else if (state.route === "exercicios") renderExercicios();
+  else if (state.route === "alimentacao") renderAlimentacao();
+  else if (state.route === "receitas") renderReceitas();
+  else renderPlaceholder();
+}
+
+function renderPendencias() {
+  const all = loadPendencias();
+  const filtered = all
+    .filter(p => state.filter === "abertas" ? !p.done : p.done)
+    .filter(p => !state.search || `${p.title} ${p.category} ${p.note}`.toLowerCase().includes(state.search.toLowerCase()))
+    .sort((a,b) => {
+      if (a.done !== b.done) return Number(a.done)-Number(b.done);
+      if (!a.due && !b.due) return b.createdAt-a.createdAt;
+      if (!a.due) return 1;
+      if (!b.due) return -1;
+      return a.due.localeCompare(b.due);
+    });
+
+  const openCount = all.filter(p => !p.done).length;
+  app.innerHTML = `
+    <section class="hero">
+      <h2>Vamos tirar isso da cabeça.</h2>
+      <p>Um lugar simples para guardar o que precisa ser resolvido — sem transformar tudo em urgência.</p>
+    </section>
+
+    <div class="add-row">
+      <input class="search" id="searchInput" placeholder="Buscar pendência..." value="${escapeHtml(state.search)}">
+      <button class="primary" id="addBtn">＋ Adicionar</button>
+    </div>
+
+    <div class="tabs">
+      <button class="tab ${state.filter==="abertas"?"active":""}" data-filter="abertas">Abertas ${openCount ? `· ${openCount}` : ""}</button>
+      <button class="tab ${state.filter==="concluidas"?"active":""}" data-filter="concluidas">Concluídas</button>
+    </div>
+
+    <div class="list">
+      ${filtered.length ? filtered.map(cardHtml).join("") : emptyHtml()}
+    </div>
+  `;
+
+  document.querySelector("#addBtn").onclick = () => openModal();
+  document.querySelector("#searchInput").oninput = e => { state.search=e.target.value; renderPendencias(); };
+  document.querySelectorAll("[data-filter]").forEach(b => b.onclick = () => { state.filter=b.dataset.filter; renderPendencias(); });
+  document.querySelectorAll("[data-id]").forEach(card => {
+    const id = card.dataset.id;
+    card.querySelector(".check").onclick = e => { e.stopPropagation(); toggleDone(id); };
+    card.querySelector(".more").onclick = e => { e.stopPropagation(); openModal(id); };
+    card.onclick = e => {
+      if (e.target.closest(".check,.more")) return;
+      openModal(id);
+    };
+  });
+}
+
+function cardHtml(p) {
+  const due = p.due ? `<span class="pill ${dueClass(p.due)}">${p.due < todayISO() ? "Vencida · " : ""}${formatDate(p.due)}</span>` : "";
+  return `
+    <article class="card pending-card" data-id="${p.id}">
+      <div class="pending">
+        <button class="check ${p.done ? "done":""}" aria-label="${p.done?"Reabrir":"Concluir"}"></button>
+        <div class="pending-main">
+          <div class="pending-title ${p.done?"done-text":""}">${escapeHtml(p.title)}</div>
+          <div class="meta">
+            <span class="pill">${escapeHtml(p.category)}</span>${due}
+          </div>
+          ${p.note ? `<p class="note">${escapeHtml(p.note)}</p>` : ""}
+        </div>
+        <button class="more" aria-label="Editar">•••</button>
+      </div>
+    </article>`;
+}
+function emptyHtml() {
+  return state.filter === "abertas" ? `
+    <div class="empty">
+      <div class="symbol">☁︎</div>
+      <strong>Nada precisa de você agora.</strong>
+      <span>Se algo surgir, coloque aqui. Você não precisa lembrar.</span>
+    </div>` : `
+    <div class="empty">
+      <div class="symbol">✓</div>
+      <strong>Ainda não há concluídas.</strong>
+      <span>Quando você resolver algo, ele ficará aqui.</span>
+    </div>`;
+}
+
+function openModal(id=null) {
+  state.editingId = id;
+  const p = id ? loadPendencias().find(x => x.id===id) : null;
+  document.querySelector("#dialogEyebrow").textContent = p ? "EDITAR PENDÊNCIA" : "NOVA PENDÊNCIA";
+  document.querySelector("#dialogTitle").textContent = p ? "Editar pendência" : "Adicionar pendência";
+  document.querySelector("#pendingTitle").value = p?.title || "";
+  document.querySelector("#pendingCategory").value = p?.category || "Pessoal";
+  document.querySelector("#pendingDue").value = p?.due || "";
+  document.querySelector("#pendingNote").value = p?.note || "";
+  document.querySelector("#deletePendingBtn").hidden = !p;
+  dialog.showModal();
+  setTimeout(() => document.querySelector("#pendingTitle").focus(), 50);
+}
+
+function closeModal() {
+  dialog.close();
+  state.editingId = null;
+}
+document.querySelector("#cancelPendingBtn").onclick = closeModal;
+document.querySelector("#deletePendingBtn").onclick = () => {
+  if (!state.editingId) return;
+  if (confirm("Excluir esta pendência?")) {
+    savePendencias(loadPendencias().filter(p => p.id !== state.editingId));
+    closeModal(); renderPendencias();
+  }
+};
+
+form.addEventListener("submit", e => {
+  e.preventDefault();
+  const items = loadPendencias();
+  const data = {
+    title: document.querySelector("#pendingTitle").value.trim(),
+    category: document.querySelector("#pendingCategory").value,
+    due: document.querySelector("#pendingDue").value,
+    note: document.querySelector("#pendingNote").value.trim()
+  };
+  if (!data.title) return;
+  if (state.editingId) {
+    const i = items.findIndex(p => p.id===state.editingId);
+    items[i] = {...items[i], ...data, updatedAt:Date.now()};
+  } else {
+    items.push({id:uid(), ...data, done:false, createdAt:Date.now(), updatedAt:Date.now()});
+  }
+  savePendencias(items);
+  closeModal();
+  renderPendencias();
+});
+
+function toggleDone(id) {
+  const items = loadPendencias();
+  const i = items.findIndex(p => p.id===id);
+  if (i < 0) return;
+  items[i].done = !items[i].done;
+  items[i].updatedAt = Date.now();
+  items[i].completedAt = items[i].done ? Date.now() : null;
+  savePendencias(items);
+  renderPendencias();
+}
+
+
+const IDEAS_KEY = "minha-vida.ideias.v1";
+let ideaFilter = "todas";
+
+function loadIdeias() {
+  try { return JSON.parse(localStorage.getItem(IDEAS_KEY)) || []; }
+  catch { return []; }
+}
+function saveIdeias(items) {
+  localStorage.setItem(IDEAS_KEY, JSON.stringify(items));
+}
+function renderIdeias() {
+  const all = loadIdeias();
+  const counts = {
+    todas: all.length,
+    ideias: all.filter(x => x.type === "ideia").length,
+    projetos: all.filter(x => x.type === "projeto").length,
+    planos: all.filter(x => x.type === "plano").length
+  };
+  const filtered = all
+    .filter(x => ideaFilter === "todas" || x.type === ideaFilter)
+    .sort((a,b) => b.updatedAt - a.updatedAt);
+
+  app.innerHTML = `
+    <section class="hero">
+      <h2>Guarde sem se obrigar.</h2>
+      <p>Ideias podem simplesmente existir. Quando fizer sentido, uma delas pode virar projeto, plano ou pendência.</p>
+    </section>
+
+    <div class="add-row">
+      <input class="search" id="ideaSearch" placeholder="Buscar ideia..." autocomplete="off">
+      <button class="primary" id="addIdeaBtn">＋ Adicionar</button>
+    </div>
+
+    <div class="tabs idea-tabs">
+      ${ideaTab("todas","Tudo",counts.todas)}
+      ${ideaTab("ideia","Ideias",counts.ideias)}
+      ${ideaTab("projeto","Projetos",counts.projetos)}
+      ${ideaTab("plano","Planos",counts.planos)}
+    </div>
+
+    <div class="list" id="ideaList">
+      ${filtered.length ? filtered.map(ideaCardHtml).join("") : ideaEmptyHtml()}
+    </div>
+  `;
+
+  document.querySelector("#addIdeaBtn").onclick = () => openIdeaModal();
+  document.querySelector("#ideaSearch").oninput = e => {
+    const q = e.target.value.toLowerCase();
+    document.querySelector("#ideaList").innerHTML = filtered
+      .filter(x => `${x.title} ${x.note}`.toLowerCase().includes(q))
+      .map(ideaCardHtml).join("") || ideaEmptyHtml();
+    bindIdeaCards();
+  };
+  document.querySelectorAll(".idea-tab").forEach(b => b.onclick = () => {
+    ideaFilter = b.dataset.filter;
+    renderIdeias();
+  });
+  bindIdeaCards();
+}
+
+function ideaTab(filter, label, count) {
+  return `<button class="tab idea-tab ${ideaFilter===filter?"active":""}" data-filter="${filter}">${label}${count ? ` · ${count}` : ""}</button>`;
+}
+function ideaCardHtml(x) {
+  const typeLabel = x.type === "projeto" ? "Projeto" : x.type === "plano" ? "Plano" : "Ideia";
+  return `
+    <article class="card pending-card idea-card" data-idea-id="${x.id}">
+      <div class="pending">
+        <div class="idea-symbol">${x.type === "projeto" ? "◌" : x.type === "plano" ? "⌁" : "✦"}</div>
+        <div class="pending-main">
+          <div class="pending-title">${escapeHtml(x.title)}</div>
+          <div class="meta"><span class="pill">${typeLabel}</span></div>
+          ${x.note ? `<p class="note">${escapeHtml(x.note)}</p>` : ""}
+        </div>
+        <button class="more idea-more" aria-label="Editar">•••</button>
+      </div>
+    </article>`;
+}
+function ideaEmptyHtml() {
+  return `<div class="empty"><div class="symbol">✦</div><strong>Esse espaço está leve.</strong><span>Registre uma ideia quando ela aparecer. Ela não precisa virar tarefa.</span></div>`;
+}
+function bindIdeaCards() {
+  document.querySelectorAll("[data-idea-id]").forEach(card => {
+    card.onclick = e => {
+      if (e.target.closest(".idea-more")) e.stopPropagation();
+      openIdeaModal(card.dataset.ideaId);
+    };
+  });
+}
+
+function openIdeaModal(id=null) {
+  const p = id ? loadIdeias().find(x => x.id===id) : null;
+  const title = p ? "Editar registro" : "Nova ideia";
+  const type = p?.type || "ideia";
+  const body = `
+    <form method="dialog" id="ideaForm" class="modal-card">
+      <div class="modal-head">
+        <div><div class="eyebrow">${p ? "EDITAR" : "CRIAÇÃO & IDEIAS"}</div><h2>${title}</h2></div>
+        <button class="icon-btn" value="cancel" aria-label="Fechar">×</button>
+      </div>
+      <label>
+        Nome
+        <input id="ideaTitle" required maxlength="120" value="${escapeHtml(p?.title || "")}" placeholder="Ex.: Organizar projeto da casa">
+      </label>
+      <label>
+        Tipo
+        <select id="ideaType">
+          <option value="ideia" ${type==="ideia"?"selected":""}>Ideia</option>
+          <option value="projeto" ${type==="projeto"?"selected":""}>Projeto</option>
+          <option value="plano" ${type==="plano"?"selected":""}>Plano</option>
+        </select>
+      </label>
+      <label>
+        Observação <span class="muted">(opcional)</span>
+        <textarea id="ideaNote" rows="4" maxlength="500" placeholder="Contexto, inspiração, próximos pensamentos...">${escapeHtml(p?.note || "")}</textarea>
+      </label>
+      <div class="modal-actions">
+        ${p ? `<button type="button" class="secondary" id="deleteIdeaBtn">Excluir</button>` : ""}
+        <div class="grow"></div>
+        <button type="button" class="secondary" id="cancelIdeaBtn">Cancelar</button>
+        <button class="primary" value="default">Salvar</button>
+      </div>
+    </form>`;
+  const d = document.createElement("dialog");
+  d.id = "ideaDialog";
+  d.innerHTML = body;
+  document.body.appendChild(d);
+  d.showModal();
+  d.querySelector("#cancelIdeaBtn").onclick = () => { d.close(); d.remove(); };
+  if (p) d.querySelector("#deleteIdeaBtn").onclick = () => {
+    if (confirm("Excluir este registro?")) {
+      saveIdeias(loadIdeias().filter(x => x.id !== p.id));
+      d.close(); d.remove(); renderIdeias();
+    }
+  };
+  d.querySelector("#ideaForm").addEventListener("submit", e => {
+    e.preventDefault();
+    const items = loadIdeias();
+    const data = {
+      title: d.querySelector("#ideaTitle").value.trim(),
+      type: d.querySelector("#ideaType").value,
+      note: d.querySelector("#ideaNote").value.trim()
+    };
+    if (!data.title) return;
+    if (p) {
+      const i = items.findIndex(x => x.id===p.id);
+      items[i] = {...items[i], ...data, updatedAt:Date.now()};
+    } else {
+      items.push({id:uid(), ...data, createdAt:Date.now(), updatedAt:Date.now()});
+    }
+    saveIdeias(items);
+    d.close(); d.remove(); renderIdeias();
+  });
+  setTimeout(() => d.querySelector("#ideaTitle").focus(), 50);
+}
+
+
+const RITUAIS_KEY = "minha-vida.rituais.v1";
+const RITUAL_CAPILAR_KEY = "minha-vida.ritual-capilar.v1";
+
+function loadRituais() {
+  try { return JSON.parse(localStorage.getItem(RITUAIS_KEY)) || []; }
+  catch { return []; }
+}
+function saveRituais(items) {
+  localStorage.setItem(RITUAIS_KEY, JSON.stringify(items));
+}
+function loadCapilar() {
+  try { return JSON.parse(localStorage.getItem(RITUAL_CAPILAR_KEY)) || defaultCapilar(); }
+  catch { return defaultCapilar(); }
+}
+function saveCapilar(data) {
+  localStorage.setItem(RITUAL_CAPILAR_KEY, JSON.stringify(data));
+}
+function defaultCapilar() {
+  return {
+    washDays: [],
+    notes: "",
+    steps: [
+      {id:"lavagem", name:"Lavagem", detail:"Definir quando lavar e seguir a rotina de produtos."},
+      {id:"tratamento", name:"Tratamento", detail:"Escolher o tratamento previsto para a lavagem."},
+      {id:"finalizacao", name:"Finalização", detail:"Finalizar o cabelo após a lavagem."},
+      {id:"dayafter", name:"Day after", detail:"Manutenção do dia seguinte à lavagem."}
+    ]
+  };
+}
+
+function renderRituais() {
+  app.innerHTML = `
+    <section class="hero">
+      <h2>✨ Rituais</h2>
+      <p>Rotinas que cuidam de você sem virar uma lista infinita. Cada ritual tem seu próprio espaço.</p>
+    </section>
+
+    <div class="ritual-grid">
+      <button class="ritual-card featured" id="capilarBtn">
+        <span class="ritual-icon">✦</span>
+        <div><strong>Ritual Capilar</strong><span>Lavagem · tratamento · finalização · day after</span></div>
+        <b>›</b>
+      </button>
+      <button class="ritual-card" id="newRitualBtn">
+        <span class="ritual-icon">＋</span>
+        <div><strong>Novo ritual</strong><span>Crie outro ritual quando fizer sentido.</span></div>
+        <b>›</b>
+      </button>
+    </div>
+
+    <div class="section-title">MEUS RITUAIS</div>
+    <div class="list" id="ritualList">
+      ${loadRituais().map(ritualCardHtml).join("") || `<div class="empty"><div class="symbol">☾</div><strong>Nenhum outro ritual ainda.</strong><span>Não precisamos preencher esse espaço.</span></div>`}
+    </div>
+  `;
+
+  document.querySelector("#capilarBtn").onclick = renderCapilar;
+  document.querySelector("#newRitualBtn").onclick = () => openRitualModal();
+  document.querySelectorAll("[data-ritual-id]").forEach(x => x.onclick = () => openRitualModal(x.dataset.ritualId));
+}
+function ritualCardHtml(x) {
+  return `<article class="card ritual-small" data-ritual-id="${x.id}">
+    <div class="pending">
+      <span class="ritual-icon small">✦</span>
+      <div class="pending-main"><div class="pending-title">${escapeHtml(x.name)}</div><p class="note">${escapeHtml(x.description || "")}</p></div>
+      <button class="more">›</button>
+    </div>
+  </article>`;
+}
+
+function renderCapilar() {
+  const c = loadCapilar();
+  app.innerHTML = `
+    <section class="hero">
+      <div class="backline"><button class="back-inline" id="ritualBack">‹ Rituais</button></div>
+      <h2>✦ Ritual Capilar</h2>
+      <p>Um espaço próprio para a rotina do cabelo — sem misturar com as outras tarefas do dia.</p>
+    </section>
+
+    <div class="card capilar-panel">
+      <div class="panel-head"><div><div class="eyebrow">ROTINA</div><h3>Lavagem & cuidado</h3></div><button class="secondary" id="editCapilar">Editar</button></div>
+      <div class="capilar-steps">
+        ${c.steps.map((s,i) => `<div class="capilar-step"><span>${i+1}</span><div><strong>${escapeHtml(s.name)}</strong><small>${escapeHtml(s.detail)}</small></div></div>`).join("")}
+      </div>
+    </div>
+
+    <div class="section-title">OBSERVAÇÕES</div>
+    <div class="card">
+      <p class="note big-note">${escapeHtml(c.notes || "Nenhuma observação registrada.")}</p>
+    </div>
+
+    <div class="section-title">LAVAGENS PROGRAMADAS</div>
+    <div class="card">
+      <div class="wash-list">${c.washDays.length ? c.washDays.map(d => `<span class="pill today">${formatDate(d)}</span>`).join("") : `<span class="muted">Nenhuma data definida ainda.</span>`}</div>
+    </div>
+  `;
+  document.querySelector("#ritualBack").onclick = renderRituais;
+  document.querySelector("#editCapilar").onclick = () => openCapilarModal();
+}
+
+function openCapilarModal() {
+  const c = loadCapilar();
+  const d = document.createElement("dialog");
+  d.id = "capilarDialog";
+  d.innerHTML = `
+    <form method="dialog" id="capilarForm" class="modal-card">
+      <div class="modal-head"><div><div class="eyebrow">RITUAL CAPILAR</div><h2>Configurar rotina</h2></div><button class="icon-btn" value="cancel">×</button></div>
+      <label>Datas de lavagem <span class="muted">(separe por vírgulas)</span>
+        <input id="washDays" value="${c.washDays.join(", ")}" placeholder="2026-09-09, 2026-09-12">
+      </label>
+      <label>Observações
+        <textarea id="capilarNotes" rows="4" maxlength="700" placeholder="Produtos, cuidados ou observações importantes...">${escapeHtml(c.notes)}</textarea>
+      </label>
+      <div class="section-title inner">ETAPAS</div>
+      ${c.steps.map((s,i) => `<label class="step-edit">${i+1}. ${escapeHtml(s.name)}<textarea data-step="${s.id}" rows="2" maxlength="250">${escapeHtml(s.detail)}</textarea></label>`).join("")}
+      <div class="modal-actions"><div class="grow"></div><button type="button" class="secondary" id="closeCapilar">Cancelar</button><button class="primary" value="default">Salvar</button></div>
+    </form>`;
+  document.body.appendChild(d);
+  d.showModal();
+  d.querySelector("#closeCapilar").onclick = () => { d.close(); d.remove(); };
+  d.querySelector("#capilarForm").addEventListener("submit", e => {
+    e.preventDefault();
+    const dates = d.querySelector("#washDays").value.split(",").map(x=>x.trim()).filter(Boolean);
+    const steps = c.steps.map(s => ({...s, detail:d.querySelector(`[data-step="${s.id}"]`).value.trim()}));
+    saveCapilar({washDays:dates, notes:d.querySelector("#capilarNotes").value.trim(), steps});
+    d.close(); d.remove(); renderCapilar();
+  });
+}
+
+function openRitualModal(id=null) {
+  const p = id ? loadRituais().find(x=>x.id===id) : null;
+  const d = document.createElement("dialog");
+  d.innerHTML = `<form method="dialog" class="modal-card" id="ritualForm">
+    <div class="modal-head"><div><div class="eyebrow">RITUAL</div><h2>${p?"Editar":"Novo"} ritual</h2></div><button class="icon-btn" value="cancel">×</button></div>
+    <label>Nome<input id="ritualName" required maxlength="80" value="${escapeHtml(p?.name||"")}"></label>
+    <label>Descrição<textarea id="ritualDescription" rows="4" maxlength="300">${escapeHtml(p?.description||"")}</textarea></label>
+    <div class="modal-actions">${p?'<button type="button" class="secondary" id="deleteRitual">Excluir</button>':""}<div class="grow"></div><button type="button" class="secondary" id="cancelRitual">Cancelar</button><button class="primary" value="default">Salvar</button></div>
+  </form>`;
+  document.body.appendChild(d); d.showModal();
+  d.querySelector("#cancelRitual").onclick=()=>{d.close();d.remove();};
+  if(p) d.querySelector("#deleteRitual").onclick=()=>{ if(confirm("Excluir este ritual?")){saveRituais(loadRituais().filter(x=>x.id!==p.id));d.close();d.remove();renderRituais();}};
+  d.querySelector("#ritualForm").addEventListener("submit",e=>{
+    e.preventDefault();
+    const items=loadRituais(), data={name:d.querySelector("#ritualName").value.trim(),description:d.querySelector("#ritualDescription").value.trim()};
+    if(p){const i=items.findIndex(x=>x.id===p.id);items[i]={...items[i],...data,updatedAt:Date.now()};}
+    else items.push({id:uid(),...data,createdAt:Date.now(),updatedAt:Date.now()});
+    saveRituais(items);d.close();d.remove();renderRituais();
+  });
+}
+
+
+const ESTUDOS_KEY = "minha-vida.estudos.v1";
+
+function loadEstudos() {
+  try {
+    const data = JSON.parse(localStorage.getItem(ESTUDOS_KEY));
+    return data || { subjects: [], sessions: [], reviews: [], questions: [] };
+  } catch {
+    return { subjects: [], sessions: [], reviews: [], questions: [] };
+  }
+}
+function saveEstudos(data) {
+  localStorage.setItem(ESTUDOS_KEY, JSON.stringify(data));
+}
+
+function renderEstudos() {
+  const d = loadEstudos();
+  const totalSessions = d.sessions.length;
+  const totalQuestions = d.questions.reduce((n,q)=>n + Number(q.count || 0), 0);
+  const completedReviews = d.reviews.filter(x=>x.done).length;
+
+  app.innerHTML = `
+    <section class="hero">
+      <h2>📚 Estudos</h2>
+      <p>Um lugar para organizar o CEBRASPE e outros conteúdos sem transformar estudo em uma agenda pesada.</p>
+    </section>
+
+    <div class="study-summary">
+      <div class="summary-card"><strong>${d.subjects.length}</strong><span>matérias</span></div>
+      <div class="summary-card"><strong>${totalSessions}</strong><span>estudos registrados</span></div>
+      <div class="summary-card"><strong>${totalQuestions}</strong><span>questões</span></div>
+    </div>
+
+    <div class="study-section">
+      <div class="section-heading"><div><div class="eyebrow">FOCO</div><h3>CEBRASPE</h3></div><button class="secondary" id="addSubject">＋ Matéria</button></div>
+      <div class="list">
+        ${d.subjects.length ? d.subjects.map(subjectHtml).join("") : `<div class="empty compact"><strong>Comece pelas matérias.</strong><span>Cadastre apenas o que realmente faz parte do seu estudo.</span></div>`}
+      </div>
+    </div>
+
+    <div class="study-section">
+      <div class="section-heading"><div><div class="eyebrow">REGISTRO</div><h3>Estudos realizados</h3></div><button class="secondary" id="addSession">＋ Estudo</button></div>
+      <div class="list">
+        ${d.sessions.length ? d.sessions.slice().reverse().slice(0,8).map(sessionHtml).join("") : `<div class="empty compact"><strong>Nenhum estudo registrado.</strong><span>O registro é opcional. Use quando ajudar a enxergar seu progresso.</span></div>`}
+      </div>
+    </div>
+
+    <div class="study-section">
+      <div class="section-heading"><div><div class="eyebrow">REVISÕES</div><h3>Revisões</h3></div><button class="secondary" id="addReview">＋ Revisão</button></div>
+      <div class="list">
+        ${d.reviews.length ? d.reviews.map(reviewHtml).join("") : `<div class="empty compact"><strong>Nenhuma revisão planejada.</strong><span>Não é preciso preencher o calendário antes de precisar dele.</span></div>`}
+      </div>
+    </div>
+
+    <div class="study-section">
+      <div class="section-heading"><div><div class="eyebrow">QUESTÕES</div><h3>Questões</h3></div><button class="secondary" id="addQuestions">＋ Registrar</button></div>
+      <div class="list">
+        ${d.questions.length ? d.questions.slice().reverse().slice(0,8).map(questionHtml).join("") : `<div class="empty compact"><strong>Nenhuma questão registrada.</strong><span>Registre volume quando isso for útil para você.</span></div>`}
+      </div>
+    </div>
+  `;
+
+  document.querySelector("#addSubject").onclick = () => openStudyModal("subject");
+  document.querySelector("#addSession").onclick = () => openStudyModal("session");
+  document.querySelector("#addReview").onclick = () => openStudyModal("review");
+  document.querySelector("#addQuestions").onclick = () => openStudyModal("questions");
+
+  document.querySelectorAll("[data-study-edit]").forEach(x => x.onclick = () => openStudyModal(x.dataset.studyEdit, x.dataset.id));
+  document.querySelectorAll("[data-review-toggle]").forEach(x => x.onclick = () => {
+    const data = loadEstudos(), i = data.reviews.findIndex(r=>r.id===x.dataset.reviewToggle);
+    if(i>=0){ data.reviews[i].done=!data.reviews[i].done; saveEstudos(data); renderEstudos(); }
+  });
+}
+function subjectHtml(x) {
+  return `<article class="card study-card"><div><strong>${escapeHtml(x.name)}</strong><span class="study-meta">${escapeHtml(x.content || "Conteúdos ainda não detalhados.")}</span></div><button class="more" data-study-edit="subject" data-id="${x.id}">•••</button></article>`;
+}
+function sessionHtml(x) {
+  return `<article class="card study-card"><div><strong>${escapeHtml(x.subject || "Estudo")}</strong><span class="study-meta">${formatDate(x.date)} · ${escapeHtml(x.minutes || "—")} min${x.note ? " · "+escapeHtml(x.note) : ""}</span></div><button class="more" data-study-edit="session" data-id="${x.id}">•••</button></article>`;
+}
+function reviewHtml(x) {
+  return `<article class="card study-card"><button class="study-check ${x.done?"done":""}" data-review-toggle="${x.id}">${x.done?"✓":"○"}</button><div><strong class="${x.done?"done-text":""}">${escapeHtml(x.subject || "Revisão")}</strong><span class="study-meta">${x.date ? formatDate(x.date) : "Sem data"}${x.note ? " · "+escapeHtml(x.note) : ""}</span></div><button class="more" data-study-edit="review" data-id="${x.id}">•••</button></article>`;
+}
+function questionHtml(x) {
+  return `<article class="card study-card"><div><strong>${Number(x.count||0)} questões</strong><span class="study-meta">${escapeHtml(x.subject || "CEBRASPE")}${x.accuracy !== "" && x.accuracy != null ? " · "+escapeHtml(String(x.accuracy))+"% de acerto" : ""}${x.note ? " · "+escapeHtml(x.note) : ""}</span></div><button class="more" data-study-edit="questions" data-id="${x.id}">•••</button></article>`;
+}
+
+function openStudyModal(type, id=null) {
+  const data = loadEstudos();
+  const collection = type === "subject" ? "subjects" : type === "session" ? "sessions" : type === "review" ? "reviews" : "questions";
+  const existing = id ? data[collection].find(x=>x.id===id) : null;
+  const title = {subject:"Matéria",session:"Estudo realizado",review:"Revisão",questions:"Questões"}[type];
+  const bodyByType = {
+    subject: `<label>Matéria<input id="sName" required maxlength="80" value="${escapeHtml(existing?.name||"")}" placeholder="Ex.: Língua Portuguesa"></label>
+              <label>Conteúdos <span class="muted">(opcional)</span><textarea id="sContent" rows="3" maxlength="400">${escapeHtml(existing?.content||"")}</textarea></label>`,
+    session: `<label>Matéria<input id="sName" maxlength="80" value="${escapeHtml(existing?.subject||"")}" placeholder="Ex.: Direito Constitucional"></label>
+              <div class="form-grid"><label>Data<input id="sDate" type="date" value="${existing?.date||todayISO()}"></label><label>Minutos<input id="sMinutes" type="number" min="1" max="1440" value="${existing?.minutes||30}"></label></div>
+              <label>Observação <span class="muted">(opcional)</span><input id="sNote" maxlength="160" value="${escapeHtml(existing?.note||"")}"></label>`,
+    review: `<label>Matéria<input id="sName" maxlength="80" value="${escapeHtml(existing?.subject||"")}" placeholder="Ex.: Português"></label>
+             <label>Data <span class="muted">(opcional)</span><input id="sDate" type="date" value="${existing?.date||""}"></label>
+             <label>Observação <span class="muted">(opcional)</span><input id="sNote" maxlength="160" value="${escapeHtml(existing?.note||"")}"></label>`,
+    questions: `<label>Matéria<input id="sName" maxlength="80" value="${escapeHtml(existing?.subject||"CEBRASPE")}"></label>
+                <div class="form-grid"><label>Nº de questões<input id="sCount" type="number" min="1" value="${existing?.count||10}"></label><label>% de acerto<input id="sAccuracy" type="number" min="0" max="100" value="${existing?.accuracy ?? ""}"></label></div>
+                <label>Observação <span class="muted">(opcional)</span><input id="sNote" maxlength="160" value="${escapeHtml(existing?.note||"")}"></label>`
+  }[type];
+
+  const dlg=document.createElement("dialog");
+  dlg.innerHTML=`<form method="dialog" class="modal-card" id="studyForm">
+    <div class="modal-head"><div><div class="eyebrow">📚 ESTUDOS</div><h2>${existing?"Editar":"Registrar"} ${title.toLowerCase()}</h2></div><button class="icon-btn" value="cancel">×</button></div>
+    ${bodyByType}
+    <div class="modal-actions">${existing?'<button type="button" class="secondary" id="deleteStudy">Excluir</button>':""}<div class="grow"></div><button type="button" class="secondary" id="cancelStudy">Cancelar</button><button class="primary" value="default">Salvar</button></div>
+  </form>`;
+  document.body.appendChild(dlg); dlg.showModal();
+  dlg.querySelector("#cancelStudy").onclick=()=>{dlg.close();dlg.remove();};
+  if(existing) dlg.querySelector("#deleteStudy").onclick=()=>{if(confirm("Excluir este registro?")){data[collection]=data[collection].filter(x=>x.id!==existing.id);saveEstudos(data);dlg.close();dlg.remove();renderEstudos();}};
+  dlg.querySelector("#studyForm").addEventListener("submit",e=>{
+    e.preventDefault();
+    let obj={id:existing?.id||uid(),updatedAt:Date.now()};
+    const v=id=>dlg.querySelector(id)?.value ?? "";
+    if(type==="subject") obj={...obj,name:v("#sName").trim(),content:v("#sContent").trim()};
+    if(type==="session") obj={...obj,subject:v("#sName").trim(),date:v("#sDate"),minutes:Number(v("#sMinutes"))||0,note:v("#sNote").trim()};
+    if(type==="review") obj={...obj,subject:v("#sName").trim(),date:v("#sDate"),note:v("#sNote").trim(),done:existing?.done||false};
+    if(type==="questions") obj={...obj,subject:v("#sName").trim(),count:Number(v("#sCount"))||0,accuracy:v("#sAccuracy"),note:v("#sNote").trim()};
+    const idx=existing ? data[collection].findIndex(x=>x.id===existing.id) : -1;
+    if(idx>=0) data[collection][idx]=obj; else data[collection].push(obj);
+    saveEstudos(data); dlg.close(); dlg.remove(); renderEstudos();
+  });
+}
+
+
+const FIN_KEY = "minha-vida.financeiro.v1";
+const FIN_BASE = {
+  income: 19172.96,
+  expenses: [
+    {id:"aluguel",name:"Aluguel da casa",value:9503.50,category:"Casa",payer:"Usuária",status:"confirmado"},
+    {id:"bb",name:"BB — dívidas/parcelamentos",value:2329.59,category:"Dívidas",payer:"Usuária",status:"confirmado"},
+    {id:"caesb",name:"CAESB + Neoenergia",value:203.79,category:"Casa",payer:"Usuária",status:"base"},
+    {id:"combustivel",name:"Combustível",value:650,category:"Transporte",payer:"Usuária",status:"teto"},
+    {id:"pets",name:"Pets",value:450,category:"Animais",payer:"Usuária",status:"teto"},
+    {id:"itau5298",name:"Itaú 5298 — fatura agosto",value:1702.25,category:"Cartão",payer:"Usuária",status:"confirmado"}
+  ],
+  excluded:[
+    {name:"Itaú 4590 — fatura alta",value:5566.54,payer:"Mãe",reason:"Pago pela mãe; fora do orçamento da usuária."},
+    {name:"Unimed + Unidental",value:0,payer:"Empregador",reason:"Benefício; não entra no orçamento."},
+    {name:"BEC",value:0,payer:"—",reason:"Sem despesas atuais."}
+  ],
+  goals:[
+    {month:"Setembro",min:2000,max:3000,status:"Pendente"},
+    {month:"Outubro",min:2000,max:3000,status:"Pendente"},
+    {month:"Novembro",min:2000,max:3000,status:"Pendente"},
+    {month:"Dezembro",min:2000,max:3000,status:"Pendente"}
+  ],
+  transactions:[]
+};
+function loadFin(){try{const d=JSON.parse(localStorage.getItem(FIN_KEY));if(d)return {...FIN_BASE,...d};}catch{}return JSON.parse(JSON.stringify(FIN_BASE));}
+function saveFin(d){localStorage.setItem(FIN_KEY,JSON.stringify(d));}
+function finKnownTotal(d){return d.expenses.reduce((s,x)=>s+Number(x.value||0),0);}
+function money(n){return Number(n||0).toLocaleString("pt-BR",{minimumFractionDigits:2,maximumFractionDigits:2});}
+function renderFinanceiro(){
+ const d=loadFin(),known=finKnownTotal(d),balance=d.income-known;
+ const min=d.goals.reduce((s,x)=>s+Number(x.min||0),0),max=d.goals.reduce((s,x)=>s+Number(x.max||0),0);
+ app.innerHTML=`<section class="hero"><h2>💰 Financeiro</h2><p>Clareza sobre o que realmente sai do seu caixa — sem transformar sua vida em contabilidade.</p></section>
+ <div class="money-hero card"><span class="eyebrow">RENDA MENSAL BASE</span><strong>R$ ${money(d.income)}</strong><div class="money-grid"><div><span>Conhecido</span><b>R$ ${money(known)}</b></div><div><span>Sobra conhecida</span><b>R$ ${money(balance)}</b></div></div></div>
+ <div class="section-title">ORÇAMENTO BASE</div><div class="list">${d.expenses.map(finExpenseHtml).join("")}</div><button class="add-full secondary" id="addExpense">＋ Adicionar despesa</button>
+ <div class="section-title">COMPRAS / GASTOS DO MÊS</div><div class="card"><p class="note">A planilha enviada não traz uma lista detalhada das compras do mês. Ela registra que alimentação, seguros, assinaturas, despesas do Henrique e variáveis ainda precisam ser incorporados ao fechamento. Por isso, esses gastos ficam separados até termos os valores reais.</p><button class="primary" id="addTransaction">＋ Registrar gasto</button></div>
+ <div class="list">${d.transactions.slice().reverse().slice(0,10).map(transactionHtml).join("")||`<div class="empty compact"><strong>Nenhum gasto registrado.</strong><span>Podemos começar a registrar aqui sem alterar o orçamento-base.</span></div>`}</div>
+ <div class="section-title">FUNDO CARRO</div><div class="card goal-card"><div class="panel-head"><div><span class="eyebrow">SETEMBRO → DEZEMBRO</span><h3>Meta acumulada</h3></div><span class="pill today">R$ ${money(min)}–${money(max)}</span></div><div class="goal-list">${d.goals.map((g,i)=>`<div class="goal-row"><span>${escapeHtml(g.month)}</span><strong>R$ ${money(g.min)}–${money(g.max)}</strong><button class="goal-toggle ${g.status==="Concluído"?"done":""}" data-goal="${i}">${g.status==="Concluído"?"✓":"○"}</button></div>`).join("")}</div></div>
+ <div class="section-title">FORA DO SEU ORÇAMENTO</div><div class="list">${d.excluded.map(x=>`<div class="card excluded-card"><div><strong>${escapeHtml(x.name)}</strong><span>${x.value?`R$ ${money(x.value)} · `:""}${escapeHtml(x.reason)}</span></div><span class="pill">${escapeHtml(x.payer)}</span></div>`).join("")}</div>`;
+ document.querySelector("#addExpense").onclick=()=>openFinModal("expense");
+ document.querySelector("#addTransaction").onclick=()=>openFinModal("transaction");
+ document.querySelectorAll("[data-goal]").forEach(b=>b.onclick=()=>{const x=loadFin(),i=+b.dataset.goal;x.goals[i].status=x.goals[i].status==="Concluído"?"Pendente":"Concluído";saveFin(x);renderFinanceiro();});
+}
+function finExpenseHtml(x){return `<article class="card finance-row"><div><strong>${escapeHtml(x.name)}</strong><span>${escapeHtml(x.category)} · ${escapeHtml(x.status)}</span></div><b>R$ ${money(x.value)}</b></article>`;}
+function transactionHtml(x){return `<article class="card finance-row"><div><strong>${escapeHtml(x.name)}</strong><span>${x.date?formatDate(x.date):""} · ${escapeHtml(x.category||"Variável")}</span></div><b>R$ ${money(x.value)}</b></article>`;}
+function openFinModal(type){
+ const d=loadFin(),dlg=document.createElement("dialog");
+ dlg.innerHTML=`<form method="dialog" class="modal-card" id="finForm"><div class="modal-head"><div><div class="eyebrow">💰 FINANCEIRO</div><h2>Registrar ${type==="expense"?"despesa":"gasto"}</h2></div><button class="icon-btn" value="cancel">×</button></div>
+ <label>Descrição<input id="fName" required maxlength="100"></label><div class="form-grid"><label>Valor<input id="fValue" required type="number" min="0" step="0.01"></label><label>Categoria<input id="fCategory" maxlength="50" value="Variável"></label></div>
+ ${type==="expense"?`<label>Responsável<select id="fPayer"><option>Usuária</option><option>Mãe</option><option>Empregador</option></select></label>`:`<label>Data<input id="fDate" type="date" value="${todayISO()}"></label>`}
+ <div class="modal-actions"><div class="grow"></div><button type="button" class="secondary" id="cancelFin">Cancelar</button><button class="primary" value="default">Salvar</button></div></form>`;
+ document.body.appendChild(dlg);dlg.showModal();dlg.querySelector("#cancelFin").onclick=()=>{dlg.close();dlg.remove()};
+ dlg.querySelector("#finForm").addEventListener("submit",e=>{e.preventDefault();const obj={id:uid(),name:dlg.querySelector("#fName").value.trim(),value:+dlg.querySelector("#fValue").value||0,category:dlg.querySelector("#fCategory").value.trim(),updatedAt:Date.now()};if(type==="expense"){obj.payer=dlg.querySelector("#fPayer").value;obj.status="manual";d.expenses.push(obj)}else{obj.date=dlg.querySelector("#fDate").value;d.transactions.push(obj)}saveFin(d);dlg.close();dlg.remove();renderFinanceiro()});
+}
+
+const CASA_KEY="minha-vida.casa.v1";
+const CASA_BASE={
+ areas:[
+  {id:"cozinha",title:"Cozinha",icon:"🍽️",tasks:[
+   {id:"coz1",name:"Passar pano no piso",freq:"diário",when:"manhã/noite",done:false},
+   {id:"coz2",name:"Organizar pia",freq:"diário",when:"manhã/noite",done:false},
+   {id:"coz3",name:"Limpar bancada",freq:"diário",when:"manhã/noite",done:false},
+   {id:"coz4",name:"Guardar alimentos",freq:"diário",when:"noite",done:false},
+   {id:"coz5",name:"Retirar lixo se necessário",freq:"diário",when:"noite",done:false}
+  ]},
+  {id:"limpeza",title:"Limpeza da casa",icon:"🧹",tasks:[
+   {id:"lim1",name:"Varrer/aspirar a casa",freq:"a cada 2 dias",when:"bloco doméstico",done:false},
+   {id:"lim2",name:"Varrer e passar pano na lavanderia",freq:"a cada 2 dias",when:"bloco doméstico",done:false},
+   {id:"lim3",name:"Passar pano nas áreas realmente usadas",freq:"semanal",when:"bloco doméstico",done:false},
+   {id:"lim4",name:"Limpeza pesada",freq:"quinzenal",when:"bloco doméstico",done:false}
+  ]},
+  {id:"lavanderia",title:"Lavanderia",icon:"🧺",tasks:[
+   {id:"lav1",name:"Rodar uma lavanderia",freq:"conforme volume",when:"1–2x/semana",done:false},
+   {id:"lav2",name:"Lavar toalhas",freq:"semanal",when:"lavanderia",done:false},
+   {id:"lav3",name:"Trocar/lavar roupa de cama",freq:"semanal",when:"lavanderia",done:false},
+   {id:"lav4",name:"Bloco de passar",freq:"semanal",when:"bloco único",done:false}
+  ]},
+  {id:"externa",title:"Jardim • Piscina • Áreas externas",icon:"🌿",tasks:[]},
+  {id:"animais",title:"Animais",icon:"🐾",tasks:[
+   {id:"ani1",name:"Alimentar animais",freq:"diário",when:"manhã/noite",done:false},
+   {id:"ani2",name:"Cuidar da Luna",freq:"diário",when:"manhã/início da noite",done:false}
+  ]},
+  {id:"henrique",title:"Henrique",icon:"👦",tasks:[
+   {id:"hen1",name:"Arrumar a própria cama",freq:"diário",when:"manhã",done:false},
+   {id:"hen2",name:"Organizar higiene, roupas e mochila",freq:"diário",when:"manhã",done:false},
+   {id:"hen3",name:"Colocar louça da lancheira na pia",freq:"diário",when:"ao chegar",done:false},
+   {id:"hen4",name:"Ajudar com os animais / Luna",freq:"diário",when:"manhã/início da noite",done:false},
+   {id:"hen5",name:"Uma ajuda doméstica eventual",freq:"eventual",when:"sem sobrecarregar",done:false}
+  ]}
+ ],
+ maintenance:[],
+ notes:""
+};
+function loadCasa(){try{const d=JSON.parse(localStorage.getItem(CASA_KEY));if(d)return {...CASA_BASE,...d};}catch{}return JSON.parse(JSON.stringify(CASA_BASE));}
+function saveCasa(d){localStorage.setItem(CASA_KEY,JSON.stringify(d));}
+function renderCasa(){
+ const d=loadCasa();
+ const all=d.areas.flatMap(a=>a.tasks), done=all.filter(x=>x.done).length;
+ app.innerHTML=`<section class="hero"><h2>🏠 Casa</h2><p>Uma casa funcional, sem transformar a manutenção em uma segunda jornada.</p></section>
+ <div class="home-principle card"><span class="eyebrow">REGRA DA CASA</span><strong>Agrupar. Delegar. Adiar quando puder.</strong><p>Não espalhar microtarefas pelo dia. O essencial entra em blocos; o resto pode esperar.</p></div>
+ <div class="home-summary"><div class="card"><span>Rotinas</span><b>${all.length}</b></div><div class="card"><span>Feitas agora</span><b>${done}</b></div></div>
+ <div class="section-title">ROTINAS</div>
+ <div class="list">${d.areas.map(a=>`<div class="card home-area"><div class="panel-head"><h3>${a.icon} ${escapeHtml(a.title)}</h3><span class="pill">${a.tasks.length}</span></div>
+ ${a.tasks.length?a.tasks.map(t=>`<label class="home-task ${t.done?"done":""}"><input type="checkbox" data-casa-task="${a.id}|${t.id}" ${t.done?"checked":""}><span><strong>${escapeHtml(t.name)}</strong><small>${escapeHtml(t.freq)} · ${escapeHtml(t.when)}</small></span></label>`).join(""):`<p class="note">Sem rotina cadastrada. Mantemos espaço para incluir apenas o que realmente for necessário.</p>`}</div>`).join("")}</div>
+ <div class="section-title">MANUTENÇÃO</div>
+ <div class="card"><p class="note">Problemas, reparos e projetos da casa ficam aqui para não invadirem o dia. Só entram como prioridade quando realmente precisam de atenção.</p><button class="secondary" id="addMaintenance">＋ Adicionar manutenção</button></div>
+ <div class="list">${d.maintenance.map(x=>`<div class="card maintenance-row"><div><strong>${escapeHtml(x.name)}</strong><span>${escapeHtml(x.note||"")}</span></div><button class="more" data-maint="${x.id}">✓</button></div>`).join("")||`<div class="empty compact"><strong>Nenhuma manutenção pendente.</strong><span>Ótimo. Não precisamos criar trabalho só para preencher espaço.</span></div>`}</div>`;
+ document.querySelectorAll("[data-casa-task]").forEach(el=>el.onchange=()=>{const [aid,tid]=el.dataset.casaTask.split("|"),x=loadCasa(),a=x.areas.find(a=>a.id===aid),t=a.tasks.find(t=>t.id===tid);t.done=el.checked;saveCasa(x);renderCasa();});
+ document.querySelector("#addMaintenance").onclick=()=>openCasaMaintenance();
+ document.querySelectorAll("[data-maint]").forEach(b=>b.onclick=()=>{const x=loadCasa();x.maintenance=x.maintenance.filter(m=>m.id!==b.dataset.maint);saveCasa(x);renderCasa();});
+}
+function openCasaMaintenance(){
+ const d=loadCasa(),dlg=document.createElement("dialog");
+ dlg.innerHTML=`<form method="dialog" class="modal-card" id="casaForm"><div class="modal-head"><div><div class="eyebrow">🏠 CASA</div><h2>Nova manutenção</h2></div><button class="icon-btn" value="cancel">×</button></div>
+ <label>O que precisa ser resolvido?<input id="mName" required maxlength="100"></label><label>Observação (opcional)<textarea id="mNote" rows="3"></textarea></label>
+ <div class="modal-actions"><div class="grow"></div><button type="button" class="secondary" id="cancelCasa">Cancelar</button><button class="primary" value="default">Salvar</button></div></form>`;
+ document.body.appendChild(dlg);dlg.showModal();dlg.querySelector("#cancelCasa").onclick=()=>{dlg.close();dlg.remove()};
+ dlg.querySelector("#casaForm").addEventListener("submit",e=>{e.preventDefault();d.maintenance.push({id:uid(),name:dlg.querySelector("#mName").value.trim(),note:dlg.querySelector("#mNote").value.trim(),createdAt:Date.now()});saveCasa(d);dlg.close();dlg.remove();renderCasa();});
+}
+
+const EX_KEY="minha-vida.exercicios.v1";
+const EX_BASE={
+  plans:[
+    {id:"treino1",name:"Esteira",type:"Cardio",target:"20 min",days:["Seg","Ter","Qua","Qui","Sex"],active:true},
+    {id:"treino2",name:"Treino de força",type:"Força",target:"Conforme treino",days:[],active:true}
+  ],
+  sessions:[],
+  notes:""
+};
+function loadEx(){try{const d=JSON.parse(localStorage.getItem(EX_KEY));if(d)return {...EX_BASE,...d};}catch{}return JSON.parse(JSON.stringify(EX_BASE));}
+function saveEx(d){localStorage.setItem(EX_KEY,JSON.stringify(d));}
+function renderExercicios(){
+ const d=loadEx(), today=new Date().toISOString().slice(0,10);
+ const sessions=d.sessions.slice().reverse();
+ app.innerHTML=`<section class="hero"><h2>🏃 Exercícios</h2><p>Movimento como parte da rotina — sem transformar treino em cobrança.</p></section>
+ <div class="exercise-focus card"><span class="eyebrow">HOJE</span><strong>05:35–05:55 · Esteira</strong><p>20 minutos. O objetivo é manter o ritual da manhã, não buscar perfeição.</p><button class="primary" id="quickExercise">✓ Registrar treino de hoje</button></div>
+ <div class="section-title">ROTINA DE MOVIMENTO</div>
+ <div class="list">${d.plans.map(p=>`<div class="card exercise-plan"><div><strong>${escapeHtml(p.name)}</strong><span>${escapeHtml(p.type)} · ${escapeHtml(p.target)}</span>${p.days.length?`<small>${p.days.join(" · ")}</small>`:""}</div><span class="pill">${p.active?"Ativo":"Pausado"}</span></div>`).join("")}</div>
+ <button class="secondary add-full" id="addPlan">＋ Adicionar treino</button>
+ <div class="section-title">REGISTRO</div>
+ <div class="list">${sessions.slice(0,12).map(s=>`<div class="card exercise-session"><div><strong>${escapeHtml(s.name)}</strong><span>${formatDate(s.date)} · ${escapeHtml(s.duration||"")} ${s.note?`· ${escapeHtml(s.note)}`:""}</span></div><button class="more" data-ex="${s.id}">×</button></div>`).join("")||`<div class="empty compact"><strong>Nenhum treino registrado ainda.</strong><span>Comece pelo ritual de esteira da manhã.</span></div>`}</div>
+ <div class="card exercise-note"><span class="eyebrow">REGRA</span><p>Se o dia apertar, o treino pode ser reduzido. Se estiver cansada, descanso não é falha — é parte do sistema.</p></div>`;
+ document.querySelector("#quickExercise").onclick=()=>addExerciseSession("Esteira","20 min",today);
+ document.querySelector("#addPlan").onclick=()=>openExercisePlan();
+ document.querySelectorAll("[data-ex]").forEach(b=>b.onclick=()=>{const x=loadEx();x.sessions=x.sessions.filter(s=>s.id!==b.dataset.ex);saveEx(x);renderExercicios();});
+}
+function addExerciseSession(name,duration,date){
+ const d=loadEx();
+ if(d.sessions.some(s=>s.date===date&&s.name===name)){alert("Esse treino já foi registrado hoje.");return;}
+ d.sessions.push({id:uid(),name,duration,date,note:"",createdAt:Date.now()});saveEx(d);renderExercicios();
+}
+function openExercisePlan(){
+ const d=loadEx(),dlg=document.createElement("dialog");
+ dlg.innerHTML=`<form method="dialog" class="modal-card" id="exForm"><div class="modal-head"><div><div class="eyebrow">🏃 EXERCÍCIOS</div><h2>Novo treino</h2></div><button class="icon-btn" value="cancel">×</button></div>
+ <label>Nome<input id="eName" required maxlength="70" placeholder="Ex.: Pilates"></label>
+ <div class="form-grid"><label>Tipo<input id="eType" value="Treino"></label><label>Duração/meta<input id="eTarget" placeholder="Ex.: 30 min"></label></div>
+ <div class="modal-actions"><div class="grow"></div><button type="button" class="secondary" id="cancelEx">Cancelar</button><button class="primary" value="default">Salvar</button></div></form>`;
+ document.body.appendChild(dlg);dlg.showModal();dlg.querySelector("#cancelEx").onclick=()=>{dlg.close();dlg.remove()};
+ dlg.querySelector("#exForm").addEventListener("submit",e=>{e.preventDefault();d.plans.push({id:uid(),name:dlg.querySelector("#eName").value.trim(),type:dlg.querySelector("#eType").value.trim(),target:dlg.querySelector("#eTarget").value.trim(),days:[],active:true});saveEx(d);dlg.close();dlg.remove();renderExercicios();});
+}
+
+const FOOD_KEY="minha-vida.alimentacao.v1";
+const FOOD_BASE={
+ week:1,
+ breakfasts:[
+  ["Segunda","Pão frito + café com leite"],["Terça","Crepioca de cottage"],["Quarta","Waffle de queijo"],["Quinta","Panqueca"],["Sexta","Pão frito"],["Sábado","Cuscuz + queijo"],["Domingo","Panquecas + café com leite"]
+ ],
+ dinners:[
+  ["Segunda","Frango assado com batatas + arroz + salada","terça"],
+  ["Terça","Strogonoff de frango + arroz + batata palha + salada","quarta"],
+  ["Quarta","Bife de alcatra acebolado + purê + brócolis","quinta"],
+  ["Quinta","Ragu de carne + arroz + legumes","sexta"],
+  ["Sexta","Hambúrguer caseiro + batata assada + salada",""],
+  ["Sábado","Pizza caseira / noite de pizza",""],
+  ["Domingo","Carne de panela com músculo + arroz + feijão + legumes",""]
+ ],
+ lunchbox:true,
+ shoppingWeekly:true,
+ cookingDone:false
+};
+function loadFood(){try{const d=JSON.parse(localStorage.getItem(FOOD_KEY));if(d)return {...FOOD_BASE,...d};}catch{}return JSON.parse(JSON.stringify(FOOD_BASE));}
+function saveFood(d){localStorage.setItem(FOOD_KEY,JSON.stringify(d));}
+function renderAlimentacao(){
+ const d=loadFood();
+ app.innerHTML=`<section class="hero"><h2>🍽️ Alimentação</h2><p>Comer bem com menos decisões: cardápio definido, cozinha quinzenal e finalizações simples.</p></section>
+ <div class="food-principle card"><span class="eyebrow">SISTEMA DA CASA</span><strong>Jantar → marmita do dia seguinte</strong><p>O planejamento foi construído para 3 pessoas e, de segunda a quinta, uma porção extra para a marmita. fileciteturn1file0L12-L23</p></div>
+ <div class="section-title">SEMANA 1 · CARDÁPIO</div>
+ <div class="list"><div class="card"><div class="panel-head"><h3>☀️ Café da manhã</h3><span class="pill">7 dias</span></div>${d.breakfasts.map(x=>`<div class="food-row"><span>${x[0]}</span><strong>${escapeHtml(x[1])}</strong></div>`).join("")}</div>
+ <div class="card"><div class="panel-head"><h3>🌙 Jantar + marmita</h3><span class="pill">3 pessoas</span></div>${d.dinners.map(x=>`<div class="food-row"><span>${x[0]}</span><strong>${escapeHtml(x[1])}</strong>${x[2]?`<small>marmita → ${x[2]}</small>`:""}</div>`).join("")}</div></div>
+ <div class="section-title">ROTINA DE PREPARO</div>
+ <div class="card food-checklist">
+  <label><input type="checkbox" id="foodCook" ${d.cookingDone?"checked":""}><span><strong>Cozinha quinzenal</strong><small>Produzir bases, porcionar, etiquetar e congelar.</small></span></label>
+  <div class="food-rule"><b>Compra mensal</b><span>Carnes, arroz, feijão, grãos, massas, flocão, tapioca, Rap10, biscoitos, azeite, manteiga, café e itens de boa validade.</span></div>
+  <div class="food-rule"><b>Compra semanal</b><span>Frutas, verduras, folhas, pão, iogurtes, cottage, frios e demais perecíveis.</span></div>
+ </div>
+ <div class="section-title">AMANHÃ</div>
+ <div class="card tomorrow-food"><span class="eyebrow">ANTES DE DORMIR</span><strong>Preparar alimentação de amanhã</strong><p>Deixar encaminhados café da manhã, lancheira e marmita. De manhã, apenas finalizar o que for necessário.</p></div>
+ <div class="card food-note"><span class="eyebrow">FREEZER</span><p>As etiquetas seguem: <strong>NOME • DATA • Nº DE PORÇÕES • FINALIZAÇÃO</strong>. Arroz e feijão podem ser congelados; folhas, salada e itens crocantes ficam frescos. fileciteturn1file0L24-L43</p></div>`;
+ document.querySelector("#foodCook").onchange=e=>{const x=loadFood();x.cookingDone=e.target.checked;saveFood(x);};
+}
+
+const REC_KEY="minha-vida.receitas.v1";
+const RECIPES=[
+ {id:"frango-assado",name:"Frango assado com batatas",cat:"Frango",yield:"4 porções",prep:"Produção quinzenal",finish:"Finalizar com arroz + salada"},
+ {id:"strogonoff",name:"Strogonoff de frango",cat:"Frango",yield:"4 porções",prep:"Produção quinzenal",finish:"Servir com arroz + batata palha"},
+ {id:"alcatra",name:"Bife de alcatra acebolado",cat:"Carne bovina",yield:"3–4 porções",prep:"Preparar próximo ao consumo",finish:"Servir com purê + brócolis"},
+ {id:"ragu",name:"Ragu de carne",cat:"Carne bovina",yield:"4 porções",prep:"Congelar em pote de 600–700 g",finish:"Fazer a massa no dia de servir"},
+ {id:"hamburguer",name:"Hambúrguer caseiro",cat:"Carne bovina",yield:"1 unidade/pessoa",prep:"Modelar e congelar",finish:"Servir com batata + salada"},
+ {id:"musculo",name:"Carne de panela com músculo",cat:"Carne bovina",yield:"4 porções",prep:"Produção quinzenal",finish:"Servir com arroz + feijão + legumes"},
+ {id:"panquecas",name:"Panquecas salgadas de carne e queijo",cat:"Coringas",yield:"Conforme receita",prep:"Pode congelar prontas",finish:"Aquecer e servir com salada"},
+ {id:"frango-grelhado",name:"Filé de frango grelhado",cat:"Frango",yield:"3–4 porções",prep:"Preparar próximo ao consumo",finish:"Servir com arroz + feijão + legumes"},
+ {id:"frango-desfiado",name:"Frango desfiado cremoso para Rap10",cat:"Frango",yield:"3–4 porções",prep:"Congelar o recheio",finish:"Aquecer + Rap10 + salada fresca"},
+ {id:"risoto",name:"Risoto rápido de frango/carne",cat:"Coringas",yield:"3–4 porções",prep:"Preparar no dia",finish:"Servir com salada"},
+ {id:"porco",name:"Porco assado",cat:"Porco",yield:"3–4 porções",prep:"Produção quinzenal",finish:"Servir com acompanhamentos"},
+ {id:"carne-legumes",name:"Carne moída com legumes",cat:"Carne bovina",yield:"3–4 porções",prep:"Produção quinzenal",finish:"Servir com arroz + feijão"},
+ {id:"frango-gratinado",name:"Frango gratinado com queijo",cat:"Frango",yield:"4 porções",prep:"Montar e congelar se desejado",finish:"Gratinar antes de servir"},
+ {id:"almondegas",name:"Almôndegas",cat:"Carne bovina",yield:"12–20 unidades",prep:"Congelar com molho",finish:"Servir com acompanhamento"},
+ {id:"coxa-sobrecoxa",name:"Coxa/sobrecoxa",cat:"Frango",yield:"Conforme compra",prep:"Produção quinzenal",finish:"Finalizar no forno"},
+ {id:"arroz-forno",name:"Arroz de forno com frango",cat:"Coringas",yield:"4 porções",prep:"Montar e congelar antes de gratinar",finish:"Gratinar até aquecer e dourar"},
+ {id:"porco-rap10",name:"Porco desfiado com Rap10",cat:"Porco",yield:"3–4 porções",prep:"Congelar apenas o porco",finish:"Aquecer + Rap10 + queijo + salada"},
+ {id:"fraldinha",name:"Churrasco de fraldinha",cat:"Carne bovina",yield:"3–4 porções",prep:"Congelar a peça crua",finish:"Descongelar na geladeira + churrasqueira"},
+ {id:"crepioca",name:"Crepioca de cottage",cat:"Café da manhã",yield:"1 porção",prep:"Preparar na hora",finish:"Ovo + tapioca + cottage"},
+ {id:"cuscuz",name:"Cuscuz com queijo",cat:"Café da manhã",yield:"3 porções",prep:"Preparar na hora",finish:"Servir com queijo e, se desejar, manteiga"},
+ {id:"pico-morango",name:"Picolé de morango cremoso",cat:"Picolé",yield:"Estoque",prep:"Produção quinzenal",finish:"Manter congelado"},
+ {id:"pico-coco",name:"Picolé de coco",cat:"Picolé",yield:"Estoque",prep:"Produção quinzenal",finish:"Manter congelado"},
+ {id:"pico-maracuja",name:"Picolé de maracujá cremoso",cat:"Picolé",yield:"Estoque",prep:"Produção quinzenal",finish:"Manter congelado"},
+ {id:"pico-banana",name:"Picolé de banana com canela",cat:"Picolé",yield:"Estoque",prep:"Produção quinzenal",finish:"Manter congelado"}
+];
+function loadRec(){try{const d=JSON.parse(localStorage.getItem(REC_KEY));return d||{favorites:[]};}catch{return {favorites:[]};}}
+function saveRec(d){localStorage.setItem(REC_KEY,JSON.stringify(d));}
+function renderReceitas(){
+ const d=loadRec();
+ app.innerHTML=`<section class="hero"><h2>📖 Receitas</h2><p>O livro da casa: receitas organizadas para cozinhar uma vez e facilitar muitos dias.</p></section>
+ <div class="recipe-principle card"><span class="eyebrow">COMO USAR</span><strong>Receita → produção → freezer → finalização</strong><p>As receitas fazem parte do sistema de alimentação quinzenal, não são uma lista para decidir o que cozinhar todos os dias. fileciteturn1file0L16-L23</p></div>
+ <div class="recipe-filters"><input id="recipeSearch" placeholder="Buscar receita…"><select id="recipeCat"><option value="">Todas</option>${[...new Set(RECIPES.map(r=>r.cat))].map(c=>`<option>${c}</option>`).join("")}</select></div>
+ <div class="list" id="recipeList">${recipeCards(RECIPES,d)}</div>
+ <div class="card freezer-rule"><span class="eyebrow">❄️ FREEZER</span><p>Identificar cada preparo com <strong>NOME • DATA • Nº DE PORÇÕES • FINALIZAÇÃO</strong>. Preparações refrigeradas: referência doméstica de 3–4 dias; congelados, preferencialmente ao longo da quinzena. fileciteturn1file0L39-L43</p></div>`;
+ const update=()=>{const q=document.querySelector("#recipeSearch").value.toLowerCase(),c=document.querySelector("#recipeCat").value;document.querySelector("#recipeList").innerHTML=recipeCards(RECIPES.filter(r=>(!q||r.name.toLowerCase().includes(q))&&(!c||r.cat===c)),loadRec());};
+ document.querySelector("#recipeSearch").oninput=update;document.querySelector("#recipeCat").onchange=update;
+ document.querySelectorAll("[data-fav]").forEach(b=>b.onclick=()=>{const x=loadRec(),id=b.dataset.fav;x.favorites=x.favorites.includes(id)?x.favorites.filter(v=>v!==id):[...x.favorites,id];saveRec(x);update();});
+}
+function recipeCards(list,d){return list.map(r=>`<article class="card recipe-card"><div class="recipe-main"><div><span class="eyebrow">${escapeHtml(r.cat)}</span><h3>${escapeHtml(r.name)}</h3><span>${escapeHtml(r.yield)} · ${escapeHtml(r.prep)}</span></div><button class="favorite ${d.favorites.includes(r.id)?"active":""}" data-fav="${r.id}">${d.favorites.includes(r.id)?"♥":"♡"}</button></div><p><strong>Finalização:</strong> ${escapeHtml(r.finish)}</p></article>`).join("")||`<div class="empty compact"><strong>Nenhuma receita encontrada.</strong></div>`;}
+function renderPlaceholder() {
+  const data = {
+    ideias: ["💡", "Criação & Ideias", "Este espaço vem em seguida. A ideia é registrar sem transformar tudo em obrigação."],
+    rituais: ["✨", "Rituais", "O próximo módulo será construído depois de Criação & Ideias — incluindo o Ritual Capilar."]
+  };
+  const item = data[state.route] || ["💜", "Minha Vida", "Os módulos serão construídos de baixo para cima, na ordem definida."];
+  app.innerHTML = `
+    <section class="hero">
+      <h2>${item[0]} ${item[1]}</h2>
+      <p>${item[2]}</p>
+    </section>
+    <div class="module-grid">
+      <button class="module" data-route="pendencias"><span class="emoji">📝</span><strong>Pendências</strong><span>Descarregar a cabeça.</span></button>
+      <button class="module" data-route="ideias"><span class="emoji">💡</span><strong>Criação & Ideias</strong><span>Guardar sem obrigação.</span></button>
+      <button class="module" data-route="rituais"><span class="emoji">✨</span><strong>Rituais</strong><span>Rotinas que viram cuidado.</span></button>
+      <button class="module" data-route="mais"><span class="emoji">＋</span><strong>Próximos módulos</strong><span>Construídos um por vez.</span></button>
+    </div>`;
+  document.querySelectorAll("[data-route]").forEach(b => b.onclick = () => { state.route=b.dataset.route; render(); });
+}
+
+document.querySelector("#homeBtn").onclick = () => { state.route="pendencias"; state.filter="abertas"; state.search=""; render(); };
+document.querySelector("#backBtn").onclick = () => { state.route="pendencias"; render(); };
+document.querySelectorAll(".nav-item").forEach(b => b.onclick = () => { state.route=b.dataset.route; render(); });
+
+if ("serviceWorker" in navigator) window.addEventListener("load", () => navigator.serviceWorker.register("sw.js").catch(console.warn));
+
+render();

@@ -1,0 +1,89 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#f8f6f8">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
+  <meta name="apple-mobile-web-app-title" content="Minha Vida">
+  <link rel="manifest" href="manifest.webmanifest">
+  <link rel="apple-touch-icon" href="assets/icon-192.svg">
+  <link rel="stylesheet" href="style.css">
+  <title>💜 Minha Vida</title>
+</head>
+<body>
+  <div class="app-shell">
+    <header class="topbar">
+      <button class="icon-btn" id="backBtn" aria-label="Voltar" hidden>‹</button>
+      <div>
+        <div class="eyebrow">MENOS DECISÕES • MAIS RITUAL</div>
+        <h1 id="pageTitle">📝 Pendências</h1>
+      </div>
+      <button class="icon-btn" id="homeBtn" aria-label="Início">⌂</button>
+    </header>
+
+    <main id="app" class="content"></main>
+
+    <nav class="bottom-nav" aria-label="Navegação principal">
+      <button class="nav-item active" data-route="pendencias">📝<span>Pendências</span></button>
+      <button class="nav-item" data-route="ideias">💡<span>Ideias</span></button>
+      <button class="nav-item" data-route="rituais">✨<span>Rituais</span></button>
+      <button class="nav-item" data-route="mais">•••<span>Mais</span></button>
+    </nav>
+  </div>
+
+  <dialog id="pendingDialog">
+    <form method="dialog" id="pendingForm" class="modal-card">
+      <div class="modal-head">
+        <div>
+          <div class="eyebrow" id="dialogEyebrow">NOVA PENDÊNCIA</div>
+          <h2 id="dialogTitle">Adicionar pendência</h2>
+        </div>
+        <button class="icon-btn" value="cancel" aria-label="Fechar">×</button>
+      </div>
+
+      <label>
+        O que precisa sair da sua cabeça?
+        <input id="pendingTitle" name="title" required maxlength="120" autocomplete="off" placeholder="Ex.: Resolver documento">
+      </label>
+
+      <div class="form-grid">
+        <label>
+          Categoria
+          <select id="pendingCategory">
+            <option value="Pessoal">Pessoal</option>
+            <option value="Casa">Casa</option>
+            <option value="Henrique">Henrique</option>
+            <option value="Financeiro">Financeiro</option>
+            <option value="Trabalho">Trabalho</option>
+            <option value="Estudos">Estudos</option>
+            <option value="Compras">Compras</option>
+            <option value="Outros">Outros</option>
+          </select>
+        </label>
+        <label>
+          Prazo
+          <input id="pendingDue" type="date">
+        </label>
+      </div>
+
+      <label>
+        Observação <span class="muted">(opcional)</span>
+        <textarea id="pendingNote" rows="3" maxlength="300" placeholder="Algum detalhe que você não quer esquecer?"></textarea>
+      </label>
+
+      <div class="modal-actions">
+        <button type="button" class="secondary" id="deletePendingBtn" hidden>Excluir</button>
+        <div class="grow"></div>
+        <button type="button" class="secondary" id="cancelPendingBtn">Cancelar</button>
+        <button class="primary" value="default">Salvar</button>
+      </div>
+    </form>
+  </dialog>
+
+  <script src="app.js"></script>
+<nav class="bottom-nav" aria-label="Navegação principal"><a href="#meu-dia">💜<span>Meu Dia</span></a><a href="#pendencias">📝<span>Pendências</span></a><a href="#rituais">✨<span>Rituais</span></a><button type="button" onclick="document.getElementById('moduleMenu').showModal()">☰<span>Mais</span></button></nav>
+<dialog id="moduleMenu"><div class="module-sheet"><div class="sheet-head"><strong>MINHA VIDA</strong><button onclick="document.getElementById('moduleMenu').close()">×</button></div><div class="module-links">
+<a href="#ideias">💡 Criação & Ideias</a><a href="#estudos">📚 Estudos / CEBRASPE</a><a href="#financeiro">💰 Financeiro</a><a href="#casa">🏠 Casa</a><a href="#exercicios">🏃 Exercícios</a><a href="#alimentacao">🍽️ Alimentação</a><a href="#receitas">📖 Receitas</a></div></div></dialog></body>
+</html>
