@@ -74,7 +74,7 @@ function renderMeuDia(){
  ${(w===1||w===3)?'<div><b>14:40–16:10</b><span>Janela estratégica</span></div>':''}
  <div><b>${ho}</b><span>Home office</span></div><div><b>19:00+</b><span>Noite protegida · descanso primeiro</span></div></div></section>
  ${p.length?`<section class="day-section"><div class="section-head"><h2>Pendências que merecem aparecer</h2><a href="#pendencias">ver todas</a></div>${p.map(x=>`<div class="compact-item"><strong>${x.title||x.name||'Pendência'}</strong>${x.dueDate?`<small>${x.dueDate}</small>`:''}</div>`).join('')}</section>`:''}
- <section class="quick-grid"><a href="#rituais">✨<span>Rituais</span></a><a href="#exercicios">🏃<span>Exercícios</span></a><a href="#alimentacao">🍽️<span>Alimentação</span></a><a href="#receitas">📖<span>Receitas</span></a><a href="#casa">🏠<span>Casa</span></a><a href="#financeiro">💰<span>Financeiro</span></a></section>
+ <section class="quick-grid"><a href="#rituais">✨<span>Rituais</span></a><a href="#exercicios">🏃<span>Exercícios</span></a><a href="#alimentacao">🍽️<span>Alimentação</span></a><a href="#receitas">📖<span>Receitas</span></a><a href="#cabelo">💇‍♀️<span>Cabelo</span></a><a href="#casa">🏠<span>Casa</span></a><a href="#financeiro">💰<span>Financeiro</span></a></section>
  <section class="free-space"><div>☁️</div><strong>Espaço livre também faz parte do dia.</strong><p>Se nada precisa ser resolvido agora, não resolva.</p></section>`;
 }
 
@@ -1134,10 +1134,94 @@ function renderReceitas(){
  document.querySelectorAll("[data-fav]").forEach(b=>b.onclick=()=>{const x=loadRec(),id=b.dataset.fav;x.favorites=x.favorites.includes(id)?x.favorites.filter(v=>v!==id):[...x.favorites,id];saveRec(x);update();});
 }
 function recipeCards(list,d){return list.map(r=>`<article class="card recipe-card"><div class="recipe-main"><div><span class="eyebrow">${escapeHtml(r.cat)}</span><h3>${escapeHtml(r.name)}</h3><span>${escapeHtml(r.yield)} · ${escapeHtml(r.prep)}</span></div><button class="favorite ${d.favorites.includes(r.id)?"active":""}" data-fav="${r.id}">${d.favorites.includes(r.id)?"♥":"♡"}</button></div><p><strong>Finalização:</strong> ${escapeHtml(r.finish)}</p></article>`).join("")||`<div class="empty compact"><strong>Nenhuma receita encontrada.</strong></div>`;}
+
+// =====================================================
+// 💇‍♀️ COMO FAZER • RITUAL CAPILAR
+// Fonte: cronograma capilar Scriptable • 31/08/2026–14/10/2026
+// =====================================================
+const HAIR_START = new Date(2026,7,31);
+const HAIR_END = new Date(2026,9,14);
+const HAIR_KEY = "minha-vida.cabelo.v1";
+const HAIR_WASH = {
+"31/08":{shampoo:"t:r S10 Colors Even More — Grayish-Brown Color Protective Shampoo",s10:"30–60 s de massagem • SEM PAUSA",tratamento:"REPARAÇÃO\nKerasys Propolis Hair Bonding Pro Repair Treatment",condicionador:"Mise en Scène Perfect Serum Styling Conditioner",serum:"Mise en Scène Perfect Serum Original"},
+"02/09":{shampoo:"Elseve Cachos Longos dos Sonhos Shampoo Nutri-Preenchedor",tratamento:"HIDRATAÇÃO\nMáscara Hidra + Reconstrução",condicionador:"Elseve Cachos Longos dos Sonhos Condicionador Selador",serum:"Mise en Scène Perfect Serum Hydrating"},
+"04/09":{shampoo:"Mise en Scène Perfect Serum Styling Shampoo",tratamento:"NUTRIÇÃO\nPré-shampoo: óleo de semente de uva (20–30 min) → lavagem",condicionador:"Mise en Scène Perfect Serum Styling Conditioner",serum:"Mise en Scène Perfect Serum Original"},
+"06/09":{shampoo:"Elseve Cachos Longos dos Sonhos Shampoo Nutri-Preenchedor",tratamento:"REPARAÇÃO\nKerasys Propolis Hair Bonding Pro Repair Treatment",condicionador:"Elseve Cachos Longos dos Sonhos Condicionador Selador",serum:"Mise en Scène Perfect Serum Styling"},
+"08/09":{shampoo:"t:r S10 Colors Even More — Grayish-Brown Color Protective Shampoo",s10:"30–60 s de massagem • SEM PAUSA",tratamento:"HIDRATAÇÃO\nMáscara Hidra + Reconstrução",condicionador:"Mise en Scène Perfect Serum Styling Conditioner",serum:"Mise en Scène Perfect Serum Hydrating"},
+"10/09":{shampoo:"Elseve Cachos Longos dos Sonhos Shampoo Nutri-Preenchedor",tratamento:"ACIDIFICAÇÃO\nLola Tannic Acid Acidificante — 5 min, comprimento e pontas",condicionador:"Elseve Cachos Longos dos Sonhos Condicionador Selador",serum:"Mise en Scène Perfect Serum Original"},
+"12/09":{shampoo:"Mise en Scène Perfect Serum Styling Shampoo",tratamento:"NUTRIÇÃO\nPré-shampoo: óleo de coco ou semente de uva (20–30 min)",condicionador:"Mise en Scène Perfect Serum Styling Conditioner",serum:"Mise en Scène Perfect Serum Hydrating"},
+"14/09":{shampoo:"Elseve Cachos Longos dos Sonhos Shampoo Nutri-Preenchedor",tratamento:"PÓS-COR\nLavagem suave + condicionador; sem máscara pesada",condicionador:"Mise en Scène Perfect Serum Styling Conditioner",serum:"Mise en Scène Perfect Serum Original"},
+"16/09":{shampoo:"Mise en Scène Perfect Serum Styling Shampoo",tratamento:"HIDRATAÇÃO\nMáscara Hidra + Reconstrução",condicionador:"Mise en Scène Perfect Serum Styling Conditioner",serum:"Mise en Scène Perfect Serum Hydrating"},
+"18/09":{shampoo:"Elseve Cachos Longos dos Sonhos Shampoo Nutri-Preenchedor",tratamento:"REPARAÇÃO\nKerasys Propolis Hair Bonding Pro Repair Treatment",condicionador:"Elseve Cachos Longos dos Sonhos Condicionador Selador",serum:"Mise en Scène Perfect Serum Styling"},
+"20/09":{shampoo:"Mise en Scène Perfect Serum Styling Shampoo",tratamento:"NUTRIÇÃO\nPré-shampoo: óleo de semente de uva (20–30 min)",condicionador:"Mise en Scène Perfect Serum Styling Conditioner",serum:"Mise en Scène Perfect Serum Original"},
+"22/09":{shampoo:"Elseve Cachos Longos dos Sonhos Shampoo Nutri-Preenchedor",tratamento:"ACIDIFICAÇÃO\nLola Tannic Acid Acidificante — 5 min",condicionador:"Elseve Cachos Longos dos Sonhos Condicionador Selador",serum:"Mise en Scène Perfect Serum Hydrating"},
+"24/09":{shampoo:"t:r S10 Colors Even More — Grayish-Brown Color Protective Shampoo",s10:"30–60 s de massagem • SEM PAUSA",tratamento:"HIDRATAÇÃO\nMáscara Hidra + Reconstrução",condicionador:"Mise en Scène Perfect Serum Styling Conditioner",serum:"Mise en Scène Perfect Serum Styling"},
+"26/09":{shampoo:"Elseve Cachos Longos dos Sonhos Shampoo Nutri-Preenchedor",tratamento:"REPARAÇÃO\nKerasys Propolis Hair Bonding Pro Repair Treatment",condicionador:"Elseve Cachos Longos dos Sonhos Condicionador Selador",serum:"Mise en Scène Perfect Serum Original"},
+"28/09":{shampoo:"Mise en Scène Perfect Serum Styling Shampoo",tratamento:"NUTRIÇÃO\nPré-shampoo: óleo de girassol ou semente de uva (20–30 min)",condicionador:"Mise en Scène Perfect Serum Styling Conditioner",serum:"Mise en Scène Perfect Serum Hydrating"},
+"30/09":{shampoo:"Elseve Cachos Longos dos Sonhos Shampoo Nutri-Preenchedor",tratamento:"HIDRATAÇÃO\nMáscara Hidra + Reconstrução",condicionador:"Elseve Cachos Longos dos Sonhos Condicionador Selador",serum:"Mise en Scène Perfect Serum Styling"},
+"02/10":{shampoo:"Mise en Scène Perfect Serum Styling Shampoo",tratamento:"REPARAÇÃO\nKerasys Propolis Hair Bonding Pro Repair Treatment",condicionador:"Mise en Scène Perfect Serum Styling Conditioner",serum:"Mise en Scène Perfect Serum Original"},
+"04/10":{shampoo:"Elseve Cachos Longos dos Sonhos Shampoo Nutri-Preenchedor",tratamento:"ACIDIFICAÇÃO\nLola Tannic Acid Acidificante — 5 min",condicionador:"Elseve Cachos Longos dos Sonhos Condicionador Selador",serum:"Mise en Scène Perfect Serum Hydrating"},
+"06/10":{shampoo:"Mise en Scène Perfect Serum Styling Shampoo",tratamento:"NUTRIÇÃO\nPré-shampoo: óleo de semente de uva (20–30 min)",condicionador:"Mise en Scène Perfect Serum Styling Conditioner",serum:"Mise en Scène Perfect Serum Original"},
+"08/10":{shampoo:"Elseve Cachos Longos dos Sonhos Shampoo Nutri-Preenchedor",tratamento:"HIDRATAÇÃO\nMáscara Hidra + Reconstrução",condicionador:"Elseve Cachos Longos dos Sonhos Condicionador Selador",serum:"Mise en Scène Perfect Serum Hydrating"},
+"10/10":{shampoo:"t:r S10 Colors Even More — Grayish-Brown Color Protective Shampoo",s10:"30–60 s de massagem • SEM PAUSA",tratamento:"REPARAÇÃO\nKerasys Propolis Hair Bonding Pro Repair Treatment",condicionador:"Mise en Scène Perfect Serum Styling Conditioner",serum:"Mise en Scène Perfect Serum Styling"},
+"12/10":{shampoo:"Elseve Cachos Longos dos Sonhos Shampoo Nutri-Preenchedor",tratamento:"ACIDIFICAÇÃO\nLola Tannic Acid Acidificante — 5 min",condicionador:"Elseve Cachos Longos dos Sonhos Condicionador Selador",serum:"Mise en Scène Perfect Serum Original"},
+"14/10":{shampoo:"Mise en Scène Perfect Serum Styling Shampoo",tratamento:"HIDRATAÇÃO\nMáscara Hidra + Reconstrução",condicionador:"Mise en Scène Perfect Serum Styling Conditioner",serum:"Mise en Scène Perfect Serum Hydrating"}
+};
+function hairLoad(){try{return JSON.parse(localStorage.getItem(HAIR_KEY))||{done:{}}}catch{return{done:{}}}}
+function hairSave(x){localStorage.setItem(HAIR_KEY,JSON.stringify(x))}
+function hairDateKey(d){return String(d.getDate()).padStart(2,"0")+"/"+String(d.getMonth()+1).padStart(2,"0")}
+function hairDateBR(d){return String(d.getDate()).padStart(2,"0")+"/"+String(d.getMonth()+1).padStart(2,"0")+"/"+d.getFullYear()}
+function hairDayNumber(d){return Math.floor((d-HAIR_START)/86400000)+1}
+function hairDay(d){let x=new Date(d);x.setHours(0,0,0,0);return x}
+function hairFinalizacao(){return "Phyto Manga → Lola Plot Twist Guava Mousse → Griffus Amo Cachos Gelatina Dia Seguinte"}
+function hairDayAfter(){return `💦 Umedecer mãos/áreas necessárias.\n✨ Lola Plot Twist Guava Misturinha OU Griffus Amo Cachos Gelatina Dia Seguinte.\nAmassar de baixo para cima.\n\n🪞 Se houver frizz em cabelo seco:\n1 gota de Mise en Scène Perfect Serum Original ou Elseve Óleo Extraordinário nas pontas.\n\n🌙 NOITE: preservar o cabelo; sem lavagem.`}
+function hairColoring(){return `🎨 COLORAÇÃO • 🌙 NOITE\n\nImédia L'Oréal 6.1 — somente raiz/brancos.\nNão puxar a permanente para o comprimento.\n\n🧴 Após enxaguar: seguir o passo a passo da caixa.\nNão fazer máscara/reconstrução neste momento.\n\n🌙 Após a coloração: deixar o cabelo em repouso.\n➡️ Próxima lavagem: 14/09 de manhã.`}
+function hairTodayData(){
+ const now=hairDay(new Date());
+ if(now<HAIR_START)return {kind:"before",date:now};
+ if(now>HAIR_END)return {kind:"done",date:now};
+ const key=hairDateKey(now),r=HAIR_WASH[key];
+ if(r)return {kind:"wash",date:now,key,r};
+ if(key==="13/09")return {kind:"color",date:now,key};
+ return {kind:"dayafter",date:now,key};
+}
+function hairStepRows(info){
+ if(info.kind==="wash"){
+  const r=info.r, rows=["🚿 LAVAGEM • ☀️ MANHÃ","🧴 "+r.shampoo];
+  if(r.s10)rows.push("⏱️ "+r.s10);
+  rows.push("🧖🏼‍♀️ "+r.tratamento,"🧴 Cond.: "+r.condicionador,"💇🏼‍♀️ FINALIZAÇÃO • "+hairFinalizacao(),"✨ Sérum: "+r.serum,"🌙 NOITE: não lavar; preservar a definição."); return rows;
+ }
+ if(info.kind==="color")return hairColoring().split("\n");
+ if(info.kind==="before")return ["🌙 DIA 0 — 30/08/2026","NÃO LAVAR","✨ Preservar os cachos.","🌙 À noite: proteger o cabelo para dormir.","🫧 O cronograma oficial começa amanhã."];
+ if(info.kind==="done")return ["🌙 CRONOGRAMA FINALIZADO","Os 45 dias foram concluídos."];
+ return ["☀️ MANHÃ • DAY AFTER",...hairDayAfter().split("\n")];
+}
+function hairTypeLabel(k){return k==="wash"?"Lavagem":k==="color"?"Coloração":k==="dayafter"?"Day after":k==="before"?"Antes do início":"Finalizado"}
+function renderCabelo(){
+ const info=hairTodayData(), steps=hairStepRows(info), done=hairLoad().done||{};
+ const todayKey=info.key||hairDateKey(info.date);
+ app.innerHTML=`<section class="hair-hero"><div class="eyebrow">💇‍♀️ COMO FAZER</div><h2>Ritual Capilar</h2><p>Seu cronograma de 45 dias, transformado em um caminho simples dentro do MINHA VIDA.</p></section>
+ <section class="hair-today"><div class="hair-kicker">HOJE • ${hairDateBR(info.date)}</div><div class="hair-title">${hairTypeLabel(info.kind)}</div><div class="hair-steps">${steps.map((x,i)=>`<div class="hair-step"><span>${i+1}</span><div>${escapeHtml(x).replace(/\n/g,"<br>")}</div></div>`).join("")}</div><button class="hair-complete" id="hairComplete">${done[todayKey]?"✓ Feito hoje":"Marcar como feito"}</button></section>
+ <section class="hair-section"><div class="section-head"><h2>Seu caminho</h2><span class="soft-count">45 dias</span></div><div class="hair-links"><button data-hair-view="cronograma">📅 Ver cronograma</button><button data-hair-view="dayafter">✨ Como fazer o day after</button><button data-hair-view="night">🌙 Como preservar à noite</button></div></section>
+ <section class="hair-section"><div class="section-head"><h2>Próximas lavagens</h2></div><div class="hair-list">${Object.entries(HAIR_WASH).filter(([k])=>{const [dd,mm]=k.split("/").map(Number);const y=mm<8?2027:2026;return new Date(y,mm-1,dd)>=hairDay(new Date())}).slice(0,4).map(([k,r])=>`<button class="hair-list-item" data-hair-date="${k}"><strong>${k}</strong><span>${escapeHtml(r.tratamento.split("\\n")[0])}</span><small>${escapeHtml(r.shampoo)}</small></button>`).join("")}</div></section>`;
+ document.querySelector("#hairComplete").onclick=()=>{const x=hairLoad();x.done=x.done||{};x.done[todayKey]=!x.done[todayKey];hairSave(x);renderCabelo()};
+ document.querySelectorAll("[data-hair-view]").forEach(b=>b.onclick=()=>openHairInfo(b.dataset.hairView));
+ document.querySelectorAll("[data-hair-date]").forEach(b=>b.onclick=()=>openHairWash(b.dataset.hairDate));
+}
+function openHairInfo(type){
+ let title="",body="";
+ if(type==="dayafter"){title="✨ Como fazer o day after";body=hairDayAfter();}
+ else if(type==="night"){title="🌙 Como preservar à noite";body="Não lavar. Preservar a definição e proteger o cabelo para dormir. Na manhã seguinte, seguir o COMO do day after quando necessário.";}
+ else {title="📅 Cronograma de 45 dias";body=Object.entries(HAIR_WASH).map(([k,r])=>`${k} • ${r.tratamento.split("\\n")[0]}`).join("\n")+"\n\n13/09 • COLORAÇÃO — Imédia L'Oréal 6.1, somente raiz/brancos.";}
+ openHairDialog(title,body);
+}
+function openHairWash(key){const r=HAIR_WASH[key];if(!r)return;openHairDialog("🚿 Lavagem • "+key,`☀️ MANHÃ\n\n🧴 ${r.shampoo}${r.s10?"\n⏱️ "+r.s10:""}\n\n🧖🏼‍♀️ ${r.tratamento}\n\n🧴 Cond.: ${r.condicionador}\n\n💇🏼‍♀️ FINALIZAÇÃO\n${hairFinalizacao()}\n\n✨ Sérum: ${r.serum}\n\n🌙 NOITE: não lavar; preservar a definição.`)}
+function openHairDialog(title,body){const d=document.createElement("dialog");d.className="hair-dialog";d.innerHTML=`<div class="hair-dialog-inner"><div class="eyebrow">COMO FAZER</div><h3>${escapeHtml(title)}</h3><div class="hair-dialog-body">${escapeHtml(body).replace(/\n/g,"<br>")}</div><button class="primary" id="closeHair">Fechar</button></div>`;document.body.appendChild(d);d.querySelector("#closeHair").onclick=()=>{d.close();d.remove()};d.addEventListener("click",e=>{if(e.target===d){d.close();d.remove()}});d.showModal();}
+
 function renderPlaceholder() {
   const data = {
     ideias: ["💡", "Criação & Ideias", "Este espaço vem em seguida. A ideia é registrar sem transformar tudo em obrigação."],
-    rituais: ["✨", "Rituais", "O próximo módulo será construído depois de Criação & Ideias — incluindo o Ritual Capilar."]
+    rituais: ["✨", "Rituais", "Seu espaço para rotinas conscientes. O Ritual Capilar já pode ser acessado pelo caminho COMO FAZER."]
   };
   const item = data[state.route] || ["💜", "Minha Vida", "Os módulos serão construídos de baixo para cima, na ordem definida."];
   app.innerHTML = `
