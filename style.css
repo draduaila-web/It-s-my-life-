@@ -601,3 +601,19 @@ h2 { margin:0; font-size:22px; letter-spacing:-.02em; }
 .bottom-nav > a:nth-child(1), .bottom-nav > a:nth-child(2), .bottom-nav > a:nth-child(3), .bottom-nav > button:nth-child(4) {
   display: flex !important;
 }
+
+/* CASA — procedimentos e caminhos externos */
+.home-task-wrap{border-top:1px solid var(--line);padding:0 0 8px}
+.home-task-wrap .home-task{border-top:0;margin:0}
+.home-how{margin:0 0 0 39px;border:0;background:transparent;padding:4px 0 5px;font-size:11px;font-weight:800;color:#9a6f82;cursor:pointer}
+.casa-how-meta{display:flex;gap:8px;margin:0 0 12px}
+.casa-how-meta span{display:inline-block;background:#F5E9EE;border-radius:999px;padding:6px 10px;font-size:11px;font-weight:700}
+.mv-how h3{font-size:12px;margin:18px 0 6px}
+.mv-how ul,.mv-how ol{margin-top:6px;padding-left:21px}
+.casa-how-tip{margin-top:16px;background:#FFF5D8;border-radius:16px;padding:12px}
+.casa-how-tip strong{font-size:12px}.casa-how-tip p{margin:5px 0 0!important;opacity:.8!important;font-size:11px!important}
+.casa-web-card{background:linear-gradient(135deg,#FFF8F1,#F4EEF8 55%,#EDF7F3)}
+.casa-web-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;margin-top:12px}
+.casa-web-link{display:flex;justify-content:space-between;align-items:center;gap:8px;text-decoration:none;color:inherit;background:rgba(255,255,255,.82);border:1px solid rgba(120,100,120,.10);border-radius:15px;padding:11px 12px;font-size:11px;font-weight:800}
+.casa-web-link span{font-size:14px;opacity:.65}
+@media(max-width:420px){.casa-web-grid{grid-template-columns:1fr}.home-how{margin-left:39px}}

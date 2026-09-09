@@ -879,11 +879,17 @@ const CASA_BASE={
    {id:"lim3",name:"Passar pano nas áreas realmente usadas",freq:"semanal",when:"bloco doméstico",done:false},
    {id:"lim4",name:"Limpeza pesada",freq:"quinzenal",when:"bloco doméstico",done:false}
   ]},
-  {id:"lavanderia",title:"Lavanderia",icon:"🧺",tasks:[
-   {id:"lav1",name:"Rodar uma lavanderia",freq:"conforme volume",when:"1–2x/semana",done:false},
-   {id:"lav2",name:"Lavar toalhas",freq:"semanal",when:"lavanderia",done:false},
-   {id:"lav3",name:"Trocar/lavar roupa de cama",freq:"semanal",when:"lavanderia",done:false},
-   {id:"lav4",name:"Bloco de passar",freq:"semanal",when:"bloco único",done:false}
+  {id:"roupas",title:"Roupas & Lavanderia",icon:"👕",tasks:[
+   {id:"roup1",name:"Separar roupas por tipo/cor",freq:"conforme volume",when:"antes da lavagem",done:false},
+   {id:"roup2",name:"Lavar roupas do dia a dia",freq:"conforme volume",when:"lavanderia",done:false},
+   {id:"roup3",name:"Cuidar das peças delicadas",freq:"conforme necessidade",when:"lavanderia",done:false},
+   {id:"roup4",name:"Tratar manchas antes da máquina",freq:"sempre que necessário",when:"antes da lavagem",done:false},
+   {id:"roup5",name:"Secar e retirar as peças no tempo certo",freq:"a cada lavagem",when:"lavanderia",done:false},
+   {id:"roup6",name:"Lavar toalhas",freq:"semanal",when:"lavanderia",done:false},
+   {id:"roup7",name:"Trocar/lavar roupa de cama",freq:"semanal",when:"lavanderia",done:false},
+   {id:"roup8",name:"Passar roupas",freq:"semanal",when:"bloco único",done:false},
+   {id:"roup9",name:"Dobrar e guardar",freq:"após secar/passar",when:"armários",done:false},
+   {id:"roup10",name:"Revisar conservação e organização do armário",freq:"quinzenal",when:"armários",done:false}
   ]},
   {id:"externa",title:"Jardim • Piscina • Áreas externas",icon:"🌿",tasks:[]},
   {id:"animais",title:"Animais",icon:"🐾",tasks:[
@@ -901,8 +907,49 @@ const CASA_BASE={
  maintenance:[],
  notes:""
 };
+
+const CASA_HOW={
+ coz1:{title:"Passar pano no piso",time:"10–15 min",products:["Água","Detergente neutro ou produto adequado ao piso"],materials:["Vassoura/aspirador","Mop ou pano de microfibra","Balde"],steps:["Retire objetos e resíduos soltos.","Varra ou aspire primeiro; o pano vem depois para não espalhar a sujeira.","Dilua o produto conforme o rótulo.","Passe o pano úmido, sem encharcar o piso.","Deixe o ambiente secar completamente."],tip:"Para a limpeza geral, o manual da residência orienta aspirar/varrer antes do pano úmido."},
+ coz2:{title:"Organizar pia",time:"5–10 min",products:["Detergente neutro"],materials:["Esponja macia","Pano de microfibra","Escorredor"],steps:["Retire toda a louça e coloque cada item em seu lugar.","Lave o que estiver pendente.","Limpe cuba, torneira e área ao redor com detergente neutro.","Enxágue e seque as superfícies.","Finalize deixando a pia livre e pronta para o próximo uso."],tip:"A regra é deixar a cozinha pronta para o próximo dia."},
+ coz3:{title:"Limpar bancada",time:"5 min",products:["Detergente neutro"],materials:["Pano de microfibra"],steps:["Retire objetos e resíduos.","Passe pano úmido com detergente neutro.","Dê atenção às áreas de gordura e aos cantos.","Passe pano limpo e finalize com a superfície seca.","Recoloque somente o que realmente pertence à bancada."],tip:"Superfícies limpas e secas facilitam a manutenção diária."},
+ lim1:{title:"Varrer / aspirar a casa",time:"15–25 min",products:[],materials:["Aspirador ou vassoura","Pá/coletor","Pano de microfibra"],steps:["Recolha objetos que estejam no chão.","Comece pelas áreas mais altas e siga para o piso.","Varra ou aspire todos os ambientes, incluindo cantos e sob móveis quando possível.","Finalize com pano úmido apenas quando necessário."],tip:"O manual reforça: aspirador/varredura antes do pano úmido evita 'barrear' o chão."},
+ lim2:{title:"Limpar a lavanderia",time:"10–15 min",products:["Detergente neutro ou produto adequado ao piso"],materials:["Vassoura/aspirador","Mop ou pano","Balde"],steps:["Retire cestos e objetos do piso.","Varra ou aspire primeiro.","Limpe respingos e áreas próximas à máquina.","Passe pano úmido sem excesso de água.","Deixe secar e reorganize os itens."],tip:"Mantenha a área seca e livre para circulação."},
+ lim3:{title:"Passar pano nas áreas usadas",time:"10–20 min",products:["Detergente neutro ou produto adequado ao piso"],materials:["Mop/pano de microfibra","Balde"],steps:["Priorize somente os ambientes que realmente foram usados.","Retire sujeira solta com vassoura ou aspirador.","Passe pano úmido nas áreas de circulação.","Troque a água quando estiver suja.","Deixe o piso secar completamente."],tip:"A ideia é limpar o que precisa, sem transformar manutenção em uma segunda jornada."},
+ lim4:{title:"Limpeza pesada",time:"60–90 min",products:["Detergente neutro","Desinfetante adequado à superfície","Álcool ou limpa-vidros"],materials:["Luvas","Panos de microfibra","Esponja","Escova macia","Aspirador","Vassoura e pá","Balde","Toalhas limpas"],steps:["Abra as janelas e reúna todos os materiais antes de começar.","Retire objetos soltos e trabalhe de cima para baixo.","Aspire/varra pisos e áreas escondidas antes do pano.","Limpe rodapés, superfícies, portas e maçanetas.","Limpe vidros e espelhos com álcool ou limpa-vidros e seque com microfibra.","Finalize os pisos com pano úmido e deixe tudo secar.","Recoloque objetos e faça uma conferência visual final."],tip:"O manual da residência orienta trabalhar de cima para baixo, manter ventilação e nunca misturar produtos de limpeza."},
+ roup1:{title:"Separar roupas por tipo e cor",time:"5–10 min",products:[],materials:["Cesto(s) de roupa","Saquinhos para peças delicadas, se necessário"],steps:["Separe brancas, coloridas/escuras e peças que exigem cuidado especial.","Confira etiquetas e instruções de lavagem.","Separe peças delicadas e coloque-as em saco protetor quando indicado.","Verifique bolsos e fechos antes de colocar na máquina.","Trate manchas antes da lavagem."],tip:"Separar corretamente reduz transferência de cor e desgaste desnecessário."},
+ roup2:{title:"Lavar roupas do dia a dia",time:"Conforme o ciclo",products:["Sabão para roupas","Amaciante, se desejado"],materials:["Máquina de lavar","Cesto de roupas"],steps:["Separe as peças por cor e tecido.","Não sobrecarregue a máquina.","Use a quantidade de produto indicada pelo fabricante da máquina/produto.","Escolha o ciclo compatível com as etiquetas.","Retire as roupas assim que o ciclo terminar para evitar odores e vincos."],tip:"Menos produto não significa melhor sempre; siga a dosagem indicada para sua máquina e para a carga."},
+ roup3:{title:"Cuidar das peças delicadas",time:"10 min + ciclo",products:["Sabão adequado para roupas delicadas"],materials:["Saco protetor para delicadas","Máquina ou recipiente para lavagem manual"],steps:["Leia a etiqueta antes de lavar.","Separe seda, renda, tecidos finos e peças com aplicações.","Use ciclo delicado ou lavagem manual quando indicado.","Evite excesso de atrito e centrifugação agressiva.","Seque conforme a etiqueta e evite calor excessivo."],tip:"No manual de passadoria, peças delicadas entram sempre na menor temperatura."},
+ roup4:{title:"Tratar manchas antes da máquina",time:"5–15 min",products:["Produto tira-manchas compatível com o tecido"],materials:["Pano limpo ou escova macia","Luvas, se o produto exigir"],steps:["Identifique o tipo de mancha e confira a etiqueta da peça.","Aplique o produto apropriado em pequena quantidade.","Trabalhe delicadamente, sem esfregar agressivamente tecidos sensíveis.","Aguarde o tempo indicado pelo fabricante.","Lave a peça normalmente e confira a mancha antes de secar ou passar."],tip:"Não fixe a mancha com calor: confirme que ela saiu antes da secagem quente ou da passadoria."},
+ roup5:{title:"Secar e retirar as peças",time:"5–10 min",products:[],materials:["Varal ou secadora, conforme a etiqueta","Cabides quando apropriado"],steps:["Retire as peças da máquina assim que o ciclo terminar.","Sacuda e acomode as peças para reduzir vincos.","Use varal ou secadora somente de acordo com a etiqueta.","Evite deixar roupas úmidas acumuladas no cesto.","Quando estiverem secas, encaminhe para dobrar ou passar."],tip:"Retirar logo após a lavagem ajuda a evitar odores e vincos profundos."},
+ roup6:{title:"Lavar toalhas",time:"Ciclo completo",products:["Sabão em pó ou líquido","Pouco amaciante","Vinagre de álcool, conforme o manual da residência"],materials:["Máquina de lavar","Cesto"],steps:["Reúna as toalhas e trate manchas antes de colocar na máquina.","Não encha demais a máquina; deixe espaço para circulação de água.","Use pouco sabão, conforme o manual da residência.","No dispenser de amaciante, use pouco amaciante e, conforme a rotina registrada no manual, complete com um pouco de vinagre de álcool.","Use programa compatível e retire as toalhas imediatamente ao terminar.","Coloque-as para secar sem deixá-las amontoadas."],tip:"O manual da residência orienta pouco sabão e retirada imediata das toalhas após o ciclo."},
+ roup7:{title:"Trocar / lavar roupa de cama",time:"Ciclo completo",products:["Sabão para roupas","Amaciante, se desejado"],materials:["Máquina de lavar","Cesto"],steps:["Retire o jogo completo e confira manchas de suor ou oleosidade.","Trate manchas antes da lavagem.","Coloque os lençóis sem compactar demais a máquina.","Use o programa indicado para lençóis/cama ou o compatível com a etiqueta.","Retire imediatamente ao término para facilitar a secagem e a passadoria.","Dobre ou passe e guarde o jogo completo junto."],tip:"O manual recomenda espaço na máquina para evitar amassados excessivos."},
+ roup8:{title:"Passar roupas",time:"20–45 min",products:["Água","Amaciante, para a misturinha do borrifador usada no manual da residência"],materials:["Ferro","Tábua de passar","Borrifador","Cabides"],steps:["Separe as roupas por tecido e temperatura.","Comece pelas peças que exigem temperatura baixa.","Passe delicadas, coloridas e peças com elástico/aplicações antes das de temperatura média.","Borrife levemente a misturinha usada na rotina da casa.","Passe camisetas e peças de algodão em temperatura adequada.","Dobre ou coloque em cabide imediatamente."],tip:"O manual orienta começar por baixa temperatura e nunca deixar o ferro parado sobre a peça."},
+ roup9:{title:"Dobrar e guardar",time:"10–20 min",products:[],materials:["Superfície limpa e seca","Cabides, divisórias ou organizadores"],steps:["Separe as peças por categoria.","Dobre ou pendure de acordo com o tecido e o formato.","Guarde somente roupas completamente secas.","Mantenha peças delicadas sem compressão excessiva.","Agrupe conjuntos e jogos de cama para facilitar o uso."],tip:"Guardar logo após secar/passar evita uma segunda rodada de organização."},
+ roup10:{title:"Conservar e organizar o armário",time:"15–20 min",products:[],materials:["Pano de microfibra","Cabides","Organizadores, se necessários"],steps:["Retire apenas o necessário para trabalhar por uma categoria.","Confira se as peças estão limpas e completamente secas.","Limpe prateleiras e superfícies com pano adequado.","Separe peças sem uso, para conserto ou para doação.","Devolva as roupas por categoria, deixando as mais usadas acessíveis."],tip:"A organização deve facilitar a rotina, não criar um projeto permanente."}
+};
+
+const CASA_WEB=[
+ ["🧹 Dicas de limpeza","https://www.google.com/search?q=dicas+de+limpeza+da+casa"],
+ ["👕 Cuidados com roupas","https://www.google.com/search?q=dicas+cuidados+com+roupas+lavagem+secagem"],
+ ["🧺 Organização da lavanderia","https://www.google.com/search?q=organizacao+da+lavanderia+dicas"],
+ ["🌿 Jardim e áreas externas","https://www.google.com/search?q=dicas+cuidados+jardim+e+areas+externas"],
+ ["🐾 Cuidados com gatos","https://www.google.com/search?q=dicas+cuidados+com+gatos+em+casa"],
+ ["✨ Organização da casa","https://www.google.com/search?q=dicas+organizacao+da+casa"]
+];
+
 function loadCasa(){try{const d=JSON.parse(localStorage.getItem(CASA_KEY));if(d)return {...CASA_BASE,...d};}catch{}return JSON.parse(JSON.stringify(CASA_BASE));}
 function saveCasa(d){localStorage.setItem(CASA_KEY,JSON.stringify(d));}
+function openCasaHow(id){
+ const h=CASA_HOW[id];if(!h)return;
+ const o=document.createElement("div");o.className="mv-how-overlay";
+ o.innerHTML=`<div class="mv-how"><button class="mv-how-x" onclick="this.closest('.mv-how-overlay').remove()">×</button><div class="eyebrow">COMO FAZER</div><h2>🧺 ${escapeHtml(h.title)}</h2>
+ <div class="casa-how-meta"><span>⏱️ ${escapeHtml(h.time)}</span></div>
+ <h3>🧴 Produtos</h3><ul>${(h.products.length?h.products:["Nenhum produto específico — siga a orientação da etiqueta ou da superfície."]).map(x=>`<li>${escapeHtml(x)}</li>`).join("")}</ul>
+ <h3>🧰 Materiais</h3><ul>${h.materials.map(x=>`<li>${escapeHtml(x)}</li>`).join("")}</ul>
+ <h3>Passo a passo</h3><ol>${h.steps.map(x=>`<li>${escapeHtml(x)}</li>`).join("")}</ol>
+ <div class="casa-how-tip"><strong>💡 Dica</strong><p>${escapeHtml(h.tip)}</p></div></div>`;
+ document.body.appendChild(o);
+}
 function renderCasa(){
  const d=loadCasa();
  const all=d.areas.flatMap(a=>a.tasks), done=all.filter(x=>x.done).length;
@@ -911,11 +958,14 @@ function renderCasa(){
  <div class="home-summary"><div class="card"><span>Rotinas</span><b>${all.length}</b></div><div class="card"><span>Feitas agora</span><b>${done}</b></div></div>
  <div class="section-title">ROTINAS</div>
  <div class="list">${d.areas.map(a=>`<div class="card home-area"><div class="panel-head"><h3>${a.icon} ${escapeHtml(a.title)}</h3><span class="pill">${a.tasks.length}</span></div>
- ${a.tasks.length?a.tasks.map(t=>`<label class="home-task ${t.done?"done":""}"><input type="checkbox" data-casa-task="${a.id}|${t.id}" ${t.done?"checked":""}><span><strong>${escapeHtml(t.name)}</strong><small>${escapeHtml(t.freq)} · ${escapeHtml(t.when)}</small></span></label>`).join(""):`<p class="note">Sem rotina cadastrada. Mantemos espaço para incluir apenas o que realmente for necessário.</p>`}</div>`).join("")}</div>
+ ${a.tasks.length?a.tasks.map(t=>`<div class="home-task-wrap"><label class="home-task ${t.done?"done":""}"><input type="checkbox" data-casa-task="${a.id}|${t.id}" ${t.done?"checked":""}><span><strong>${escapeHtml(t.name)}</strong><small>${escapeHtml(t.freq)} · ${escapeHtml(t.when)}</small></span></label>${CASA_HOW[t.id]?`<button type="button" class="home-how" data-casa-how="${t.id}">Como fazer →</button>`:""}</div>`).join(""):`<p class="note">Sem rotina cadastrada. Mantemos espaço para incluir apenas o que realmente for necessário.</p>`}</div>`).join("")}</div>
+ <div class="section-title">💡 DICAS PARA A CASA</div>
+ <div class="card casa-web-card"><p class="note">Quando quiser aprofundar uma tarefa, abra um caminho para a internet. O conteúdo externo é complementar; o essencial continua dentro do MINHA VIDA.</p><div class="casa-web-grid">${CASA_WEB.map(([label,url])=>`<a class="casa-web-link" href="${url}" target="_blank" rel="noopener">${label}<span>↗</span></a>`).join("")}</div></div>
  <div class="section-title">MANUTENÇÃO</div>
  <div class="card"><p class="note">Problemas, reparos e projetos da casa ficam aqui para não invadirem o dia. Só entram como prioridade quando realmente precisam de atenção.</p><button class="secondary" id="addMaintenance">＋ Adicionar manutenção</button></div>
  <div class="list">${d.maintenance.map(x=>`<div class="card maintenance-row"><div><strong>${escapeHtml(x.name)}</strong><span>${escapeHtml(x.note||"")}</span></div><button class="more" data-maint="${x.id}">✓</button></div>`).join("")||`<div class="empty compact"><strong>Nenhuma manutenção pendente.</strong><span>Ótimo. Não precisamos criar trabalho só para preencher espaço.</span></div>`}</div>`;
- document.querySelectorAll("[data-casa-task]").forEach(el=>el.onchange=()=>{const [aid,tid]=el.dataset.casaTask.split("|"),x=loadCasa(),a=x.areas.find(a=>a.id===aid),t=a.tasks.find(t=>t.id===tid);t.done=el.checked;saveCasa(x);renderCasa();});
+ document.querySelectorAll("[data-casa-task]").forEach(el=>el.onchange=()=>{const [aid,tid]=el.dataset.casaTask.split("|"),x=loadCasa(),a=x.areas.find(a=>a.id===aid),t=a.tasks.find(t=>t.id===tid);if(t){t.done=el.checked;saveCasa(x);renderCasa();}});
+ document.querySelectorAll("[data-casa-how]").forEach(b=>b.onclick=()=>openCasaHow(b.dataset.casaHow));
  document.querySelector("#addMaintenance").onclick=()=>openCasaMaintenance();
  document.querySelectorAll("[data-maint]").forEach(b=>b.onclick=()=>{const x=loadCasa();x.maintenance=x.maintenance.filter(m=>m.id!==b.dataset.maint);saveCasa(x);renderCasa();});
 }
@@ -1384,7 +1434,7 @@ document.querySelectorAll(".nav-item").forEach(b => {
 
 if ("serviceWorker" in navigator) {
   window.addEventListener("load", () =>
-    navigator.serviceWorker.register("sw.js?v=27", {updateViaCache:"none"}).catch(console.warn)
+    navigator.serviceWorker.register("sw.js").catch(console.warn)
   );
 }
 
