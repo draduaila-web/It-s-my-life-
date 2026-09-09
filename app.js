@@ -39,26 +39,32 @@ function escapeHtml(value="") {
   return value.replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[c]));
 }
 
-const WORK_REMOTE_KEY="minha-vida.trabalho-remoto.v1";
+const WORK_REMOTE_KEY="minha-vida.trabalho-remoto.v2";
 const WORK_REMOTE_BASE={
   targetMinutes:120,
-  days:{1:{start:"16:40",minutes:120},2:{start:"16:00",minutes:120},3:{start:"16:40",minutes:120},4:{start:"16:00",minutes:120},5:{start:"16:00",minutes:120}}
+  days:{
+    1:{start:"16:45",minutes:120},
+    2:{start:"16:00",minutes:120},
+    3:{start:"16:45",minutes:120},
+    4:{start:"16:00",minutes:120},
+    5:{start:"16:00",minutes:120}
+  }
 };
-function loadWorkRemote(){try{const d=JSON.parse(localStorage.getItem(WORK_REMOTE_KEY));if(d)return {...WORK_REMOTE_BASE,...d,days:{...WORK_REMOTE_BASE.days,...(d.days||{})}}}catch{}return JSON.parse(JSON.stringify(WORK_REMOTE_BASE));}
+function loadWorkRemote(){try{let d=JSON.parse(localStorage.getItem(WORK_REMOTE_KEY)||"null");if(!d){const old=JSON.parse(localStorage.getItem("minha-vida.trabalho-remoto.v1")||"null");if(old)d={...old};}if(d)return {...WORK_REMOTE_BASE,...d,days:{...WORK_REMOTE_BASE.days,...(d.days||{})}}}catch{}return JSON.parse(JSON.stringify(WORK_REMOTE_BASE));}
 function saveWorkRemote(d){localStorage.setItem(WORK_REMOTE_KEY,JSON.stringify(d));}
-function hhmmToMin(v){const [h,m]=v.split(":").map(Number);return h*60+m}
-function minToHHMM(n){const h=Math.floor(n/60),m=n%60;return `${String(h).padStart(2,"0")}:${String(m).padStart(2,"0")}`}
-function remoteLabel(minutes){return minutes===120?"2h contínuas":minutes===90?"1h30 contínuas":minutes===60?"1h contínua":"ajustar"}
+function hhmmToMin(v){const [h,m]=String(v||"00:00").split(":").map(Number);return h*60+m}
+function minToHHMM(n){n=((n%1440)+1440)%1440;const h=Math.floor(n/60),m=n%60;return `${String(h).padStart(2,"0")}:${String(m).padStart(2,"0")}`}
+function remoteLabel(minutes){return minutes===120?"2h contínuas":minutes===90?"1h30 contínuas":minutes===60?"1h contínua":`${minutes} min contínuos`}
 function remoteToday(){return loadWorkRemote().days[mvDow()]||null}
-function remoteRange(day=mvDow()){const x=loadWorkRemote().days[day];if(!x)return "—";return `${x.start}–${minToHHMM(hhmmToMin(x.start)+x.minutes)}`}
+function remoteWeeklyMinutes(){return [1,2,3,4,5].reduce((n,d)=>n+(loadWorkRemote().days[d]?.minutes||0),0)}
+function remoteRange(day=mvDow()){const x=loadWorkRemote().days[day];if(!x)return "não programado";return `${x.start}–${minToHHMM(hhmmToMin(x.start)+x.minutes)}`}
 function openWorkRemoteEditor(){
  const d=loadWorkRemote(),dlg=document.createElement("dialog");
  const rows=[1,2,3,4,5].map(day=>{const x=d.days[day]||{start:"16:00",minutes:120};const name=["","Segunda","Terça","Quarta","Quinta","Sexta"][day];return `<div class="remote-edit-row"><strong>${name}</strong><input type="time" data-rday="${day}" value="${x.start}"><select data-rmin="${day}"><option value="120" ${x.minutes===120?"selected":""}>2h contínuas</option><option value="90" ${x.minutes===90?"selected":""}>1h30 contínuas</option><option value="60" ${x.minutes===60?"selected":""}>1h contínua</option></select></div>`}).join("");
- dlg.innerHTML=`<form method="dialog" class="modal-card" id="remoteForm"><div class="modal-head"><div><div class="eyebrow">💻 TRABALHO REMOTO</div><h2>Minha janela de trabalho</h2></div><button class="icon-btn" value="cancel">×</button></div><p class="note">Meta: 2h por dia. Se um dia não comportar, use 1h ou 1h30 e compense pelo banco de horas. O bloco nunca é fracionado.</p><div class="remote-edit-grid">${rows}</div><div class="modal-actions"><div class="grow"></div><button type="button" class="secondary" id="cancelRemote">Cancelar</button><button class="primary" value="default">Salvar</button></div></form>`;
+ dlg.innerHTML=`<form method="dialog" class="modal-card" id="remoteForm"><div class="modal-head"><div><div class="eyebrow">💻 TRABALHO REMOTO</div><h2>Minha janela de trabalho</h2></div><button class="icon-btn" value="cancel">×</button></div><p class="note">Meta semanal: 10h. Atualmente programado: ${Math.floor(remoteWeeklyMinutes()/60)}h${remoteWeeklyMinutes()%60?String(remoteWeeklyMinutes()%60).padStart(2,"0"):""}. Padrão de 2h contínuas por dia. Quando a semana apertar, 1h ou 1h30 contínuas podem ser usadas e a diferença fica para compensação no banco de horas.</p><div class="remote-edit-grid">${rows}</div><div class="modal-actions"><div class="grow"></div><button type="button" class="secondary" id="cancelRemote">Cancelar</button><button class="primary" value="default">Salvar</button></div></form>`;
  document.body.appendChild(dlg);dlg.showModal();dlg.querySelector("#cancelRemote").onclick=()=>{dlg.close();dlg.remove()};
  dlg.querySelector("#remoteForm").addEventListener("submit",e=>{e.preventDefault();[1,2,3,4,5].forEach(day=>{d.days[day]={start:dlg.querySelector(`[data-rday="${day}"]`).value,minutes:+dlg.querySelector(`[data-rmin="${day}"]`).value}});saveWorkRemote(d);dlg.close();dlg.remove();renderMeuDia()});
 }
-
 
 function mvNow(){return new Date();}
 function mvMinutes(d=mvNow()){return d.getHours()*60+d.getMinutes();}
@@ -66,109 +72,144 @@ function mvDow(d=mvNow()){return d.getDay();}
 function mvDate(){return new Intl.DateTimeFormat('pt-BR',{weekday:'long',day:'numeric',month:'long'}).format(mvNow());}
 function mvRead(k){try{return JSON.parse(localStorage.getItem(k)||'[]')}catch(e){return[]}}
 function mvPending(){
- const a=mvRead('minha-vida.pendencias.v1'), t=new Date(); t.setHours(0,0,0,0);
- return a.filter(x=>!x.completed&&!x.done&&(!x.dueDate||new Date(x.dueDate+'T00:00:00')<=t)).slice(0,5);
+ const a=mvRead('minha-vida.pendencias.v1');
+ return a.filter(x=>!x.completed&&!x.done).sort((a,b)=>{if(!a.dueDate&&!b.dueDate)return (b.createdAt||0)-(a.createdAt||0);if(!a.dueDate)return 1;if(!b.dueDate)return -1;return String(a.dueDate).localeCompare(String(b.dueDate))}).slice(0,5);
+}
+function mvWeekKey(){return `minha-vida.semana.real.v3`}
+const MV_WEEK_BASE={
+ therapyWeek:true,
+ therapyTime:"",
+ mbaTime:"19:00–22:15",
+ windows:{
+  0:[{start:"09:00",end:"12:00",label:"Projeto / livre protegido"},{start:"14:30",end:"17:00",label:"Projeto / livre protegido"}],
+  1:[{start:"14:50",end:"16:10",label:"Janela curta após Conselho"},{start:"18:45",end:"20:00",label:"Janela da noite"}],
+  2:[{start:"14:30",end:"15:10",label:"Janela curta antes de buscar Henrique"},{start:"18:00",end:"19:00",label:"Janela da tarde"}],
+  3:[{start:"14:50",end:"16:10",label:"Janela curta após Conselho"},{start:"18:45",end:"20:00",label:"Janela da noite"}],
+  4:[{start:"14:30",end:"15:10",label:"Janela curta antes de buscar Henrique"},{start:"18:00",end:"19:00",label:"Janela da tarde"}],
+  5:[{start:"14:30",end:"15:10",label:"Janela curta antes de buscar Henrique"},{start:"18:00",end:"19:00",label:"Janela da tarde"},{start:"20:00",end:"21:30",label:"Noite tranquila"}],
+  6:[{start:"09:00",end:"12:00",label:"Projeto / livre protegido"},{start:"14:30",end:"17:00",label:"Projeto / livre protegido"}]
+ }
+};
+const MV_ACTIVITY_KEY="minha-vida.atividades.v3";
+const MV_TIMELOG_KEY="minha-vida.tempo.v2";
+const MV_ACTIVITY_BASE=[
+ {id:"remote",name:"Trabalho remoto",module:"Trabalho",minutes:120,priority:5,days:[1,2,3,4,5],fraction:false,active:false},
+ {id:"fin-revisao",name:"Revisão financeira",module:"Financeiro",minutes:30,priority:3,days:[5],fraction:true},
+ {id:"casa-lim",name:"Rotina de limpeza da casa",module:"Casa",minutes:20,priority:2,days:[1,2,3,4,5],fraction:true},
+ {id:"roupas",name:"Cuidar das roupas",module:"Casa",minutes:30,priority:2,days:[2,4,5,6],fraction:true},
+ {id:"pend-rapida",name:"Resolver uma pendência",module:"Pendências",minutes:35,priority:3,days:[1,2,3,4,5],fraction:true},
+ {id:"estudo",name:"Estudo para o concurso",module:"Estudos",minutes:60,priority:5,days:[1,2,3,4,5,6,0],fraction:true,dueDate:"2026-11-22"},
+ {id:"exercicio",name:"Movimento",module:"Exercícios",minutes:30,priority:3,days:[1,3,5,6],fraction:true},
+ {id:"casa-organizacao",name:"Organização da casa",module:"Casa",minutes:45,priority:2,days:[6,0],fraction:true},
+ {id:"projeto-estudos",name:"Organizar sala de estudos",module:"Projeto",minutes:90,priority:5,days:[6,0],fraction:false,dueDate:"2026-10-31"},
+ {id:"projeto-deposito",name:"Organizar depósito",module:"Projeto",minutes:90,priority:5,days:[6,0],fraction:false,dueDate:"2026-10-31"}
+];
+function loadWeekPlan(){try{let raw=JSON.parse(localStorage.getItem(mvWeekKey())||"null");if(!raw)raw=JSON.parse(localStorage.getItem("minha-vida.semana.v2")||"{}");return {...MV_WEEK_BASE,...raw,windows:{...MV_WEEK_BASE.windows,...(raw.windows||{})}}}catch{return JSON.parse(JSON.stringify(MV_WEEK_BASE))}}
+function saveWeekPlan(x){localStorage.setItem(mvWeekKey(),JSON.stringify(x))}
+function loadActivities(){try{let x=JSON.parse(localStorage.getItem(MV_ACTIVITY_KEY)||"null");if(!Array.isArray(x)||!x.length)x=JSON.parse(localStorage.getItem("minha-vida.atividades.v2")||"null");if(Array.isArray(x)&&x.length){const base=JSON.parse(JSON.stringify(MV_ACTIVITY_BASE));return base.map(b=>{const old=x.find(a=>a.id===b.id);return old?{...b,...old}:b}).concat(x.filter(a=>!base.some(b=>b.id===a.id)));}return JSON.parse(JSON.stringify(MV_ACTIVITY_BASE))}catch{return JSON.parse(JSON.stringify(MV_ACTIVITY_BASE))}}
+function saveActivities(x){localStorage.setItem(MV_ACTIVITY_KEY,JSON.stringify(x))}
+function mvFixedBlocks(day){
+ const blocks=[{start:"05:16",end:"08:00",label:"Manhã protegida",type:"protected"},{start:"08:00",end:"14:00",label:"Trabalho oficial",type:"fixed"}];
+ if(day===1||day===3){blocks.push({start:"14:15",end:"14:50",label:"Conselho + deslocamento",type:"fixed"});blocks.push({start:"16:10",end:"16:30",label:"Deslocamento para buscar Henrique",type:"fixed"});}
+ if(day===2||day===4||day===5){blocks.push({start:"14:00",end:"14:30",label:"Deslocamento, se sair às 14:00",type:"fixed"});blocks.push({start:"15:10",end:"15:40",label:"Buscar Henrique + chegada",type:"fixed"});}
+ const wp=loadWeekPlan();
+ if((day===2||day===4)&&!wp.therapyWeek)blocks.push({start:"19:00",end:"22:15",label:"MBA",type:"fixed"});
+ if(day===3&&wp.therapyWeek&&wp.therapyTime){const [st,en]=wp.therapyTime.split("–");if(st&&en)blocks.push({start:st,end:en,label:"Terapia",type:"fixed"});}
+ return blocks;
+}
+function mvWindows(day=mvDow()){
+ const wp=loadWeekPlan();
+ const therapy=day===3&&wp.therapyWeek&&wp.therapyTime?wp.therapyTime.split("–").map(hhmmToMin):null;
+ return (wp.windows[day]||[]).map(x=>({...x})).filter(w=>{
+  if(!w.start||!w.end)return false;
+  const st=hhmmToMin(w.start),en=hhmmToMin(w.end);
+  if(!wp.therapyWeek&&(day===2||day===4)&&st>=1140)return false;
+  if(therapy&&therapy.length===2&&st<therapy[1]&&en>therapy[0])return false;
+  return en>st;
+ });
 }
 function mvCurrentBlock(){
- const d=mvNow(), m=mvMinutes(d), w=mvDow(d);
- if(m>=316&&m<455)return ['Manhã protegida','05:16–07:35','Seu ritual de manhã. Sem tarefas domésticas.','protected'];
+ const d=mvNow(),m=mvMinutes(d),w=mvDow(d),wp=loadWeekPlan();
+ if(m>=316&&m<480)return ['Manhã protegida','05:16–08:00','Seu ritual de manhã. Sem tarefas domésticas.','protected'];
  if(m>=480&&m<840)return ['Trabalho CREFITO-11','08:00–14:00','Bloco oficial de trabalho.','work'];
- if((w===1||w===3)&&m>=880&&m<970)return ['Janela estratégica','14:40–16:10','Espaço para decisões e prioridades estratégicas.','strategy'];
- const ro=remoteToday();
- if(ro){const s=hhmmToMin(ro.start),e=s+ro.minutes;if(m>=s&&m<e)return ['Home office',`${ro.start}–${minToHHMM(e)}`,'Bloco contínuo de trabalho remoto.','office'];}
- if(m>=1140)return ['Noite protegida','após 19:00','Agora é espaço para desacelerar. O sistema não vai encher sua noite.','rest'];
+ const fixed=mvFixedBlocks(w).find(x=>m>=hhmmToMin(x.start)&&m<hhmmToMin(x.end));
+ if(fixed)return [fixed.label,`${fixed.start}–${fixed.end}`,'Compromisso protegido.','fixed'];
+ const ro=remoteToday();if(ro){const s=hhmmToMin(ro.start),e=s+ro.minutes;if(m>=s&&m<e)return ['Trabalho remoto',`${ro.start}–${minToHHMM(e)}`,'Bloco contínuo de trabalho remoto.','office'];}
+ if(m>=1140)return ['Noite protegida','19:00+','Agora é espaço para desacelerar. O sistema não vai encher sua noite.','rest'];
  return ['Espaço livre','agora','Você não precisa preencher cada minuto.','free'];
 }
+function activityDaysLabel(days){return ["Dom","Seg","Ter","Qua","Qui","Sex","Sáb"].filter((_,i)=>days.includes(i)).join(" · ")}
+function mvActivitySuggestions(minutes,day=mvDow()){
+ const pending=mvPending(),acts=loadActivities(),now=new Date(),today=todayISO();
+ let candidates=acts.filter(a=>a.active!==false&&a.id!=="remote"&&a.days.includes(day)&&a.minutes<=minutes);
+ try{
+  const cd=loadCasaDurations(), ct=loadCasa();
+  const casaCandidates=ct.areas.flatMap(area=>area.tasks.map(t=>({id:"casa-"+t.id,name:t.name,module:"Casa",minutes:cd[t.id]||15,priority:area.id==="roupas"?2:1,days:[0,1,2,3,4,5,6]}))).filter(a=>a.minutes<=minutes);
+  candidates.unshift(...casaCandidates.slice(0,3));
+ }catch(e){}
+ if(pending.length)candidates.unshift(...pending.slice(0,2).map((p,i)=>({id:"pending-"+(p.id||i),name:p.title||p.name||"Pendência",module:"Pendências",minutes:Math.min(35,minutes),priority:5})).filter(a=>a.minutes<=minutes));
+ candidates=candidates.map(a=>{let score=(a.priority||0)*10;if(a.dueDate){const days=Math.ceil((new Date(a.dueDate+"T23:59:59")-now)/86400000);if(days<=14)score+=30;else if(days<=45)score+=15}if(a.module==="Projeto"&&day!==0&&day!==6)score-=20;return {...a,_score:score}});
+ const seen=new Set();return candidates.filter(a=>{if(seen.has(a.name))return false;seen.add(a.name);return true}).sort((a,b)=>(b._score||0)-(a._score||0)||a.minutes-b.minutes).slice(0,4);
+}
+function mvSuggestBlock(win){
+ const mins=hhmmToMin(win.end)-hhmmToMin(win.start), options=mvActivitySuggestions(mins);
+ return `<div class="suggestion-block"><div class="suggestion-head"><span>⏱️ ${escapeHtml(win.start)}–${escapeHtml(win.end)} · ${mins} min</span><small>${escapeHtml(win.label||"Janela disponível")}</small></div><div class="suggestion-list">${options.map((a,i)=>`<button type="button" class="suggestion-option ${i===0?'suggestion-best':''}" data-suggestion="${escapeHtml(a.id)}"><span>${i===0?'✨':'○'}</span><span><strong>${escapeHtml(a.name)}</strong><small>${escapeHtml(a.module)} · ${a.minutes} min</small></span></button>`).join('')||`<div class="suggestion-empty">🌿 Tempo livre protegido — nada precisa ser encaixado aqui.</div>`}</div></div>`;
+}
+function openActivityEditor(id){
+ const acts=loadActivities(),a=acts.find(x=>x.id===id)||acts[0];if(!a)return;const dlg=document.createElement('dialog');
+ dlg.innerHTML=`<form method="dialog" class="modal-card" id="activityEditForm"><div class="modal-head"><div><div class="eyebrow">✏️ ATIVIDADE</div><h2>Editar atividade</h2></div><button class="icon-btn" value="cancel">×</button></div><label>Nome<input id="aeName" value="${escapeHtml(a.name)}"></label><div class="form-grid"><label>Duração real estimada (min)<input id="aeMin" type="number" min="5" max="480" step="5" value="${a.minutes}"></label><label>Prioridade<select id="aePri"><option value="1">Baixa</option><option value="2">Normal</option><option value="3">Importante</option><option value="5">Prioridade alta</option></select></label></div><label>Dias em que pode aparecer<input id="aeDays" value="${activityDaysLabel(a.days||[])}" readonly><small class="note">Para simplificar, use o botão abaixo para marcar/desmarcar os dias.</small></label><div class="day-toggle-grid">${[1,2,3,4,5,6,0].map(day=>`<button type="button" class="day-toggle ${(a.days||[]).includes(day)?'on':''}" data-aeday="${day}">${["Dom","Seg","Ter","Qua","Qui","Sex","Sáb"][day]}</button>`).join('')}</div><label>Horário/janela preferencial (opcional)<input id="aeTime" value="${escapeHtml(a.preferredTime||"")}" placeholder="Ex.: tarde / 14:30–15:10"></label><div class="modal-actions"><div class="grow"></div><button type="button" class="secondary" id="cancelAe">Cancelar</button><button class="primary" value="default">Salvar</button></div></form>`;
+ document.body.appendChild(dlg);dlg.querySelector('#aePri').value=a.priority||2;dlg.showModal();dlg.querySelector('#cancelAe').onclick=()=>{dlg.close();dlg.remove()};
+ dlg.querySelectorAll('[data-aeday]').forEach(b=>b.onclick=()=>b.classList.toggle('on'));
+ dlg.querySelector('#activityEditForm').addEventListener('submit',e=>{e.preventDefault();a.name=dlg.querySelector('#aeName').value.trim()||a.name;a.minutes=Math.max(5,+dlg.querySelector('#aeMin').value||a.minutes);a.priority=+dlg.querySelector('#aePri').value;a.preferredTime=dlg.querySelector('#aeTime').value.trim();a.days=[...dlg.querySelectorAll('.day-toggle.on')].map(b=>+b.dataset.aeday);saveActivities(acts);dlg.close();dlg.remove();renderMeuDia()});
+}
+function openFreeTimeLog(){
+ const dlg=document.createElement('dialog');dlg.innerHTML=`<form method="dialog" class="modal-card" id="freeLogForm"><div class="modal-head"><div><div class="eyebrow">🌿 TEMPO LIVRE PROTEGIDO</div><h2>Registrar o que você fez</h2></div><button class="icon-btn" value="cancel">×</button></div><p class="note">Se você usou um período que estava protegido para uma atividade, registramos o tempo. Depois o Meu Dia pode sugerir recuperar esse descanso.</p><label>Atividade<input id="flName" required placeholder="Ex.: organizei uma gaveta"></label><label>Tempo usado (min)<input id="flMin" type="number" min="5" max="240" value="20"></label><div class="modal-actions"><div class="grow"></div><button type="button" class="secondary" id="cancelFl">Cancelar</button><button class="primary" value="default">Registrar</button></div></form>`;document.body.appendChild(dlg);dlg.showModal();dlg.querySelector('#cancelFl').onclick=()=>{dlg.close();dlg.remove()};dlg.querySelector('#freeLogForm').addEventListener('submit',e=>{e.preventDefault();const logs=mvProtectedLogs();logs.push({id:uid(),date:todayISO(),name:dlg.querySelector('#flName').value.trim(),minutes:+dlg.querySelector('#flMin').value||0,protectedTimeUsed:true});localStorage.setItem(MV_TIMELOG_KEY,JSON.stringify(logs));dlg.close();dlg.remove();renderMeuDia()});
+}
+function openWeekEditor(){
+ const wp=loadWeekPlan(),dlg=document.createElement('dialog');
+ const rows=[1,2,3,4,5,6,0].map(day=>{const ws=wp.windows[day]||[];const name=["Domingo","Segunda","Terça","Quarta","Quinta","Sexta","Sábado"][day];return `<div class="week-day-edit"><strong>${name}</strong><div class="week-window-list" data-wday="${day}">${ws.map((x,i)=>`<div class="week-window-row"><input type="time" data-ws value="${x.start}"><span>até</span><input type="time" data-we value="${x.end}"><input type="text" data-wl value="${escapeHtml(x.label||"Janela disponível")}" placeholder="Nome da janela"><button type="button" class="more" data-remove-window>×</button></div>`).join('')}</div><button type="button" class="secondary mini" data-add-window="${day}">＋ adicionar janela</button></div>`}).join('');
+ dlg.innerHTML=`<form method="dialog" class="modal-card" id="weekEditForm"><div class="modal-head"><div><div class="eyebrow">⚙️ MINHA SEMANA</div><h2>Editar janelas</h2></div><button class="icon-btn" value="cancel">×</button></div><p class="note">As janelas são sugestões, não obrigações. Compromissos fixos continuam protegidos.</p><label class="check-line"><input id="therapyWeek" type="checkbox" ${wp.therapyWeek?'checked':''}> Esta é uma semana de terapia</label><label>Horário da terapia nesta semana (opcional)<input id="therapyTime" value="${escapeHtml(wp.therapyTime||"")}" placeholder="Ex.: 18:30–19:30"></label><div class="week-edit-grid">${rows}</div><div class="modal-actions"><div class="grow"></div><button type="button" class="secondary" id="cancelWeek">Cancelar</button><button class="primary" value="default">Salvar</button></div></form>`;
+ document.body.appendChild(dlg);dlg.showModal();dlg.querySelector('#cancelWeek').onclick=()=>{dlg.close();dlg.remove()};
+ dlg.querySelectorAll('[data-add-window]').forEach(b=>b.onclick=()=>{const box=dlg.querySelector(`[data-wday="${b.dataset.addWindow}"]`);box.insertAdjacentHTML('beforeend',`<div class="week-window-row"><input type="time" data-ws value="09:00"><span>até</span><input type="time" data-we value="10:00"><input type="text" data-wl value="Janela disponível"><button type="button" class="more" data-remove-window>×</button></div>`)});
+ dlg.addEventListener('click',e=>{if(e.target.matches('[data-remove-window]'))e.target.closest('.week-window-row')?.remove()});
+ dlg.querySelector('#weekEditForm').addEventListener('submit',e=>{e.preventDefault();const out={...wp,therapyWeek:dlg.querySelector('#therapyWeek').checked,therapyTime:dlg.querySelector('#therapyTime').value.trim(),windows:{}};[1,2,3,4,5,6,0].forEach(day=>{out.windows[day]=[...dlg.querySelectorAll(`[data-wday="${day}"] .week-window-row`)].map(r=>({start:r.querySelector('[data-ws]').value,end:r.querySelector('[data-we]').value,label:r.querySelector('[data-wl]').value.trim()||'Janela disponível'})).filter(x=>x.start&&x.end&&hhmmToMin(x.end)>hhmmToMin(x.start))});saveWeekPlan(out);dlg.close();dlg.remove();renderMeuDia()});
+}
+function mvProtectedLogs(){let x=mvRead(MV_TIMELOG_KEY);if(!x.length)x=mvRead("minha-vida.tempo.v1");return Array.isArray(x)?x:[]}
+function mvProtectedBalance(){return mvProtectedLogs().filter(x=>x.protectedTimeUsed&&!x.recovered).reduce((n,x)=>n+(+x.minutes||0),0)}
+function recoverProtectedTime(){const logs=mvProtectedLogs();let remaining=mvProtectedBalance();for(const x of logs){if(remaining<=0)break;if(x.protectedTimeUsed&&!x.recovered){x.recovered=true;remaining-=+x.minutes||0;}}localStorage.setItem(MV_TIMELOG_KEY,JSON.stringify(logs));renderMeuDia();}
+function openActivitiesManager(){
+ const acts=loadActivities(),dlg=document.createElement('dialog');
+ dlg.innerHTML=`<form method="dialog" class="modal-card" id="actsManager"><div class="modal-head"><div><div class="eyebrow">🧩 MÓDULOS</div><h2>Atividades que podem ser sugeridas</h2></div><button class="icon-btn" value="cancel">×</button></div><p class="note">A duração é a referência que o Meu Dia usa para descobrir o que cabe em cada janela. Edite quando sua realidade mudar.</p><div class="activity-manager-list">${acts.filter(a=>a.id!=="remote").map(a=>`<button type="button" class="activity-manager-row" data-am="${a.id}"><span><strong>${escapeHtml(a.name)}</strong><small>${escapeHtml(a.module)} · ${a.minutes} min · ${activityDaysLabel(a.days||[])}</small></span><b>Editar</b></button>`).join('')}</div><div class="modal-actions"><div class="grow"></div><button class="secondary" value="default">Fechar</button></div></form>`;
+ document.body.appendChild(dlg);dlg.showModal();dlg.querySelectorAll('[data-am]').forEach(b=>b.onclick=()=>{dlg.close();dlg.remove();openActivityEditor(b.dataset.am)});
+}
+function renderSmartSuggestions(){
+ const day=mvDow(),wins=mvWindows(day),balance=mvProtectedBalance();
+ return `<section class="day-section smart-suggestions"><div class="section-head"><div><h2>✨ O que cabe aqui</h2><small>O app sugere. Você decide.</small></div><div class="suggestion-head-actions"><button type="button" class="text-btn" onclick="openWeekEditor()">editar janelas</button><button type="button" class="text-btn" onclick="openActivitiesManager()">editar atividades</button></div></div>${wins.map(mvSuggestBlock).join('')||`<div class="suggestion-empty standalone">🌿 Hoje não há nenhuma janela programada. Isso também é organização.</div>`}${balance?`<div class="rest-balance">🌿 <strong>Tempo livre a recuperar: ${balance} min</strong><small>Você usou tempo que estava protegido. Em outra janela, o app pode sugerir descanso.</small><button type="button" class="secondary mini" onclick="recoverProtectedTime()">Registrar que já recuperei</button></div>`:''}<button type="button" class="secondary protected-log-btn" onclick="openFreeTimeLog()">＋ Registrar atividade feita no tempo livre</button></section>`;
+}
+
 function renderMeuDiaExercicio(){
  const p=exTodayPlan(), d=loadEx(), date=exDateKey(), done=d.logs.filter(x=>x.date===date).length;
  return `<section class="day-section day-exercise-card"><div class="section-head"><h2>🏃 Movimento de hoje</h2><span class="soft-count">${done}/2</span></div><div class="day-exercise-row"><span>☀️</span><div><strong>Esteira · ${escapeHtml(p.morning.meta)}</strong><small>Manhã</small></div><b>${exDone(p.morning.name)?'✓':'→'}</b></div><div class="day-exercise-row"><span>${p.afternoon.icon}</span><div><strong>${escapeHtml(p.afternoon.name)} · ${escapeHtml(p.afternoon.meta)}</strong><small>Tarde · ${escapeHtml(p.afternoon.intensity)}</small></div><b>${exDone(p.afternoon.name)?'✓':'→'}</b></div><a class="exercise-open-link" href="#exercicios">Abrir exercícios →</a></section>`;
 }
 
-const MV_WEEK_KEY="minha-vida.semana.v2";
-const MV_ACTIVITY_KEY="minha-vida.atividades.v2";
-const MV_TIMELOG_KEY="minha-vida.tempo.v1";
-const MV_WEEK_BASE={therapyWeek:true, therapyTime:"", mbaTime:"19:00–22:15", remoteTarget:120};
-const MV_WINDOWS={
-  0:[{start:"09:30",end:"11:30",label:"Janela de projeto"}],
-  1:[{start:"14:50",end:"16:10",label:"Janela disponível"},{start:"18:40",end:"19:30",label:"Janela disponível"}],
-  2:[{start:"14:30",end:"15:10",label:"Janela curta"},{start:"17:40",end:"19:00",label:"Janela da tarde"},{start:"20:00",end:"21:30",label:"Noite disponível"}],
-  3:[{start:"14:50",end:"16:10",label:"Janela disponível"},{start:"18:40",end:"20:00",label:"Janela da tarde/noite"}],
-  4:[{start:"14:30",end:"15:10",label:"Janela curta"},{start:"17:40",end:"19:00",label:"Janela da tarde"},{start:"20:00",end:"21:30",label:"Noite disponível"}],
-  5:[{start:"14:30",end:"15:10",label:"Janela curta"},{start:"17:40",end:"19:00",label:"Janela da tarde"},{start:"20:00",end:"21:30",label:"Noite disponível"}],
-  6:[{start:"09:00",end:"12:00",label:"Janela de projeto"},{start:"14:30",end:"17:00",label:"Janela de projeto / livre"}]
-};
-const MV_ACTIVITY_BASE=[
- {id:"fin-revisao",name:"Revisão financeira",module:"Financeiro",minutes:30,priority:3,days:[1,2,3,4,5],fraction:false},
- {id:"casa-lim",name:"Rotina de limpeza da casa",module:"Casa",minutes:20,priority:2,days:[1,2,3,4,5],fraction:true},
- {id:"roupas",name:"Cuidar das roupas",module:"Casa",minutes:30,priority:2,days:[1,2,3,4,5,6],fraction:true},
- {id:"pend-rapida",name:"Resolver uma pendência",module:"Pendências",minutes:35,priority:3,days:[1,2,3,4,5],fraction:true},
- {id:"estudo",name:"Estudo para o concurso",module:"Estudos",minutes:60,priority:5,days:[1,2,3,4,5,6],fraction:true},
- {id:"exercicio",name:"Movimento",module:"Exercícios",minutes:25,priority:3,days:[1,2,3,4,5,6,0],fraction:true},
- {id:"casa-organizacao",name:"Organização da casa",module:"Casa",minutes:45,priority:2,days:[1,2,3,4,5,6],fraction:true}
-];
-function loadWeekPlan(){try{return {...MV_WEEK_BASE,...JSON.parse(localStorage.getItem(MV_WEEK_KEY)||"{}")}}catch{return {...MV_WEEK_BASE}}}
-function saveWeekPlan(x){localStorage.setItem(MV_WEEK_KEY,JSON.stringify(x))}
-function loadActivities(){try{const x=JSON.parse(localStorage.getItem(MV_ACTIVITY_KEY));return Array.isArray(x)&&x.length?x:JSON.parse(JSON.stringify(MV_ACTIVITY_BASE))}catch{return JSON.parse(JSON.stringify(MV_ACTIVITY_BASE))}}
-function saveActivities(x){localStorage.setItem(MV_ACTIVITY_KEY,JSON.stringify(x))}
-function mvWindows(day=mvDow()){
- const w=[...(MV_WINDOWS[day]||[])];
- const week=loadWeekPlan();
- if(!week.therapyWeek && (day===2||day===4)) return w.filter(x=>x.label!=="Noite disponível");
- return w;
-}
-function mvActivitySuggestions(minutes,day=mvDow()){
- const pending=mvPending();const acts=loadActivities();
- const candidates=[...acts.filter(a=>a.days.includes(day)&&a.minutes<=minutes)];
- if(pending.length)candidates.unshift(...pending.slice(0,2).map((p,i)=>({id:"pending-"+(p.id||i),name:p.title||p.name||"Pendência",module:"Pendências",minutes:Math.min(35,minutes),priority:5})).filter(a=>a.minutes<=minutes));
- const seen=new Set();return candidates.filter(a=>{if(seen.has(a.name))return false;seen.add(a.name);return true}).sort((a,b)=>(b.priority||0)-(a.priority||0)||a.minutes-b.minutes).slice(0,4);
-}
-function mvSuggestBlock(win){
- const mins=hhmmToMin(win.end)-hhmmToMin(win.start), options=mvActivitySuggestions(mins);
- return `<div class="suggestion-block"><div class="suggestion-head"><span>⏱️ ${escapeHtml(win.start)}–${escapeHtml(win.end)} · ${mins} min</span><small>${escapeHtml(win.label)}</small></div><div class="suggestion-list">${options.map((a,i)=>`<button type="button" class="suggestion-option ${i===0?'suggestion-best':''}" data-suggestion="${escapeHtml(a.id)}"><span>${i===0?'✨':'○'}</span><span><strong>${escapeHtml(a.name)}</strong><small>${escapeHtml(a.module)} · ${a.minutes} min</small></span></button>`).join('')||`<div class="suggestion-empty">🌿 Tempo livre protegido — nada precisa ser encaixado aqui.</div>`}</div></div>`;
-}
-function openActivityEditor(id){
- const acts=loadActivities(),a=acts.find(x=>x.id===id)||acts[0];if(!a)return;const dlg=document.createElement('dialog');
- dlg.innerHTML=`<form method="dialog" class="modal-card" id="activityEditForm"><div class="modal-head"><div><div class="eyebrow">✏️ ATIVIDADE</div><h2>Editar atividade</h2></div><button class="icon-btn" value="cancel">×</button></div><label>Nome<input id="aeName" value="${escapeHtml(a.name)}"></label><label>Duração (minutos)<input id="aeMin" type="number" min="5" max="480" step="5" value="${a.minutes}"></label><label>Prioridade<select id="aePri"><option value="1">Baixa</option><option value="2">Normal</option><option value="3">Importante</option><option value="5">Prioridade alta</option></select></label><div class="modal-actions"><div class="grow"></div><button type="button" class="secondary" id="cancelAe">Cancelar</button><button class="primary" value="default">Salvar</button></div></form>`;
- document.body.appendChild(dlg);dlg.querySelector('#aePri').value=a.priority||2;dlg.showModal();dlg.querySelector('#cancelAe').onclick=()=>{dlg.close();dlg.remove()};dlg.querySelector('#activityEditForm').addEventListener('submit',e=>{e.preventDefault();a.name=dlg.querySelector('#aeName').value.trim()||a.name;a.minutes=Math.max(5,+dlg.querySelector('#aeMin').value||a.minutes);a.priority=+dlg.querySelector('#aePri').value;saveActivities(acts);dlg.close();dlg.remove();renderMeuDia()});
-}
-function openFreeTimeLog(){
- const dlg=document.createElement('dialog');dlg.innerHTML=`<form method="dialog" class="modal-card" id="freeLogForm"><div class="modal-head"><div><div class="eyebrow">🌿 TEMPO LIVRE PROTEGIDO</div><h2>Registrar o que você fez</h2></div><button class="icon-btn" value="cancel">×</button></div><p class="note">Se você usou um período que estava protegido para uma atividade, registramos esse tempo para depois sugerir uma compensação de descanso.</p><label>Atividade<input id="flName" required placeholder="Ex.: organizei uma gaveta"></label><label>Tempo usado (min)<input id="flMin" type="number" min="5" max="240" value="20"></label><div class="modal-actions"><div class="grow"></div><button type="button" class="secondary" id="cancelFl">Cancelar</button><button class="primary" value="default">Registrar</button></div></form>`;document.body.appendChild(dlg);dlg.showModal();dlg.querySelector('#cancelFl').onclick=()=>{dlg.close();dlg.remove()};dlg.querySelector('#freeLogForm').addEventListener('submit',e=>{e.preventDefault();const logs=mvRead(MV_TIMELOG_KEY);logs.push({id:uid(),date:todayISO(),name:dlg.querySelector('#flName').value.trim(),minutes:+dlg.querySelector('#flMin').value||0,protectedTimeUsed:true});localStorage.setItem(MV_TIMELOG_KEY,JSON.stringify(logs));dlg.close();dlg.remove();renderMeuDia()});
-}
-
-function openWeekEditor(){
- const dlg=document.createElement('dialog');
- const rows=[1,2,3,4,5,6,0].map(day=>{const x=(MV_WINDOWS[day]||[])[0]||{start:"09:00",end:"10:00"};const name=["Domingo","Segunda","Terça","Quarta","Quinta","Sexta","Sábado"][day];return `<div class="week-edit-row"><strong>${name}</strong><input type="time" data-wd="${day}" data-ws value="${x.start}"><span>até</span><input type="time" data-wd="${day}" data-we value="${x.end}"></div>`}).join('');
- dlg.innerHTML=`<form method="dialog" class="modal-card" id="weekEditForm"><div class="modal-head"><div><div class="eyebrow">⚙️ MINHA SEMANA</div><h2>Editar janelas disponíveis</h2></div><button class="icon-btn" value="cancel">×</button></div><p class="note">Estas são janelas para sugestões. Compromissos fixos continuam protegidos. Você pode ajustar quando sua vida mudar.</p><label class="check-line"><input id="therapyWeek" type="checkbox" ${loadWeekPlan().therapyWeek?'checked':''}> Esta é uma semana de terapia</label><div class="week-edit-grid">${rows}</div><div class="modal-actions"><div class="grow"></div><button type="button" class="secondary" id="cancelWeek">Cancelar</button><button class="primary" value="default">Salvar</button></div></form>`;
- document.body.appendChild(dlg);dlg.showModal();dlg.querySelector('#cancelWeek').onclick=()=>{dlg.close();dlg.remove()};dlg.querySelector('#weekEditForm').addEventListener('submit',e=>{e.preventDefault();const vals={...MV_WINDOWS};[1,2,3,4,5,6,0].forEach(day=>{const st=dlg.querySelector(`[data-wd="${day}"][data-ws]`).value,en=dlg.querySelector(`[data-wd="${day}"][data-we]`).value;if(st&&en)vals[day]=[{start:st,end:en,label:'Janela disponível'}]});Object.keys(MV_WINDOWS).forEach(k=>MV_WINDOWS[k]=vals[k]);const wp=loadWeekPlan();wp.therapyWeek=dlg.querySelector('#therapyWeek').checked;saveWeekPlan(wp);dlg.close();dlg.remove();renderMeuDia()});
-}
-
-function mvProtectedBalance(){try{return mvRead(MV_TIMELOG_KEY).filter(x=>x.protectedTimeUsed).reduce((n,x)=>n+(+x.minutes||0),0)}catch{return 0}}
-function renderSmartSuggestions(){
- const day=mvDow(),wins=mvWindows(day);return `<section class="day-section smart-suggestions"><div class="section-head"><div><h2>✨ O que cabe aqui</h2><small>O app sugere. Você decide.</small></div><div class="suggestion-head-actions"><button type="button" class="text-btn" onclick="openWeekEditor()">editar janelas</button><button type="button" class="text-btn" onclick="openFreeTimeLog()">registrar tempo livre</button></div></div>${wins.map(mvSuggestBlock).join('')}</section>`;
-}
-
 function renderMeuDia(){
- const d=mvNow(), h=d.getHours(), greet=h<12?'Bom dia':h<18?'Boa tarde':'Boa noite', b=mvCurrentBlock(), p=mvPending();
+ const d=mvNow(), h=d.getHours(), greet=h<12?'Bom dia':h<18?'Boa tarde':'Boa noite', b=mvCurrentBlock(), p=mvPending(), w=mvDow(d), ho=remoteRange(w), wp=loadWeekPlan();
  const focus=b[3]==='rest'?[['Desacelerar','Nada urgente precisa entrar aqui.']]:p.slice(0,3).map(x=>[x.title||x.name||'Pendência',x.note||'Pendência para hoje']);
  if(!focus.length)focus.push(['Seu essencial está em dia','Use este espaço para viver, descansar ou escolher o que importa.']);
- const w=mvDow(d), ho=remoteRange(w);
+ const fixed=mvFixedBlocks(w).filter(x=>x.type==='fixed').map(x=>`<div><b>${x.start}–${x.end}</b><span>${escapeHtml(x.label)}</span></div>`).join('');
+ const remote=remoteToday();
  return `<section class="day-hero"><div class="eyebrow">💜 MEU DIA</div><h1>${greet}, Duaila.</h1><p class="day-date">${mvDate()}</p></section>
- <section class="now-card ${b[3]}"><div class="card-kicker">AGORA</div><div class="now-title">${b[0]}</div><div class="now-time">${b[1]}</div><p>${b[2]}</p></section>
- <section class="day-section"><div class="section-head"><h2>O que importa hoje</h2><span class="soft-count">${focus.length}</span></div>
- ${focus.map((x,i)=>`<div class="focus-row"><span class="focus-dot">${i+1}</span><div><strong>${x[0]}</strong><small>${x[1]}</small></div></div>`).join('')}</section>
- <section class="day-section"><div class="section-head"><h2>Seu dia, sem excesso</h2><button type="button" class="text-btn" onclick="openWorkRemoteEditor()">editar trabalho remoto</button></div><div class="timeline">
- <div><b>05:16–07:35</b><span>Manhã protegida · movimento + café + se arrumar</span></div>
- <div><b>08:00–14:00</b><span>Trabalho oficial</span></div>
- ${(w===1||w===3)?'<div><b>14:15/14:20+</b><span>Conselho · deslocamento · Henrique às 16:15</span></div>':''}
- ${(w===2||w===4||w===5)?'<div><b>14:00–15:10</b><span>Preferência: sair às 14:00 quando o trabalho permitir · buscar Henrique às 15:10</span></div>':''}
- <div><b>${ho}</b><span>Trabalho remoto · ${remoteLabel(remoteToday()?.minutes||0)} · bloco contínuo</span></div><div><b>19:00+</b><span>${loadWeekPlan().therapyWeek?'Noites sem compromisso fixo: preservar descanso':'MBA terça/quinta · demais noites, descanso primeiro'}</span></div></div></section>
+ <section class="now-card ${b[3]}"><div class="card-kicker">AGORA</div><div class="now-title">${escapeHtml(b[0])}</div><div class="now-time">${escapeHtml(b[1])}</div><p>${escapeHtml(b[2])}</p></section>
+ <section class="day-section"><div class="section-head"><h2>O que importa hoje</h2><span class="soft-count">${focus.length}</span></div>${focus.map((x,i)=>`<div class="focus-row"><span class="focus-dot">${i+1}</span><div><strong>${escapeHtml(x[0])}</strong><small>${escapeHtml(x[1])}</small></div></div>`).join('')}</section>
+ <section class="day-section"><div class="section-head"><div><h2>Seu dia, sem excesso</h2><small>Compromissos protegem. Janelas sugerem.</small></div><button type="button" class="text-btn" onclick="openWorkRemoteEditor()">editar trabalho remoto</button></div><div class="timeline">
+ <div><b>05:16–08:00</b><span>Manhã protegida</span></div><div><b>08:00–14:00</b><span>Trabalho oficial</span></div>${fixed}<div><b>${remote?remoteRange(w):'janela editável'}</b><span>Trabalho remoto · ${remote?remoteLabel(remote.minutes):'defina uma janela'} · contínuo</span></div>${(w===2||w===4)&&!wp.therapyWeek?'<div><b>19:00–22:15</b><span>MBA · noite protegida</span></div>':''}${w===3&&wp.therapyWeek?`<div><b>${wp.therapyTime||'horário a definir'}</b><span>Terapia · semana de terapia</span></div>`:''}</div></section>
  ${renderSmartSuggestions()}
  ${renderRituaisHojeV13()}
  ${renderMeuDiaExercicio()}
- ${p.length?`<section class="day-section"><div class="section-head"><h2>Pendências que merecem aparecer</h2><a href="#pendencias">ver todas</a></div>${p.map(x=>`<div class="compact-item"><strong>${x.title||x.name||'Pendência'}</strong>${x.dueDate?`<small>${x.dueDate}</small>`:''}</div>`).join('')}</section>`:''}
+ ${p.length?`<section class="day-section"><div class="section-head"><h2>Pendências que merecem aparecer</h2><a href="#pendencias">ver todas</a></div>${p.map(x=>`<div class="compact-item"><strong>${escapeHtml(x.title||x.name||'Pendência')}</strong>${x.dueDate?`<small>${escapeHtml(x.dueDate)}</small>`:''}</div>`).join('')}</section>`:''}
  <section class="quick-grid"><a href="#rituais">✨<span>Rituais</span></a><a href="#exercicios">🏃<span>Exercícios</span></a><a href="#alimentacao">🍽️<span>Alimentação</span></a><a href="#receitas">📖<span>Receitas</span></a><a href="#cabelo">💇‍♀️<span>Cabelo</span></a><a href="#casa">🏠<span>Casa</span></a><a href="#financeiro">💰<span>Financeiro</span></a></section>
- <section class="free-space"><div>☁️</div><strong>Tempo livre protegido também faz parte do dia.</strong><p>Se nada precisa ser resolvido agora, não resolva. ${mvProtectedBalance()?`Você tem ${mvProtectedBalance()} min de tempo livre usado para recuperar quando quiser.`:''}</p></section>`;
- document.querySelectorAll('[data-suggestion]').forEach(b=>b.onclick=()=>{const a=loadActivities().find(x=>x.id===b.dataset.suggestion);if(a)openActivityEditor(a.id)});
+ <section class="free-space"><div>☁️</div><strong>Tempo livre protegido também faz parte do dia.</strong><p>Se nada precisa ser resolvido agora, não resolva. ${mvProtectedBalance()?`Você tem ${mvProtectedBalance()} min para recuperar em outro momento.`:''}</p></section>`;
+ document.querySelectorAll('[data-suggestion]').forEach(b=>b.onclick=()=>{const id=b.dataset.suggestion;if(id.startsWith('casa-')){openCasaTaskEditor(id.slice(5));return;}const a=loadActivities().find(x=>x.id===id);if(a)openActivityEditor(a.id)});
 }
 
 /* CORREÇÃO PRINCIPAL:
@@ -995,14 +1036,17 @@ const CASA_BASE={
  notes:""
 };
 
-const CASA_TIME={
+const CASA_TIME_KEY="minha-vida.casa.time.v2";
+const CASA_TIME_BASE={
  ani1:"07:00 · 18:30", ani2:"07:15 · 18:30",
  hen1:"07:00", hen2:"07:10", hen3:"ao chegar", hen4:"18:30", hen5:"fim de semana",
  coz1:"após as refeições", coz2:"após as refeições", coz3:"após as refeições", coz4:"após o jantar", coz5:"após o jantar",
  lim1:"janela doméstica", lim2:"janela doméstica", lim3:"janela doméstica", lim4:"fim de semana",
  roup1:"janela de lavanderia", roup2:"janela de lavanderia", roup3:"janela de lavanderia", roup4:"antes da lavagem", roup5:"ao fim do ciclo", roup6:"janela de lavanderia", roup7:"janela de lavanderia", roup8:"bloco de roupas", roup9:"após secar/passar", roup10:"fim de semana"
 };
-function casaTime(id){return CASA_TIME[id]||"horário a definir";}
+function loadCasaTimes(){try{return {...CASA_TIME_BASE,...JSON.parse(localStorage.getItem(CASA_TIME_KEY)||"{}")}}catch{return {...CASA_TIME_BASE}}}
+function saveCasaTimes(x){localStorage.setItem(CASA_TIME_KEY,JSON.stringify(x))}
+function casaTime(id){return loadCasaTimes()[id]||"horário a definir";}
 
 const CASA_HOW={
  coz1:{title:"Passar pano no piso",time:"10–15 min",products:["Água","Detergente neutro ou produto adequado ao piso"],materials:["Vassoura/aspirador","Mop ou pano de microfibra","Balde"],steps:["Retire objetos e resíduos soltos.","Varra ou aspire primeiro; o pano vem depois para não espalhar a sujeira.","Dilua o produto conforme o rótulo.","Passe o pano úmido, sem encharcar o piso.","Deixe o ambiente secar completamente."],tip:"Para a limpeza geral, o manual da residência orienta aspirar/varrer antes do pano úmido."},
@@ -1041,7 +1085,7 @@ function saveCasaDurations(x){localStorage.setItem(CASA_DURATION_KEY,JSON.string
 function casaDuration(id){return `${loadCasaDurations()[id]||15} min`}
 function openCasaTaskEditor(id){
  const d=loadCasa(),task=d.areas.flatMap(a=>a.tasks).find(t=>t.id===id);if(!task)return;const ds=loadCasaDurations(),dlg=document.createElement('dialog');
- dlg.innerHTML=`<form method="dialog" class="modal-card" id="casaTaskEdit"><div class="modal-head"><div><div class="eyebrow">🏠 CASA</div><h2>Editar rotina</h2></div><button class="icon-btn" value="cancel">×</button></div><label>Atividade<input id="ctName" value="${escapeHtml(task.name)}"></label><label>Duração real estimada (min)<input id="ctMin" type="number" min="5" max="480" step="5" value="${ds[id]||15}"></label><label>Horário / janela preferencial<input id="ctTime" value="${escapeHtml(casaTime(id))}"></label><label>Frequência<input id="ctFreq" value="${escapeHtml(task.freq)}"></label><div class="modal-actions"><div class="grow"></div><button type="button" class="secondary" id="cancelCt">Cancelar</button><button class="primary" value="default">Salvar</button></div></form>`;document.body.appendChild(dlg);dlg.showModal();dlg.querySelector('#cancelCt').onclick=()=>{dlg.close();dlg.remove()};dlg.querySelector('#casaTaskEdit').addEventListener('submit',e=>{e.preventDefault();task.name=dlg.querySelector('#ctName').value.trim()||task.name;task.freq=dlg.querySelector('#ctFreq').value.trim()||task.freq;ds[id]=Math.max(5,+dlg.querySelector('#ctMin').value||ds[id]||15);CASA_TIME[id]=dlg.querySelector('#ctTime').value.trim()||CASA_TIME[id];saveCasa(d);saveCasaDurations(ds);dlg.close();dlg.remove();renderCasa()});
+ dlg.innerHTML=`<form method="dialog" class="modal-card" id="casaTaskEdit"><div class="modal-head"><div><div class="eyebrow">🏠 CASA</div><h2>Editar rotina</h2></div><button class="icon-btn" value="cancel">×</button></div><label>Atividade<input id="ctName" value="${escapeHtml(task.name)}"></label><label>Duração real estimada (min)<input id="ctMin" type="number" min="5" max="480" step="5" value="${ds[id]||15}"></label><label>Horário / janela preferencial<input id="ctTime" value="${escapeHtml(casaTime(id))}"></label><label>Frequência<input id="ctFreq" value="${escapeHtml(task.freq)}"></label><div class="modal-actions"><div class="grow"></div><button type="button" class="secondary" id="cancelCt">Cancelar</button><button class="primary" value="default">Salvar</button></div></form>`;document.body.appendChild(dlg);dlg.showModal();dlg.querySelector('#cancelCt').onclick=()=>{dlg.close();dlg.remove()};dlg.querySelector('#casaTaskEdit').addEventListener('submit',e=>{e.preventDefault();task.name=dlg.querySelector('#ctName').value.trim()||task.name;task.freq=dlg.querySelector('#ctFreq').value.trim()||task.freq;ds[id]=Math.max(5,+dlg.querySelector('#ctMin').value||ds[id]||15);const times=loadCasaTimes();times[id]=dlg.querySelector('#ctTime').value.trim()||times[id];saveCasa(d);saveCasaDurations(ds);saveCasaTimes(times);dlg.close();dlg.remove();renderCasa()});
 }
 
 function loadCasa(){try{const d=JSON.parse(localStorage.getItem(CASA_KEY));if(d)return {...CASA_BASE,...d};}catch{}return JSON.parse(JSON.stringify(CASA_BASE));}
@@ -1064,7 +1108,7 @@ function renderCasa(){
  <div class="home-principle card"><span class="eyebrow">REGRA DA CASA</span><strong>Agrupar. Delegar. Adiar quando puder.</strong><p>Não espalhar microtarefas pelo dia. O essencial entra em blocos; o resto pode esperar.</p></div>
  <div class="home-summary"><div class="card"><span>Rotinas</span><b>${all.length}</b></div><div class="card"><span>Feitas agora</span><b>${done}</b></div></div>
  <div class="section-title">⏰ HORÁRIOS DA CASA</div>
- <div class="card casa-schedule-card"><p class="note">Os horários são o ponto de partida da rotina. Eles organizam a casa sem deixar que ela organize você.</p><div class="casa-schedule">${all.filter(t=>CASA_TIME[t.id] && CASA_TIME[t.id]!="ao fim do ciclo").slice().sort((a,b)=>String(CASA_TIME[a.id]).localeCompare(String(CASA_TIME[b.id]))).map(t=>`<div class="casa-schedule-row"><span class="casa-time">${escapeHtml(casaTime(t.id))}</span><strong>${escapeHtml(t.name)}</strong></div>`).join("")}</div></div>
+ <div class="card casa-schedule-card"><p class="note">Os horários são o ponto de partida da rotina. Eles organizam a casa sem deixar que ela organize você.</p><div class="casa-schedule">${all.filter(t=>casaTime(t.id) && casaTime(t.id)!="ao fim do ciclo").slice().sort((a,b)=>String(casaTime(a.id)).localeCompare(String(casaTime(b.id)))).map(t=>`<div class="casa-schedule-row"><span class="casa-time">${escapeHtml(casaTime(t.id))}</span><strong>${escapeHtml(t.name)}</strong></div>`).join("")}</div></div>
  <div class="section-title">ROTINAS</div>
  <div class="list">${d.areas.map(a=>`<div class="card home-area"><div class="panel-head"><h3>${a.icon} ${escapeHtml(a.title)}</h3><span class="pill">${a.tasks.length}</span></div>
  ${a.tasks.length?a.tasks.map(t=>`<div class="home-task-wrap"><label class="home-task ${t.done?"done":""}"><input type="checkbox" data-casa-task="${a.id}|${t.id}" ${t.done?"checked":""}><span><strong>${escapeHtml(t.name)}</strong><small>⏱️ ${escapeHtml(casaDuration(t.id))} · ⏰ ${escapeHtml(casaTime(t.id))} · ${escapeHtml(t.freq)} · ${escapeHtml(t.when)}</small></span></label><div class="home-task-actions">${CASA_HOW[t.id]?`<button type="button" class="home-how" data-casa-how="${t.id}">Como fazer →</button>`:""}<button type="button" class="home-edit" data-casa-edit="${t.id}">Editar</button></div></div>`).join(""):`<p class="note">Sem rotina cadastrada. Mantemos espaço para incluir apenas o que realmente for necessário.</p>`}</div>`).join("")}</div>
