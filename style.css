@@ -617,3 +617,11 @@ h2 { margin:0; font-size:22px; letter-spacing:-.02em; }
 .casa-web-link{display:flex;justify-content:space-between;align-items:center;gap:8px;text-decoration:none;color:inherit;background:rgba(255,255,255,.82);border:1px solid rgba(120,100,120,.10);border-radius:15px;padding:11px 12px;font-size:11px;font-weight:800}
 .casa-web-link span{font-size:14px;opacity:.65}
 @media(max-width:420px){.casa-web-grid{grid-template-columns:1fr}.home-how{margin-left:39px}}
+
+/* V23 — horários da casa */
+.casa-schedule-card{background:linear-gradient(135deg,#fff8f1,#eef7f5 52%,#f4eef8)}
+.casa-schedule{display:grid;gap:0;margin-top:12px}
+.casa-schedule-row{display:grid;grid-template-columns:88px 1fr;gap:10px;align-items:center;padding:9px 0;border-top:1px solid rgba(120,100,120,.10)}
+.casa-schedule-row:first-child{border-top:0}
+.casa-time{font-size:11px;font-weight:800;color:#8b6b80;background:rgba(255,255,255,.72);border-radius:10px;padding:6px 7px;text-align:center}
+@media(max-width:380px){.casa-schedule-row{grid-template-columns:76px 1fr}.casa-time{font-size:10px}}

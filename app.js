@@ -908,6 +908,15 @@ const CASA_BASE={
  notes:""
 };
 
+const CASA_TIME={
+ ani1:"07:00 · 19:00", ani2:"07:15 · 18:30",
+ hen1:"07:00", hen2:"07:10", hen3:"17:30", hen4:"07:20 · 18:30", hen5:"10:00",
+ coz1:"08:00 · 20:30", coz2:"07:30 · 20:30", coz3:"07:35 · 20:35", coz4:"20:45", coz5:"20:50",
+ lim1:"09:00", lim2:"09:20", lim3:"09:00", lim4:"09:00",
+ roup1:"08:30", roup2:"09:00", roup3:"09:00", roup4:"08:45", roup5:"ao fim do ciclo", roup6:"10:00", roup7:"10:00", roup8:"15:30", roup9:"16:15", roup10:"16:30"
+};
+function casaTime(id){return CASA_TIME[id]||"horário a definir";}
+
 const CASA_HOW={
  coz1:{title:"Passar pano no piso",time:"10–15 min",products:["Água","Detergente neutro ou produto adequado ao piso"],materials:["Vassoura/aspirador","Mop ou pano de microfibra","Balde"],steps:["Retire objetos e resíduos soltos.","Varra ou aspire primeiro; o pano vem depois para não espalhar a sujeira.","Dilua o produto conforme o rótulo.","Passe o pano úmido, sem encharcar o piso.","Deixe o ambiente secar completamente."],tip:"Para a limpeza geral, o manual da residência orienta aspirar/varrer antes do pano úmido."},
  coz2:{title:"Organizar pia",time:"5–10 min",products:["Detergente neutro"],materials:["Esponja macia","Pano de microfibra","Escorredor"],steps:["Retire toda a louça e coloque cada item em seu lugar.","Lave o que estiver pendente.","Limpe cuba, torneira e área ao redor com detergente neutro.","Enxágue e seque as superfícies.","Finalize deixando a pia livre e pronta para o próximo uso."],tip:"A regra é deixar a cozinha pronta para o próximo dia."},
@@ -956,9 +965,11 @@ function renderCasa(){
  app.innerHTML=`<section class="hero"><h2>🏠 Casa</h2><p>Uma casa funcional, sem transformar a manutenção em uma segunda jornada.</p></section>
  <div class="home-principle card"><span class="eyebrow">REGRA DA CASA</span><strong>Agrupar. Delegar. Adiar quando puder.</strong><p>Não espalhar microtarefas pelo dia. O essencial entra em blocos; o resto pode esperar.</p></div>
  <div class="home-summary"><div class="card"><span>Rotinas</span><b>${all.length}</b></div><div class="card"><span>Feitas agora</span><b>${done}</b></div></div>
+ <div class="section-title">⏰ HORÁRIOS DA CASA</div>
+ <div class="card casa-schedule-card"><p class="note">Os horários são o ponto de partida da rotina. Eles organizam a casa sem deixar que ela organize você.</p><div class="casa-schedule">${all.filter(t=>CASA_TIME[t.id] && CASA_TIME[t.id]!="ao fim do ciclo").slice().sort((a,b)=>String(CASA_TIME[a.id]).localeCompare(String(CASA_TIME[b.id]))).map(t=>`<div class="casa-schedule-row"><span class="casa-time">${escapeHtml(casaTime(t.id))}</span><strong>${escapeHtml(t.name)}</strong></div>`).join("")}</div></div>
  <div class="section-title">ROTINAS</div>
  <div class="list">${d.areas.map(a=>`<div class="card home-area"><div class="panel-head"><h3>${a.icon} ${escapeHtml(a.title)}</h3><span class="pill">${a.tasks.length}</span></div>
- ${a.tasks.length?a.tasks.map(t=>`<div class="home-task-wrap"><label class="home-task ${t.done?"done":""}"><input type="checkbox" data-casa-task="${a.id}|${t.id}" ${t.done?"checked":""}><span><strong>${escapeHtml(t.name)}</strong><small>${escapeHtml(t.freq)} · ${escapeHtml(t.when)}</small></span></label>${CASA_HOW[t.id]?`<button type="button" class="home-how" data-casa-how="${t.id}">Como fazer →</button>`:""}</div>`).join(""):`<p class="note">Sem rotina cadastrada. Mantemos espaço para incluir apenas o que realmente for necessário.</p>`}</div>`).join("")}</div>
+ ${a.tasks.length?a.tasks.map(t=>`<div class="home-task-wrap"><label class="home-task ${t.done?"done":""}"><input type="checkbox" data-casa-task="${a.id}|${t.id}" ${t.done?"checked":""}><span><strong>${escapeHtml(t.name)}</strong><small>⏰ ${escapeHtml(casaTime(t.id))} · ${escapeHtml(t.freq)} · ${escapeHtml(t.when)}</small></span></label>${CASA_HOW[t.id]?`<button type="button" class="home-how" data-casa-how="${t.id}">Como fazer →</button>`:""}</div>`).join(""):`<p class="note">Sem rotina cadastrada. Mantemos espaço para incluir apenas o que realmente for necessário.</p>`}</div>`).join("")}</div>
  <div class="section-title">💡 DICAS PARA A CASA</div>
  <div class="card casa-web-card"><p class="note">Quando quiser aprofundar uma tarefa, abra um caminho para a internet. O conteúdo externo é complementar; o essencial continua dentro do MINHA VIDA.</p><div class="casa-web-grid">${CASA_WEB.map(([label,url])=>`<a class="casa-web-link" href="${url}" target="_blank" rel="noopener">${label}<span>↗</span></a>`).join("")}</div></div>
  <div class="section-title">MANUTENÇÃO</div>
