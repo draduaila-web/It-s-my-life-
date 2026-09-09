@@ -1,19 +1,39 @@
 <!doctype html>
-<html lang="pt-BR"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Atualizando Minha Vida…</title></head>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Atualizando Minha Vida…</title>
+</head>
 <body style="font-family:-apple-system,BlinkMacSystemFont,sans-serif;text-align:center;padding:40px;background:#fff9f5;color:#4d4350">
-<h2>💜 Atualizando o Minha Vida…</h2><p id="msg">Só um instante.</p>
+<h2>💜 Preparando o Minha Vida…</h2>
+<p id="msg">Limpando apenas o cache técnico antigo.</p>
 <script>
 (async () => {
+  const msg = document.getElementById("msg");
   try {
-    const reg = await navigator.serviceWorker.register("./sw-v28.js", {updateViaCache:"none"});
-    await reg.update();
-    if (reg.waiting) reg.waiting.postMessage({type:"SKIP_WAITING"});
-    navigator.serviceWorker.addEventListener("controllerchange", () => {
-      location.replace("./index.html?v=28");
-    });
-    setTimeout(() => location.replace("./index.html?v=28"), 2500);
+    // Remove os Service Workers antigos deste site.
+    const regs = await navigator.serviceWorker.getRegistrations();
+    await Promise.all(regs.map(r => r.unregister()));
+
+    // Remove somente os caches do Minha Vida.
+    const keys = await caches.keys();
+    await Promise.all(
+      keys
+        .filter(k => k.startsWith("minha-vida-"))
+        .map(k => caches.delete(k))
+    );
+
+    msg.textContent = "Pronto. Abrindo a versão atual…";
+
+    // Cache-bust the document itself.
+    setTimeout(() => {
+      location.replace("./index.html?reset=" + Date.now());
+    }, 700);
   } catch (e) {
-    document.getElementById("msg").textContent = "Abra novamente esta página em alguns segundos.";
+    msg.textContent = "Não foi possível limpar automaticamente. Tente abrir novamente.";
   }
 })();
-</script></body></html>
+</script>
+</body>
+</html>
