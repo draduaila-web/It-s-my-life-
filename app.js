@@ -39,6 +39,26 @@ function escapeHtml(value="") {
   return value.replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[c]));
 }
 
+const WORK_REMOTE_KEY="minha-vida.trabalho-remoto.v1";
+const WORK_REMOTE_BASE={
+  targetMinutes:120,
+  days:{1:{start:"16:40",minutes:120},2:{start:"16:00",minutes:120},3:{start:"16:40",minutes:120},4:{start:"16:00",minutes:120},5:{start:"16:00",minutes:120}}
+};
+function loadWorkRemote(){try{const d=JSON.parse(localStorage.getItem(WORK_REMOTE_KEY));if(d)return {...WORK_REMOTE_BASE,...d,days:{...WORK_REMOTE_BASE.days,...(d.days||{})}}}catch{}return JSON.parse(JSON.stringify(WORK_REMOTE_BASE));}
+function saveWorkRemote(d){localStorage.setItem(WORK_REMOTE_KEY,JSON.stringify(d));}
+function hhmmToMin(v){const [h,m]=v.split(":").map(Number);return h*60+m}
+function minToHHMM(n){const h=Math.floor(n/60),m=n%60;return `${String(h).padStart(2,"0")}:${String(m).padStart(2,"0")}`}
+function remoteLabel(minutes){return minutes===120?"2h contínuas":minutes===90?"1h30 contínuas":minutes===60?"1h contínua":"ajustar"}
+function remoteToday(){return loadWorkRemote().days[mvDow()]||null}
+function remoteRange(day=mvDow()){const x=loadWorkRemote().days[day];if(!x)return "—";return `${x.start}–${minToHHMM(hhmmToMin(x.start)+x.minutes)}`}
+function openWorkRemoteEditor(){
+ const d=loadWorkRemote(),dlg=document.createElement("dialog");
+ const rows=[1,2,3,4,5].map(day=>{const x=d.days[day]||{start:"16:00",minutes:120};const name=["","Segunda","Terça","Quarta","Quinta","Sexta"][day];return `<div class="remote-edit-row"><strong>${name}</strong><input type="time" data-rday="${day}" value="${x.start}"><select data-rmin="${day}"><option value="120" ${x.minutes===120?"selected":""}>2h contínuas</option><option value="90" ${x.minutes===90?"selected":""}>1h30 contínuas</option><option value="60" ${x.minutes===60?"selected":""}>1h contínua</option></select></div>`}).join("");
+ dlg.innerHTML=`<form method="dialog" class="modal-card" id="remoteForm"><div class="modal-head"><div><div class="eyebrow">💻 TRABALHO REMOTO</div><h2>Minha janela de trabalho</h2></div><button class="icon-btn" value="cancel">×</button></div><p class="note">Meta: 2h por dia. Se um dia não comportar, use 1h ou 1h30 e compense pelo banco de horas. O bloco nunca é fracionado.</p><div class="remote-edit-grid">${rows}</div><div class="modal-actions"><div class="grow"></div><button type="button" class="secondary" id="cancelRemote">Cancelar</button><button class="primary" value="default">Salvar</button></div></form>`;
+ document.body.appendChild(dlg);dlg.showModal();dlg.querySelector("#cancelRemote").onclick=()=>{dlg.close();dlg.remove()};
+ dlg.querySelector("#remoteForm").addEventListener("submit",e=>{e.preventDefault();[1,2,3,4,5].forEach(day=>{d.days[day]={start:dlg.querySelector(`[data-rday="${day}"]`).value,minutes:+dlg.querySelector(`[data-rmin="${day}"]`).value}});saveWorkRemote(d);dlg.close();dlg.remove();renderMeuDia()});
+}
+
 
 function mvNow(){return new Date();}
 function mvMinutes(d=mvNow()){return d.getHours()*60+d.getMinutes();}
@@ -54,8 +74,8 @@ function mvCurrentBlock(){
  if(m>=320&&m<455)return ['Manhã protegida','05:20–07:35','Seu ritual de manhã. Sem tarefas domésticas.','protected'];
  if(m>=480&&m<840)return ['Trabalho CREFITO-11','08:00–14:00','Bloco oficial de trabalho.','work'];
  if((w===1||w===3)&&m>=880&&m<970)return ['Janela estratégica','14:40–16:10','Espaço para decisões e prioridades estratégicas.','strategy'];
- const ho={1:['16:40','18:40'],2:['15:40','17:40'],3:['16:40','18:40'],4:['15:40','17:40'],5:['15:40','17:40']}[w];
- if(ho){const s=+ho[0].slice(0,2)*60+ +ho[0].slice(3),e=+ho[1].slice(0,2)*60+ +ho[1].slice(3);if(m>=s&&m<e)return ['Home office',ho.join('–'),'Bloco obrigatório de trabalho em casa.','office'];}
+ const ro=remoteToday();
+ if(ro){const s=hhmmToMin(ro.start),e=s+ro.minutes;if(m>=s&&m<e)return ['Home office',`${ro.start}–${minToHHMM(e)}`,'Bloco contínuo de trabalho remoto.','office'];}
  if(m>=1140)return ['Noite protegida','após 19:00','Agora é espaço para desacelerar. O sistema não vai encher sua noite.','rest'];
  return ['Espaço livre','agora','Você não precisa preencher cada minuto.','free'];
 }
@@ -67,16 +87,16 @@ function renderMeuDia(){
  const d=mvNow(), h=d.getHours(), greet=h<12?'Bom dia':h<18?'Boa tarde':'Boa noite', b=mvCurrentBlock(), p=mvPending();
  const focus=b[3]==='rest'?[['Desacelerar','Nada urgente precisa entrar aqui.']]:p.slice(0,3).map(x=>[x.title||x.name||'Pendência',x.note||'Pendência para hoje']);
  if(!focus.length)focus.push(['Seu essencial está em dia','Use este espaço para viver, descansar ou escolher o que importa.']);
- const w=mvDow(d), ho={1:'16:40–18:40',2:'15:40–17:40',3:'16:40–18:40',4:'15:40–17:40',5:'15:40–17:40'}[w]||'—';
+ const w=mvDow(d), ho=remoteRange(w);
  return `<section class="day-hero"><div class="eyebrow">💜 MEU DIA</div><h1>${greet}, Duaila.</h1><p class="day-date">${mvDate()}</p></section>
  <section class="now-card ${b[3]}"><div class="card-kicker">AGORA</div><div class="now-title">${b[0]}</div><div class="now-time">${b[1]}</div><p>${b[2]}</p></section>
  <section class="day-section"><div class="section-head"><h2>O que importa hoje</h2><span class="soft-count">${focus.length}</span></div>
  ${focus.map((x,i)=>`<div class="focus-row"><span class="focus-dot">${i+1}</span><div><strong>${x[0]}</strong><small>${x[1]}</small></div></div>`).join('')}</section>
- <section class="day-section"><div class="section-head"><h2>Seu dia, sem excesso</h2></div><div class="timeline">
+ <section class="day-section"><div class="section-head"><h2>Seu dia, sem excesso</h2><button type="button" class="text-btn" onclick="openWorkRemoteEditor()">editar horários</button></div><div class="timeline">
  <div><b>05:20–07:35</b><span>Manhã protegida · movimento + café + se arrumar</span></div>
  <div><b>08:00–14:00</b><span>Trabalho oficial</span></div>
  ${(w===1||w===3)?'<div><b>14:40–16:10</b><span>Janela estratégica</span></div>':''}
- <div><b>${ho}</b><span>Home office</span></div><div><b>19:00+</b><span>Noite protegida · descanso primeiro</span></div></div></section>
+ <div><b>${ho}</b><span>Home office · ${remoteLabel(remoteToday()?.minutes||0)}</span></div><div><b>19:00+</b><span>Noite protegida · descanso primeiro</span></div></div></section>
  ${renderRituaisHojeV13()}
  ${renderMeuDiaExercicio()}
  ${p.length?`<section class="day-section"><div class="section-head"><h2>Pendências que merecem aparecer</h2><a href="#pendencias">ver todas</a></div>${p.map(x=>`<div class="compact-item"><strong>${x.title||x.name||'Pendência'}</strong>${x.dueDate?`<small>${x.dueDate}</small>`:''}</div>`).join('')}</section>`:''}
@@ -909,11 +929,11 @@ const CASA_BASE={
 };
 
 const CASA_TIME={
- ani1:"07:00 · 19:00", ani2:"07:15 · 18:30",
- hen1:"07:00", hen2:"07:10", hen3:"17:30", hen4:"07:20 · 18:30", hen5:"10:00",
- coz1:"08:00 · 20:30", coz2:"07:30 · 20:30", coz3:"07:35 · 20:35", coz4:"20:45", coz5:"20:50",
- lim1:"09:00", lim2:"09:20", lim3:"09:00", lim4:"09:00",
- roup1:"08:30", roup2:"09:00", roup3:"09:00", roup4:"08:45", roup5:"ao fim do ciclo", roup6:"10:00", roup7:"10:00", roup8:"15:30", roup9:"16:15", roup10:"16:30"
+ ani1:"07:00 · 18:30", ani2:"07:15 · 18:30",
+ hen1:"07:00", hen2:"07:10", hen3:"ao chegar", hen4:"18:30", hen5:"fim de semana",
+ coz1:"após as refeições", coz2:"após as refeições", coz3:"após as refeições", coz4:"após o jantar", coz5:"após o jantar",
+ lim1:"janela doméstica", lim2:"janela doméstica", lim3:"janela doméstica", lim4:"fim de semana",
+ roup1:"janela de lavanderia", roup2:"janela de lavanderia", roup3:"janela de lavanderia", roup4:"antes da lavagem", roup5:"ao fim do ciclo", roup6:"janela de lavanderia", roup7:"janela de lavanderia", roup8:"bloco de roupas", roup9:"após secar/passar", roup10:"fim de semana"
 };
 function casaTime(id){return CASA_TIME[id]||"horário a definir";}
 

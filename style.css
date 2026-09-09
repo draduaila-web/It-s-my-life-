@@ -625,3 +625,9 @@ h2 { margin:0; font-size:22px; letter-spacing:-.02em; }
 .casa-schedule-row:first-child{border-top:0}
 .casa-time{font-size:11px;font-weight:800;color:#8b6b80;background:rgba(255,255,255,.72);border-radius:10px;padding:6px 7px;text-align:center}
 @media(max-width:380px){.casa-schedule-row{grid-template-columns:76px 1fr}.casa-time{font-size:10px}}
+
+/* V25 — horários reais e editáveis do trabalho remoto */
+.text-btn{border:0;background:none;padding:4px 0;color:#80627b;font-size:11px;font-weight:800}
+.remote-edit-grid{display:grid;gap:8px;margin:12px 0}
+.remote-edit-row{display:grid;grid-template-columns:72px 92px 1fr;gap:7px;align-items:center;background:#faf7f7;border-radius:14px;padding:8px}
+.remote-edit-row strong{font-size:12px}.remote-edit-row input,.remote-edit-row select{min-width:0;width:100%;padding:9px;border:1px solid var(--line);border-radius:10px;background:#fff;font:inherit;font-size:11px}
