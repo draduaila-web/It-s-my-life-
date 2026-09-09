@@ -577,3 +577,27 @@ h2 { margin:0; font-size:22px; letter-spacing:-.02em; }
 .day-exercise-card{background:linear-gradient(135deg,#fff1f6,#eaf4fb);border-radius:24px;padding:18px;margin-top:18px;border:1px solid var(--line)}
 .day-exercise-row{display:flex;align-items:center;gap:10px;background:rgba(255,255,255,.75);border-radius:16px;padding:10px;margin-top:8px}.day-exercise-row>span{font-size:19px}.day-exercise-row>div{flex:1}.day-exercise-row strong{display:block;font-size:12px}.day-exercise-row small{display:block;color:var(--muted);font-size:10px;margin-top:2px}.day-exercise-row>b{color:#7a5c8f}.exercise-open-link{display:block;text-align:center;margin-top:12px;font-size:12px;font-weight:800;color:#7a5c8f;text-decoration:none}
 @media(max-width:380px){.toolkit-grid{grid-template-columns:1fr}.exercise-actions{gap:4px}.mini-how,.mini-done{padding:7px 8px!important;font-size:10px!important}}
+
+
+/* V20 — barra principal fixa: Meu Dia + Pendências + Rituais + Mais */
+.bottom-nav {
+  left: 8px !important;
+  right: 8px !important;
+  width: auto !important;
+  max-width: none !important;
+  display: grid !important;
+  grid-template-columns: repeat(4, minmax(0, 1fr)) !important;
+  align-items: stretch !important;
+  box-sizing: border-box !important;
+  overflow: visible !important;
+}
+.bottom-nav > a, .bottom-nav > button {
+  min-width: 0 !important;
+  width: 100% !important;
+  box-sizing: border-box !important;
+  visibility: visible !important;
+  opacity: 1 !important;
+}
+.bottom-nav > a:nth-child(1), .bottom-nav > a:nth-child(2), .bottom-nav > a:nth-child(3), .bottom-nav > button:nth-child(4) {
+  display: flex !important;
+}
