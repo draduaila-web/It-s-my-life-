@@ -1384,7 +1384,7 @@ document.querySelectorAll(".nav-item").forEach(b => {
 
 if ("serviceWorker" in navigator) {
   window.addEventListener("load", () =>
-    navigator.serviceWorker.register("sw.js").catch(console.warn)
+    navigator.serviceWorker.register("sw.js?v=27", {updateViaCache:"none"}).catch(console.warn)
   );
 }
 
