@@ -1,0 +1,19 @@
+<!doctype html>
+<html lang="pt-BR"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Atualizando Minha Vida…</title></head>
+<body style="font-family:-apple-system,BlinkMacSystemFont,sans-serif;text-align:center;padding:40px;background:#fff9f5;color:#4d4350">
+<h2>💜 Atualizando o Minha Vida…</h2><p id="msg">Só um instante.</p>
+<script>
+(async () => {
+  try {
+    const reg = await navigator.serviceWorker.register("./sw-v28.js", {updateViaCache:"none"});
+    await reg.update();
+    if (reg.waiting) reg.waiting.postMessage({type:"SKIP_WAITING"});
+    navigator.serviceWorker.addEventListener("controllerchange", () => {
+      location.replace("./index.html?v=28");
+    });
+    setTimeout(() => location.replace("./index.html?v=28"), 2500);
+  } catch (e) {
+    document.getElementById("msg").textContent = "Abra novamente esta página em alguns segundos.";
+  }
+})();
+</script></body></html>
