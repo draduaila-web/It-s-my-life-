@@ -941,17 +941,54 @@ function renderTrabalho(){
  <section class="card work-note"><strong>Menos decisões · mais clareza</strong><span>Cada frente tem seu próprio espaço. O que for realmente importante pode depois alimentar o Meu Dia.</span></section>`;
  document.querySelectorAll("[data-work-route]").forEach(b=>b.onclick=()=>{location.hash=b.dataset.workRoute});
 }
+const CREFITO_KEY="minha-vida.trabalho.crefito.v1";
+function loadCrefito(){try{return JSON.parse(localStorage.getItem(CREFITO_KEY))||[]}catch{return[]}}
+function saveCrefito(x){localStorage.setItem(CREFITO_KEY,JSON.stringify(x))}
+function ensureCrefitoStyles(){
+ if(document.getElementById("crefito-v3-styles")) return;
+ const s=document.createElement("style");s.id="crefito-v3-styles";s.textContent=`
+ .work-summary{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;margin:14px 0 20px}.work-stat{padding:15px;border-radius:18px;background:#f7f0e8;border:1px solid rgba(92,72,104,.09)}.work-stat b{display:block;font-size:22px;color:#4b4350}.work-stat span{font-size:12px;color:#817783}.work-section{margin-top:18px}.work-section-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px}.work-section-head h3{margin:0}.work-add{border:0;border-radius:999px;background:#eee7f7;color:#654b75;padding:8px 13px;font-weight:800}.work-list{display:grid;gap:9px}.work-item{padding:14px 16px!important;display:grid;grid-template-columns:1fr auto;gap:5px}.work-item small{color:#817783}.work-badge{align-self:start;border-radius:999px;padding:5px 9px;background:#f7f0e8;color:#756975;font-size:11px;font-weight:800}.work-empty{padding:18px;border:1px dashed rgba(92,72,104,.18);border-radius:18px;color:#817783;text-align:center}.work-form{display:grid;gap:12px}.work-form label{display:grid;gap:6px;font-weight:700;color:#6f6672}.work-form input,.work-form select,.work-form textarea{width:100%;box-sizing:border-box;border:1px solid #e6dce4;border-radius:14px;padding:12px 13px;background:#fff;font:inherit}.work-form textarea{min-height:90px;resize:vertical}.work-actions{display:flex;gap:10px;justify-content:flex-end}.work-cancel{border:0;background:#f2ecef;color:#655b67;border-radius:999px;padding:10px 15px;font-weight:800}.work-save{border:0;background:#d989aa;color:white;border-radius:999px;padding:10px 17px;font-weight:800}
+ `;document.head.appendChild(s)
+}
+function openCrefitoItem(kind){
+ const labels={demanda:"Nova demanda",projeto:"Novo projeto",reuniao:"Nova reunião",pauta:"Nova pauta / acompanhamento"};
+ const dlg=document.createElement("dialog");dlg.className="app-dialog";dlg.innerHTML=`<div class="dialog-card"><div class="dialog-head"><div><div class="eyebrow">🏛️ CREFITO-11</div><h2>${labels[kind]}</h2></div><button type="button" class="dialog-close" aria-label="Fechar">×</button></div><form class="work-form" id="crefitoForm">
+ <label>Título<input id="cTitle" required placeholder="O que precisa ser acompanhado?"></label>
+ <label>Data<input id="cDate" type="date" value="${new Date().toISOString().slice(0,10)}"></label>
+ ${kind!=="reuniao"?`<label>Status<select id="cStatus"><option>Aberto</option><option>Em andamento</option><option>Concluído</option><option>Aguardando</option></select></label>`:`<label>Horário<input id="cTime" type="time"></label>`}
+ <label>Prioridade<select id="cPriority"><option>Normal</option><option>Alta</option><option>Baixa</option></select></label>
+ <label>Observação<textarea id="cNote" placeholder="Anotações, próximos passos ou contexto..."></textarea></label>
+ <div class="work-actions"><button type="button" class="work-cancel">Cancelar</button><button class="work-save" type="submit">Salvar</button></div>
+ </form></div>`;
+ document.body.appendChild(dlg);dlg.showModal();
+ const close=()=>{if(dlg.open)dlg.close();setTimeout(()=>dlg.remove(),0)};
+ dlg.querySelector(".dialog-close").onclick=close;dlg.querySelector(".work-cancel").onclick=close;
+ dlg.addEventListener("click",e=>{if(e.target===dlg)close()});
+ dlg.querySelector("form").onsubmit=e=>{e.preventDefault();const arr=loadCrefito();arr.push({id:uid(),kind,title:dlg.querySelector("#cTitle").value.trim(),date:dlg.querySelector("#cDate").value,status:dlg.querySelector("#cStatus")?.value||"Agendada",time:dlg.querySelector("#cTime")?.value||"",priority:dlg.querySelector("#cPriority").value,note:dlg.querySelector("#cNote").value.trim(),createdAt:Date.now()});saveCrefito(arr);close();renderTrabalhoSub("crefito")};
+}
+function renderCrefito(){
+ ensureWorkStyles();ensureCrefitoStyles();
+ const all=loadCrefito(), today=new Date().toISOString().slice(0,10), open=all.filter(x=>x.status!=="Concluído"), upcoming=all.filter(x=>x.kind==="reuniao"&&x.date>=today).sort((a,b)=>(a.date+a.time).localeCompare(b.date+b.time));
+ const labels={demanda:"Demanda",projeto:"Projeto",reuniao:"Reunião",pauta:"Pauta"};
+ const item=x=>`<article class="card work-item"><div><strong>${x.title}</strong><small>${x.date?new Date(x.date+"T12:00:00").toLocaleDateString("pt-BR"):"Sem data"}${x.time?` · ${x.time}`:""} · ${labels[x.kind]} · ${x.priority}</small>${x.note?`<small>${x.note}</small>`:""}</div><span class="work-badge">${x.status||"Agendada"}</span></article>`;
+ app.innerHTML=`<section class="hero"><div class="eyebrow">💼 TRABALHO</div><h2>🏛️ CREFITO-11</h2><p>Um espaço próprio para acompanhar o trabalho oficial, sem misturar com a vida pessoal.</p></section>
+ <div class="work-subnav"><button class="work-back" id="backWork">← Trabalho</button><p class="work-subtitle">ROTINA OFICIAL · 08:00–14:00</p></div>
+ <section class="work-summary"><div class="work-stat"><b>${open.length}</b><span>itens em aberto</span></div><div class="work-stat"><b>${upcoming.length}</b><span>reuniões futuras</span></div></section>
+ <section class="work-section"><div class="work-section-head"><h3>📋 Demandas</h3><button class="work-add" data-add="demanda">+ adicionar</button></div><div class="work-list">${all.filter(x=>x.kind==="demanda").slice(-5).reverse().map(item).join("")||`<div class="work-empty">Nenhuma demanda registrada ainda.</div>`}</div></section>
+ <section class="work-section"><div class="work-section-head"><h3>📁 Projetos</h3><button class="work-add" data-add="projeto">+ adicionar</button></div><div class="work-list">${all.filter(x=>x.kind==="projeto").slice(-5).reverse().map(item).join("")||`<div class="work-empty">Nenhum projeto registrado ainda.</div>`}</div></section>
+ <section class="work-section"><div class="work-section-head"><h3>🗓️ Reuniões</h3><button class="work-add" data-add="reuniao">+ adicionar</button></div><div class="work-list">${upcoming.slice(0,5).map(item).join("")||`<div class="work-empty">Nenhuma reunião futura registrada.</div>`}</div></section>
+ <section class="work-section"><div class="work-section-head"><h3>📝 Pautas & acompanhamentos</h3><button class="work-add" data-add="pauta">+ adicionar</button></div><div class="work-list">${all.filter(x=>x.kind==="pauta").slice(-5).reverse().map(item).join("")||`<div class="work-empty">Nenhuma pauta registrada ainda.</div>`}</div></section>
+ <div class="work-rule">O que for realmente importante pode depois alimentar o Meu Dia. Registrar aqui não cria obrigação automaticamente.</div>`;
+ document.getElementById("backWork").onclick=()=>{location.hash="trabalho"};document.querySelectorAll("[data-add]").forEach(b=>b.onclick=()=>openCrefitoItem(b.dataset.add));
+}
 function renderTrabalhoSub(kind){
+ if(kind==="crefito"){renderCrefito();return}
  ensureWorkStyles();
  const cfg={
-  crefito:{icon:"🏛️",name:"CREFITO-11",desc:"Seu espaço para o trabalho oficial.",tag:"ROTINA OFICIAL",panels:[["📋 Demandas","Registrar o que precisa ser acompanhado ou entregue."],["📁 Projetos","Organizar assuntos e projetos sem misturar com a vida pessoal."],["⏱️ Rotina","Referência atual: trabalho oficial das 08:00 às 14:00."]]},
   bec:{icon:"🌿",name:"BEC",desc:"Seu espaço para a empresa, projetos e operações.",tag:"EMPRESA",panels:[["📋 Demandas","Registrar o que precisa ser resolvido na operação da BEC."],["💡 Projetos","Manter projetos, ideias e próximos passos em um lugar próprio."],["📦 Produtos & serviços","Organizar iniciativas da BEC sem lançá-las automaticamente como gasto financeiro."]]},
-  tiktok:{icon:"🎵",name:"TikTok",desc:"Seu espaço para conteúdo e presença digital.",tag:"CONTEÚDO",panels:[["💡 Ideias","Guardar ideias de vídeos e conteúdos antes de decidir quando publicar."],["🎬 Produção","Acompanhar conteúdos em preparação, gravação e edição."],["📅 Publicações","Organizar o que foi publicado e o que está planejado."]] }
+  tiktok:{icon:"🎵",name:"TikTok",desc:"Seu espaço para conteúdo e presença digital.",tag:"CONTEÚDO",panels:[["💡 Ideias","Guardar ideias de vídeos e conteúdos antes de decidir quando publicar."],["🎬 Produção","Acompanhar conteúdos em preparação, gravação e edição."],["📅 Publicações","Organizar o que foi publicado e o que está planejado."]]}
  }[kind];
- app.innerHTML=`<section class="hero"><div class="eyebrow">💼 TRABALHO</div><h2>${cfg.icon} ${cfg.name}</h2><p>${cfg.desc}</p></section>
- <div class="work-subnav"><button class="work-back" id="backWork">← Trabalho</button><p class="work-subtitle">${cfg.tag}</p></div>
- <section class="work-panels">${cfg.panels.map(x=>`<article class="card work-panel"><span class="panel-tag">${cfg.tag}</span><h3>${x[0]}</h3><span>${x[1]}</span></article>`).join("")}</section>
- <div class="work-rule">Nada aqui vira obrigação automaticamente. Primeiro organizamos; depois decidimos o que merece entrar no Meu Dia.</div>`;
+ app.innerHTML=`<section class="hero"><div class="eyebrow">💼 TRABALHO</div><h2>${cfg.icon} ${cfg.name}</h2><p>${cfg.desc}</p></section><div class="work-subnav"><button class="work-back" id="backWork">← Trabalho</button><p class="work-subtitle">${cfg.tag}</p></div><section class="work-panels">${cfg.panels.map(x=>`<article class="card work-panel"><span class="panel-tag">${cfg.tag}</span><h3>${x[0]}</h3><span>${x[1]}</span></article>`).join("")}</section><div class="work-rule">Nada aqui vira obrigação automaticamente. Primeiro organizamos; depois decidimos o que merece entrar no Meu Dia.</div>`;
  document.getElementById("backWork").onclick=()=>{location.hash="trabalho"};
 }
 
