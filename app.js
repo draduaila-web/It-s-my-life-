@@ -1116,6 +1116,67 @@ const CASA_HOW={
  roup10:{title:"Conservar e organizar o armário",time:"15–20 min",products:[],materials:["Pano de microfibra","Cabides","Organizadores, se necessários"],steps:["Retire apenas o necessário para trabalhar por uma categoria.","Confira se as peças estão limpas e completamente secas.","Limpe prateleiras e superfícies com pano adequado.","Separe peças sem uso, para conserto ou para doação.","Devolva as roupas por categoria, deixando as mais usadas acessíveis."],tip:"A organização deve facilitar a rotina, não criar um projeto permanente."}
 };
 
+
+const CASA_MANUAL_PROCEDURES=[
+ {id:"manual-coz-bancada",area:"Cozinha",title:"Bancadas e superfícies",time:"5–10 min",products:["Cif Espuma Milagrosa"],materials:["Pano de microfibra","Pano multiuso"],steps:["Retire objetos e migalhas.","Passe pano multiuso úmido.","Para gordura, aplique Cif Espuma Milagrosa na superfície compatível, aja conforme o rótulo e remova com pano limpo."],tip:"O manual recomenda produto específico para gordura e pano limpo para finalizar."},
+ {id:"manual-coz-pia",area:"Cozinha",title:"Pia",time:"5 min",products:["Qualitá Home Lava-Louças Líquido Coco"],materials:["Esponja","Pano"],steps:["Retire resíduos.","Lave com lava-louças líquido de coco e esponja.","Enxágue e seque."],tip:"Deixar a pia limpa e seca facilita a manutenção seguinte."},
+ {id:"manual-coz-fogao",area:"Cozinha",title:"Fogão / cooktop",time:"5–10 min",products:["Cif Espuma Milagrosa"],materials:["Pano","Esponja"],steps:["Remova resíduos.","Use produto apropriado para gordura.","Passe pano úmido e finalize com pano limpo."],tip:"Use somente produto compatível com a superfície."},
+ {id:"manual-coz-armarios",area:"Cozinha",title:"Frentes de armários",time:"5–10 min",products:["Cif Espuma Milagrosa"],materials:["Pano de microfibra"],steps:["Retire marcas e gordura com pano levemente úmido.","Em sujeira engordurada, use produto compatível.","Finalize com pano limpo."],tip:"Teste o produto em pequena área quando houver dúvida sobre compatibilidade."},
+ {id:"manual-coz-piso",area:"Cozinha",title:"Piso da cozinha",time:"10–15 min",products:["Solução apropriada para cerâmica"],materials:["Vassoura ou aspirador","Mop","Balde"],steps:["Remova resíduos com vassoura ou aspirador.","Passe mop com solução apropriada para cerâmica.","Evite excesso de água e deixe secar."],tip:"Remover a sujeira solta antes do pano evita espalhar resíduos."},
+ {id:"manual-sala-poeira",area:"Sala de TV, antessala e corredores",title:"Poeira de superfícies",time:"5–10 min",products:[],materials:["Espanador","Pano de microfibra","Pano multiuso"],steps:["Retire objetos.","Passe espanador ou pano de microfibra.","Finalize com pano multiuso quando necessário."],tip:"Trabalhe por partes para não espalhar a poeira."},
+ {id:"manual-sala-sofa",area:"Sala de TV, antessala e corredores",title:"Sofá",time:"10 min",products:[],materials:["Aspirador"],steps:["Aspire assentos, encostos, frestas e laterais.","Não encharque o tecido."],tip:"O manual orienta evitar água em excesso no tecido."},
+ {id:"manual-sala-esteira",area:"Sala de TV, antessala e corredores",title:"Esteira",time:"5 min",products:[],materials:["Pano de microfibra"],steps:["Remova poeira.","Limpe superfícies externas com pano levemente úmido.","Não molhe partes elétricas."],tip:"Componentes elétricos devem permanecer secos."},
+ {id:"manual-sala-livros",area:"Sala de TV, antessala e corredores",title:"Livros",time:"5–10 min",products:[],materials:["Espanador","Pano seco"],steps:["Tire poeira das capas e prateleiras.","Evite umidade excessiva."],tip:"Pano seco é a opção-base para preservar livros."},
+ {id:"manual-sala-porcelanato",area:"Sala de TV, antessala e corredores",title:"Piso de porcelanato",time:"10–15 min",products:["Solução compatível com porcelanato"],materials:["Aspirador ou vassoura","Mop"],steps:["Aspire ou varra.","Passe mop bem torcido com solução compatível.","Finalize sem excesso de água."],tip:"Evite abrasivos e excesso de produto."},
+ {id:"manual-quarto-cama",area:"Quartos",title:"Cama e organização",time:"5–10 min",products:[],materials:["Cesto de roupa","Panos"],steps:["Arrume a cama.","Recolha roupas e objetos.","Devolva cada item ao lugar."],tip:"A organização diária deve ser curta e objetiva."},
+ {id:"manual-quarto-poeira",area:"Quartos",title:"Poeira",time:"5–10 min",products:[],materials:["Pano de microfibra"],steps:["Limpe as superfícies com pano de microfibra.","Comece pelas partes mais altas."],tip:"De cima para baixo reduz retrabalho."},
+ {id:"manual-quarto-piso",area:"Quartos",title:"Piso dos quartos",time:"10 min",products:["Solução compatível com o piso"],materials:["Aspirador ou vassoura","Mop"],steps:["Aspire ou varra.","Passe mop bem torcido.","Deixe secar."],tip:"Evite excesso de água."},
+ {id:"manual-quarto-espelhos",area:"Quartos",title:"Espelhos",time:"3–5 min",products:[],materials:["Pano próprio para vidro","Rodo de vidro"],steps:["Use pouca umidade.","Limpe a superfície.","Finalize com pano ou rodo de vidro."],tip:"Evite excesso de produto e umidade."},
+ {id:"manual-banheiro-bancada",area:"Banheiros",title:"Bancada e cuba",time:"5 min",products:["Produto adequado"],materials:["Esponja","Pano"],steps:["Retire objetos.","Lave/limpe com produto compatível.","Enxágue quando necessário e seque."],tip:"A compatibilidade do produto depende da superfície."},
+ {id:"manual-banheiro-vaso",area:"Banheiros",title:"Vaso sanitário",time:"5–10 min",products:["Produto adequado para vaso sanitário"],materials:["Escova de vaso/refil","Pano"],steps:["Aplique o produto próprio na parte interna.","Escove.","Acione a descarga.","Limpe a parte externa com pano."],tip:"Use a escova/refil específico para o vaso."},
+ {id:"manual-banheiro-box",area:"Banheiros",title:"Box",time:"10 min",products:["Produto compatível com vidro e metais"],materials:["Rodo","Pano","Esponja"],steps:["Limpe os vidros com rodo e pano.","Remova resíduos de sabonete.","Limpe metais sem produto abrasivo."],tip:"Evite abrasivos nos metais."},
+ {id:"manual-banheiro-piso",area:"Banheiros",title:"Piso cerâmico",time:"10 min",products:["Solução compatível"],materials:["Vassoura","Mop","Escova"],steps:["Varra ou aspire.","Aplique solução compatível.","Esfregue pontos necessários.","Retire excesso de água."],tip:"Cuidado com rejuntes muito encharcados."},
+ {id:"manual-lav-maquina",area:"Lavanderia",title:"Máquina LG",time:"5 min",products:[],materials:["Pano de microfibra"],steps:["Após o uso, retire a roupa.","Deixe a porta aberta para ventilar.","Limpe a borracha da porta.","Limpe as superfícies externas com pano levemente úmido."],tip:"A ventilação após o uso faz parte da rotina de conservação registrada no manual."},
+ {id:"manual-lav-tanque",area:"Lavanderia",title:"Tanque e bancada",time:"5–10 min",products:["Produto compatível"],materials:["Esponja","Pano"],steps:["Retire objetos.","Limpe tanque e bancada.","Seque."],tip:"Mantenha a área livre para a próxima lavagem."},
+ {id:"manual-lav-panos",area:"Lavanderia",title:"Panos de limpeza",time:"10–15 min + ciclo",products:["Produto de lavagem adequado"],materials:["Máquina LG","Cesto"],steps:["Separe os panos conforme o uso.","Lave de acordo com o tipo de tecido e orientação da máquina.","Retire após o ciclo e encaminhe para secagem."],tip:"Separar panos por uso ajuda a evitar contaminação cruzada."},
+ {id:"manual-lav-organizacao",area:"Lavanderia",title:"Organização da lavanderia",time:"5–10 min",products:[],materials:["Recipientes/organizadores"],steps:["Mantenha produtos fechados.","Identifique os recipientes.","Separe os produtos por função."],tip:"Produtos concentrados devem permanecer em suas embalagens originais e identificadas."},
+ {id:"manual-calcados",area:"Quarto de calçados",title:"Calçados",time:"10–15 min",products:[],materials:["Escova","Pano","Secador de calçados"],steps:["Retire poeira e sujeira das solas.","Use o secador de calçados quando necessário.","Organize por categoria."],tip:"Só guarde o calçado depois de completamente seco."},
+ {id:"manual-calcados-piso",area:"Quarto de calçados",title:"Piso",time:"5–10 min",products:["Solução compatível com o piso"],materials:["Aspirador ou vassoura","Mop"],steps:["Aspire ou varra.","Passe mop bem torcido."],tip:"Evite excesso de água."},
+ {id:"manual-rouparia-prateleiras",area:"Rouparia / armário de enxoval",title:"Prateleiras",time:"10–15 min",products:[],materials:["Pano de microfibra","Espanador"],steps:["Retire itens por partes.","Tire o pó.","Limpe com pano levemente úmido.","Devolva os itens organizados."],tip:"Trabalhar por pequenas partes evita desmontar todo o armário."},
+ {id:"manual-rouparia-enxoval",area:"Rouparia / armário de enxoval",title:"Enxoval",time:"10–20 min",products:[],materials:["Organizadores"],steps:["Dobre e agrupe por categoria.","Mantenha fácil acesso às peças de uso frequente."],tip:"A organização deve favorecer o uso frequente."},
+ {id:"manual-varanda-residuos",area:"Varanda grande / área do cachorro",title:"Fezes e sujeiras pontuais",time:"3–5 min",products:[],materials:["Pá/saco","Luvas"],steps:["Recolha resíduos sólidos antes de molhar o piso.","Descarte adequadamente."],tip:"Primeiro remova os sólidos; só depois faça a lavagem."},
+ {id:"manual-varanda-poeira",area:"Varanda grande / área do cachorro",title:"Poeira, pelos e folhas",time:"10 min",products:[],materials:["Vassoura","Pá","Aspirador"],steps:["Varra ou aspire conforme o equipamento disponível.","Recolha os resíduos."],tip:"Escolha o equipamento que gere menos esforço para a área."},
+ {id:"manual-varanda-pedra",area:"Varanda grande / área do cachorro",title:"Pedra portuguesa",time:"15–30 min",products:["Produto compatível com pedra"],materials:["Vassoura","Escova","Mangueira ou WAP"],steps:["Remova sólidos primeiro.","Lave/esfregue com água e produto compatível.","Use a WAP apenas quando a pressão for adequada ao local e às juntas."],tip:"Teste produto e pressão em pequena área."},
+ {id:"manual-varanda-moveis",area:"Varanda grande / área do cachorro",title:"Mobiliário",time:"5–10 min",products:["Produto compatível com o material, quando necessário"],materials:["Pano de microfibra"],steps:["Retire poeira.","Limpe com pano compatível com o material."],tip:"A superfície do móvel determina o produto adequado."},
+ {id:"manual-garagem-piso",area:"Garagem",title:"Piso",time:"20–30 min",products:["Produto compatível com o piso, quando necessário"],materials:["Vassoura","Mangueira ou WAP"],steps:["Varra primeiro.","Lave com mangueira ou WAP quando necessário.","Direcione a água para o escoamento."],tip:"Observe sempre o escoamento antes de usar água em volume."},
+ {id:"manual-garagem-cantos",area:"Garagem",title:"Cantinhos e paredes baixas",time:"10–15 min",products:["Produto compatível, quando necessário"],materials:["Escova","Mangueira"],steps:["Escove a sujeira acumulada.","Remova com água."],tip:"Trabalhe por pequenas áreas."},
+ {id:"manual-janelas-vidros",area:"Janelas, grades e telas",title:"Vidros",time:"5–10 min por janela",products:["Produto compatível para vidro"],materials:["Pano","Rodo de vidro"],steps:["Remova poeira.","Limpe com pano adequado.","Finalize com rodo de vidro."],tip:"Limpar uma janela por vez ajuda a controlar o tempo."},
+ {id:"manual-janelas-grades",area:"Janelas, grades e telas",title:"Grades",time:"5–10 min",products:["Produto compatível"],materials:["Pano","Escova"],steps:["Limpe separadamente com pano úmido ou escova.","Não dependa do acessório de telas."],tip:"Grades e telas têm procedimentos diferentes."},
+ {id:"manual-janelas-telas",area:"Janelas, grades e telas",title:"Telas / mosquiteiros",time:"5–10 min",products:[],materials:["Ferramenta de cabo longo com cabeça própria para tela"],steps:["Use a ferramenta própria.","Faça movimentos suaves para retirar poeira."],tip:"Movimentos suaves preservam a tela."},
+ {id:"manual-jardim-folhas",area:"Jardim / áreas externas",title:"Folhas",time:"10–20 min",products:[],materials:["Vassoura","Pá"],steps:["Recolha folhas e detritos com vassoura e pá.","Descarte ou destine os resíduos adequadamente."],tip:"Faça a coleta antes de lavar as áreas externas."},
+ {id:"manual-jardim-cimento",area:"Jardim / áreas externas",title:"Área cimentada",time:"10–20 min",products:["Produto compatível, quando necessário"],materials:["Vassoura","Mangueira"],steps:["Varra.","Lave quando necessário.","Observe o escoamento."],tip:"Não espalhe resíduos de animais durante a lavagem."},
+ {id:"manual-jardim-animais",area:"Jardim / áreas externas",title:"Resíduos de animais",time:"3–5 min",products:[],materials:["Pá/saco","Luvas"],steps:["Recolha antes da lavagem.","Descarte adequadamente."],tip:"Sempre remova os resíduos sólidos antes de molhar a área."},
+ {id:"manual-piscina-superficie",area:"Piscina de 6.000 L",title:"Superfície",time:"5–10 min",products:[],materials:["Peneira/limpador de piscina"],steps:["Retire folhas e resíduos da água antes da limpeza."],tip:"Faça a remoção superficial antes de qualquer outra etapa."},
+ {id:"manual-piscina-bordas",area:"Piscina de 6.000 L",title:"Bordas",time:"5–10 min",products:["Produto compatível com o revestimento"],materials:["Pano/esponja"],steps:["Limpe a borda com produto compatível.","Enxágue sem deixar resíduos na água."],tip:"A compatibilidade com o revestimento é essencial."},
+ {id:"manual-piscina-agua",area:"Piscina de 6.000 L",title:"Tratamento da água",time:"Conforme necessidade",products:["Produtos próprios de tratamento"],materials:["Medidores"],steps:["Siga exclusivamente as instruções dos produtos específicos.","Siga também as orientações do fabricante da piscina."],tip:"Não improvise dosagens."},
+ {id:"manual-edicula-escritorio",area:"Edícula — futuro escritório",title:"Preparação",time:"20–30 min",products:[],materials:["Ferramentas apropriadas"],steps:["Quando chegar o momento, desmonte a cama.","Libere a área."],tip:"É um projeto, não uma rotina diária."},
+ {id:"manual-edicula-escritorio-piso",area:"Edícula — futuro escritório",title:"Poeira e piso",time:"15–20 min",products:["Solução compatível com o piso"],materials:["Espanador","Aspirador ou vassoura","Mop"],steps:["Remova poeira de cima para baixo.","Aspire/varra.","Limpe o piso."],tip:"Trabalhar de cima para baixo evita retrabalho."},
+ {id:"manual-deposito-org",area:"Edícula — depósito",title:"Organização",time:"20–30 min por bloco",products:[],materials:["Caixas/organizadores","Pano","Vassoura"],steps:["Separe por categorias.","Retire itens sem uso.","Limpe prateleiras.","Devolva em caixas identificadas."],tip:"O próprio manual trata essa tarefa como organização por pequenos blocos."},
+ {id:"manual-deposito-piso",area:"Edícula — depósito",title:"Limpeza do piso",time:"10–20 min",products:["Solução compatível com o piso"],materials:["Vassoura ou aspirador","Mop"],steps:["Retire objetos por pequenos blocos.","Varra/aspire.","Passe mop ou pano compatível."],tip:"Faça por pequenos blocos para não transformar a tarefa em um projeto enorme."},
+ {id:"manual-edicula-pia",area:"Edícula — varanda e pia grande",title:"Pia grande",time:"5–10 min",products:["Qualitá Home Lava-Louças Líquido Coco"],materials:["Esponja","Pano"],steps:["Remova resíduos.","Lave e enxágue.","Finalize com pano limpo."],tip:"Deixe a pia seca ao final."},
+ {id:"manual-edicula-varanda",area:"Edícula — varanda e pia grande",title:"Varanda",time:"10–20 min",products:["Produto compatível, quando necessário"],materials:["Vassoura","Mangueira","Escova"],steps:["Varra.","Retire pó e resíduos.","Lave quando necessário."],tip:"Retire resíduos sólidos antes da lavagem."},
+ {id:"manual-edicula-marcenaria",area:"Edícula — varanda e pia grande",title:"Área de marcenaria",time:"10–20 min",products:[],materials:["Vassoura ou aspirador","Pano"],steps:["Recolha serragem e resíduos primeiro.","Depois limpe bancadas e piso sem espalhar a poeira."],tip:"A primeira etapa é conter a serragem, não espalhá-la."}
+];
+
+const CASA_RECIPES=[
+ {id:"recipe-panos-multiuso",title:"Panos Multiuso Úmidos",time:"5–10 min",yieldText:"Recipiente abastecido",ingredients:[["Água","800 ml"],["Álcool líquido 70%","100 ml"],["Amaciante concentrado","50 ml"],["Lava-louças líquido de coco","50 ml"],["Panos limpos de algodão/microfibra","quantidade suficiente"]],materials:["Recipiente com tampa"],steps:["Misture 800 ml de água com 100 ml de álcool 70%.","Adicione 50 ml de amaciante concentrado.","Adicione 50 ml de lava-louças líquido de coco.","Misture suavemente.","Coloque os panos limpos no recipiente.","Umedeça os panos com a solução.","Torça/pressione até ficarem úmidos, sem excesso de líquido.","Guarde o recipiente fechado."],tip:"Uso para móveis, portas, puxadores, rodapés e pequenas sujeiras. Não usar como desinfetante nem em eletrônicos; em superfícies de preparo de alimentos, fazer a limpeza adequada posteriormente."},
+ {id:"recipe-panos-secadora",title:"Panos Reutilizáveis para Secadora",time:"5 min",yieldText:"8–10 panos de aproximadamente 15 × 15 cm",ingredients:[["Amaciante concentrado","250 ml"],["Água","250 ml"],["Panos de algodão/flanela","8–10 unidades"]],materials:["Recipiente com tampa"],steps:["Misture 250 ml de amaciante concentrado com 250 ml de água.","Coloque os panos no recipiente.","Despeje a solução sobre os panos.","Pressione para absorver.","Na hora de usar, retire um pano e torça bem: deve ficar úmido, não pingando.","Coloque 1 pano na secadora junto com a roupa.","Depois do ciclo, retire e devolva ao recipiente para reutilização."],tip:"A receita-base do manual usa proporção 1:1 e orienta retirar o excesso antes da secadora."},
+ {id:"recipe-coala",title:"Solução de Coala Chá Branco",time:"2–3 min",yieldText:"1 litro",ingredients:[["Água","1 litro"],["Coala Chá Branco concentrado","8 gotas"]],materials:["Recipiente apropriado"],steps:["Coloque 1 litro de água no recipiente.","Adicione 8 gotas de Coala Chá Branco.","Misture.","Aplique com pano úmido na superfície compatível.","Teste primeiro em pequena área."],tip:"O manual registra que não é necessário enxaguar quando usado conforme a orientação do fabricante. Não misture Coala com água sanitária, vinagre, álcool ou outros produtos sem orientação específica."}
+];
+
+const CASA_INVENTORY_PRODUCTS=["Qualitá Home Lava-Louças Líquido Coco","Cif Espuma Milagrosa — Derrete Gordura 500 ml","Coala Chá Branco Limpador Perfumado","Querosene","Sabão de querosene","Água sanitária","Tudax","Solução diluída de Coala + álcool + água já preparada","Amaciante concentrado","Álcool líquido 70%","Panos de algodão/microfibra e flanela","Panos próprios para secadora","Panos multiuso úmidos"];
+const CASA_INVENTORY_TOOLS=["Aspirador","Vassouras e escovas","Pá de lixo","Mop/esfregão com balde","Rodos e limpadores de vidro/box","Panos de microfibra","Esponjas e escovas","Espanador de penas","Lavadora/secadora LG Direct Drive 11/6 kg","Secador de calçados","Mangueiras — 2 unidades","Lavadora de alta pressão/WAP","Ferramenta de cabo longo para telas/mosquiteiros","Pia grande da edícula","Recipientes organizadores","Escovas para vaso sanitário e refil"];
+
 const CASA_WEB=[
  ["🧹 Dicas de limpeza","https://www.google.com/search?q=dicas+de+limpeza+da+casa"],
  ["👕 Cuidados com roupas","https://www.google.com/search?q=dicas+cuidados+com+roupas+lavagem+secagem"],
@@ -1125,6 +1186,35 @@ const CASA_WEB=[
  ["✨ Organização da casa","https://www.google.com/search?q=dicas+organizacao+da+casa"]
 ];
 
+
+
+function casaManualById(id){return CASA_MANUAL_PROCEDURES.find(x=>x.id===id)||null;}
+function openCasaManual(id){
+ const h=casaManualById(id);if(!h)return;
+ const o=document.createElement("div");o.className="mv-how-overlay";
+ const products=h.products.length?h.products:["Nenhum produto específico."];
+ o.innerHTML=`<div class="mv-how"><button class="mv-how-x" type="button">×</button><div class="eyebrow">MANUAL DA CASA · ${escapeHtml(h.area)}</div><h2>🧽 ${escapeHtml(h.title)}</h2><div class="casa-how-top-actions"><button type="button" class="secondary" id="editManualCasa">✏️ Editar este procedimento</button></div><div class="casa-how-meta"><span>⏱️ ${escapeHtml(h.time)}</span></div><h3>🧴 Produtos</h3><ul>${products.map(x=>`<li><span>${escapeHtml(x)}</span><button type="button" class="casa-buy-mini" data-casa-buy="${escapeHtml(x)}">＋ compras</button></li>`).join("")}</ul><h3>🧰 Utensílios / materiais</h3><ul>${h.materials.map(x=>`<li><span>${escapeHtml(x)}</span><button type="button" class="casa-buy-mini" data-casa-buy="${escapeHtml(x)}">＋ compras</button></li>`).join("")}</ul><h3>Passo a passo</h3><ol>${h.steps.map(x=>`<li>${escapeHtml(x)}</li>`).join("")}</ol><div class="casa-how-tip"><strong>💡 Dica</strong><p>${escapeHtml(h.tip)}</p></div></div>`;
+ document.body.appendChild(o);
+ o.querySelector(".mv-how-x").onclick=()=>o.remove();
+ o.addEventListener("click",e=>{if(e.target===o)o.remove()});
+ o.querySelector("#editManualCasa").onclick=()=>{o.remove();openCasaManualEditor(id)};
+ o.querySelectorAll("[data-casa-buy]").forEach(b=>b.onclick=()=>{addCasaShopping(b.dataset.casaBuy,h.title);b.textContent="✓ na lista";b.disabled=true;});
+}
+function openCasaManualEditor(id){
+ const h=casaManualById(id);if(!h)return;const custom=loadCasaHowCustom()[id]||{};const dlg=document.createElement("dialog");
+ dlg.innerHTML=`<form method="dialog" class="modal-card" id="manualCasaEdit"><div class="modal-head"><div><div class="eyebrow">MANUAL DA CASA</div><h2>Editar procedimento</h2></div><button class="icon-btn" value="cancel">×</button></div><label>Ambiente<input id="mhArea" value="${escapeHtml(custom.area||h.area)}"></label><label>Atividade<input id="mhTitle" value="${escapeHtml(custom.title||h.title)}"></label><label>Tempo<input id="mhTime" value="${escapeHtml(custom.time||h.time)}"></label><label>🧴 Produtos <small>um por linha</small><textarea id="mhProducts" rows="5">${escapeHtml((custom.products||h.products).join("\n"))}</textarea></label><label>🧰 Utensílios / materiais <small>um por linha</small><textarea id="mhMaterials" rows="5">${escapeHtml((custom.materials||h.materials).join("\n"))}</textarea></label><label>Passo a passo <small>um passo por linha</small><textarea id="mhSteps" rows="8">${escapeHtml((custom.steps||h.steps).join("\n"))}</textarea></label><label>💡 Dica<textarea id="mhTip" rows="3">${escapeHtml(custom.tip||h.tip)}</textarea></label><div class="modal-actions"><div class="grow"></div><button type="button" class="secondary" id="cancelMh">Cancelar</button><button class="primary" value="default">Salvar alterações</button></div></form>`;
+ document.body.appendChild(dlg);dlg.showModal();dlg.querySelector("#cancelMh").onclick=()=>{dlg.close();dlg.remove()};
+ dlg.querySelector("#manualCasaEdit").addEventListener("submit",e=>{e.preventDefault();const all=loadCasaHowCustom();all[id]={area:dlg.querySelector("#mhArea").value.trim()||h.area,title:dlg.querySelector("#mhTitle").value.trim()||h.title,time:dlg.querySelector("#mhTime").value.trim()||h.time,products:casaHowList(dlg.querySelector("#mhProducts").value),materials:casaHowList(dlg.querySelector("#mhMaterials").value),steps:casaHowList(dlg.querySelector("#mhSteps").value),tip:dlg.querySelector("#mhTip").value.trim()||h.tip};saveCasaHowCustom(all);dlg.close();dlg.remove();openCasaManual(id)});
+}
+function casaManualViewData(id){const h=casaManualById(id),c=loadCasaHowCustom()[id]||{};return h?{...h,...c,products:Array.isArray(c.products)?c.products:h.products,materials:Array.isArray(c.materials)?c.materials:h.materials,steps:Array.isArray(c.steps)?c.steps:h.steps}:null;}
+function renderCasaManual(){
+ const groups={};CASA_MANUAL_PROCEDURES.forEach(x=>{(groups[x.area]||(groups[x.area]=[])).push(x)});
+ return Object.entries(groups).map(([area,items])=>`<div class="card casa-manual-area"><div class="panel-head"><h3>🧽 ${escapeHtml(area)}</h3><span class="pill">${items.length}</span></div><div class="casa-manual-list">${items.map(x=>{const h=casaManualViewData(x.id);return `<div class="casa-manual-row"><div><strong>${escapeHtml(h.title)}</strong><small>⏱️ ${escapeHtml(h.time)}</small></div><button type="button" class="home-how" data-casa-manual="${x.id}">Como fazer →</button></div>`}).join("")}</div></div>`).join("");
+}
+function renderCasaRecipes(){
+ return CASA_RECIPES.map(r=>`<div class="card casa-recipe"><div class="panel-head"><h3>🧪 ${escapeHtml(r.title)}</h3><span class="pill">${escapeHtml(r.time)}</span></div><p class="note">Rendimento: ${escapeHtml(r.yieldText)}</p><h4>Ingredientes</h4><ul>${r.ingredients.map(([n,q])=>`<li><span>${escapeHtml(n)} — <b>${escapeHtml(q)}</b></span><button type="button" class="casa-buy-mini" data-recipe-buy="${escapeHtml(n)}">＋ compras</button></li>`).join("")}</ul><h4>Preparo</h4><ol>${r.steps.map(x=>`<li>${escapeHtml(x)}</li>`).join("")}</ol><div class="casa-how-tip"><strong>💡 Observação</strong><p>${escapeHtml(r.tip)}</p></div></div>`).join("");
+}
+function renderCasaInventory(){return `<div class="card casa-inventory"><div class="panel-head"><h3>🧴 Produtos que você tem</h3><span class="pill">${CASA_INVENTORY_PRODUCTS.length}</span></div><div class="chip-list">${CASA_INVENTORY_PRODUCTS.map(x=>`<span class="pill">${escapeHtml(x)}</span>`).join("")}</div><div class="panel-head inventory-tools-head"><h3>🧰 Utensílios e equipamentos</h3><span class="pill">${CASA_INVENTORY_TOOLS.length}</span></div><div class="chip-list">${CASA_INVENTORY_TOOLS.map(x=>`<span class="pill">${escapeHtml(x)}</span>`).join("")}</div></div>`;}
 
 const CASA_DURATION_KEY="minha-vida.casa.duration.v1";
 const CASA_DURATION={coz1:10,coz2:10,coz3:5,coz4:10,coz5:5,lim1:20,lim2:15,lim3:15,lim4:75,roup1:10,roup2:45,roup3:30,roup4:10,roup5:10,roup6:60,roup7:60,roup8:35,roup9:20,roup10:20,ani1:10,ani2:10,hen1:5,hen2:10,hen3:5,hen4:10,hen5:20};
@@ -1138,17 +1228,53 @@ function openCasaTaskEditor(id){
 
 function loadCasa(){try{const d=JSON.parse(localStorage.getItem(CASA_KEY));if(d)return {...CASA_BASE,...d};}catch{}return JSON.parse(JSON.stringify(CASA_BASE));}
 function saveCasa(d){localStorage.setItem(CASA_KEY,JSON.stringify(d));}
-function openCasaHow(id){
- const h=CASA_HOW[id];if(!h)return;
- const o=document.createElement("div");o.className="mv-how-overlay";
- o.innerHTML=`<div class="mv-how"><button class="mv-how-x" onclick="this.closest('.mv-how-overlay').remove()">×</button><div class="eyebrow">COMO FAZER</div><h2>🧺 ${escapeHtml(h.title)}</h2>
- <div class="casa-how-meta"><span>⏱️ ${escapeHtml(h.time)}</span></div>
- <h3>🧴 Produtos</h3><ul>${(h.products.length?h.products:["Nenhum produto específico — siga a orientação da etiqueta ou da superfície."]).map(x=>`<li>${escapeHtml(x)}</li>`).join("")}</ul>
- <h3>🧰 Materiais</h3><ul>${h.materials.map(x=>`<li>${escapeHtml(x)}</li>`).join("")}</ul>
- <h3>Passo a passo</h3><ol>${h.steps.map(x=>`<li>${escapeHtml(x)}</li>`).join("")}</ol>
- <div class="casa-how-tip"><strong>💡 Dica</strong><p>${escapeHtml(h.tip)}</p></div></div>`;
- document.body.appendChild(o);
+const CASA_HOW_CUSTOM_KEY="minha-vida.casa.how.v1";
+const CASA_SHOP_KEY="minha-vida.compras.casa.v1";
+function loadCasaHowCustom(){try{return JSON.parse(localStorage.getItem(CASA_HOW_CUSTOM_KEY)||"{}")}catch{return {}}}
+function saveCasaHowCustom(x){localStorage.setItem(CASA_HOW_CUSTOM_KEY,JSON.stringify(x))}
+function casaHowData(id){const base=CASA_HOW[id];if(!base)return null;const custom=loadCasaHowCustom()[id];if(!custom)return base;return {...base,...custom,products:Array.isArray(custom.products)?custom.products:base.products,materials:Array.isArray(custom.materials)?custom.materials:base.materials,steps:Array.isArray(custom.steps)?custom.steps:base.steps};}
+function loadCasaShopping(){try{return JSON.parse(localStorage.getItem(CASA_SHOP_KEY)||"[]")}catch{return []}}
+function saveCasaShopping(x){localStorage.setItem(CASA_SHOP_KEY,JSON.stringify(x))}
+function addCasaShopping(name,source){name=(name||"").trim();if(!name)return;const items=loadCasaShopping();if(!items.some(x=>x.name.toLowerCase()===name.toLowerCase()))items.push({id:uid(),name,source:source||"Casa",createdAt:Date.now(),done:false});saveCasaShopping(items);}
+function removeCasaShopping(id){saveCasaShopping(loadCasaShopping().filter(x=>x.id!==id))}
+function casaHowList(text){return String(text||"").split(/\n|;/).map(x=>x.trim()).filter(Boolean)}
+function openCasaHowEditor(id){
+ const h=casaHowData(id);if(!h)return;const dlg=document.createElement("dialog");
+ dlg.innerHTML=`<form method="dialog" class="modal-card" id="casaHowEdit"><div class="modal-head"><div><div class="eyebrow">🏠 CASA</div><h2>Editar como fazer</h2></div><button class="icon-btn" value="cancel">×</button></div>
+ <label>Nome<input id="chTitle" value="${escapeHtml(h.title)}"></label>
+ <label>Tempo estimado<input id="chTime" value="${escapeHtml(h.time)}"></label>
+ <label>🧴 Produtos <small>um por linha</small><textarea id="chProducts" rows="5">${escapeHtml(h.products.join("\\n"))}</textarea></label>
+ <label>🧰 Utensílios / materiais <small>um por linha</small><textarea id="chMaterials" rows="5">${escapeHtml(h.materials.join("\\n"))}</textarea></label>
+ <label>Passo a passo <small>um passo por linha</small><textarea id="chSteps" rows="8">${escapeHtml(h.steps.join("\\n"))}</textarea></label>
+ <label>💡 Dica<textarea id="chTip" rows="3">${escapeHtml(h.tip)}</textarea></label>
+ <div class="modal-actions"><div class="grow"></div><button type="button" class="secondary" id="cancelCh">Cancelar</button><button class="primary" value="default">Salvar alterações</button></div></form>`;
+ document.body.appendChild(dlg);dlg.showModal();dlg.querySelector("#cancelCh").onclick=()=>{dlg.close();dlg.remove()};
+ dlg.querySelector("#casaHowEdit").addEventListener("submit",e=>{e.preventDefault();const all=loadCasaHowCustom();all[id]={title:dlg.querySelector("#chTitle").value.trim()||h.title,time:dlg.querySelector("#chTime").value.trim()||h.time,products:casaHowList(dlg.querySelector("#chProducts").value),materials:casaHowList(dlg.querySelector("#chMaterials").value),steps:casaHowList(dlg.querySelector("#chSteps").value),tip:dlg.querySelector("#chTip").value.trim()||h.tip};saveCasaHowCustom(all);dlg.close();dlg.remove();openCasaHow(id)});
 }
+
+function openCasaHow(id){
+ const h=casaHowData(id);if(!h)return;
+ const o=document.createElement("div");o.className="mv-how-overlay";
+ const productRows=(h.products.length?h.products:["Nenhum produto específico — siga a orientação da etiqueta ou da superfície."]).map(x=>`<li><span>${escapeHtml(x)}</span><button type="button" class="casa-buy-mini" data-casa-buy="${escapeHtml(x)}">＋ compras</button></li>`).join("");
+ const materialRows=h.materials.map(x=>`<li><span>${escapeHtml(x)}</span><button type="button" class="casa-buy-mini" data-casa-buy="${escapeHtml(x)}">＋ compras</button></li>`).join("");
+ o.innerHTML=`<div class="mv-how"><button class="mv-how-x" onclick="this.closest('.mv-how-overlay').remove()">×</button><div class="eyebrow">COMO FAZER</div><h2>🧺 ${escapeHtml(h.title)}</h2>
+ <div class="casa-how-top-actions"><button type="button" class="secondary" id="editCasaHow">✏️ Editar este procedimento</button></div>
+ <div class="casa-how-meta"><span>⏱️ ${escapeHtml(h.time)}</span></div>
+ <h3>🧴 Produtos</h3><ul>${productRows}</ul>
+ <h3>🧰 Utensílios / materiais</h3><ul>${materialRows}</ul>
+ <h3>Passo a passo</h3><ol>${h.steps.map(x=>`<li>${escapeHtml(x)}</li>`).join("")}</ol>
+ <div class="casa-how-tip"><strong>💡 Dica</strong><p>${escapeHtml(h.tip)}</p></div>
+ <div class="casa-how-shopping-note">🛒 Quando algum produto ou utensílio estiver acabando, toque em <b>＋ compras</b>. Ele vai para a lista compartilhada de compras.</div></div>`;
+ document.body.appendChild(o);
+ o.querySelector("#editCasaHow").onclick=()=>{o.remove();openCasaHowEditor(id)};
+ o.querySelectorAll("[data-casa-buy]").forEach(b=>b.onclick=()=>{addCasaShopping(b.dataset.casaBuy,h.title);b.textContent="✓ na lista";b.disabled=true;});
+}
+function renderCasaShoppingMini(){
+ const items=loadCasaShopping();
+ if(!items.length)return `<div class="empty compact"><strong>Nenhum item da casa na lista.</strong><span>Quando algum produto ou utensílio estiver acabando, você pode enviá-lo daqui.</span></div>`;
+ return `<div class="casa-mini-shopping">${items.map(x=>`<div class="casa-mini-shop-row ${x.done?'done':''}"><label><input type="checkbox" data-casa-shop-done="${x.id}" ${x.done?'checked':''}><span>${escapeHtml(x.name)}</span></label><button type="button" class="more" data-casa-shop-del="${x.id}">×</button></div>`).join("")}<a class="food-big-link blue" href="#alimentacao">🛒 Abrir lista de compras</a></div>`;
+}
+
 function renderCasa(){
  const d=loadCasa();
  const all=d.areas.flatMap(a=>a.tasks), done=all.filter(x=>x.done).length;
@@ -1160,14 +1286,19 @@ function renderCasa(){
  <div class="section-title">ROTINAS</div>
  <div class="list">${d.areas.map(a=>`<div class="card home-area"><div class="panel-head"><h3>${a.icon} ${escapeHtml(a.title)}</h3><span class="pill">${a.tasks.length}</span></div>
  ${a.tasks.length?a.tasks.map(t=>`<div class="home-task-wrap"><label class="home-task ${t.done?"done":""}"><input type="checkbox" data-casa-task="${a.id}|${t.id}" ${t.done?"checked":""}><span><strong>${escapeHtml(t.name)}</strong><small>⏱️ ${escapeHtml(casaDuration(t.id))} · ⏰ ${escapeHtml(casaTime(t.id))} · ${escapeHtml(t.freq)} · ${escapeHtml(t.when)}</small></span></label><div class="home-task-actions">${CASA_HOW[t.id]?`<button type="button" class="home-how" data-casa-how="${t.id}">Como fazer →</button>`:""}<button type="button" class="home-edit" data-casa-edit="${t.id}">Editar</button></div></div>`).join(""):`<p class="note">Sem rotina cadastrada. Mantemos espaço para incluir apenas o que realmente for necessário.</p>`}</div>`).join("")}</div>
+ <div class="section-title">📖 MANUAL DA CASA · PROCEDIMENTOS</div><div class="list">${renderCasaManual()}</div><div class="section-title">🧪 RECEITAS DA CASA</div><div class="list">${renderCasaRecipes()}</div><div class="section-title">🧴 INVENTÁRIO DA CASA</div>${renderCasaInventory()}
  <div class="section-title">💡 DICAS PARA A CASA</div>
  <div class="card casa-web-card"><p class="note">Quando quiser aprofundar uma tarefa, abra um caminho para a internet. O conteúdo externo é complementar; o essencial continua dentro do MINHA VIDA.</p><div class="casa-web-grid">${CASA_WEB.map(([label,url])=>`<a class="casa-web-link" href="${url}" target="_blank" rel="noopener">${label}<span>↗</span></a>`).join("")}</div></div>
+ <div class="section-title">🛒 LISTA DE COMPRAS DA CASA</div><div class="card casa-shopping-card"><p class="note">Produtos e utensílios que você adicionou pelos procedimentos ficam aqui e também podem ser vistos na lista de compras.</p>${renderCasaShoppingMini()}</div>
  <div class="section-title">MANUTENÇÃO</div>
  <div class="card"><p class="note">Problemas, reparos e projetos da casa ficam aqui para não invadirem o dia. Só entram como prioridade quando realmente precisam de atenção.</p><button class="secondary" id="addMaintenance">＋ Adicionar manutenção</button></div>
  <div class="list">${d.maintenance.map(x=>`<div class="card maintenance-row"><div><strong>${escapeHtml(x.name)}</strong><span>${escapeHtml(x.note||"")}</span></div><button class="more" data-maint="${x.id}">✓</button></div>`).join("")||`<div class="empty compact"><strong>Nenhuma manutenção pendente.</strong><span>Ótimo. Não precisamos criar trabalho só para preencher espaço.</span></div>`}</div>`;
  document.querySelectorAll("[data-casa-task]").forEach(el=>el.onchange=()=>{const [aid,tid]=el.dataset.casaTask.split("|"),x=loadCasa(),a=x.areas.find(a=>a.id===aid),t=a.tasks.find(t=>t.id===tid);if(t){t.done=el.checked;saveCasa(x);renderCasa();}});
  document.querySelectorAll("[data-casa-how]").forEach(b=>b.onclick=()=>openCasaHow(b.dataset.casaHow));
  document.querySelectorAll("[data-casa-edit]").forEach(b=>b.onclick=()=>openCasaTaskEditor(b.dataset.casaEdit));
+ document.querySelectorAll("[data-casa-shop-done]").forEach(b=>b.onchange=()=>{const items=loadCasaShopping();const x=items.find(i=>i.id===b.dataset.casaShopDone);if(x)x.done=b.checked;saveCasaShopping(items);renderCasa();});
+ document.querySelectorAll("[data-casa-shop-del]").forEach(b=>b.onclick=()=>{removeCasaShopping(b.dataset.casaShopDel);renderCasa();});
+ document.querySelectorAll("[data-casa-manual]").forEach(b=>b.onclick=()=>openCasaManual(b.dataset.casaManual)); document.querySelectorAll("[data-recipe-buy]").forEach(b=>b.onclick=()=>{addCasaShopping(b.dataset.recipeBuy,"Receita da Casa");b.textContent="✓ na lista";b.disabled=true;});
  document.querySelector("#addMaintenance").onclick=()=>openCasaMaintenance();
  document.querySelectorAll("[data-maint]").forEach(b=>b.onclick=()=>{const x=loadCasa();x.maintenance=x.maintenance.filter(m=>m.id!==b.dataset.maint);saveCasa(x);renderCasa();});
 }
@@ -1421,8 +1552,12 @@ function openFoodMonthCreator(monthId){
  };
 }
 function renderFoodShopping(d){
- const items=foodShoppingItems(d),done=d.shoppingDone||{},hash=foodShoppingHash(items);
- return `<div class="food-shopping-head"><div><span class="eyebrow">AUTOMÁTICA</span><strong>Lista gerada pelo cardápio</strong><p>Se você alterar uma refeição, a lista é recalculada.</p></div><span class="food-count">${items.filter(x=>done[x.name]).length}/${items.length}</span></div><div class="food-shopping-list">${items.map((x,i)=>{const checked=!!done[x.name];return `<label class="food-shop-item ${checked?'done':''}"><input type="checkbox" data-food-shopping-item="${escapeHtml(x.name)}" ${checked?'checked':''}><span><b>${escapeHtml(x.name)}</b><small>${escapeHtml(x.qtys.join(" + "))} · ${escapeHtml(x.cat)}</small></span></label>`}).join("")}</div><div class="food-shopping-foot">💡 A lista é uma estimativa baseada nas receitas cadastradas e no cardápio do mês. Confira o estoque antes de comprar.</div>`;
+ const items=foodShoppingItems(d),done=d.shoppingDone||{},house=loadCasaShopping();
+ const total=items.length+house.length;
+ return `<div class="food-shopping-head"><div><span class="eyebrow">COMPARTILHADA</span><strong>Lista de compras</strong><p>Alimentação gera os itens do cardápio; Casa acrescenta produtos e utensílios que estão acabando.</p></div><span class="food-count">${items.filter(x=>done[x.name]).length+house.filter(x=>x.done).length}/${total}</span></div>
+ <div class="food-shopping-subhead">🍽️ Alimentação</div><div class="food-shopping-list">${items.map(x=>{const checked=!!done[x.name];return `<label class="food-shop-item ${checked?'done':''}"><input type="checkbox" data-food-shopping-item="${escapeHtml(x.name)}" ${checked?'checked':''}><span><b>${escapeHtml(x.name)}</b><small>${escapeHtml(x.qtys.join(" + "))} · ${escapeHtml(x.cat)}</small></span></label>`}).join("")||'<div class="empty compact"><span>Nenhum item automático neste cardápio.</span></div>'}</div>
+ <div class="food-shopping-subhead">🏠 Casa</div><div class="food-shopping-list">${house.map(x=>`<label class="food-shop-item ${x.done?'done':''}"><input type="checkbox" data-casa-shop-done-food="${x.id}" ${x.done?'checked':''}><span><b>${escapeHtml(x.name)}</b><small>Casa · ${escapeHtml(x.source||'procedimento')}</small></span><button type="button" class="more" data-casa-shop-del-food="${x.id}">×</button></label>`).join("")||'<div class="empty compact"><span>Nenhum item da casa adicionado.</span></div>'}</div>
+ <div class="food-shopping-foot">💡 Confira o estoque antes de comprar. Itens adicionados pela Casa permanecem na lista até serem marcados ou removidos.</div>`;
 }
 function renderAlimentacao(){
  const d=loadFood();
@@ -1452,6 +1587,8 @@ function renderAlimentacao(){
  document.querySelectorAll("[data-food-edit]").forEach(b=>b.onclick=()=>{const [wid,day,type]=b.dataset.foodEdit.split("|");openFoodMealEditor(Number(wid),day,type);});
  document.querySelectorAll("[data-food-prep]").forEach(el=>el.onchange=()=>{const x=loadFood();const a=new Set(x.prepDone||[]);el.checked?a.add(el.dataset.foodPrep):a.delete(el.dataset.foodPrep);x.prepDone=[...a];saveFood(x);renderAlimentacao();});
  document.querySelectorAll("[data-food-shopping-item]").forEach(el=>el.onchange=()=>{const x=loadFood();x.shoppingDone=x.shoppingDone||{};el.checked?x.shoppingDone[el.dataset.foodShoppingItem]=true:delete x.shoppingDone[el.dataset.foodShoppingItem];saveFood(x);renderAlimentacao();});
+ document.querySelectorAll("[data-casa-shop-done-food]").forEach(el=>el.onchange=()=>{const items=loadCasaShopping();const x=items.find(i=>i.id===el.dataset.casaShopDoneFood);if(x)x.done=el.checked;saveCasaShopping(items);renderAlimentacao();});
+ document.querySelectorAll("[data-casa-shop-del-food]").forEach(b=>b.onclick=()=>{removeCasaShopping(b.dataset.casaShopDelFood);renderAlimentacao();});
  document.querySelector("#foodDefineMonth")?.addEventListener("click",()=>openFoodMonthCreator(d.month));
  document.querySelector("#foodMarketJump")?.addEventListener("click",()=>document.querySelector("#foodShoppingCard")?.scrollIntoView({behavior:"smooth",block:"start"}));
 }
