@@ -1001,7 +1001,7 @@ function saveCrefito(x){localStorage.setItem(CREFITO_KEY,JSON.stringify(x))}
 function ensureCrefitoStyles(){
  if(document.getElementById("crefito-v3-styles")) return;
  const s=document.createElement("style");s.id="crefito-v3-styles";s.textContent=`
- .work-summary{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;margin:14px 0 20px}.work-stat{padding:15px;border-radius:18px;background:#f7f0e8;border:1px solid rgba(92,72,104,.09)}.work-stat b{display:block;font-size:22px;color:#4b4350}.work-stat span{font-size:12px;color:#817783}.work-section{margin-top:18px}.work-section-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px}.work-section-head h3{margin:0}.work-add{border:0;border-radius:999px;background:#eee7f7;color:#654b75;padding:8px 13px;font-weight:800}.work-list{display:grid;gap:9px}.work-item{padding:14px 16px!important;display:grid;grid-template-columns:1fr auto;gap:5px}.work-item small{color:#817783}.work-badge{align-self:start;border-radius:999px;padding:5px 9px;background:#f7f0e8;color:#756975;font-size:11px;font-weight:800}.work-empty{padding:18px;border:1px dashed rgba(92,72,104,.18);border-radius:18px;color:#817783;text-align:center}.work-form{display:grid;gap:12px}.work-form label{display:grid;gap:6px;font-weight:700;color:#6f6672}.work-form input,.work-form select,.work-form textarea{width:100%;box-sizing:border-box;border:1px solid #e6dce4;border-radius:14px;padding:12px 13px;background:#fff;font:inherit}.work-form textarea{min-height:90px;resize:vertical}.work-actions{display:flex;gap:10px;justify-content:flex-end}.work-cancel{border:0;background:#f2ecef;color:#655b67;border-radius:999px;padding:10px 15px;font-weight:800}.work-save{border:0;background:#d989aa;color:white;border-radius:999px;padding:10px 17px;font-weight:800}.crefito-dialog{width:min(88vw,500px)!important;max-width:500px!important;max-height:72vh!important;margin:auto!important;padding:0!important;border:0!important;border-radius:24px!important;background:#fffdfb!important;overflow:hidden!important;box-shadow:0 24px 70px rgba(55,42,60,.20)!important}.crefito-dialog::backdrop{background:rgba(45,37,48,.34)!important;backdrop-filter:blur(3px)}.crefito-dialog .dialog-card{max-height:72vh!important;overflow-y:auto!important;overflow-x:hidden!important;padding:18px 20px 20px!important;box-sizing:border-box!important}.crefito-dialog .dialog-head{position:sticky!important;top:-18px!important;z-index:5!important;background:#fffdfb!important;padding:0 0 12px!important;margin-bottom:12px!important;border-bottom:1px solid #eadfe6!important;display:flex!important;justify-content:space-between!important;align-items:flex-start!important;gap:10px!important}.crefito-dialog .dialog-head h2{margin:3px 0 0!important;font-size:24px!important}.crefito-dialog .dialog-close{width:42px!important;height:42px!important;min-width:42px!important;border:0!important;border-radius:50%!important;background:#fff!important;color:#76568a!important;font-size:28px!important;line-height:1!important;cursor:pointer!important;position:relative!important;z-index:20!important;box-shadow:0 4px 14px rgba(55,42,60,.08)!important}.crefito-dialog .choice-group{display:grid;grid-template-columns:1fr 1fr;gap:7px}.crefito-dialog .choice-group label{display:flex!important;align-items:center!important;gap:7px!important;padding:8px 9px!important;border:1px solid #eadfe6!important;border-radius:11px!important;background:#fff!important;font-weight:600!important;font-size:12px!important}.crefito-dialog .choice-group input{width:auto!important;margin:0!important}.crefito-dialog .conditional{display:none}.crefito-dialog .conditional.show{display:grid}.crefito-dialog .helper{font-size:11px;color:#8a7f88;font-weight:500}.crefito-dialog .section-label{display:grid;gap:6px}.crefito-dialog .section-label>span{font-size:14px;font-weight:700;color:#6f6672}@media(max-width:560px){.crefito-dialog{width:88vw!important;max-width:88vw!important;max-height:72vh!important;border-radius:22px!important}.crefito-dialog .dialog-card{max-height:72vh!important;padding:16px 16px 18px!important}.crefito-dialog .choice-group{grid-template-columns:1fr 1fr!important}.crefito-dialog .dialog-head{top:-16px!important}}
+ .work-summary{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;margin:14px 0 20px}.work-stat{padding:15px;border-radius:18px;background:#f7f0e8;border:1px solid rgba(92,72,104,.09)}.work-stat b{display:block;font-size:22px;color:#4b4350}.work-stat span{font-size:12px;color:#817783}.work-section{margin-top:18px}.work-section-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px}.work-section-head h3{margin:0}.work-add{border:0;border-radius:999px;background:#eee7f7;color:#654b75;padding:8px 13px;font-weight:800}.work-list{display:grid;gap:9px}.work-item{padding:14px 16px!important;display:grid;grid-template-columns:1fr auto;gap:5px}.work-item small{color:#817783}.work-badge{align-self:start;border-radius:999px;padding:5px 9px;background:#f7f0e8;color:#756975;font-size:11px;font-weight:800}.work-empty{padding:18px;border:1px dashed rgba(92,72,104,.18);border-radius:18px;color:#817783;text-align:center}.work-form{display:grid;gap:12px}.work-form label{display:grid;gap:6px;font-weight:700;color:#6f6672}.work-form input,.work-form select,.work-form textarea{width:100%;box-sizing:border-box;border:1px solid #e6dce4;border-radius:14px;padding:12px 13px;background:#fff;font:inherit}.work-form textarea{min-height:90px;resize:vertical}.work-actions{display:flex;gap:10px;justify-content:flex-end}.work-cancel{border:0;background:#f2ecef;color:#655b67;border-radius:999px;padding:10px 15px;font-weight:800}.work-save{border:0;background:#d989aa;color:white;border-radius:999px;padding:10px 17px;font-weight:800}.crefito-dialog{width:min(92vw,560px)!important;max-width:560px!important;max-height:82vh!important;margin:auto!important;padding:0!important;border:0!important;border-radius:26px!important;background:#fffdfb!important;overflow:hidden!important;box-shadow:0 24px 70px rgba(55,42,60,.20)!important}.crefito-dialog::backdrop{background:rgba(45,37,48,.34)!important;backdrop-filter:blur(3px)}.crefito-dialog .dialog-card{max-height:82vh!important;overflow-y:auto!important;overflow-x:hidden!important;padding:22px!important;box-sizing:border-box!important}.crefito-dialog .dialog-head{position:sticky!important;top:-22px!important;z-index:5!important;background:#fffdfb!important;padding:0 0 14px!important;margin-bottom:16px!important;border-bottom:1px solid #eadfe6!important;display:flex!important;justify-content:space-between!important;align-items:flex-start!important;gap:12px!important}.crefito-dialog .dialog-close{width:46px!important;height:46px!important;min-width:46px!important;border:0!important;border-radius:50%!important;background:#fff!important;color:#76568a!important;font-size:30px!important;line-height:1!important;cursor:pointer!important;position:relative!important;z-index:20!important;box-shadow:0 4px 14px rgba(55,42,60,.08)!important}.crefito-dialog .choice-group{display:grid;grid-template-columns:1fr 1fr;gap:8px}.crefito-dialog .choice-group label{display:flex!important;align-items:center!important;gap:8px!important;padding:9px 10px!important;border:1px solid #eadfe6!important;border-radius:12px!important;background:#fff!important;font-weight:600!important;font-size:13px!important}.crefito-dialog .choice-group input{width:auto!important;margin:0!important}.crefito-dialog .conditional{display:none}.crefito-dialog .conditional.show{display:grid}.crefito-dialog .helper{font-size:11px;color:#8a7f88;font-weight:500}.crefito-dialog .section-label{display:grid;gap:7px}.crefito-dialog .section-label>span{font-size:14px;font-weight:700;color:#6f6672}@media(max-width:560px){.crefito-dialog{width:92vw!important;max-width:92vw!important;max-height:82vh!important;border-radius:24px!important}.crefito-dialog .dialog-card{max-height:82vh!important;padding:20px!important}.crefito-dialog .choice-group{grid-template-columns:1fr!important}.crefito-dialog .dialog-head{top:-20px!important}}
  `;document.head.appendChild(s)
 }
 function openCrefitoItem(kind){
@@ -1291,3 +1291,169 @@ if ("serviceWorker" in navigator) {
 window.addEventListener("DOMContentLoaded", ensureMainNavigation);
 
 render();
+
+
+/* ============================================================
+   MINHA VIDA — MODAL PADRÃO GLOBAL
+   Usa o mesmo padrão visual do modal mestre "Registrar gasto".
+   ============================================================ */
+(function applyGlobalModalPattern(){
+  const css = `
+    /* Modal mestre: mesma linguagem em todo o app */
+    dialog.app-dialog,
+    dialog.finance-dialog,
+    dialog.crefito-dialog {
+      width: min(92vw, 620px) !important;
+      max-width: 620px !important;
+      max-height: 84vh !important;
+      margin: auto !important;
+      padding: 0 !important;
+      border: 0 !important;
+      border-radius: 28px !important;
+      background: #fffdfb !important;
+      overflow: hidden !important;
+      box-shadow: 0 24px 70px rgba(55,42,60,.20) !important;
+    }
+    dialog.app-dialog::backdrop,
+    dialog.finance-dialog::backdrop,
+    dialog.crefito-dialog::backdrop {
+      background: rgba(45,37,48,.34) !important;
+      backdrop-filter: blur(3px);
+    }
+    dialog.app-dialog .modal-card,
+    dialog.finance-dialog .modal-card,
+    dialog.crefito-dialog .dialog-card {
+      width: 100% !important;
+      max-width: none !important;
+      max-height: 84vh !important;
+      box-sizing: border-box !important;
+      overflow-y: auto !important;
+      overflow-x: hidden !important;
+      padding: 24px !important;
+    }
+    dialog.app-dialog .modal-head,
+    dialog.finance-dialog .modal-head,
+    dialog.crefito-dialog .dialog-head {
+      position: sticky !important;
+      top: -24px !important;
+      z-index: 20 !important;
+      background: #fffdfb !important;
+      padding: 0 0 18px !important;
+      margin-bottom: 18px !important;
+      display: flex !important;
+      justify-content: space-between !important;
+      align-items: flex-start !important;
+      gap: 12px !important;
+      border-bottom: 1px solid #eadfe6 !important;
+    }
+    dialog.app-dialog .icon-btn,
+    dialog.finance-dialog .icon-btn,
+    dialog.crefito-dialog .dialog-close {
+      width: 48px !important;
+      height: 48px !important;
+      min-width: 48px !important;
+      flex: 0 0 48px !important;
+      border: 0 !important;
+      border-radius: 50% !important;
+      background: #fff !important;
+      color: #76568a !important;
+      font-size: 30px !important;
+      line-height: 1 !important;
+      cursor: pointer !important;
+      pointer-events: auto !important;
+      position: relative !important;
+      z-index: 30 !important;
+      box-shadow: 0 4px 14px rgba(55,42,60,.08) !important;
+    }
+    dialog.app-dialog label,
+    dialog.finance-dialog label,
+    dialog.crefito-dialog .section-label {
+      display: grid !important;
+      gap: 7px !important;
+      margin-bottom: 14px !important;
+    }
+    dialog.app-dialog input,
+    dialog.app-dialog select,
+    dialog.app-dialog textarea,
+    dialog.finance-dialog input,
+    dialog.finance-dialog select,
+    dialog.finance-dialog textarea,
+    dialog.crefito-dialog input,
+    dialog.crefito-dialog select,
+    dialog.crefito-dialog textarea {
+      width: 100% !important;
+      box-sizing: border-box !important;
+      border-radius: 14px !important;
+    }
+    /* Escolhas: compactas e respiráveis, como os cards da Casa */
+    dialog.crefito-dialog .choice-group {
+      display: grid !important;
+      grid-template-columns: 1fr 1fr !important;
+      gap: 8px !important;
+    }
+    dialog.crefito-dialog .choice-group label {
+      display: flex !important;
+      align-items: center !important;
+      gap: 8px !important;
+      padding: 10px 11px !important;
+      margin: 0 !important;
+      border: 1px solid #eadfe6 !important;
+      border-radius: 12px !important;
+      background: #fff !important;
+      font-weight: 600 !important;
+      font-size: 14px !important;
+    }
+    dialog.crefito-dialog .choice-group input {
+      width: auto !important;
+      margin: 0 !important;
+    }
+    dialog.app-dialog .modal-actions,
+    dialog.finance-dialog .modal-actions,
+    dialog.crefito-dialog .work-actions {
+      display: flex !important;
+      gap: 10px !important;
+      justify-content: flex-end !important;
+      padding-top: 4px !important;
+    }
+    dialog.app-dialog .secondary,
+    dialog.finance-dialog .secondary,
+    dialog.crefito-dialog .work-cancel {
+      border-radius: 999px !important;
+    }
+    dialog.app-dialog .primary,
+    dialog.finance-dialog .primary,
+    dialog.crefito-dialog .work-save {
+      border-radius: 999px !important;
+    }
+    @media (max-width: 560px) {
+      dialog.app-dialog,
+      dialog.finance-dialog,
+      dialog.crefito-dialog {
+        width: 92vw !important;
+        max-width: 92vw !important;
+        max-height: 84vh !important;
+        border-radius: 24px !important;
+      }
+      dialog.app-dialog .modal-card,
+      dialog.finance-dialog .modal-card,
+      dialog.crefito-dialog .dialog-card {
+        max-height: 84vh !important;
+        padding: 20px !important;
+      }
+      dialog.app-dialog .modal-head,
+      dialog.finance-dialog .modal-head,
+      dialog.crefito-dialog .dialog-head {
+        top: -20px !important;
+      }
+      dialog.crefito-dialog .choice-group {
+        grid-template-columns: 1fr 1fr !important;
+      }
+    }
+  `;
+  if(!document.getElementById('minha-vida-modal-global-style')){
+    const st=document.createElement('style');
+    st.id='minha-vida-modal-global-style';
+    st.textContent=css;
+    document.head.appendChild(st);
+  }
+})();
