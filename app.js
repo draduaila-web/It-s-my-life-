@@ -1004,27 +1004,25 @@ function renderTrabalho(){
    <span class="work-icon work-logo-wrap"><img class="work-logo official-logo crefito-logo" src="crefito11-logo.png" alt="CREFITO-11"></span>
    <span class="work-copy"><strong>CREFITO-11</strong><span>Trabalho oficial · 08:00–14:00</span></span>
   </article>
-  <button type="button" class="card work-card work-card-bec" data-work-route="trabalho-bec">
+  <a href="#trabalho-bec" class="card work-card work-card-bec" data-work-route="trabalho-bec" aria-label="Abrir BEC">
    <span class="work-icon work-logo-wrap"><img class="work-logo official-logo bec-logo" src="bec-logo.png" alt="BEC"></span>
    <span class="work-copy"><strong>BEC</strong><span>Empresa, projetos e operações.</span></span>
-  </button>
-  <button type="button" class="card work-card work-card-tiktok" data-work-route="trabalho-tiktok">
+  </a>
+  <a href="#trabalho-tiktok" class="card work-card work-card-tiktok" data-work-route="trabalho-tiktok" aria-label="Abrir TikTok">
    <span class="work-icon work-logo-wrap"><img class="work-logo official-logo tiktok-logo" src="tiktok-logo.png" alt="TikTok"></span>
    <span class="work-copy"><strong>TikTok</strong><span>Conteúdo, ideias e presença digital.</span></span>
-  </button>
+  </a>
  </section>
  <section class="card work-note"><strong>Menos decisões · mais clareza</strong><span>Cada frente tem seu próprio espaço. O que for realmente importante pode depois alimentar o Meu Dia.</span></section>`;
  window.openWorkRoute=(route)=>{
    state.route=route;
-   if(location.hash!=="#"+route) location.hash="#"+route;
+   const hash="#"+route;
+   if(location.hash!==hash) location.hash=hash;
    else render();
  };
- document.querySelectorAll("[data-work-route]").forEach(card=>{
-   const route=card.getAttribute("data-work-route");
-   const go=(e)=>{ if(e){e.preventDefault();e.stopPropagation();} state.route=route; location.hash=route; };
-   card.addEventListener("click",go,{capture:true});
-   card.addEventListener("touchend",go,{capture:true,passive:false});
- });
+ // Os cards principais usam links reais (#rota). Isso evita conflitos de toque
+ // do Safari/iPhone com listeners duplicados e mantém a navegação nativa.
+ window.openWorkRoute = window.openWorkRoute;
 }
 
 const CREFITO_KEY="minha-vida.trabalho.crefito.v1";
@@ -1033,7 +1031,7 @@ function saveCrefito(x){localStorage.setItem(CREFITO_KEY,JSON.stringify(x))}
 function ensureCrefitoStyles(){
  if(document.getElementById("crefito-v4-styles")) return;
  const s=document.createElement("style");s.id="crefito-v4-styles";s.textContent=`
- .work-card{color:#40384a!important}.work-card strong{color:#40384a!important}.work-card span{color:#817783!important}.work-card .work-icon{display:flex;align-items:center;justify-content:center;width:52px;height:52px}.work-logo{width:48px;height:48px;object-fit:contain;display:block}.work-logo.bec{width:52px;height:52px;border-radius:14px;object-fit:contain}.tiktok-word{font-size:18px;font-weight:900;letter-spacing:-1px;color:#111;line-height:1}.tiktok-word i{font-style:normal;text-shadow:2px 0 #25f4ee,-2px 0 #fe2c55}
+ .work-card{text-decoration:none!important;color:#40384a!important;cursor:pointer!important;display:flex!important;align-items:center!important}.work-card strong{color:#40384a!important}.work-card span{color:#817783!important}.work-card .work-icon{display:flex;align-items:center;justify-content:center;width:52px;height:52px}.work-logo{width:48px;height:48px;object-fit:contain;display:block}.work-logo.bec{width:52px;height:52px;border-radius:14px;object-fit:contain}.tiktok-word{font-size:18px;font-weight:900;letter-spacing:-1px;color:#111;line-height:1}.tiktok-word i{font-style:normal;text-shadow:2px 0 #25f4ee,-2px 0 #fe2c55}
  .work-summary{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;margin:14px 0 20px}.work-stat{padding:15px;border-radius:18px;background:#f7f0e8;border:1px solid rgba(92,72,104,.09)}.work-stat b{display:block;font-size:22px;color:#4b4350}.work-stat span{font-size:12px;color:#817783}.work-section{margin-top:18px}.work-section-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px}.work-section-head h3{margin:0}.work-add{border:0;border-radius:999px;background:#eee7f7;color:#654b75;padding:8px 13px;font-weight:800}.work-list{display:grid;gap:9px}.work-item{padding:14px 16px!important;display:grid;grid-template-columns:1fr auto;gap:5px}.work-item small{color:#817783}.work-badge{align-self:start;border-radius:999px;padding:5px 9px;background:#f7f0e8;color:#756975;font-size:11px;font-weight:800}.work-empty{padding:18px;border:1px dashed rgba(92,72,104,.18);border-radius:18px;color:#817783;text-align:center}.work-rule{margin-top:16px;padding:14px 16px;border-radius:18px;background:linear-gradient(135deg,#f5edf7,#eef5f2);color:#6e6470} .modal-brand-logo{width:28px;height:20px;object-fit:contain;vertical-align:middle}.hero h2{display:flex;align-items:center;gap:10px}.hero-brand-logo{width:42px;height:32px;object-fit:contain}.bec-mark{display:flex;align-items:center;justify-content:center;width:48px;height:48px;border-radius:14px;background:linear-gradient(135deg,#edf5f2,#f5edf7);color:#65795f;font-size:18px;font-weight:900;letter-spacing:-1px}.tiktok-mark{display:flex;align-items:center;justify-content:center;width:48px;height:48px;border-radius:14px;background:#111;color:#fff;font-size:28px;font-weight:900}
  .crefito-dialog{outline:none!important;border:0!important;max-width:620px!important;max-height:84vh!important;margin:auto!important;padding:0!important;border:0!important;border-radius:28px!important;background:#fffdfb!important;overflow:hidden!important;box-shadow:0 24px 70px rgba(55,42,60,.20)!important}.crefito-dialog::backdrop{background:rgba(45,37,48,.34)!important;backdrop-filter:blur(3px)}.crefito-dialog .modal-card{width:100%!important;max-width:none!important;max-height:84vh!important;box-sizing:border-box!important;overflow-y:auto!important;overflow-x:hidden!important;padding:24px!important}.crefito-dialog .modal-head{position:sticky!important;top:-24px!important;z-index:5!important;background:#fffdfb!important;padding:0 0 18px!important;margin-bottom:18px!important}.crefito-dialog .modal-head .icon-btn{width:48px!important;height:48px!important;min-width:48px!important;border-radius:50%!important;cursor:pointer!important;pointer-events:auto!important;z-index:20!important}.crefito-dialog label{display:block!important;margin-bottom:16px!important}.crefito-dialog input,.crefito-dialog select,.crefito-dialog textarea{width:100%!important;box-sizing:border-box!important}.crefito-dialog .form-grid{display:grid!important;grid-template-columns:1fr 1fr!important;gap:14px!important}.crefito-dialog .choice-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:0 0 16px}.crefito-dialog .choice-title{font-weight:800;color:#6f6672;margin:2px 0 8px}.crefito-dialog .choice{display:flex;align-items:center;gap:10px;border:1px solid #e6dce4;border-radius:14px;padding:11px 12px;background:#fff;font-weight:700;color:#6f6672;min-height:46px;box-sizing:border-box}.crefito-dialog .choice input{width:20px!important;height:20px!important;margin:0;accent-color:#80629a}.crefito-dialog .modal-actions{display:flex;gap:10px;justify-content:flex-end;padding-top:4px}.crefito-dialog .modal-actions .secondary{border:0;background:#f2ecef;color:#655b67;border-radius:999px;padding:10px 15px;font-weight:800}.crefito-dialog .modal-actions .primary{border:0;background:#d989aa;color:white;border-radius:999px;padding:10px 17px;font-weight:800}.crefito-dialog .modal-actions .grow{flex:1}@media(max-width:560px){.crefito-dialog{width:92vw!important;max-width:92vw!important;max-height:84vh!important;border-radius:24px!important}.crefito-dialog .modal-card{max-height:84vh!important;padding:20px!important}.crefito-dialog .form-grid,.crefito-dialog .choice-grid{grid-template-columns:1fr 1fr!important}.crefito-dialog .modal-head{top:-20px!important}}
  `;document.head.appendChild(s)
