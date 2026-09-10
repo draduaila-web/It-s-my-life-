@@ -74,8 +74,30 @@ function renderMeuDia(){
  ${(w===1||w===3)?'<div><b>14:40–16:10</b><span>Janela estratégica</span></div>':''}
  <div><b>${ho}</b><span>Home office</span></div><div><b>19:00+</b><span>Noite protegida · descanso primeiro</span></div></div></section>
  ${p.length?`<section class="day-section"><div class="section-head"><h2>Pendências que merecem aparecer</h2><a href="#pendencias">ver todas</a></div>${p.map(x=>`<div class="compact-item"><strong>${x.title||x.name||'Pendência'}</strong>${x.dueDate?`<small>${x.dueDate}</small>`:''}</div>`).join('')}</section>`:''}
- <section class="quick-grid"><a href="#rituais">✨<span>Rituais</span></a><a href="#exercicios">🏃<span>Exercícios</span></a><a href="#alimentacao">🍽️<span>Alimentação</span></a><a href="#receitas">📖<span>Receitas</span></a><a href="#casa">🏠<span>Casa</span></a><a href="#financeiro">💰<span>Financeiro</span></a><a href="#ideias">💡<span>Criação &amp; Ideias</span></a><a href="#estudos">📚<span>Estudos</span></a></section>
+ <section class="quick-grid"><a href="#pendencias">📝<span>Pendências</span></a><a href="#rituais">✨<span>Rituais</span></a><a href="#exercicios">🏃<span>Exercícios</span></a><a href="#alimentacao">🍽️<span>Alimentação</span></a><a href="#receitas">📖<span>Receitas</span></a><a href="#casa">🏠<span>Casa</span></a><a href="#financeiro">💰<span>Financeiro</span></a><a href="#ideias">💡<span>Criação &amp; Ideias</span></a><a href="#estudos">📚<span>Estudos</span></a></section>
  <section class="free-space"><div>☁️</div><strong>Espaço livre também faz parte do dia.</strong><p>Se nada precisa ser resolvido agora, não resolva.</p></section>`;
+}
+
+function ensureSoftMeuDiaStyles(){
+  if(document.getElementById('soft-meu-dia-styles')) return;
+  const style=document.createElement('style');
+  style.id='soft-meu-dia-styles';
+  style.textContent=`
+    .quick-grid{gap:14px!important;}
+    .quick-grid a{min-height:104px!important;border:1px solid rgba(92,72,104,.10)!important;box-shadow:0 8px 24px rgba(76,58,82,.06)!important;transition:transform .18s ease,box-shadow .18s ease!important;}
+    .quick-grid a:active{transform:scale(.985);}
+    .quick-grid a:nth-child(1){background:#f6e5ea!important;}
+    .quick-grid a:nth-child(2){background:#eee7f7!important;}
+    .quick-grid a:nth-child(3){background:#e5f2ed!important;}
+    .quick-grid a:nth-child(4){background:#f8e9df!important;}
+    .quick-grid a:nth-child(5){background:#e8f0f7!important;}
+    .quick-grid a:nth-child(6){background:#f7f0d9!important;}
+    .quick-grid a:nth-child(7){background:#e5f2ed!important;}
+    .quick-grid a:nth-child(8){background:#f1e9f5!important;}
+    .quick-grid a:nth-child(9){background:#e8eff7!important;}
+    .quick-grid a span{font-weight:500!important;}
+  `;
+  document.head.appendChild(style);
 }
 
 /* NAVEGAÇÃO PRINCIPAL — MINHA VIDA
@@ -84,6 +106,7 @@ function renderMeuDia(){
    e depois Pendências, como definido no fluxo do app.
 */
 function ensureMainNavigation() {
+  ensureSoftMeuDiaStyles();
   const nav = document.querySelector('.bottom-nav');
   if (nav) {
     nav.innerHTML = `
