@@ -174,6 +174,7 @@ function ensureMainNavigation() {
       ['meu-dia','💜 Meu Dia'],
       ['pendencias','📝 Pendências'],
       ['ideias','💡 Criação & Ideias'],
+      ['trabalho','💼 Trabalho'],
       ['estudos','📚 Estudos / CEBRASPE'],
       ['financeiro','💰 Financeiro'],
       ['casa','🏠 Casa'],
@@ -225,6 +226,7 @@ function render() {
   else if (route === "exercicios") renderExercicios();
   else if (route === "alimentacao") renderAlimentacao();
   else if (route === "receitas") renderReceitas();
+  else if (route === "trabalho") renderTrabalho();
   else renderPlaceholder();
 }
 
@@ -784,6 +786,7 @@ function openStudyModal(type, id=null) {
 
 
 const FIN_KEY="minha-vida.financeiro.v2";
+const FIN_PRIVACY_KEY="minha-vida.financeiro.privacy.v1";
 const FIN_BASE={
  income:19172.96,
  fixed:[
@@ -796,8 +799,7 @@ const FIN_BASE={
  ],
  excluded:[
   {name:"Itaú 4590 — fatura alta",value:5566.54,payer:"Mãe",reason:"Pago pela mãe; fora do orçamento da usuária."},
-  {name:"Unimed + Unidental",value:0,payer:"Empregador",reason:"Benefício; não entra no orçamento."},
-  {name:"BEC",value:0,payer:"—",reason:"Sem despesas atuais."}
+  {name:"Unimed + Unidental",value:0,payer:"Empregador",reason:"Benefício; não entra no orçamento."}
  ],
  goals:[
   {month:"Setembro",min:2000,max:3000,saved:0},
@@ -807,39 +809,49 @@ const FIN_BASE={
  ],
  transactions:[]
 };
+const FIN_CATEGORIES=["Casa","Alimentação","Transporte","Animais","Cartão","Dívidas","Henrique","Assinaturas","Saúde","Autocuidado","Lazer","Trabalho","Variável","Outros"];
+const FIN_PAYMENT=["Pix","Débito","Crédito","Dinheiro","Conta / débito automático"];
+const FIN_ACCOUNTS=["Itaú 5298","Conta principal","BB","Outro cartão / conta"];
+const FIN_BEHAVIOR=["Essencial","Planejado","Variável","Impulso"];
+function finPrivacy(){return localStorage.getItem(FIN_PRIVACY_KEY)!== "hidden";}
+function setFinPrivacy(hidden){localStorage.setItem(FIN_PRIVACY_KEY,hidden?"hidden":"visible");}
 function loadFin(){
  try{
   const raw=JSON.parse(localStorage.getItem(FIN_KEY));
-  if(raw)return {...FIN_BASE,...raw,fixed:raw.fixed||FIN_BASE.fixed,excluded:raw.excluded||FIN_BASE.excluded,goals:raw.goals||FIN_BASE.goals,transactions:raw.transactions||[]};
+  if(raw){
+   const d={...FIN_BASE,...raw,fixed:raw.fixed||FIN_BASE.fixed,excluded:(raw.excluded||FIN_BASE.excluded).filter(x=>x.name!=="BEC"),goals:raw.goals||FIN_BASE.goals,transactions:raw.transactions||[]};
+   return d;
+  }
  }catch{}
- // migrate the previous finance store if it exists
  try{
   const old=JSON.parse(localStorage.getItem("minha-vida.financeiro.v1"));
-  if(old){const migrated={...FIN_BASE,income:old.income||FIN_BASE.income,fixed:old.expenses||FIN_BASE.fixed,excluded:old.excluded||FIN_BASE.excluded,goals:(old.goals||FIN_BASE.goals).map(g=>({...g,saved:g.saved||0})),transactions:old.transactions||[]};saveFin(migrated);return migrated;}
+  if(old){const migrated={...FIN_BASE,income:old.income||FIN_BASE.income,fixed:old.expenses||FIN_BASE.fixed,excluded:(old.excluded||FIN_BASE.excluded).filter(x=>x.name!=="BEC"),goals:(old.goals||FIN_BASE.goals).map(g=>({...g,saved:g.saved||0})),transactions:old.transactions||[]};saveFin(migrated);return migrated;}
  }catch{}
  return JSON.parse(JSON.stringify(FIN_BASE));
 }
 function saveFin(d){localStorage.setItem(FIN_KEY,JSON.stringify(d));}
 function money(n){return Number(n||0).toLocaleString("pt-BR",{minimumFractionDigits:2,maximumFractionDigits:2});}
+function finMoney(n){return finPrivacy()?`R$ ${money(n)}`:"R$ ••••••";}
 function finFixedTotal(d){return d.fixed.reduce((s,x)=>s+Number(x.value||0),0);}
 function finMonthTotal(d,month){return d.transactions.filter(x=>(x.date||"").slice(0,7)===month).reduce((s,x)=>s+Number(x.value||0),0);}
 function finCategoryTotals(d,month){const out={};d.transactions.filter(x=>(x.date||"").slice(0,7)===month).forEach(x=>{const k=x.category||"Variável";out[k]=(out[k]||0)+Number(x.value||0)});return out;}
 function finCurrentMonth(){return todayISO().slice(0,7);}
 function finMonthLabel(iso){const [y,m]=iso.split("-");return new Intl.DateTimeFormat("pt-BR",{month:"long",year:"numeric"}).format(new Date(Number(y),Number(m)-1,1));}
-function finFixedHtml(x){return `<article class="card finance-row"><div><strong>${escapeHtml(x.name)}</strong><span>${escapeHtml(x.category)}${x.kind==="teto"?" · teto":""}</span></div><b>R$ ${money(x.value)}</b></article>`;}
-function finTransactionHtml(x){return `<article class="card finance-row"><div><strong>${escapeHtml(x.name)}</strong><span>${x.date?formatDate(x.date):""} · ${escapeHtml(x.category||"Variável")}</span></div><b>R$ ${money(x.value)}</b><button class="mini-delete" data-fin-delete="${x.id}" aria-label="Excluir">×</button></article>`;}
+function finFixedHtml(x){return `<article class="card finance-row"><div><strong>${escapeHtml(x.name)}</strong><span>${escapeHtml(x.category)}${x.kind==="teto"?" · teto":""}</span></div><b>${finMoney(x.value)}</b></article>`;}
+function finTransactionHtml(x){const meta=[x.date?formatDate(x.date):"",x.category||"Variável",x.payment||"",x.account||""].filter(Boolean).join(" · ");return `<article class="card finance-row"><div><strong>${escapeHtml(x.name)}</strong><span>${escapeHtml(meta)}</span></div><b>${finMoney(x.value)}</b><button class="mini-delete" data-fin-delete="${x.id}" aria-label="Excluir">×</button></article>`;}
 function renderFinanceiro(){
- const d=loadFin(),month=finCurrentMonth(),fixed=finFixedTotal(d),variable=finMonthTotal(d,month),planned=fixed+variable,remaining=d.income-planned,cats=finCategoryTotals(d,month);
- const catHtml=Object.entries(cats).sort((a,b)=>b[1]-a[1]).slice(0,6).map(([k,v])=>`<div class="finance-cat"><span>${escapeHtml(k)}</span><strong>R$ ${money(v)}</strong></div>`).join("")||`<div class="empty compact"><strong>Nenhum gasto variável registrado.</strong><span>Registre apenas o que realmente precisar acompanhar.</span></div>`;
+ const d=loadFin(),month=finCurrentMonth(),fixed=finFixedTotal(d),variable=finMonthTotal(d,month),planned=fixed+variable,remaining=d.income-planned,cats=finCategoryTotals(d,month),visible=finPrivacy();
+ const catHtml=Object.entries(cats).sort((a,b)=>b[1]-a[1]).slice(0,6).map(([k,v])=>`<div class="finance-cat"><span>${escapeHtml(k)}</span><strong>${finMoney(v)}</strong></div>`).join("")||`<div class="empty compact"><strong>Nenhum gasto variável registrado.</strong><span>Registre apenas o que realmente precisar acompanhar.</span></div>`;
  const goalTotal=d.goals.reduce((s,g)=>s+Number(g.saved||0),0), goalMin=d.goals.reduce((s,g)=>s+Number(g.min||0),0), goalMax=d.goals.reduce((s,g)=>s+Number(g.max||0),0);
  app.innerHTML=`<section class="hero"><h2>💰 Financeiro</h2><p>Clareza sobre o dinheiro, sem transformar sua vida em contabilidade.</p></section>
- <section class="finance-summary card"><div class="finance-main"><span class="eyebrow">RENDA MENSAL</span><strong>R$ ${money(d.income)}</strong><button class="text-btn" id="editIncome">editar</button></div><div class="finance-metrics"><div><span>Base</span><b>R$ ${money(fixed)}</b></div><div><span>Variável · ${escapeHtml(finMonthLabel(month))}</span><b>R$ ${money(variable)}</b></div><div><span>Disponível conhecido</span><b>R$ ${money(remaining)}</b></div></div></section>
+ <section class="finance-summary card"><div class="finance-main"><span class="eyebrow">RENDA MENSAL</span><strong>${finMoney(d.income)}</strong><div class="finance-actions"><button class="text-btn" id="toggleFinPrivacy">${visible?"🙈 Ocultar valores":"👁️ Mostrar valores"}</button><button class="text-btn" id="editIncome">editar</button></div></div><div class="finance-metrics"><div><span>Base</span><b>${finMoney(fixed)}</b></div><div><span>Variável · ${escapeHtml(finMonthLabel(month))}</span><b>${finMoney(variable)}</b></div><div><span>Disponível conhecido</span><b>${finMoney(remaining)}</b></div></div></section>
  <div class="section-title">ORÇAMENTO BASE</div><div class="list">${d.fixed.map(finFixedHtml).join("")}</div><button class="add-full secondary" id="addFixed">＋ Adicionar item ao orçamento</button>
  <div class="section-title">GASTOS DO MÊS</div><section class="card"><div class="panel-head"><div><span class="eyebrow">${escapeHtml(finMonthLabel(month))}</span><h3>O que saiu de verdade</h3></div><button class="primary compact-btn" id="addTransaction">＋ Registrar</button></div><div class="list inner-list">${d.transactions.slice().reverse().slice(0,20).map(finTransactionHtml).join("")||`<div class="empty compact"><strong>Nenhum gasto registrado.</strong><span>O registro é opcional — use quando ajudar a enxergar seu mês.</span></div>`}</div></section>
  <div class="section-title">POR CATEGORIA</div><section class="card finance-cats">${catHtml}</section>
- <div class="section-title">FUNDO CARRO</div><section class="card goal-card"><div class="panel-head"><div><span class="eyebrow">SETEMBRO → DEZEMBRO</span><h3>Construção da meta</h3></div><span class="pill today">R$ ${money(goalTotal)}</span></div><p class="note">Meta mensal planejada: R$ ${money(goalMin)}–R$ ${money(goalMax)}.</p><div class="goal-list">${d.goals.map((g,i)=>`<div class="goal-row"><span>${escapeHtml(g.month)}</span><strong>R$ ${money(g.saved||0)} / ${money(g.min)}–${money(g.max)}</strong><button class="goal-toggle ${Number(g.saved||0)>=Number(g.min||0)?"done":""}" data-goal="${i}">${Number(g.saved||0)>=Number(g.min||0)?"✓":"＋"}</button></div>`).join("")}</div></section>
- <div class="section-title">FORA DO SEU ORÇAMENTO</div><div class="list">${d.excluded.map(x=>`<div class="card excluded-card"><div><strong>${escapeHtml(x.name)}</strong><span>${x.value?`R$ ${money(x.value)} · `:""}${escapeHtml(x.reason)}</span></div><span class="pill">${escapeHtml(x.payer)}</span></div>`).join("")}</div>`;
+ <div class="section-title">FUNDO CARRO</div><section class="card goal-card"><div class="panel-head"><div><span class="eyebrow">SETEMBRO → DEZEMBRO</span><h3>Construção da meta</h3></div><span class="pill today">${finMoney(goalTotal)}</span></div><p class="note">Meta mensal planejada: ${finMoney(goalMin)}–${finMoney(goalMax)}.</p><div class="goal-list">${d.goals.map((g,i)=>`<div class="goal-row"><span>${escapeHtml(g.month)}</span><strong>${finMoney(g.saved||0)} / ${money(g.min)}–${money(g.max)}</strong><button class="goal-toggle ${Number(g.saved||0)>=Number(g.min||0)?"done":""}" data-goal="${i}">${Number(g.saved||0)>=Number(g.min||0)?"✓":"＋"}</button></div>`).join("")}</div></section>
+ <div class="section-title">FORA DO SEU ORÇAMENTO</div><div class="list">${d.excluded.map(x=>`<div class="card excluded-card"><div><strong>${escapeHtml(x.name)}</strong><span>${x.value?`${finMoney(x.value)} · `:""}${escapeHtml(x.reason)}</span></div><span class="pill">${escapeHtml(x.payer)}</span></div>`).join("")}</div>`;
  ensureFinanceStyles();
+ document.getElementById("toggleFinPrivacy").onclick=()=>{setFinPrivacy(finPrivacy());renderFinanceiro()};
  document.getElementById("editIncome").onclick=()=>openFinModal("income");
  document.getElementById("addFixed").onclick=()=>openFinModal("fixed");
  document.getElementById("addTransaction").onclick=()=>openFinModal("transaction");
@@ -847,10 +859,10 @@ function renderFinanceiro(){
  document.querySelectorAll("[data-goal]").forEach(b=>b.onclick=()=>{const x=loadFin(),i=+b.dataset.goal;const current=Number(x.goals[i].saved||0);const next=current>=Number(x.goals[i].min||0)?0:Number(x.goals[i].min||0);x.goals[i].saved=next;saveFin(x);renderFinanceiro()});
 }
 function ensureFinanceStyles(){
- if(document.getElementById("finance-v2-styles"))return;
- const s=document.createElement("style");s.id="finance-v2-styles";s.textContent=`
+ if(document.getElementById("finance-v3-styles"))return;
+ const s=document.createElement("style");s.id="finance-v3-styles";s.textContent=`
  .finance-summary{background:linear-gradient(135deg,#edf5f2,#f2edf8);border:1px solid rgba(92,72,104,.10)}
- .finance-main{display:flex;align-items:center;gap:10px;flex-wrap:wrap}.finance-main strong{font-size:32px;display:block;width:100%}.text-btn{border:0;background:transparent;color:#77558a;font-weight:700;padding:0}
+ .finance-main{display:flex;align-items:center;gap:10px;flex-wrap:wrap}.finance-main strong{font-size:32px;display:block;width:100%}.finance-actions{display:flex;gap:16px}.text-btn{border:0;background:transparent;color:#77558a;font-weight:700;padding:0}
  .finance-metrics{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:16px}.finance-metrics>div{background:rgba(255,255,255,.62);border-radius:16px;padding:10px}.finance-metrics span{display:block;font-size:12px;color:#817783}.finance-metrics b{display:block;margin-top:4px;font-size:14px}
  .compact-btn{padding:9px 12px!important}.inner-list{margin-top:12px}.finance-row{position:relative;display:flex;align-items:center;justify-content:space-between;gap:10px}.finance-row>div{min-width:0}.finance-row b{white-space:nowrap}.mini-delete{border:0;background:transparent;color:#9a8e98;font-size:22px;padding:4px}.finance-cats{display:grid;gap:8px}.finance-cat{display:flex;justify-content:space-between;padding:10px 12px;border-radius:14px;background:#faf6f2}.finance-cat span{color:#655c67}.goal-toggle{min-width:38px}.goal-toggle.done{background:#e4f1eb}
  @media(max-width:420px){.finance-metrics{grid-template-columns:1fr}.panel-head{gap:8px}}
@@ -859,11 +871,25 @@ function ensureFinanceStyles(){
 function openFinModal(type){
  const d=loadFin(),dlg=document.createElement("dialog");
  const title=type==="income"?"Ajustar renda mensal":type==="fixed"?"Adicionar ao orçamento":"Registrar gasto";
+ const options=(arr,sel)=>arr.map(x=>`<option ${x===sel?"selected":""}>${x}</option>`).join("");
  dlg.innerHTML=`<form method="dialog" class="modal-card" id="finForm"><div class="modal-head"><div><div class="eyebrow">💰 FINANCEIRO</div><h2>${title}</h2></div><button class="icon-btn" value="cancel">×</button></div>
- ${type==="income"?`<label>Renda mensal<input id="fValue" required type="number" min="0" step="0.01" value="${d.income}"></label>`:`<label>Descrição<input id="fName" required maxlength="100"></label><div class="form-grid"><label>Valor<input id="fValue" required type="number" min="0" step="0.01"></label><label>Categoria<select id="fCategory"><option>Casa</option><option>Alimentação</option><option>Transporte</option><option>Animais</option><option>Cartão</option><option>Dívidas</option><option>Henrique</option><option>Assinaturas</option><option>Saúde</option><option>Variável</option><option>Outros</option></select></label></div>${type==="transaction"?`<label>Data<input id="fDate" type="date" value="${todayISO()}"></label>`:`<label>Tipo<select id="fKind"><option>fixo</option><option>teto</option></select></label>`}`}
+ ${type==="income"?`<label>Renda mensal<input id="fValue" required type="number" min="0" step="0.01" value="${d.income}"></label>`:`<label>Descrição<input id="fName" required maxlength="100" placeholder="Ex.: mercado, gasolina, farmácia…"></label><div class="form-grid"><label>Valor<input id="fValue" required type="number" min="0" step="0.01"></label><label>Data<input id="fDate" type="date" value="${todayISO()}"></label></div><div class="form-grid"><label>Categoria<select id="fCategory">${options(FIN_CATEGORIES,"Casa")}</select></label><label>Como pagou<select id="fPayment">${options(FIN_PAYMENT,"Pix")}</select></label></div><label>Qual conta / cartão<select id="fAccount">${options(FIN_ACCOUNTS,"Itaú 5298")}</select></label>${type==="transaction"?`<div class="form-grid"><label>Tipo de gasto<select id="fBehavior">${options(FIN_BEHAVIOR,"Variável")}</select></label><label>Parcelas<input id="fInstallments" type="number" min="1" step="1" value="1"></label></div><label>Observação<input id="fNote" maxlength="160" placeholder="Opcional"></label>`:`<label>Tipo<select id="fKind"><option>fixo</option><option>teto</option></select></label>`}`}
  <div class="modal-actions"><div class="grow"></div><button type="button" class="secondary" id="cancelFin">Cancelar</button><button class="primary" value="default">Salvar</button></div></form>`;
  document.body.appendChild(dlg);dlg.showModal();dlg.querySelector("#cancelFin").onclick=()=>{dlg.close();dlg.remove()};
- dlg.querySelector("#finForm").addEventListener("submit",e=>{e.preventDefault();if(type==="income"){d.income=+dlg.querySelector("#fValue").value||0}else{const obj={id:uid(),name:dlg.querySelector("#fName").value.trim(),value:+dlg.querySelector("#fValue").value||0,category:dlg.querySelector("#fCategory").value,updatedAt:Date.now()};if(type==="transaction"){obj.date=dlg.querySelector("#fDate").value;d.transactions.push(obj)}else{obj.kind=dlg.querySelector("#fKind").value;obj.payer="Usuária";d.fixed.push(obj)}}saveFin(d);dlg.close();dlg.remove();renderFinanceiro()});
+ dlg.querySelector("#finForm").addEventListener("submit",e=>{e.preventDefault();if(type==="income"){d.income=+dlg.querySelector("#fValue").value||0}else{const obj={id:uid(),name:dlg.querySelector("#fName").value.trim(),value:+dlg.querySelector("#fValue").value||0,category:dlg.querySelector("#fCategory").value,updatedAt:Date.now()};if(type==="transaction"){obj.date=dlg.querySelector("#fDate").value;obj.payment=dlg.querySelector("#fPayment").value;obj.account=dlg.querySelector("#fAccount").value;obj.behavior=dlg.querySelector("#fBehavior").value;obj.installments=+dlg.querySelector("#fInstallments").value||1;obj.note=dlg.querySelector("#fNote").value.trim();d.transactions.push(obj)}else{obj.payment=dlg.querySelector("#fPayment").value;obj.account=dlg.querySelector("#fAccount").value;obj.kind=dlg.querySelector("#fKind").value;obj.payer="Usuária";d.fixed.push(obj)}}saveFin(d);dlg.close();dlg.remove();renderFinanceiro()});
+}
+
+function renderTrabalho(){
+ app.innerHTML=`<section class="hero"><h2>💼 Trabalho</h2><p>Um espaço separado para organizar minhas frentes profissionais, sem misturar trabalho com o Financeiro.</p></section>
+ <div class="section-title">MINHAS FRENTES</div>
+ <section class="work-grid">
+  <button class="card work-card" data-work="crefito"><span class="work-icon">🏛️</span><strong>CREFITO-11</strong><span>Trabalho oficial · 08:00–14:00</span></button>
+  <button class="card work-card" data-work="bec"><span class="work-icon">🌿</span><strong>BEC</strong><span>Empresa, projetos e operações.</span></button>
+  <button class="card work-card" data-work="tiktok"><span class="work-icon">🎵</span><strong>TikTok</strong><span>Conteúdo, ideias e presença digital.</span></button>
+ </section>
+ <section class="card work-note"><strong>Menos decisões · mais clareza</strong><span>Cada frente pode ganhar tarefas, projetos e indicadores próprios depois, sem sobrecarregar o Meu Dia.</span></section>`;
+ if(!document.getElementById("work-v1-styles")){const s=document.createElement("style");s.id="work-v1-styles";s.textContent=`.work-grid{display:grid;gap:12px}.work-card{border:1px solid rgba(92,72,104,.12);text-align:left;display:grid;grid-template-columns:46px 1fr;grid-template-rows:auto auto;column-gap:12px;align-items:center;cursor:pointer}.work-card .work-icon{grid-row:1/3;font-size:30px}.work-card strong{font-size:18px}.work-card span:last-child{font-size:13px;color:#817783}.work-note{margin-top:16px;display:grid;gap:6px}.work-note span{color:#817783}`;document.head.appendChild(s)}
+ document.querySelectorAll("[data-work]").forEach(b=>b.onclick=()=>alert("Submódulo em construção. Primeiro vamos estruturar esta frente profissional."));
 }
 
 const CASA_KEY="minha-vida.casa.v1";
