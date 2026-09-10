@@ -1,6 +1,6 @@
 const STORAGE_KEY = "minha-vida.pendencias.v1";
 const state = {
-  route: "pendencias",
+  route: "meu-dia",
   filter: "abertas",
   editingId: null,
   search: ""
@@ -74,17 +74,48 @@ function renderMeuDia(){
  ${(w===1||w===3)?'<div><b>14:40–16:10</b><span>Janela estratégica</span></div>':''}
  <div><b>${ho}</b><span>Home office</span></div><div><b>19:00+</b><span>Noite protegida · descanso primeiro</span></div></div></section>
  ${p.length?`<section class="day-section"><div class="section-head"><h2>Pendências que merecem aparecer</h2><a href="#pendencias">ver todas</a></div>${p.map(x=>`<div class="compact-item"><strong>${x.title||x.name||'Pendência'}</strong>${x.dueDate?`<small>${x.dueDate}</small>`:''}</div>`).join('')}</section>`:''}
- <section class="quick-grid"><a href="#rituais">✨<span>Rituais</span></a><a href="#exercicios">🏃<span>Exercícios</span></a><a href="#alimentacao">🍽️<span>Alimentação</span></a><a href="#receitas">📖<span>Receitas</span></a><a href="#casa">🏠<span>Casa</span></a><a href="#financeiro">💰<span>Financeiro</span></a></section>
+ <section class="quick-grid"><a href="#rituais">✨<span>Rituais</span></a><a href="#exercicios">🏃<span>Exercícios</span></a><a href="#alimentacao">🍽️<span>Alimentação</span></a><a href="#receitas">📖<span>Receitas</span></a><a href="#casa">🏠<span>Casa</span></a><a href="#financeiro">💰<span>Financeiro</span></a><a href="#ideias">💡<span>Criação &amp; Ideias</span></a><a href="#estudos">📚<span>Estudos</span></a></section>
  <section class="free-space"><div>☁️</div><strong>Espaço livre também faz parte do dia.</strong><p>Se nada precisa ser resolvido agora, não resolva.</p></section>`;
 }
 
-/* CORREÇÃO PRINCIPAL:
-   O hash é usado para navegação quando existir; sem hash, a página inicial
-   agora é Pendências. A rota Meu Dia continua disponível em #meu-dia.
+/* NAVEGAÇÃO PRINCIPAL — MINHA VIDA
+   A abertura padrão é Meu Dia. A barra inferior mantém quatro acessos:
+   Meu Dia · Pendências · Rituais · Mais. O menu Mais começa por Meu Dia
+   e depois Pendências, como definido no fluxo do app.
 */
+function ensureMainNavigation() {
+  const nav = document.querySelector('.bottom-nav');
+  if (nav) {
+    nav.innerHTML = `
+      <a class="nav-item" data-route="meu-dia" href="#meu-dia" aria-label="Meu Dia">💜<span>Meu Dia</span></a>
+      <a class="nav-item" data-route="pendencias" href="#pendencias" aria-label="Pendências">📝<span>Pendências</span></a>
+      <a class="nav-item" data-route="rituais" href="#rituais" aria-label="Rituais">✨<span>Rituais</span></a>
+      <button class="nav-item" type="button" data-more="1" aria-label="Mais">☰<span>Mais</span></button>`;
+    const more = nav.querySelector('[data-more]');
+    if (more) more.onclick = () => document.getElementById('moduleMenu')?.showModal();
+  }
+
+  const links = document.querySelector('.module-links');
+  if (links) {
+    const desired = [
+      ['meu-dia','💜 Meu Dia'],
+      ['pendencias','📝 Pendências'],
+      ['ideias','💡 Criação & Ideias'],
+      ['estudos','📚 Estudos / CEBRASPE'],
+      ['financeiro','💰 Financeiro'],
+      ['casa','🏠 Casa'],
+      ['exercicios','🏃 Exercícios'],
+      ['alimentacao','🍽️ Alimentação'],
+      ['receitas','📖 Receitas']
+    ];
+    links.innerHTML = desired.map(([r,label]) => `<a href="#${r}">${label}</a>`).join('');
+  }
+}
+
 function render() {
+  ensureMainNavigation();
   const hash = (location.hash || "").replace("#", "").trim();
-  const route = hash || state.route || "pendencias";
+  const route = hash || state.route || "meu-dia";
   state.route = route;
 
   const pageTitle = document.querySelector("#pageTitle");
@@ -944,27 +975,18 @@ function renderPlaceholder() {
   });
 }
 
-document.querySelector("#homeBtn").onclick = () => {
-  state.route="pendencias";
-  state.filter="abertas";
-  state.search="";
-  location.hash = "pendencias";
+document.querySelector("#homeBtn").onclick = (e) => {
+  e.preventDefault();
+  state.route="meu-dia";
+  location.hash = "meu-dia";
   render();
 };
 
 document.querySelector("#backBtn").onclick = () => {
-  state.route="pendencias";
-  location.hash = "pendencias";
+  state.route="meu-dia";
+  location.hash = "meu-dia";
   render();
 };
-
-document.querySelectorAll(".nav-item").forEach(b => {
-  b.onclick = () => {
-    state.route=b.dataset.route;
-    location.hash = state.route;
-    render();
-  };
-});
 
 if ("serviceWorker" in navigator) {
   window.addEventListener("load", () =>
