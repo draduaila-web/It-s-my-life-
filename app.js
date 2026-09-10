@@ -1074,7 +1074,7 @@ function workTaskDateLabel(v){return v?new Date(v+'T12:00:00').toLocaleDateStrin
 function ensureWorkTaskStyles(){
  if(document.getElementById('work-task-styles'))return;
  const s=document.createElement('style');s.id='work-task-styles';s.textContent=`
- .work-action-grid{display:flex;flex-wrap:wrap;gap:8px;margin:0 0 12px}.work-action-chip{border:1px solid #e1d7e5;background:#fffdfb;color:#66586d;border-radius:999px;padding:9px 12px;font-weight:700;font-size:13px}.work-action-chip:active{transform:scale(.985)}
+ .work-action-grid{display:flex;flex-wrap:wrap;gap:8px;margin:0 0 12px}.work-click-panel{cursor:pointer;transition:transform .15s ease,box-shadow .15s ease}.work-click-panel:active{transform:scale(.99)}.work-panel-main{display:grid;gap:5px;text-align:left;border:0;background:transparent;padding:0;color:#40384a;width:100%;font:inherit;cursor:pointer}.work-panel-main h3{margin:0;font-size:20px}.work-panel-main span{color:#756d78;font-size:14px;line-height:1.35}.work-click-panel .work-action-grid{margin-top:8px}.work-click-panel .work-action-chip{cursor:pointer}.work-action-chip{border:1px solid #e1d7e5;background:#fffdfb;color:#66586d;border-radius:999px;padding:9px 12px;font-weight:700;font-size:13px}.work-action-chip:active{transform:scale(.985)}
  .work-task-item{align-items:center}.work-task-actions{display:flex;align-items:center;gap:6px}.mini-work-edit{border:0;background:#f2ecef;color:#6d6270;border-radius:50%;width:32px;height:32px;font-size:16px}.work-sub-logo{width:42px!important;height:42px!important;object-fit:contain!important}.work-action-plan{display:grid;gap:5px;margin-bottom:16px}.work-action-plan strong{font-size:16px}.work-action-plan span{color:#756d78}
  `;document.head.appendChild(s);
 }
@@ -1106,21 +1106,61 @@ function renderTrabalhoSub(kind){
  if(kind==='crefito'){renderCrefito();return}
  ensureWorkStyles();ensureWorkTaskStyles();
  const cfgs={
-  bec:{kind:'bec',key:WORK_BEC_KEY,name:'BEC',desc:'Organizar o que precisa ser feito na BEC, sem transformar o módulo em um CRM.',tag:'EMPRESA',actions:['Matrizia · Nova campanha','Matrizia · Acompanhar matches','Matrizia · Acompanhar campanha','Matrizia · Verificar resultados','Matrizia · Outro','Instagram · Novo post','Instagram · Novo story','Instagram · Novo Reels','Instagram · Impulsionar','Instagram · Outro','Bling · Nova tarefa','Desenvolvimento de produtos · Nova tarefa','Novo projeto'],sections:[['Matrizia','Nova campanha · Acompanhar matches · Acompanhar campanha · Verificar resultados · Outro'],['Instagram','Novo post · Novo story · Novo Reels · Impulsionar · Outro'],['Bling','Uma tarefa por vez, com observação livre.'],['Desenvolvimento de produtos','Uma tarefa por vez, com descrição livre.'],['Novo projeto','Registrar a ideia como uma tarefa quando ela virar ação.']]},
-  tiktok:{kind:'tiktok',key:WORK_TIKTOK_KEY,name:'TikTok',desc:'Um plano de ação simples para construir presença, produzir e acompanhar conteúdo.',tag:'CONTEÚDO',actions:['Definir ideia','Roteirizar','Gravar','Editar','Publicar','Reaproveitar conteúdo','Responder / comunidade','Analisar resultado','Planejar próxima semana','Outra tarefa'],sections:[['1 · Clareza','Definir posicionamento, pilares e linguagem.'],['2 · Banco de ideias','Capturar ideias sem precisar produzir na hora.'],['3 · Produção','Roteirizar → gravar → editar.'],['4 · Publicação','Publicar e reaproveitar o que fizer sentido em outras redes.'],['5 · Análise','Ver o que funcionou e transformar aprendizado em próxima ação.']]}
+  bec:{
+   kind:'bec',key:WORK_BEC_KEY,name:'BEC',
+   desc:'Seu espaço para a empresa, projetos e operações.',tag:'EMPRESA',
+   logo:'bec-logo.png',
+   groups:[
+    {title:'Matrizia',desc:'Campanhas, matches e resultados.',actions:['Nova campanha','Acompanhar matches','Acompanhar campanha','Verificar resultados','Outro']},
+    {title:'Instagram',desc:'Conteúdo e divulgação.',actions:['Novo post','Novo story','Novo Reels','Impulsionar','Outro']},
+    {title:'Bling',desc:'Registrar uma tarefa operacional.',actions:['Nova tarefa']},
+    {title:'Desenvolvimento de produtos',desc:'Registrar o próximo passo de um desenvolvimento.',actions:['Nova tarefa']},
+    {title:'Novo projeto',desc:'Registrar uma ideia que virou ação.',actions:['Nova tarefa']}
+   ]
+  },
+  tiktok:{
+   kind:'tiktok',key:WORK_TIKTOK_KEY,name:'TikTok',
+   desc:'Seu espaço para conteúdo e presença digital.',tag:'CONTEÚDO',
+   logo:'tiktok-logo.png',
+   groups:[
+    {title:'Ideias',desc:'Guardar ideias antes de decidir quando publicar.',actions:['Definir ideia']},
+    {title:'Produção',desc:'Roteirizar, gravar e editar conteúdos.',actions:['Roteirizar','Gravar','Editar']},
+    {title:'Publicação',desc:'Publicar e reaproveitar conteúdos quando fizer sentido.',actions:['Publicar','Reaproveitar conteúdo']},
+    {title:'Comunidade',desc:'Responder e manter presença com quem acompanha.',actions:['Responder / comunidade']},
+    {title:'Análise',desc:'Ver o que funcionou e definir a próxima ação.',actions:['Analisar resultado','Planejar próxima semana']},
+    {title:'Outra tarefa',desc:'Qualquer ação que não esteja nas opções acima.',actions:['Outra tarefa']}
+   ]
+  }
  };
  const cfg=cfgs[kind];
- const logo=`<img class="hero-brand-logo work-sub-logo" src="${kind==='bec'?'bec-logo.png':'tiktok-logo.png'}" alt="${cfg.name}">`;
  const all=loadWorkTasks(cfg.key),done=all.filter(x=>x.status==='Concluído').length;
+ const logo=`<img class="hero-brand-logo work-sub-logo" src="${cfg.logo}" alt="${cfg.name}">`;
+ const actionBtn=(group,a)=>`<button type="button" class="work-action-chip" data-work-action="${escapeHtml(a)}" data-work-group="${escapeHtml(group)}">${escapeHtml(a)}</button>`;
+ const groupsHtml=cfg.groups.map(g=>`
+   <section class="card work-panel work-click-panel">
+     <div class="panel-tag">${cfg.tag}</div>
+     <button type="button" class="work-panel-main" data-work-group-main="${escapeHtml(g.title)}" aria-label="Adicionar tarefa em ${escapeHtml(g.title)}">
+       <h3>${escapeHtml(g.title)}</h3><span>${escapeHtml(g.desc)}</span>
+     </button>
+     <div class="work-action-grid">${g.actions.map(a=>actionBtn(g.title,a)).join('')}</div>
+   </section>`).join('');
+ const taskHtml=renderWorkTaskArea(cfg);
  app.innerHTML=`<section class="hero"><div class="eyebrow">💼 TRABALHO</div><h2>${logo} ${cfg.name}</h2><p>${cfg.desc}</p></section>
  <div class="work-subnav"><button class="work-back" id="backWork">← Trabalho</button><p class="work-subtitle">${cfg.tag}</p></div>
  ${kind==='tiktok'?`<section class="work-rule work-action-plan"><strong>Plano de ação</strong><span>Capturar → produzir → publicar → analisar. Cada ação entra com uma duração para poder alimentar o Meu Dia.</span></section>`:''}
- ${renderWorkTaskArea(cfg)}
- <section class="work-section"><div class="work-section-head"><h3>Como organizar</h3><span class="work-badge">${done} concluídas</span></div><div class="work-panels">${cfg.sections.map(x=>`<article class="card work-panel"><span class="panel-tag">${cfg.tag}</span><h3>${escapeHtml(x[0])}</h3><span>${escapeHtml(x[1])}</span></article>`).join('')}</div></section>
+ ${taskHtml}
+ <section class="work-section"><div class="work-section-head"><h3>Áreas</h3><span class="work-badge">${done} concluídas</span></div><div class="work-panels">${groupsHtml}</div></section>
  <div class="work-rule">O objetivo é saber o que precisa ser feito e quanto tempo isso ocupa. O Meu Dia usa essas tarefas quando fizer sentido.</div>`;
  document.getElementById('backWork').onclick=()=>{location.hash='trabalho'};
  document.getElementById('addWorkTask').onclick=()=>openWorkTaskModal(cfg);
- document.querySelectorAll('[data-work-action]').forEach(b=>b.onclick=()=>openWorkTaskModal(cfg,{title:b.dataset.workAction,date:todayISO(),duration:b.dataset.workAction.includes('campanha')?'30 min':'30 min',priority:'Normal',status:'A fazer',note:''}));
+ document.querySelectorAll('[data-work-action]').forEach(b=>b.onclick=()=>{
+   const action=b.dataset.workAction, group=b.dataset.workGroup;
+   const presetTitle=(action==='Nova tarefa'||action==='Outra tarefa')?`${group} · `:`${group} · ${action}`;
+   openWorkTaskModal(cfg,{title:presetTitle,date:todayISO(),duration:'30 min',priority:'Normal',status:'A fazer',note:''});
+ });
+ document.querySelectorAll('[data-work-group-main]').forEach(b=>b.onclick=()=>{
+   openWorkTaskModal(cfg,{title:`${b.dataset.workGroupMain} · `,date:todayISO(),duration:'30 min',priority:'Normal',status:'A fazer',note:''});
+ });
  document.querySelectorAll('[data-work-edit]').forEach(b=>b.onclick=()=>{const item=all.find(x=>x.id===b.dataset.workEdit);if(item)openWorkTaskModal(cfg,item)});
 }
 
