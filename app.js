@@ -136,16 +136,37 @@ function ensureSoftMeuDiaStyles(){
 function ensureMainNavigation() {
   ensureSoftMeuDiaStyles();
   ensureStudyMeuDiaStyles();
-  const nav = document.querySelector('.bottom-nav');
-  if (nav) {
-    nav.innerHTML = `
-      <a class="nav-item" data-route="meu-dia" href="#meu-dia" aria-label="Meu Dia">💜<span>Meu Dia</span></a>
-      <a class="nav-item" data-route="pendencias" href="#pendencias" aria-label="Pendências">📝<span>Pendências</span></a>
-      <a class="nav-item" data-route="rituais" href="#rituais" aria-label="Rituais">✨<span>Rituais</span></a>
-      <button class="nav-item" type="button" data-more="1" aria-label="Mais">☰<span>Mais</span></button>`;
-    const more = nav.querySelector('[data-more]');
-    if (more) more.onclick = () => document.getElementById('moduleMenu')?.showModal();
+  // Reconstrói uma única barra inferior, mesmo que o index antigo tenha
+  // deixado uma barra duplicada/antiga. Isso evita o problema do iPhone
+  // mostrar apenas “Rituais | Mais”.
+  const navs = Array.from(document.querySelectorAll('.bottom-nav'));
+  let nav = navs[0] || null;
+  navs.slice(1).forEach(n => n.remove());
+  if (!nav) {
+    nav = document.createElement('nav');
+    nav.className = 'bottom-nav';
+    nav.setAttribute('aria-label', 'Navegação principal');
+    document.body.appendChild(nav);
   }
+  nav.innerHTML = `
+    <a class="nav-item" data-route="meu-dia" href="#meu-dia" aria-label="Meu Dia">💜<span>Meu Dia</span></a>
+    <a class="nav-item" data-route="pendencias" href="#pendencias" aria-label="Pendências">📝<span>Pendências</span></a>
+    <a class="nav-item" data-route="rituais" href="#rituais" aria-label="Rituais">✨<span>Rituais</span></a>
+    <button class="nav-item" type="button" data-more="1" aria-label="Mais">☰<span>Mais</span></button>`;
+  Object.assign(nav.style, {
+    position:'fixed', left:'0', right:'0', bottom:'0', width:'100%', maxWidth:'none',
+    margin:'0', transform:'none', display:'grid', gridTemplateColumns:'repeat(4,minmax(0,1fr))',
+    boxSizing:'border-box', zIndex:'99999', padding:'8px 10px calc(8px + env(safe-area-inset-bottom))',
+    borderRadius:'24px 24px 0 0', background:'rgba(255,250,246,.97)',
+    backdropFilter:'blur(12px)', WebkitBackdropFilter:'blur(12px)'
+  });
+  nav.querySelectorAll('.nav-item').forEach(item => Object.assign(item.style, {
+    minWidth:'0', width:'100%', display:'flex', alignItems:'center', justifyContent:'center',
+    gap:'3px', flexDirection:'column', whiteSpace:'nowrap', boxSizing:'border-box', padding:'6px 2px',
+    background:'transparent', border:'0', textDecoration:'none'
+  }));
+  const more = nav.querySelector('[data-more]');
+  if (more) more.onclick = () => document.getElementById('moduleMenu')?.showModal();
 
   const links = document.querySelector('.module-links');
   if (links) {
@@ -186,7 +207,7 @@ function render() {
       "Minha Vida";
   }
 
-  document.querySelectorAll(".nav-item").forEach(b =>
+  document.querySelectorAll(".bottom-nav .nav-item").forEach(b =>
     b.classList.toggle("active", b.dataset.route === route)
   );
 
