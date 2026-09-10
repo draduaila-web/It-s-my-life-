@@ -961,7 +961,7 @@ function ensureFinanceStyles(){
  `;document.head.appendChild(s);
 }
 function openFinModal(type){
- const d=loadFin(),dlg=document.createElement("dialog"); dlg.className="finance-dialog";
+ const d=loadFin(),dlg=document.createElement("dialog"); dlg.className="finance-dialog crefito-dialog";
  const title=type==="income"?"Ajustar renda mensal":type==="fixed"?"Adicionar ao orçamento":"Registrar gasto";
  const options=(arr,sel)=>arr.map(x=>`<option ${x===sel?"selected":""}>${x}</option>`).join("");
  dlg.innerHTML=`<form method="dialog" class="modal-card" id="finForm"><div class="modal-head"><div><div class="eyebrow">💰 FINANCEIRO</div><h2>${title}</h2></div><button type="button" class="icon-btn fin-close" id="closeFinX" aria-label="Fechar">×</button></div>
@@ -1006,8 +1006,8 @@ function ensureCrefitoStyles(){
 }
 function openCrefitoItem(kind){
  const labels={demanda:"Nova demanda",projeto:"Novo projeto",reuniao:"Nova reunião",pauta:"Nova pauta / acompanhamento"};
- const dlg=document.createElement("dialog");dlg.className="app-dialog crefito-dialog";
- dlg.innerHTML=`<div class="dialog-card"><div class="dialog-head"><div><div class="eyebrow">🏛️ CREFITO-11</div><h2>${labels[kind]}</h2></div><button type="button" class="dialog-close" aria-label="Fechar">×</button></div><form class="work-form" id="crefitoForm">
+ const dlg=document.createElement("dialog");dlg.className="finance-dialog crefito-dialog";
+ dlg.innerHTML=`<form method="dialog" class="modal-card" id="crefitoForm"><div class="modal-head"><div><div class="eyebrow">🏛️ CREFITO-11</div><h2>${labels[kind]}</h2></div><button type="button" class="icon-btn" aria-label="Fechar">×</button></div>
  <label>Título<input id="cTitle" required placeholder="O que precisa ser acompanhado?"></label>
  <label>Data<input id="cDate" type="date" value="${new Date().toISOString().slice(0,10)}"></label>
  ${kind!=="reuniao"?`<label>Status<select id="cStatus"><option>Aberto</option><option>Em andamento</option><option>Concluído</option><option>Aguardando</option></select></label>`:`<label>Horário<input id="cTime" type="time"></label>`}
@@ -1021,11 +1021,11 @@ function openCrefitoItem(kind){
  <div class="section-label conditional" id="cSpreadsheetWrap"><span>📊 Qual planilha?</span><input id="cSpreadsheet" placeholder="Nome ou identificação da planilha"><span class="helper">Se houver mais de uma, separe por vírgulas.</span></div>
  <label>📍 Onde deve ser acompanhado?<select id="cFollow"><option>Siscaf</option><option>SEI</option><option>Controle interno</option><option>Pendências do setor</option><option>Outro</option></select></label>
  <label>Observação<textarea id="cNote" placeholder="Anotações, próximos passos ou contexto..."></textarea></label>
- <div class="work-actions"><button type="button" class="work-cancel">Cancelar</button><button class="work-save" type="submit">Salvar</button></div>
- </form></div>`;
+ <div class="modal-actions"><div class="grow"></div><button type="button" class="secondary">Cancelar</button><button class="primary" type="submit" value="default">Salvar</button></div>
+ </form>`;
  document.body.appendChild(dlg);dlg.showModal();
  const close=()=>{if(dlg.open)dlg.close();setTimeout(()=>dlg.remove(),0)};
- dlg.querySelector(".dialog-close").onclick=close;dlg.querySelector(".work-cancel").onclick=close;
+ dlg.querySelector(".icon-btn").onclick=close;dlg.querySelector(".secondary").onclick=close;
  dlg.addEventListener("click",e=>{if(e.target===dlg)close()});
  const syncSheet=()=>dlg.querySelector("#cSpreadsheetWrap").classList.toggle("show",[...dlg.querySelectorAll('input[name="sys"]:checked')].some(x=>x.value==="Planilha"));
  dlg.querySelectorAll('input[name="sys"]').forEach(x=>x.addEventListener("change",syncSheet));syncSheet();
