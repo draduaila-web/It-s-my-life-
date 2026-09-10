@@ -783,58 +783,87 @@ function openStudyModal(type, id=null) {
 }
 
 
-const FIN_KEY="minha-vida.financeiro.v1";
+const FIN_KEY="minha-vida.financeiro.v2";
 const FIN_BASE={
-  income: 19172.96,
-  expenses: [
-    {id:"aluguel",name:"Aluguel da casa",value:9503.50,category:"Casa",payer:"Usuária",status:"confirmado"},
-    {id:"bb",name:"BB — dívidas/parcelamentos",value:2329.59,category:"Dívidas",payer:"Usuária",status:"confirmado"},
-    {id:"caesb",name:"CAESB + Neoenergia",value:203.79,category:"Casa",payer:"Usuária",status:"base"},
-    {id:"combustivel",name:"Combustível",value:650,category:"Transporte",payer:"Usuária",status:"teto"},
-    {id:"pets",name:"Pets",value:450,category:"Animais",payer:"Usuária",status:"teto"},
-    {id:"itau5298",name:"Itaú 5298 — fatura agosto",value:1702.25,category:"Cartão",payer:"Usuária",status:"confirmado"}
-  ],
-  excluded:[
-    {name:"Itaú 4590 — fatura alta",value:5566.54,payer:"Mãe",reason:"Pago pela mãe; fora do orçamento da usuária."},
-    {name:"Unimed + Unidental",value:0,payer:"Empregador",reason:"Benefício; não entra no orçamento."},
-    {name:"BEC",value:0,payer:"—",reason:"Sem despesas atuais."}
-  ],
-  goals:[
-    {month:"Setembro",min:2000,max:3000,status:"Pendente"},
-    {month:"Outubro",min:2000,max:3000,status:"Pendente"},
-    {month:"Novembro",min:2000,max:3000,status:"Pendente"},
-    {month:"Dezembro",min:2000,max:3000,status:"Pendente"}
-  ],
-  transactions:[]
+ income:19172.96,
+ fixed:[
+  {id:"aluguel",name:"Aluguel da casa",value:9503.50,category:"Casa",payer:"Usuária"},
+  {id:"bb",name:"BB — dívidas/parcelamentos",value:2329.59,category:"Dívidas",payer:"Usuária"},
+  {id:"caesb",name:"CAESB + Neoenergia",value:203.79,category:"Casa",payer:"Usuária"},
+  {id:"combustivel",name:"Combustível",value:650,category:"Transporte",payer:"Usuária",kind:"teto"},
+  {id:"pets",name:"Pets",value:450,category:"Animais",payer:"Usuária",kind:"teto"},
+  {id:"itau5298",name:"Itaú 5298 — fatura agosto",value:1702.25,category:"Cartão",payer:"Usuária"}
+ ],
+ excluded:[
+  {name:"Itaú 4590 — fatura alta",value:5566.54,payer:"Mãe",reason:"Pago pela mãe; fora do orçamento da usuária."},
+  {name:"Unimed + Unidental",value:0,payer:"Empregador",reason:"Benefício; não entra no orçamento."},
+  {name:"BEC",value:0,payer:"—",reason:"Sem despesas atuais."}
+ ],
+ goals:[
+  {month:"Setembro",min:2000,max:3000,saved:0},
+  {month:"Outubro",min:2000,max:3000,saved:0},
+  {month:"Novembro",min:2000,max:3000,saved:0},
+  {month:"Dezembro",min:2000,max:3000,saved:0}
+ ],
+ transactions:[]
 };
-function loadFin(){try{const d=JSON.parse(localStorage.getItem(FIN_KEY));if(d)return {...FIN_BASE,...d};}catch{}return JSON.parse(JSON.stringify(FIN_BASE));}
-function saveFin(d){localStorage.setItem(FIN_KEY,JSON.stringify(d));}
-function finKnownTotal(d){return d.expenses.reduce((s,x)=>s+Number(x.value||0),0);}
-function money(n){return Number(n||0).toLocaleString("pt-BR",{minimumFractionDigits:2,maximumFractionDigits:2});}
-function renderFinanceiro(){
- const d=loadFin(),known=finKnownTotal(d),balance=d.income-known;
- const min=d.goals.reduce((s,x)=>s+Number(x.min||0),0),max=d.goals.reduce((s,x)=>s+Number(x.max||0),0);
- app.innerHTML=`<section class="hero"><h2>💰 Financeiro</h2><p>Clareza sobre o que realmente sai do seu caixa — sem transformar sua vida em contabilidade.</p></section>
- <div class="money-hero card"><span class="eyebrow">RENDA MENSAL BASE</span><strong>R$ ${money(d.income)}</strong><div class="money-grid"><div><span>Conhecido</span><b>R$ ${money(known)}</b></div><div><span>Sobra conhecida</span><b>R$ ${money(balance)}</b></div></div></div>
- <div class="section-title">ORÇAMENTO BASE</div><div class="list">${d.expenses.map(finExpenseHtml).join("")}</div><button class="add-full secondary" id="addExpense">＋ Adicionar despesa</button>
- <div class="section-title">COMPRAS / GASTOS DO MÊS</div><div class="card"><p class="note">A planilha enviada não traz uma lista detalhada das compras do mês. Ela registra que alimentação, seguros, assinaturas, despesas do Henrique e variáveis ainda precisam ser incorporados ao fechamento. Por isso, esses gastos ficam separados até termos os valores reais.</p><button class="primary" id="addTransaction">＋ Registrar gasto</button></div>
- <div class="list">${d.transactions.slice().reverse().slice(0,10).map(transactionHtml).join("")||`<div class="empty compact"><strong>Nenhum gasto registrado.</strong><span>Podemos começar a registrar aqui sem alterar o orçamento-base.</span></div>`}</div>
- <div class="section-title">FUNDO CARRO</div><div class="card goal-card"><div class="panel-head"><div><span class="eyebrow">SETEMBRO → DEZEMBRO</span><h3>Meta acumulada</h3></div><span class="pill today">R$ ${money(min)}–${money(max)}</span></div><div class="goal-list">${d.goals.map((g,i)=>`<div class="goal-row"><span>${escapeHtml(g.month)}</span><strong>R$ ${money(g.min)}–${money(g.max)}</strong><button class="goal-toggle ${g.status==="Concluído"?"done":""}" data-goal="${i}">${g.status==="Concluído"?"✓":"○"}</button></div>`).join("")}</div></div>
- <div class="section-title">FORA DO SEU ORÇAMENTO</div><div class="list">${d.excluded.map(x=>`<div class="card excluded-card"><div><strong>${escapeHtml(x.name)}</strong><span>${x.value?`R$ ${money(x.value)} · `:""}${escapeHtml(x.reason)}</span></div><span class="pill">${escapeHtml(x.payer)}</span></div>`).join("")}</div>`;
- document.querySelector("#addExpense").onclick=()=>openFinModal("expense");
- document.querySelector("#addTransaction").onclick=()=>openFinModal("transaction");
- document.querySelectorAll("[data-goal]").forEach(b=>b.onclick=()=>{const x=loadFin(),i=+b.dataset.goal;x.goals[i].status=x.goals[i].status==="Concluído"?"Pendente":"Concluído";saveFin(x);renderFinanceiro();});
+function loadFin(){
+ try{
+  const raw=JSON.parse(localStorage.getItem(FIN_KEY));
+  if(raw)return {...FIN_BASE,...raw,fixed:raw.fixed||FIN_BASE.fixed,excluded:raw.excluded||FIN_BASE.excluded,goals:raw.goals||FIN_BASE.goals,transactions:raw.transactions||[]};
+ }catch{}
+ // migrate the previous finance store if it exists
+ try{
+  const old=JSON.parse(localStorage.getItem("minha-vida.financeiro.v1"));
+  if(old){const migrated={...FIN_BASE,income:old.income||FIN_BASE.income,fixed:old.expenses||FIN_BASE.fixed,excluded:old.excluded||FIN_BASE.excluded,goals:(old.goals||FIN_BASE.goals).map(g=>({...g,saved:g.saved||0})),transactions:old.transactions||[]};saveFin(migrated);return migrated;}
+ }catch{}
+ return JSON.parse(JSON.stringify(FIN_BASE));
 }
-function finExpenseHtml(x){return `<article class="card finance-row"><div><strong>${escapeHtml(x.name)}</strong><span>${escapeHtml(x.category)} · ${escapeHtml(x.status)}</span></div><b>R$ ${money(x.value)}</b></article>`;}
-function transactionHtml(x){return `<article class="card finance-row"><div><strong>${escapeHtml(x.name)}</strong><span>${x.date?formatDate(x.date):""} · ${escapeHtml(x.category||"Variável")}</span></div><b>R$ ${money(x.value)}</b></article>`;}
+function saveFin(d){localStorage.setItem(FIN_KEY,JSON.stringify(d));}
+function money(n){return Number(n||0).toLocaleString("pt-BR",{minimumFractionDigits:2,maximumFractionDigits:2});}
+function finFixedTotal(d){return d.fixed.reduce((s,x)=>s+Number(x.value||0),0);}
+function finMonthTotal(d,month){return d.transactions.filter(x=>(x.date||"").slice(0,7)===month).reduce((s,x)=>s+Number(x.value||0),0);}
+function finCategoryTotals(d,month){const out={};d.transactions.filter(x=>(x.date||"").slice(0,7)===month).forEach(x=>{const k=x.category||"Variável";out[k]=(out[k]||0)+Number(x.value||0)});return out;}
+function finCurrentMonth(){return todayISO().slice(0,7);}
+function finMonthLabel(iso){const [y,m]=iso.split("-");return new Intl.DateTimeFormat("pt-BR",{month:"long",year:"numeric"}).format(new Date(Number(y),Number(m)-1,1));}
+function finFixedHtml(x){return `<article class="card finance-row"><div><strong>${escapeHtml(x.name)}</strong><span>${escapeHtml(x.category)}${x.kind==="teto"?" · teto":""}</span></div><b>R$ ${money(x.value)}</b></article>`;}
+function finTransactionHtml(x){return `<article class="card finance-row"><div><strong>${escapeHtml(x.name)}</strong><span>${x.date?formatDate(x.date):""} · ${escapeHtml(x.category||"Variável")}</span></div><b>R$ ${money(x.value)}</b><button class="mini-delete" data-fin-delete="${x.id}" aria-label="Excluir">×</button></article>`;}
+function renderFinanceiro(){
+ const d=loadFin(),month=finCurrentMonth(),fixed=finFixedTotal(d),variable=finMonthTotal(d,month),planned=fixed+variable,remaining=d.income-planned,cats=finCategoryTotals(d,month);
+ const catHtml=Object.entries(cats).sort((a,b)=>b[1]-a[1]).slice(0,6).map(([k,v])=>`<div class="finance-cat"><span>${escapeHtml(k)}</span><strong>R$ ${money(v)}</strong></div>`).join("")||`<div class="empty compact"><strong>Nenhum gasto variável registrado.</strong><span>Registre apenas o que realmente precisar acompanhar.</span></div>`;
+ const goalTotal=d.goals.reduce((s,g)=>s+Number(g.saved||0),0), goalMin=d.goals.reduce((s,g)=>s+Number(g.min||0),0), goalMax=d.goals.reduce((s,g)=>s+Number(g.max||0),0);
+ app.innerHTML=`<section class="hero"><h2>💰 Financeiro</h2><p>Clareza sobre o dinheiro, sem transformar sua vida em contabilidade.</p></section>
+ <section class="finance-summary card"><div class="finance-main"><span class="eyebrow">RENDA MENSAL</span><strong>R$ ${money(d.income)}</strong><button class="text-btn" id="editIncome">editar</button></div><div class="finance-metrics"><div><span>Base</span><b>R$ ${money(fixed)}</b></div><div><span>Variável · ${escapeHtml(finMonthLabel(month))}</span><b>R$ ${money(variable)}</b></div><div><span>Disponível conhecido</span><b>R$ ${money(remaining)}</b></div></div></section>
+ <div class="section-title">ORÇAMENTO BASE</div><div class="list">${d.fixed.map(finFixedHtml).join("")}</div><button class="add-full secondary" id="addFixed">＋ Adicionar item ao orçamento</button>
+ <div class="section-title">GASTOS DO MÊS</div><section class="card"><div class="panel-head"><div><span class="eyebrow">${escapeHtml(finMonthLabel(month))}</span><h3>O que saiu de verdade</h3></div><button class="primary compact-btn" id="addTransaction">＋ Registrar</button></div><div class="list inner-list">${d.transactions.slice().reverse().slice(0,20).map(finTransactionHtml).join("")||`<div class="empty compact"><strong>Nenhum gasto registrado.</strong><span>O registro é opcional — use quando ajudar a enxergar seu mês.</span></div>`}</div></section>
+ <div class="section-title">POR CATEGORIA</div><section class="card finance-cats">${catHtml}</section>
+ <div class="section-title">FUNDO CARRO</div><section class="card goal-card"><div class="panel-head"><div><span class="eyebrow">SETEMBRO → DEZEMBRO</span><h3>Construção da meta</h3></div><span class="pill today">R$ ${money(goalTotal)}</span></div><p class="note">Meta mensal planejada: R$ ${money(goalMin)}–R$ ${money(goalMax)}.</p><div class="goal-list">${d.goals.map((g,i)=>`<div class="goal-row"><span>${escapeHtml(g.month)}</span><strong>R$ ${money(g.saved||0)} / ${money(g.min)}–${money(g.max)}</strong><button class="goal-toggle ${Number(g.saved||0)>=Number(g.min||0)?"done":""}" data-goal="${i}">${Number(g.saved||0)>=Number(g.min||0)?"✓":"＋"}</button></div>`).join("")}</div></section>
+ <div class="section-title">FORA DO SEU ORÇAMENTO</div><div class="list">${d.excluded.map(x=>`<div class="card excluded-card"><div><strong>${escapeHtml(x.name)}</strong><span>${x.value?`R$ ${money(x.value)} · `:""}${escapeHtml(x.reason)}</span></div><span class="pill">${escapeHtml(x.payer)}</span></div>`).join("")}</div>`;
+ ensureFinanceStyles();
+ document.getElementById("editIncome").onclick=()=>openFinModal("income");
+ document.getElementById("addFixed").onclick=()=>openFinModal("fixed");
+ document.getElementById("addTransaction").onclick=()=>openFinModal("transaction");
+ document.querySelectorAll("[data-fin-delete]").forEach(b=>b.onclick=()=>{const x=loadFin();x.transactions=x.transactions.filter(t=>t.id!==b.dataset.finDelete);saveFin(x);renderFinanceiro()});
+ document.querySelectorAll("[data-goal]").forEach(b=>b.onclick=()=>{const x=loadFin(),i=+b.dataset.goal;const current=Number(x.goals[i].saved||0);const next=current>=Number(x.goals[i].min||0)?0:Number(x.goals[i].min||0);x.goals[i].saved=next;saveFin(x);renderFinanceiro()});
+}
+function ensureFinanceStyles(){
+ if(document.getElementById("finance-v2-styles"))return;
+ const s=document.createElement("style");s.id="finance-v2-styles";s.textContent=`
+ .finance-summary{background:linear-gradient(135deg,#edf5f2,#f2edf8);border:1px solid rgba(92,72,104,.10)}
+ .finance-main{display:flex;align-items:center;gap:10px;flex-wrap:wrap}.finance-main strong{font-size:32px;display:block;width:100%}.text-btn{border:0;background:transparent;color:#77558a;font-weight:700;padding:0}
+ .finance-metrics{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:16px}.finance-metrics>div{background:rgba(255,255,255,.62);border-radius:16px;padding:10px}.finance-metrics span{display:block;font-size:12px;color:#817783}.finance-metrics b{display:block;margin-top:4px;font-size:14px}
+ .compact-btn{padding:9px 12px!important}.inner-list{margin-top:12px}.finance-row{position:relative;display:flex;align-items:center;justify-content:space-between;gap:10px}.finance-row>div{min-width:0}.finance-row b{white-space:nowrap}.mini-delete{border:0;background:transparent;color:#9a8e98;font-size:22px;padding:4px}.finance-cats{display:grid;gap:8px}.finance-cat{display:flex;justify-content:space-between;padding:10px 12px;border-radius:14px;background:#faf6f2}.finance-cat span{color:#655c67}.goal-toggle{min-width:38px}.goal-toggle.done{background:#e4f1eb}
+ @media(max-width:420px){.finance-metrics{grid-template-columns:1fr}.panel-head{gap:8px}}
+ `;document.head.appendChild(s);
+}
 function openFinModal(type){
  const d=loadFin(),dlg=document.createElement("dialog");
- dlg.innerHTML=`<form method="dialog" class="modal-card" id="finForm"><div class="modal-head"><div><div class="eyebrow">💰 FINANCEIRO</div><h2>Registrar ${type==="expense"?"despesa":"gasto"}</h2></div><button class="icon-btn" value="cancel">×</button></div>
- <label>Descrição<input id="fName" required maxlength="100"></label><div class="form-grid"><label>Valor<input id="fValue" required type="number" min="0" step="0.01"></label><label>Categoria<input id="fCategory" maxlength="50" value="Variável"></label></div>
- ${type==="expense"?`<label>Responsável<select id="fPayer"><option>Usuária</option><option>Mãe</option><option>Empregador</option></select></label>`:`<label>Data<input id="fDate" type="date" value="${todayISO()}"></label>`}
+ const title=type==="income"?"Ajustar renda mensal":type==="fixed"?"Adicionar ao orçamento":"Registrar gasto";
+ dlg.innerHTML=`<form method="dialog" class="modal-card" id="finForm"><div class="modal-head"><div><div class="eyebrow">💰 FINANCEIRO</div><h2>${title}</h2></div><button class="icon-btn" value="cancel">×</button></div>
+ ${type==="income"?`<label>Renda mensal<input id="fValue" required type="number" min="0" step="0.01" value="${d.income}"></label>`:`<label>Descrição<input id="fName" required maxlength="100"></label><div class="form-grid"><label>Valor<input id="fValue" required type="number" min="0" step="0.01"></label><label>Categoria<select id="fCategory"><option>Casa</option><option>Alimentação</option><option>Transporte</option><option>Animais</option><option>Cartão</option><option>Dívidas</option><option>Henrique</option><option>Assinaturas</option><option>Saúde</option><option>Variável</option><option>Outros</option></select></label></div>${type==="transaction"?`<label>Data<input id="fDate" type="date" value="${todayISO()}"></label>`:`<label>Tipo<select id="fKind"><option>fixo</option><option>teto</option></select></label>`}`}
  <div class="modal-actions"><div class="grow"></div><button type="button" class="secondary" id="cancelFin">Cancelar</button><button class="primary" value="default">Salvar</button></div></form>`;
  document.body.appendChild(dlg);dlg.showModal();dlg.querySelector("#cancelFin").onclick=()=>{dlg.close();dlg.remove()};
- dlg.querySelector("#finForm").addEventListener("submit",e=>{e.preventDefault();const obj={id:uid(),name:dlg.querySelector("#fName").value.trim(),value:+dlg.querySelector("#fValue").value||0,category:dlg.querySelector("#fCategory").value.trim(),updatedAt:Date.now()};if(type==="expense"){obj.payer=dlg.querySelector("#fPayer").value;obj.status="manual";d.expenses.push(obj)}else{obj.date=dlg.querySelector("#fDate").value;d.transactions.push(obj)}saveFin(d);dlg.close();dlg.remove();renderFinanceiro()});
+ dlg.querySelector("#finForm").addEventListener("submit",e=>{e.preventDefault();if(type==="income"){d.income=+dlg.querySelector("#fValue").value||0}else{const obj={id:uid(),name:dlg.querySelector("#fName").value.trim(),value:+dlg.querySelector("#fValue").value||0,category:dlg.querySelector("#fCategory").value,updatedAt:Date.now()};if(type==="transaction"){obj.date=dlg.querySelector("#fDate").value;d.transactions.push(obj)}else{obj.kind=dlg.querySelector("#fKind").value;obj.payer="Usuária";d.fixed.push(obj)}}saveFin(d);dlg.close();dlg.remove();renderFinanceiro()});
 }
 
 const CASA_KEY="minha-vida.casa.v1";
