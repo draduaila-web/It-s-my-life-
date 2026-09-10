@@ -280,6 +280,9 @@ function render() {
   const route = hash || state.route || "meu-dia";
   state.route = route;
 
+  const backBtn = document.querySelector("#backBtn");
+  if (backBtn) backBtn.hidden = !["trabalho-crefito", "trabalho-bec", "trabalho-tiktok"].includes(route);
+
   const pageTitle = document.querySelector("#pageTitle");
   if (pageTitle) {
     pageTitle.textContent =
@@ -321,6 +324,17 @@ function render() {
   else if (route === "trabalho-tiktok") renderTrabalhoSub("tiktok");
   else renderPlaceholder();
 }
+
+document.addEventListener("click", (e) => {
+  const workRouteEl = e.target.closest("[data-work-route]");
+  if (!workRouteEl) return;
+  const route = workRouteEl.getAttribute("data-work-route");
+  if (!route) return;
+  e.preventDefault();
+  state.route = route;
+  location.hash = route;
+  render();
+});
 
 window.addEventListener("hashchange", render);
 
@@ -1000,10 +1014,10 @@ function renderTrabalho(){
  app.innerHTML=`<section class="hero work-front-hero"><div class="eyebrow">💼 TRABALHO</div><h2>Trabalho</h2><p>Um espaço separado para organizar minhas frentes profissionais, sem misturar trabalho com o Financeiro.</p></section>
  <div class="section-title">MINHAS FRENTES</div>
  <section class="work-grid work-front-v12">
-  <article class="card work-card work-card-crefito" data-work-route="trabalho-crefito" role="button" tabindex="0">
+  <a href="#trabalho-crefito" class="card work-card work-card-crefito" data-work-route="trabalho-crefito" aria-label="Abrir CREFITO-11">
    <span class="work-icon work-logo-wrap"><img class="work-logo official-logo crefito-logo" src="crefito11-logo.png" alt="CREFITO-11"></span>
    <span class="work-copy"><strong>CREFITO-11</strong><span>Trabalho oficial · 08:00–14:00</span></span>
-  </article>
+  </a>
   <a href="#trabalho-bec" class="card work-card work-card-bec" data-work-route="trabalho-bec" aria-label="Abrir BEC">
    <span class="work-icon work-logo-wrap"><img class="work-logo official-logo bec-logo" src="bec-logo.png" alt="BEC"></span>
    <span class="work-copy"><strong>BEC</strong><span>Empresa, projetos e operações.</span></span>
@@ -1403,12 +1417,15 @@ document.querySelector("#homeBtn").onclick = (e) => {
   render();
 };
 
-document.querySelector("#backBtn").onclick = () => {
+document.addEventListener("click", (e) => {
+  const btn = e.target.closest("#backBtn");
+  if (!btn) return;
+  e.preventDefault();
   if (state.route.startsWith("trabalho-")) { state.route="trabalho"; location.hash="trabalho"; render(); return; }
   state.route="meu-dia";
   location.hash = "meu-dia";
   render();
-};
+});
 
 if ("serviceWorker" in navigator) {
   window.addEventListener("load", () =>
