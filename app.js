@@ -59,7 +59,34 @@ function mvCurrentBlock(){
  if(m>=1140)return ['Noite protegida','após 19:00','Agora é espaço para desacelerar. O sistema não vai encher sua noite.','rest'];
  return ['Espaço livre','agora','Você não precisa preencher cada minuto.','free'];
 }
+function studyWindowNow(){
+ const d=mvNow(),m=mvMinutes(d),w=mvDow(d);
+ if((w===1||w===3) && m>=880 && m<970) return {minutes:970-m,start:880,end:970,label:'Janela estratégica'};
+ if((w===2||w===4||w===5) && m>=870 && m<910) return {minutes:910-m,start:870,end:910,label:'Janela curta'};
+ return null;
+}
+function renderStudySuggestionMeuDia(){
+ const win=studyWindowNow();
+ if(!win) return '';
+ const sug=estudoSugestao(win.minutes);
+ if(!sug || !sug.maps?.length) return `<section class="study-now-card"><div class="eyebrow">📚 ESTUDOS</div><strong>Nenhum conteúdo precisa entrar agora.</strong><p>Sua janela está disponível. Se quiser estudar, escolha livremente; caso contrário, preserve o espaço.</p></section>`;
+ const first=sug.maps[0];
+ const label=win.minutes>=75?'até 1h30':win.minutes>=45?'até 1h':'até 40 min';
+ return `<section class="study-now-card"><div class="eyebrow">📚 ESTUDOS · ${escapeHtml(win.label)} · ${label}</div><h3>${escapeHtml(sug.title)}</h3><p>${escapeHtml(sug.text)}</p><button class="study-now-action" onclick="location.hash='#estudos';setTimeout(()=>document.getElementById('mapa-${first.id}')?.scrollIntoView({behavior:'smooth',block:'center'}),80)">Mapa ${String(first.id).padStart(3,'0')} · ${escapeHtml(first.materia)}<small>${escapeHtml(first.topico)}</small></button></section>`;
+}
+function ensureStudyMeuDiaStyles(){
+ if(document.getElementById('study-meu-dia-styles')) return;
+ const style=document.createElement('style'); style.id='study-meu-dia-styles';
+ style.textContent=`
+ .study-now-card{margin:16px 0;padding:18px;border:1px solid rgba(92,72,104,.10);border-radius:24px;background:linear-gradient(135deg,#f3eef8,#eef5f8);box-shadow:0 8px 24px rgba(76,58,82,.05)}
+ .study-now-card h3{margin:6px 0 4px;font-size:21px}.study-now-card p{margin:0 0 12px;color:#756d78}.study-now-action{width:100%;text-align:left;border:1px solid #ddd2e8;border-radius:16px;padding:12px;background:#fffdfb;color:#654b75;font-weight:800}.study-now-action small{display:block;margin-top:4px;color:#8a808e;font-weight:500}
+ .bottom-nav{position:fixed!important;left:0!important;right:0!important;bottom:0!important;width:100%!important;max-width:none!important;margin:0!important;transform:none!important;display:grid!important;grid-template-columns:repeat(4,minmax(0,1fr))!important;align-items:stretch!important;z-index:9999!important;border-radius:24px 24px 0 0!important;padding:8px 10px calc(8px + env(safe-area-inset-bottom))!important;box-sizing:border-box!important;background:rgba(255,250,246,.96)!important;backdrop-filter:blur(12px)!important}
+ .bottom-nav .nav-item{min-width:0!important;width:100%!important;display:flex!important;align-items:center!important;justify-content:center!important;gap:3px!important;flex-direction:column!important;white-space:nowrap!important}
+ `;
+ document.head.appendChild(style);
+}
 function renderMeuDia(){
+ ensureStudyMeuDiaStyles();
  const d=mvNow(), h=d.getHours(), greet=h<12?'Bom dia':h<18?'Boa tarde':'Boa noite', b=mvCurrentBlock(), p=mvPending();
  const focus=b[3]==='rest'?[['Desacelerar','Nada urgente precisa entrar aqui.']]:p.slice(0,3).map(x=>[x.title||x.name||'Pendência',x.note||'Pendência para hoje']);
  if(!focus.length)focus.push(['Seu essencial está em dia','Use este espaço para viver, descansar ou escolher o que importa.']);
@@ -74,6 +101,7 @@ function renderMeuDia(){
  ${(w===1||w===3)?'<div><b>14:40–16:10</b><span>Janela estratégica</span></div>':''}
  <div><b>${ho}</b><span>Home office</span></div><div><b>19:00+</b><span>Noite protegida · descanso primeiro</span></div></div></section>
  ${p.length?`<section class="day-section"><div class="section-head"><h2>Pendências que merecem aparecer</h2><a href="#pendencias">ver todas</a></div>${p.map(x=>`<div class="compact-item"><strong>${x.title||x.name||'Pendência'}</strong>${x.dueDate?`<small>${x.dueDate}</small>`:''}</div>`).join('')}</section>`:''}
+ ${renderStudySuggestionMeuDia()}
  <section class="quick-grid"><a href="#pendencias">📝<span>Pendências</span></a><a href="#rituais">✨<span>Rituais</span></a><a href="#exercicios">🏃<span>Exercícios</span></a><a href="#alimentacao">🍽️<span>Alimentação</span></a><a href="#receitas">📖<span>Receitas</span></a><a href="#casa">🏠<span>Casa</span></a><a href="#financeiro">💰<span>Financeiro</span></a><a href="#ideias">💡<span>Criação &amp; Ideias</span></a><a href="#estudos">📚<span>Estudos</span></a></section>
  <section class="free-space"><div>☁️</div><strong>Espaço livre também faz parte do dia.</strong><p>Se nada precisa ser resolvido agora, não resolva.</p></section>`;
 }
@@ -107,6 +135,7 @@ function ensureSoftMeuDiaStyles(){
 */
 function ensureMainNavigation() {
   ensureSoftMeuDiaStyles();
+  ensureStudyMeuDiaStyles();
   const nav = document.querySelector('.bottom-nav');
   if (nav) {
     nav.innerHTML = `
