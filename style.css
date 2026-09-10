@@ -653,3 +653,8 @@ h2 { margin:0; font-size:22px; letter-spacing:-.02em; }
 .activity-manager-row strong{display:block;font-size:12px}.activity-manager-row small{display:block;font-size:10px;color:var(--muted);margin-top:3px}.activity-manager-row b{font-size:10px;color:#8b6b80}
 .standalone{padding:18px;background:#f7f2f6;border-radius:18px}.rest-balance{margin-top:12px;padding:13px 14px;border-radius:17px;background:var(--mint-soft);color:#537a6a}.rest-balance strong,.rest-balance small{display:block}.rest-balance strong{font-size:12px}.rest-balance small{font-size:10px;margin-top:4px;opacity:.8}.protected-log-btn{width:100%;margin-top:10px}
 @media(max-width:420px){.week-window-row{grid-template-columns:66px 14px 66px 1fr 24px}.week-window-row input{font-size:9px!important}.day-toggle-grid{margin-left:16px;margin-right:16px}}
+
+/* V28 — sistema de encaixe: projetos, pendências e movimento */
+.project-planning{margin:10px 0;padding:14px;border-radius:18px;background:linear-gradient(135deg,#f8f0f7,#eef6f3);border:1px solid var(--line)}
+.project-planning .eyebrow{margin-bottom:8px}.project-planning .day-toggle-grid{margin-top:8px}
+.project-planning .check-line{margin-top:10px}

@@ -139,17 +139,41 @@ function mvCurrentBlock(){
  return ['Espaço livre','agora','Você não precisa preencher cada minuto.','free'];
 }
 function activityDaysLabel(days){return ["Dom","Seg","Ter","Qua","Qui","Sex","Sáb"].filter((_,i)=>days.includes(i)).join(" · ")}
+function mvPendingCandidates(minutes,day){
+ const items=loadPendencias().filter(p=>!p.done);
+ return items.map(p=>{
+  const total=Math.max(5,+p.durationMinutes||35);
+  const fractionable=p.fractionable!==false;
+  const allowed=Array.isArray(p.days)?p.days.includes(day):true;
+  if(!allowed)return null;
+  if(total<=minutes)return {id:"pending-"+p.id,name:p.title,module:"Pendências",minutes:total,priority:+p.priority||3,dueDate:p.due||p.dueDate,fractionable,detail:total+" min"};
+  if(fractionable && minutes>=10)return {id:"pending-"+p.id,name:p.title,module:"Pendências",minutes:minutes,priority:(+p.priority||3)+1,dueDate:p.due||p.dueDate,fractionable:true,detail:`sessão de ${minutes} min · total ${total} min`};
+  return null;
+ }).filter(Boolean);
+}
+function mvProjectCandidates(minutes,day){
+ const ideas=loadIdeias();
+ return ideas.filter(p=>p.type==="projeto").map(p=>{
+  const session=Math.max(10,+p.sessionMinutes||60),total=Math.max(session,+p.totalMinutes||session),fractionable=p.fractionable!==false;
+  const days=Array.isArray(p.days)&&p.days.length?p.days:[0,6];
+  if(!days.includes(day))return null;
+  if(session<=minutes)return {id:"project-"+p.id,name:p.title,module:"Projeto",minutes:session,priority:+p.priority||4,dueDate:p.dueDate,detail:`sessão ${session} min · ${total} min totais`};
+  if(fractionable && minutes>=10)return {id:"project-"+p.id,name:p.title,module:"Projeto",minutes,priority:(+p.priority||4)+1,dueDate:p.dueDate,detail:`sessão de ${minutes} min · ${total} min totais`};
+  return null;
+ }).filter(Boolean);
+}
 function mvActivitySuggestions(minutes,day=mvDow()){
- const pending=mvPending(),acts=loadActivities(),now=new Date(),today=todayISO();
- let candidates=acts.filter(a=>a.active!==false&&a.id!=="remote"&&a.days.includes(day)&&a.minutes<=minutes);
+ const acts=loadActivities(),now=new Date();
+ let candidates=acts.filter(a=>a.active!==false&&a.id!=="remote"&&(!a.days||a.days.includes(day))).map(a=>({...a,detail:`${a.minutes} min`})).filter(a=>a.minutes<=minutes);
+ candidates.push(...mvPendingCandidates(minutes,day));
+ candidates.push(...mvProjectCandidates(minutes,day));
  try{
-  const cd=loadCasaDurations(), ct=loadCasa();
-  const casaCandidates=ct.areas.flatMap(area=>area.tasks.map(t=>({id:"casa-"+t.id,name:t.name,module:"Casa",minutes:cd[t.id]||15,priority:area.id==="roupas"?2:1,days:[0,1,2,3,4,5,6]}))).filter(a=>a.minutes<=minutes);
-  candidates.unshift(...casaCandidates.slice(0,3));
+  const cd=loadCasaDurations(),ct=loadCasa();
+  const casaCandidates=ct.areas.flatMap(area=>area.tasks.map(t=>({id:"casa-"+t.id,name:t.name,module:"Casa",minutes:cd[t.id]||15,priority:area.id==="roupas"?2:1,days:[0,1,2,3,4,5,6],detail:`${cd[t.id]||15} min`}))).filter(a=>a.minutes<=minutes);
+  candidates.push(...casaCandidates);
  }catch(e){}
- if(pending.length)candidates.unshift(...pending.slice(0,2).map((p,i)=>({id:"pending-"+(p.id||i),name:p.title||p.name||"Pendência",module:"Pendências",minutes:Math.min(35,minutes),priority:5})).filter(a=>a.minutes<=minutes));
- candidates=candidates.map(a=>{let score=(a.priority||0)*10;if(a.dueDate){const days=Math.ceil((new Date(a.dueDate+"T23:59:59")-now)/86400000);if(days<=14)score+=30;else if(days<=45)score+=15}if(a.module==="Projeto"&&day!==0&&day!==6)score-=20;return {...a,_score:score}});
- const seen=new Set();return candidates.filter(a=>{if(seen.has(a.name))return false;seen.add(a.name);return true}).sort((a,b)=>(b._score||0)-(a._score||0)||a.minutes-b.minutes).slice(0,4);
+ candidates=candidates.map(a=>{let score=(a.priority||0)*10;if(a.dueDate){const days=Math.ceil((new Date(a.dueDate+"T23:59:59")-now)/86400000);if(days<=14)score+=30;else if(days<=45)score+=15}if(a.module==="Projeto"&&day!==0&&day!==6)score-=20;if(a.module==="Exercícios")score+=3;return {...a,_score:score}});
+ const seen=new Set();return candidates.filter(a=>{if(seen.has(a.name))return false;seen.add(a.name);return true}).sort((a,b)=>(b._score||0)-(a._score||0)||a.minutes-b.minutes).slice(0,5);
 }
 function mvSuggestBlock(win){
  const mins=hhmmToMin(win.end)-hhmmToMin(win.start), options=mvActivitySuggestions(mins);
@@ -157,10 +181,10 @@ function mvSuggestBlock(win){
 }
 function openActivityEditor(id){
  const acts=loadActivities(),a=acts.find(x=>x.id===id)||acts[0];if(!a)return;const dlg=document.createElement('dialog');
- dlg.innerHTML=`<form method="dialog" class="modal-card" id="activityEditForm"><div class="modal-head"><div><div class="eyebrow">✏️ ATIVIDADE</div><h2>Editar atividade</h2></div><button class="icon-btn" value="cancel">×</button></div><label>Nome<input id="aeName" value="${escapeHtml(a.name)}"></label><div class="form-grid"><label>Duração real estimada (min)<input id="aeMin" type="number" min="5" max="480" step="5" value="${a.minutes}"></label><label>Prioridade<select id="aePri"><option value="1">Baixa</option><option value="2">Normal</option><option value="3">Importante</option><option value="5">Prioridade alta</option></select></label></div><label>Dias em que pode aparecer<input id="aeDays" value="${activityDaysLabel(a.days||[])}" readonly><small class="note">Para simplificar, use o botão abaixo para marcar/desmarcar os dias.</small></label><div class="day-toggle-grid">${[1,2,3,4,5,6,0].map(day=>`<button type="button" class="day-toggle ${(a.days||[]).includes(day)?'on':''}" data-aeday="${day}">${["Dom","Seg","Ter","Qua","Qui","Sex","Sáb"][day]}</button>`).join('')}</div><label>Horário/janela preferencial (opcional)<input id="aeTime" value="${escapeHtml(a.preferredTime||"")}" placeholder="Ex.: tarde / 14:30–15:10"></label><div class="modal-actions"><div class="grow"></div><button type="button" class="secondary" id="cancelAe">Cancelar</button><button class="primary" value="default">Salvar</button></div></form>`;
+ dlg.innerHTML=`<form method="dialog" class="modal-card" id="activityEditForm"><div class="modal-head"><div><div class="eyebrow">✏️ ATIVIDADE</div><h2>Editar atividade</h2></div><button class="icon-btn" value="cancel">×</button></div><label>Nome<input id="aeName" value="${escapeHtml(a.name)}"></label><div class="form-grid"><label>Duração real estimada (min)<input id="aeMin" type="number" min="5" max="480" step="5" value="${a.minutes}"></label><label>Prioridade<select id="aePri"><option value="1">Baixa</option><option value="2">Normal</option><option value="3">Importante</option><option value="5">Prioridade alta</option></select></label></div><label>Dias em que pode aparecer<input id="aeDays" value="${activityDaysLabel(a.days||[])}" readonly><small class="note">Para simplificar, use o botão abaixo para marcar/desmarcar os dias.</small></label><div class="day-toggle-grid">${[1,2,3,4,5,6,0].map(day=>`<button type="button" class="day-toggle ${(a.days||[]).includes(day)?'on':''}" data-aeday="${day}">${["Dom","Seg","Ter","Qua","Qui","Sex","Sáb"][day]}</button>`).join('')}</div><label>Horário/janela preferencial (opcional)<input id="aeTime" value="${escapeHtml(a.preferredTime||"")}" placeholder="Ex.: tarde / 14:30–15:10"></label><label class="check-line"><input id="aeFraction" type="checkbox" ${a.fraction!==false?"checked":""}> Pode usar parte da janela</label><div class="modal-actions"><div class="grow"></div><button type="button" class="secondary" id="cancelAe">Cancelar</button><button class="primary" value="default">Salvar</button></div></form>`;
  document.body.appendChild(dlg);dlg.querySelector('#aePri').value=a.priority||2;dlg.showModal();dlg.querySelector('#cancelAe').onclick=()=>{dlg.close();dlg.remove()};
  dlg.querySelectorAll('[data-aeday]').forEach(b=>b.onclick=()=>b.classList.toggle('on'));
- dlg.querySelector('#activityEditForm').addEventListener('submit',e=>{e.preventDefault();a.name=dlg.querySelector('#aeName').value.trim()||a.name;a.minutes=Math.max(5,+dlg.querySelector('#aeMin').value||a.minutes);a.priority=+dlg.querySelector('#aePri').value;a.preferredTime=dlg.querySelector('#aeTime').value.trim();a.days=[...dlg.querySelectorAll('.day-toggle.on')].map(b=>+b.dataset.aeday);saveActivities(acts);dlg.close();dlg.remove();renderMeuDia()});
+ dlg.querySelector('#activityEditForm').addEventListener('submit',e=>{e.preventDefault();a.name=dlg.querySelector('#aeName').value.trim()||a.name;a.minutes=Math.max(5,+dlg.querySelector('#aeMin').value||a.minutes);a.priority=+dlg.querySelector('#aePri').value;a.preferredTime=dlg.querySelector('#aeTime').value.trim();a.fraction=dlg.querySelector('#aeFraction').checked;a.days=[...dlg.querySelectorAll('.day-toggle.on')].map(b=>+b.dataset.aeday);saveActivities(acts);dlg.close();dlg.remove();renderMeuDia()});
 }
 function openFreeTimeLog(){
  const dlg=document.createElement('dialog');dlg.innerHTML=`<form method="dialog" class="modal-card" id="freeLogForm"><div class="modal-head"><div><div class="eyebrow">🌿 TEMPO LIVRE PROTEGIDO</div><h2>Registrar o que você fez</h2></div><button class="icon-btn" value="cancel">×</button></div><p class="note">Se você usou um período que estava protegido para uma atividade, registramos o tempo. Depois o Meu Dia pode sugerir recuperar esse descanso.</p><label>Atividade<input id="flName" required placeholder="Ex.: organizei uma gaveta"></label><label>Tempo usado (min)<input id="flMin" type="number" min="5" max="240" value="20"></label><div class="modal-actions"><div class="grow"></div><button type="button" class="secondary" id="cancelFl">Cancelar</button><button class="primary" value="default">Registrar</button></div></form>`;document.body.appendChild(dlg);dlg.showModal();dlg.querySelector('#cancelFl').onclick=()=>{dlg.close();dlg.remove()};dlg.querySelector('#freeLogForm').addEventListener('submit',e=>{e.preventDefault();const logs=mvProtectedLogs();logs.push({id:uid(),date:todayISO(),name:dlg.querySelector('#flName').value.trim(),minutes:+dlg.querySelector('#flMin').value||0,protectedTimeUsed:true});localStorage.setItem(MV_TIMELOG_KEY,JSON.stringify(logs));dlg.close();dlg.remove();renderMeuDia()});
@@ -188,8 +212,9 @@ function renderSmartSuggestions(){
 }
 
 function renderMeuDiaExercicio(){
- const p=exTodayPlan(), d=loadEx(), date=exDateKey(), done=d.logs.filter(x=>x.date===date).length;
- return `<section class="day-section day-exercise-card"><div class="section-head"><h2>🏃 Movimento de hoje</h2><span class="soft-count">${done}/2</span></div><div class="day-exercise-row"><span>☀️</span><div><strong>Esteira · ${escapeHtml(p.morning.meta)}</strong><small>Manhã</small></div><b>${exDone(p.morning.name)?'✓':'→'}</b></div><div class="day-exercise-row"><span>${p.afternoon.icon}</span><div><strong>${escapeHtml(p.afternoon.name)} · ${escapeHtml(p.afternoon.meta)}</strong><small>Tarde · ${escapeHtml(p.afternoon.intensity)}</small></div><b>${exDone(p.afternoon.name)?'✓':'→'}</b></div><a class="exercise-open-link" href="#exercicios">Abrir exercícios →</a></section>`;
+ const day=mvDow(),wins=mvWindows(day),a=loadActivities().find(x=>x.id==="exercicio"),fits=wins.filter(w=>hhmmToMin(w.end)-hhmmToMin(w.start)>=(a?.minutes||30));
+ if(!a || !fits.length) return `<section class="day-section day-exercise-card"><div class="section-head"><h2>🏃 Movimento</h2><span class="soft-count">flexível</span></div><p class="note">Hoje o movimento não precisa ser encaixado à força. Ele aparece nas janelas quando houver tempo suficiente.</p><a class="exercise-open-link" href="#exercicios">Abrir exercícios →</a></section>`;
+ return `<section class="day-section day-exercise-card"><div class="section-head"><h2>🏃 Movimento que cabe hoje</h2><span class="soft-count">${a.minutes} min</span></div><div class="day-exercise-row"><span>✨</span><div><strong>${escapeHtml(a.name)}</strong><small>${a.minutes} min · cabe em ${escapeHtml(fits[0].start)}–${escapeHtml(fits[0].end)}</small></div><b>→</b></div><p class="note">É uma sugestão, não uma obrigação. Se você escolher outra coisa, tudo bem.</p><a class="exercise-open-link" href="#exercicios">Abrir exercícios →</a></section>`;
 }
 
 function renderMeuDia(){
@@ -400,7 +425,7 @@ function cardHtml(p) {
         <div class="pending-main">
           <div class="pending-title ${p.done?"done-text":""}">${escapeHtml(p.title)}</div>
           <div class="meta">
-            <span class="pill">${escapeHtml(p.category)}</span>${due}
+            <span class="pill">${escapeHtml(p.category)}</span><span class="pill">⏱ ${p.durationMinutes||35} min</span>${p.fractionable===false?'<span class="pill">bloco único</span>':'<span class="pill">fracionável</span>'}${due}
           </div>
           ${p.note ? `<p class="note">${escapeHtml(p.note)}</p>` : ""}
         </div>
@@ -430,6 +455,9 @@ function openModal(id=null) {
   document.querySelector("#pendingTitle").value = p?.title || "";
   document.querySelector("#pendingCategory").value = p?.category || "Pessoal";
   document.querySelector("#pendingDue").value = p?.due || "";
+  document.querySelector("#pendingDuration").value = p?.durationMinutes || 35;
+  document.querySelector("#pendingPriority").value = p?.priority || 3;
+  document.querySelector("#pendingFraction").checked = p?.fractionable !== false;
   document.querySelector("#pendingNote").value = p?.note || "";
   document.querySelector("#deletePendingBtn").hidden = !p;
   dialog.showModal();
@@ -598,6 +626,20 @@ function openIdeaModal(id=null) {
           <option value="plano" ${type==="plano"?"selected":""}>Plano</option>
         </select>
       </label>
+      <div id="projectPlanning" class="project-planning" style="display:${type==="projeto"?"block":"none"}">
+        <div class="eyebrow">🧩 PLANEJAMENTO DO PROJETO</div>
+        <div class="form-grid">
+          <label>Prazo<input id="ideaDueDate" type="date" value="${escapeHtml(p?.dueDate||"")}"></label>
+          <label>Esforço total (min)<input id="ideaTotalMin" type="number" min="10" step="10" value="${p?.totalMinutes||360}"></label>
+        </div>
+        <div class="form-grid">
+          <label>Sessão sugerida (min)<input id="ideaSessionMin" type="number" min="10" step="10" value="${p?.sessionMinutes||60}"></label>
+          <label>Prioridade<select id="ideaPriority"><option value="1">Baixa</option><option value="2">Normal</option><option value="3">Importante</option><option value="5">Alta</option></select></label>
+        </div>
+        <label>Frequência desejada<input id="ideaFrequency" value="${escapeHtml(p?.frequency||"1x por semana")}" placeholder="Ex.: 3x/semana · a cada 2 dias"></label>
+        <label class="check-line"><input id="ideaFraction" type="checkbox" ${p?.fractionable!==false?"checked":""}> Pode ser feito em sessões menores</label>
+        <div class="day-toggle-grid">${[1,2,3,4,5,6,0].map(day=>`<button type="button" class="day-toggle project-day ${(p?.days||[0,6]).includes(day)?'on':''}" data-pday="${day}">${["Dom","Seg","Ter","Qua","Qui","Sex","Sáb"][day]}</button>`).join('')}</div>
+      </div>
       <label>
         Observação <span class="muted">(opcional)</span>
         <textarea id="ideaNote" rows="4" maxlength="500" placeholder="Contexto, inspiração, próximos pensamentos...">${escapeHtml(p?.note || "")}</textarea>
@@ -614,6 +656,9 @@ function openIdeaModal(id=null) {
   d.innerHTML = body;
   document.body.appendChild(d);
   d.showModal();
+  if(d.querySelector("#ideaPriority")) d.querySelector("#ideaPriority").value=p?.priority||3;
+  d.querySelector("#ideaType").addEventListener("change",()=>{d.querySelector("#projectPlanning").style.display=d.querySelector("#ideaType").value==="projeto"?"block":"none"});
+  d.querySelectorAll("[data-pday]").forEach(b=>b.onclick=()=>b.classList.toggle("on"));
   d.querySelector("#cancelIdeaBtn").onclick = () => { d.close(); d.remove(); };
   if (p) d.querySelector("#deleteIdeaBtn").onclick = () => {
     if (confirm("Excluir este registro?")) {
@@ -629,6 +674,15 @@ function openIdeaModal(id=null) {
       type: d.querySelector("#ideaType").value,
       note: d.querySelector("#ideaNote").value.trim()
     };
+    if(data.type==="projeto"){
+      data.dueDate=d.querySelector("#ideaDueDate").value;
+      data.totalMinutes=Math.max(10,+d.querySelector("#ideaTotalMin").value||360);
+      data.sessionMinutes=Math.max(10,+d.querySelector("#ideaSessionMin").value||60);
+      data.priority=+d.querySelector("#ideaPriority").value||3;
+      data.frequency=d.querySelector("#ideaFrequency").value.trim()||"1x por semana";
+      data.fractionable=d.querySelector("#ideaFraction").checked;
+      data.days=[...d.querySelectorAll("[data-pday].on")].map(b=>+b.dataset.pday);
+    }
     if (!data.title) return;
     if (p) {
       const i = items.findIndex(x => x.id===p.id);

@@ -38,6 +38,8 @@
       </div>
       <label>O que precisa sair da sua cabeça?<input id="pendingTitle" name="title" required maxlength="120" autocomplete="off" placeholder="Ex.: Resolver documento"></label>
       <div class="form-grid"><label>Categoria<select id="pendingCategory"><option value="Pessoal">Pessoal</option><option value="Casa">Casa</option><option value="Henrique">Henrique</option><option value="Financeiro">Financeiro</option><option value="Trabalho">Trabalho</option><option value="Estudos">Estudos</option><option value="Compras">Compras</option><option value="Outros">Outros</option></select></label><label>Prazo<input id="pendingDue" type="date"></label></div>
+      <div class="form-grid"><label>Duração estimada (min)<input id="pendingDuration" type="number" min="5" max="720" step="5" value="35"></label><label>Prioridade<select id="pendingPriority"><option value="1">Baixa</option><option value="2">Normal</option><option value="3">Importante</option><option value="5">Alta</option></select></label></div>
+      <label class="check-line"><input id="pendingFraction" type="checkbox" checked> Pode ser feita em uma janela menor, por sessões</label>
       <label>Observação <span class="muted">(opcional)</span><textarea id="pendingNote" rows="3" maxlength="300" placeholder="Algum detalhe que você não quer esquecer?"></textarea></label>
       <div class="modal-actions"><button type="button" class="secondary" id="deletePendingBtn" hidden>Excluir</button><div class="grow"></div><button type="button" class="secondary" id="cancelPendingBtn">Cancelar</button><button class="primary" value="default">Salvar</button></div>
     </form>
