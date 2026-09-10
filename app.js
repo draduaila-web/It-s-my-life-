@@ -166,11 +166,13 @@ function ensureMainNavigation() {
     background:'transparent', border:'0', textDecoration:'none'
   }));
   const more = nav.querySelector('[data-more]');
-  const moduleMenu = document.getElementById('moduleMenu');
   if (more) more.onclick = (e) => {
     e.preventDefault();
-    if (moduleMenu && !moduleMenu.open) moduleMenu.showModal();
+    const moduleMenu = document.getElementById('moduleMenu');
+    if (!moduleMenu) return;
+    if (!moduleMenu.open) moduleMenu.showModal();
   };
+  const moduleMenu = document.getElementById('moduleMenu');
 
   // Garante o fechamento do menu principal pelo X mesmo quando o index
   // estiver vindo de uma versão antiga/cacheada.
@@ -209,7 +211,8 @@ function ensureMainNavigation() {
         const href = link.getAttribute('href');
         if (!href) return;
         e.preventDefault();
-        if (moduleMenu && moduleMenu.open) moduleMenu.close();
+        const menu = document.getElementById('moduleMenu');
+        if (menu && menu.open) menu.close();
         if (location.hash === href) {
           render();
         } else {
@@ -1222,5 +1225,7 @@ if ("serviceWorker" in navigator) {
     navigator.serviceWorker.register("sw.js").catch(console.warn)
   );
 }
+
+window.addEventListener("DOMContentLoaded", ensureMainNavigation);
 
 render();
