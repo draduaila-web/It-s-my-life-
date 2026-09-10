@@ -202,6 +202,21 @@ function ensureMainNavigation() {
       ['receitas','📖 Receitas']
     ];
     links.innerHTML = desired.map(([r,label]) => `<a href="#${r}">${label}</a>`).join('');
+    // Ao escolher um módulo no menu, navega e fecha o menu automaticamente.
+    // O usuário não precisa tocar no X.
+    links.querySelectorAll('a[href^="#"]').forEach(link => {
+      link.onclick = (e) => {
+        const href = link.getAttribute('href');
+        if (!href) return;
+        e.preventDefault();
+        if (moduleMenu && moduleMenu.open) moduleMenu.close();
+        if (location.hash === href) {
+          render();
+        } else {
+          location.hash = href;
+        }
+      };
+    });
   }
 }
 
