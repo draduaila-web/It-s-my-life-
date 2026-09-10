@@ -1014,10 +1014,15 @@ function renderTrabalho(){
   </article>
  </section>
  <section class="card work-note"><strong>Menos decisões · mais clareza</strong><span>Cada frente tem seu próprio espaço. O que for realmente importante pode depois alimentar o Meu Dia.</span></section>`;
+ window.openWorkRoute=(route)=>{
+   state.route=route;
+   if(location.hash!=="#"+route) location.hash="#"+route;
+   else render();
+ };
  document.querySelectorAll("[data-work-route]").forEach(card=>{
-   const go=()=>{ location.hash="#"+card.dataset.workRoute; };
-   card.addEventListener("click",go);
-   card.addEventListener("keydown",e=>{ if(e.key==="Enter"||e.key===" "){e.preventDefault();go();} });
+   const route=card.dataset.workRoute;
+   card.onclick=(e)=>{e.preventDefault();e.stopPropagation();window.openWorkRoute(route)};
+   card.onkeydown=(e)=>{ if(e.key==="Enter"||e.key===" "){e.preventDefault();window.openWorkRoute(route);} };
  });
 }
 
@@ -1076,6 +1081,8 @@ function saveWorkTasks(key,items){localStorage.setItem(key,JSON.stringify(items)
 function workTaskMinutes(v){return ({"15 min":15,"30 min":30,"45 min":45,"1h":60,"1h30":90,"2h":120}[v]||30)}
 function workTaskDateLabel(v){return v?new Date(v+'T12:00:00').toLocaleDateString('pt-BR'):"Sem data"}
 function ensureWorkTaskStyles(){
+ if(document.getElementById('work-dialog-global-styles'))return;
+ const gs=document.createElement('style');gs.id='work-dialog-global-styles';gs.textContent='dialog{outline:none!important}dialog:focus{outline:none!important}dialog::-webkit-backdrop{background:rgba(45,37,48,.34)}';document.head.appendChild(gs);
  if(document.getElementById('work-task-styles'))return;
  const s=document.createElement('style');s.id='work-task-styles';s.textContent=`
  .work-action-grid{display:flex;flex-wrap:wrap;gap:8px;margin:0 0 12px}.work-click-panel{cursor:pointer;transition:transform .15s ease,box-shadow .15s ease}.work-click-panel:active{transform:scale(.99)}.work-panel-main{display:grid;gap:5px;text-align:left;border:0;background:transparent;padding:0;color:#40384a;width:100%;font:inherit;cursor:pointer}.work-panel-main h3{margin:0;font-size:20px}.work-panel-main span{color:#756d78;font-size:14px;line-height:1.35}.work-click-panel .work-action-grid{margin-top:8px}.work-click-panel .work-action-chip{cursor:pointer}.work-action-chip{border:1px solid #e1d7e5;background:#fffdfb;color:#66586d;border-radius:999px;padding:9px 12px;font-weight:700;font-size:13px}.work-action-chip:active{transform:scale(.985)}
@@ -1163,20 +1170,20 @@ function renderTrabalhoSub(kind){
  <div class="work-rule">O objetivo é saber o que precisa ser feito e quanto tempo isso ocupa. O Meu Dia usa essas tarefas quando fizer sentido.</div>`;
  document.getElementById('backWork').onclick=()=>{location.hash='trabalho'};
  document.getElementById('addWorkTask').onclick=()=>openWorkTaskModal(cfg);
- document.querySelectorAll('[data-work-action]').forEach(b=>b.onclick=()=>{
+ const openTask=(title)=>openWorkTaskModal(cfg,{title:`${title} · `,date:todayISO(),duration:'30 min',priority:'Normal',status:'A fazer',note:''});
+ document.querySelectorAll('[data-work-action]').forEach(b=>b.onclick=(e)=>{
+   e.preventDefault();e.stopPropagation();
    const action=b.dataset.workAction, group=b.dataset.workGroup;
    const presetTitle=(action==='Nova tarefa'||action==='Outra tarefa')?`${group} · `:`${group} · ${action}`;
    openWorkTaskModal(cfg,{title:presetTitle,date:todayISO(),duration:'30 min',priority:'Normal',status:'A fazer',note:''});
  });
- document.querySelectorAll('[data-work-group-main]').forEach(b=>b.onclick=()=>{
-   openWorkTaskModal(cfg,{title:`${b.dataset.workGroupMain} · `,date:todayISO(),duration:'30 min',priority:'Normal',status:'A fazer',note:''});
+ document.querySelectorAll('[data-work-group-main]').forEach(b=>b.onclick=(e)=>{
+   e.preventDefault();e.stopPropagation();openTask(b.dataset.workGroupMain);
  });
- document.querySelectorAll('.work-click-panel').forEach(card=>card.addEventListener('click',e=>{
-   if(e.target.closest('button')) return;
-   const group=card.dataset.workGroupMain||card.dataset.planTitle;
-   if(group) openWorkTaskModal(cfg,{title:`${group} · `,date:todayISO(),duration:'30 min',priority:'Normal',status:'A fazer',note:''});
- }));
- document.querySelectorAll('[data-work-edit]').forEach(b=>b.onclick=()=>{const item=all.find(x=>x.id===b.dataset.workEdit);if(item)openWorkTaskModal(cfg,item)});
+ document.querySelectorAll('[data-plan-title]').forEach(card=>card.onclick=(e)=>{
+   e.preventDefault();e.stopPropagation();openTask(card.dataset.planTitle);
+ });
+ document.querySelectorAll('[data-work-edit]').forEach(b=>b.onclick=(e)=>{e.preventDefault();e.stopPropagation();const item=all.find(x=>x.id===b.dataset.workEdit);if(item)openWorkTaskModal(cfg,item)});
 }
 
 const CASA_KEY="minha-vida.casa.v1";
