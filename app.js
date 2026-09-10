@@ -981,12 +981,12 @@ function ensureWorkStyles(){
  if(document.getElementById("work-v2-styles")) return;
  const s=document.createElement("style");s.id="work-v2-styles";s.textContent=`
  .work-grid{display:grid;gap:14px}.work-card{border:1px solid rgba(92,72,104,.12);text-align:left;display:grid;grid-template-columns:52px 1fr;grid-template-rows:auto auto;column-gap:12px;align-items:center;cursor:pointer;padding:18px!important}.work-card .work-icon{grid-row:1/3;font-size:32px}.work-card strong{font-size:19px}.work-card span:last-child{font-size:13px;color:#817783}.work-note{margin-top:16px;display:grid;gap:6px}.work-note span{color:#817783}.work-subnav{display:flex;align-items:center;gap:10px;margin:4px 0 18px}.work-back{border:0;background:#f1e9f5;color:#654b75;border-radius:999px;padding:9px 14px;font-weight:800}.work-subtitle{color:#817783;margin:0}.work-panels{display:grid;gap:12px}.work-panel{padding:18px!important;display:grid;gap:7px;border:1px solid rgba(92,72,104,.10)}.work-panel span{color:#817783;font-size:14px}.work-panel .panel-tag{justify-self:start;background:#f7f0e8;border-radius:999px;padding:6px 10px;font-size:12px;color:#756975;font-weight:700}.work-rule{margin-top:16px;padding:14px 16px;border-radius:18px;background:linear-gradient(135deg,#f5edf7,#eef5f2);color:#6e6470} .modal-brand-logo{width:28px;height:20px;object-fit:contain;vertical-align:middle}.hero h2{display:flex;align-items:center;gap:10px}.hero-brand-logo{width:42px;height:32px;object-fit:contain}.bec-mark{display:flex;align-items:center;justify-content:center;width:48px;height:48px;border-radius:14px;background:linear-gradient(135deg,#edf5f2,#f5edf7);color:#65795f;font-size:18px;font-weight:900;letter-spacing:-1px}.tiktok-mark{display:flex;align-items:center;justify-content:center;width:48px;height:48px;border-radius:14px;background:#111;color:#fff;font-size:28px;font-weight:900}
- .work-front-v12 .work-card{min-height:82px!important;background:#fffdfb!important;grid-template-columns:64px 1fr!important;grid-template-rows:1fr!important;column-gap:16px!important;padding:16px 18px!important;}
- .work-front-v12 .work-icon{grid-row:1!important;width:64px!important;height:64px!important;display:flex!important;align-items:center!important;justify-content:center!important;}
- .work-front-v12 .work-logo{display:block!important;width:64px!important;height:64px!important;object-fit:contain!important;}
- .work-front-v12 .crefito-logo{width:64px!important;height:54px!important;}
- .work-front-v12 .bec-logo{width:58px!important;height:58px!important;}
- .work-front-v12 .tiktok-logo{width:58px!important;height:58px!important;border-radius:14px!important;}
+ .work-front-v12 .work-card{min-height:96px!important;background:#fffdfb!important;grid-template-columns:82px 1fr!important;grid-template-rows:1fr!important;column-gap:18px!important;padding:16px 18px!important;}
+ .work-front-v12 .work-icon{grid-row:1!important;width:82px!important;height:76px!important;display:flex!important;align-items:center!important;justify-content:center!important;}
+ .work-front-v12 .work-logo{display:block!important;width:76px!important;height:76px!important;object-fit:contain!important;}
+ .work-front-v12 .crefito-logo{width:80px!important;height:68px!important;}
+ .work-front-v12 .bec-logo{width:72px!important;height:72px!important;}
+ .work-front-v12 .tiktok-logo{width:68px!important;height:68px!important;border-radius:16px!important;}
  .work-front-v12 .work-copy{display:grid!important;gap:3px!important;min-width:0;}
  .work-front-v12 .work-copy strong{font-size:19px!important;color:#40384a!important;line-height:1.15!important;}
  .work-front-v12 .work-copy span{font-size:14px!important;color:#817783!important;line-height:1.3!important;}
