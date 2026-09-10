@@ -1,0 +1,42 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Atualizar MINHA VIDA</title>
+<style>
+body{font-family:-apple-system,BlinkMacSystemFont,sans-serif;background:#fbf6f0;color:#40384a;display:flex;align-items:center;justify-content:center;min-height:100vh;text-align:center;margin:0}
+.card{background:white;border-radius:28px;padding:32px;max-width:360px;box-shadow:0 10px 40px #0001}
+h1{font-size:28px;margin:0 0 12px}p{line-height:1.5;color:#706978}
+button{border:0;border-radius:18px;padding:15px 22px;font-size:17px;font-weight:700;background:#eadff0;color:#604d70}
+</style>
+</head>
+<body>
+<div class="card">
+<div style="font-size:42px">✨</div>
+<h1>Atualizar MINHA VIDA</h1>
+<p>Toque no botão para limpar a versão antiga e abrir a versão atual.</p>
+<button id="go">Atualizar agora</button>
+<p id="status" style="font-size:14px"></p>
+</div>
+<script>
+async function atualizar(){
+  const status=document.getElementById("status");
+  status.textContent="Atualizando…";
+  try{
+    if("serviceWorker" in navigator){
+      const regs=await navigator.serviceWorker.getRegistrations();
+      await Promise.all(regs.map(r=>r.unregister()));
+    }
+    if("caches" in window){
+      const keys=await caches.keys();
+      await Promise.all(keys.map(k=>caches.delete(k)));
+    }
+  }catch(e){}
+  status.textContent="Pronto! Abrindo…";
+  setTimeout(()=>location.replace("./"),500);
+}
+document.getElementById("go").onclick=atualizar;
+</script>
+</body>
+</html>
