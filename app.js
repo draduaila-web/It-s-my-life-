@@ -1174,8 +1174,45 @@ const CASA_RECIPES=[
  {id:"recipe-coala",title:"Solução de Coala Chá Branco",time:"2–3 min",yieldText:"1 litro",ingredients:[["Água","1 litro"],["Coala Chá Branco concentrado","8 gotas"]],materials:["Recipiente apropriado"],steps:["Coloque 1 litro de água no recipiente.","Adicione 8 gotas de Coala Chá Branco.","Misture.","Aplique com pano úmido na superfície compatível.","Teste primeiro em pequena área."],tip:"O manual registra que não é necessário enxaguar quando usado conforme a orientação do fabricante. Não misture Coala com água sanitária, vinagre, álcool ou outros produtos sem orientação específica."}
 ];
 
-const CASA_INVENTORY_PRODUCTS=["Qualitá Home Lava-Louças Líquido Coco","Cif Espuma Milagrosa — Derrete Gordura 500 ml","Coala Chá Branco Limpador Perfumado","Querosene","Sabão de querosene","Água sanitária","Tudax","Solução diluída de Coala + álcool + água já preparada","Amaciante concentrado","Álcool líquido 70%","Panos de algodão/microfibra e flanela","Panos próprios para secadora","Panos multiuso úmidos"];
-const CASA_INVENTORY_TOOLS=["Aspirador","Vassouras e escovas","Pá de lixo","Mop/esfregão com balde","Rodos e limpadores de vidro/box","Panos de microfibra","Esponjas e escovas","Espanador de penas","Lavadora/secadora LG Direct Drive 11/6 kg","Secador de calçados","Mangueiras — 2 unidades","Lavadora de alta pressão/WAP","Ferramenta de cabo longo para telas/mosquiteiros","Pia grande da edícula","Recipientes organizadores","Escovas para vaso sanitário e refil"];
+const CASA_PRODUCT_CATALOG=[
+ {name:"Tudo Limpinho Petklin",use:"Áreas internas de cães e gatos; varanda/áreas dos animais",status:"SUBSTITUTO",substitute:"Manter — linha principal"},
+ {name:"Tudo Limpinho Álcool Perfumado — Glamour de Shopping",use:"Limpeza geral e acabamento/perfumação de superfícies compatíveis",status:"SUBSTITUTO",substitute:"Manter — linha principal"},
+ {name:"Tudo Limpinho Flotalim Extra Forte",use:"Gordura e sujeira pesada em superfícies compatíveis",status:"SUBSTITUTO",substitute:"Manter — linha principal"},
+ {name:"Tudo Limpinho Porcelanex",use:"Limpeza de porcelanato",status:"SUBSTITUTO",substitute:"Manter — linha principal"},
+ {name:"Tudo Limpinho Tudax Limpeza Pesada",use:"Limpeza pesada geral em superfícies laváveis",status:"SUBSTITUTO",substitute:"Manter — linha principal"},
+ {name:"Tudo Limpinho Querosene — Sabão Spray",use:"Desengorduramento/desengraxe e sujeira pesada conforme rótulo",status:"SUBSTITUTO",substitute:"Manter — uso específico"},
+ {name:"Tudo Limpinho Limpador Clorado",use:"Higienização, desengorduramento e branqueamento em superfícies compatíveis",status:"SUBSTITUTO",substitute:"Manter — linha principal"},
+ {name:"Tudo Limpinho Ultra Clean",use:"Sujeira aderida em superfícies compatíveis",status:"SUBSTITUTO",substitute:"Manter — linha principal"},
+ {name:"Tudo Limpinho Rejuntec",use:"Limpeza de rejuntes",status:"SUBSTITUTO",substitute:"Manter — linha principal"},
+ {name:"Tudo Limpinho Finisher Fresh Bouquet",use:"Finalizador/facilitador para roupas/tecidos conforme rótulo",status:"EM USO",substitute:"Manter — uso específico"},
+ {name:"Tudo Limpinho Ultra Box",use:"Limpeza do box conforme indicação do rótulo",status:"SUBSTITUTO",substitute:"Manter — linha principal"},
+ {name:"Tudo Limpinho Polimax",use:"Pasta limpadora/polidora para superfícies compatíveis",status:"SUBSTITUTO",substitute:"Manter — linha principal"},
+ {name:"Tudo Limpinho Thunder — Limpeza Pesada Porcelanato",use:"Limpeza pesada específica de porcelanato",status:"SUBSTITUTO",substitute:"Manter — linha principal"},
+ {name:"Qualitá Home Lava-Louças Líquido Coco",use:"Louça, pia e limpeza leve",status:"EM USO",substitute:"Tudo Limpinho — detergente próprio para louça"},
+ {name:"Cif Espuma Milagrosa — Derrete Gordura",use:"Desengordurante de cozinha",status:"EM USO",substitute:"Tudo Limpinho Flotalim Extra Forte"},
+ {name:"Cif Espuma Milagrosa — Extermina Limo",use:"Limo/sujeira de banheiro",status:"EM USO",substitute:"Tudo Limpinho Ultra Box / produto adequado"},
+ {name:"UAU Blindex Box",use:"Limpeza profunda de box/vidros",status:"EM USO",substitute:"Tudo Limpinho Ultra Box"},
+ {name:"Ypê Tira Limo — Cloro Ativo em Gel",use:"Limo e higienização conforme rótulo",status:"EM USO",substitute:"Tudo Limpinho Limpador Clorado, se compatível"},
+ {name:"Aromasil Saponáceo Cremoso Cloro 3 em 1",use:"Limpeza pesada de superfícies compatíveis",status:"EM USO",substitute:"Tudo Limpinho Ultra Clean/Polimax, conforme superfície"},
+ {name:"Bombril Sapólio Radium",use:"Saponáceo em pó para sujeira aderida",status:"EM USO",substitute:"Tudo Limpinho Ultra Clean/Polimax"},
+ {name:"Sol Querosene 500 ml",use:"Querosene para usos específicos compatíveis",status:"EM USO",substitute:"Tudo Limpinho Querosene — Sabão Spray"},
+ {name:"Veja Perfumes — Buquê Cerrado",use:"Limpeza perfumada de manutenção",status:"EM USO",substitute:"Tudo Limpinho Álcool Perfumado"},
+ {name:"Coala Zulu Coala Limpa Perfume",use:"Limpeza/perfumação de manutenção",status:"EM USO",substitute:"Tudo Limpinho Álcool Perfumado ou Coala Chá Branco"},
+ {name:"GloDePeroba — Jasmine",use:"Limpeza/conservação de móveis e superfícies indicadas",status:"EM USO",substitute:"Manter produto específico para madeira"},
+ {name:"Lysol — lenços desinfetantes",use:"Higienização pontual de superfícies compatíveis",status:"EM USO",substitute:"Usar até acabar; sem substituição automática"},
+ {name:"HIKO Fabric Refresher",use:"Revitalização de tecidos conforme rótulo",status:"EM USO",substitute:"Usar até acabar; não confundir com limpador de superfícies"},
+ {name:"Jakhebe Adhesive Remover",use:"Remoção de cola/adesivo em superfícies compatíveis",status:"EM USO",substitute:"Manter como produto específico"},
+ {name:"Coala Chá Branco Limpador Perfumado",use:"Limpeza perfumada concentrada para pisos, azulejos e superfícies laváveis compatíveis",status:"EM USO",substitute:"Manter como complemento"},
+ {name:"Querosene",use:"Uso específico conforme manual/rótulo",status:"EM USO",substitute:"Tudo Limpinho Querosene — Sabão Spray"},
+ {name:"Sabão de querosene",use:"Uso específico conforme manual/rótulo",status:"EM USO",substitute:"Tudo Limpinho Querosene — Sabão Spray"},
+ {name:"Água sanitária",use:"Uso específico conforme rótulo",status:"EM USO",substitute:"Tudo Limpinho Limpador Clorado, quando compatível"},
+ {name:"Tudax",use:"Limpeza pesada",status:"EM USO",substitute:"Tudo Limpinho Tudax Limpeza Pesada"},
+ {name:"Solução diluída de Coala + álcool + água já preparada",use:"Solução já preparada para usos registrados",status:"EM USO",substitute:"Repreparar somente conforme receita/uso definido"},
+ {name:"Amaciante concentrado",use:"Roupas e receitas de panos",status:"EM USO",substitute:"Manter conforme uso específico"},
+ {name:"Álcool líquido 70%",use:"Receita de panos multiuso e usos compatíveis",status:"EM USO",substitute:"Repor quando acabar"}
+];
+const CASA_INVENTORY_PRODUCTS=CASA_PRODUCT_CATALOG.map(x=>x.name);
+const CASA_INVENTORY_TOOLS=["Aspirador","Vassouras e escovas","Pá de lixo","Mop/esfregão com balde","Rodos e limpadores de vidro/box","Panos de microfibra","Esponjas e escovas","Espanador de penas","Lavadora/secadora LG Direct Drive 11/6 kg","Secador de calçados","Mangueiras — 2 unidades","Lavadora de alta pressão/WAP","Ferramenta de cabo longo para telas/mosquiteiros","Pia grande da edícula","Recipientes organizadores","Escovas para vaso sanitário e refil","Panos de algodão/microfibra e flanela","Panos próprios para secadora","Panos multiuso úmidos"];
 
 const CASA_WEB=[
  ["🧹 Dicas de limpeza","https://www.google.com/search?q=dicas+de+limpeza+da+casa"],
@@ -1214,7 +1251,7 @@ function renderCasaManual(){
 function renderCasaRecipes(){
  return CASA_RECIPES.map(r=>`<div class="card casa-recipe"><div class="panel-head"><h3>🧪 ${escapeHtml(r.title)}</h3><span class="pill">${escapeHtml(r.time)}</span></div><p class="note">Rendimento: ${escapeHtml(r.yieldText)}</p><h4>Ingredientes</h4><ul>${r.ingredients.map(([n,q])=>`<li><span>${escapeHtml(n)} — <b>${escapeHtml(q)}</b></span><button type="button" class="casa-buy-mini" data-recipe-buy="${escapeHtml(n)}">＋ compras</button></li>`).join("")}</ul><h4>Preparo</h4><ol>${r.steps.map(x=>`<li>${escapeHtml(x)}</li>`).join("")}</ol><div class="casa-how-tip"><strong>💡 Observação</strong><p>${escapeHtml(r.tip)}</p></div></div>`).join("");
 }
-function renderCasaInventory(){return `<div class="card casa-inventory"><div class="panel-head"><h3>🧴 Produtos que você tem</h3><span class="pill">${CASA_INVENTORY_PRODUCTS.length}</span></div><div class="chip-list">${CASA_INVENTORY_PRODUCTS.map(x=>`<span class="pill">${escapeHtml(x)}</span>`).join("")}</div><div class="panel-head inventory-tools-head"><h3>🧰 Utensílios e equipamentos</h3><span class="pill">${CASA_INVENTORY_TOOLS.length}</span></div><div class="chip-list">${CASA_INVENTORY_TOOLS.map(x=>`<span class="pill">${escapeHtml(x)}</span>`).join("")}</div></div>`;}
+function renderCasaInventory(){return `<div class="card casa-inventory"><div class="panel-head"><div><h3>🧴 Produtos que você tem</h3><p class="note">Os produtos atuais permanecem em uso até acabarem. A transição para Tudo Limpinho acontece conforme o mapa do manual.</p></div><span class="pill">${CASA_PRODUCT_CATALOG.length}</span></div><div class="casa-product-list">${CASA_PRODUCT_CATALOG.map(x=>`<div class="casa-product-row"><div><strong>${escapeHtml(x.name)}</strong><small>${escapeHtml(x.use)}</small><small>Substituição: ${escapeHtml(x.substitute)}</small></div><span class="pill">${escapeHtml(x.status)}</span></div>`).join("")}</div><div class="panel-head inventory-tools-head"><h3>🧰 Utensílios e equipamentos</h3><span class="pill">${CASA_INVENTORY_TOOLS.length}</span></div><div class="chip-list">${CASA_INVENTORY_TOOLS.map(x=>`<span class="pill">${escapeHtml(x)}</span>`).join("")}</div></div>`;}
 
 const CASA_DURATION_KEY="minha-vida.casa.duration.v1";
 const CASA_DURATION={coz1:10,coz2:10,coz3:5,coz4:10,coz5:5,lim1:20,lim2:15,lim3:15,lim4:75,roup1:10,roup2:45,roup3:30,roup4:10,roup5:10,roup6:60,roup7:60,roup8:35,roup9:20,roup10:20,ani1:10,ani2:10,hen1:5,hen2:10,hen3:5,hen4:10,hen5:20};
