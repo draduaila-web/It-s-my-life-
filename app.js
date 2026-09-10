@@ -1062,15 +1062,66 @@ function renderCrefito(){
  <div class="work-rule">O que for realmente importante pode depois alimentar o Meu Dia. Registrar aqui não cria obrigação automaticamente.</div>`;
  document.getElementById("backWork").onclick=()=>{location.hash="trabalho"};document.querySelectorAll("[data-add]").forEach(b=>b.onclick=()=>openCrefitoItem(b.dataset.add));
 }
+const WORK_BEC_KEY="minha-vida.trabalho.bec.v1";
+const WORK_TIKTOK_KEY="minha-vida.trabalho.tiktok.v1";
+const WORK_DURATIONS=["15 min","30 min","45 min","1h","1h30","2h"];
+const WORK_PRIORITIES=["Normal","Alta","Baixa"];
+const WORK_STATUSES=["A fazer","Em andamento","Concluído"];
+function loadWorkTasks(key){try{return JSON.parse(localStorage.getItem(key)||'[]')}catch{return[]}}
+function saveWorkTasks(key,items){localStorage.setItem(key,JSON.stringify(items))}
+function workTaskMinutes(v){return ({"15 min":15,"30 min":30,"45 min":45,"1h":60,"1h30":90,"2h":120}[v]||30)}
+function workTaskDateLabel(v){return v?new Date(v+'T12:00:00').toLocaleDateString('pt-BR'):"Sem data"}
+function ensureWorkTaskStyles(){
+ if(document.getElementById('work-task-styles'))return;
+ const s=document.createElement('style');s.id='work-task-styles';s.textContent=`
+ .work-action-grid{display:flex;flex-wrap:wrap;gap:8px;margin:0 0 12px}.work-action-chip{border:1px solid #e1d7e5;background:#fffdfb;color:#66586d;border-radius:999px;padding:9px 12px;font-weight:700;font-size:13px}.work-action-chip:active{transform:scale(.985)}
+ .work-task-item{align-items:center}.work-task-actions{display:flex;align-items:center;gap:6px}.mini-work-edit{border:0;background:#f2ecef;color:#6d6270;border-radius:50%;width:32px;height:32px;font-size:16px}.work-sub-logo{width:42px!important;height:42px!important;object-fit:contain!important}.work-action-plan{display:grid;gap:5px;margin-bottom:16px}.work-action-plan strong{font-size:16px}.work-action-plan span{color:#756d78}
+ `;document.head.appendChild(s);
+}
+function openWorkTaskModal(cfg, preset=null){
+ const dlg=document.createElement('dialog');dlg.className='finance-dialog';
+ const isEdit=!!preset;
+ const options=(arr,sel)=>arr.map(x=>`<option ${x===sel?'selected':''}>${x}</option>`).join('');
+ const title=isEdit?'Editar tarefa':`Nova tarefa · ${cfg.name}`;
+ dlg.innerHTML=`<form method="dialog" class="modal-card" id="workTaskForm"><div class="modal-head"><div><div class="eyebrow">💼 ${escapeHtml(cfg.name.toUpperCase())}</div><h2>${title}</h2></div><button type="button" class="icon-btn" id="closeWorkTaskX" aria-label="Fechar">×</button></div>
+ <label>O que precisa ser feito?<input id="wtTitle" required maxlength="140" placeholder="Ex.: acompanhar campanha" value="${escapeHtml(preset?.title||'')}"></label>
+ <div class="form-grid"><label>Quando<input id="wtDate" type="date" value="${preset?.date||todayISO()}"></label><label>Quanto tempo<select id="wtDuration">${options(WORK_DURATIONS,preset?.duration||'30 min')}</select></label></div>
+ <div class="form-grid"><label>Prioridade<select id="wtPriority">${options(WORK_PRIORITIES,preset?.priority||'Normal')}</select></label><label>Status<select id="wtStatus">${options(WORK_STATUSES,preset?.status||'A fazer')}</select></label></div>
+ <label>Observação<textarea id="wtNote" maxlength="500" placeholder="Opcional">${escapeHtml(preset?.note||'')}</textarea></label>
+ <div class="modal-actions"><div class="grow"></div><button type="button" class="secondary" id="cancelWorkTask">Cancelar</button><button class="primary" value="default">Salvar</button></div></form>`;
+ document.body.appendChild(dlg);dlg.showModal();
+ const close=()=>{try{if(dlg.open)dlg.close()}finally{dlg.remove()}};
+ dlg.querySelector('#closeWorkTaskX').onclick=e=>{e.preventDefault();close()};dlg.querySelector('#cancelWorkTask').onclick=e=>{e.preventDefault();close()};dlg.addEventListener('cancel',e=>{e.preventDefault();close()});dlg.addEventListener('click',e=>{if(e.target===dlg)close()});
+ dlg.querySelector('#workTaskForm').onsubmit=e=>{e.preventDefault();const arr=loadWorkTasks(cfg.key);const data={id:preset?.id||uid(),title:dlg.querySelector('#wtTitle').value.trim(),date:dlg.querySelector('#wtDate').value,duration:dlg.querySelector('#wtDuration').value,minutes:workTaskMinutes(dlg.querySelector('#wtDuration').value),priority:dlg.querySelector('#wtPriority').value,status:dlg.querySelector('#wtStatus').value,note:dlg.querySelector('#wtNote').value.trim(),createdAt:preset?.createdAt||Date.now(),updatedAt:Date.now(),source:cfg.name};if(!data.title)return;if(preset){const i=arr.findIndex(x=>x.id===preset.id);if(i>=0)arr[i]=data;else arr.push(data)}else arr.push(data);saveWorkTasks(cfg.key,arr);close();renderTrabalhoSub(cfg.kind)};
+}
+function workTaskCard(x,cfg){return `<article class="card work-item work-task-item"><div><strong>${escapeHtml(x.title)}</strong><small>${workTaskDateLabel(x.date)} · ${escapeHtml(x.duration||'30 min')} · ${escapeHtml(x.priority||'Normal')}</small>${x.note?`<small>${escapeHtml(x.note)}</small>`:''}</div><div class="work-task-actions"><span class="work-badge">${escapeHtml(x.status||'A fazer')}</span><button class="mini-work-edit" data-work-edit="${escapeHtml(x.id)}" aria-label="Editar">✎</button></div></article>`}
+function renderWorkTaskArea(cfg){
+ const all=loadWorkTasks(cfg.key), open=all.filter(x=>x.status!=='Concluído').sort((a,b)=>(a.date||'9999').localeCompare(b.date||'9999'));
+ const actionButtons=cfg.actions.map(a=>`<button class="work-action-chip" data-work-action="${escapeHtml(a)}">${escapeHtml(a)}</button>`).join('');
+ const taskHtml=open.slice(0,12).map(x=>workTaskCard(x,cfg)).join('')||`<div class="work-empty">Nenhuma tarefa em aberto ainda.</div>`;
+ return `<section class="work-section"><div class="work-section-head"><h3>O que preciso fazer</h3><button class="work-add" id="addWorkTask">+ adicionar</button></div>
+ <div class="work-action-grid">${actionButtons}</div><div class="work-list">${taskHtml}</div></section>`;
+}
 function renderTrabalhoSub(kind){
- if(kind==="crefito"){renderCrefito();return}
- ensureWorkStyles();
- const cfg={
-  bec:{icon:`<span class="bec-mark">BEC</span>`,name:"BEC",desc:"Seu espaço para a empresa, projetos e operações.",tag:"EMPRESA",panels:[["📋 Demandas","Registrar o que precisa ser resolvido na operação da BEC."],["💡 Projetos","Manter projetos, ideias e próximos passos em um lugar próprio."],["📦 Produtos & serviços","Organizar iniciativas da BEC sem lançá-las automaticamente como gasto financeiro."]]},
-  tiktok:{icon:`<span class="tiktok-mark">♪</span>`,name:"TikTok",desc:"Seu espaço para conteúdo e presença digital.",tag:"CONTEÚDO",panels:[["💡 Ideias","Guardar ideias de vídeos e conteúdos antes de decidir quando publicar."],["🎬 Produção","Acompanhar conteúdos em preparação, gravação e edição."],["📅 Publicações","Organizar o que foi publicado e o que está planejado."]]}
- }[kind];
- app.innerHTML=`<section class="hero"><div class="eyebrow">💼 TRABALHO</div><h2>${cfg.icon} ${cfg.name}</h2><p>${cfg.desc}</p></section><div class="work-subnav"><button class="work-back" id="backWork">← Trabalho</button><p class="work-subtitle">${cfg.tag}</p></div><section class="work-panels">${cfg.panels.map(x=>`<article class="card work-panel"><span class="panel-tag">${cfg.tag}</span><h3>${x[0]}</h3><span>${x[1]}</span></article>`).join("")}</section><div class="work-rule">Nada aqui vira obrigação automaticamente. Primeiro organizamos; depois decidimos o que merece entrar no Meu Dia.</div>`;
- document.getElementById("backWork").onclick=()=>{location.hash="trabalho"};
+ if(kind==='crefito'){renderCrefito();return}
+ ensureWorkStyles();ensureWorkTaskStyles();
+ const cfgs={
+  bec:{kind:'bec',key:WORK_BEC_KEY,name:'BEC',desc:'Organizar o que precisa ser feito na BEC, sem transformar o módulo em um CRM.',tag:'EMPRESA',actions:['Matrizia · Nova campanha','Matrizia · Acompanhar matches','Matrizia · Acompanhar campanha','Matrizia · Verificar resultados','Matrizia · Outro','Instagram · Novo post','Instagram · Novo story','Instagram · Novo Reels','Instagram · Impulsionar','Instagram · Outro','Bling · Nova tarefa','Desenvolvimento de produtos · Nova tarefa','Novo projeto'],sections:[['Matrizia','Nova campanha · Acompanhar matches · Acompanhar campanha · Verificar resultados · Outro'],['Instagram','Novo post · Novo story · Novo Reels · Impulsionar · Outro'],['Bling','Uma tarefa por vez, com observação livre.'],['Desenvolvimento de produtos','Uma tarefa por vez, com descrição livre.'],['Novo projeto','Registrar a ideia como uma tarefa quando ela virar ação.']]},
+  tiktok:{kind:'tiktok',key:WORK_TIKTOK_KEY,name:'TikTok',desc:'Um plano de ação simples para construir presença, produzir e acompanhar conteúdo.',tag:'CONTEÚDO',actions:['Definir ideia','Roteirizar','Gravar','Editar','Publicar','Reaproveitar conteúdo','Responder / comunidade','Analisar resultado','Planejar próxima semana','Outra tarefa'],sections:[['1 · Clareza','Definir posicionamento, pilares e linguagem.'],['2 · Banco de ideias','Capturar ideias sem precisar produzir na hora.'],['3 · Produção','Roteirizar → gravar → editar.'],['4 · Publicação','Publicar e reaproveitar o que fizer sentido em outras redes.'],['5 · Análise','Ver o que funcionou e transformar aprendizado em próxima ação.']]}
+ };
+ const cfg=cfgs[kind];
+ const logo=`<img class="hero-brand-logo work-sub-logo" src="${kind==='bec'?'bec-logo.png':'tiktok-logo.png'}" alt="${cfg.name}">`;
+ const all=loadWorkTasks(cfg.key),done=all.filter(x=>x.status==='Concluído').length;
+ app.innerHTML=`<section class="hero"><div class="eyebrow">💼 TRABALHO</div><h2>${logo} ${cfg.name}</h2><p>${cfg.desc}</p></section>
+ <div class="work-subnav"><button class="work-back" id="backWork">← Trabalho</button><p class="work-subtitle">${cfg.tag}</p></div>
+ ${kind==='tiktok'?`<section class="work-rule work-action-plan"><strong>Plano de ação</strong><span>Capturar → produzir → publicar → analisar. Cada ação entra com uma duração para poder alimentar o Meu Dia.</span></section>`:''}
+ ${renderWorkTaskArea(cfg)}
+ <section class="work-section"><div class="work-section-head"><h3>Como organizar</h3><span class="work-badge">${done} concluídas</span></div><div class="work-panels">${cfg.sections.map(x=>`<article class="card work-panel"><span class="panel-tag">${cfg.tag}</span><h3>${escapeHtml(x[0])}</h3><span>${escapeHtml(x[1])}</span></article>`).join('')}</div></section>
+ <div class="work-rule">O objetivo é saber o que precisa ser feito e quanto tempo isso ocupa. O Meu Dia usa essas tarefas quando fizer sentido.</div>`;
+ document.getElementById('backWork').onclick=()=>{location.hash='trabalho'};
+ document.getElementById('addWorkTask').onclick=()=>openWorkTaskModal(cfg);
+ document.querySelectorAll('[data-work-action]').forEach(b=>b.onclick=()=>openWorkTaskModal(cfg,{title:b.dataset.workAction,date:todayISO(),duration:b.dataset.workAction.includes('campanha')?'30 min':'30 min',priority:'Normal',status:'A fazer',note:''}));
+ document.querySelectorAll('[data-work-edit]').forEach(b=>b.onclick=()=>{const item=all.find(x=>x.id===b.dataset.workEdit);if(item)openWorkTaskModal(cfg,item)});
 }
 
 const CASA_KEY="minha-vida.casa.v1";
