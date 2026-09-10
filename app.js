@@ -956,7 +956,7 @@ function ensureFinanceStyles(){
  .finance-summary{background:linear-gradient(135deg,#edf5f2,#f2edf8);border:1px solid rgba(92,72,104,.10)}
  .finance-main{display:flex;align-items:center;gap:10px;flex-wrap:wrap}.finance-main strong{font-size:32px;display:block;width:100%}.finance-actions{display:flex;gap:16px}.text-btn{border:0;background:transparent;color:#77558a;font-weight:700;padding:0}
  .finance-metrics{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:16px}.finance-metrics>div{background:rgba(255,255,255,.62);border-radius:16px;padding:10px}.finance-metrics span{display:block;font-size:12px;color:#817783}.finance-metrics b{display:block;margin-top:4px;font-size:14px}
- .finance-dialog{outline:none!important;border:0!important;max-width:620px!important;max-height:82vh!important;margin:auto!important;padding:0!important;border:0!important;border-radius:28px!important;background:#fffdfb!important;overflow:hidden!important;box-shadow:0 24px 70px rgba(55,42,60,.20)!important}.finance-dialog::backdrop{background:rgba(45,37,48,.34)!important;backdrop-filter:blur(3px)}.finance-dialog .modal-card{width:100%!important;max-width:none!important;max-height:82vh!important;box-sizing:border-box!important;overflow-y:auto!important;overflow-x:hidden!important;padding:24px!important}.finance-dialog .modal-head{position:sticky!important;top:-24px!important;z-index:5!important;background:#fffdfb!important;padding:0 0 18px!important;margin-bottom:18px!important}.finance-dialog .modal-head .icon-btn{width:48px!important;height:48px!important;min-width:48px!important;border-radius:50%!important;cursor:pointer!important;pointer-events:auto!important;z-index:20!important}.finance-dialog label{display:block!important;margin-bottom:16px!important}.finance-dialog input,.finance-dialog select{width:100%!important;box-sizing:border-box!important}.finance-dialog .form-grid{display:grid!important;grid-template-columns:1fr 1fr!important;gap:14px!important}@media(max-width:560px){.finance-dialog{width:92vw!important;max-width:92vw!important;max-height:84vh!important;border-radius:24px!important}.finance-dialog .modal-card{max-height:84vh!important;padding:20px!important}.finance-dialog .form-grid{grid-template-columns:1fr!important}.finance-dialog .modal-head{top:-20px!important}} .compact-btn{padding:9px 12px!important}.inner-list{margin-top:12px}.finance-row{position:relative;display:flex;align-items:center;justify-content:space-between;gap:10px}.finance-row>div{min-width:0}.finance-row b{white-space:nowrap}.mini-delete{border:0;background:transparent;color:#9a8e98;font-size:22px;padding:4px}.finance-cats{display:grid;gap:8px}.finance-cat{display:flex;justify-content:space-between;padding:10px 12px;border-radius:14px;background:#faf6f2}.finance-cat span{color:#655c67}.goal-toggle{min-width:38px}.goal-toggle.done{background:#e4f1eb}
+ .finance-dialog{appearance:none!important;-webkit-appearance:none!important;outline:0!important;border:0!important;max-width:620px!important;max-height:82vh!important;margin:auto!important;padding:0!important;border:0!important;border-radius:28px!important;background:#fffdfb!important;overflow:hidden!important;box-shadow:0 24px 70px rgba(55,42,60,.20)!important}.finance-dialog::backdrop{background:rgba(45,37,48,.34)!important;backdrop-filter:blur(3px)}.finance-dialog .modal-card{width:100%!important;max-width:none!important;max-height:82vh!important;box-sizing:border-box!important;overflow-y:auto!important;overflow-x:hidden!important;padding:24px!important}.finance-dialog .modal-head{position:sticky!important;top:-24px!important;z-index:5!important;background:#fffdfb!important;padding:0 0 18px!important;margin-bottom:18px!important}.finance-dialog .modal-head .icon-btn{width:48px!important;height:48px!important;min-width:48px!important;border-radius:50%!important;cursor:pointer!important;pointer-events:auto!important;z-index:20!important}.finance-dialog label{display:block!important;margin-bottom:16px!important}.finance-dialog input,.finance-dialog select{width:100%!important;box-sizing:border-box!important}.finance-dialog .form-grid{display:grid!important;grid-template-columns:1fr 1fr!important;gap:14px!important}@media(max-width:560px){.finance-dialog{width:92vw!important;max-width:92vw!important;max-height:84vh!important;border-radius:24px!important}.finance-dialog .modal-card{max-height:84vh!important;padding:20px!important}.finance-dialog .form-grid{grid-template-columns:1fr!important}.finance-dialog .modal-head{top:-20px!important}} .compact-btn{padding:9px 12px!important}.inner-list{margin-top:12px}.finance-row{position:relative;display:flex;align-items:center;justify-content:space-between;gap:10px}.finance-row>div{min-width:0}.finance-row b{white-space:nowrap}.mini-delete{border:0;background:transparent;color:#9a8e98;font-size:22px;padding:4px}.finance-cats{display:grid;gap:8px}.finance-cat{display:flex;justify-content:space-between;padding:10px 12px;border-radius:14px;background:#faf6f2}.finance-cat span{color:#655c67}.goal-toggle{min-width:38px}.goal-toggle.done{background:#e4f1eb}
  @media(max-width:420px){.finance-metrics{grid-template-columns:1fr}.panel-head{gap:8px}}
  `;document.head.appendChild(s);
 }
@@ -1000,21 +1000,25 @@ function renderTrabalho(){
  app.innerHTML=`<section class="hero work-front-hero"><div class="eyebrow">💼 TRABALHO</div><h2>Trabalho</h2><p>Um espaço separado para organizar minhas frentes profissionais, sem misturar trabalho com o Financeiro.</p></section>
  <div class="section-title">MINHAS FRENTES</div>
  <section class="work-grid work-front-v12">
-  <button class="card work-card work-card-crefito" data-work-route="trabalho-crefito">
+  <article class="card work-card work-card-crefito" data-work-route="trabalho-crefito" role="button" tabindex="0">
    <span class="work-icon work-logo-wrap"><img class="work-logo official-logo crefito-logo" src="crefito11-logo.png" alt="CREFITO-11"></span>
    <span class="work-copy"><strong>CREFITO-11</strong><span>Trabalho oficial · 08:00–14:00</span></span>
-  </button>
-  <button class="card work-card work-card-bec" data-work-route="trabalho-bec">
+  </article>
+  <article class="card work-card work-card-bec" data-work-route="trabalho-bec" role="button" tabindex="0">
    <span class="work-icon work-logo-wrap"><img class="work-logo official-logo bec-logo" src="bec-logo.png" alt="BEC"></span>
    <span class="work-copy"><strong>BEC</strong><span>Empresa, projetos e operações.</span></span>
-  </button>
-  <button class="card work-card work-card-tiktok" data-work-route="trabalho-tiktok">
+  </article>
+  <article class="card work-card work-card-tiktok" data-work-route="trabalho-tiktok" role="button" tabindex="0">
    <span class="work-icon work-logo-wrap"><img class="work-logo official-logo tiktok-logo" src="tiktok-logo.png" alt="TikTok"></span>
    <span class="work-copy"><strong>TikTok</strong><span>Conteúdo, ideias e presença digital.</span></span>
-  </button>
+  </article>
  </section>
  <section class="card work-note"><strong>Menos decisões · mais clareza</strong><span>Cada frente tem seu próprio espaço. O que for realmente importante pode depois alimentar o Meu Dia.</span></section>`;
- document.querySelectorAll("[data-work-route]").forEach(b=>b.onclick=()=>{location.hash=b.dataset.workRoute});
+ document.querySelectorAll("[data-work-route]").forEach(card=>{
+   const go=()=>{ location.hash="#"+card.dataset.workRoute; };
+   card.addEventListener("click",go);
+   card.addEventListener("keydown",e=>{ if(e.key==="Enter"||e.key===" "){e.preventDefault();go();} });
+ });
 }
 
 const CREFITO_KEY="minha-vida.trabalho.crefito.v1";
