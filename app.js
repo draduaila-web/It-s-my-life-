@@ -239,6 +239,7 @@ function render() {
       route === "exercicios" ? "🏃 Exercícios" :
       route === "alimentacao" ? "🍽️ Alimentação" :
       route === "receitas" ? "📖 Receitas" :
+      route === "trabalho" || route.startsWith("trabalho-") ? "💼 Trabalho" :
       "Minha Vida";
   }
 
@@ -261,6 +262,9 @@ function render() {
   else if (route === "alimentacao") renderAlimentacao();
   else if (route === "receitas") renderReceitas();
   else if (route === "trabalho") renderTrabalho();
+  else if (route === "trabalho-crefito") renderTrabalhoSub("crefito");
+  else if (route === "trabalho-bec") renderTrabalhoSub("bec");
+  else if (route === "trabalho-tiktok") renderTrabalhoSub("tiktok");
   else renderPlaceholder();
 }
 
@@ -919,17 +923,36 @@ function openFinModal(type){
  dlg.querySelector("#finForm").addEventListener("submit",e=>{if(e.submitter && e.submitter.id!=="saveFin"){e.preventDefault();closeFin();return}e.preventDefault();if(type==="income"){d.income=+dlg.querySelector("#fValue").value||0}else{const obj={id:uid(),name:dlg.querySelector("#fName").value.trim(),value:+dlg.querySelector("#fValue").value||0,category:dlg.querySelector("#fCategory").value,updatedAt:Date.now()};if(type==="transaction"){obj.date=dlg.querySelector("#fDate").value;obj.payment=dlg.querySelector("#fPayment").value;obj.account=dlg.querySelector("#fAccount").value;obj.behavior=dlg.querySelector("#fBehavior").value;obj.installments=+dlg.querySelector("#fInstallments").value||1;obj.note=dlg.querySelector("#fNote").value.trim();d.transactions.push(obj)}else{obj.payment=dlg.querySelector("#fPayment").value;obj.account=dlg.querySelector("#fAccount").value;obj.kind=dlg.querySelector("#fKind").value;obj.payer="Usuária";d.fixed.push(obj)}}saveFin(d);closeFin();renderFinanceiro()});
 }
 
+function ensureWorkStyles(){
+ if(document.getElementById("work-v2-styles")) return;
+ const s=document.createElement("style");s.id="work-v2-styles";s.textContent=`
+ .work-grid{display:grid;gap:14px}.work-card{border:1px solid rgba(92,72,104,.12);text-align:left;display:grid;grid-template-columns:52px 1fr;grid-template-rows:auto auto;column-gap:12px;align-items:center;cursor:pointer;padding:18px!important}.work-card .work-icon{grid-row:1/3;font-size:32px}.work-card strong{font-size:19px}.work-card span:last-child{font-size:13px;color:#817783}.work-note{margin-top:16px;display:grid;gap:6px}.work-note span{color:#817783}.work-subnav{display:flex;align-items:center;gap:10px;margin:4px 0 18px}.work-back{border:0;background:#f1e9f5;color:#654b75;border-radius:999px;padding:9px 14px;font-weight:800}.work-subtitle{color:#817783;margin:0}.work-panels{display:grid;gap:12px}.work-panel{padding:18px!important;display:grid;gap:7px;border:1px solid rgba(92,72,104,.10)}.work-panel span{color:#817783;font-size:14px}.work-panel .panel-tag{justify-self:start;background:#f7f0e8;border-radius:999px;padding:6px 10px;font-size:12px;color:#756975;font-weight:700}.work-rule{margin-top:16px;padding:14px 16px;border-radius:18px;background:linear-gradient(135deg,#f5edf7,#eef5f2);color:#6e6470}
+ `;document.head.appendChild(s)
+}
 function renderTrabalho(){
+ ensureWorkStyles();
  app.innerHTML=`<section class="hero"><h2>💼 Trabalho</h2><p>Um espaço separado para organizar minhas frentes profissionais, sem misturar trabalho com o Financeiro.</p></section>
  <div class="section-title">MINHAS FRENTES</div>
  <section class="work-grid">
-  <button class="card work-card" data-work="crefito"><span class="work-icon">🏛️</span><strong>CREFITO-11</strong><span>Trabalho oficial · 08:00–14:00</span></button>
-  <button class="card work-card" data-work="bec"><span class="work-icon">🌿</span><strong>BEC</strong><span>Empresa, projetos e operações.</span></button>
-  <button class="card work-card" data-work="tiktok"><span class="work-icon">🎵</span><strong>TikTok</strong><span>Conteúdo, ideias e presença digital.</span></button>
+  <button class="card work-card" data-work-route="trabalho-crefito"><span class="work-icon">🏛️</span><strong>CREFITO-11</strong><span>Trabalho oficial · 08:00–14:00</span></button>
+  <button class="card work-card" data-work-route="trabalho-bec"><span class="work-icon">🌿</span><strong>BEC</strong><span>Empresa, projetos e operações.</span></button>
+  <button class="card work-card" data-work-route="trabalho-tiktok"><span class="work-icon">🎵</span><strong>TikTok</strong><span>Conteúdo, ideias e presença digital.</span></button>
  </section>
- <section class="card work-note"><strong>Menos decisões · mais clareza</strong><span>Cada frente pode ganhar tarefas, projetos e indicadores próprios depois, sem sobrecarregar o Meu Dia.</span></section>`;
- if(!document.getElementById("work-v1-styles")){const s=document.createElement("style");s.id="work-v1-styles";s.textContent=`.work-grid{display:grid;gap:12px}.work-card{border:1px solid rgba(92,72,104,.12);text-align:left;display:grid;grid-template-columns:46px 1fr;grid-template-rows:auto auto;column-gap:12px;align-items:center;cursor:pointer}.work-card .work-icon{grid-row:1/3;font-size:30px}.work-card strong{font-size:18px}.work-card span:last-child{font-size:13px;color:#817783}.work-note{margin-top:16px;display:grid;gap:6px}.work-note span{color:#817783}`;document.head.appendChild(s)}
- document.querySelectorAll("[data-work]").forEach(b=>b.onclick=()=>alert("Submódulo em construção. Primeiro vamos estruturar esta frente profissional."));
+ <section class="card work-note"><strong>Menos decisões · mais clareza</strong><span>Cada frente tem seu próprio espaço. O que for realmente importante pode depois alimentar o Meu Dia.</span></section>`;
+ document.querySelectorAll("[data-work-route]").forEach(b=>b.onclick=()=>{location.hash=b.dataset.workRoute});
+}
+function renderTrabalhoSub(kind){
+ ensureWorkStyles();
+ const cfg={
+  crefito:{icon:"🏛️",name:"CREFITO-11",desc:"Seu espaço para o trabalho oficial.",tag:"ROTINA OFICIAL",panels:[["📋 Demandas","Registrar o que precisa ser acompanhado ou entregue."],["📁 Projetos","Organizar assuntos e projetos sem misturar com a vida pessoal."],["⏱️ Rotina","Referência atual: trabalho oficial das 08:00 às 14:00."]]},
+  bec:{icon:"🌿",name:"BEC",desc:"Seu espaço para a empresa, projetos e operações.",tag:"EMPRESA",panels:[["📋 Demandas","Registrar o que precisa ser resolvido na operação da BEC."],["💡 Projetos","Manter projetos, ideias e próximos passos em um lugar próprio."],["📦 Produtos & serviços","Organizar iniciativas da BEC sem lançá-las automaticamente como gasto financeiro."]]},
+  tiktok:{icon:"🎵",name:"TikTok",desc:"Seu espaço para conteúdo e presença digital.",tag:"CONTEÚDO",panels:[["💡 Ideias","Guardar ideias de vídeos e conteúdos antes de decidir quando publicar."],["🎬 Produção","Acompanhar conteúdos em preparação, gravação e edição."],["📅 Publicações","Organizar o que foi publicado e o que está planejado."]] }
+ }[kind];
+ app.innerHTML=`<section class="hero"><div class="eyebrow">💼 TRABALHO</div><h2>${cfg.icon} ${cfg.name}</h2><p>${cfg.desc}</p></section>
+ <div class="work-subnav"><button class="work-back" id="backWork">← Trabalho</button><p class="work-subtitle">${cfg.tag}</p></div>
+ <section class="work-panels">${cfg.panels.map(x=>`<article class="card work-panel"><span class="panel-tag">${cfg.tag}</span><h3>${x[0]}</h3><span>${x[1]}</span></article>`).join("")}</section>
+ <div class="work-rule">Nada aqui vira obrigação automaticamente. Primeiro organizamos; depois decidimos o que merece entrar no Meu Dia.</div>`;
+ document.getElementById("backWork").onclick=()=>{location.hash="trabalho"};
 }
 
 const CASA_KEY="minha-vida.casa.v1";
@@ -1151,6 +1174,7 @@ document.querySelector("#homeBtn").onclick = (e) => {
 };
 
 document.querySelector("#backBtn").onclick = () => {
+  if (state.route.startsWith("trabalho-")) { state.route="trabalho"; location.hash="trabalho"; render(); return; }
   state.route="meu-dia";
   location.hash = "meu-dia";
   render();
