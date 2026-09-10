@@ -1,6 +1,6 @@
 const STORAGE_KEY = "minha-vida.pendencias.v1";
 const state = {
-  route: "meu-dia",
+  route: "pendencias",
   filter: "abertas",
   editingId: null,
   search: ""
@@ -39,32 +39,6 @@ function escapeHtml(value="") {
   return value.replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[c]));
 }
 
-const WORK_REMOTE_KEY="minha-vida.trabalho-remoto.v2";
-const WORK_REMOTE_BASE={
-  targetMinutes:120,
-  days:{
-    1:{start:"16:45",minutes:120},
-    2:{start:"16:00",minutes:120},
-    3:{start:"16:45",minutes:120},
-    4:{start:"16:00",minutes:120},
-    5:{start:"16:00",minutes:120}
-  }
-};
-function loadWorkRemote(){try{let d=JSON.parse(localStorage.getItem(WORK_REMOTE_KEY)||"null");if(!d){const old=JSON.parse(localStorage.getItem("minha-vida.trabalho-remoto.v1")||"null");if(old)d={...old};}if(d)return {...WORK_REMOTE_BASE,...d,days:{...WORK_REMOTE_BASE.days,...(d.days||{})}}}catch{}return JSON.parse(JSON.stringify(WORK_REMOTE_BASE));}
-function saveWorkRemote(d){localStorage.setItem(WORK_REMOTE_KEY,JSON.stringify(d));}
-function hhmmToMin(v){const [h,m]=String(v||"00:00").split(":").map(Number);return h*60+m}
-function minToHHMM(n){n=((n%1440)+1440)%1440;const h=Math.floor(n/60),m=n%60;return `${String(h).padStart(2,"0")}:${String(m).padStart(2,"0")}`}
-function remoteLabel(minutes){return minutes===120?"2h contínuas":minutes===90?"1h30 contínuas":minutes===60?"1h contínua":`${minutes} min contínuos`}
-function remoteToday(){return loadWorkRemote().days[mvDow()]||null}
-function remoteWeeklyMinutes(){return [1,2,3,4,5].reduce((n,d)=>n+(loadWorkRemote().days[d]?.minutes||0),0)}
-function remoteRange(day=mvDow()){const x=loadWorkRemote().days[day];if(!x)return "não programado";return `${x.start}–${minToHHMM(hhmmToMin(x.start)+x.minutes)}`}
-function openWorkRemoteEditor(){
- const d=loadWorkRemote(),dlg=document.createElement("dialog");
- const rows=[1,2,3,4,5].map(day=>{const x=d.days[day]||{start:"16:00",minutes:120};const name=["","Segunda","Terça","Quarta","Quinta","Sexta"][day];return `<div class="remote-edit-row"><strong>${name}</strong><input type="time" data-rday="${day}" value="${x.start}"><select data-rmin="${day}"><option value="120" ${x.minutes===120?"selected":""}>2h contínuas</option><option value="90" ${x.minutes===90?"selected":""}>1h30 contínuas</option><option value="60" ${x.minutes===60?"selected":""}>1h contínua</option></select></div>`}).join("");
- dlg.innerHTML=`<form method="dialog" class="modal-card" id="remoteForm"><div class="modal-head"><div><div class="eyebrow">💻 TRABALHO REMOTO</div><h2>Minha janela de trabalho</h2></div><button class="icon-btn" value="cancel">×</button></div><p class="note">Meta semanal: 10h. Atualmente programado: ${Math.floor(remoteWeeklyMinutes()/60)}h${remoteWeeklyMinutes()%60?String(remoteWeeklyMinutes()%60).padStart(2,"0"):""}. Padrão de 2h contínuas por dia. Quando a semana apertar, 1h ou 1h30 contínuas podem ser usadas e a diferença fica para compensação no banco de horas.</p><div class="remote-edit-grid">${rows}</div><div class="modal-actions"><div class="grow"></div><button type="button" class="secondary" id="cancelRemote">Cancelar</button><button class="primary" value="default">Salvar</button></div></form>`;
- document.body.appendChild(dlg);dlg.showModal();dlg.querySelector("#cancelRemote").onclick=()=>{dlg.close();dlg.remove()};
- dlg.querySelector("#remoteForm").addEventListener("submit",e=>{e.preventDefault();[1,2,3,4,5].forEach(day=>{d.days[day]={start:dlg.querySelector(`[data-rday="${day}"]`).value,minutes:+dlg.querySelector(`[data-rmin="${day}"]`).value}});saveWorkRemote(d);dlg.close();dlg.remove();renderMeuDia()});
-}
 
 function mvNow(){return new Date();}
 function mvMinutes(d=mvNow()){return d.getHours()*60+d.getMinutes();}
@@ -72,240 +46,45 @@ function mvDow(d=mvNow()){return d.getDay();}
 function mvDate(){return new Intl.DateTimeFormat('pt-BR',{weekday:'long',day:'numeric',month:'long'}).format(mvNow());}
 function mvRead(k){try{return JSON.parse(localStorage.getItem(k)||'[]')}catch(e){return[]}}
 function mvPending(){
- const a=mvRead('minha-vida.pendencias.v1');
- return a.filter(x=>!x.completed&&!x.done).sort((a,b)=>{if(!a.dueDate&&!b.dueDate)return (b.createdAt||0)-(a.createdAt||0);if(!a.dueDate)return 1;if(!b.dueDate)return -1;return String(a.dueDate).localeCompare(String(b.dueDate))}).slice(0,5);
-}
-function mvWeekKey(){return `minha-vida.semana.real.v3`}
-const MV_WEEK_BASE={
- therapyWeek:true,
- therapyTime:"",
- mbaTime:"19:00–22:15",
- windows:{
-  0:[{start:"09:00",end:"12:00",label:"Projeto / livre protegido"},{start:"14:30",end:"17:00",label:"Projeto / livre protegido"}],
-  1:[{start:"14:50",end:"16:10",label:"Janela curta após Conselho"},{start:"18:45",end:"20:00",label:"Janela da noite"}],
-  2:[{start:"14:30",end:"15:10",label:"Janela curta antes de buscar Henrique"},{start:"18:00",end:"19:00",label:"Janela da tarde"}],
-  3:[{start:"14:50",end:"16:10",label:"Janela curta após Conselho"},{start:"18:45",end:"20:00",label:"Janela da noite"}],
-  4:[{start:"14:30",end:"15:10",label:"Janela curta antes de buscar Henrique"},{start:"18:00",end:"19:00",label:"Janela da tarde"}],
-  5:[{start:"14:30",end:"15:10",label:"Janela curta antes de buscar Henrique"},{start:"18:00",end:"19:00",label:"Janela da tarde"},{start:"20:00",end:"21:30",label:"Noite tranquila"}],
-  6:[{start:"09:00",end:"12:00",label:"Projeto / livre protegido"},{start:"14:30",end:"17:00",label:"Projeto / livre protegido"}]
- }
-};
-const MV_ACTIVITY_KEY="minha-vida.atividades.v3";
-const MV_TIMELOG_KEY="minha-vida.tempo.v2";
-const MV_ACTIVITY_BASE=[
- {id:"remote",name:"Trabalho remoto",module:"Trabalho",minutes:120,priority:5,days:[1,2,3,4,5],fraction:false,active:false},
- {id:"fin-revisao",name:"Revisão financeira",module:"Financeiro",minutes:30,priority:3,days:[5],fraction:true},
- {id:"casa-lim",name:"Rotina de limpeza da casa",module:"Casa",minutes:20,priority:2,days:[1,2,3,4,5],fraction:true},
- {id:"roupas",name:"Cuidar das roupas",module:"Casa",minutes:30,priority:2,days:[2,4,5,6],fraction:true},
- {id:"pend-rapida",name:"Resolver uma pendência",module:"Pendências",minutes:35,priority:3,days:[1,2,3,4,5],fraction:true},
- {id:"estudo",name:"Estudo para o concurso",module:"Estudos",minutes:60,priority:5,days:[1,2,3,4,5,6,0],fraction:true,dueDate:"2026-11-22"},
- {id:"exercicio",name:"Movimento",module:"Exercícios",minutes:30,priority:3,days:[1,3,5,6],fraction:true},
- {id:"casa-organizacao",name:"Organização da casa",module:"Casa",minutes:45,priority:2,days:[6,0],fraction:true},
- {id:"projeto-estudos",name:"Organizar sala de estudos",module:"Projeto",minutes:90,priority:5,days:[6,0],fraction:false,dueDate:"2026-10-31"},
- {id:"projeto-deposito",name:"Organizar depósito",module:"Projeto",minutes:90,priority:5,days:[6,0],fraction:false,dueDate:"2026-10-31"}
-];
-function loadWeekPlan(){try{let raw=JSON.parse(localStorage.getItem(mvWeekKey())||"null");if(!raw)raw=JSON.parse(localStorage.getItem("minha-vida.semana.v2")||"{}");return {...MV_WEEK_BASE,...raw,windows:{...MV_WEEK_BASE.windows,...(raw.windows||{})}}}catch{return JSON.parse(JSON.stringify(MV_WEEK_BASE))}}
-function saveWeekPlan(x){localStorage.setItem(mvWeekKey(),JSON.stringify(x))}
-function loadActivities(){try{let x=JSON.parse(localStorage.getItem(MV_ACTIVITY_KEY)||"null");if(!Array.isArray(x)||!x.length)x=JSON.parse(localStorage.getItem("minha-vida.atividades.v2")||"null");if(Array.isArray(x)&&x.length){const base=JSON.parse(JSON.stringify(MV_ACTIVITY_BASE));return base.map(b=>{const old=x.find(a=>a.id===b.id);return old?{...b,...old}:b}).concat(x.filter(a=>!base.some(b=>b.id===a.id)));}return JSON.parse(JSON.stringify(MV_ACTIVITY_BASE))}catch{return JSON.parse(JSON.stringify(MV_ACTIVITY_BASE))}}
-function saveActivities(x){localStorage.setItem(MV_ACTIVITY_KEY,JSON.stringify(x))}
-function mvFixedBlocks(day){
- const blocks=[{start:"05:16",end:"08:00",label:"Manhã protegida",type:"protected"},{start:"08:00",end:"14:00",label:"Trabalho oficial",type:"fixed"}];
- if(day===1||day===3){blocks.push({start:"14:15",end:"14:50",label:"Conselho + deslocamento",type:"fixed"});blocks.push({start:"16:10",end:"16:30",label:"Deslocamento para buscar Henrique",type:"fixed"});}
- if(day===2||day===4||day===5){blocks.push({start:"14:00",end:"14:30",label:"Deslocamento, se sair às 14:00",type:"fixed"});blocks.push({start:"15:10",end:"15:40",label:"Buscar Henrique + chegada",type:"fixed"});}
- const wp=loadWeekPlan();
- if((day===2||day===4)&&!wp.therapyWeek)blocks.push({start:"19:00",end:"22:15",label:"MBA",type:"fixed"});
- if(day===3&&wp.therapyWeek&&wp.therapyTime){const [st,en]=wp.therapyTime.split("–");if(st&&en)blocks.push({start:st,end:en,label:"Terapia",type:"fixed"});}
- return blocks;
-}
-function mvWindows(day=mvDow()){
- const wp=loadWeekPlan();
- const therapy=day===3&&wp.therapyWeek&&wp.therapyTime?wp.therapyTime.split("–").map(hhmmToMin):null;
- return (wp.windows[day]||[]).map(x=>({...x})).filter(w=>{
-  if(!w.start||!w.end)return false;
-  const st=hhmmToMin(w.start),en=hhmmToMin(w.end);
-  if(!wp.therapyWeek&&(day===2||day===4)&&st>=1140)return false;
-  if(therapy&&therapy.length===2&&st<therapy[1]&&en>therapy[0])return false;
-  return en>st;
- });
+ const a=mvRead('minha-vida.pendencias.v1'), t=new Date(); t.setHours(0,0,0,0);
+ return a.filter(x=>!x.completed&&!x.done&&(!x.dueDate||new Date(x.dueDate+'T00:00:00')<=t)).slice(0,5);
 }
 function mvCurrentBlock(){
- const d=mvNow(),m=mvMinutes(d),w=mvDow(d),wp=loadWeekPlan();
- if(m>=316&&m<480)return ['Manhã protegida','05:16–08:00','Seu ritual de manhã. Sem tarefas domésticas.','protected'];
+ const d=mvNow(), m=mvMinutes(d), w=mvDow(d);
+ if(m>=320&&m<455)return ['Manhã protegida','05:20–07:35','Seu ritual de manhã. Sem tarefas domésticas.','protected'];
  if(m>=480&&m<840)return ['Trabalho CREFITO-11','08:00–14:00','Bloco oficial de trabalho.','work'];
- const fixed=mvFixedBlocks(w).find(x=>m>=hhmmToMin(x.start)&&m<hhmmToMin(x.end));
- if(fixed)return [fixed.label,`${fixed.start}–${fixed.end}`,'Compromisso protegido.','fixed'];
- const ro=remoteToday();if(ro){const s=hhmmToMin(ro.start),e=s+ro.minutes;if(m>=s&&m<e)return ['Trabalho remoto',`${ro.start}–${minToHHMM(e)}`,'Bloco contínuo de trabalho remoto.','office'];}
- if(m>=1140)return ['Noite protegida','19:00+','Agora é espaço para desacelerar. O sistema não vai encher sua noite.','rest'];
+ if((w===1||w===3)&&m>=880&&m<970)return ['Janela estratégica','14:40–16:10','Espaço para decisões e prioridades estratégicas.','strategy'];
+ const ho={1:['16:40','18:40'],2:['15:40','17:40'],3:['16:40','18:40'],4:['15:40','17:40'],5:['15:40','17:40']}[w];
+ if(ho){const s=+ho[0].slice(0,2)*60+ +ho[0].slice(3),e=+ho[1].slice(0,2)*60+ +ho[1].slice(3);if(m>=s&&m<e)return ['Home office',ho.join('–'),'Bloco obrigatório de trabalho em casa.','office'];}
+ if(m>=1140)return ['Noite protegida','após 19:00','Agora é espaço para desacelerar. O sistema não vai encher sua noite.','rest'];
  return ['Espaço livre','agora','Você não precisa preencher cada minuto.','free'];
 }
-function activityDaysLabel(days){return ["Dom","Seg","Ter","Qua","Qui","Sex","Sáb"].filter((_,i)=>days.includes(i)).join(" · ")}
-function formatDuration(mins){const n=Math.max(0,Math.round(+mins||0));if(n<60)return `${n} min`;const h=Math.floor(n/60),m=n%60;return m?`${h}h${String(m).padStart(2,"0")}`:`${h}h`;}
-function durationOptions(selected=60){const vals=[5,10,15,20,30,45,60,90,120,180,240,360,480];return vals.map(v=>`<option value="${v}" ${+selected===v?'selected':''}>${formatDuration(v)}</option>`).join('')+`<option value="custom" ${!vals.includes(+selected)?'selected':''}>Personalizada…</option>`;}
-function sessionOptions(selected=60){return [10,15,20,30,45,60,90,120,180].map(v=>`<option value="${v}" ${+selected===v?'selected':''}>${formatDuration(v)}</option>`).join('');}
-function mvPendingCandidates(minutes,day){
- const items=loadPendencias().filter(p=>!p.done);
- return items.map(p=>{const total=Math.max(5,+p.durationMinutes||35),fractionable=p.fractionable!==false,allowed=Array.isArray(p.days)?p.days.includes(day):true;if(!allowed)return null;if(total<=minutes)return {id:"pending-"+p.id,name:p.title,module:"Pendências",minutes:total,priority:+p.priority||3,dueDate:p.due||p.dueDate,fractionable,detail:formatDuration(total)};if(fractionable){const minSession=Math.max(5,+p.sessionMinMinutes||10),ideal=Math.max(minSession,+p.sessionMinutes||60);if(minutes>=minSession){const session=Math.min(minutes,ideal);return {id:"pending-"+p.id,name:p.title,module:"Pendências",minutes:session,priority:(+p.priority||3)+1,dueDate:p.due||p.dueDate,fractionable:true,detail:`sessão ${formatDuration(session)} · total ${formatDuration(total)}`};}}return null;}).filter(Boolean);}
-function mvProjectCandidates(minutes,day){
- const ideas=loadIdeias();
- return ideas.filter(p=>p.type==="projeto").map(p=>{const session=Math.max(10,+p.sessionMinutes||60),total=Math.max(session,+p.totalMinutes||session),fractionable=p.fractionable!==false,minSession=Math.max(5,+p.sessionMinMinutes||10),days=Array.isArray(p.days)&&p.days.length?p.days:[0,6];if(!days.includes(day))return null;if(session<=minutes)return {id:"project-"+p.id,name:p.title,module:"Projeto",minutes:session,priority:+p.priority||4,dueDate:p.dueDate,detail:`sessão ${formatDuration(session)} · ${formatDuration(total)} totais`};if(fractionable&&minutes>=minSession){const use=Math.min(minutes,session);return {id:"project-"+p.id,name:p.title,module:"Projeto",minutes:use,priority:(+p.priority||4)+1,dueDate:p.dueDate,detail:`sessão ${formatDuration(use)} · ${formatDuration(total)} totais`};}return null;}).filter(Boolean);}
-function mvActivitySuggestions(minutes,day=mvDow()){
- const acts=loadActivities(),now=new Date();
- let candidates=acts.filter(a=>a.active!==false&&a.id!=="remote"&&(!a.days||a.days.includes(day))).map(a=>{if(a.minutes<=minutes)return {...a,detail:formatDuration(a.minutes)};if(a.fraction!==false){const minSession=Math.max(5,+a.sessionMinMinutes||10);if(minutes>=minSession){const use=Math.min(minutes,+a.sessionMinutes||a.minutes);return {...a,minutes:use,detail:`sessão ${formatDuration(use)} · total ${formatDuration(a.minutes)}`};}}return null;}).filter(Boolean);
- candidates.push(...mvPendingCandidates(minutes,day));
- candidates.push(...mvProjectCandidates(minutes,day));
- try{
-  const cd=loadCasaDurations(),ct=loadCasa();
-  const casaCandidates=ct.areas.flatMap(area=>area.tasks.map(t=>({id:"casa-"+t.id,name:t.name,module:"Casa",minutes:cd[t.id]||15,priority:area.id==="roupas"?2:1,days:[0,1,2,3,4,5,6],detail:`${cd[t.id]||15} min`}))).filter(a=>a.minutes<=minutes);
-  candidates.push(...casaCandidates);
- }catch(e){}
- candidates=candidates.map(a=>{let score=(a.priority||0)*10;if(a.dueDate){const days=Math.ceil((new Date(a.dueDate+"T23:59:59")-now)/86400000);if(days<=14)score+=30;else if(days<=45)score+=15}if(a.module==="Projeto"&&day!==0&&day!==6)score-=20;if(a.module==="Exercícios")score+=3;return {...a,_score:score}});
- const seen=new Set();return candidates.filter(a=>{if(seen.has(a.name))return false;seen.add(a.name);return true}).sort((a,b)=>(b._score||0)-(a._score||0)||a.minutes-b.minutes).slice(0,5);
-}
-function mvSuggestBlock(win){
- const mins=hhmmToMin(win.end)-hhmmToMin(win.start), options=mvActivitySuggestions(mins);
- return `<div class="suggestion-block"><div class="suggestion-head"><span>⏱️ ${escapeHtml(win.start)}–${escapeHtml(win.end)} · ${mins} min</span><small>${escapeHtml(win.label||"Janela disponível")}</small></div><div class="suggestion-list">${options.map((a,i)=>`<button type="button" class="suggestion-option ${i===0?'suggestion-best':''}" data-suggestion="${escapeHtml(a.id)}"><span>${i===0?'✨':'○'}</span><span><strong>${escapeHtml(a.name)}</strong><small>${escapeHtml(a.module)} · ${a.minutes} min</small></span></button>`).join('')||`<div class="suggestion-empty">🌿 Tempo livre protegido — nada precisa ser encaixado aqui.</div>`}</div></div>`;
-}
-function openActivityEditor(id){
- const acts=loadActivities(),a=acts.find(x=>x.id===id)||acts[0];if(!a)return;const dlg=document.createElement('dialog');
- dlg.innerHTML=`<form method="dialog" class="modal-card" id="activityEditForm"><div class="modal-head"><div><div class="eyebrow">✏️ ATIVIDADE</div><h2>Editar atividade</h2></div><button class="icon-btn" value="cancel">×</button></div><label>Nome<input id="aeName" value="${escapeHtml(a.name)}"></label><div class="form-grid"><label>Duração total<select id="aeMin">${durationOptions(a.minutes)}</select><input id="aeMinCustom" class="duration-custom" type="number" min="5" max="480" step="5" value="${a.minutes}" style="display:none"></label><label>Prioridade<select id="aePri"><option value="1">Baixa</option><option value="2">Normal</option><option value="3">Importante</option><option value="5">Prioridade alta</option></select></label></div><label>Dias em que pode aparecer<input id="aeDays" value="${activityDaysLabel(a.days||[])}" readonly><small class="note">Para simplificar, use o botão abaixo para marcar/desmarcar os dias.</small></label><div class="day-toggle-grid">${[1,2,3,4,5,6,0].map(day=>`<button type="button" class="day-toggle ${(a.days||[]).includes(day)?'on':''}" data-aeday="${day}">${["Dom","Seg","Ter","Qua","Qui","Sex","Sáb"][day]}</button>`).join('')}</div><label>Horário/janela preferencial (opcional)<input id="aeTime" value="${escapeHtml(a.preferredTime||"")}" placeholder="Ex.: tarde / 14:30–15:10"></label><label class="check-line"><input id="aeFraction" type="checkbox" ${a.fraction!==false?"checked":""}> Pode usar parte da janela</label><div class="form-grid" id="aeSessionFields" style="display:${a.fraction!==false?"grid":"none"}"><label>Sessão ideal<select id="aeSession">${sessionOptions(a.sessionMinutes||a.minutes)}</select></label><label>Sessão mínima<select id="aeSessionMin">${sessionOptions(a.sessionMinMinutes||10)}</select></label></div><div class="modal-actions"><div class="grow"></div><button type="button" class="secondary" id="cancelAe">Cancelar</button><button class="primary" value="default">Salvar</button></div></form>`;
- document.body.appendChild(dlg);dlg.querySelector('#aePri').value=a.priority||2;dlg.querySelector('#aeMin').addEventListener('change',()=>{dlg.querySelector('#aeMinCustom').style.display=dlg.querySelector('#aeMin').value==='custom'?'block':'none'});dlg.querySelector('#aeFraction').addEventListener('change',()=>{dlg.querySelector('#aeSessionFields').style.display=dlg.querySelector('#aeFraction').checked?'grid':'none'});dlg.showModal();dlg.querySelector('#cancelAe').onclick=()=>{dlg.close();dlg.remove()};
- dlg.querySelectorAll('[data-aeday]').forEach(b=>b.onclick=()=>b.classList.toggle('on'));
- dlg.querySelector('#activityEditForm').addEventListener('submit',e=>{e.preventDefault();a.name=dlg.querySelector('#aeName').value.trim()||a.name;const ms=dlg.querySelector('#aeMin').value;a.minutes=Math.max(5,ms==='custom'?(+dlg.querySelector('#aeMinCustom').value||a.minutes):(+ms||a.minutes));a.priority=+dlg.querySelector('#aePri').value;a.preferredTime=dlg.querySelector('#aeTime').value.trim();a.fraction=dlg.querySelector('#aeFraction').checked;a.sessionMinutes=a.fraction?(+dlg.querySelector('#aeSession').value||a.minutes):a.minutes;a.sessionMinMinutes=a.fraction?(+dlg.querySelector('#aeSessionMin').value||10):a.minutes;a.days=[...dlg.querySelectorAll('.day-toggle.on')].map(b=>+b.dataset.aeday);saveActivities(acts);dlg.close();dlg.remove();renderMeuDia()});
-}
-function openFreeTimeLog(){
- const dlg=document.createElement('dialog');dlg.innerHTML=`<form method="dialog" class="modal-card" id="freeLogForm"><div class="modal-head"><div><div class="eyebrow">🌿 TEMPO LIVRE PROTEGIDO</div><h2>Registrar o que você fez</h2></div><button class="icon-btn" value="cancel">×</button></div><p class="note">Se você usou um período que estava protegido para uma atividade, registramos o tempo. Depois o Meu Dia pode sugerir recuperar esse descanso.</p><label>Atividade<input id="flName" required placeholder="Ex.: organizei uma gaveta"></label><label>Tempo usado (min)<input id="flMin" type="number" min="5" max="240" value="20"></label><div class="modal-actions"><div class="grow"></div><button type="button" class="secondary" id="cancelFl">Cancelar</button><button class="primary" value="default">Registrar</button></div></form>`;document.body.appendChild(dlg);dlg.showModal();dlg.querySelector('#cancelFl').onclick=()=>{dlg.close();dlg.remove()};dlg.querySelector('#freeLogForm').addEventListener('submit',e=>{e.preventDefault();const logs=mvProtectedLogs();logs.push({id:uid(),date:todayISO(),name:dlg.querySelector('#flName').value.trim(),minutes:+dlg.querySelector('#flMin').value||0,protectedTimeUsed:true});localStorage.setItem(MV_TIMELOG_KEY,JSON.stringify(logs));dlg.close();dlg.remove();renderMeuDia()});
-}
-function openWeekEditor(){
- const wp=loadWeekPlan(),dlg=document.createElement('dialog');
- const rows=[1,2,3,4,5,6,0].map(day=>{const ws=wp.windows[day]||[];const name=["Domingo","Segunda","Terça","Quarta","Quinta","Sexta","Sábado"][day];return `<div class="week-day-edit"><strong>${name}</strong><div class="week-window-list" data-wday="${day}">${ws.map((x,i)=>`<div class="week-window-row"><input type="time" data-ws value="${x.start}"><span>até</span><input type="time" data-we value="${x.end}"><input type="text" data-wl value="${escapeHtml(x.label||"Janela disponível")}" placeholder="Nome da janela"><button type="button" class="more" data-remove-window>×</button></div>`).join('')}</div><button type="button" class="secondary mini" data-add-window="${day}">＋ adicionar janela</button></div>`}).join('');
- dlg.innerHTML=`<form method="dialog" class="modal-card" id="weekEditForm"><div class="modal-head"><div><div class="eyebrow">⚙️ MINHA SEMANA</div><h2>Editar janelas</h2></div><button class="icon-btn" value="cancel">×</button></div><p class="note">As janelas são sugestões, não obrigações. Compromissos fixos continuam protegidos.</p><label class="check-line"><input id="therapyWeek" type="checkbox" ${wp.therapyWeek?'checked':''}> Esta é uma semana de terapia</label><label>Horário da terapia nesta semana (opcional)<input id="therapyTime" value="${escapeHtml(wp.therapyTime||"")}" placeholder="Ex.: 18:30–19:30"></label><div class="week-edit-grid">${rows}</div><div class="modal-actions"><div class="grow"></div><button type="button" class="secondary" id="cancelWeek">Cancelar</button><button class="primary" value="default">Salvar</button></div></form>`;
- document.body.appendChild(dlg);dlg.showModal();dlg.querySelector('#cancelWeek').onclick=()=>{dlg.close();dlg.remove()};
- dlg.querySelectorAll('[data-add-window]').forEach(b=>b.onclick=()=>{const box=dlg.querySelector(`[data-wday="${b.dataset.addWindow}"]`);box.insertAdjacentHTML('beforeend',`<div class="week-window-row"><input type="time" data-ws value="09:00"><span>até</span><input type="time" data-we value="10:00"><input type="text" data-wl value="Janela disponível"><button type="button" class="more" data-remove-window>×</button></div>`)});
- dlg.addEventListener('click',e=>{if(e.target.matches('[data-remove-window]'))e.target.closest('.week-window-row')?.remove()});
- dlg.querySelector('#weekEditForm').addEventListener('submit',e=>{e.preventDefault();const out={...wp,therapyWeek:dlg.querySelector('#therapyWeek').checked,therapyTime:dlg.querySelector('#therapyTime').value.trim(),windows:{}};[1,2,3,4,5,6,0].forEach(day=>{out.windows[day]=[...dlg.querySelectorAll(`[data-wday="${day}"] .week-window-row`)].map(r=>({start:r.querySelector('[data-ws]').value,end:r.querySelector('[data-we]').value,label:r.querySelector('[data-wl]').value.trim()||'Janela disponível'})).filter(x=>x.start&&x.end&&hhmmToMin(x.end)>hhmmToMin(x.start))});saveWeekPlan(out);dlg.close();dlg.remove();renderMeuDia()});
-}
-function mvProtectedLogs(){let x=mvRead(MV_TIMELOG_KEY);if(!x.length)x=mvRead("minha-vida.tempo.v1");return Array.isArray(x)?x:[]}
-function mvProtectedBalance(){return mvProtectedLogs().filter(x=>x.protectedTimeUsed&&!x.recovered).reduce((n,x)=>n+(+x.minutes||0),0)}
-function recoverProtectedTime(){const logs=mvProtectedLogs();let remaining=mvProtectedBalance();for(const x of logs){if(remaining<=0)break;if(x.protectedTimeUsed&&!x.recovered){x.recovered=true;remaining-=+x.minutes||0;}}localStorage.setItem(MV_TIMELOG_KEY,JSON.stringify(logs));renderMeuDia();}
-function openActivitiesManager(){
- const acts=loadActivities(),dlg=document.createElement('dialog');
- dlg.innerHTML=`<form method="dialog" class="modal-card" id="actsManager"><div class="modal-head"><div><div class="eyebrow">🧩 MÓDULOS</div><h2>Atividades que podem ser sugeridas</h2></div><button class="icon-btn" value="cancel">×</button></div><p class="note">A duração é a referência que o Meu Dia usa para descobrir o que cabe em cada janela. Edite quando sua realidade mudar.</p><div class="activity-manager-list">${acts.filter(a=>a.id!=="remote").map(a=>`<button type="button" class="activity-manager-row" data-am="${a.id}"><span><strong>${escapeHtml(a.name)}</strong><small>${escapeHtml(a.module)} · ${a.minutes} min · ${activityDaysLabel(a.days||[])}</small></span><b>Editar</b></button>`).join('')}</div><div class="modal-actions"><div class="grow"></div><button class="secondary" value="default">Fechar</button></div></form>`;
- document.body.appendChild(dlg);dlg.showModal();dlg.querySelectorAll('[data-am]').forEach(b=>b.onclick=()=>{dlg.close();dlg.remove();openActivityEditor(b.dataset.am)});
-}
-function renderSmartSuggestions(){
- const day=mvDow(),wins=mvWindows(day),balance=mvProtectedBalance();
- return `<section class="day-section smart-suggestions"><div class="section-head"><div><h2>✨ O que cabe aqui</h2><small>O app sugere. Você decide.</small></div><div class="suggestion-head-actions"><button type="button" class="text-btn" onclick="openWeekEditor()">editar janelas</button><button type="button" class="text-btn" onclick="openActivitiesManager()">editar atividades</button></div></div>${wins.map(mvSuggestBlock).join('')||`<div class="suggestion-empty standalone">🌿 Hoje não há nenhuma janela programada. Isso também é organização.</div>`}${balance?`<div class="rest-balance">🌿 <strong>Tempo livre a recuperar: ${balance} min</strong><small>Você usou tempo que estava protegido. Em outra janela, o app pode sugerir descanso.</small><button type="button" class="secondary mini" onclick="recoverProtectedTime()">Registrar que já recuperei</button></div>`:''}<button type="button" class="secondary protected-log-btn" onclick="openFreeTimeLog()">＋ Registrar atividade feita no tempo livre</button></section>`;
-}
-
-function renderMeuDiaExercicio(){
- const day=mvDow(),wins=mvWindows(day),a=loadActivities().find(x=>x.id==="exercicio"),fits=wins.filter(w=>hhmmToMin(w.end)-hhmmToMin(w.start)>=(a?.minutes||30));
- if(!a || !fits.length) return `<section class="day-section day-exercise-card"><div class="section-head"><h2>🏃 Movimento</h2><span class="soft-count">flexível</span></div><p class="note">Hoje o movimento não precisa ser encaixado à força. Ele aparece nas janelas quando houver tempo suficiente.</p><a class="exercise-open-link" href="#exercicios">Abrir exercícios →</a></section>`;
- return `<section class="day-section day-exercise-card"><div class="section-head"><h2>🏃 Movimento que cabe hoje</h2><span class="soft-count">${a.minutes} min</span></div><div class="day-exercise-row"><span>✨</span><div><strong>${escapeHtml(a.name)}</strong><small>${a.minutes} min · cabe em ${escapeHtml(fits[0].start)}–${escapeHtml(fits[0].end)}</small></div><b>→</b></div><p class="note">É uma sugestão, não uma obrigação. Se você escolher outra coisa, tudo bem.</p><a class="exercise-open-link" href="#exercicios">Abrir exercícios →</a></section>`;
-}
-
 function renderMeuDia(){
- const d=mvNow(), h=d.getHours(), greet=h<12?'Bom dia':h<18?'Boa tarde':'Boa noite', b=mvCurrentBlock(), p=mvPending(), w=mvDow(d), ho=remoteRange(w), wp=loadWeekPlan();
+ const d=mvNow(), h=d.getHours(), greet=h<12?'Bom dia':h<18?'Boa tarde':'Boa noite', b=mvCurrentBlock(), p=mvPending();
  const focus=b[3]==='rest'?[['Desacelerar','Nada urgente precisa entrar aqui.']]:p.slice(0,3).map(x=>[x.title||x.name||'Pendência',x.note||'Pendência para hoje']);
  if(!focus.length)focus.push(['Seu essencial está em dia','Use este espaço para viver, descansar ou escolher o que importa.']);
- const fixed=mvFixedBlocks(w).filter(x=>x.type==='fixed').map(x=>`<div><b>${x.start}–${x.end}</b><span>${escapeHtml(x.label)}</span></div>`).join('');
- const remote=remoteToday();
+ const w=mvDow(d), ho={1:'16:40–18:40',2:'15:40–17:40',3:'16:40–18:40',4:'15:40–17:40',5:'15:40–17:40'}[w]||'—';
  return `<section class="day-hero"><div class="eyebrow">💜 MEU DIA</div><h1>${greet}, Duaila.</h1><p class="day-date">${mvDate()}</p></section>
- <section class="now-card ${b[3]}"><div class="card-kicker">AGORA</div><div class="now-title">${escapeHtml(b[0])}</div><div class="now-time">${escapeHtml(b[1])}</div><p>${escapeHtml(b[2])}</p></section>
- <section class="day-section"><div class="section-head"><h2>O que importa hoje</h2><span class="soft-count">${focus.length}</span></div>${focus.map((x,i)=>`<div class="focus-row"><span class="focus-dot">${i+1}</span><div><strong>${escapeHtml(x[0])}</strong><small>${escapeHtml(x[1])}</small></div></div>`).join('')}</section>
- <section class="day-section"><div class="section-head"><div><h2>Seu dia, sem excesso</h2><small>Compromissos protegem. Janelas sugerem.</small></div><button type="button" class="text-btn" onclick="openWorkRemoteEditor()">editar trabalho remoto</button></div><div class="timeline">
- <div><b>05:16–08:00</b><span>Manhã protegida</span></div>${fixed}<div><b>${remote?remoteRange(w):'janela editável'}</b><span>Trabalho remoto · ${remote?remoteLabel(remote.minutes):'defina uma janela'} · contínuo</span></div>${(w===2||w===4)&&!wp.therapyWeek?'<div><b>19:00–22:15</b><span>MBA · noite protegida</span></div>':''}${w===3&&wp.therapyWeek?`<div><b>${wp.therapyTime||'horário a definir'}</b><span>Terapia · semana de terapia</span></div>`:''}</div></section>
- ${renderSmartSuggestions()}
- ${renderRituaisHojeV13()}
- ${renderMeuDiaExercicio()}
- ${p.length?`<section class="day-section"><div class="section-head"><h2>Pendências que merecem aparecer</h2><a href="#pendencias">ver todas</a></div>${p.map(x=>`<div class="compact-item"><strong>${escapeHtml(x.title||x.name||'Pendência')}</strong>${x.dueDate?`<small>${escapeHtml(x.dueDate)}</small>`:''}</div>`).join('')}</section>`:''}
- <section class="quick-grid"><a href="#rituais">✨<span>Rituais</span></a><a href="#exercicios">🏃<span>Exercícios</span></a><a href="#alimentacao">🍽️<span>Alimentação</span></a><a href="#receitas">📖<span>Receitas</span></a><a href="#cabelo">💇‍♀️<span>Cabelo</span></a><a href="#casa">🏠<span>Casa</span></a><a href="#financeiro">💰<span>Financeiro</span></a></section>
- <section class="free-space"><div>☁️</div><strong>Tempo livre protegido também faz parte do dia.</strong><p>Se nada precisa ser resolvido agora, não resolva. ${mvProtectedBalance()?`Você tem ${mvProtectedBalance()} min para recuperar em outro momento.`:''}</p></section>`;
- document.querySelectorAll('[data-suggestion]').forEach(b=>b.onclick=()=>{const id=b.dataset.suggestion;if(id.startsWith('casa-')){openCasaTaskEditor(id.slice(5));return;}const a=loadActivities().find(x=>x.id===id);if(a)openActivityEditor(a.id)});
+ <section class="now-card ${b[3]}"><div class="card-kicker">AGORA</div><div class="now-title">${b[0]}</div><div class="now-time">${b[1]}</div><p>${b[2]}</p></section>
+ <section class="day-section"><div class="section-head"><h2>O que importa hoje</h2><span class="soft-count">${focus.length}</span></div>
+ ${focus.map((x,i)=>`<div class="focus-row"><span class="focus-dot">${i+1}</span><div><strong>${x[0]}</strong><small>${x[1]}</small></div></div>`).join('')}</section>
+ <section class="day-section"><div class="section-head"><h2>Seu dia, sem excesso</h2></div><div class="timeline">
+ <div><b>05:20–07:35</b><span>Manhã protegida · movimento + café + se arrumar</span></div>
+ <div><b>08:00–14:00</b><span>Trabalho oficial</span></div>
+ ${(w===1||w===3)?'<div><b>14:40–16:10</b><span>Janela estratégica</span></div>':''}
+ <div><b>${ho}</b><span>Home office</span></div><div><b>19:00+</b><span>Noite protegida · descanso primeiro</span></div></div></section>
+ ${p.length?`<section class="day-section"><div class="section-head"><h2>Pendências que merecem aparecer</h2><a href="#pendencias">ver todas</a></div>${p.map(x=>`<div class="compact-item"><strong>${x.title||x.name||'Pendência'}</strong>${x.dueDate?`<small>${x.dueDate}</small>`:''}</div>`).join('')}</section>`:''}
+ <section class="quick-grid"><a href="#rituais">✨<span>Rituais</span></a><a href="#exercicios">🏃<span>Exercícios</span></a><a href="#alimentacao">🍽️<span>Alimentação</span></a><a href="#receitas">📖<span>Receitas</span></a><a href="#casa">🏠<span>Casa</span></a><a href="#financeiro">💰<span>Financeiro</span></a></section>
+ <section class="free-space"><div>☁️</div><strong>Espaço livre também faz parte do dia.</strong><p>Se nada precisa ser resolvido agora, não resolva.</p></section>`;
 }
 
 /* CORREÇÃO PRINCIPAL:
    O hash é usado para navegação quando existir; sem hash, a página inicial
    agora é Pendências. A rota Meu Dia continua disponível em #meu-dia.
 */
-/* ===== RITUAIS DE HOJE + AUTOCUIDADO V13 ===== */
-const SELFCARE_KEY_V13="minha-vida.selfcare.v3";
-const SELFCARE_BASE_V13=[
-["MEZZO BIOSCULPT","✦","20 min",["Limpeza facial","Mezzo — 20 min","Hidratação"],"mezzo"],
-["DEPILAÇÃO","◦","20–30 min",["Banho morno","Pernas + axilas","Virilha","Hidratação"],"depilacao"],
-["MÁSCARA FACIAL","✦","20–30 min",["Higienizar pele","Máscara calmante","Retirar","Sérum + hidratação"],"mascara"],
-["MANUTENÇÃO","◦","10 min",["Óleo cutículas","Creme mãos","Creme pés","Conferir soft gel"],"manutencao"],
-["DIA DAS UNHAS","♡","≈ 3 horas",["Remover soft gel","Preparar unhas","Aplicar soft gel","Fazer os pés","Hidratar"],"unhas"],
-["LIVRE","✧","Variável",["Cronograma capilar","Hidratação corporal","Cutículas","Desacelerar"],"livre"],
-["RESET","☾","10–15 min",["Hidratar mãos","Óleo cutículas","Creme pés","Skincare noturno"],"reset"],
-["MEZZO BIOSCULPT","✦","20 min",["Limpeza facial","Mezzo — 20 min","Hidratação"],"mezzo"],
-["DEPILAÇÃO","◦","20–30 min",["Banho morno","Pernas + axilas","Virilha","Hidratação"],"depilacao"],
-["BUÇO + SOBRANCELHAS","✧","15 min",["Aparelho no buço","Pinça","Tesoura","Hidratação"],"sobrancelhas"],
-["MÁSCARA FACIAL","✦","20–30 min",["Higienizar pele","Máscara antioxidante","Retirar","Sérum + hidratação"],"mascara"],
-["SPA CORPORAL","♡","30–40 min",["Banho","Esfoliação","Depilação localizada","Hidratação","Creme nos pés"],"spa"],
-["MEZZO + RELAXAMENTO","☾","20–30 min",["Mezzo — 20 min","Skincare","Hidratação corporal","Relaxar"],"mezzo-relax"],
-["RESET","☾","10–15 min",["Hidratar mãos","Óleo cutículas","Creme pés","Skincare noturno"],"reset"]
-];
-const SELFCARE_HOW_V13={
-mezzo:["Limpeza facial","Mezzo — 20 min","Hidratação"],
-depilacao:["Banho morno","Realizar depilação programada","Hidratar a pele"],
-mascara:["Higienizar a pele","Aplicar a máscara indicada","Retirar","Sérum + hidratação"],
-manutencao:["Óleo nas cutículas","Creme nas mãos","Creme nos pés","Conferir soft gel"],
-unhas:["Remover soft gel","Preparar unhas","Aplicar soft gel","Fazer os pés","Hidratar"],
-livre:["Escolher o cuidado previsto","Hidratação corporal ou cutículas","Se envolver cabelo, abrir o COMO do Ritual Capilar","Desacelerar"],
-reset:["Hidratar mãos","Óleo nas cutículas","Creme nos pés","Skincare noturno"],
-sobrancelhas:["Aparelho no buço","Pinça nas sobrancelhas","Tesoura se necessário","Hidratação"],
-spa:["Banho","Esfoliação","Depilação localizada se prevista","Hidratação","Creme nos pés"],
-"mezzo-relax":["Mezzo — 20 min","Skincare","Hidratação corporal","Relaxar"]
-};
-function selfcareLoadV13(){
- try{const x=JSON.parse(localStorage.getItem(SELFCARE_KEY_V13)||"null");if(x&&Array.isArray(x.days)&&x.days.length===14)return x;}catch(e){}
- const days=SELFCARE_BASE_V13.map(x=>({titulo:x[0],icone:x[1],duracao:x[2],tarefas:[...x[3]],id:x[4]}));
- const x={cycleStart:"2026-08-30",days,overrides:{}};localStorage.setItem(SELFCARE_KEY_V13,JSON.stringify(x));return x;
-}
-function selfcareDateKeyV13(d){return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,"0")}-${String(d.getDate()).padStart(2,"0")}`;}
-function selfcareIndexV13(d=new Date()){
- const x=selfcareLoadV13(),a=x.cycleStart.split("-").map(Number),start=new Date(a[0],a[1]-1,a[2]),cur=new Date(d.getFullYear(),d.getMonth(),d.getDate());
- return ((Math.floor((cur-start)/86400000)%14)+14)%14;
-}
-function selfcareTodayV13(d=new Date()){
- const x=selfcareLoadV13(),k=selfcareDateKeyV13(d),i=selfcareIndexV13(d);return {index:i,items:[x.days[i],...(x.overrides[k]||[])]};
-}
-function selfcareDoneV13(item,d=new Date()){return localStorage.getItem(`minha-vida.selfcare.done.${selfcareDateKeyV13(d)}.${item.id||item.titulo}`)==="1";}
-function selfcareToggleV13(item){const k=`minha-vida.selfcare.done.${selfcareDateKeyV13(new Date())}.${item.id||item.titulo}`;if(localStorage.getItem(k)==="1")localStorage.removeItem(k);else localStorage.setItem(k,"1");render();}
-function selfcareHowV13(item){
- const steps=SELFCARE_HOW_V13[item.id]||item.tarefas||[],o=document.createElement("div");o.className="mv-how-overlay";
- o.innerHTML=`<div class="mv-how"><button class="mv-how-x" onclick="this.closest('.mv-how-overlay').remove()">×</button><div class="eyebrow">COMO FAZER</div><h2>${item.icone||"✦"} ${escapeHtml(item.titulo||"Ritual")}</h2><ol>${steps.map(s=>`<li>${escapeHtml(s)}</li>`).join("")}</ol><p>Você poderá editar este passo a passo pelo próprio app.</p></div>`;document.body.appendChild(o);
-}
-function renderAutocuidadoV13(){
- const x=selfcareLoadV13(),t=selfcareTodayV13();
- app.innerHTML=`<section class="hero selfcare-v13-hero"><div class="backline"><button class="back-inline" onclick="location.hash='rituais';renderRituais()">‹ Rituais</button></div><div class="eyebrow">🌸 RITUAIS</div><h2>Autocuidado</h2><p>Ciclo de 14 dias em looping contínuo. Você pode editar e acrescentar cuidados em datas específicas.</p></section>
- <section class="selfcare-v13-today"><div class="selfcare-v13-head"><strong>✨ Hoje • Dia ${t.index+1}/14</strong><button class="secondary" onclick="openSelfcareEditV13()">Editar ciclo</button></div>
- ${t.items.map(it=>`<article class="selfcare-v13-card"><span class="sc-icon">${it.icone||"✦"}</span><div><b>${escapeHtml(it.titulo)}</b><small>⏱ ${escapeHtml(it.duracao||"Variável")}</small><div class="sc-actions"><button onclick='selfcareHowV13(${JSON.stringify(it).replace(/'/g,"&#39;")})'>COMO FAZER →</button><button onclick='selfcareToggleV13(${JSON.stringify(it).replace(/'/g,"&#39;")})'>${selfcareDoneV13(it)?"↩ Feito":"✓ Marcar feito"}</button></div></div></article>`).join("")}</section>
- <section class="selfcare-v13-add"><button onclick="openSelfcareDateV13()">＋ Adicionar ritual em uma data</button><p>Para cadastrar plasma, botox e tratamentos profundos quando as datas forem definidas.</p></section>
- <section class="selfcare-v13-cycle"><strong>📅 Ciclo contínuo</strong><div class="sc-cycle-grid">${x.days.map((it,i)=>`<button onclick="openSelfcareDayV13(${i})"><b>${i+1}</b><span>${escapeHtml(it.titulo)}</span></button>`).join("")}</div></section>`;
-}
-function openSelfcareDayV13(i){
- const x=selfcareLoadV13(),it=x.days[i],o=document.createElement("div");o.className="mv-how-overlay";
- o.innerHTML=`<div class="mv-how"><button class="mv-how-x" onclick="this.closest('.mv-how-overlay').remove()">×</button><div class="eyebrow">EDITAR CICLO</div><h2>Dia ${i+1}/14</h2><label>Título<input id="scv13t" value="${escapeHtml(it.titulo)}"></label><label>Duração<input id="scv13d" value="${escapeHtml(it.duracao||"Variável")}"></label><label>Checklist<textarea id="scv13s">${escapeHtml((it.tarefas||[]).join("\n"))}</textarea></label><button class="primary" onclick="saveSelfcareDayV13(${i})">Salvar</button></div>`;document.body.appendChild(o);
-}
-function saveSelfcareDayV13(i){const x=selfcareLoadV13(),it=x.days[i];it.titulo=document.getElementById("scv13t").value.trim()||"Ritual";it.duracao=document.getElementById("scv13d").value.trim()||"Variável";it.tarefas=document.getElementById("scv13s").value.split("\n").map(x=>x.trim()).filter(Boolean);selfcareSaveV13(x);document.querySelector(".mv-how-overlay")?.remove();render();}
-function selfcareSaveV13(x){localStorage.setItem(SELFCARE_KEY_V13,JSON.stringify(x));}
-function openSelfcareDateV13(){const o=document.createElement("div");o.className="mv-how-overlay";o.innerHTML=`<div class="mv-how"><button class="mv-how-x" onclick="this.closest('.mv-how-overlay').remove()">×</button><div class="eyebrow">NOVO RITUAL</div><h2>＋ Adicionar data</h2><label>Data<input id="scv13date" type="date" value="${selfcareDateKeyV13(new Date())}"></label><label>Ritual<input id="scv13new" placeholder="Ex.: Plasma facial"></label><label>Duração<input id="scv13dur" value="30 min"></label><label>Como fazer / checklist<textarea id="scv13tasks" placeholder="Um passo por linha"></textarea></label><button class="primary" onclick="saveSelfcareDateV13()">Adicionar</button></div>`;document.body.appendChild(o);}
-function saveSelfcareDateV13(){const x=selfcareLoadV13(),k=document.getElementById("scv13date").value;if(!k)return;x.overrides[k]=x.overrides[k]||[];x.overrides[k].push({id:"custom-"+Date.now(),titulo:document.getElementById("scv13new").value.trim()||"Novo ritual",icone:"✦",duracao:document.getElementById("scv13dur").value.trim()||"Variável",tarefas:document.getElementById("scv13tasks").value.split("\n").map(x=>x.trim()).filter(Boolean)});selfcareSaveV13(x);document.querySelector(".mv-how-overlay")?.remove();render();}
-function openSelfcareEditV13(){openSelfcareDayV13(selfcareIndexV13(new Date()));}
-function ritualsTodayV13(){
- const arr=[];let h=null;try{if(typeof hairTodayData==="function")h=hairTodayData();}catch(e){}
- if(h)arr.push({type:"hair",title:"Ritual Capilar",sub:hairTypeLabel(h.kind),icon:"💇‍♀️"});
- const s=selfcareTodayV13();s.items.forEach(it=>arr.push({type:"selfcare",item:it,title:it.titulo,sub:`${it.duracao||"Variável"} • Dia ${s.index+1}/14`,icon:it.icone||"🌸"}));return arr;
-}
-function renderRituaisHojeV13(){
- const arr=ritualsTodayV13();if(!arr.length)return "";
- return `<section class="mv-rh-v13"><div class="mv-rh-v13-head"><h2>✨ Rituais de hoje</h2><span>${arr.length} ${arr.length===1?"ritual":"rituais"}</span></div>${arr.map(x=>`<article class="mv-rh-v13-card"><span>${x.icon}</span><div><b>${escapeHtml(x.title)}</b><small>${escapeHtml(x.sub)}</small><div><button onclick='${x.type==="hair"?"location.hash=\"cabelo\";renderCabelo()":"selfcareHowV13("+JSON.stringify(x.item).replace(/'/g,"&#39;")+")"}'>COMO FAZER →</button><button onclick='${x.type==="hair"?"location.hash=\"cabelo\";renderCabelo()":"selfcareToggleV13("+JSON.stringify(x.item).replace(/'/g,"&#39;")+")"}'>${x.type==="hair"?"Abrir":(selfcareDoneV13(x.item)?"↩ Feito":"✓ Feito")}</button></div></div></article>`).join("")}</section>`;
-}
-
 function render() {
   const hash = (location.hash || "").replace("#", "").trim();
-  const route = hash || state.route || "meu-dia";
+  const route = hash || state.route || "pendencias";
   state.route = route;
 
   const pageTitle = document.querySelector("#pageTitle");
@@ -315,7 +94,6 @@ function render() {
       route === "meu-dia" ? "💜 Meu Dia" :
       route === "ideias" ? "💡 Criação & Ideias" :
       route === "rituais" ? "✨ Rituais" :
-      route === "autocuidado" ? "🌸 Autocuidado" :
       route === "estudos" ? "📚 Estudos" :
       route === "financeiro" ? "💰 Financeiro" :
       route === "casa" ? "🏠 Casa" :
@@ -333,10 +111,6 @@ function render() {
     app.innerHTML = renderMeuDia();
     return;
   }
-  if (route === "autocuidado") {
-    renderAutocuidadoV13();
-    return;
-  }
 
   if (route === "pendencias") renderPendencias();
   else if (route === "ideias") renderIdeias();
@@ -347,12 +121,10 @@ function render() {
   else if (route === "exercicios") renderExercicios();
   else if (route === "alimentacao") renderAlimentacao();
   else if (route === "receitas") renderReceitas();
-  else if (route === "cabelo") renderCabelo();
   else renderPlaceholder();
 }
 
 window.addEventListener("hashchange", render);
-document.addEventListener("DOMContentLoaded",()=>{const moduleMenuEl=document.getElementById("moduleMenu");if(moduleMenuEl){moduleMenuEl.querySelectorAll(".module-links a").forEach(a=>a.addEventListener("click",()=>setTimeout(()=>{if(moduleMenuEl.open)moduleMenuEl.close()},0)));}});
 
 function renderPendencias() {
   const all = loadPendencias();
@@ -412,7 +184,7 @@ function cardHtml(p) {
         <div class="pending-main">
           <div class="pending-title ${p.done?"done-text":""}">${escapeHtml(p.title)}</div>
           <div class="meta">
-            <span class="pill">${escapeHtml(p.category)}</span><span class="pill">⏱ ${formatDuration(p.durationMinutes||35)}</span>${p.fractionable===false?'<span class="pill">bloco único</span>':'<span class="pill">fracionável</span>'}${due}
+            <span class="pill">${escapeHtml(p.category)}</span>${due}
           </div>
           ${p.note ? `<p class="note">${escapeHtml(p.note)}</p>` : ""}
         </div>
@@ -442,12 +214,6 @@ function openModal(id=null) {
   document.querySelector("#pendingTitle").value = p?.title || "";
   document.querySelector("#pendingCategory").value = p?.category || "Pessoal";
   document.querySelector("#pendingDue").value = p?.due || "";
-  const total=p?.durationMinutes||35, standard=[5,10,15,20,30,45,60,90,120,180,240,360,480], ds=document.querySelector("#pendingDuration");
-  ds.innerHTML=durationOptions(total); ds.value=standard.includes(+total)?String(total):"custom"; document.querySelector("#pendingDurationCustom").value=total; document.querySelector("#pendingDurationCustom").style.display=ds.value==="custom"?"block":"none";
-  document.querySelector("#pendingPriority").value = p?.priority || 3;
-  document.querySelector("#pendingWorkMode").value = p?.fractionable === false ? "single" : "fraction";
-  document.querySelector("#pendingSession").value = String(p?.sessionMinutes||60); document.querySelector("#pendingSessionMin").value = String(p?.sessionMinMinutes||10);
-  document.querySelector("#pendingSessionFields").style.display=p?.fractionable===false?"none":"grid";
   document.querySelector("#pendingNote").value = p?.note || "";
   document.querySelector("#deletePendingBtn").hidden = !p;
   dialog.showModal();
@@ -459,9 +225,6 @@ function closeModal() {
   state.editingId = null;
 }
 document.querySelector("#cancelPendingBtn").onclick = closeModal;
-document.querySelector("#pendingDuration").addEventListener("change",()=>{const s=document.querySelector("#pendingDuration"),c=document.querySelector("#pendingDurationCustom");c.style.display=s.value==="custom"?"block":"none";});
-document.querySelector("#pendingWorkMode").addEventListener("change",()=>{document.querySelector("#pendingSessionFields").style.display=document.querySelector("#pendingWorkMode").value==="fraction"?"grid":"none";});
-
 document.querySelector("#deletePendingBtn").onclick = () => {
   if (!state.editingId) return;
   if (confirm("Excluir esta pendência?")) {
@@ -473,10 +236,12 @@ document.querySelector("#deletePendingBtn").onclick = () => {
 form.addEventListener("submit", e => {
   e.preventDefault();
   const items = loadPendencias();
-  const durSel=document.querySelector("#pendingDuration").value;
-  const durationMinutes=durSel==="custom"?Math.max(5,+document.querySelector("#pendingDurationCustom").value||35):+durSel;
-  const fractionable=document.querySelector("#pendingWorkMode").value==="fraction";
-  const data={title:document.querySelector("#pendingTitle").value.trim(),category:document.querySelector("#pendingCategory").value,due:document.querySelector("#pendingDue").value,note:document.querySelector("#pendingNote").value.trim(),durationMinutes,priority:+document.querySelector("#pendingPriority").value||3,fractionable,sessionMinutes:fractionable?(+document.querySelector("#pendingSession").value||60):durationMinutes,sessionMinMinutes:fractionable?(+document.querySelector("#pendingSessionMin").value||10):durationMinutes};
+  const data = {
+    title: document.querySelector("#pendingTitle").value.trim(),
+    category: document.querySelector("#pendingCategory").value,
+    due: document.querySelector("#pendingDue").value,
+    note: document.querySelector("#pendingNote").value.trim()
+  };
   if (!data.title) return;
   if (state.editingId) {
     const i = items.findIndex(p => p.id===state.editingId);
@@ -617,20 +382,6 @@ function openIdeaModal(id=null) {
           <option value="plano" ${type==="plano"?"selected":""}>Plano</option>
         </select>
       </label>
-      <div id="projectPlanning" class="project-planning" style="display:${type==="projeto"?"block":"none"}">
-        <div class="eyebrow">🧩 PLANEJAMENTO DO PROJETO</div>
-        <div class="form-grid">
-          <label>Prazo<input id="ideaDueDate" type="date" value="${escapeHtml(p?.dueDate||"")}"></label>
-          <label>Esforço total<select id="ideaTotalMin">${durationOptions(p?.totalMinutes||360)}</select><input id="ideaTotalCustom" class="duration-custom" type="number" min="10" max="960" step="10" value="${p?.totalMinutes||360}" style="display:none"></label>
-        </div>
-        <div class="form-grid">
-          <label>Sessão ideal<select id="ideaSessionMin">${sessionOptions(p?.sessionMinutes||60)}</select></label>
-          <label>Prioridade<select id="ideaPriority"><option value="1">Baixa</option><option value="2">Normal</option><option value="3">Importante</option><option value="5">Alta</option></select></label>
-        </div>
-        <label>Frequência desejada<input id="ideaFrequency" value="${escapeHtml(p?.frequency||"1x por semana")}" placeholder="Ex.: 3x/semana · a cada 2 dias"></label>
-        <label class="check-line"><input id="ideaFraction" type="checkbox" ${p?.fractionable!==false?"checked":""}> Pode ser feito em sessões menores</label><label>Sessão mínima<select id="ideaSessionMinMin">${sessionOptions(p?.sessionMinMinutes||10)}</select></label>
-        <div class="day-toggle-grid">${[1,2,3,4,5,6,0].map(day=>`<button type="button" class="day-toggle project-day ${(p?.days||[0,6]).includes(day)?'on':''}" data-pday="${day}">${["Dom","Seg","Ter","Qua","Qui","Sex","Sáb"][day]}</button>`).join('')}</div>
-      </div>
       <label>
         Observação <span class="muted">(opcional)</span>
         <textarea id="ideaNote" rows="4" maxlength="500" placeholder="Contexto, inspiração, próximos pensamentos...">${escapeHtml(p?.note || "")}</textarea>
@@ -647,10 +398,6 @@ function openIdeaModal(id=null) {
   d.innerHTML = body;
   document.body.appendChild(d);
   d.showModal();
-  if(d.querySelector("#ideaPriority")) d.querySelector("#ideaPriority").value=p?.priority||3;
-  d.querySelector("#ideaType").addEventListener("change",()=>{d.querySelector("#projectPlanning").style.display=d.querySelector("#ideaType").value==="projeto"?"block":"none"});
-  d.querySelector("#ideaTotalMin").addEventListener("change",()=>{d.querySelector("#ideaTotalCustom").style.display=d.querySelector("#ideaTotalMin").value==="custom"?"block":"none"});
-  d.querySelectorAll("[data-pday]").forEach(b=>b.onclick=()=>b.classList.toggle("on"));
   d.querySelector("#cancelIdeaBtn").onclick = () => { d.close(); d.remove(); };
   if (p) d.querySelector("#deleteIdeaBtn").onclick = () => {
     if (confirm("Excluir este registro?")) {
@@ -666,17 +413,6 @@ function openIdeaModal(id=null) {
       type: d.querySelector("#ideaType").value,
       note: d.querySelector("#ideaNote").value.trim()
     };
-    if(data.type==="projeto"){
-      data.dueDate=d.querySelector("#ideaDueDate").value;
-      const totalSel=d.querySelector("#ideaTotalMin").value;
-      data.totalMinutes=Math.max(10,totalSel==="custom"?(+d.querySelector("#ideaTotalCustom").value||360):(+totalSel||360));
-      data.sessionMinutes=Math.max(10,+d.querySelector("#ideaSessionMin").value||60);
-      data.sessionMinMinutes=Math.max(5,+d.querySelector("#ideaSessionMinMin").value||10);
-      data.priority=+d.querySelector("#ideaPriority").value||3;
-      data.frequency=d.querySelector("#ideaFrequency").value.trim()||"1x por semana";
-      data.fractionable=d.querySelector("#ideaFraction").checked;
-      data.days=[...d.querySelectorAll("[data-pday].on")].map(b=>+b.dataset.pday);
-    }
     if (!data.title) return;
     if (p) {
       const i = items.findIndex(x => x.id===p.id);
@@ -733,15 +469,9 @@ function renderRituais() {
     </section>
 
     <div class="ritual-grid">
-      <div class="ritual-today-hint">✨ <strong>Rituais de hoje</strong><span>Os rituais programados aparecem automaticamente no Meu Dia.</span></div>
       <button class="ritual-card featured" id="capilarBtn">
         <span class="ritual-icon">✦</span>
         <div><strong>Ritual Capilar</strong><span>Lavagem · tratamento · finalização · day after</span></div>
-        <b>›</b>
-      </button>
-      <button class="ritual-card featured" id="autocuidadoBtn">
-        <span class="ritual-icon">🌸</span>
-        <div><strong>Ritual de Autocuidado</strong><span>Unhas · depilação · pele · tratamentos</span></div>
         <b>›</b>
       </button>
       <button class="ritual-card" id="newRitualBtn">
@@ -757,8 +487,7 @@ function renderRituais() {
     </div>
   `;
 
-  document.querySelector("#capilarBtn").onclick = () => { location.hash = "cabelo"; renderCabelo(); };
-  document.querySelector("#autocuidadoBtn").onclick = () => { location.hash = "autocuidado"; renderAutocuidadoV13(); };
+  document.querySelector("#capilarBtn").onclick = renderCapilar;
   document.querySelector("#newRitualBtn").onclick = () => openRitualModal();
   document.querySelectorAll("[data-ritual-id]").forEach(x => x.onclick = () => openRitualModal(x.dataset.ritualId));
 }
@@ -871,64 +600,22 @@ function saveEstudos(data) {
   localStorage.setItem(ESTUDOS_KEY, JSON.stringify(data));
 }
 
-function renderEstudos() {
-  const d = loadEstudos();
-  const totalSessions = d.sessions.length;
-  const totalQuestions = d.questions.reduce((n,q)=>n + Number(q.count || 0), 0);
-  const completedReviews = d.reviews.filter(x=>x.done).length;
+const TCDF_MAPAS = [{"id": 1, "bloco": "Orientação", "materia": "Orientação e Estratégia", "topico": "Como funciona a prova do TCDF 2026", "semana": "S1"}, {"id": 2, "bloco": "Orientação", "materia": "Orientação e Estratégia", "topico": "Como funciona a pontuação Cebraspe", "semana": "S1"}, {"id": 3, "bloco": "Orientação", "materia": "Orientação e Estratégia", "topico": "Como usar os Mapas da Aprovação", "semana": "S1"}, {"id": 4, "bloco": "Orientação", "materia": "Orientação e Estratégia", "topico": "Rota visual até a prova", "semana": "S1"}, {"id": 5, "bloco": "P1", "materia": "Língua Portuguesa", "topico": "Mapa Mestre de Língua Portuguesa", "semana": "S1"}, {"id": 6, "bloco": "P1", "materia": "Língua Portuguesa", "topico": "Compreensão e interpretação de textos", "semana": "S1"}, {"id": 7, "bloco": "P1", "materia": "Língua Portuguesa", "topico": "Tipos e gêneros textuais", "semana": "S1"}, {"id": 8, "bloco": "P1", "materia": "Língua Portuguesa", "topico": "Ortografia oficial", "semana": "S1"}, {"id": 9, "bloco": "P1", "materia": "Língua Portuguesa", "topico": "Coesão: referenciação, substituição e repetição", "semana": "S1"}, {"id": 10, "bloco": "P1", "materia": "Língua Portuguesa", "topico": "Conectores e sequenciação textual", "semana": "S1"}, {"id": 11, "bloco": "P1", "materia": "Língua Portuguesa", "topico": "Tempos e modos verbais", "semana": "S1"}, {"id": 12, "bloco": "P1", "materia": "Língua Portuguesa", "topico": "Classes de palavras", "semana": "S1"}, {"id": 13, "bloco": "P1", "materia": "Língua Portuguesa", "topico": "Coordenação", "semana": "S1"}, {"id": 14, "bloco": "P1", "materia": "Língua Portuguesa", "topico": "Subordinação", "semana": "S1"}, {"id": 15, "bloco": "P1", "materia": "Língua Portuguesa", "topico": "Pontuação", "semana": "S1"}, {"id": 16, "bloco": "P1", "materia": "Língua Portuguesa", "topico": "Concordância verbal e nominal", "semana": "S1"}, {"id": 17, "bloco": "P1", "materia": "Língua Portuguesa", "topico": "Regência verbal e nominal", "semana": "S1"}, {"id": 18, "bloco": "P1", "materia": "Língua Portuguesa", "topico": "Crase", "semana": "S1"}, {"id": 19, "bloco": "P1", "materia": "Língua Portuguesa", "topico": "Colocação dos pronomes átonos", "semana": "S1"}, {"id": 20, "bloco": "P1", "materia": "Língua Portuguesa", "topico": "Significação e substituição de palavras/trechos", "semana": "S1"}, {"id": 21, "bloco": "P1", "materia": "Língua Portuguesa", "topico": "Reorganização e reescrita de frases, períodos, gêneros e níveis de formalidade", "semana": "S1"}, {"id": 22, "bloco": "P1", "materia": "Lei Orgânica do DF", "topico": "Mapa Mestre da LODF", "semana": "S2"}, {"id": 23, "bloco": "P1", "materia": "Lei Orgânica do DF", "topico": "Fundamentos da organização dos poderes e do Distrito Federal", "semana": "S2"}, {"id": 24, "bloco": "P1", "materia": "Lei Orgânica do DF", "topico": "Organização do Distrito Federal", "semana": "S2"}, {"id": 25, "bloco": "P1", "materia": "Lei Orgânica do DF", "topico": "Organização dos Poderes", "semana": "S2"}, {"id": 26, "bloco": "P1", "materia": "Lei Orgânica do DF", "topico": "Tributação do Distrito Federal", "semana": "S2"}, {"id": 27, "bloco": "P1", "materia": "Lei Orgânica do DF", "topico": "Orçamento do Distrito Federal", "semana": "S2"}, {"id": 28, "bloco": "P1", "materia": "Lei Orgânica do DF", "topico": "Ordem econômica do Distrito Federal", "semana": "S2"}, {"id": 29, "bloco": "P1", "materia": "DF, RIDE e Política para Mulheres", "topico": "Mapa Mestre: DF, RIDE e Política para Mulheres", "semana": "S2"}, {"id": 30, "bloco": "P1", "materia": "DF, RIDE e Política para Mulheres", "topico": "Realidade étnica e social do Distrito Federal", "semana": "S2"}, {"id": 31, "bloco": "P1", "materia": "DF, RIDE e Política para Mulheres", "topico": "Realidade histórica e geográfica", "semana": "S2"}, {"id": 32, "bloco": "P1", "materia": "DF, RIDE e Política para Mulheres", "topico": "Realidade cultural, política e econômica", "semana": "S2"}, {"id": 33, "bloco": "P1", "materia": "DF, RIDE e Política para Mulheres", "topico": "RIDE — Lei Complementar Federal nº 94/1998", "semana": "S2"}, {"id": 34, "bloco": "P1", "materia": "DF, RIDE e Política para Mulheres", "topico": "RIDE — Decreto Federal nº 7.469/2011", "semana": "S2"}, {"id": 35, "bloco": "P1", "materia": "DF, RIDE e Política para Mulheres", "topico": "Plano Distrital de Política para Mulheres 2020–2023", "semana": "S2"}, {"id": 36, "bloco": "P1", "materia": "DF, RIDE e Política para Mulheres", "topico": "Lei Maria da Penha — Lei nº 11.340/2006", "semana": "S2"}, {"id": 37, "bloco": "P1", "materia": "Primeiros Socorros", "topico": "Cuidados iniciais, urgência, emergência e acionamento do socorro", "semana": "S2"}, {"id": 38, "bloco": "P1", "materia": "Primeiros Socorros", "topico": "Engasgo", "semana": "S2"}, {"id": 39, "bloco": "P1", "materia": "Primeiros Socorros", "topico": "Sangramento", "semana": "S2"}, {"id": 40, "bloco": "P1", "materia": "Primeiros Socorros", "topico": "Fratura", "semana": "S2"}, {"id": 41, "bloco": "P1", "materia": "Primeiros Socorros", "topico": "Queimadura", "semana": "S2"}, {"id": 42, "bloco": "P1", "materia": "Primeiros Socorros", "topico": "Desmaio e convulsão", "semana": "S2"}, {"id": 43, "bloco": "P1", "materia": "Primeiros Socorros", "topico": "Intoxicação", "semana": "S2"}, {"id": 44, "bloco": "P1", "materia": "Raciocínio Lógico e Matemática Financeira", "topico": "Mapa Mestre de RLM", "semana": "S3"}, {"id": 45, "bloco": "P1", "materia": "Raciocínio Lógico e Matemática Financeira", "topico": "Estruturas lógicas", "semana": "S3"}, {"id": 46, "bloco": "P1", "materia": "Raciocínio Lógico e Matemática Financeira", "topico": "Lógica de argumentação", "semana": "S3"}, {"id": 47, "bloco": "P1", "materia": "Raciocínio Lógico e Matemática Financeira", "topico": "Analogias e inferências", "semana": "S3"}, {"id": 48, "bloco": "P1", "materia": "Raciocínio Lógico e Matemática Financeira", "topico": "Deduções e conclusões", "semana": "S3"}, {"id": 49, "bloco": "P1", "materia": "Raciocínio Lógico e Matemática Financeira", "topico": "Proposições simples e compostas", "semana": "S3"}, {"id": 50, "bloco": "P1", "materia": "Raciocínio Lógico e Matemática Financeira", "topico": "Tabelas-verdade", "semana": "S3"}, {"id": 51, "bloco": "P1", "materia": "Raciocínio Lógico e Matemática Financeira", "topico": "Equivalências", "semana": "S3"}, {"id": 52, "bloco": "P1", "materia": "Raciocínio Lógico e Matemática Financeira", "topico": "Leis de De Morgan", "semana": "S3"}, {"id": 53, "bloco": "P1", "materia": "Raciocínio Lógico e Matemática Financeira", "topico": "Diagramas lógicos", "semana": "S3"}, {"id": 54, "bloco": "P1", "materia": "Raciocínio Lógico e Matemática Financeira", "topico": "Lógica de primeira ordem", "semana": "S3"}, {"id": 55, "bloco": "P1", "materia": "Raciocínio Lógico e Matemática Financeira", "topico": "Princípios de contagem", "semana": "S3"}, {"id": 56, "bloco": "P1", "materia": "Raciocínio Lógico e Matemática Financeira", "topico": "Probabilidade", "semana": "S3"}, {"id": 57, "bloco": "P1", "materia": "Raciocínio Lógico e Matemática Financeira", "topico": "Operações com conjuntos", "semana": "S3"}, {"id": 58, "bloco": "P1", "materia": "Raciocínio Lógico e Matemática Financeira", "topico": "Razão, proporção e porcentagem", "semana": "S3"}, {"id": 59, "bloco": "P1", "materia": "Raciocínio Lógico e Matemática Financeira", "topico": "Juros simples", "semana": "S3"}, {"id": 60, "bloco": "P1", "materia": "Raciocínio Lógico e Matemática Financeira", "topico": "Juros compostos", "semana": "S3"}, {"id": 61, "bloco": "P1", "materia": "Raciocínio Lógico e Matemática Financeira", "topico": "Taxas nominal, efetiva e equivalente", "semana": "S3"}, {"id": 62, "bloco": "P1", "materia": "Raciocínio Lógico e Matemática Financeira", "topico": "Sistemas de amortização", "semana": "S3"}, {"id": 63, "bloco": "P1", "materia": "Raciocínio Lógico e Matemática Financeira", "topico": "Fluxo de caixa", "semana": "S3"}, {"id": 64, "bloco": "P2", "materia": "Lei Orgânica e Regimento Interno do TCDF", "topico": "Mapa Mestre do TCDF", "semana": "S4"}, {"id": 65, "bloco": "P2", "materia": "Lei Orgânica e Regimento Interno do TCDF", "topico": "Natureza, competência e jurisdição", "semana": "S4"}, {"id": 66, "bloco": "P2", "materia": "Lei Orgânica e Regimento Interno do TCDF", "topico": "Composição do TCDF", "semana": "S4"}, {"id": 67, "bloco": "P2", "materia": "Lei Orgânica e Regimento Interno do TCDF", "topico": "Plenário e Câmaras", "semana": "S4"}, {"id": 68, "bloco": "P2", "materia": "Lei Orgânica e Regimento Interno do TCDF", "topico": "Presidente e Vice-Presidente", "semana": "S4"}, {"id": 69, "bloco": "P2", "materia": "Lei Orgânica e Regimento Interno do TCDF", "topico": "Conselheiros, Auditores e Ministério Público", "semana": "S4"}, {"id": 70, "bloco": "P2", "materia": "Lei Orgânica e Regimento Interno do TCDF", "topico": "Serviços auxiliares", "semana": "S4"}, {"id": 71, "bloco": "P2", "materia": "Lei Orgânica e Regimento Interno do TCDF", "topico": "Regimento Interno — Título I", "semana": "S4"}, {"id": 72, "bloco": "P2", "materia": "Lei Orgânica e Regimento Interno do TCDF", "topico": "Regimento Interno — Título II", "semana": "S4"}, {"id": 73, "bloco": "P2", "materia": "Lei Orgânica e Regimento Interno do TCDF", "topico": "Regimento Interno — Título III", "semana": "S4"}, {"id": 74, "bloco": "P2", "materia": "Lei Orgânica e Regimento Interno do TCDF", "topico": "Lei Orgânica × Regimento: visão integrada", "semana": "S4"}, {"id": 75, "bloco": "P2", "materia": "Direito Constitucional", "topico": "Mapa Mestre de Constitucional", "semana": "S4"}, {"id": 76, "bloco": "P2", "materia": "Direito Constitucional", "topico": "Princípios fundamentais", "semana": "S4"}, {"id": 77, "bloco": "P2", "materia": "Direito Constitucional", "topico": "Aplicabilidade das normas constitucionais: plena, contida, limitada e programáticas", "semana": "S4"}, {"id": 78, "bloco": "P2", "materia": "Direito Constitucional", "topico": "Emenda, reforma e revisão constitucional", "semana": "S4"}, {"id": 79, "bloco": "P2", "materia": "Direito Constitucional", "topico": "Direitos e deveres individuais e coletivos", "semana": "S4"}, {"id": 80, "bloco": "P2", "materia": "Direito Constitucional", "topico": "Direitos sociais", "semana": "S4"}, {"id": 81, "bloco": "P2", "materia": "Direito Constitucional", "topico": "Nacionalidade", "semana": "S4"}, {"id": 82, "bloco": "P2", "materia": "Direito Constitucional", "topico": "Direitos políticos e partidos políticos", "semana": "S4"}, {"id": 83, "bloco": "P2", "materia": "Direito Constitucional", "topico": "Organização político-administrativa", "semana": "S4"}, {"id": 84, "bloco": "P2", "materia": "Direito Constitucional", "topico": "União, estados, Distrito Federal e municípios", "semana": "S4"}, {"id": 85, "bloco": "P2", "materia": "Direito Constitucional", "topico": "Administração Pública: disposições gerais", "semana": "S5"}, {"id": 86, "bloco": "P2", "materia": "Direito Constitucional", "topico": "Servidores públicos", "semana": "S5"}, {"id": 87, "bloco": "P2", "materia": "Direito Constitucional", "topico": "Poder Executivo", "semana": "S5"}, {"id": 88, "bloco": "P2", "materia": "Direito Constitucional", "topico": "Presidente da República: atribuições e responsabilidades", "semana": "S5"}, {"id": 89, "bloco": "P2", "materia": "Direito Constitucional", "topico": "Poder Legislativo: estrutura, funcionamento e atribuições", "semana": "S5"}, {"id": 90, "bloco": "P2", "materia": "Direito Constitucional", "topico": "Processo legislativo", "semana": "S5"}, {"id": 91, "bloco": "P2", "materia": "Direito Constitucional", "topico": "Fiscalização contábil, financeira e orçamentária + CPI", "semana": "S5"}, {"id": 92, "bloco": "P2", "materia": "Direito Constitucional", "topico": "Poder Judiciário + Ministério Público + Advocacia Pública + Defensoria", "semana": "S5"}, {"id": 93, "bloco": "P2", "materia": "Direito Previdenciário", "topico": "Mapa Mestre de Previdenciário", "semana": "S5"}, {"id": 94, "bloco": "P2", "materia": "Direito Previdenciário", "topico": "Seguridade Social: origem e evolução", "semana": "S5"}, {"id": 95, "bloco": "P2", "materia": "Direito Previdenciário", "topico": "Seguridade: conceito, organização e princípios constitucionais", "semana": "S5"}, {"id": 96, "bloco": "P2", "materia": "Direito Previdenciário", "topico": "RGPS — Lei nº 8.212/1991 I", "semana": "S5"}, {"id": 97, "bloco": "P2", "materia": "Direito Previdenciário", "topico": "RGPS — Lei nº 8.212/1991 II", "semana": "S5"}, {"id": 98, "bloco": "P2", "materia": "Direito Previdenciário", "topico": "RGPS — Lei nº 8.213/1991 I", "semana": "S5"}, {"id": 99, "bloco": "P2", "materia": "Direito Previdenciário", "topico": "RGPS — Lei nº 8.213/1991 II", "semana": "S5"}, {"id": 100, "bloco": "P2", "materia": "Direito Previdenciário", "topico": "Regime Próprio de Previdência Social", "semana": "S5"}, {"id": 101, "bloco": "P2", "materia": "Direito Previdenciário", "topico": "RPPS/DF — LC Distrital nº 769/2008", "semana": "S5"}, {"id": 102, "bloco": "P2", "materia": "Direito Previdenciário", "topico": "Previdência complementar — LC nº 108/2001 e LC nº 109/2001", "semana": "S5"}, {"id": 103, "bloco": "P2", "materia": "Direito Previdenciário", "topico": "Previdência complementar do DF — LC Distrital nº 932/2017", "semana": "S5"}, {"id": 104, "bloco": "P2", "materia": "Direito Civil", "topico": "Mapa Mestre de Direito Civil", "semana": "S6"}, {"id": 105, "bloco": "P2", "materia": "Direito Civil", "topico": "LINDB", "semana": "S6"}, {"id": 106, "bloco": "P2", "materia": "Direito Civil", "topico": "Pessoas naturais e pessoas jurídicas", "semana": "S6"}, {"id": 107, "bloco": "P2", "materia": "Direito Civil", "topico": "Domicílio", "semana": "S6"}, {"id": 108, "bloco": "P2", "materia": "Direito Civil", "topico": "Bens", "semana": "S6"}, {"id": 109, "bloco": "P2", "materia": "Direito Civil", "topico": "Fatos jurídicos", "semana": "S6"}, {"id": 110, "bloco": "P2", "materia": "Direito Civil", "topico": "Negócio jurídico", "semana": "S6"}, {"id": 111, "bloco": "P2", "materia": "Direito Civil", "topico": "Atos lícitos e ilícitos + prescrição e decadência", "semana": "S6"}, {"id": 112, "bloco": "P2", "materia": "Direito Tributário", "topico": "Mapa Mestre de Tributário", "semana": "S6"}, {"id": 113, "bloco": "P2", "materia": "Direito Tributário", "topico": "Direito Tributário: conceito e fontes", "semana": "S6"}, {"id": 114, "bloco": "P2", "materia": "Direito Tributário", "topico": "Sistema Tributário Nacional", "semana": "S6"}, {"id": 115, "bloco": "P2", "materia": "Direito Tributário", "topico": "Princípios tributários", "semana": "S6"}, {"id": 116, "bloco": "P2", "materia": "Direito Tributário", "topico": "Limitações constitucionais ao poder de tributar", "semana": "S6"}, {"id": 117, "bloco": "P2", "materia": "Direito Tributário", "topico": "Repartição das receitas tributárias", "semana": "S6"}, {"id": 118, "bloco": "P2", "materia": "Direito Tributário", "topico": "Tributo: conceito e natureza jurídica", "semana": "S6"}, {"id": 119, "bloco": "P2", "materia": "Direito Tributário", "topico": "Imposto × taxa × contribuição de melhoria", "semana": "S6"}, {"id": 120, "bloco": "P2", "materia": "Direito Tributário", "topico": "Empréstimos compulsórios × contribuições", "semana": "S6"}, {"id": 121, "bloco": "P2", "materia": "Dados, Estatística, IA e Excel", "topico": "Mapa Mestre de Dados, Estatística, IA e Excel", "semana": "S6"}, {"id": 122, "bloco": "P2", "materia": "Dados, Estatística, IA e Excel", "topico": "Tipos de dados: estruturados/não estruturados e quantitativos/qualitativos", "semana": "S6"}, {"id": 123, "bloco": "P2", "materia": "Dados, Estatística, IA e Excel", "topico": "Produtos da análise: bases, relatórios, planilhas e dashboards", "semana": "S6"}, {"id": 124, "bloco": "P2", "materia": "Dados, Estatística, IA e Excel", "topico": "Distribuição de frequências", "semana": "S6"}, {"id": 125, "bloco": "P2", "materia": "Dados, Estatística, IA e Excel", "topico": "Média, mediana e moda", "semana": "S6"}, {"id": 126, "bloco": "P2", "materia": "Dados, Estatística, IA e Excel", "topico": "Variância e desvio-padrão", "semana": "S6"}, {"id": 127, "bloco": "P2", "materia": "Dados, Estatística, IA e Excel", "topico": "Anomalias e outliers", "semana": "S7"}, {"id": 128, "bloco": "P2", "materia": "Dados, Estatística, IA e Excel", "topico": "Séries históricas", "semana": "S7"}, {"id": 129, "bloco": "P2", "materia": "Dados, Estatística, IA e Excel", "topico": "Gráficos e boas práticas de visualização", "semana": "S7"}, {"id": 130, "bloco": "P2", "materia": "Dados, Estatística, IA e Excel", "topico": "Storytelling e narrativa com dados", "semana": "S7"}, {"id": 131, "bloco": "P2", "materia": "Dados, Estatística, IA e Excel", "topico": "Inteligência artificial generativa", "semana": "S7"}, {"id": 132, "bloco": "P2", "materia": "Dados, Estatística, IA e Excel", "topico": "Engenharia de prompt: contexto, persona, exemplos, saída e encadeamento", "semana": "S7"}, {"id": 133, "bloco": "P2", "materia": "Dados, Estatística, IA e Excel", "topico": "Vieses cognitivos e ética no uso de dados/IA", "semana": "S7"}, {"id": 134, "bloco": "P2", "materia": "Dados, Estatística, IA e Excel", "topico": "Excel: Power Query", "semana": "S7"}, {"id": 135, "bloco": "P2", "materia": "Dados, Estatística, IA e Excel", "topico": "Excel: fórmulas lógicas, financeiras e de busca", "semana": "S7"}, {"id": 136, "bloco": "P2", "materia": "Dados, Estatística, IA e Excel", "topico": "Excel: tabelas dinâmicas e grandes bases relacionais", "semana": "S7"}, {"id": 137, "bloco": "P3", "materia": "Direito Administrativo", "topico": "Mapa Mestre de Direito Administrativo", "semana": "S7"}, {"id": 138, "bloco": "P3", "materia": "Direito Administrativo", "topico": "Estado × Governo × Administração Pública", "semana": "S7"}, {"id": 139, "bloco": "P3", "materia": "Direito Administrativo", "topico": "Direito Administrativo: conceito, objeto e fontes", "semana": "S7"}, {"id": 140, "bloco": "P3", "materia": "Direito Administrativo", "topico": "Conceito e requisitos", "semana": "S7"}, {"id": 141, "bloco": "P3", "materia": "Direito Administrativo", "topico": "Atributos", "semana": "S7"}, {"id": 142, "bloco": "P3", "materia": "Direito Administrativo", "topico": "Classificação e espécies", "semana": "S7"}, {"id": 143, "bloco": "P3", "materia": "Direito Administrativo", "topico": "Cassação × anulação × revogação × convalidação", "semana": "S7"}, {"id": 144, "bloco": "P3", "materia": "Direito Administrativo", "topico": "Decadência administrativa", "semana": "S7"}, {"id": 145, "bloco": "P3", "materia": "Direito Administrativo", "topico": "Conceito, espécies e disposições constitucionais", "semana": "S7"}, {"id": 146, "bloco": "P3", "materia": "Direito Administrativo", "topico": "Cargo × emprego × função", "semana": "S7"}, {"id": 147, "bloco": "P3", "materia": "Direito Administrativo", "topico": "Provimento × vacância", "semana": "S7"}, {"id": 148, "bloco": "P3", "materia": "Direito Administrativo", "topico": "Efetividade × estabilidade × vitaliciedade", "semana": "S7"}, {"id": 149, "bloco": "P3", "materia": "Direito Administrativo", "topico": "Remuneração, direitos, deveres e responsabilidades", "semana": "S7"}, {"id": 150, "bloco": "P3", "materia": "Direito Administrativo", "topico": "Sindicância e PAD", "semana": "S8"}, {"id": 151, "bloco": "P3", "materia": "Direito Administrativo", "topico": "Poder hierárquico × disciplinar", "semana": "S8"}, {"id": 152, "bloco": "P3", "materia": "Direito Administrativo", "topico": "Poder regulamentar × poder de polícia", "semana": "S8"}, {"id": 153, "bloco": "P3", "materia": "Direito Administrativo", "topico": "Uso × abuso de poder", "semana": "S8"}, {"id": 154, "bloco": "P3", "materia": "Direito Administrativo", "topico": "Regime jurídico-administrativo e princípios", "semana": "S8"}, {"id": 155, "bloco": "P3", "materia": "Direito Administrativo", "topico": "Evolução e responsabilidade por ação estatal", "semana": "S8"}, {"id": 156, "bloco": "P3", "materia": "Direito Administrativo", "topico": "Omissão e requisitos", "semana": "S8"}, {"id": 157, "bloco": "P3", "materia": "Direito Administrativo", "topico": "Excludentes, atenuantes, reparação e direito de regresso", "semana": "S8"}, {"id": 158, "bloco": "P3", "materia": "Direito Administrativo", "topico": "Conceito, elementos e classificação", "semana": "S8"}, {"id": 159, "bloco": "P3", "materia": "Direito Administrativo", "topico": "Princípios, formas de prestação e meios de execução", "semana": "S8"}, {"id": 160, "bloco": "P3", "materia": "Direito Administrativo", "topico": "Autarquias × fundações", "semana": "S8"}, {"id": 161, "bloco": "P3", "materia": "Direito Administrativo", "topico": "Empresas públicas × sociedades de economia mista", "semana": "S8"}, {"id": 162, "bloco": "P3", "materia": "Direito Administrativo", "topico": "Paraestatais e terceiro setor", "semana": "S8"}, {"id": 163, "bloco": "P3", "materia": "Direito Administrativo", "topico": "Controle administrativo", "semana": "S8"}, {"id": 164, "bloco": "P3", "materia": "Direito Administrativo", "topico": "Controle judicial × legislativo", "semana": "S8"}, {"id": 165, "bloco": "P3", "materia": "Direito Administrativo", "topico": "Improbidade — Lei nº 8.429/1992", "semana": "S8"}, {"id": 166, "bloco": "P3", "materia": "Direito Administrativo", "topico": "Processo Administrativo — Lei nº 9.784/1999", "semana": "S8"}, {"id": 167, "bloco": "P3", "materia": "Direito Administrativo", "topico": "Lei de Acesso à Informação", "semana": "S8"}, {"id": 168, "bloco": "P3", "materia": "Direito Administrativo", "topico": "LGPD", "semana": "S8"}, {"id": 169, "bloco": "P3", "materia": "Administração Financeira e Orçamentária", "topico": "Mapa Mestre de AFO", "semana": "S9"}, {"id": 170, "bloco": "P3", "materia": "Administração Financeira e Orçamentária", "topico": "Orçamento público: conceito e técnicas", "semana": "S9"}, {"id": 171, "bloco": "P3", "materia": "Administração Financeira e Orçamentária", "topico": "Princípios orçamentários", "semana": "S9"}, {"id": 172, "bloco": "P3", "materia": "Administração Financeira e Orçamentária", "topico": "Ciclo e processo orçamentário", "semana": "S9"}, {"id": 173, "bloco": "P3", "materia": "Administração Financeira e Orçamentária", "topico": "Sistema de planejamento e orçamento", "semana": "S9"}, {"id": 174, "bloco": "P3", "materia": "Administração Financeira e Orçamentária", "topico": "PPA", "semana": "S9"}, {"id": 175, "bloco": "P3", "materia": "Administração Financeira e Orçamentária", "topico": "LDO", "semana": "S9"}, {"id": 176, "bloco": "P3", "materia": "Administração Financeira e Orçamentária", "topico": "LOA", "semana": "S9"}, {"id": 177, "bloco": "P3", "materia": "Administração Financeira e Orçamentária", "topico": "Classificações orçamentárias", "semana": "S9"}, {"id": 178, "bloco": "P3", "materia": "Administração Financeira e Orçamentária", "topico": "Estrutura programática", "semana": "S9"}, {"id": 179, "bloco": "P3", "materia": "Administração Financeira e Orçamentária", "topico": "Créditos ordinários e adicionais", "semana": "S9"}, {"id": 180, "bloco": "P3", "materia": "Administração Financeira e Orçamentária", "topico": "Programação e execução orçamentária e financeira", "semana": "S9"}, {"id": 181, "bloco": "P3", "materia": "Administração Financeira e Orçamentária", "topico": "Descentralização orçamentária e financeira", "semana": "S9"}, {"id": 182, "bloco": "P3", "materia": "Administração Financeira e Orçamentária", "topico": "Acompanhamento, sistemas e alterações orçamentárias", "semana": "S9"}, {"id": 183, "bloco": "P3", "materia": "Administração Financeira e Orçamentária", "topico": "Receita pública: conceito e classificações", "semana": "S9"}, {"id": 184, "bloco": "P3", "materia": "Administração Financeira e Orçamentária", "topico": "Estágios, fontes e dívida ativa", "semana": "S9"}, {"id": 185, "bloco": "P3", "materia": "Administração Financeira e Orçamentária", "topico": "Despesa pública: conceito e classificações", "semana": "S9"}, {"id": 186, "bloco": "P3", "materia": "Administração Financeira e Orçamentária", "topico": "Estágios da despesa", "semana": "S9"}, {"id": 187, "bloco": "P3", "materia": "Administração Financeira e Orçamentária", "topico": "Restos a pagar × despesas de exercícios anteriores", "semana": "S9"}, {"id": 188, "bloco": "P3", "materia": "Administração Financeira e Orçamentária", "topico": "Dívida flutuante × fundada + suprimento de fundos", "semana": "S9"}, {"id": 189, "bloco": "P3", "materia": "Administração Financeira e Orçamentária", "topico": "Lei de Responsabilidade Fiscal", "semana": "S9"}, {"id": 190, "bloco": "P3", "materia": "Administração Financeira e Orçamentária", "topico": "Lei nº 4.320/1964", "semana": "S9"}, {"id": 191, "bloco": "P3", "materia": "Administração Financeira e Orçamentária", "topico": "Transferências voluntárias", "semana": "S9"}, {"id": 192, "bloco": "P3", "materia": "Administração Financeira e Orçamentária", "topico": "Decreto Distrital nº 32.598/2010", "semana": "S9"}, {"id": 193, "bloco": "P3", "materia": "Administração Geral e Pública", "topico": "Mapa Mestre de Administração", "semana": "S10"}, {"id": 194, "bloco": "P3", "materia": "Administração Geral e Pública", "topico": "Perspectiva clássica: científica e burocrática", "semana": "S10"}, {"id": 195, "bloco": "P3", "materia": "Administração Geral e Pública", "topico": "Relações humanas, recursos humanos e ciências comportamentais", "semana": "S10"}, {"id": 196, "bloco": "P3", "materia": "Administração Geral e Pública", "topico": "Pensamento sistêmico × contingência", "semana": "S10"}, {"id": 197, "bloco": "P3", "materia": "Administração Geral e Pública", "topico": "Evolução da Administração do setor público brasileiro", "semana": "S10"}, {"id": 198, "bloco": "P3", "materia": "Administração Geral e Pública", "topico": "Patrimonialista × burocrática × gerencial", "semana": "S10"}, {"id": 199, "bloco": "P3", "materia": "Administração Geral e Pública", "topico": "Princípios da governança pública", "semana": "S10"}, {"id": 200, "bloco": "P3", "materia": "Administração Geral e Pública", "topico": "Liderança × estratégia × controle", "semana": "S10"}, {"id": 201, "bloco": "P3", "materia": "Administração Geral e Pública", "topico": "Planejamento × organização × direção × controle", "semana": "S10"}, {"id": 202, "bloco": "P3", "materia": "Administração Geral e Pública", "topico": "SWOT × GUT × 5W2H", "semana": "S10"}, {"id": 203, "bloco": "P3", "materia": "Administração Geral e Pública", "topico": "PDCA × mapas estratégicos × benchmarking × fatores críticos de sucesso", "semana": "S10"}, {"id": 204, "bloco": "P3", "materia": "Administração Geral e Pública", "topico": "Modelagem de processos", "semana": "S10"}, {"id": 205, "bloco": "P3", "materia": "Administração Geral e Pública", "topico": "BPMN", "semana": "S10"}, {"id": 206, "bloco": "P3", "materia": "Administração Geral e Pública", "topico": "EPC × IDF0 × cadeia de valor", "semana": "S10"}, {"id": 207, "bloco": "P3", "materia": "Administração Geral e Pública", "topico": "CHA × matriz de competências × APPO", "semana": "S10"}, {"id": 208, "bloco": "P3", "materia": "Administração Geral e Pública", "topico": "Liderança × motivação", "semana": "S10"}, {"id": 209, "bloco": "P3", "materia": "Administração Geral e Pública", "topico": "PMBOK × Prince × Scrum × métodos ágeis", "semana": "S10"}, {"id": 210, "bloco": "P3", "materia": "Administração Geral e Pública", "topico": "Cronogramas, escopo, sequenciamento, esforço, duração, pessoas e Kanban", "semana": "S10"}, {"id": 211, "bloco": "P3", "materia": "LC Distrital 840/2011", "topico": "Mapa Mestre LC 840", "semana": "S10"}, {"id": 212, "bloco": "P3", "materia": "LC Distrital 840/2011", "topico": "Disposições preliminares, cargos e funções de confiança", "semana": "S10"}, {"id": 213, "bloco": "P3", "materia": "LC Distrital 840/2011", "topico": "Concurso público, nomeação e requisitos de investidura", "semana": "S10"}, {"id": 214, "bloco": "P3", "materia": "LC Distrital 840/2011", "topico": "Posse, exercício e estágio probatório", "semana": "S10"}, {"id": 215, "bloco": "P3", "materia": "LC Distrital 840/2011", "topico": "Estabilidade e formas de provimento derivado", "semana": "S10"}, {"id": 216, "bloco": "P3", "materia": "LC Distrital 840/2011", "topico": "Remoção, redistribuição e substituição", "semana": "S10"}, {"id": 217, "bloco": "P3", "materia": "LC Distrital 840/2011", "topico": "Vacância do cargo público", "semana": "S11"}, {"id": 218, "bloco": "P3", "materia": "LC Distrital 840/2011", "topico": "Carreiras, promoção, regime e jornada de trabalho", "semana": "S11"}, {"id": 219, "bloco": "P3", "materia": "LC Distrital 840/2011", "topico": "Sistema remuneratório: subsídio, remuneração, teto e descontos", "semana": "S11"}, {"id": 220, "bloco": "P3", "materia": "LC Distrital 840/2011", "topico": "Vantagens: indenizações, gratificações e adicionais", "semana": "S11"}, {"id": 221, "bloco": "P3", "materia": "LC Distrital 840/2011", "topico": "Férias", "semana": "S11"}, {"id": 222, "bloco": "P3", "materia": "LC Distrital 840/2011", "topico": "Licenças", "semana": "S11"}, {"id": 223, "bloco": "P3", "materia": "LC Distrital 840/2011", "topico": "Abono de ponto e afastamentos", "semana": "S11"}, {"id": 224, "bloco": "P3", "materia": "LC Distrital 840/2011", "topico": "Tempo de serviço e direito de petição", "semana": "S11"}, {"id": 225, "bloco": "P3", "materia": "LC Distrital 840/2011", "topico": "Deveres e responsabilidades do servidor", "semana": "S11"}, {"id": 226, "bloco": "P3", "materia": "LC Distrital 840/2011", "topico": "Infrações disciplinares", "semana": "S11"}, {"id": 227, "bloco": "P3", "materia": "LC Distrital 840/2011", "topico": "Sanções disciplinares, prescrição e extinção da punibilidade", "semana": "S11"}, {"id": 228, "bloco": "P3", "materia": "LC Distrital 840/2011", "topico": "Sindicância, processo disciplinar e revisão", "semana": "S11"}, {"id": 229, "bloco": "P3", "materia": "LC Distrital 840/2011", "topico": "Seguridade social, saúde e disposições finais e transitórias", "semana": "S11"}, {"id": 230, "bloco": "P3", "materia": "LC Distrital 840/2011", "topico": "Revisão integrada da LC 840", "semana": "S11"}, {"id": 231, "bloco": "P3", "materia": "Gestão de Contratos", "topico": "Mapa Mestre de Gestão de Contratos", "semana": "S11"}, {"id": 232, "bloco": "P3", "materia": "Gestão de Contratos", "topico": "Lei nº 14.133/2021 — visão integrada", "semana": "S11"}, {"id": 233, "bloco": "P3", "materia": "Gestão de Contratos", "topico": "Decreto Distrital nº 44.330/2023", "semana": "S11"}, {"id": 234, "bloco": "P3", "materia": "Gestão de Contratos", "topico": "IN nº 5/2017", "semana": "S11"}, {"id": 235, "bloco": "P3", "materia": "Gestão de Contratos", "topico": "Elaboração de contratos", "semana": "S11"}, {"id": 236, "bloco": "P3", "materia": "Gestão de Contratos", "topico": "Cláusulas contratuais", "semana": "S11"}, {"id": 237, "bloco": "P3", "materia": "Gestão de Contratos", "topico": "Indicadores de nível de serviço", "semana": "S11"}, {"id": 238, "bloco": "P3", "materia": "Gestão de Contratos", "topico": "Papel do fiscal", "semana": "S11"}, {"id": 239, "bloco": "P3", "materia": "Gestão de Contratos", "topico": "Papel do preposto", "semana": "S11"}, {"id": 240, "bloco": "P3", "materia": "Gestão de Contratos", "topico": "Acompanhamento da execução", "semana": "S11"}, {"id": 241, "bloco": "P3", "materia": "Gestão de Contratos", "topico": "Registro de irregularidades", "semana": "S12"}, {"id": 242, "bloco": "P3", "materia": "Gestão de Contratos", "topico": "Notificação de irregularidades", "semana": "S12"}, {"id": 243, "bloco": "P3", "materia": "Gestão de Contratos", "topico": "Penalidades", "semana": "S12"}, {"id": 244, "bloco": "P3", "materia": "Gestão de Contratos", "topico": "Sanções administrativas", "semana": "S12"}, {"id": 245, "bloco": "P3", "materia": "Gestão de Contratos", "topico": "Equação econômico-financeira", "semana": "S12"}, {"id": 246, "bloco": "P3", "materia": "Gestão de Contratos", "topico": "Reajuste", "semana": "S12"}, {"id": 247, "bloco": "P3", "materia": "Gestão de Contratos", "topico": "Repactuação", "semana": "S12"}, {"id": 248, "bloco": "P3", "materia": "Gestão de Contratos", "topico": "Quadro comparativo integrado: contratação e fiscalização", "semana": "S12"}, {"id": 249, "bloco": "P4", "materia": "Discursiva", "topico": "Como funciona a prova discursiva do TCDF", "semana": "S12"}, {"id": 250, "bloco": "P4", "materia": "Discursiva", "topico": "Critérios de correção e nota mínima", "semana": "S12"}, {"id": 251, "bloco": "P4", "materia": "Discursiva", "topico": "Como estruturar a questão de até 20 linhas", "semana": "S12"}, {"id": 252, "bloco": "P4", "materia": "Discursiva", "topico": "Como interpretar o comando da discursiva", "semana": "S12"}, {"id": 253, "bloco": "P4", "materia": "Discursiva", "topico": "Como planejar a resposta antes de escrever", "semana": "S12"}, {"id": 254, "bloco": "P4", "materia": "Discursiva", "topico": "Introdução, desenvolvimento e conclusão sem desperdiçar linhas", "semana": "S12"}, {"id": 255, "bloco": "P4", "materia": "Discursiva", "topico": "Coerência, coesão e linguagem formal", "semana": "S12"}, {"id": 256, "bloco": "P4", "materia": "Discursiva", "topico": "Erros gramaticais e impacto na pontuação", "semana": "S12"}, {"id": 257, "bloco": "P4", "materia": "Discursiva", "topico": "Gestão do limite de linhas", "semana": "S12"}, {"id": 258, "bloco": "P4", "materia": "Discursiva", "topico": "Peça técnica “Informação”: estrutura", "semana": "S12"}, {"id": 259, "bloco": "P4", "materia": "Discursiva", "topico": "Como transformar conhecimento de P3 em peça técnica", "semana": "S12"}, {"id": 260, "bloco": "P4", "materia": "Discursiva", "topico": "Checklist visual de revisão antes de entregar", "semana": "S12"}];
+const ESTUDOS_MAPAS_KEY = "minha-vida.estudos.mapas.v1";
+function loadMapasStatus(){try{return JSON.parse(localStorage.getItem(ESTUDOS_MAPAS_KEY))||{};}catch{return {};}}
+function saveMapasStatus(x){localStorage.setItem(ESTUDOS_MAPAS_KEY,JSON.stringify(x));}
+function toggleMapa(id,field){const d=loadMapasStatus(),k=String(id);d[k]={...(d[k]||{}),[field]:!(d[k]?.[field])};saveMapasStatus(d);renderEstudos();}
+function estudoSugestao(minutos){const d=loadMapasStatus(),due=TCDF_MAPAS.filter(x=>!d[x.id]?.domino),revis=TCDF_MAPAS.filter(x=>d[x.id]?.primeira&&!d[x.id]?.domino&&!d[x.id]?.questoes);if(minutos<=15)return{title:'Janela curta',text:'Faça 5–10 questões C/E ou uma revisão D+1/D+3.',maps:revis.slice(0,1)};if(minutos<=30)return{title:'Janela de 30 min',text:'Estude 1 mapa e faça uma retomada ativa.',maps:due.slice(0,1)};if(minutos<=60)return{title:'Janela de 1h',text:'1–2 mapas + questões do tópico.',maps:due.slice(0,2)};if(minutos<=90)return{title:'Janela de 1h30',text:'Mapa + questões + registro de erros.',maps:due.slice(0,2)};return{title:'Janela longa',text:'2–4 mapas, questões e revisões previstas.',maps:due.slice(0,4)};}
+function renderEstudos(){const d=loadEstudos(),st=loadMapasStatus(),totalQuestions=d.questions.reduce((n,q)=>n+Number(q.count||0),0),first=TCDF_MAPAS.filter(x=>st[x.id]?.primeira).length,q=TCDF_MAPAS.filter(x=>st[x.id]?.questoes).length,dom=TCDF_MAPAS.filter(x=>st[x.id]?.domino).length,sug=estudoSugestao(30);
+app.innerHTML=`<section class="hero"><h2>📚 Estudos</h2><p>Menos decisões. Mais ritual. O TCDF é acompanhado mapa a mapa, sem transformar seu dia em uma agenda pesada.</p></section>
+<div class="study-summary"><div class="summary-card"><strong>${first}</strong><span>1ª volta</span></div><div class="summary-card"><strong>${q}</strong><span>com questões</span></div><div class="summary-card"><strong>${dom}<small> / 260</small></strong><span>Domino</span></div></div>
+<div class="card" style="margin:14px 0"><div class="eyebrow">SUGESTÃO INTELIGENTE · 30 MIN</div><h3>${sug.title}</h3><p>${sug.text}</p>${sug.maps.map(x=>`<button class="secondary" style="margin-top:6px;width:100%;text-align:left" onclick="document.getElementById('mapa-${x.id}').scrollIntoView({behavior:'smooth',block:'center'})">Mapa ${String(x.id).padStart(3,'0')} · ${escapeHtml(x.materia)}<br><small>${escapeHtml(x.topico)}</small></button>`).join('')}</div>
+<div class="study-section"><div class="section-heading"><div><div class="eyebrow">TCDF 2026</div><h3>260 mapas</h3></div></div><div class="card"><p><strong>Regra:</strong> 1ª volta → Questões → Domino. Domino só entra quando você acerta o teste C/E e consegue explicar o rodapé-macete sem olhar.</p><div style="display:flex;gap:8px;flex-wrap:wrap"><span class="pill">P1 59</span><span class="pill">P2 73</span><span class="pill">P3 112</span><span class="pill">P4 12</span></div></div>
+<div class="list">${TCDF_MAPAS.map(x=>{const a=st[x.id]||{};return `<article class="card study-card" id="mapa-${x.id}"><div style="min-width:0"><strong>Mapa ${String(x.id).padStart(3,'0')} · ${escapeHtml(x.topico)}</strong><span class="study-meta">${escapeHtml(x.materia)} · ${x.bloco} · ${x.semana}</span></div><div style="display:flex;gap:4px;align-items:center;flex-wrap:wrap"><button class="study-check ${a.primeira?'done':''}" title="1ª volta" onclick="toggleMapa(${x.id},'primeira')">${a.primeira?'✓':'1ª'}</button><button class="study-check ${a.questoes?'done':''}" title="Questões" onclick="toggleMapa(${x.id},'questoes')">${a.questoes?'✓':'Q'}</button><button class="study-check ${a.domino?'done':''}" title="Domino" onclick="toggleMapa(${x.id},'domino')">${a.domino?'✓':'D'}</button></div></article>`}).join('')}</div></div>
+<div class="study-section"><div class="section-heading"><div><div class="eyebrow">REGISTRO</div><h3>Estudos realizados</h3></div><button class="secondary" id="addSession">＋ Estudo</button></div><div class="list">${d.sessions.length?d.sessions.slice().reverse().slice(0,8).map(sessionHtml).join(''):`<div class="empty compact"><strong>Nenhum estudo registrado.</strong><span>Use o registro quando ajudar a enxergar seu progresso.</span></div>`}</div></div>
+<div class="study-section"><div class="section-heading"><div><div class="eyebrow">QUESTÕES</div><h3>Volume registrado</h3></div><button class="secondary" id="addQuestions">＋ Registrar</button></div><div class="list">${d.questions.length?d.questions.slice().reverse().slice(0,8).map(questionHtml).join(''):`<div class="empty compact"><strong>Nenhuma questão registrada.</strong><span>O volume dos mapas é acompanhado acima.</span></div>`}</div></div>`;
+document.querySelector('#addSession').onclick=()=>openStudyModal('session');document.querySelector('#addQuestions').onclick=()=>openStudyModal('questions');document.querySelectorAll('[data-study-edit]').forEach(x=>x.onclick=()=>openStudyModal(x.dataset.studyEdit,x.dataset.id));}
 
-  app.innerHTML = `
-    <section class="hero">
-      <h2>📚 Estudos</h2>
-      <p>Um lugar para organizar o CEBRASPE e outros conteúdos sem transformar estudo em uma agenda pesada.</p>
-    </section>
-
-    <div class="study-summary">
-      <div class="summary-card"><strong>${d.subjects.length}</strong><span>matérias</span></div>
-      <div class="summary-card"><strong>${totalSessions}</strong><span>estudos registrados</span></div>
-      <div class="summary-card"><strong>${totalQuestions}</strong><span>questões</span></div>
-    </div>
-
-    <div class="study-section">
-      <div class="section-heading"><div><div class="eyebrow">FOCO</div><h3>CEBRASPE</h3></div><button class="secondary" id="addSubject">＋ Matéria</button></div>
-      <div class="list">
-        ${d.subjects.length ? d.subjects.map(subjectHtml).join("") : `<div class="empty compact"><strong>Comece pelas matérias.</strong><span>Cadastre apenas o que realmente faz parte do seu estudo.</span></div>`}
-      </div>
-    </div>
-
-    <div class="study-section">
-      <div class="section-heading"><div><div class="eyebrow">REGISTRO</div><h3>Estudos realizados</h3></div><button class="secondary" id="addSession">＋ Estudo</button></div>
-      <div class="list">
-        ${d.sessions.length ? d.sessions.slice().reverse().slice(0,8).map(sessionHtml).join("") : `<div class="empty compact"><strong>Nenhum estudo registrado.</strong><span>O registro é opcional. Use quando ajudar a enxergar seu progresso.</span></div>`}
-      </div>
-    </div>
-
-    <div class="study-section">
-      <div class="section-heading"><div><div class="eyebrow">REVISÕES</div><h3>Revisões</h3></div><button class="secondary" id="addReview">＋ Revisão</button></div>
-      <div class="list">
-        ${d.reviews.length ? d.reviews.map(reviewHtml).join("") : `<div class="empty compact"><strong>Nenhuma revisão planejada.</strong><span>Não é preciso preencher o calendário antes de precisar dele.</span></div>`}
-      </div>
-    </div>
-
-    <div class="study-section">
-      <div class="section-heading"><div><div class="eyebrow">QUESTÕES</div><h3>Questões</h3></div><button class="secondary" id="addQuestions">＋ Registrar</button></div>
-      <div class="list">
-        ${d.questions.length ? d.questions.slice().reverse().slice(0,8).map(questionHtml).join("") : `<div class="empty compact"><strong>Nenhuma questão registrada.</strong><span>Registre volume quando isso for útil para você.</span></div>`}
-      </div>
-    </div>
-  `;
-
-  document.querySelector("#addSubject").onclick = () => openStudyModal("subject");
-  document.querySelector("#addSession").onclick = () => openStudyModal("session");
-  document.querySelector("#addReview").onclick = () => openStudyModal("review");
-  document.querySelector("#addQuestions").onclick = () => openStudyModal("questions");
-
-  document.querySelectorAll("[data-study-edit]").forEach(x => x.onclick = () => openStudyModal(x.dataset.studyEdit, x.dataset.id));
-  document.querySelectorAll("[data-review-toggle]").forEach(x => x.onclick = () => {
-    const data = loadEstudos(), i = data.reviews.findIndex(r=>r.id===x.dataset.reviewToggle);
-    if(i>=0){ data.reviews[i].done=!data.reviews[i].done; saveEstudos(data); renderEstudos(); }
-  });
-}
 function subjectHtml(x) {
   return `<article class="card study-card"><div><strong>${escapeHtml(x.name)}</strong><span class="study-meta">${escapeHtml(x.content || "Conteúdos ainda não detalhados.")}</span></div><button class="more" data-study-edit="subject" data-id="${x.id}">•••</button></article>`;
 }
@@ -1055,17 +742,11 @@ const CASA_BASE={
    {id:"lim3",name:"Passar pano nas áreas realmente usadas",freq:"semanal",when:"bloco doméstico",done:false},
    {id:"lim4",name:"Limpeza pesada",freq:"quinzenal",when:"bloco doméstico",done:false}
   ]},
-  {id:"roupas",title:"Roupas & Lavanderia",icon:"👕",tasks:[
-   {id:"roup1",name:"Separar roupas por tipo/cor",freq:"conforme volume",when:"antes da lavagem",done:false},
-   {id:"roup2",name:"Lavar roupas do dia a dia",freq:"conforme volume",when:"lavanderia",done:false},
-   {id:"roup3",name:"Cuidar das peças delicadas",freq:"conforme necessidade",when:"lavanderia",done:false},
-   {id:"roup4",name:"Tratar manchas antes da máquina",freq:"sempre que necessário",when:"antes da lavagem",done:false},
-   {id:"roup5",name:"Secar e retirar as peças no tempo certo",freq:"a cada lavagem",when:"lavanderia",done:false},
-   {id:"roup6",name:"Lavar toalhas",freq:"semanal",when:"lavanderia",done:false},
-   {id:"roup7",name:"Trocar/lavar roupa de cama",freq:"semanal",when:"lavanderia",done:false},
-   {id:"roup8",name:"Passar roupas",freq:"semanal",when:"bloco único",done:false},
-   {id:"roup9",name:"Dobrar e guardar",freq:"após secar/passar",when:"armários",done:false},
-   {id:"roup10",name:"Revisar conservação e organização do armário",freq:"quinzenal",when:"armários",done:false}
+  {id:"lavanderia",title:"Lavanderia",icon:"🧺",tasks:[
+   {id:"lav1",name:"Rodar uma lavanderia",freq:"conforme volume",when:"1–2x/semana",done:false},
+   {id:"lav2",name:"Lavar toalhas",freq:"semanal",when:"lavanderia",done:false},
+   {id:"lav3",name:"Trocar/lavar roupa de cama",freq:"semanal",when:"lavanderia",done:false},
+   {id:"lav4",name:"Bloco de passar",freq:"semanal",when:"bloco único",done:false}
   ]},
   {id:"externa",title:"Jardim • Piscina • Áreas externas",icon:"🌿",tasks:[]},
   {id:"animais",title:"Animais",icon:"🐾",tasks:[
@@ -1083,245 +764,21 @@ const CASA_BASE={
  maintenance:[],
  notes:""
 };
-
-const CASA_TIME_KEY="minha-vida.casa.time.v2";
-const CASA_TIME_BASE={
- ani1:"07:00 · 18:30", ani2:"07:15 · 18:30",
- hen1:"07:00", hen2:"07:10", hen3:"ao chegar", hen4:"18:30", hen5:"fim de semana",
- coz1:"após as refeições", coz2:"após as refeições", coz3:"após as refeições", coz4:"após o jantar", coz5:"após o jantar",
- lim1:"janela doméstica", lim2:"janela doméstica", lim3:"janela doméstica", lim4:"fim de semana",
- roup1:"janela de lavanderia", roup2:"janela de lavanderia", roup3:"janela de lavanderia", roup4:"antes da lavagem", roup5:"ao fim do ciclo", roup6:"janela de lavanderia", roup7:"janela de lavanderia", roup8:"bloco de roupas", roup9:"após secar/passar", roup10:"fim de semana"
-};
-function loadCasaTimes(){try{return {...CASA_TIME_BASE,...JSON.parse(localStorage.getItem(CASA_TIME_KEY)||"{}")}}catch{return {...CASA_TIME_BASE}}}
-function saveCasaTimes(x){localStorage.setItem(CASA_TIME_KEY,JSON.stringify(x))}
-function casaTime(id){return loadCasaTimes()[id]||"horário a definir";}
-
-const CASA_HOW={
- coz1:{title:"Passar pano no piso",time:"10–15 min",products:["Tudo Limpinho Álcool Perfumado — Glamour de Shopping","Tudo Limpinho Tudax Limpeza Pesada"],materials:["Vassoura/aspirador","Mop ou pano de microfibra","Balde"],steps:["Retire objetos e resíduos soltos.","Varra ou aspire primeiro.","Para manutenção, use Tudo Limpinho Álcool Perfumado — Glamour de Shopping em superfície compatível.","Para sujeira pesada em piso cerâmico compatível, use Tudo Limpinho Tudax conforme o rótulo.","Passe o mop/pano sem encharcar e deixe secar."],tip:"No porcelanato, use Tudo Limpinho Porcelanex; não use esta opção genérica de produto no porcelanato."},
- coz2:{title:"Organizar pia",time:"5–10 min",products:["Qualitá Home Lava-Louças Líquido Coco","Cif Espuma Milagrosa — Derrete Gordura","Tudo Limpinho Flotalim Extra Forte"],materials:["Esponja","Pano de microfibra","Escorredor"],steps:["Retire os resíduos e a louça.","Use Qualitá Home Lava-Louças Líquido Coco para a manutenção.","Para gordura, use Cif Espuma Milagrosa — Derrete Gordura enquanto houver estoque; depois, Tudo Limpinho Flotalim Extra Forte.","Enxágue/remova o produto quando indicado e seque."],tip:"Cif Derrete Gordura faz a transição para Flotalim quando acabar; nunca misture os produtos."},
- coz3:{title:"Limpar bancada",time:"5–10 min",products:["Tudo Limpinho Álcool Perfumado — Glamour de Shopping","Tudo Limpinho Flotalim Extra Forte"],materials:["Pano de microfibra","Pano multiuso"],steps:["Retire objetos e migalhas.","Para manutenção, use Tudo Limpinho Álcool Perfumado — Glamour de Shopping em superfície compatível.","Para gordura, use Tudo Limpinho Flotalim Extra Forte conforme o rótulo.","Finalize com pano limpo e deixe a superfície seca."],tip:"Álcool Perfumado é para manutenção; Flotalim é para gordura."},
- lim1:{title:"Varrer / aspirar a casa",time:"15–25 min",products:[],materials:["Aspirador ou vassoura","Pá/coletor","Pano de microfibra"],steps:["Recolha objetos que estejam no chão.","Varra ou aspire todos os ambientes, incluindo cantos e sob móveis quando possível.","Só depois faça a limpeza úmida, escolhendo o produto conforme a superfície."],tip:"O manual orienta aspirar/varrer antes do pano úmido."},
- lim2:{title:"Limpar a lavanderia",time:"10–15 min",products:["Qualitá Home Lava-Louças Líquido Coco","Tudo Limpinho Tudax Limpeza Pesada"],materials:["Vassoura/aspirador","Mop ou pano","Balde"],steps:["Retire cestos e objetos do piso.","Varra ou aspire primeiro.","Para sujeira leve no tanque, use Qualitá Home Lava-Louças Líquido Coco.","Para sujeira pesada compatível, use Tudo Limpinho Tudax conforme o rótulo.","Deixe secar e reorganize os itens."],tip:"Na máquina, o manual orienta deixar a porta aberta após o uso e limpar borracha/exterior com pano."},
- lim3:{title:"Passar pano nas áreas usadas",time:"10–20 min",products:["Tudo Limpinho Porcelanex","Tudo Limpinho Álcool Perfumado — Glamour de Shopping","Coala Chá Branco Limpador Perfumado","Tudo Limpinho Tudax Limpeza Pesada"],materials:["Mop/pano de microfibra","Balde"],steps:["Priorize somente os ambientes que realmente foram usados.","Retire sujeira solta com vassoura ou aspirador.","No porcelanato, use Tudo Limpinho Porcelanex.","Em cerâmica/superfície lavável compatível, use Tudo Limpinho Álcool Perfumado — Glamour de Shopping ou Coala Chá Branco conforme indicação.","Para sujeira pesada em piso cerâmico compatível, use Tudo Limpinho Tudax conforme o rótulo.","Use um único produto por vez e deixe o piso secar."],tip:"O produto depende da superfície; porcelanato deve seguir a orientação específica do manual."},
- lim4:{title:"Limpeza pesada",time:"60–90 min",products:["Tudo Limpinho Tudax Limpeza Pesada","Tudo Limpinho Ultra Clean","Tudo Limpinho Polimax","Tudo Limpinho Porcelanex","Tudo Limpinho Thunder — Limpeza Pesada Porcelanato","Tudo Limpinho Limpador Clorado","Tudo Limpinho Rejuntec","Tudo Limpinho Álcool Perfumado — Glamour de Shopping"],materials:["Luvas","Panos de microfibra","Esponja","Escova macia","Aspirador","Vassoura e pá","Balde","Toalhas limpas","Rodo"],steps:["Abra as janelas e reúna os materiais.","Trabalhe por ambientes e superfícies, usando um produto por vez.","Aspire/varra antes da limpeza úmida.","Use Tudax em limpeza pesada geral de superfícies laváveis compatíveis.","Use Ultra Clean/Polimax em sujeira aderida quando a superfície aceitar.","No porcelanato, use Porcelanex; para sujeira pesada, Thunder conforme o rótulo.","Use Limpador Clorado apenas onde for compatível e nunca junto com álcool, ácidos, tira-limo ou outros limpadores.","Use Rejuntec nos rejuntes, por áreas.","Finalize conforme a superfície e deixe secar."],tip:"O manual não define um único produto para toda a limpeza pesada: o produto muda conforme ambiente e superfície. Nunca misture produtos."},
- roup1:{title:"Separar roupas por tipo e cor",time:"5–10 min",products:[],materials:["Cesto(s) de roupa","Saquinhos para peças delicadas, se necessário"],steps:["Separe brancas, coloridas/escuras e peças que exigem cuidado especial.","Confira etiquetas e instruções de lavagem.","Separe peças delicadas e coloque-as em saco protetor quando indicado.","Verifique bolsos e fechos antes de colocar na máquina.","Trate manchas antes da lavagem."],tip:"Separar corretamente reduz transferência de cor e desgaste desnecessário."},
- roup2:{title:"Lavar roupas do dia a dia",time:"Conforme o ciclo",products:["Sabão para roupas","Amaciante, se desejado"],materials:["Máquina de lavar","Cesto de roupas"],steps:["Separe as peças por cor e tecido.","Não sobrecarregue a máquina.","Use a quantidade de produto indicada pelo fabricante da máquina/produto.","Escolha o ciclo compatível com as etiquetas.","Retire as roupas assim que o ciclo terminar para evitar odores e vincos."],tip:"Menos produto não significa melhor sempre; siga a dosagem indicada para sua máquina e para a carga."},
- roup3:{title:"Cuidar das peças delicadas",time:"10 min + ciclo",products:["Sabão adequado para roupas delicadas"],materials:["Saco protetor para delicadas","Máquina ou recipiente para lavagem manual"],steps:["Leia a etiqueta antes de lavar.","Separe seda, renda, tecidos finos e peças com aplicações.","Use ciclo delicado ou lavagem manual quando indicado.","Evite excesso de atrito e centrifugação agressiva.","Seque conforme a etiqueta e evite calor excessivo."],tip:"No manual de passadoria, peças delicadas entram sempre na menor temperatura."},
- roup4:{title:"Tratar manchas antes da máquina",time:"5–15 min",products:["Produto tira-manchas compatível com o tecido"],materials:["Pano limpo ou escova macia","Luvas, se o produto exigir"],steps:["Identifique o tipo de mancha e confira a etiqueta da peça.","Aplique o produto apropriado em pequena quantidade.","Trabalhe delicadamente, sem esfregar agressivamente tecidos sensíveis.","Aguarde o tempo indicado pelo fabricante.","Lave a peça normalmente e confira a mancha antes de secar ou passar."],tip:"Não fixe a mancha com calor: confirme que ela saiu antes da secagem quente ou da passadoria."},
- roup5:{title:"Secar e retirar as peças",time:"5–10 min",products:[],materials:["Varal ou secadora, conforme a etiqueta","Cabides quando apropriado"],steps:["Retire as peças da máquina assim que o ciclo terminar.","Sacuda e acomode as peças para reduzir vincos.","Use varal ou secadora somente de acordo com a etiqueta.","Evite deixar roupas úmidas acumuladas no cesto.","Quando estiverem secas, encaminhe para dobrar ou passar."],tip:"Retirar logo após a lavagem ajuda a evitar odores e vincos profundos."},
- roup6:{title:"Lavar toalhas",time:"Ciclo completo",products:["Sabão em pó ou líquido","Pouco amaciante","Vinagre de álcool, conforme o manual da residência"],materials:["Máquina de lavar","Cesto"],steps:["Reúna as toalhas e trate manchas antes de colocar na máquina.","Não encha demais a máquina; deixe espaço para circulação de água.","Use pouco sabão, conforme o manual da residência.","No dispenser de amaciante, use pouco amaciante e, conforme a rotina registrada no manual, complete com um pouco de vinagre de álcool.","Use programa compatível e retire as toalhas imediatamente ao terminar.","Coloque-as para secar sem deixá-las amontoadas."],tip:"O manual da residência orienta pouco sabão e retirada imediata das toalhas após o ciclo."},
- roup7:{title:"Trocar / lavar roupa de cama",time:"Ciclo completo",products:["Sabão para roupas","Amaciante, se desejado"],materials:["Máquina de lavar","Cesto"],steps:["Retire o jogo completo e confira manchas de suor ou oleosidade.","Trate manchas antes da lavagem.","Coloque os lençóis sem compactar demais a máquina.","Use o programa indicado para lençóis/cama ou o compatível com a etiqueta.","Retire imediatamente ao término para facilitar a secagem e a passadoria.","Dobre ou passe e guarde o jogo completo junto."],tip:"O manual recomenda espaço na máquina para evitar amassados excessivos."},
- roup8:{title:"Passar roupas",time:"20–45 min",products:["Água","Amaciante, para a misturinha do borrifador usada no manual da residência"],materials:["Ferro","Tábua de passar","Borrifador","Cabides"],steps:["Separe as roupas por tecido e temperatura.","Comece pelas peças que exigem temperatura baixa.","Passe delicadas, coloridas e peças com elástico/aplicações antes das de temperatura média.","Borrife levemente a misturinha usada na rotina da casa.","Passe camisetas e peças de algodão em temperatura adequada.","Dobre ou coloque em cabide imediatamente."],tip:"O manual orienta começar por baixa temperatura e nunca deixar o ferro parado sobre a peça."},
- roup9:{title:"Dobrar e guardar",time:"10–20 min",products:[],materials:["Superfície limpa e seca","Cabides, divisórias ou organizadores"],steps:["Separe as peças por categoria.","Dobre ou pendure de acordo com o tecido e o formato.","Guarde somente roupas completamente secas.","Mantenha peças delicadas sem compressão excessiva.","Agrupe conjuntos e jogos de cama para facilitar o uso."],tip:"Guardar logo após secar/passar evita uma segunda rodada de organização."},
- roup10:{title:"Conservar e organizar o armário",time:"15–20 min",products:[],materials:["Pano de microfibra","Cabides","Organizadores, se necessários"],steps:["Retire apenas o necessário para trabalhar por uma categoria.","Confira se as peças estão limpas e completamente secas.","Limpe prateleiras e superfícies com pano adequado.","Separe peças sem uso, para conserto ou para doação.","Devolva as roupas por categoria, deixando as mais usadas acessíveis."],tip:"A organização deve facilitar a rotina, não criar um projeto permanente."}
-};
-
-
-const CASA_MANUAL_PROCEDURES=[
- {id:"manual-coz-louca",area:"Cozinha",title:"Louça",time:"5–10 min",products:["Qualitá Home Lava-Louças Líquido Coco"],materials:["Esponja","Pano"],steps:["Retire os resíduos.","Lave com Qualitá Home Lava-Louças Líquido Coco e esponja.","Enxágue.","Deixe secar."],tip:"Usar o detergente próprio para louça até acabar; não misturar produtos."},
- {id:"manual-coz-pia",area:"Cozinha",title:"Pia",time:"5 min",products:["Qualitá Home Lava-Louças Líquido Coco","Cif Espuma Milagrosa — Derrete Gordura","Tudo Limpinho Flotalim Extra Forte"],materials:["Esponja","Pano de microfibra"],steps:["Retire os resíduos.","Para manutenção, use Qualitá Home Lava-Louças Líquido Coco.","Para gordura, use Cif Espuma Milagrosa — Derrete Gordura enquanto houver estoque; depois, Tudo Limpinho Flotalim Extra Forte, conforme o rótulo.","Remova o produto, enxágue quando indicado e seque."],tip:"Cif Derrete Gordura faz a transição para Flotalim quando acabar."},
- {id:"manual-coz-fogao",area:"Cozinha",title:"Fogão / cooktop",time:"5–10 min",products:["Cif Espuma Milagrosa — Derrete Gordura","Tudo Limpinho Flotalim Extra Forte"],materials:["Pano","Esponja"],steps:["Remova os resíduos.","Use Cif Espuma Milagrosa — Derrete Gordura enquanto houver estoque; depois, Tudo Limpinho Flotalim Extra Forte, conforme o rótulo e a compatibilidade da superfície.","Remova o produto com pano úmido.","Seque a superfície."],tip:"Não misture produtos; use um por vez."},
- {id:"manual-coz-bancadas",area:"Cozinha",title:"Bancadas e superfícies",time:"5–10 min",products:["Tudo Limpinho Álcool Perfumado — Glamour de Shopping","Tudo Limpinho Flotalim Extra Forte"],materials:["Pano de microfibra","Pano multiuso"],steps:["Retire objetos e migalhas.","Para manutenção, passe pano com Tudo Limpinho Álcool Perfumado — Glamour de Shopping em superfície compatível.","Para gordura, use Tudo Limpinho Flotalim Extra Forte conforme o rótulo.","Remova o produto quando indicado e finalize com pano limpo."],tip:"O álcool perfumado é para manutenção; Flotalim é para gordura."},
- {id:"manual-coz-piso",area:"Cozinha",title:"Piso cerâmico",time:"10–15 min",products:["Tudo Limpinho Tudax Limpeza Pesada","Tudo Limpinho Álcool Perfumado — Glamour de Shopping","Coala Chá Branco Limpador Perfumado"],materials:["Vassoura ou aspirador","Mop","Balde"],steps:["Varra ou aspire primeiro.","Para manutenção, use produto compatível com a cerâmica, como Tudo Limpinho Álcool Perfumado — Glamour de Shopping ou Coala Chá Branco conforme a diluição indicada.","Para sujeira pesada, use Tudo Limpinho Tudax Limpeza Pesada conforme o rótulo.","Passe o mop sem encharcar e deixe secar."],tip:"Escolha somente produto compatível com a superfície."},
- {id:"manual-coz-aderida",area:"Cozinha",title:"Sujeira aderida",time:"5–10 min",products:["Tudo Limpinho Ultra Clean","Tudo Limpinho Polimax","Aromasil Saponáceo Cremoso Cloro 3 em 1","Bombril Sapólio Radium"],materials:["Esponja","Pano"],steps:["Identifique a superfície e teste em pequena área.","Use um único produto por vez: Tudo Limpinho Ultra Clean ou Tudo Limpinho Polimax; enquanto houver estoque, podem ser usados Aromasil Saponáceo Cremoso Cloro 3 em 1 ou Bombril Sapólio Radium quando compatíveis.","Aja e remova os resíduos conforme o rótulo.","Enxágue/limpe a superfície quando indicado."],tip:"Aromasil e Sapólio fazem transição para Ultra Clean ou Polimax, conforme a superfície."},
- {id:"manual-banheiro-vaso",area:"Banheiros",title:"Vaso sanitário",time:"5–10 min",products:["Tudo Limpinho Limpador Clorado","Ypê Tira Limo — Cloro Ativo em Gel"],materials:["Escova de vaso sanitário","Pano"],steps:["Aplique o produto indicado no interior conforme o rótulo.","Escove o interior e acione a descarga.","Limpe a parte externa com pano e produto compatível.","Use Ypê Tira Limo enquanto houver estoque somente conforme o rótulo; a transição para Tudo Limpinho Limpador Clorado só ocorre se a função for compatível."],tip:"Nunca misture produtos clorados com ácidos, tira-limo, álcool, vinagre ou outros limpadores."},
- {id:"manual-banheiro-box",area:"Banheiros",title:"Box",time:"10 min",products:["Tudo Limpinho Ultra Box","UAU Blindex Box","Cif Espuma Milagrosa — Extermina Limo"],materials:["Rodo","Pano","Esponja"],steps:["Use Tudo Limpinho Ultra Box como linha principal, conforme o rótulo.","Enquanto houver estoque, UAU Blindex Box ou Cif Espuma Milagrosa — Extermina Limo podem ser usados conforme seus rótulos.","Remova os resíduos.","Finalize com o rodo."],tip:"UAU Blindex Box e Cif Extermina Limo fazem transição para Ultra Box quando acabarem, conforme compatibilidade."},
- {id:"manual-banheiro-rejunte",area:"Banheiros",title:"Rejunte",time:"10–20 min",products:["Tudo Limpinho Rejuntec"],materials:["Escova","Pano","Luvas"],steps:["Trabalhe por pequenas áreas.","Aplique Tudo Limpinho Rejuntec conforme o rótulo.","Esfregue o rejunte.","Remova os resíduos conforme indicado."],tip:"Não misture com produtos clorados ou ácidos."},
- {id:"manual-banheiro-cuba",area:"Banheiros",title:"Cuba / bancada",time:"5–10 min",products:["Tudo Limpinho Ultra Clean","Tudo Limpinho Polimax"],materials:["Esponja","Pano"],steps:["Retire objetos.","Use somente produto compatível com a superfície.","Tudo Limpinho Ultra Clean ou Polimax pode ser usado quando a superfície aceitar.","Remova/enxágue quando indicado e seque."],tip:"A superfície determina qual produto é seguro."},
- {id:"manual-banheiro-piso",area:"Banheiros",title:"Piso",time:"10 min",products:["Tudo Limpinho Tudax Limpeza Pesada","Tudo Limpinho Limpador Clorado"],materials:["Vassoura","Mop","Escova"],steps:["Varra ou aspire.","Use produto compatível com o piso.","Para sujeira pesada, use Tudo Limpinho Tudax Limpeza Pesada conforme o rótulo.","Use Tudo Limpinho Limpador Clorado somente quando indicado e compatível.","Remova o excesso e deixe secar."],tip:"Use um produto por vez e siga o rótulo."},
- {id:"manual-porc-manutencao",area:"Porcelanatos",title:"Manutenção",time:"10–15 min",products:["Tudo Limpinho Porcelanex"],materials:["Mop bem torcido","Balde","Pano de microfibra"],steps:["Remova poeira e resíduos.","Use Tudo Limpinho Porcelanex conforme o rótulo.","Passe o mop bem torcido.","Deixe secar."],tip:"Evite excesso de água e produto."},
- {id:"manual-porc-pesada",area:"Porcelanatos",title:"Sujeira pesada",time:"10–20 min",products:["Tudo Limpinho Thunder — Limpeza Pesada Porcelanato","Tudo Limpinho Porcelanex"],materials:["Mop","Pano de microfibra","Balde","Luvas"],steps:["Remova a sujeira solta.","Use Tudo Limpinho Thunder — Limpeza Pesada Porcelanato ou Tudo Limpinho Porcelanex conforme o rótulo.","Trabalhe por áreas.","Remova resíduos e finalize com mop bem torcido."],tip:"Produtos fortes devem ser testados em pequena área e usados somente em superfície compatível."},
- {id:"manual-porc-acabamento",area:"Porcelanatos",title:"Acabamento",time:"5–10 min",products:["Tudo Limpinho Álcool Perfumado — Glamour de Shopping","Coala Chá Branco Limpador Perfumado"],materials:["Pano de microfibra","Mop"],steps:["Com o piso limpo e seco, use Tudo Limpinho Álcool Perfumado — Glamour de Shopping ou Coala Chá Branco diluído, quando compatível.","Aplique sem excesso.","Finalize com pano/mop adequado."],tip:"O acabamento só entra depois da limpeza e secagem, e apenas em superfície compatível."},
- {id:"manual-sala-poeira",area:"Salas / quartos / corredores",title:"Poeira",time:"5–10 min",products:["Tudo Limpinho Álcool Perfumado — Glamour de Shopping","Coala Chá Branco Limpador Perfumado"],materials:["Espanador","Pano de microfibra","Pano multiuso"],steps:["Retire objetos.","Trabalhe de cima para baixo com espanador ou pano de microfibra.","Finalize com pano multiuso.","Para acabamento, use Tudo Limpinho Álcool Perfumado — Glamour de Shopping ou Coala Chá Branco somente em superfície compatível."],tip:"Os panos multiuso úmidos têm receita própria no manual e não devem ser cadastrados como desinfetante."},
- {id:"manual-sala-sofa",area:"Salas / quartos / corredores",title:"Sofá",time:"10 min",products:["HIKO Fabric Refresher"],materials:["Aspirador"],steps:["Aspire assentos, encostos, frestas e laterais.","Não encharque o tecido.","Se desejar revitalizar o tecido, use HIKO Fabric Refresher somente em tecido compatível e conforme o rótulo."],tip:"HIKO Fabric Refresher é para tecidos; não usar como limpador de superfícies."},
- {id:"manual-sala-madeira",area:"Salas / quartos / corredores",title:"Móveis de madeira",time:"5–10 min",products:["GloDePeroba — Jasmine"],materials:["Pano de microfibra"],steps:["Retire o pó.","Aplique GloDePeroba — Jasmine conforme o rótulo e o acabamento desejado.","Finalize com pano adequado."],tip:"GloDePeroba é específico para madeira e não deve ser substituído por limpador geral."},
- {id:"manual-sala-pisos",area:"Salas / quartos / corredores",title:"Pisos",time:"10–15 min",products:["Tudo Limpinho Porcelanex","Tudo Limpinho Álcool Perfumado — Glamour de Shopping","Coala Chá Branco Limpador Perfumado"],materials:["Aspirador ou vassoura","Mop","Balde"],steps:["Aspire ou varra.","Em porcelanato, use Tudo Limpinho Porcelanex.","Na cerâmica, use produto compatível; para manutenção pode usar Tudo Limpinho Álcool Perfumado — Glamour de Shopping ou Coala Chá Branco conforme indicação.","Passe o mop sem encharcar e deixe secar."],tip:"O produto deve seguir a superfície: porcelanato e cerâmica não são tratados da mesma forma."},
- {id:"manual-lav-maquina",area:"Lavanderia",title:"Máquina",time:"5 min",products:[],materials:["Pano de microfibra"],steps:["Após o uso, retire as roupas.","Deixe a porta aberta.","Limpe a borracha e o exterior com pano.","Não use produto químico em componentes elétricos."],tip:"A ventilação após o uso faz parte da conservação da máquina."},
- {id:"manual-lav-tanque",area:"Lavanderia",title:"Tanque",time:"5–10 min",products:["Qualitá Home Lava-Louças Líquido Coco","Tudo Limpinho Tudax Limpeza Pesada"],materials:["Esponja","Pano"],steps:["Retire resíduos.","Para sujeira leve, use Qualitá Home Lava-Louças Líquido Coco.","Para sujeira pesada compatível, use Tudo Limpinho Tudax Limpeza Pesada conforme o rótulo.","Enxágue e seque."],tip:"Qualitá Coco permanece para limpeza leve; Tudax entra na sujeira pesada."},
- {id:"manual-lav-roupas",area:"Lavanderia",title:"Roupas / tecidos",time:"conforme ciclo",products:["Tudo Limpinho Finisher Fresh Bouquet","HIKO Fabric Refresher"],materials:["Máquina","Recipiente de lavagem"],steps:["Lave as roupas conforme o tecido e o ciclo adequado.","Use Tudo Limpinho Finisher Fresh Bouquet conforme o rótulo como finalizador/facilitador para roupas e tecidos.","Para revitalização específica de tecido, use HIKO Fabric Refresher conforme o rótulo.","Não confunda HIKO com limpador de superfícies."],tip:"Produtos para tecidos devem ser usados conforme a indicação do fabricante."},
- {id:"manual-lav-panos",area:"Lavanderia",title:"Panos",time:"conforme ciclo",products:["Tudo Limpinho Finisher Fresh Bouquet"],materials:["Máquina","Recipientes para panos"],steps:["Lave os panos separados quando necessário.","Após secos, devolva-os aos recipientes correspondentes.","Use produtos para roupas/tecidos somente conforme o rótulo."],tip:"O manual também mantém receitas específicas para panos multiuso e panos reutilizáveis da secadora."},
- {id:"manual-varanda-residuos",area:"Varanda / área dos animais",title:"Resíduos dos animais",time:"3–5 min",products:["Tudo Limpinho Petklin"],materials:["Pá","Saco","Luvas"],steps:["Recolha os resíduos sólidos antes de lavar.","Aplique Tudo Limpinho Petklin conforme o rótulo.","Remova/enxágue quando indicado.","Mantenha os animais afastados enquanto a superfície estiver molhada ou com produto."],tip:"Primeiro remova os sólidos; depois faça a limpeza."},
- {id:"manual-varanda-pedra",area:"Varanda / área dos animais",title:"Pedra portuguesa",time:"10–20 min",products:["Tudo Limpinho Tudax Limpeza Pesada","Tudo Limpinho Petklin"],materials:["Vassoura","Escova","Mangueira ou WAP"],steps:["Varra e remova resíduos.","Escove e lave.","Para sujeira pesada, use produto compatível, como Tudo Limpinho Tudax Limpeza Pesada quando indicado pelo rótulo.","Na área dos animais, use Tudo Limpinho Petklin conforme o rótulo.","Teste antes em pequena área."],tip:"A WAP deve ser usada respeitando pressão, distância e compatibilidade da superfície."},
- {id:"manual-varanda-finalizacao",area:"Varanda / área dos animais",title:"Finalização",time:"5–10 min",products:["Tudo Limpinho Álcool Perfumado — Glamour de Shopping","Coala Chá Branco Limpador Perfumado"],materials:["Pano de microfibra"],steps:["Deixe a superfície limpa e seca.","Use Tudo Limpinho Álcool Perfumado — Glamour de Shopping ou Coala Chá Branco somente em superfície compatível.","Mantenha os animais afastados durante a aplicação e até a superfície estar segura para eles."],tip:"Finalização somente depois da secagem."},
- {id:"manual-garagem-piso",area:"Garagem / externas",title:"Piso",time:"20–30 min",products:["Tudo Limpinho Tudax Limpeza Pesada","Tudo Limpinho Querosene — Sabão Spray"],materials:["Vassoura","Mangueira ou WAP","Rodo"],steps:["Varra antes de molhar.","Lave com mangueira ou WAP.","Para sujeira pesada, use Tudo Limpinho Tudax Limpeza Pesada ou Tudo Limpinho Querosene — Sabão Spray somente quando a superfície for compatível e conforme o rótulo.","Direcione a água para o escoamento."],tip:"Nunca misture querosene com outros produtos."},
- {id:"manual-garagem-desengraxe",area:"Garagem / externas",title:"Desengraxe",time:"10–20 min",products:["Tudo Limpinho Querosene — Sabão Spray","Tudo Limpinho Flotalim Extra Forte"],materials:["Luvas","Escova","Pano"],steps:["Identifique a gordura e a superfície.","Use Tudo Limpinho Querosene — Sabão Spray ou Tudo Limpinho Flotalim Extra Forte conforme o rótulo.","Use um único produto por vez.","Remova o produto conforme a orientação do rótulo."],tip:"Querosene e Flotalim não devem ser misturados."},
- {id:"manual-edicula-deposito",area:"Edícula / marcenaria",title:"Depósito",time:"10–20 min",products:["Tudo Limpinho Tudax Limpeza Pesada","Tudo Limpinho Álcool Perfumado — Glamour de Shopping"],materials:["Aspirador","Vassoura","Pano de microfibra"],steps:["Trabalhe por pequenas áreas.","Aspire ou varra primeiro.","Use Tudo Limpinho Tudax Limpeza Pesada para sujeira pesada em superfície compatível.","Use Tudo Limpinho Álcool Perfumado — Glamour de Shopping para manutenção/acabamento quando compatível."],tip:"Não tente limpar o depósito inteiro de uma vez; trabalhe por áreas."},
- {id:"manual-edicula-pia",area:"Edícula / marcenaria",title:"Pia",time:"5 min",products:["Qualitá Home Lava-Louças Líquido Coco"],materials:["Esponja","Pano"],steps:["Retire resíduos.","Lave com Qualitá Home Lava-Louças Líquido Coco e esponja.","Enxágue.","Seque."],tip:"Usar o detergente próprio para louça até acabar."},
- {id:"manual-edicula-marcenaria",area:"Edícula / marcenaria",title:"Marcenaria",time:"10–20 min",products:["GloDePeroba — Jasmine","Tudo Limpinho Álcool Perfumado — Glamour de Shopping"],materials:["Aspirador","Vassoura","Pano de microfibra"],steps:["Retire serragem com aspirador ou vassoura antes de passar pano.","Em madeira, use GloDePeroba — Jasmine conforme o rótulo.","Não substitua o produto de madeira por limpador geral.","Use Tudo Limpinho Álcool Perfumado — Glamour de Shopping somente em superfícies compatíveis que não sejam tratadas como madeira."],tip:"A madeira mantém seu produto específico."},
- {id:"manual-edicula-adesivos",area:"Edícula / marcenaria",title:"Adesivos",time:"5–10 min",products:["Jakhebe Adhesive Remover"],materials:["Pano","Espátula adequada, se necessário","Luvas"],steps:["Teste primeiro em pequena área.","Aplique Jakhebe Adhesive Remover somente na superfície compatível.","Remova o adesivo com cuidado.","Limpe o resíduo conforme a orientação do produto."],tip:"É um produto específico e deve ser mantido."},
- {id:"manual-vidros",area:"Vidros / telas / grades",title:"Vidros",time:"5–10 min",products:["UAU Blindex Box","Tudo Limpinho Ultra Box"],materials:["Rodo","Pano de microfibra"],steps:["Limpe o vidro com produto compatível.","Use UAU Blindex Box enquanto houver estoque nas situações indicadas; a reposição planejada é Tudo Limpinho Ultra Box.","Finalize com rodo e pano."],tip:"A transição de UAU Blindex Box para Ultra Box é prevista no manual."},
- {id:"manual-telas",area:"Vidros / telas / grades",title:"Telas",time:"5–10 min",products:["Tudo Limpinho Álcool Perfumado — Glamour de Shopping"],materials:["Ferramenta específica de cabo longo para telas/mosquiteiros","Pano"],steps:["Remova a sujeira com movimentos suaves.","Use a ferramenta específica de cabo longo.","Se precisar de produto, use somente produto compatível com a tela e em pequena quantidade.","Deixe secar."],tip:"Não usar a ferramenta de telas como se fosse para grades."},
- {id:"manual-grades",area:"Vidros / telas / grades",title:"Grades",time:"5–10 min",products:["Tudo Limpinho Tudax Limpeza Pesada","Tudo Limpinho Álcool Perfumado — Glamour de Shopping"],materials:["Pano","Escova"],steps:["Remova poeira e resíduos.","Use pano ou escova com produto compatível.","Para sujeira pesada, use Tudo Limpinho Tudax Limpeza Pesada conforme o rótulo.","Para manutenção/acabamento, use Tudo Limpinho Álcool Perfumado — Glamour de Shopping quando compatível."],tip:"Não use a ferramenta de telas como se fosse para grades."}
-];
-
-const CASA_RECIPES=[
- {id:"recipe-panos-multiuso",title:"Panos Multiuso Úmidos",time:"5–10 min",yieldText:"Recipiente abastecido",ingredients:[["Água","800 ml"],["Álcool líquido 70%","100 ml"],["Amaciante concentrado","50 ml"],["Lava-louças líquido de coco","50 ml"],["Panos limpos de algodão/microfibra","quantidade suficiente"]],materials:["Recipiente com tampa"],steps:["Misture 800 ml de água com 100 ml de álcool 70%.","Adicione 50 ml de amaciante concentrado.","Adicione 50 ml de lava-louças líquido de coco.","Misture suavemente.","Coloque os panos limpos no recipiente.","Umedeça os panos com a solução.","Torça/pressione até ficarem úmidos, sem excesso de líquido.","Guarde o recipiente fechado."],tip:"Uso para móveis, portas, puxadores, rodapés e pequenas sujeiras. Não usar como desinfetante nem em eletrônicos; em superfícies de preparo de alimentos, fazer a limpeza adequada posteriormente."},
- {id:"recipe-panos-secadora",title:"Panos Reutilizáveis para Secadora",time:"5 min",yieldText:"8–10 panos de aproximadamente 15 × 15 cm",ingredients:[["Amaciante concentrado","250 ml"],["Água","250 ml"],["Panos de algodão/flanela","8–10 unidades"]],materials:["Recipiente com tampa"],steps:["Misture 250 ml de amaciante concentrado com 250 ml de água.","Coloque os panos no recipiente.","Despeje a solução sobre os panos.","Pressione para absorver.","Na hora de usar, retire um pano e torça bem: deve ficar úmido, não pingando.","Coloque 1 pano na secadora junto com a roupa.","Depois do ciclo, retire e devolva ao recipiente para reutilização."],tip:"A receita-base do manual usa proporção 1:1 e orienta retirar o excesso antes da secadora."},
- {id:"recipe-coala",title:"Solução de Coala Chá Branco",time:"2–3 min",yieldText:"1 litro",ingredients:[["Água","1 litro"],["Coala Chá Branco concentrado","8 gotas"]],materials:["Recipiente apropriado"],steps:["Coloque 1 litro de água no recipiente.","Adicione 8 gotas de Coala Chá Branco.","Misture.","Aplique com pano úmido na superfície compatível.","Teste primeiro em pequena área."],tip:"O manual registra que não é necessário enxaguar quando usado conforme a orientação do fabricante. Não misture Coala com água sanitária, vinagre, álcool ou outros produtos sem orientação específica."}
-];
-
-const CASA_PRODUCT_CATALOG=[
- {name:"Tudo Limpinho Petklin",use:"Áreas internas de cães e gatos; varanda/áreas dos animais",status:"SUBSTITUTO",substitute:"Manter — linha principal"},
- {name:"Tudo Limpinho Álcool Perfumado — Glamour de Shopping",use:"Limpeza geral e acabamento/perfumação de superfícies compatíveis",status:"SUBSTITUTO",substitute:"Manter — linha principal"},
- {name:"Tudo Limpinho Flotalim Extra Forte",use:"Gordura e sujeira pesada em superfícies compatíveis",status:"SUBSTITUTO",substitute:"Manter — linha principal"},
- {name:"Tudo Limpinho Porcelanex",use:"Limpeza de porcelanato",status:"SUBSTITUTO",substitute:"Manter — linha principal"},
- {name:"Tudo Limpinho Tudax Limpeza Pesada",use:"Limpeza pesada geral em superfícies laváveis",status:"SUBSTITUTO",substitute:"Manter — linha principal"},
- {name:"Tudo Limpinho Querosene — Sabão Spray",use:"Desengorduramento/desengraxe e sujeira pesada conforme rótulo",status:"SUBSTITUTO",substitute:"Manter — uso específico"},
- {name:"Tudo Limpinho Limpador Clorado",use:"Higienização, desengorduramento e branqueamento em superfícies compatíveis",status:"SUBSTITUTO",substitute:"Manter — linha principal"},
- {name:"Tudo Limpinho Ultra Clean",use:"Sujeira aderida em superfícies compatíveis",status:"SUBSTITUTO",substitute:"Manter — linha principal"},
- {name:"Tudo Limpinho Rejuntec",use:"Limpeza de rejuntes",status:"SUBSTITUTO",substitute:"Manter — linha principal"},
- {name:"Tudo Limpinho Finisher Fresh Bouquet",use:"Finalizador/facilitador para roupas/tecidos conforme rótulo",status:"EM USO",substitute:"Manter — uso específico"},
- {name:"Tudo Limpinho Ultra Box",use:"Limpeza do box conforme indicação do rótulo",status:"SUBSTITUTO",substitute:"Manter — linha principal"},
- {name:"Tudo Limpinho Polimax",use:"Pasta limpadora/polidora para superfícies compatíveis",status:"SUBSTITUTO",substitute:"Manter — linha principal"},
- {name:"Tudo Limpinho Thunder — Limpeza Pesada Porcelanato",use:"Limpeza pesada específica de porcelanato",status:"SUBSTITUTO",substitute:"Manter — linha principal"},
- {name:"Qualitá Home Lava-Louças Líquido Coco",use:"Louça, pia e limpeza leve",status:"EM USO",substitute:"Tudo Limpinho — detergente próprio para louça"},
- {name:"Cif Espuma Milagrosa — Derrete Gordura",use:"Desengordurante de cozinha",status:"EM USO",substitute:"Tudo Limpinho Flotalim Extra Forte"},
- {name:"Cif Espuma Milagrosa — Extermina Limo",use:"Limo/sujeira de banheiro",status:"EM USO",substitute:"Tudo Limpinho Ultra Box / produto adequado"},
- {name:"UAU Blindex Box",use:"Limpeza profunda de box/vidros",status:"EM USO",substitute:"Tudo Limpinho Ultra Box"},
- {name:"Ypê Tira Limo — Cloro Ativo em Gel",use:"Limo e higienização conforme rótulo",status:"EM USO",substitute:"Tudo Limpinho Limpador Clorado, se compatível"},
- {name:"Aromasil Saponáceo Cremoso Cloro 3 em 1",use:"Limpeza pesada de superfícies compatíveis",status:"EM USO",substitute:"Tudo Limpinho Ultra Clean/Polimax, conforme superfície"},
- {name:"Bombril Sapólio Radium",use:"Saponáceo em pó para sujeira aderida",status:"EM USO",substitute:"Tudo Limpinho Ultra Clean/Polimax"},
- {name:"Sol Querosene 500 ml",use:"Querosene para usos específicos compatíveis",status:"EM USO",substitute:"Tudo Limpinho Querosene — Sabão Spray"},
- {name:"Veja Perfumes — Buquê Cerrado",use:"Limpeza perfumada de manutenção",status:"EM USO",substitute:"Tudo Limpinho Álcool Perfumado"},
- {name:"Coala Zulu Coala Limpa Perfume",use:"Limpeza/perfumação de manutenção",status:"EM USO",substitute:"Tudo Limpinho Álcool Perfumado ou Coala Chá Branco"},
- {name:"GloDePeroba — Jasmine",use:"Limpeza/conservação de móveis e superfícies indicadas",status:"EM USO",substitute:"Manter produto específico para madeira"},
- {name:"Lysol — lenços desinfetantes",use:"Higienização pontual de superfícies compatíveis",status:"EM USO",substitute:"Usar até acabar; sem substituição automática"},
- {name:"HIKO Fabric Refresher",use:"Revitalização de tecidos conforme rótulo",status:"EM USO",substitute:"Usar até acabar; não confundir com limpador de superfícies"},
- {name:"Jakhebe Adhesive Remover",use:"Remoção de cola/adesivo em superfícies compatíveis",status:"EM USO",substitute:"Manter como produto específico"},
- {name:"Coala Chá Branco Limpador Perfumado",use:"Limpeza perfumada concentrada para pisos, azulejos e superfícies laváveis compatíveis",status:"EM USO",substitute:"Manter como complemento"},
- {name:"Querosene",use:"Uso específico conforme manual/rótulo",status:"EM USO",substitute:"Tudo Limpinho Querosene — Sabão Spray"},
- {name:"Sabão de querosene",use:"Uso específico conforme manual/rótulo",status:"EM USO",substitute:"Tudo Limpinho Querosene — Sabão Spray"},
- {name:"Água sanitária",use:"Uso específico conforme rótulo",status:"EM USO",substitute:"Tudo Limpinho Limpador Clorado, quando compatível"},
- {name:"Tudax",use:"Limpeza pesada",status:"EM USO",substitute:"Tudo Limpinho Tudax Limpeza Pesada"},
- {name:"Solução diluída de Coala + álcool + água já preparada",use:"Solução já preparada para usos registrados",status:"EM USO",substitute:"Repreparar somente conforme receita/uso definido"},
- {name:"Amaciante concentrado",use:"Roupas e receitas de panos",status:"EM USO",substitute:"Manter conforme uso específico"},
- {name:"Álcool líquido 70%",use:"Receita de panos multiuso e usos compatíveis",status:"EM USO",substitute:"Repor quando acabar"}
-];
-const CASA_INVENTORY_PRODUCTS=CASA_PRODUCT_CATALOG.map(x=>x.name);
-const CASA_INVENTORY_TOOLS=["Aspirador","Vassouras e escovas","Pá de lixo","Mop/esfregão com balde","Rodos e limpadores de vidro/box","Panos de microfibra","Esponjas e escovas","Espanador de penas","Lavadora/secadora LG Direct Drive 11/6 kg","Secador de calçados","Mangueiras — 2 unidades","Lavadora de alta pressão/WAP","Ferramenta de cabo longo para telas/mosquiteiros","Pia grande da edícula","Recipientes organizadores","Escovas para vaso sanitário e refil","Panos de algodão/microfibra e flanela","Panos próprios para secadora","Panos multiuso úmidos"];
-
-const CASA_WEB=[
- ["🧹 Dicas de limpeza","https://www.google.com/search?q=dicas+de+limpeza+da+casa"],
- ["👕 Cuidados com roupas","https://www.google.com/search?q=dicas+cuidados+com+roupas+lavagem+secagem"],
- ["🧺 Organização da lavanderia","https://www.google.com/search?q=organizacao+da+lavanderia+dicas"],
- ["🌿 Jardim e áreas externas","https://www.google.com/search?q=dicas+cuidados+jardim+e+areas+externas"],
- ["🐾 Cuidados com gatos","https://www.google.com/search?q=dicas+cuidados+com+gatos+em+casa"],
- ["✨ Organização da casa","https://www.google.com/search?q=dicas+organizacao+da+casa"]
-];
-
-
-
-function casaManualById(id){return CASA_MANUAL_PROCEDURES.find(x=>x.id===id)||null;}
-function openCasaManual(id){
- const h=casaManualById(id);if(!h)return;
- const o=document.createElement("div");o.className="mv-how-overlay";
- const products=h.products.length?h.products:["Nenhum produto específico."];
- o.innerHTML=`<div class="mv-how"><button class="mv-how-x" type="button">×</button><div class="eyebrow">MANUAL DA CASA · ${escapeHtml(h.area)}</div><h2>🧽 ${escapeHtml(h.title)}</h2><div class="casa-how-top-actions"><button type="button" class="secondary" id="editManualCasa">✏️ Editar este procedimento</button></div><div class="casa-how-meta"><span>⏱️ ${escapeHtml(h.time)}</span></div><h3>🧴 Produtos</h3><ul>${products.map(x=>`<li><span>${escapeHtml(x)}</span><button type="button" class="casa-buy-mini" data-casa-buy="${escapeHtml(x)}">＋ compras</button></li>`).join("")}</ul><h3>🧰 Utensílios / materiais</h3><ul>${h.materials.map(x=>`<li><span>${escapeHtml(x)}</span><button type="button" class="casa-buy-mini" data-casa-buy="${escapeHtml(x)}">＋ compras</button></li>`).join("")}</ul><h3>Passo a passo</h3><ol>${h.steps.map(x=>`<li>${escapeHtml(x)}</li>`).join("")}</ol><div class="casa-how-tip"><strong>💡 Dica</strong><p>${escapeHtml(h.tip)}</p></div></div>`;
- document.body.appendChild(o);
- o.querySelector(".mv-how-x").onclick=()=>o.remove();
- o.addEventListener("click",e=>{if(e.target===o)o.remove()});
- o.querySelector("#editManualCasa").onclick=()=>{o.remove();openCasaManualEditor(id)};
- o.querySelectorAll("[data-casa-buy]").forEach(b=>b.onclick=()=>{addCasaShopping(b.dataset.casaBuy,h.title);b.textContent="✓ na lista";b.disabled=true;});
-}
-function openCasaManualEditor(id){
- const h=casaManualById(id);if(!h)return;const custom=loadCasaHowCustom()[id]||{};const dlg=document.createElement("dialog");
- dlg.innerHTML=`<form method="dialog" class="modal-card" id="manualCasaEdit"><div class="modal-head"><div><div class="eyebrow">MANUAL DA CASA</div><h2>Editar procedimento</h2></div><button class="icon-btn" value="cancel">×</button></div><label>Ambiente<input id="mhArea" value="${escapeHtml(custom.area||h.area)}"></label><label>Atividade<input id="mhTitle" value="${escapeHtml(custom.title||h.title)}"></label><label>Tempo<input id="mhTime" value="${escapeHtml(custom.time||h.time)}"></label><label>🧴 Produtos <small>um por linha</small><textarea id="mhProducts" rows="5">${escapeHtml((custom.products||h.products).join("\n"))}</textarea></label><label>🧰 Utensílios / materiais <small>um por linha</small><textarea id="mhMaterials" rows="5">${escapeHtml((custom.materials||h.materials).join("\n"))}</textarea></label><label>Passo a passo <small>um passo por linha</small><textarea id="mhSteps" rows="8">${escapeHtml((custom.steps||h.steps).join("\n"))}</textarea></label><label>💡 Dica<textarea id="mhTip" rows="3">${escapeHtml(custom.tip||h.tip)}</textarea></label><div class="modal-actions"><div class="grow"></div><button type="button" class="secondary" id="cancelMh">Cancelar</button><button class="primary" value="default">Salvar alterações</button></div></form>`;
- document.body.appendChild(dlg);dlg.showModal();dlg.querySelector("#cancelMh").onclick=()=>{dlg.close();dlg.remove()};
- dlg.querySelector("#manualCasaEdit").addEventListener("submit",e=>{e.preventDefault();const all=loadCasaHowCustom();all[id]={area:dlg.querySelector("#mhArea").value.trim()||h.area,title:dlg.querySelector("#mhTitle").value.trim()||h.title,time:dlg.querySelector("#mhTime").value.trim()||h.time,products:casaHowList(dlg.querySelector("#mhProducts").value),materials:casaHowList(dlg.querySelector("#mhMaterials").value),steps:casaHowList(dlg.querySelector("#mhSteps").value),tip:dlg.querySelector("#mhTip").value.trim()||h.tip};saveCasaHowCustom(all);dlg.close();dlg.remove();openCasaManual(id)});
-}
-function casaManualViewData(id){const h=casaManualById(id),c=loadCasaHowCustom()[id]||{};return h?{...h,...c,products:Array.isArray(c.products)?c.products:h.products,materials:Array.isArray(c.materials)?c.materials:h.materials,steps:Array.isArray(c.steps)?c.steps:h.steps}:null;}
-function renderCasaManual(){
- const groups={};CASA_MANUAL_PROCEDURES.forEach(x=>{(groups[x.area]||(groups[x.area]=[])).push(x)});
- return Object.entries(groups).map(([area,items])=>`<div class="card casa-manual-area"><div class="panel-head"><h3>🧽 ${escapeHtml(area)}</h3><span class="pill">${items.length}</span></div><div class="casa-manual-list">${items.map(x=>{const h=casaManualViewData(x.id);return `<div class="casa-manual-row"><div><strong>${escapeHtml(h.title)}</strong><small>⏱️ ${escapeHtml(h.time)}</small></div><button type="button" class="home-how" data-casa-manual="${x.id}">Como fazer →</button></div>`}).join("")}</div></div>`).join("");
-}
-function renderCasaRecipes(){
- return CASA_RECIPES.map(r=>`<div class="card casa-recipe"><div class="panel-head"><h3>🧪 ${escapeHtml(r.title)}</h3><span class="pill">${escapeHtml(r.time)}</span></div><p class="note">Rendimento: ${escapeHtml(r.yieldText)}</p><h4>Ingredientes</h4><ul>${r.ingredients.map(([n,q])=>`<li><span>${escapeHtml(n)} — <b>${escapeHtml(q)}</b></span><button type="button" class="casa-buy-mini" data-recipe-buy="${escapeHtml(n)}">＋ compras</button></li>`).join("")}</ul><h4>Preparo</h4><ol>${r.steps.map(x=>`<li>${escapeHtml(x)}</li>`).join("")}</ol><div class="casa-how-tip"><strong>💡 Observação</strong><p>${escapeHtml(r.tip)}</p></div></div>`).join("");
-}
-function renderCasaInventory(){return `<div class="card casa-inventory"><div class="panel-head"><div><h3>🧴 Produtos que você tem</h3><p class="note">Os produtos atuais permanecem em uso até acabarem. A transição para Tudo Limpinho acontece conforme o mapa do manual.</p></div><span class="pill">${CASA_PRODUCT_CATALOG.length}</span></div><div class="casa-product-list">${CASA_PRODUCT_CATALOG.map(x=>`<div class="casa-product-row"><div><strong>${escapeHtml(x.name)}</strong><small>${escapeHtml(x.use)}</small><small>Substituição: ${escapeHtml(x.substitute)}</small></div><span class="pill">${escapeHtml(x.status)}</span></div>`).join("")}</div><div class="panel-head inventory-tools-head"><h3>🧰 Utensílios e equipamentos</h3><span class="pill">${CASA_INVENTORY_TOOLS.length}</span></div><div class="chip-list">${CASA_INVENTORY_TOOLS.map(x=>`<span class="pill">${escapeHtml(x)}</span>`).join("")}</div></div>`;}
-
-const CASA_DURATION_KEY="minha-vida.casa.duration.v1";
-const CASA_DURATION={coz1:10,coz2:10,coz3:5,coz4:10,coz5:5,lim1:20,lim2:15,lim3:15,lim4:75,roup1:10,roup2:45,roup3:30,roup4:10,roup5:10,roup6:60,roup7:60,roup8:35,roup9:20,roup10:20,ani1:10,ani2:10,hen1:5,hen2:10,hen3:5,hen4:10,hen5:20};
-function loadCasaDurations(){try{return {...CASA_DURATION,...JSON.parse(localStorage.getItem(CASA_DURATION_KEY)||"{}")}}catch{return {...CASA_DURATION}}}
-function saveCasaDurations(x){localStorage.setItem(CASA_DURATION_KEY,JSON.stringify(x))}
-function casaDuration(id){return `${loadCasaDurations()[id]||15} min`}
-function openCasaTaskEditor(id){
- const d=loadCasa(),task=d.areas.flatMap(a=>a.tasks).find(t=>t.id===id);if(!task)return;const ds=loadCasaDurations(),dlg=document.createElement('dialog');
- dlg.innerHTML=`<form method="dialog" class="modal-card" id="casaTaskEdit"><div class="modal-head"><div><div class="eyebrow">🏠 CASA</div><h2>Editar rotina</h2></div><button class="icon-btn" value="cancel">×</button></div><label>Atividade<input id="ctName" value="${escapeHtml(task.name)}"></label><label>Duração real estimada (min)<input id="ctMin" type="number" min="5" max="480" step="5" value="${ds[id]||15}"></label><label>Horário / janela preferencial<input id="ctTime" value="${escapeHtml(casaTime(id))}"></label><label>Frequência<input id="ctFreq" value="${escapeHtml(task.freq)}"></label><div class="modal-actions"><div class="grow"></div><button type="button" class="secondary" id="cancelCt">Cancelar</button><button class="primary" value="default">Salvar</button></div></form>`;document.body.appendChild(dlg);dlg.showModal();dlg.querySelector('#cancelCt').onclick=()=>{dlg.close();dlg.remove()};dlg.querySelector('#casaTaskEdit').addEventListener('submit',e=>{e.preventDefault();task.name=dlg.querySelector('#ctName').value.trim()||task.name;task.freq=dlg.querySelector('#ctFreq').value.trim()||task.freq;ds[id]=Math.max(5,+dlg.querySelector('#ctMin').value||ds[id]||15);const times=loadCasaTimes();times[id]=dlg.querySelector('#ctTime').value.trim()||times[id];saveCasa(d);saveCasaDurations(ds);saveCasaTimes(times);dlg.close();dlg.remove();renderCasa()});
-}
-
 function loadCasa(){try{const d=JSON.parse(localStorage.getItem(CASA_KEY));if(d)return {...CASA_BASE,...d};}catch{}return JSON.parse(JSON.stringify(CASA_BASE));}
 function saveCasa(d){localStorage.setItem(CASA_KEY,JSON.stringify(d));}
-const CASA_HOW_CUSTOM_KEY="minha-vida.casa.how.v1";
-const CASA_SHOP_KEY="minha-vida.compras.casa.v1";
-function loadCasaHowCustom(){try{return JSON.parse(localStorage.getItem(CASA_HOW_CUSTOM_KEY)||"{}")}catch{return {}}}
-function saveCasaHowCustom(x){localStorage.setItem(CASA_HOW_CUSTOM_KEY,JSON.stringify(x))}
-function casaHowData(id){const base=CASA_HOW[id];if(!base)return null;const custom=loadCasaHowCustom()[id];if(!custom)return base;return {...base,...custom,products:Array.isArray(custom.products)?custom.products:base.products,materials:Array.isArray(custom.materials)?custom.materials:base.materials,steps:Array.isArray(custom.steps)?custom.steps:base.steps};}
-function loadCasaShopping(){try{return JSON.parse(localStorage.getItem(CASA_SHOP_KEY)||"[]")}catch{return []}}
-function saveCasaShopping(x){localStorage.setItem(CASA_SHOP_KEY,JSON.stringify(x))}
-function addCasaShopping(name,source){name=(name||"").trim();if(!name)return;const items=loadCasaShopping();if(!items.some(x=>x.name.toLowerCase()===name.toLowerCase()))items.push({id:uid(),name,source:source||"Casa",createdAt:Date.now(),done:false});saveCasaShopping(items);}
-function removeCasaShopping(id){saveCasaShopping(loadCasaShopping().filter(x=>x.id!==id))}
-function casaHowList(text){return String(text||"").split(/\n|;/).map(x=>x.trim()).filter(Boolean)}
-function openCasaHowEditor(id){
- const h=casaHowData(id);if(!h)return;const dlg=document.createElement("dialog");
- dlg.innerHTML=`<form method="dialog" class="modal-card" id="casaHowEdit"><div class="modal-head"><div><div class="eyebrow">🏠 CASA</div><h2>Editar como fazer</h2></div><button class="icon-btn" value="cancel">×</button></div>
- <label>Nome<input id="chTitle" value="${escapeHtml(h.title)}"></label>
- <label>Tempo estimado<input id="chTime" value="${escapeHtml(h.time)}"></label>
- <label>🧴 Produtos <small>um por linha</small><textarea id="chProducts" rows="5">${escapeHtml(h.products.join("\\n"))}</textarea></label>
- <label>🧰 Utensílios / materiais <small>um por linha</small><textarea id="chMaterials" rows="5">${escapeHtml(h.materials.join("\\n"))}</textarea></label>
- <label>Passo a passo <small>um passo por linha</small><textarea id="chSteps" rows="8">${escapeHtml(h.steps.join("\\n"))}</textarea></label>
- <label>💡 Dica<textarea id="chTip" rows="3">${escapeHtml(h.tip)}</textarea></label>
- <div class="modal-actions"><div class="grow"></div><button type="button" class="secondary" id="cancelCh">Cancelar</button><button class="primary" value="default">Salvar alterações</button></div></form>`;
- document.body.appendChild(dlg);dlg.showModal();dlg.querySelector("#cancelCh").onclick=()=>{dlg.close();dlg.remove()};
- dlg.querySelector("#casaHowEdit").addEventListener("submit",e=>{e.preventDefault();const all=loadCasaHowCustom();all[id]={title:dlg.querySelector("#chTitle").value.trim()||h.title,time:dlg.querySelector("#chTime").value.trim()||h.time,products:casaHowList(dlg.querySelector("#chProducts").value),materials:casaHowList(dlg.querySelector("#chMaterials").value),steps:casaHowList(dlg.querySelector("#chSteps").value),tip:dlg.querySelector("#chTip").value.trim()||h.tip};saveCasaHowCustom(all);dlg.close();dlg.remove();openCasaHow(id)});
-}
-
-function openCasaHow(id){
- const h=casaHowData(id);if(!h)return;
- const o=document.createElement("div");o.className="mv-how-overlay";
- const productRows=(h.products.length?h.products:["Nenhum produto específico — siga a orientação da etiqueta ou da superfície."]).map(x=>`<li><span>${escapeHtml(x)}</span><button type="button" class="casa-buy-mini" data-casa-buy="${escapeHtml(x)}">＋ compras</button></li>`).join("");
- const materialRows=h.materials.map(x=>`<li><span>${escapeHtml(x)}</span><button type="button" class="casa-buy-mini" data-casa-buy="${escapeHtml(x)}">＋ compras</button></li>`).join("");
- o.innerHTML=`<div class="mv-how"><button class="mv-how-x" onclick="this.closest('.mv-how-overlay').remove()">×</button><div class="eyebrow">COMO FAZER</div><h2>🧺 ${escapeHtml(h.title)}</h2>
- <div class="casa-how-top-actions"><button type="button" class="secondary" id="editCasaHow">✏️ Editar este procedimento</button></div>
- <div class="casa-how-meta"><span>⏱️ ${escapeHtml(h.time)}</span></div>
- <h3>🧴 Produtos</h3><ul>${productRows}</ul>
- <h3>🧰 Utensílios / materiais</h3><ul>${materialRows}</ul>
- <h3>Passo a passo</h3><ol>${h.steps.map(x=>`<li>${escapeHtml(x)}</li>`).join("")}</ol>
- <div class="casa-how-tip"><strong>💡 Dica</strong><p>${escapeHtml(h.tip)}</p></div>
- <div class="casa-how-shopping-note">🛒 Quando algum produto ou utensílio estiver acabando, toque em <b>＋ compras</b>. Ele vai para a lista compartilhada de compras.</div></div>`;
- document.body.appendChild(o);
- o.querySelector("#editCasaHow").onclick=()=>{o.remove();openCasaHowEditor(id)};
- o.querySelectorAll("[data-casa-buy]").forEach(b=>b.onclick=()=>{addCasaShopping(b.dataset.casaBuy,h.title);b.textContent="✓ na lista";b.disabled=true;});
-}
-function renderCasaShoppingMini(){
- const items=loadCasaShopping();
- if(!items.length)return `<div class="empty compact"><strong>Nenhum item da casa na lista.</strong><span>Quando algum produto ou utensílio estiver acabando, você pode enviá-lo daqui.</span></div>`;
- return `<div class="casa-mini-shopping">${items.map(x=>`<div class="casa-mini-shop-row ${x.done?'done':''}"><label><input type="checkbox" data-casa-shop-done="${x.id}" ${x.done?'checked':''}><span>${escapeHtml(x.name)}</span></label><button type="button" class="more" data-casa-shop-del="${x.id}">×</button></div>`).join("")}<a class="food-big-link blue" href="#alimentacao">🛒 Abrir lista de compras</a></div>`;
-}
-
 function renderCasa(){
  const d=loadCasa();
  const all=d.areas.flatMap(a=>a.tasks), done=all.filter(x=>x.done).length;
  app.innerHTML=`<section class="hero"><h2>🏠 Casa</h2><p>Uma casa funcional, sem transformar a manutenção em uma segunda jornada.</p></section>
  <div class="home-principle card"><span class="eyebrow">REGRA DA CASA</span><strong>Agrupar. Delegar. Adiar quando puder.</strong><p>Não espalhar microtarefas pelo dia. O essencial entra em blocos; o resto pode esperar.</p></div>
  <div class="home-summary"><div class="card"><span>Rotinas</span><b>${all.length}</b></div><div class="card"><span>Feitas agora</span><b>${done}</b></div></div>
- <div class="section-title">⏰ HORÁRIOS DA CASA</div>
- <div class="card casa-schedule-card"><p class="note">Os horários são o ponto de partida da rotina. Eles organizam a casa sem deixar que ela organize você.</p><div class="casa-schedule">${all.filter(t=>casaTime(t.id) && casaTime(t.id)!="ao fim do ciclo").slice().sort((a,b)=>String(casaTime(a.id)).localeCompare(String(casaTime(b.id)))).map(t=>`<div class="casa-schedule-row"><span class="casa-time">${escapeHtml(casaTime(t.id))}</span><strong>${escapeHtml(t.name)}</strong></div>`).join("")}</div></div>
  <div class="section-title">ROTINAS</div>
  <div class="list">${d.areas.map(a=>`<div class="card home-area"><div class="panel-head"><h3>${a.icon} ${escapeHtml(a.title)}</h3><span class="pill">${a.tasks.length}</span></div>
- ${a.tasks.length?a.tasks.map(t=>`<div class="home-task-wrap"><label class="home-task ${t.done?"done":""}"><input type="checkbox" data-casa-task="${a.id}|${t.id}" ${t.done?"checked":""}><span><strong>${escapeHtml(t.name)}</strong><small>⏱️ ${escapeHtml(casaDuration(t.id))} · ⏰ ${escapeHtml(casaTime(t.id))} · ${escapeHtml(t.freq)} · ${escapeHtml(t.when)}</small></span></label><div class="home-task-actions">${CASA_HOW[t.id]?`<button type="button" class="home-how" data-casa-how="${t.id}">Como fazer →</button>`:""}<button type="button" class="home-edit" data-casa-edit="${t.id}">Editar</button></div></div>`).join(""):`<p class="note">Sem rotina cadastrada. Mantemos espaço para incluir apenas o que realmente for necessário.</p>`}</div>`).join("")}</div>
- <div class="section-title">📖 MANUAL DA CASA · PROCEDIMENTOS</div><div class="list">${renderCasaManual()}</div><div class="section-title">🧪 RECEITAS DA CASA</div><div class="list">${renderCasaRecipes()}</div><div class="section-title">🧴 INVENTÁRIO DA CASA</div>${renderCasaInventory()}
- <div class="section-title">💡 DICAS PARA A CASA</div>
- <div class="card casa-web-card"><p class="note">Quando quiser aprofundar uma tarefa, abra um caminho para a internet. O conteúdo externo é complementar; o essencial continua dentro do MINHA VIDA.</p><div class="casa-web-grid">${CASA_WEB.map(([label,url])=>`<a class="casa-web-link" href="${url}" target="_blank" rel="noopener">${label}<span>↗</span></a>`).join("")}</div></div>
- <div class="section-title">🛒 LISTA DE COMPRAS DA CASA</div><div class="card casa-shopping-card"><p class="note">Produtos e utensílios que você adicionou pelos procedimentos ficam aqui e também podem ser vistos na lista de compras.</p>${renderCasaShoppingMini()}</div>
+ ${a.tasks.length?a.tasks.map(t=>`<label class="home-task ${t.done?"done":""}"><input type="checkbox" data-casa-task="${a.id}|${t.id}" ${t.done?"checked":""}><span><strong>${escapeHtml(t.name)}</strong><small>${escapeHtml(t.freq)} · ${escapeHtml(t.when)}</small></span></label>`).join(""):`<p class="note">Sem rotina cadastrada. Mantemos espaço para incluir apenas o que realmente for necessário.</p>`}</div>`).join("")}</div>
  <div class="section-title">MANUTENÇÃO</div>
  <div class="card"><p class="note">Problemas, reparos e projetos da casa ficam aqui para não invadirem o dia. Só entram como prioridade quando realmente precisam de atenção.</p><button class="secondary" id="addMaintenance">＋ Adicionar manutenção</button></div>
  <div class="list">${d.maintenance.map(x=>`<div class="card maintenance-row"><div><strong>${escapeHtml(x.name)}</strong><span>${escapeHtml(x.note||"")}</span></div><button class="more" data-maint="${x.id}">✓</button></div>`).join("")||`<div class="empty compact"><strong>Nenhuma manutenção pendente.</strong><span>Ótimo. Não precisamos criar trabalho só para preencher espaço.</span></div>`}</div>`;
- document.querySelectorAll("[data-casa-task]").forEach(el=>el.onchange=()=>{const [aid,tid]=el.dataset.casaTask.split("|"),x=loadCasa(),a=x.areas.find(a=>a.id===aid),t=a.tasks.find(t=>t.id===tid);if(t){t.done=el.checked;saveCasa(x);renderCasa();}});
- document.querySelectorAll("[data-casa-how]").forEach(b=>b.onclick=()=>openCasaHow(b.dataset.casaHow));
- document.querySelectorAll("[data-casa-edit]").forEach(b=>b.onclick=()=>openCasaTaskEditor(b.dataset.casaEdit));
- document.querySelectorAll("[data-casa-shop-done]").forEach(b=>b.onchange=()=>{const items=loadCasaShopping();const x=items.find(i=>i.id===b.dataset.casaShopDone);if(x)x.done=b.checked;saveCasaShopping(items);renderCasa();});
- document.querySelectorAll("[data-casa-shop-del]").forEach(b=>b.onclick=()=>{removeCasaShopping(b.dataset.casaShopDel);renderCasa();});
- document.querySelectorAll("[data-casa-manual]").forEach(b=>b.onclick=()=>openCasaManual(b.dataset.casaManual)); document.querySelectorAll("[data-recipe-buy]").forEach(b=>b.onclick=()=>{addCasaShopping(b.dataset.recipeBuy,"Receita da Casa");b.textContent="✓ na lista";b.disabled=true;});
+ document.querySelectorAll("[data-casa-task]").forEach(el=>el.onchange=()=>{const [aid,tid]=el.dataset.casaTask.split("|"),x=loadCasa(),a=x.areas.find(a=>a.id===aid),t=a.tasks.find(t=>t.id===tid);t.done=el.checked;saveCasa(x);renderCasa();});
  document.querySelector("#addMaintenance").onclick=()=>openCasaMaintenance();
  document.querySelectorAll("[data-maint]").forEach(b=>b.onclick=()=>{const x=loadCasa();x.maintenance=x.maintenance.filter(m=>m.id!==b.dataset.maint);saveCasa(x);renderCasa();});
 }
@@ -1334,286 +791,85 @@ function openCasaMaintenance(){
  dlg.querySelector("#casaForm").addEventListener("submit",e=>{e.preventDefault();d.maintenance.push({id:uid(),name:dlg.querySelector("#mName").value.trim(),note:dlg.querySelector("#mNote").value.trim(),createdAt:Date.now()});saveCasa(d);dlg.close();dlg.remove();renderCasa();});
 }
 
-const EX_KEY="minha-vida.exercicios.v3";
-const EX_SCHEDULE=[
- {day:0,label:"Domingo",tone:"peach",morning:{name:"Esteira",meta:"10–20 min · opcional",icon:"🚶‍♀️",intensity:"Leve"},afternoon:{name:"Recuperação + alongamento",meta:"10–15 min",icon:"🌿",intensity:"Leve"}},
- {day:1,label:"Segunda",tone:"pink",morning:{name:"Esteira",meta:"10–20 min",icon:"🚶‍♀️",intensity:"Leve–moderada"},afternoon:{name:"Bumbum · vídeo",meta:"20 min",icon:"🍑",intensity:"Moderada"}},
- {day:2,label:"Terça",tone:"blue",morning:{name:"Esteira",meta:"10–20 min",icon:"🚶‍♀️",intensity:"Leve–moderada"},afternoon:{name:"Escada + socos",meta:"10–15 + 5–10 min",icon:"🥊",intensity:"Moderada"}},
- {day:3,label:"Quarta",tone:"mint",morning:{name:"Esteira",meta:"10–20 min",icon:"🚶‍♀️",intensity:"Leve–moderada"},afternoon:{name:"Força · pesos + elásticos",meta:"20–25 min",icon:"🏋️‍♀️",intensity:"Moderada"}},
- {day:4,label:"Quinta",tone:"lavender",morning:{name:"Esteira",meta:"10–20 min",icon:"🚶‍♀️",intensity:"Leve–moderada"},afternoon:{name:"Bumbum · vídeo",meta:"20 min",icon:"🍑",intensity:"Moderada"}},
- {day:5,label:"Sexta",tone:"yellow",morning:{name:"Esteira",meta:"10–20 min",icon:"🚶‍♀️",intensity:"Leve–moderada"},afternoon:{name:"Escada + socos",meta:"10–15 + 5–10 min",icon:"🥊",intensity:"Moderada"}},
- {day:6,label:"Sábado",tone:"peach",morning:{name:"Esteira",meta:"10–20 min · se quiser",icon:"🚶‍♀️",intensity:"Leve"},afternoon:{name:"Pilates + mobilidade",meta:"15–20 min",icon:"🧘‍♀️",intensity:"Leve–moderada"}}
-];
-const EX_MOVES={
- "Esteira":["Começar com 2–3 min bem leves","Manter caminhada confortável; se estiver disposta, acelerar por alguns minutos","Fechar com 1–2 min leves"],
- "Bumbum · vídeo":["Abrir seu treino de bumbum de 20 minutos","Fazer no seu ritmo e reduzir a amplitude se precisar","Finalizar com 3–5 min de alongamento leve"],
- "Escada + socos":["Escada ergométrica por 10–15 min, começando leve","Disco de socos por 5–10 min, em blocos confortáveis","Soltar pernas, ombros e braços por 2–3 min"],
- "Força · pesos + elásticos":["Escolher 3–5 movimentos com pesos e/ou elásticos","Fazer séries controladas, sem precisar chegar à falha","Finalizar com mobilidade leve de quadril e ombros"],
- "Pilates + mobilidade":["Prancha de Pilates e movimentos de core por 8–12 min","Mobilidade suave de quadril e coluna","Alongar pernas, costas e braços sem forçar"],
- "Recuperação + alongamento":["Respirar e soltar o corpo","Alongar suavemente, sem buscar intensidade","Encerrar quando sentir o corpo mais solto"]
+const EX_KEY="minha-vida.exercicios.v1";
+const EX_BASE={
+  plans:[
+    {id:"treino1",name:"Esteira",type:"Cardio",target:"20 min",days:["Seg","Ter","Qua","Qui","Sex"],active:true},
+    {id:"treino2",name:"Treino de força",type:"Força",target:"Conforme treino",days:[],active:true}
+  ],
+  sessions:[],
+  notes:""
 };
-const EX_TOOLKIT=[
- ["🚶‍♀️","Esteira","cardio curto"],["🪜","Escada","cardio + pernas"],["🥊","Disco de socos","cardio + coordenação"],["🏋️‍♀️","Pesos","força"],["〰️","Elásticos","força + ativação"],["🧘‍♀️","Prancha de Pilates","core + controle"],["🍑","Seu vídeo","bumbum · 20 min"]
-];
-function exDateKey(d=new Date()){return new Intl.DateTimeFormat('en-CA').format(d)}
-function loadEx(){
- try{const old=JSON.parse(localStorage.getItem(EX_KEY));if(old)return {...old,logs:Array.isArray(old.logs)?old.logs:[]};}catch{}
- const fresh={logs:[],custom:[]};localStorage.setItem(EX_KEY,JSON.stringify(fresh));return fresh;
-}
+function loadEx(){try{const d=JSON.parse(localStorage.getItem(EX_KEY));if(d)return {...EX_BASE,...d};}catch{}return JSON.parse(JSON.stringify(EX_BASE));}
 function saveEx(d){localStorage.setItem(EX_KEY,JSON.stringify(d));}
-function exTodayPlan(){return EX_SCHEDULE[new Date().getDay()]}
-function exDone(name,date=exDateKey()){return loadEx().logs.some(x=>x.date===date&&x.name===name)}
-function exToggle(name){const d=loadEx(),date=exDateKey(),i=d.logs.findIndex(x=>x.date===date&&x.name===name);if(i>=0)d.logs.splice(i,1);else d.logs.push({id:uid(),name,date,createdAt:Date.now()});saveEx(d);renderExercicios();}
-function exHow(name){
- const steps=EX_MOVES[name]||["Fazer no seu ritmo","Respeitar os limites do corpo","Alongar e encerrar com calma"];
- const item=EX_SCHEDULE.flatMap(x=>[x.morning,x.afternoon]).find(x=>x.name===name);
- const intensity=item?.intensity||"Moderada";
- const o=document.createElement('div');o.className='mv-how-overlay';o.innerHTML=`<div class="mv-how"><button class="mv-how-x" onclick="this.closest('.mv-how-overlay').remove()">×</button><div class="eyebrow">COMO FAZER · ${escapeHtml(intensity)}</div><h2>🏃 ${escapeHtml(name)}</h2><ol>${steps.map(x=>`<li>${escapeHtml(x)}</li>`).join('')}</ol><p>Não é prova. Se hoje couber menos, faça menos — e mantenha o ritual.</p></div>`;document.body.appendChild(o);
-}
-function exSummary(plan){return `${plan.morning.meta} pela manhã · ${plan.afternoon.meta} à tarde`}
-function renderExSlot(slot,period){
- const done=exDone(slot.name);
- return `<article class="exercise-slot ${done?'done':''}"><span class="exercise-icon">${slot.icon}</span><div class="exercise-slot-main"><small>${period}</small><strong>${escapeHtml(slot.name)}</strong><span>${escapeHtml(slot.meta)} · ${escapeHtml(slot.intensity)}</span></div><div class="exercise-actions"><button class="mini-how" data-how="${escapeHtml(slot.name)}">Como</button><button class="mini-done ${done?'is-done':''}" data-done="${escapeHtml(slot.name)}">${done?'✓ Feito':'Feito'}</button></div></article>`;
-}
 function renderExercicios(){
- const d=loadEx(),today=exTodayPlan(),date=exDateKey(),todayLogs=d.logs.filter(x=>x.date===date),todayDone=new Set(todayLogs.map(x=>x.name)),week=EX_SCHEDULE;
- const doneCount=todayLogs.length;
- app.innerHTML=`<section class="hero exercise-hero"><div class="eyebrow">🏃 MOVIMENTO</div><h2>Exercícios</h2><p>Movimento como parte da rotina — sem transformar treino em cobrança.</p></section>
- <section class="exercise-today ${today.tone}"><div class="exercise-day"><span class="eyebrow">HOJE · ${today.label.toUpperCase()}</span><strong>Seu movimento cabe no seu dia.</strong><p>${escapeHtml(exSummary(today))}</p></div>
- <div class="exercise-stack">${renderExSlot(today.morning,'☀️ MANHÃ')} ${renderExSlot(today.afternoon,'🌤️ TARDE')}</div>
- <div class="exercise-counter"><b>${doneCount}/2</b> movimentos registrados hoje <span>${doneCount===2?'✨ Fechou o movimento do dia.':doneCount===1?'Um movimento já conta. O outro pode esperar até caber.':'Comece pequeno. Dez minutos já contam.'}</span></div></section>
- <section class="exercise-week"><div class="section-head"><h2>✨ Minha semana</h2><span class="soft-count">movimento realista</span></div><div class="week-grid">${week.map(x=>`<article class="week-move ${x.day===new Date().getDay()?'today':''}"><div class="week-day"><b>${x.label.slice(0,3)}</b>${x.day===new Date().getDay()?'<span>HOJE</span>':''}</div><div class="week-main"><strong>${x.morning.icon} ${escapeHtml(x.morning.name)}</strong><span>${escapeHtml(x.morning.meta)}</span><strong>${x.afternoon.icon} ${escapeHtml(x.afternoon.name)}</strong><span>${escapeHtml(x.afternoon.meta)} · ${escapeHtml(x.afternoon.intensity)}</span></div></article>`).join('')}</div></section>
- <section class="exercise-toolkit"><div class="section-head"><h2>🧰 Seu arsenal</h2><span class="soft-count">para variar sem complicar</span></div><div class="toolkit-grid">${EX_TOOLKIT.map(x=>`<div class="tool-card"><span>${x[0]}</span><strong>${escapeHtml(x[1])}</strong><small>${escapeHtml(x[2])}</small></div>`).join('')}</div></section>
- <section class="exercise-stretch"><div><span class="exercise-big-icon">🧘‍♀️</span><div><div class="eyebrow">MOBILIDADE</div><strong>Alongamento entra nos dias certos.</strong><p>Depois dos treinos ou nos dias leves, 5–10 minutos para soltar pernas, quadril, costas e ombros.</p></div></div></section>
- <section class="exercise-rule"><strong>💜 Regra do movimento</strong><p>10 minutos contam. 20 minutos contam. Um dia leve conta. O plano é voltar amanhã.</p></section>
- <section class="exercise-history"><div class="section-head"><h2>Registro</h2><span class="soft-count">${d.logs.length}</span></div>${d.logs.slice().reverse().slice(0,10).map(x=>`<div class="exercise-log"><span>✓</span><div><strong>${escapeHtml(x.name)}</strong><small>${formatDate(x.date)}</small></div></div>`).join('')||'<div class="empty compact"><strong>Ainda sem registros.</strong><span>Comece pelo movimento de hoje.</span></div>'}</section>`;
- document.querySelectorAll('[data-how]').forEach(b=>b.onclick=()=>exHow(b.dataset.how));
- document.querySelectorAll('[data-done]').forEach(b=>b.onclick=()=>exToggle(b.dataset.done));
+ const d=loadEx(), today=new Date().toISOString().slice(0,10);
+ const sessions=d.sessions.slice().reverse();
+ app.innerHTML=`<section class="hero"><h2>🏃 Exercícios</h2><p>Movimento como parte da rotina — sem transformar treino em cobrança.</p></section>
+ <div class="exercise-focus card"><span class="eyebrow">HOJE</span><strong>05:35–05:55 · Esteira</strong><p>20 minutos. O objetivo é manter o ritual da manhã, não buscar perfeição.</p><button class="primary" id="quickExercise">✓ Registrar treino de hoje</button></div>
+ <div class="section-title">ROTINA DE MOVIMENTO</div>
+ <div class="list">${d.plans.map(p=>`<div class="card exercise-plan"><div><strong>${escapeHtml(p.name)}</strong><span>${escapeHtml(p.type)} · ${escapeHtml(p.target)}</span>${p.days.length?`<small>${p.days.join(" · ")}</small>`:""}</div><span class="pill">${p.active?"Ativo":"Pausado"}</span></div>`).join("")}</div>
+ <button class="secondary add-full" id="addPlan">＋ Adicionar treino</button>
+ <div class="section-title">REGISTRO</div>
+ <div class="list">${sessions.slice(0,12).map(s=>`<div class="card exercise-session"><div><strong>${escapeHtml(s.name)}</strong><span>${formatDate(s.date)} · ${escapeHtml(s.duration||"")} ${s.note?`· ${escapeHtml(s.note)}`:""}</span></div><button class="more" data-ex="${s.id}">×</button></div>`).join("")||`<div class="empty compact"><strong>Nenhum treino registrado ainda.</strong><span>Comece pelo ritual de esteira da manhã.</span></div>`}</div>
+ <div class="card exercise-note"><span class="eyebrow">REGRA</span><p>Se o dia apertar, o treino pode ser reduzido. Se estiver cansada, descanso não é falha — é parte do sistema.</p></div>`;
+ document.querySelector("#quickExercise").onclick=()=>addExerciseSession("Esteira","20 min",today);
+ document.querySelector("#addPlan").onclick=()=>openExercisePlan();
+ document.querySelectorAll("[data-ex]").forEach(b=>b.onclick=()=>{const x=loadEx();x.sessions=x.sessions.filter(s=>s.id!==b.dataset.ex);saveEx(x);renderExercicios();});
+}
+function addExerciseSession(name,duration,date){
+ const d=loadEx();
+ if(d.sessions.some(s=>s.date===date&&s.name===name)){alert("Esse treino já foi registrado hoje.");return;}
+ d.sessions.push({id:uid(),name,duration,date,note:"",createdAt:Date.now()});saveEx(d);renderExercicios();
+}
+function openExercisePlan(){
+ const d=loadEx(),dlg=document.createElement("dialog");
+ dlg.innerHTML=`<form method="dialog" class="modal-card" id="exForm"><div class="modal-head"><div><div class="eyebrow">🏃 EXERCÍCIOS</div><h2>Novo treino</h2></div><button class="icon-btn" value="cancel">×</button></div>
+ <label>Nome<input id="eName" required maxlength="70" placeholder="Ex.: Pilates"></label>
+ <div class="form-grid"><label>Tipo<input id="eType" value="Treino"></label><label>Duração/meta<input id="eTarget" placeholder="Ex.: 30 min"></label></div>
+ <div class="modal-actions"><div class="grow"></div><button type="button" class="secondary" id="cancelEx">Cancelar</button><button class="primary" value="default">Salvar</button></div></form>`;
+ document.body.appendChild(dlg);dlg.showModal();dlg.querySelector("#cancelEx").onclick=()=>{dlg.close();dlg.remove()};
+ dlg.querySelector("#exForm").addEventListener("submit",e=>{e.preventDefault();d.plans.push({id:uid(),name:dlg.querySelector("#eName").value.trim(),type:dlg.querySelector("#eType").value.trim(),target:dlg.querySelector("#eTarget").value.trim(),days:[],active:true});saveEx(d);dlg.close();dlg.remove();renderExercicios();});
 }
 
-const FOOD_KEY="minha-vida.alimentacao.v3";
-const FOOD_DAYS=["Segunda","Terça","Quarta","Quinta","Sexta","Sábado","Domingo"];
-const FOOD_MONTHS=[
- {id:"2026-09",label:"Setembro",defined:true},
- {id:"2026-10",label:"Outubro",defined:false},
- {id:"2026-11",label:"Novembro",defined:false},
- {id:"2026-12",label:"Dezembro",defined:false}
-];
-const FOOD_WEEKS=[
- {id:1,title:"Semana 1",pico:"Morango cremoso + coco",meals:[
-  ["Segunda","Pão frito + café com leite","Frango assado com batatas + arroz + salada","frango, batata, arroz, folhas, tomate"],
-  ["Terça","Crepioca de cottage","Strogonoff de frango + arroz + batata palha + salada","frango, creme, tomate, arroz, batata"],
-  ["Quarta","Waffle de queijo","Bife de alcatra acebolado + purê + brócolis","alcatra, cebola, batata, brócolis"],
-  ["Quinta","Panqueca","Ragu de carne + arroz + legumes","carne moída, tomate, arroz, legumes"],
-  ["Sexta","Pão frito","Hambúrguer caseiro + batata assada + salada","carne moída, batata, folhas, tomate"],
-  ["Sábado","Cuscuz + queijo","Pizza caseira / noite de pizza","massa, queijo, tomate"],
-  ["Domingo","Panquecas + café com leite","Carne de panela com músculo + arroz + feijão + legumes","músculo, arroz, feijão, legumes"]
- ]},
- {id:2,title:"Semana 2",pico:"Maracujá cremoso + banana com canela",meals:[
-  ["Segunda","Crepioca","Carne de panela desfiada + arroz + legumes","músculo, arroz, legumes"],
-  ["Terça","Waffle de queijo","Panquecas salgadas de carne e queijo + salada","carne moída, queijo, farinha, folhas"],
-  ["Quarta","Pão frito","Filé de frango grelhado + arroz + feijão + legumes","filé de frango, arroz, feijão, legumes"],
-  ["Quinta","Panquecas","Frango desfiado cremoso + Rap10 + salada","frango, Rap10, creme, folhas"],
-  ["Sexta","Cuscuz + queijo","Hambúrguer caseiro + batata rústica","carne moída, batata, queijo"],
-  ["Sábado","Waffle + café com leite","Risoto de frango/carne + salada","arroz, frango ou carne, queijo, folhas"],
-  ["Domingo","Panquecas","Lagarto assado + arroz + feijão + farofa + salada","lagarto, arroz, feijão, farinha, folhas"]
- ]},
- {id:3,title:"Semana 3",pico:"Manga + abacaxi com coco",meals:[
-  ["Segunda","Pão frito","Porco assado + arroz + feijão + salada","carne suína, arroz, feijão, folhas"],
-  ["Terça","Crepioca de cottage","Carne moída com legumes + arroz + feijão","carne moída, legumes, arroz, feijão"],
-  ["Quarta","Waffle de queijo","Frango gratinado com queijo + batata + salada","frango, queijo, batata, folhas"],
-  ["Quinta","Panquecas","Almôndegas ao molho + arroz + legumes","carne moída, tomate, arroz, legumes"],
-  ["Sexta","Pão frito","Rap10 de carne/frango + queijo + salada","Rap10, carne ou frango, queijo, folhas"],
-  ["Sábado","Cuscuz","Lanche caseiro / hambúrguer / batata","carne moída, pão, batata, queijo"],
-  ["Domingo","Panquecas","Coxa e sobrecoxa assada + arroz + feijão + farofa + salada","coxa/sobrecoxa, arroz, feijão, farinha, folhas"]
- ]},
- {id:4,title:"Semana 4",pico:"Morango com leite + doce de leite",meals:[
-  ["Segunda","Crepioca","Coxa/sobrecoxa desfiada + arroz + legumes","frango, arroz, legumes"],
-  ["Terça","Waffle de queijo","Bife acebolado + batata + salada","alcatra, cebola, batata, folhas"],
-  ["Quarta","Pão frito","Ragu de carne + massa + salada","carne moída, tomate, massa, folhas"],
-  ["Quinta","Panquecas","Frango desfiado + arroz de forno + salada","frango, arroz, queijo, folhas"],
-  ["Sexta","Cuscuz + queijo","Pizza caseira / noite de lanche","massa, queijo, tomate"],
-  ["Sábado","Waffle + café com leite","Porco desfiado + Rap10 + acompanhamentos","carne suína, Rap10, queijo, salada"],
-  ["Domingo","Panquecas","Churrasco de fraldinha + arroz + farofa + vinagrete + salada","fraldinha, arroz, farinha, tomate, cebola, folhas"]
- ]}
-];
-const FOOD_PREP=["Cozinha quinzenal","Produzir proteínas e bases","Porcionar e etiquetar","Congelar o que tolera freezer","Deixar amanhã encaminhado"];
-const FOOD_RECIPE_IDS={
- "Frango assado com batatas":"frango-assado","Strogonoff de frango":"strogonoff","Bife de alcatra acebolado":"alcatra","Ragu de carne":"ragu","Hambúrguer caseiro":"hamburguer","Carne de panela com músculo":"musculo","Carne de panela desfiada":"musculo","Panquecas salgadas de carne e queijo":"panquecas","Filé de frango grelhado":"frango-grelhado","Frango desfiado cremoso":"frango-desfiado","Frango desfiado cremoso para Rap10":"frango-desfiado","Risoto de frango/carne":"risoto","Porco assado":"porco","Carne moída com legumes":"carne-legumes","Frango gratinado com queijo":"frango-gratinado","Almôndegas ao molho":"almondegas","Coxa e sobrecoxa assada":"coxa-sobrecoxa","Coxa/sobrecoxa desfiada":"coxa-sobrecoxa","Arroz de forno":"arroz-forno","Porco desfiado":"porco-rap10","Porco desfiado + Rap10":"porco-rap10","Churrasco de fraldinha":"fraldinha","Crepioca":"crepioca","Crepioca de cottage":"crepioca","Cuscuz + queijo":"cuscuz","Picolé de morango cremoso":"pico-morango","Picolé de coco":"pico-coco","Picolé de maracujá cremoso":"pico-maracuja","Picolé de banana com canela":"pico-banana"
+const FOOD_KEY="minha-vida.alimentacao.v1";
+const FOOD_BASE={
+ week:1,
+ breakfasts:[
+  ["Segunda","Pão frito + café com leite"],["Terça","Crepioca de cottage"],["Quarta","Waffle de queijo"],["Quinta","Panqueca"],["Sexta","Pão frito"],["Sábado","Cuscuz + queijo"],["Domingo","Panquecas + café com leite"]
+ ],
+ dinners:[
+  ["Segunda","Frango assado com batatas + arroz + salada","terça"],
+  ["Terça","Strogonoff de frango + arroz + batata palha + salada","quarta"],
+  ["Quarta","Bife de alcatra acebolado + purê + brócolis","quinta"],
+  ["Quinta","Ragu de carne + arroz + legumes","sexta"],
+  ["Sexta","Hambúrguer caseiro + batata assada + salada",""],
+  ["Sábado","Pizza caseira / noite de pizza",""],
+  ["Domingo","Carne de panela com músculo + arroz + feijão + legumes",""]
+ ],
+ lunchbox:true,
+ shoppingWeekly:true,
+ cookingDone:false
 };
-/* Ingredientes usados para gerar a lista. Quando a receita é oficial, os valores vêm do Livro de Receitas; acompanhamentos comuns entram como itens de apoio. */
-const FOOD_ING={
- "frango-assado":[["Coxa/sobrecoxa ou filé de frango","800 g","Carnes"],["Batata","700 g","Hortifruti"],["Alho","3 dentes","Hortifruti"],["Cebola","1/2 un.","Hortifruti"],["Azeite","2 colheres (sopa)","Cozinha"],["Limão","1 un.","Hortifruti"]],
- "strogonoff":[["Frango","800 g","Carnes"],["Cebola","1 un. pequena","Hortifruti"],["Alho","2 dentes","Hortifruti"],["Manteiga ou azeite","1 colher (sopa)","Cozinha"],["Creme de leite","200 g","Laticínios"],["Molho de tomate","3–4 colheres (sopa)","Despensa"],["Mostarda","a gosto","Despensa"],["Batata palha","1 pacote","Despensa"]],
- "alcatra":[["Alcatra","700–800 g","Carnes"],["Cebola","1–2 un.","Hortifruti"],["Alho","2 dentes","Hortifruti"],["Azeite","1 colher (sopa)","Cozinha"],["Batata para purê","1 kg","Hortifruti"],["Brócolis","1 maço","Hortifruti"]],
- "ragu":[["Carne moída","800 g","Carnes"],["Molho de tomate","700–800 ml","Despensa"],["Cebola","1 un.","Hortifruti"],["Alho","3 dentes","Hortifruti"],["Azeite","1 colher (sopa)","Cozinha"],["Macarrão","400–500 g","Despensa"]],
- "hamburguer":[["Carne moída","1 kg","Carnes"],["Batata","1 kg","Hortifruti"],["Pão de hambúrguer","1 pacote","Padaria"],["Folhas para salada","1 maço","Hortifruti"],["Tomate","3–4 un.","Hortifruti"]],
- "musculo":[["Músculo","1,2 kg","Carnes"],["Cebola","2 un.","Hortifruti"],["Alho","4 dentes","Hortifruti"],["Tomate ou tomate pelado","2 un. ou 200 ml","Hortifruti/Despensa"],["Azeite","2 colheres (sopa)","Cozinha"],["Arroz","500 g","Despensa"],["Feijão","500 g","Despensa"],["Legumes variados","1 kg","Hortifruti"]],
- "panquecas":[["Carne moída","600 g","Carnes"],["Muçarela","200 g","Laticínios"],["Molho de tomate","400–500 ml","Despensa"],["Discos de panqueca","8 un.","Despensa"]],
- "frango-grelhado":[["Filé de frango","700–800 g","Carnes"],["Alho","2 dentes","Hortifruti"],["Azeite","1 colher (sopa)","Cozinha"],["Limão","1 un.","Hortifruti"],["Arroz","500 g","Despensa"],["Feijão","500 g","Despensa"],["Legumes variados","1 kg","Hortifruti"]],
- "frango-desfiado":[["Frango desfiado","500–600 g","Carnes"],["Cottage ou cream cheese","150 g","Laticínios"],["Cebola","1/2 un.","Hortifruti"],["Tomate ou molho","a gosto","Hortifruti/Despensa"],["Rap10","4–8 un.","Despensa"],["Folhas para salada","1 maço","Hortifruti"]],
- "risoto":[["Arroz para risoto","300 g","Despensa"],["Frango desfiado","300–400 g","Carnes"],["Cebola","1/2 un.","Hortifruti"],["Manteiga","1 colher (sopa)","Cozinha"],["Queijo","50–80 g","Laticínios"],["Folhas para salada","1 maço","Hortifruti"]],
- "porco":[["Carne suína","1,2–1,4 kg","Carnes"],["Alho","4 dentes","Hortifruti"],["Cebola","1 un.","Hortifruti"],["Azeite","2 colheres (sopa)","Cozinha"],["Limão","1 un.","Hortifruti"],["Arroz","500 g","Despensa"],["Feijão","500 g","Despensa"]],
- "carne-legumes":[["Carne moída","700 g","Carnes"],["Cenoura","1 un.","Hortifruti"],["Abobrinha","1 un. pequena","Hortifruti"],["Cebola","1/2 un.","Hortifruti"],["Alho","2 dentes","Hortifruti"],["Azeite","1 colher (sopa)","Cozinha"],["Arroz","500 g","Despensa"],["Feijão","500 g","Despensa"]],
- "frango-gratinado":[["Filé de frango","800 g","Carnes"],["Muçarela","200 g","Laticínios"],["Cottage/cream cheese ou molho leve","150–200 g","Laticínios"],["Alho","2 dentes","Hortifruti"],["Batata","1 kg","Hortifruti"],["Folhas para salada","1 maço","Hortifruti"]],
- "almondegas":[["Carne moída","700 g","Carnes"],["Molho de tomate","600–700 ml","Despensa"],["Cebola","1 un.","Hortifruti"],["Alho","2 dentes","Hortifruti"],["Arroz","500 g","Despensa"],["Legumes variados","1 kg","Hortifruti"]],
- "coxa-sobrecoxa":[["Coxa/sobrecoxa","1,5 kg","Carnes"],["Alho","3 dentes","Hortifruti"],["Cebola","1 un.","Hortifruti"],["Batata","700 g","Hortifruti"],["Arroz","500 g","Despensa"],["Feijão","500 g","Despensa"],["Farofa/farinha","250 g","Despensa"],["Folhas para salada","1 maço","Hortifruti"]],
- "arroz-forno":[["Frango desfiado","500–600 g","Carnes"],["Arroz cozido","500–600 g","Despensa"],["Muçarela","150 g","Laticínios"],["Milho/ervilha","1/2 xícara","Despensa"],["Cottage/cream cheese ou molho","150 g","Laticínios"]],
- "porco-rap10":[["Porco desfiado","400–500 g","Carnes"],["Rap10","6–8 un.","Despensa"],["Queijo","150 g","Laticínios"],["Folhas/vinagrete","a gosto","Hortifruti"]],
- "fraldinha":[["Fraldinha","1,0–1,2 kg","Carnes"],["Sal grosso/parrilla","a gosto","Despensa"],["Arroz","500 g","Despensa"],["Farofa/farinha","250 g","Despensa"],["Tomate","3–4 un.","Hortifruti"],["Cebola roxa","1 un.","Hortifruti"],["Folhas para salada","1 maço","Hortifruti"]],
- "crepioca":[["Ovos","1 un.","Café/receitas"],["Tapioca","2 colheres (sopa)","Despensa"],["Cottage","2 colheres (sopa)","Laticínios"]],
- "cuscuz":[["Flocão de milho","1/2 xícara por pessoa","Despensa"],["Queijo","a gosto","Laticínios"],["Manteiga","a gosto","Cozinha"]],
- "lagarto":[["Lagarto","1,0–1,2 kg","Carnes"],["Alho","3 dentes","Hortifruti"],["Cebola","1 un.","Hortifruti"],["Arroz","500 g","Despensa"],["Feijão","500 g","Despensa"],["Farofa/farinha","250 g","Despensa"],["Folhas para salada","1 maço","Hortifruti"]],
- "pizza":[["Massa para pizza","2–3 un.","Padaria"],["Muçarela","400–500 g","Laticínios"],["Molho de tomate","300–400 ml","Despensa"],["Tomate","3–4 un.","Hortifruti"]]
-};
-const FOOD_BREAKFAST_ING={
- "Pão frito + café com leite":[["Pão","1 pacote","Padaria"],["Manteiga","a gosto","Cozinha"],["Leite","500 ml","Laticínios"],["Café","a gosto","Café/receitas"]],
- "Pão frito":[["Pão","1 pacote","Padaria"],["Manteiga","a gosto","Cozinha"]],
- "Crepioca de cottage":[...FOOD_ING.crepioca],
- "Crepioca":[...FOOD_ING.crepioca],
- "Waffle de queijo":[["Ovos","a conferir na receita","Café/receitas"],["Muçarela","a conferir na receita","Laticínios"],["Farinha","a conferir na receita","Despensa"]],
- "Waffle + café com leite":[["Ovos","a conferir na receita","Café/receitas"],["Muçarela","a conferir na receita","Laticínios"],["Farinha","a conferir na receita","Despensa"],["Leite","500 ml","Laticínios"],["Café","a gosto","Café/receitas"]],
- "Panqueca":[["Ovos","a conferir na receita","Café/receitas"],["Farinha de trigo","a conferir na receita","Despensa"],["Leite","a conferir na receita","Laticínios"]],
- "Panquecas + café com leite":[["Ovos","a conferir na receita","Café/receitas"],["Farinha de trigo","a conferir na receita","Despensa"],["Leite","500 ml + receita","Laticínios"],["Café","a gosto","Café/receitas"]],
- "Cuscuz + queijo":[...FOOD_ING.cuscuz],
- "Cuscuz":[...FOOD_ING.cuscuz]
-};
-const FOOD_LUNCHBOX=[
- ["Segunda","sanduíche + maçã + biscoito + suco"],["Terça","pão de queijo + tangerina + biscoito + Chamyto"],["Quarta","sanduíche + banana + biscoito + Toddynho com menos açúcar"],["Quinta","pão de queijo + maçã + biscoito + iogurte"],["Sexta","Rap10/sanduíche + laranja + biscoito + suco"]
-];
-const FOOD_LUNCH_ING=[
- ["Pão/sanduíche","1 pacote","Lancheira"],["Pão de queijo","1 pacote","Lancheira"],["Rap10","1 pacote","Lancheira"],["Biscoitos variados","4–8 pacotes","Lancheira"],["Maçã","4–5 un.","Hortifruti"],["Banana","4–5 un.","Hortifruti"],["Tangerina","3–5 un.","Hortifruti"],["Laranja","3–5 un.","Hortifruti"],["Suco","2–3 unidades","Lancheira"],["Chamyto","1–2 unidades","Laticínios"],["Toddynho com menos açúcar","1–2 unidades","Lancheira"],["Iogurte","1–2 unidades","Laticínios"]
-];
-function foodDefaultMonth(){return {month:"2026-09",week:1,overrides:{},customMonths:{},shoppingDone:{},prepDone:[]};}
-function loadFood(){
- try{
-  const raw=JSON.parse(localStorage.getItem(FOOD_KEY));
-  if(raw)return {...foodDefaultMonth(),...raw,overrides:raw.overrides||{},customMonths:raw.customMonths||{},shoppingDone:raw.shoppingDone||{},prepDone:raw.prepDone||[]};
- }catch{}
- return foodDefaultMonth();
-}
+function loadFood(){try{const d=JSON.parse(localStorage.getItem(FOOD_KEY));if(d)return {...FOOD_BASE,...d};}catch{}return JSON.parse(JSON.stringify(FOOD_BASE));}
 function saveFood(d){localStorage.setItem(FOOD_KEY,JSON.stringify(d));}
-function foodInternetUrl(query){return "https://www.google.com/search?q="+encodeURIComponent("receita "+query);}
-function foodBaseMeal(week,day,type){
- const m=week.meals.find(x=>x[0]===day); if(!m)return {name:"",recipeId:"",ingredients:""};
- const name=type==="breakfast"?m[1]:m[2];
- const key=Object.keys(FOOD_RECIPE_IDS).find(k=>name===k || name.startsWith(k+" ") || name.includes(k));
- return {name,recipeId:key?FOOD_RECIPE_IDS[key]:"",ingredients:""};
-}
-function foodMeal(d,week,day,type){
- const ov=d.overrides?.[week.id]?.[day]?.[type];
- if(ov)return ov;
- return foodBaseMeal(week,day,type);
-}
-function foodAllMeals(d){
- const weekList=FOOD_WEEKS;
- const out=[];
- weekList.forEach(w=>FOOD_DAYS.forEach(day=>["breakfast","dinner"].forEach(type=>out.push(foodMeal(d,w,day,type)))));
- return out;
-}
-function foodAddIngredient(map,item){
- const [name,qty,cat]=item; const key=name.toLowerCase();
- if(!map[key])map[key]={name,qtys:[],cat:cat||"Outros"};
- if(qty && !map[key].qtys.includes(qty))map[key].qtys.push(qty);
-}
-function foodShoppingItems(d){
- const map={};
- const weeks=foodMonthWeeks(d);
- weeks.forEach(w=>FOOD_DAYS.forEach(day=>{
-  ["breakfast","dinner"].forEach(type=>{
-   const meal=foodMeal(d,w,day,type);
-   if(meal.recipeId && FOOD_ING[meal.recipeId]) FOOD_ING[meal.recipeId].forEach(x=>foodAddIngredient(map,x));
-   else if(type==="breakfast" && FOOD_BREAKFAST_ING[meal.name]) FOOD_BREAKFAST_ING[meal.name].forEach(x=>foodAddIngredient(map,x));
-   else if(meal.ingredients) meal.ingredients.split(/[,;\n]+/).map(x=>x.trim()).filter(Boolean).forEach(x=>foodAddIngredient(map,[x,"quantidade a definir","Personalizados"]));
-   else if(meal.name) foodAddIngredient(map,[meal.name,"conferir receita","A definir"]);
-  });
- }));
- FOOD_LUNCH_ING.forEach(x=>foodAddIngredient(map,x));
- return Object.values(map).sort((a,b)=>a.cat.localeCompare(b.cat)||a.name.localeCompare(b.name));
-}
-function foodShoppingHash(items){return items.map(x=>x.name.toLowerCase()).join("|");}
-function foodMonthLabel(id){return FOOD_MONTHS.find(m=>m.id===id)?.label||id;}
-function foodMonthWeeks(d){
- if(d.month==="2026-09")return FOOD_WEEKS;
- const custom=d.customMonths?.[d.month];
- if(custom?.weeks)return custom.weeks;
- return [];
-}
-function foodMonthIsDefined(d){return d.month==="2026-09" || !!d.customMonths?.[d.month]?.weeks;}
-function foodRecipeOptions(){
- return RECIPES.map(r=>`<option value="${r.id}">${escapeHtml(r.name)}</option>`).join("");
-}
-function openFoodMealEditor(weekId,day,type){
- const d=loadFood(); const sourceWeeks=foodMonthWeeks(d); const week=sourceWeeks.find(w=>w.id===weekId)||FOOD_WEEKS.find(w=>w.id===weekId)||FOOD_WEEKS[0]; const current=foodMeal(d,week,day,type);
- const dlg=document.createElement("dialog");
- dlg.innerHTML=`<form method="dialog" class="modal-card" id="foodMealForm"><div class="modal-head"><div><div class="eyebrow">🍽️ ${day.toUpperCase()}</div><h2>Alterar ${type==="breakfast"?"café da manhã":"jantar"}</h2></div><button class="icon-btn" value="cancel">×</button></div>
- <label>Escolher uma receita da casa<select id="foodRecipe"><option value="">— escolher —</option>${foodRecipeOptions()}</select></label>
- <label>Nome da refeição<input id="foodName" required maxlength="100" value="${escapeHtml(current.name)}" placeholder="Ex.: Frango com legumes"></label>
- <label>Se for uma opção nova, ingredientes para a lista de mercado<textarea id="foodIngredients" rows="4" placeholder="Ex.: 600 g frango, 2 tomates, 1 abobrinha">${escapeHtml(current.ingredients||"")}</textarea></label>
- <div class="food-modal-note">📖 Se você escolher uma receita do livro, o app usa os ingredientes cadastrados dela. Se criar uma opção nova, informe os ingredientes para que ela entre na lista de mercado.</div>
- <div class="modal-actions"><button type="button" class="secondary" id="foodCancel">Cancelar</button><button type="button" class="secondary" id="foodReset">Voltar ao cardápio-base</button><button class="primary" value="default">Salvar</button></div></form>`;
- document.body.appendChild(dlg); dlg.showModal();
- const sel=dlg.querySelector("#foodRecipe"); if(current.recipeId)sel.value=current.recipeId;
- sel.onchange=()=>{const r=RECIPES.find(x=>x.id===sel.value);if(r){dlg.querySelector("#foodName").value=r.name;dlg.querySelector("#foodIngredients").value="";}};
- dlg.querySelector("#foodCancel").onclick=()=>{dlg.close();dlg.remove()};
- dlg.querySelector("#foodReset").onclick=()=>{const x=loadFood();if(x.overrides?.[weekId]?.[day]?.[type])delete x.overrides[weekId][day][type];saveFood(x);dlg.close();dlg.remove();renderAlimentacao();};
- dlg.querySelector("#foodMealForm").addEventListener("submit",e=>{e.preventDefault();const x=loadFood();x.overrides=x.overrides||{};x.overrides[weekId]=x.overrides[weekId]||{};x.overrides[weekId][day]=x.overrides[weekId][day]||{};x.overrides[weekId][day][type]={name:dlg.querySelector("#foodName").value.trim(),recipeId:sel.value,ingredients:dlg.querySelector("#foodIngredients").value.trim()};saveFood(x);dlg.close();dlg.remove();renderAlimentacao();});
-}
-function openFoodMonthCreator(monthId){
- const d=loadFood(); const prev=FOOD_MONTHS[FOOD_MONTHS.findIndex(m=>m.id===monthId)-1];
- const dlg=document.createElement("dialog");
- dlg.innerHTML=`<form method="dialog" class="modal-card" id="foodMonthForm"><div class="modal-head"><div><div class="eyebrow">🗓️ ${foodMonthLabel(monthId).toUpperCase()}</div><h2>Definir cardápio</h2></div><button class="icon-btn" value="cancel">×</button></div>
- <p>Este mês ainda não tem um cardápio definido. Você pode deixá-lo em aberto ou criar uma cópia do mês anterior para editar refeição por refeição.</p>
- <div class="modal-actions"><button type="button" class="secondary" id="foodMonthCancel">Cancelar</button><button type="button" class="primary" id="foodCopyMonth">Copiar mês anterior</button></div></form>`;
- document.body.appendChild(dlg);dlg.showModal();
- dlg.querySelector("#foodMonthCancel").onclick=()=>{dlg.close();dlg.remove()};
- dlg.querySelector("#foodCopyMonth").onclick=()=>{
-  if(monthId!=="2026-09"){
-   const source=monthId==="2026-10"?FOOD_WEEKS:((d.customMonths?.["2026-10"]?.weeks)||FOOD_WEEKS);
-   d.customMonths=d.customMonths||{};d.customMonths[monthId]={weeks:JSON.parse(JSON.stringify(source))};d.month=monthId;d.week=1;saveFood(d);dlg.close();dlg.remove();renderAlimentacao();
-  }
- };
-}
-function renderFoodShopping(d){
- const items=foodShoppingItems(d),done=d.shoppingDone||{},house=loadCasaShopping();
- const total=items.length+house.length;
- return `<div class="food-shopping-head"><div><span class="eyebrow">COMPARTILHADA</span><strong>Lista de compras</strong><p>Alimentação gera os itens do cardápio; Casa acrescenta produtos e utensílios que estão acabando.</p></div><span class="food-count">${items.filter(x=>done[x.name]).length+house.filter(x=>x.done).length}/${total}</span></div>
- <div class="food-shopping-subhead">🍽️ Alimentação</div><div class="food-shopping-list">${items.map(x=>{const checked=!!done[x.name];return `<label class="food-shop-item ${checked?'done':''}"><input type="checkbox" data-food-shopping-item="${escapeHtml(x.name)}" ${checked?'checked':''}><span><b>${escapeHtml(x.name)}</b><small>${escapeHtml(x.qtys.join(" + "))} · ${escapeHtml(x.cat)}</small></span></label>`}).join("")||'<div class="empty compact"><span>Nenhum item automático neste cardápio.</span></div>'}</div>
- <div class="food-shopping-subhead">🏠 Casa</div><div class="food-shopping-list">${house.map(x=>`<label class="food-shop-item ${x.done?'done':''}"><input type="checkbox" data-casa-shop-done-food="${x.id}" ${x.done?'checked':''}><span><b>${escapeHtml(x.name)}</b><small>Casa · ${escapeHtml(x.source||'procedimento')}</small></span><button type="button" class="more" data-casa-shop-del-food="${x.id}">×</button></label>`).join("")||'<div class="empty compact"><span>Nenhum item da casa adicionado.</span></div>'}</div>
- <div class="food-shopping-foot">💡 Confira o estoque antes de comprar. Itens adicionados pela Casa permanecem na lista até serem marcados ou removidos.</div>`;
-}
 function renderAlimentacao(){
  const d=loadFood();
- const month=foodMonthLabel(d.month),defined=foodMonthIsDefined(d);
- const weeks=foodMonthWeeks(d); const week=weeks.find(w=>w.id===Number(d.week))||weeks[0];
- const today=FOOD_DAYS[(new Date().getDay()+6)%7];
- const todayMeal=week?.meals?.find(m=>m[0]===today);
- const prepDone=new Set(d.prepDone||[]);
- const todayHtml=defined&&todayMeal?`<div class="food-today"><span class="eyebrow">🍽️ HOJE · ${today.toUpperCase()}</span><strong>${escapeHtml(foodMeal(d,week,today,"dinner").name)}</strong><small>${escapeHtml(foodMeal(d,week,today,"dinner").ingredients||todayMeal[3])}</small><div class="food-link-row"><a class="food-link pink" href="#receitas">📖 Minhas receitas</a><a class="food-link blue" target="_blank" rel="noopener" href="${foodInternetUrl(foodMeal(d,week,today,"dinner").name)}">🔎 Mais opções na internet</a></div></div>`:`<div class="food-today"><strong>Esse mês ainda está em construção.</strong><small>Defina o cardápio quando quiser; a lista de mercado será criada a partir dele.</small></div>`;
- const monthTabs=FOOD_MONTHS.map(m=>`<button class="food-month-tab ${m.id===d.month?'active':''}" data-food-month="${m.id}">${m.label}</button>`).join("");
- const weekTabs=defined?weeks.map(w=>`<button class="food-week-tab ${w.id===week?.id?'active':''}" data-food-week="${w.id}">${w.title}</button>`).join(""):"";
- const menuHtml=defined&&week?`<div class="food-menu-grid">${week.meals.map((m,i)=>{const b=foodMeal(d,week,m[0],"breakfast"),dn=foodMeal(d,week,m[0],"dinner");return `<article class="food-meal-card food-tone-${i%6} ${m[0]===today?'today':''}"><div class="food-meal-head"><span>${m[0]}</span>${m[0]===today?'<b>HOJE</b>':''}</div><div class="food-meal-line"><small>☀️ ${escapeHtml(b.name)}</small><button class="food-edit" data-food-edit="${week.id}|${m[0]}|breakfast">Alterar</button></div><div class="food-meal-line"><strong>🌙 ${escapeHtml(dn.name)}</strong><button class="food-edit" data-food-edit="${week.id}|${m[0]}|dinner">Alterar</button></div><em>${escapeHtml(dn.ingredients||m[3])}</em><div class="food-meal-actions"><a href="#receitas">📖 Minhas receitas</a><a target="_blank" rel="noopener" href="${foodInternetUrl(dn.name)}">🔎 Outras receitas</a></div></article>`}).join("")}</div>`:`<div class="food-empty-month card"><div class="food-empty-icon">🗓️</div><strong>${month} ainda não tem cardápio definido</strong><p>O sistema já está pronto até dezembro. Quando o cardápio do mês for definido, a lista de mercado passa a nascer dele automaticamente.</p><button class="primary" id="foodDefineMonth">＋ Definir este mês</button></div>`;
- app.innerHTML=`
- <section class="hero food-hero"><div class="eyebrow">🍽️ MINHA VIDA · ${month.toUpperCase()}</div><h2>Alimentação</h2><p>Cardápio → receitas → preparo → lista de mercado. Tudo se ajusta quando você muda uma refeição.</p></section>
- <div class="food-month-tabs">${monthTabs}</div>
- ${todayHtml}
- ${defined?`<div class="food-week-tabs">${weekTabs}</div>`:""}
- ${defined?`<div class="section-title">${week.title.toUpperCase()} · CARDÁPIO</div>`:""}
- ${menuHtml}
- ${defined?`<div class="food-control-row"><a class="food-big-link pink" href="#receitas">📖 Minhas receitas</a><button class="food-big-link blue" id="foodMarketJump">🛒 Lista de mercado</button></div>`:""}
- ${defined?`<div class="section-title">🛒 LISTA DE MERCADO</div><div class="card food-shopping-card" id="foodShoppingCard">${renderFoodShopping(d)}</div>`:""}
- ${defined?`<div class="section-title">🎒 LANCHEIRA DO HENRIQUE</div><div class="card food-lunchbox"><p><strong>Base:</strong> 1 salgado + 1 crocante + 1 fruta + 1 bebida.</p>${FOOD_LUNCHBOX.map(x=>`<div>${x[0]} · ${x[1]}</div>`).join("")}</div>`:""}
- ${defined?`<div class="section-title">🧊 COZINHA QUINZENAL</div><div class="card food-checklist">${FOOD_PREP.map((x,i)=>`<label class="food-check-row ${prepDone.has(String(i))?'done':''}"><input type="checkbox" data-food-prep="${i}" ${prepDone.has(String(i))?'checked':''}><span>${x}</span></label>`).join("")}<div class="food-rule"><b>Quinzena 1</b><span>Abastecer Semanas 1 e 2 com proteínas, arroz, feijão e bases.</span></div><div class="food-rule"><b>Quinzena 2</b><span>Abastecer Semanas 3 e 4, renovar coringas e deixar compras ajustadas.</span></div></div>`:""}
- <div class="card food-note"><span class="eyebrow">⚙️ COMO FUNCIONA</span><p><strong>Você muda o cardápio → o app muda a lista.</strong> Receitas da casa usam os ingredientes cadastrados do livro; uma receita nova entra na lista quando você informar seus ingredientes.</p></div>`;
- document.querySelectorAll("[data-food-month]").forEach(b=>b.onclick=()=>{const x=loadFood();x.month=b.dataset.foodMonth;x.week=1;saveFood(x);renderAlimentacao();});
- document.querySelectorAll("[data-food-week]").forEach(b=>b.onclick=()=>{const x=loadFood();x.week=Number(b.dataset.foodWeek);saveFood(x);renderAlimentacao();});
- document.querySelectorAll("[data-food-edit]").forEach(b=>b.onclick=()=>{const [wid,day,type]=b.dataset.foodEdit.split("|");openFoodMealEditor(Number(wid),day,type);});
- document.querySelectorAll("[data-food-prep]").forEach(el=>el.onchange=()=>{const x=loadFood();const a=new Set(x.prepDone||[]);el.checked?a.add(el.dataset.foodPrep):a.delete(el.dataset.foodPrep);x.prepDone=[...a];saveFood(x);renderAlimentacao();});
- document.querySelectorAll("[data-food-shopping-item]").forEach(el=>el.onchange=()=>{const x=loadFood();x.shoppingDone=x.shoppingDone||{};el.checked?x.shoppingDone[el.dataset.foodShoppingItem]=true:delete x.shoppingDone[el.dataset.foodShoppingItem];saveFood(x);renderAlimentacao();});
- document.querySelectorAll("[data-casa-shop-done-food]").forEach(el=>el.onchange=()=>{const items=loadCasaShopping();const x=items.find(i=>i.id===el.dataset.casaShopDoneFood);if(x)x.done=el.checked;saveCasaShopping(items);renderAlimentacao();});
- document.querySelectorAll("[data-casa-shop-del-food]").forEach(b=>b.onclick=()=>{removeCasaShopping(b.dataset.casaShopDelFood);renderAlimentacao();});
- document.querySelector("#foodDefineMonth")?.addEventListener("click",()=>openFoodMonthCreator(d.month));
- document.querySelector("#foodMarketJump")?.addEventListener("click",()=>document.querySelector("#foodShoppingCard")?.scrollIntoView({behavior:"smooth",block:"start"}));
+ app.innerHTML=`<section class="hero"><h2>🍽️ Alimentação</h2><p>Comer bem com menos decisões: cardápio definido, cozinha quinzenal e finalizações simples.</p></section>
+ <div class="food-principle card"><span class="eyebrow">SISTEMA DA CASA</span><strong>Jantar → marmita do dia seguinte</strong><p>O planejamento foi construído para 3 pessoas e, de segunda a quinta, uma porção extra para a marmita.</p></div>
+ <div class="section-title">SEMANA 1 · CARDÁPIO</div>
+ <div class="list"><div class="card"><div class="panel-head"><h3>☀️ Café da manhã</h3><span class="pill">7 dias</span></div>${d.breakfasts.map(x=>`<div class="food-row"><span>${x[0]}</span><strong>${escapeHtml(x[1])}</strong></div>`).join("")}</div>
+ <div class="card"><div class="panel-head"><h3>🌙 Jantar + marmita</h3><span class="pill">3 pessoas</span></div>${d.dinners.map(x=>`<div class="food-row"><span>${x[0]}</span><strong>${escapeHtml(x[1])}</strong>${x[2]?`<small>marmita → ${x[2]}</small>`:""}</div>`).join("")}</div></div>
+ <div class="section-title">ROTINA DE PREPARO</div>
+ <div class="card food-checklist">
+  <label><input type="checkbox" id="foodCook" ${d.cookingDone?"checked":""}><span><strong>Cozinha quinzenal</strong><small>Produzir bases, porcionar, etiquetar e congelar.</small></span></label>
+  <div class="food-rule"><b>Compra mensal</b><span>Carnes, arroz, feijão, grãos, massas, flocão, tapioca, Rap10, biscoitos, azeite, manteiga, café e itens de boa validade.</span></div>
+  <div class="food-rule"><b>Compra semanal</b><span>Frutas, verduras, folhas, pão, iogurtes, cottage, frios e demais perecíveis.</span></div>
+ </div>
+ <div class="section-title">AMANHÃ</div>
+ <div class="card tomorrow-food"><span class="eyebrow">ANTES DE DORMIR</span><strong>Preparar alimentação de amanhã</strong><p>Deixar encaminhados café da manhã, lancheira e marmita. De manhã, apenas finalizar o que for necessário.</p></div>
+ <div class="card food-note"><span class="eyebrow">FREEZER</span><p>As etiquetas seguem: <strong>NOME • DATA • Nº DE PORÇÕES • FINALIZAÇÃO</strong>. Arroz e feijão podem ser congelados; folhas, salada e itens crocantes ficam frescos.</p></div>`;
+ document.querySelector("#foodCook").onchange=e=>{const x=loadFood();x.cookingDone=e.target.checked;saveFood(x);};
 }
 
 const REC_KEY="minha-vida.receitas.v1";
@@ -1657,101 +913,10 @@ function renderReceitas(){
  document.querySelectorAll("[data-fav]").forEach(b=>b.onclick=()=>{const x=loadRec(),id=b.dataset.fav;x.favorites=x.favorites.includes(id)?x.favorites.filter(v=>v!==id):[...x.favorites,id];saveRec(x);update();});
 }
 function recipeCards(list,d){return list.map(r=>`<article class="card recipe-card"><div class="recipe-main"><div><span class="eyebrow">${escapeHtml(r.cat)}</span><h3>${escapeHtml(r.name)}</h3><span>${escapeHtml(r.yield)} · ${escapeHtml(r.prep)}</span></div><button class="favorite ${d.favorites.includes(r.id)?"active":""}" data-fav="${r.id}">${d.favorites.includes(r.id)?"♥":"♡"}</button></div><p><strong>Finalização:</strong> ${escapeHtml(r.finish)}</p></article>`).join("")||`<div class="empty compact"><strong>Nenhuma receita encontrada.</strong></div>`;}
-
-// =====================================================
-// 💇‍♀️ COMO FAZER • RITUAL CAPILAR
-// Fonte: cronograma capilar Scriptable • 31/08/2026–14/10/2026
-// =====================================================
-const HAIR_START = new Date(2026,7,31);
-const HAIR_END = new Date(2026,9,14);
-const HAIR_KEY = "minha-vida.cabelo.v1";
-const HAIR_WASH = {
-"31/08":{shampoo:"t:r S10 Colors Even More — Grayish-Brown Color Protective Shampoo",s10:"30–60 s de massagem • SEM PAUSA",tratamento:"REPARAÇÃO\nKerasys Propolis Hair Bonding Pro Repair Treatment",condicionador:"Mise en Scène Perfect Serum Styling Conditioner",serum:"Mise en Scène Perfect Serum Original"},
-"02/09":{shampoo:"Elseve Cachos Longos dos Sonhos Shampoo Nutri-Preenchedor",tratamento:"HIDRATAÇÃO\nMáscara Hidra + Reconstrução",condicionador:"Elseve Cachos Longos dos Sonhos Condicionador Selador",serum:"Mise en Scène Perfect Serum Hydrating"},
-"04/09":{shampoo:"Mise en Scène Perfect Serum Styling Shampoo",tratamento:"NUTRIÇÃO\nPré-shampoo: óleo de semente de uva (20–30 min) → lavagem",condicionador:"Mise en Scène Perfect Serum Styling Conditioner",serum:"Mise en Scène Perfect Serum Original"},
-"06/09":{shampoo:"Elseve Cachos Longos dos Sonhos Shampoo Nutri-Preenchedor",tratamento:"REPARAÇÃO\nKerasys Propolis Hair Bonding Pro Repair Treatment",condicionador:"Elseve Cachos Longos dos Sonhos Condicionador Selador",serum:"Mise en Scène Perfect Serum Styling"},
-"08/09":{shampoo:"t:r S10 Colors Even More — Grayish-Brown Color Protective Shampoo",s10:"30–60 s de massagem • SEM PAUSA",tratamento:"HIDRATAÇÃO\nMáscara Hidra + Reconstrução",condicionador:"Mise en Scène Perfect Serum Styling Conditioner",serum:"Mise en Scène Perfect Serum Hydrating"},
-"10/09":{shampoo:"Elseve Cachos Longos dos Sonhos Shampoo Nutri-Preenchedor",tratamento:"ACIDIFICAÇÃO\nLola Tannic Acid Acidificante — 5 min, comprimento e pontas",condicionador:"Elseve Cachos Longos dos Sonhos Condicionador Selador",serum:"Mise en Scène Perfect Serum Original"},
-"12/09":{shampoo:"Mise en Scène Perfect Serum Styling Shampoo",tratamento:"NUTRIÇÃO\nPré-shampoo: óleo de coco ou semente de uva (20–30 min)",condicionador:"Mise en Scène Perfect Serum Styling Conditioner",serum:"Mise en Scène Perfect Serum Hydrating"},
-"14/09":{shampoo:"Elseve Cachos Longos dos Sonhos Shampoo Nutri-Preenchedor",tratamento:"PÓS-COR\nLavagem suave + condicionador; sem máscara pesada",condicionador:"Mise en Scène Perfect Serum Styling Conditioner",serum:"Mise en Scène Perfect Serum Original"},
-"16/09":{shampoo:"Mise en Scène Perfect Serum Styling Shampoo",tratamento:"HIDRATAÇÃO\nMáscara Hidra + Reconstrução",condicionador:"Mise en Scène Perfect Serum Styling Conditioner",serum:"Mise en Scène Perfect Serum Hydrating"},
-"18/09":{shampoo:"Elseve Cachos Longos dos Sonhos Shampoo Nutri-Preenchedor",tratamento:"REPARAÇÃO\nKerasys Propolis Hair Bonding Pro Repair Treatment",condicionador:"Elseve Cachos Longos dos Sonhos Condicionador Selador",serum:"Mise en Scène Perfect Serum Styling"},
-"20/09":{shampoo:"Mise en Scène Perfect Serum Styling Shampoo",tratamento:"NUTRIÇÃO\nPré-shampoo: óleo de semente de uva (20–30 min)",condicionador:"Mise en Scène Perfect Serum Styling Conditioner",serum:"Mise en Scène Perfect Serum Original"},
-"22/09":{shampoo:"Elseve Cachos Longos dos Sonhos Shampoo Nutri-Preenchedor",tratamento:"ACIDIFICAÇÃO\nLola Tannic Acid Acidificante — 5 min",condicionador:"Elseve Cachos Longos dos Sonhos Condicionador Selador",serum:"Mise en Scène Perfect Serum Hydrating"},
-"24/09":{shampoo:"t:r S10 Colors Even More — Grayish-Brown Color Protective Shampoo",s10:"30–60 s de massagem • SEM PAUSA",tratamento:"HIDRATAÇÃO\nMáscara Hidra + Reconstrução",condicionador:"Mise en Scène Perfect Serum Styling Conditioner",serum:"Mise en Scène Perfect Serum Styling"},
-"26/09":{shampoo:"Elseve Cachos Longos dos Sonhos Shampoo Nutri-Preenchedor",tratamento:"REPARAÇÃO\nKerasys Propolis Hair Bonding Pro Repair Treatment",condicionador:"Elseve Cachos Longos dos Sonhos Condicionador Selador",serum:"Mise en Scène Perfect Serum Original"},
-"28/09":{shampoo:"Mise en Scène Perfect Serum Styling Shampoo",tratamento:"NUTRIÇÃO\nPré-shampoo: óleo de girassol ou semente de uva (20–30 min)",condicionador:"Mise en Scène Perfect Serum Styling Conditioner",serum:"Mise en Scène Perfect Serum Hydrating"},
-"30/09":{shampoo:"Elseve Cachos Longos dos Sonhos Shampoo Nutri-Preenchedor",tratamento:"HIDRATAÇÃO\nMáscara Hidra + Reconstrução",condicionador:"Elseve Cachos Longos dos Sonhos Condicionador Selador",serum:"Mise en Scène Perfect Serum Styling"},
-"02/10":{shampoo:"Mise en Scène Perfect Serum Styling Shampoo",tratamento:"REPARAÇÃO\nKerasys Propolis Hair Bonding Pro Repair Treatment",condicionador:"Mise en Scène Perfect Serum Styling Conditioner",serum:"Mise en Scène Perfect Serum Original"},
-"04/10":{shampoo:"Elseve Cachos Longos dos Sonhos Shampoo Nutri-Preenchedor",tratamento:"ACIDIFICAÇÃO\nLola Tannic Acid Acidificante — 5 min",condicionador:"Elseve Cachos Longos dos Sonhos Condicionador Selador",serum:"Mise en Scène Perfect Serum Hydrating"},
-"06/10":{shampoo:"Mise en Scène Perfect Serum Styling Shampoo",tratamento:"NUTRIÇÃO\nPré-shampoo: óleo de semente de uva (20–30 min)",condicionador:"Mise en Scène Perfect Serum Styling Conditioner",serum:"Mise en Scène Perfect Serum Original"},
-"08/10":{shampoo:"Elseve Cachos Longos dos Sonhos Shampoo Nutri-Preenchedor",tratamento:"HIDRATAÇÃO\nMáscara Hidra + Reconstrução",condicionador:"Elseve Cachos Longos dos Sonhos Condicionador Selador",serum:"Mise en Scène Perfect Serum Hydrating"},
-"10/10":{shampoo:"t:r S10 Colors Even More — Grayish-Brown Color Protective Shampoo",s10:"30–60 s de massagem • SEM PAUSA",tratamento:"REPARAÇÃO\nKerasys Propolis Hair Bonding Pro Repair Treatment",condicionador:"Mise en Scène Perfect Serum Styling Conditioner",serum:"Mise en Scène Perfect Serum Styling"},
-"12/10":{shampoo:"Elseve Cachos Longos dos Sonhos Shampoo Nutri-Preenchedor",tratamento:"ACIDIFICAÇÃO\nLola Tannic Acid Acidificante — 5 min",condicionador:"Elseve Cachos Longos dos Sonhos Condicionador Selador",serum:"Mise en Scène Perfect Serum Original"},
-"14/10":{shampoo:"Mise en Scène Perfect Serum Styling Shampoo",tratamento:"HIDRATAÇÃO\nMáscara Hidra + Reconstrução",condicionador:"Mise en Scène Perfect Serum Styling Conditioner",serum:"Mise en Scène Perfect Serum Hydrating"}
-};
-function hairLoad(){try{return JSON.parse(localStorage.getItem(HAIR_KEY))||{done:{}}}catch{return{done:{}}}}
-function hairSave(x){localStorage.setItem(HAIR_KEY,JSON.stringify(x))}
-function hairDateKey(d){return String(d.getDate()).padStart(2,"0")+"/"+String(d.getMonth()+1).padStart(2,"0")}
-function hairDateBR(d){return String(d.getDate()).padStart(2,"0")+"/"+String(d.getMonth()+1).padStart(2,"0")+"/"+d.getFullYear()}
-function hairDayNumber(d){return Math.floor((d-HAIR_START)/86400000)+1}
-function hairDay(d){let x=new Date(d);x.setHours(0,0,0,0);return x}
-function hairFinalizacao(){return "Phyto Manga → Lola Plot Twist Guava Mousse → Griffus Amo Cachos Gelatina Dia Seguinte"}
-function hairDayAfter(){return `💦 Umedecer mãos/áreas necessárias.\n✨ Lola Plot Twist Guava Misturinha OU Griffus Amo Cachos Gelatina Dia Seguinte.\nAmassar de baixo para cima.\n\n🪞 Se houver frizz em cabelo seco:\n1 gota de Mise en Scène Perfect Serum Original ou Elseve Óleo Extraordinário nas pontas.\n\n🌙 NOITE: preservar o cabelo; sem lavagem.`}
-function hairColoring(){return `🎨 COLORAÇÃO • 🌙 NOITE\n\nImédia L'Oréal 6.1 — somente raiz/brancos.\nNão puxar a permanente para o comprimento.\n\n🧴 Após enxaguar: seguir o passo a passo da caixa.\nNão fazer máscara/reconstrução neste momento.\n\n🌙 Após a coloração: deixar o cabelo em repouso.\n➡️ Próxima lavagem: 14/09 de manhã.`}
-function hairTodayData(){
- const now=hairDay(new Date());
- if(now<HAIR_START)return {kind:"before",date:now};
- if(now>HAIR_END)return {kind:"done",date:now};
- const key=hairDateKey(now),r=HAIR_WASH[key];
- if(r)return {kind:"wash",date:now,key,r};
- if(key==="13/09")return {kind:"color",date:now,key};
- return {kind:"dayafter",date:now,key};
-}
-function hairStepRows(info){
- if(info.kind==="wash"){
-  const r=info.r, rows=["🚿 LAVAGEM • ☀️ MANHÃ","🧴 "+r.shampoo];
-  if(r.s10)rows.push("⏱️ "+r.s10);
-  rows.push("🧖🏼‍♀️ "+r.tratamento,"🧴 Cond.: "+r.condicionador,"💇🏼‍♀️ FINALIZAÇÃO • "+hairFinalizacao(),"✨ Sérum: "+r.serum,"🌙 NOITE: não lavar; preservar a definição."); return rows;
- }
- if(info.kind==="color")return hairColoring().split("\n");
- if(info.kind==="before")return ["🌙 DIA 0 — 30/08/2026","NÃO LAVAR","✨ Preservar os cachos.","🌙 À noite: proteger o cabelo para dormir.","🫧 O cronograma oficial começa amanhã."];
- if(info.kind==="done")return ["🌙 CRONOGRAMA FINALIZADO","Os 45 dias foram concluídos."];
- return ["☀️ MANHÃ • DAY AFTER",...hairDayAfter().split("\n")];
-}
-function hairTypeLabel(k){return k==="wash"?"Lavagem":k==="color"?"Coloração":k==="dayafter"?"Day after":k==="before"?"Antes do início":"Finalizado"}
-function renderCabelo(){
- const info=hairTodayData(), steps=hairStepRows(info), done=hairLoad().done||{};
- const todayKey=info.key||hairDateKey(info.date);
- const nextWash=Object.entries(HAIR_WASH).filter(([k])=>{
-   const [dd,mm]=k.split("/").map(Number);
-   const y=mm<8?2027:2026;
-   return new Date(y,mm-1,dd)>=hairDay(new Date());
- }).slice(0,5);
- const doneToday=!!done[todayKey];
- app.innerHTML=`<section class="hair-hero"><div class="backline"><button class="back-inline" id="hairBack">‹ Rituais</button></div><div class="eyebrow">💇‍♀️ COMO FAZER</div><h2>Ritual Capilar</h2><p>Seu cronograma de 45 dias, transformado em um caminho simples dentro do MINHA VIDA.</p></section>
- <section class="hair-today"><div class="hair-kicker">HOJE • ${hairDateBR(info.date)} • DIA ${Math.max(1,Math.min(45,hairDayNumber(info.date)))}/45</div><div class="hair-title">${hairTypeLabel(info.kind)}</div><div class="hair-steps">${steps.map((x,i)=>`<div class="hair-step"><span>${i+1}</span><div>${escapeHtml(x).replace(/\n/g,"<br>")}</div></div>`).join("")}</div><button class="hair-complete" id="hairComplete">${doneToday?"✓ Feito hoje":"Marcar como feito"}</button></section>
- <section class="hair-section"><div class="section-head"><h2>Seu caminho</h2><span class="soft-count">45 dias</span></div><div class="hair-links"><button data-hair-view="cronograma">📅 Ver cronograma</button><button data-hair-view="dayafter">✨ Como fazer o day after</button><button data-hair-view="night">🌙 Como preservar à noite</button></div></section>
- <section class="hair-section"><div class="section-head"><h2>Próximas lavagens</h2></div><div class="hair-list">${nextWash.map(([k,r])=>`<button class="hair-list-item" data-hair-date="${k}"><strong>${k}</strong><span>${escapeHtml(r.tratamento.split("\n")[0])}</span><small>${escapeHtml(r.shampoo)}</small></button>`).join("")||`<div class="empty compact"><strong>Nenhuma lavagem futura no cronograma.</strong></div>`}</div></section>`;
- document.querySelector("#hairBack").onclick=()=>{location.hash="rituais";renderRituais()};
- document.querySelector("#hairComplete").onclick=()=>{const x=hairLoad();x.done=x.done||{};x.done[todayKey]=!x.done[todayKey];hairSave(x);renderCabelo()};
- document.querySelectorAll("[data-hair-view]").forEach(b=>b.onclick=()=>openHairInfo(b.dataset.hairView));
- document.querySelectorAll("[data-hair-date]").forEach(b=>b.onclick=()=>openHairWash(b.dataset.hairDate));
-}
-function openHairInfo(type){
- let title="",body="";
- if(type==="dayafter"){title="✨ Como fazer o day after";body=hairDayAfter();}
- else if(type==="night"){title="🌙 Como preservar à noite";body="Não lavar. Preservar a definição e proteger o cabelo para dormir. Na manhã seguinte, seguir o COMO do day after quando necessário.";}
- else {title="📅 Cronograma de 45 dias";body=Object.entries(HAIR_WASH).map(([k,r])=>`${k} • ${r.tratamento.split("\\n")[0]}`).join("\n")+"\n\n13/09 • COLORAÇÃO — Imédia L'Oréal 6.1, somente raiz/brancos.";}
- openHairDialog(title,body);
-}
-function openHairWash(key){const r=HAIR_WASH[key];if(!r)return;openHairDialog("🚿 Lavagem • "+key,`☀️ MANHÃ\n\n🧴 ${r.shampoo}${r.s10?"\n⏱️ "+r.s10:""}\n\n🧖🏼‍♀️ ${r.tratamento}\n\n🧴 Cond.: ${r.condicionador}\n\n💇🏼‍♀️ FINALIZAÇÃO\n${hairFinalizacao()}\n\n✨ Sérum: ${r.serum}\n\n🌙 NOITE: não lavar; preservar a definição.`)}
-function openHairDialog(title,body){const d=document.createElement("dialog");d.className="hair-dialog";d.innerHTML=`<div class="hair-dialog-inner"><div class="eyebrow">COMO FAZER</div><h3>${escapeHtml(title)}</h3><div class="hair-dialog-body">${escapeHtml(body).replace(/\n/g,"<br>")}</div><button class="primary" id="closeHair">Fechar</button></div>`;document.body.appendChild(d);d.querySelector("#closeHair").onclick=()=>{d.close();d.remove()};d.addEventListener("click",e=>{if(e.target===d){d.close();d.remove()}});d.showModal();}
-
 function renderPlaceholder() {
   const data = {
     ideias: ["💡", "Criação & Ideias", "Este espaço vem em seguida. A ideia é registrar sem transformar tudo em obrigação."],
-    rituais: ["✨", "Rituais", "Seu espaço para rotinas conscientes. O Ritual Capilar já pode ser acessado pelo caminho COMO FAZER."]
+    rituais: ["✨", "Rituais", "O próximo módulo será construído depois de Criação & Ideias — incluindo o Ritual Capilar."]
   };
   const item = data[state.route] || ["💜", "Minha Vida", "Os módulos serão construídos de baixo para cima, na ordem definida."];
   app.innerHTML = `
@@ -1773,16 +938,16 @@ function renderPlaceholder() {
 }
 
 document.querySelector("#homeBtn").onclick = () => {
-  state.route="meu-dia";
+  state.route="pendencias";
   state.filter="abertas";
   state.search="";
-  location.hash = "meu-dia";
+  location.hash = "pendencias";
   render();
 };
 
 document.querySelector("#backBtn").onclick = () => {
-  state.route="meu-dia";
-  location.hash = "meu-dia";
+  state.route="pendencias";
+  location.hash = "pendencias";
   render();
 };
 
