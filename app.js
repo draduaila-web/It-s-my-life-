@@ -166,7 +166,26 @@ function ensureMainNavigation() {
     background:'transparent', border:'0', textDecoration:'none'
   }));
   const more = nav.querySelector('[data-more]');
-  if (more) more.onclick = () => document.getElementById('moduleMenu')?.showModal();
+  const moduleMenu = document.getElementById('moduleMenu');
+  if (more) more.onclick = (e) => {
+    e.preventDefault();
+    if (moduleMenu && !moduleMenu.open) moduleMenu.showModal();
+  };
+
+  // Garante o fechamento do menu principal pelo X mesmo quando o index
+  // estiver vindo de uma versão antiga/cacheada.
+  if (moduleMenu) {
+    const menuClose = moduleMenu.querySelector('.sheet-head button');
+    if (menuClose) menuClose.onclick = (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      moduleMenu.close();
+    };
+    moduleMenu.oncancel = (e) => { e.preventDefault(); moduleMenu.close(); };
+    moduleMenu.onclick = (e) => {
+      if (e.target === moduleMenu) moduleMenu.close();
+    };
+  }
 
   const links = document.querySelector('.module-links');
   if (links) {
