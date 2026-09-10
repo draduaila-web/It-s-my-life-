@@ -961,7 +961,7 @@ function ensureFinanceStyles(){
  `;document.head.appendChild(s);
 }
 function openFinModal(type){
- const d=loadFin(),dlg=document.createElement("dialog"); dlg.className="finance-dialog crefito-dialog";
+ const d=loadFin(),dlg=document.createElement("dialog"); dlg.className="finance-dialog";
  const title=type==="income"?"Ajustar renda mensal":type==="fixed"?"Adicionar ao orçamento":"Registrar gasto";
  const options=(arr,sel)=>arr.map(x=>`<option ${x===sel?"selected":""}>${x}</option>`).join("");
  dlg.innerHTML=`<form method="dialog" class="modal-card" id="finForm"><div class="modal-head"><div><div class="eyebrow">💰 FINANCEIRO</div><h2>${title}</h2></div><button type="button" class="icon-btn fin-close" id="closeFinX" aria-label="Fechar">×</button></div>
@@ -980,17 +980,17 @@ function openFinModal(type){
 function ensureWorkStyles(){
  if(document.getElementById("work-v2-styles")) return;
  const s=document.createElement("style");s.id="work-v2-styles";s.textContent=`
- .work-grid{display:grid;gap:14px}.work-card{border:1px solid rgba(92,72,104,.12);text-align:left;display:grid;grid-template-columns:52px 1fr;grid-template-rows:auto auto;column-gap:12px;align-items:center;cursor:pointer;padding:18px!important}.work-card .work-icon{grid-row:1/3;font-size:32px}.work-card strong{font-size:19px}.work-card span:last-child{font-size:13px;color:#817783}.work-note{margin-top:16px;display:grid;gap:6px}.work-note span{color:#817783}.work-subnav{display:flex;align-items:center;gap:10px;margin:4px 0 18px}.work-back{border:0;background:#f1e9f5;color:#654b75;border-radius:999px;padding:9px 14px;font-weight:800}.work-subtitle{color:#817783;margin:0}.work-panels{display:grid;gap:12px}.work-panel{padding:18px!important;display:grid;gap:7px;border:1px solid rgba(92,72,104,.10)}.work-panel span{color:#817783;font-size:14px}.work-panel .panel-tag{justify-self:start;background:#f7f0e8;border-radius:999px;padding:6px 10px;font-size:12px;color:#756975;font-weight:700}.work-rule{margin-top:16px;padding:14px 16px;border-radius:18px;background:linear-gradient(135deg,#f5edf7,#eef5f2);color:#6e6470}
+ .work-grid{display:grid;gap:14px}.work-card{border:1px solid rgba(92,72,104,.12);text-align:left;display:grid;grid-template-columns:52px 1fr;grid-template-rows:auto auto;column-gap:12px;align-items:center;cursor:pointer;padding:18px!important}.work-card .work-icon{grid-row:1/3;font-size:32px}.work-card strong{font-size:19px}.work-card span:last-child{font-size:13px;color:#817783}.work-note{margin-top:16px;display:grid;gap:6px}.work-note span{color:#817783}.work-subnav{display:flex;align-items:center;gap:10px;margin:4px 0 18px}.work-back{border:0;background:#f1e9f5;color:#654b75;border-radius:999px;padding:9px 14px;font-weight:800}.work-subtitle{color:#817783;margin:0}.work-panels{display:grid;gap:12px}.work-panel{padding:18px!important;display:grid;gap:7px;border:1px solid rgba(92,72,104,.10)}.work-panel span{color:#817783;font-size:14px}.work-panel .panel-tag{justify-self:start;background:#f7f0e8;border-radius:999px;padding:6px 10px;font-size:12px;color:#756975;font-weight:700}.work-rule{margin-top:16px;padding:14px 16px;border-radius:18px;background:linear-gradient(135deg,#f5edf7,#eef5f2);color:#6e6470} .modal-brand-logo{width:28px;height:20px;object-fit:contain;vertical-align:middle}.hero h2{display:flex;align-items:center;gap:10px}.hero-brand-logo{width:42px;height:32px;object-fit:contain}.bec-mark{display:flex;align-items:center;justify-content:center;width:48px;height:48px;border-radius:14px;background:linear-gradient(135deg,#edf5f2,#f5edf7);color:#65795f;font-size:18px;font-weight:900;letter-spacing:-1px}.tiktok-mark{display:flex;align-items:center;justify-content:center;width:48px;height:48px;border-radius:14px;background:#111;color:#fff;font-size:28px;font-weight:900}
  `;document.head.appendChild(s)
 }
 function renderTrabalho(){
- ensureWorkStyles();
+ ensureWorkStyles();ensureCrefitoStyles();
  app.innerHTML=`<section class="hero"><h2>💼 Trabalho</h2><p>Um espaço separado para organizar minhas frentes profissionais, sem misturar trabalho com o Financeiro.</p></section>
  <div class="section-title">MINHAS FRENTES</div>
  <section class="work-grid">
-  <button class="card work-card" data-work-route="trabalho-crefito"><span class="work-icon">🏛️</span><strong>CREFITO-11</strong><span>Trabalho oficial · 08:00–14:00</span></button>
-  <button class="card work-card" data-work-route="trabalho-bec"><span class="work-icon">🌿</span><strong>BEC</strong><span>Empresa, projetos e operações.</span></button>
-  <button class="card work-card" data-work-route="trabalho-tiktok"><span class="work-icon">🎵</span><strong>TikTok</strong><span>Conteúdo, ideias e presença digital.</span></button>
+  <button class="card work-card" data-work-route="trabalho-crefito"><span class="work-icon"><img class="work-logo" src="https://www.crefito11.gov.br/arquivos/img_logo/logo.png" alt="CREFITO-11"></span><strong>CREFITO-11</strong><span>Trabalho oficial · 08:00–14:00</span></button>
+  <button class="card work-card" data-work-route="trabalho-bec"><span class="work-icon"><span class="tiktok-word" style="color:#65795f;font-size:24px;letter-spacing:-1px">BEC</span></span><strong>BEC</strong><span>Empresa, projetos e operações.</span></button>
+  <button class="card work-card" data-work-route="trabalho-tiktok"><span class="work-icon"><span class="tiktok-word"><i>♪</i></span></span><strong>TikTok</strong><span>Conteúdo, ideias e presença digital.</span></button>
  </section>
  <section class="card work-note"><strong>Menos decisões · mais clareza</strong><span>Cada frente tem seu próprio espaço. O que for realmente importante pode depois alimentar o Meu Dia.</span></section>`;
  document.querySelectorAll("[data-work-route]").forEach(b=>b.onclick=()=>{location.hash=b.dataset.workRoute});
@@ -999,44 +999,38 @@ const CREFITO_KEY="minha-vida.trabalho.crefito.v1";
 function loadCrefito(){try{return JSON.parse(localStorage.getItem(CREFITO_KEY))||[]}catch{return[]}}
 function saveCrefito(x){localStorage.setItem(CREFITO_KEY,JSON.stringify(x))}
 function ensureCrefitoStyles(){
- if(document.getElementById("crefito-v3-styles")) return;
- const s=document.createElement("style");s.id="crefito-v3-styles";s.textContent=`
- .work-summary{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;margin:14px 0 20px}.work-stat{padding:15px;border-radius:18px;background:#f7f0e8;border:1px solid rgba(92,72,104,.09)}.work-stat b{display:block;font-size:22px;color:#4b4350}.work-stat span{font-size:12px;color:#817783}.work-section{margin-top:18px}.work-section-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px}.work-section-head h3{margin:0}.work-add{border:0;border-radius:999px;background:#eee7f7;color:#654b75;padding:8px 13px;font-weight:800}.work-list{display:grid;gap:9px}.work-item{padding:14px 16px!important;display:grid;grid-template-columns:1fr auto;gap:5px}.work-item small{color:#817783}.work-badge{align-self:start;border-radius:999px;padding:5px 9px;background:#f7f0e8;color:#756975;font-size:11px;font-weight:800}.work-empty{padding:18px;border:1px dashed rgba(92,72,104,.18);border-radius:18px;color:#817783;text-align:center}.work-form{display:grid;gap:12px}.work-form label{display:grid;gap:6px;font-weight:700;color:#6f6672}.work-form input,.work-form select,.work-form textarea{width:100%;box-sizing:border-box;border:1px solid #e6dce4;border-radius:14px;padding:12px 13px;background:#fff;font:inherit}.work-form textarea{min-height:90px;resize:vertical}.work-actions{display:flex;gap:10px;justify-content:flex-end}.work-cancel{border:0;background:#f2ecef;color:#655b67;border-radius:999px;padding:10px 15px;font-weight:800}.work-save{border:0;background:#d989aa;color:white;border-radius:999px;padding:10px 17px;font-weight:800}.crefito-dialog{width:min(92vw,560px)!important;max-width:560px!important;max-height:82vh!important;margin:auto!important;padding:0!important;border:0!important;border-radius:26px!important;background:#fffdfb!important;overflow:hidden!important;box-shadow:0 24px 70px rgba(55,42,60,.20)!important}.crefito-dialog::backdrop{background:rgba(45,37,48,.34)!important;backdrop-filter:blur(3px)}.crefito-dialog .dialog-card{max-height:82vh!important;overflow-y:auto!important;overflow-x:hidden!important;padding:22px!important;box-sizing:border-box!important}.crefito-dialog .dialog-head{position:sticky!important;top:-22px!important;z-index:5!important;background:#fffdfb!important;padding:0 0 14px!important;margin-bottom:16px!important;border-bottom:1px solid #eadfe6!important;display:flex!important;justify-content:space-between!important;align-items:flex-start!important;gap:12px!important}.crefito-dialog .dialog-close{width:46px!important;height:46px!important;min-width:46px!important;border:0!important;border-radius:50%!important;background:#fff!important;color:#76568a!important;font-size:30px!important;line-height:1!important;cursor:pointer!important;position:relative!important;z-index:20!important;box-shadow:0 4px 14px rgba(55,42,60,.08)!important}.crefito-dialog .choice-group{display:grid;grid-template-columns:1fr 1fr;gap:8px}.crefito-dialog .choice-group label{display:flex!important;align-items:center!important;gap:8px!important;padding:9px 10px!important;border:1px solid #eadfe6!important;border-radius:12px!important;background:#fff!important;font-weight:600!important;font-size:13px!important}.crefito-dialog .choice-group input{width:auto!important;margin:0!important}.crefito-dialog .conditional{display:none}.crefito-dialog .conditional.show{display:grid}.crefito-dialog .helper{font-size:11px;color:#8a7f88;font-weight:500}.crefito-dialog .section-label{display:grid;gap:7px}.crefito-dialog .section-label>span{font-size:14px;font-weight:700;color:#6f6672}@media(max-width:560px){.crefito-dialog{width:92vw!important;max-width:92vw!important;max-height:82vh!important;border-radius:24px!important}.crefito-dialog .dialog-card{max-height:82vh!important;padding:20px!important}.crefito-dialog .choice-group{grid-template-columns:1fr!important}.crefito-dialog .dialog-head{top:-20px!important}}
+ if(document.getElementById("crefito-v4-styles")) return;
+ const s=document.createElement("style");s.id="crefito-v4-styles";s.textContent=`
+ .work-card{color:#40384a!important}.work-card strong{color:#40384a!important}.work-card span{color:#817783!important}.work-card .work-icon{display:flex;align-items:center;justify-content:center;width:52px;height:52px}.work-logo{width:48px;height:48px;object-fit:contain;display:block}.work-logo.bec{width:52px;height:52px;border-radius:14px;object-fit:contain}.tiktok-word{font-size:18px;font-weight:900;letter-spacing:-1px;color:#111;line-height:1}.tiktok-word i{font-style:normal;text-shadow:2px 0 #25f4ee,-2px 0 #fe2c55}
+ .work-summary{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;margin:14px 0 20px}.work-stat{padding:15px;border-radius:18px;background:#f7f0e8;border:1px solid rgba(92,72,104,.09)}.work-stat b{display:block;font-size:22px;color:#4b4350}.work-stat span{font-size:12px;color:#817783}.work-section{margin-top:18px}.work-section-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px}.work-section-head h3{margin:0}.work-add{border:0;border-radius:999px;background:#eee7f7;color:#654b75;padding:8px 13px;font-weight:800}.work-list{display:grid;gap:9px}.work-item{padding:14px 16px!important;display:grid;grid-template-columns:1fr auto;gap:5px}.work-item small{color:#817783}.work-badge{align-self:start;border-radius:999px;padding:5px 9px;background:#f7f0e8;color:#756975;font-size:11px;font-weight:800}.work-empty{padding:18px;border:1px dashed rgba(92,72,104,.18);border-radius:18px;color:#817783;text-align:center}.work-rule{margin-top:16px;padding:14px 16px;border-radius:18px;background:linear-gradient(135deg,#f5edf7,#eef5f2);color:#6e6470} .modal-brand-logo{width:28px;height:20px;object-fit:contain;vertical-align:middle}.hero h2{display:flex;align-items:center;gap:10px}.hero-brand-logo{width:42px;height:32px;object-fit:contain}.bec-mark{display:flex;align-items:center;justify-content:center;width:48px;height:48px;border-radius:14px;background:linear-gradient(135deg,#edf5f2,#f5edf7);color:#65795f;font-size:18px;font-weight:900;letter-spacing:-1px}.tiktok-mark{display:flex;align-items:center;justify-content:center;width:48px;height:48px;border-radius:14px;background:#111;color:#fff;font-size:28px;font-weight:900}
+ .crefito-dialog{width:min(92vw,620px)!important;max-width:620px!important;max-height:84vh!important;margin:auto!important;padding:0!important;border:0!important;border-radius:28px!important;background:#fffdfb!important;overflow:hidden!important;box-shadow:0 24px 70px rgba(55,42,60,.20)!important}.crefito-dialog::backdrop{background:rgba(45,37,48,.34)!important;backdrop-filter:blur(3px)}.crefito-dialog .modal-card{width:100%!important;max-width:none!important;max-height:84vh!important;box-sizing:border-box!important;overflow-y:auto!important;overflow-x:hidden!important;padding:24px!important}.crefito-dialog .modal-head{position:sticky!important;top:-24px!important;z-index:5!important;background:#fffdfb!important;padding:0 0 18px!important;margin-bottom:18px!important}.crefito-dialog .modal-head .icon-btn{width:48px!important;height:48px!important;min-width:48px!important;border-radius:50%!important;cursor:pointer!important;pointer-events:auto!important;z-index:20!important}.crefito-dialog label{display:block!important;margin-bottom:16px!important}.crefito-dialog input,.crefito-dialog select,.crefito-dialog textarea{width:100%!important;box-sizing:border-box!important}.crefito-dialog .form-grid{display:grid!important;grid-template-columns:1fr 1fr!important;gap:14px!important}.crefito-dialog .choice-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:0 0 16px}.crefito-dialog .choice-title{font-weight:800;color:#6f6672;margin:2px 0 8px}.crefito-dialog .choice{display:flex;align-items:center;gap:10px;border:1px solid #e6dce4;border-radius:14px;padding:11px 12px;background:#fff;font-weight:700;color:#6f6672;min-height:46px;box-sizing:border-box}.crefito-dialog .choice input{width:20px!important;height:20px!important;margin:0;accent-color:#80629a}.crefito-dialog .modal-actions{display:flex;gap:10px;justify-content:flex-end;padding-top:4px}.crefito-dialog .modal-actions .secondary{border:0;background:#f2ecef;color:#655b67;border-radius:999px;padding:10px 15px;font-weight:800}.crefito-dialog .modal-actions .primary{border:0;background:#d989aa;color:white;border-radius:999px;padding:10px 17px;font-weight:800}.crefito-dialog .modal-actions .grow{flex:1}@media(max-width:560px){.crefito-dialog{width:92vw!important;max-width:92vw!important;max-height:84vh!important;border-radius:24px!important}.crefito-dialog .modal-card{max-height:84vh!important;padding:20px!important}.crefito-dialog .form-grid,.crefito-dialog .choice-grid{grid-template-columns:1fr 1fr!important}.crefito-dialog .modal-head{top:-20px!important}}
  `;document.head.appendChild(s)
 }
 function openCrefitoItem(kind){
  const labels={demanda:"Nova demanda",projeto:"Novo projeto",reuniao:"Nova reunião",pauta:"Nova pauta / acompanhamento"};
- const dlg=document.createElement("dialog");dlg.className="finance-dialog crefito-dialog";
- dlg.innerHTML=`<form method="dialog" class="modal-card" id="crefitoForm"><div class="modal-head"><div><div class="eyebrow">🏛️ CREFITO-11</div><h2>${labels[kind]}</h2></div><button type="button" class="icon-btn" aria-label="Fechar">×</button></div>
+ const dlg=document.createElement("dialog");dlg.className="crefito-dialog";
+ const today=todayISO();
+ dlg.innerHTML=`<form method="dialog" class="modal-card" id="crefitoForm"><div class="modal-head"><div><div class="eyebrow"><img class="modal-brand-logo" src="https://www.crefito11.gov.br/arquivos/img_logo/logo.png" alt="CREFITO-11"> CREFITO-11</div><h2>${labels[kind]}</h2></div><button type="button" class="icon-btn" id="closeCrefitoX" aria-label="Fechar">×</button></div>
  <label>Título<input id="cTitle" required placeholder="O que precisa ser acompanhado?"></label>
- <label>Data<input id="cDate" type="date" value="${new Date().toISOString().slice(0,10)}"></label>
- ${kind!=="reuniao"?`<label>Status<select id="cStatus"><option>Aberto</option><option>Em andamento</option><option>Concluído</option><option>Aguardando</option></select></label>`:`<label>Horário<input id="cTime" type="time"></label>`}
+ <div class="form-grid"><label>Data<input id="cDate" type="date" value="${today}"></label>${kind==="reuniao"?`<label>Horário<input id="cTime" type="time"></label>`:`<label>Status<select id="cStatus"><option>Aberto</option><option>Em andamento</option><option>Concluído</option><option>Aguardando</option></select></label>`}</div>
+ ${kind==="reuniao"?`<label>Status<select id="cStatus"><option>Agendada</option><option>Realizada</option><option>Cancelada</option></select></label>`:""}
  <label>Prioridade<select id="cPriority"><option>Normal</option><option>Alta</option><option>Baixa</option></select></label>
- <div class="section-label"><span>👥 Relaciona-se com</span><div class="choice-group">
- <label><input type="checkbox" name="rel" value="Profissional"> Profissional</label><label><input type="checkbox" name="rel" value="Empresa"> Empresa</label><label><input type="checkbox" name="rel" value="Presidência"> Presidência</label><label><input type="checkbox" name="rel" value="Jurídico"> Jurídico</label><label><input type="checkbox" name="rel" value="Tesouraria"> Tesouraria</label><label><input type="checkbox" name="rel" value="Atendimento"> Atendimento</label><label><input type="checkbox" name="rel" value="Administrativo"> Administrativo</label><label><input type="checkbox" name="rel" value="Equipe do Setor"> Equipe do Setor</label>
- </div><input id="cRelatedOther" placeholder="Outro / nome da pessoa, empresa ou setor"></div>
- <div class="section-label"><span>💻 Sistemas / controles utilizados</span><div class="choice-group">
- <label><input type="checkbox" name="sys" value="Implanta"> Implanta</label><label><input type="checkbox" name="sys" value="Siscaf"> Siscaf</label><label><input type="checkbox" name="sys" value="SEI"> SEI</label><label><input type="checkbox" name="sys" value="Planilha"> Planilha</label><label><input type="checkbox" name="sys" value="E-mail"> E-mail</label><label><input type="checkbox" name="sys" value="WhatsApp"> WhatsApp</label>
- </div><input id="cSystemOther" placeholder="Outro sistema / controle"></div>
- <div class="section-label conditional" id="cSpreadsheetWrap"><span>📊 Qual planilha?</span><input id="cSpreadsheet" placeholder="Nome ou identificação da planilha"><span class="helper">Se houver mais de uma, separe por vírgulas.</span></div>
- <label>📍 Onde deve ser acompanhado?<select id="cFollow"><option>Siscaf</option><option>SEI</option><option>Controle interno</option><option>Pendências do setor</option><option>Outro</option></select></label>
+ <div class="choice-title">👥 Relaciona-se com</div><div class="choice-grid">${["Profissional","Empresa","Presidência","Jurídico","Tesouraria","Atendimento","TI / Informática","Outro setor"].map(x=>`<label class="choice"><input type="checkbox" name="rel" value="${x}"><span>${x}</span></label>`).join("")}</div>
+ <label>Pessoa / contato<input id="cContact" maxlength="120" placeholder="Nome da pessoa, responsável ou contato (opcional)"></label>
+ <div class="choice-title">🗂️ Sistemas / planilhas envolvidos</div><div class="choice-grid">${["Implanta","Siscaf","SEI","Excel / planilha","Google Sheets","Outro sistema"].map(x=>`<label class="choice"><input type="checkbox" name="sys" value="${x}"><span>${x}</span></label>`).join("")}</div>
  <label>Observação<textarea id="cNote" placeholder="Anotações, próximos passos ou contexto..."></textarea></label>
- <div class="modal-actions"><div class="grow"></div><button type="button" class="secondary">Cancelar</button><button class="primary" type="submit" value="default">Salvar</button></div>
- </form>`;
+ <div class="modal-actions"><div class="grow"></div><button type="button" class="secondary" id="cancelCrefito">Cancelar</button><button class="primary" id="saveCrefito" value="default">Salvar</button></div></form>`;
  document.body.appendChild(dlg);dlg.showModal();
- const close=()=>{if(dlg.open)dlg.close();setTimeout(()=>dlg.remove(),0)};
- dlg.querySelector(".icon-btn").onclick=close;dlg.querySelector(".secondary").onclick=close;
- dlg.addEventListener("click",e=>{if(e.target===dlg)close()});
- const syncSheet=()=>dlg.querySelector("#cSpreadsheetWrap").classList.toggle("show",[...dlg.querySelectorAll('input[name="sys"]:checked')].some(x=>x.value==="Planilha"));
- dlg.querySelectorAll('input[name="sys"]').forEach(x=>x.addEventListener("change",syncSheet));syncSheet();
- dlg.querySelector("form").onsubmit=e=>{e.preventDefault();const arr=loadCrefito();arr.push({id:uid(),kind,title:dlg.querySelector("#cTitle").value.trim(),date:dlg.querySelector("#cDate").value,status:dlg.querySelector("#cStatus")?.value||"Agendada",time:dlg.querySelector("#cTime")?.value||"",priority:dlg.querySelector("#cPriority").value,related:[...dlg.querySelectorAll('input[name="rel"]:checked')].map(x=>x.value),relatedOther:dlg.querySelector("#cRelatedOther").value.trim(),systems:[...dlg.querySelectorAll('input[name="sys"]:checked')].map(x=>x.value),systemOther:dlg.querySelector("#cSystemOther").value.trim(),spreadsheet:dlg.querySelector("#cSpreadsheet").value.trim(),follow:dlg.querySelector("#cFollow").value,note:dlg.querySelector("#cNote").value.trim(),createdAt:Date.now()});saveCrefito(arr);close();renderTrabalhoSub("crefito")};
+ const close=()=>{try{if(dlg.open)dlg.close()}finally{if(dlg.isConnected)dlg.remove()}};
+ dlg.querySelector("#closeCrefitoX").onclick=e=>{e.preventDefault();e.stopPropagation();close()};dlg.querySelector("#cancelCrefito").onclick=e=>{e.preventDefault();e.stopPropagation();close()};dlg.addEventListener("cancel",e=>{e.preventDefault();close()});dlg.addEventListener("click",e=>{if(e.target===dlg)close()});
+ dlg.querySelector("#crefitoForm").onsubmit=e=>{e.preventDefault();const arr=loadCrefito();const checked=n=>Array.from(dlg.querySelectorAll(`input[name="${n}"]:checked`)).map(x=>x.value);arr.push({id:uid(),kind,title:dlg.querySelector("#cTitle").value.trim(),date:dlg.querySelector("#cDate").value,status:dlg.querySelector("#cStatus")?.value||"Agendada",time:dlg.querySelector("#cTime")?.value||"",priority:dlg.querySelector("#cPriority").value,relations:checked("rel"),contact:dlg.querySelector("#cContact").value.trim(),systems:checked("sys"),note:dlg.querySelector("#cNote").value.trim(),createdAt:Date.now()});saveCrefito(arr);close();renderCrefito()};
 }
 function renderCrefito(){
  ensureWorkStyles();ensureCrefitoStyles();
  const all=loadCrefito(), today=new Date().toISOString().slice(0,10), open=all.filter(x=>x.status!=="Concluído"), upcoming=all.filter(x=>x.kind==="reuniao"&&x.date>=today).sort((a,b)=>(a.date+a.time).localeCompare(b.date+b.time));
  const labels={demanda:"Demanda",projeto:"Projeto",reuniao:"Reunião",pauta:"Pauta"};
- const item=x=>`<article class="card work-item"><div><strong>${x.title}</strong><small>${x.date?new Date(x.date+"T12:00:00").toLocaleDateString("pt-BR"):"Sem data"}${x.time?` · ${x.time}`:""} · ${labels[x.kind]} · ${x.priority}</small>${x.note?`<small>${x.note}</small>`:""}</div><span class="work-badge">${x.status||"Agendada"}</span></article>`;
- app.innerHTML=`<section class="hero"><div class="eyebrow">💼 TRABALHO</div><h2>🏛️ CREFITO-11</h2><p>Um espaço próprio para acompanhar o trabalho oficial, sem misturar com a vida pessoal.</p></section>
+ const item=x=>`<article class="card work-item"><div><strong>${escapeHtml(x.title)}</strong><small>${x.date?new Date(x.date+"T12:00:00").toLocaleDateString("pt-BR"):"Sem data"}${x.time?` · ${x.time}`:""} · ${labels[x.kind]} · ${x.priority}</small>${(x.relations||[]).length?`<small>Relaciona-se: ${escapeHtml(x.relations.join(", "))}</small>`:""}${(x.systems||[]).length?`<small>Sistemas: ${escapeHtml(x.systems.join(", "))}</small>`:""}${x.contact?`<small>Contato: ${escapeHtml(x.contact)}</small>`:""}${x.note?`<small>${escapeHtml(x.note)}</small>`:""}</div><span class="work-badge">${x.status||"Agendada"}</span></article>`;
+ app.innerHTML=`<section class="hero"><div class="eyebrow">💼 TRABALHO</div><h2><img class="hero-brand-logo" src="https://www.crefito11.gov.br/arquivos/img_logo/logo.png" alt="CREFITO-11"> CREFITO-11</h2><p>Um espaço próprio para acompanhar o trabalho oficial, sem misturar com a vida pessoal.</p></section>
  <div class="work-subnav"><button class="work-back" id="backWork">← Trabalho</button><p class="work-subtitle">ROTINA OFICIAL · 08:00–14:00</p></div>
  <section class="work-summary"><div class="work-stat"><b>${open.length}</b><span>itens em aberto</span></div><div class="work-stat"><b>${upcoming.length}</b><span>reuniões futuras</span></div></section>
  <section class="work-section"><div class="work-section-head"><h3>📋 Demandas</h3><button class="work-add" data-add="demanda">+ adicionar</button></div><div class="work-list">${all.filter(x=>x.kind==="demanda").slice(-5).reverse().map(item).join("")||`<div class="work-empty">Nenhuma demanda registrada ainda.</div>`}</div></section>
@@ -1050,8 +1044,8 @@ function renderTrabalhoSub(kind){
  if(kind==="crefito"){renderCrefito();return}
  ensureWorkStyles();
  const cfg={
-  bec:{icon:"🌿",name:"BEC",desc:"Seu espaço para a empresa, projetos e operações.",tag:"EMPRESA",panels:[["📋 Demandas","Registrar o que precisa ser resolvido na operação da BEC."],["💡 Projetos","Manter projetos, ideias e próximos passos em um lugar próprio."],["📦 Produtos & serviços","Organizar iniciativas da BEC sem lançá-las automaticamente como gasto financeiro."]]},
-  tiktok:{icon:"🎵",name:"TikTok",desc:"Seu espaço para conteúdo e presença digital.",tag:"CONTEÚDO",panels:[["💡 Ideias","Guardar ideias de vídeos e conteúdos antes de decidir quando publicar."],["🎬 Produção","Acompanhar conteúdos em preparação, gravação e edição."],["📅 Publicações","Organizar o que foi publicado e o que está planejado."]]}
+  bec:{icon:`<span class="bec-mark">BEC</span>`,name:"BEC",desc:"Seu espaço para a empresa, projetos e operações.",tag:"EMPRESA",panels:[["📋 Demandas","Registrar o que precisa ser resolvido na operação da BEC."],["💡 Projetos","Manter projetos, ideias e próximos passos em um lugar próprio."],["📦 Produtos & serviços","Organizar iniciativas da BEC sem lançá-las automaticamente como gasto financeiro."]]},
+  tiktok:{icon:`<span class="tiktok-mark">♪</span>`,name:"TikTok",desc:"Seu espaço para conteúdo e presença digital.",tag:"CONTEÚDO",panels:[["💡 Ideias","Guardar ideias de vídeos e conteúdos antes de decidir quando publicar."],["🎬 Produção","Acompanhar conteúdos em preparação, gravação e edição."],["📅 Publicações","Organizar o que foi publicado e o que está planejado."]]}
  }[kind];
  app.innerHTML=`<section class="hero"><div class="eyebrow">💼 TRABALHO</div><h2>${cfg.icon} ${cfg.name}</h2><p>${cfg.desc}</p></section><div class="work-subnav"><button class="work-back" id="backWork">← Trabalho</button><p class="work-subtitle">${cfg.tag}</p></div><section class="work-panels">${cfg.panels.map(x=>`<article class="card work-panel"><span class="panel-tag">${cfg.tag}</span><h3>${x[0]}</h3><span>${x[1]}</span></article>`).join("")}</section><div class="work-rule">Nada aqui vira obrigação automaticamente. Primeiro organizamos; depois decidimos o que merece entrar no Meu Dia.</div>`;
  document.getElementById("backWork").onclick=()=>{location.hash="trabalho"};
@@ -1291,169 +1285,3 @@ if ("serviceWorker" in navigator) {
 window.addEventListener("DOMContentLoaded", ensureMainNavigation);
 
 render();
-
-
-/* ============================================================
-   MINHA VIDA — MODAL PADRÃO GLOBAL
-   Usa o mesmo padrão visual do modal mestre "Registrar gasto".
-   ============================================================ */
-(function applyGlobalModalPattern(){
-  const css = `
-    /* Modal mestre: mesma linguagem em todo o app */
-    dialog.app-dialog,
-    dialog.finance-dialog,
-    dialog.crefito-dialog {
-      width: min(92vw, 620px) !important;
-      max-width: 620px !important;
-      max-height: 84vh !important;
-      margin: auto !important;
-      padding: 0 !important;
-      border: 0 !important;
-      border-radius: 28px !important;
-      background: #fffdfb !important;
-      overflow: hidden !important;
-      box-shadow: 0 24px 70px rgba(55,42,60,.20) !important;
-    }
-    dialog.app-dialog::backdrop,
-    dialog.finance-dialog::backdrop,
-    dialog.crefito-dialog::backdrop {
-      background: rgba(45,37,48,.34) !important;
-      backdrop-filter: blur(3px);
-    }
-    dialog.app-dialog .modal-card,
-    dialog.finance-dialog .modal-card,
-    dialog.crefito-dialog .dialog-card {
-      width: 100% !important;
-      max-width: none !important;
-      max-height: 84vh !important;
-      box-sizing: border-box !important;
-      overflow-y: auto !important;
-      overflow-x: hidden !important;
-      padding: 24px !important;
-    }
-    dialog.app-dialog .modal-head,
-    dialog.finance-dialog .modal-head,
-    dialog.crefito-dialog .dialog-head {
-      position: sticky !important;
-      top: -24px !important;
-      z-index: 20 !important;
-      background: #fffdfb !important;
-      padding: 0 0 18px !important;
-      margin-bottom: 18px !important;
-      display: flex !important;
-      justify-content: space-between !important;
-      align-items: flex-start !important;
-      gap: 12px !important;
-      border-bottom: 1px solid #eadfe6 !important;
-    }
-    dialog.app-dialog .icon-btn,
-    dialog.finance-dialog .icon-btn,
-    dialog.crefito-dialog .dialog-close {
-      width: 48px !important;
-      height: 48px !important;
-      min-width: 48px !important;
-      flex: 0 0 48px !important;
-      border: 0 !important;
-      border-radius: 50% !important;
-      background: #fff !important;
-      color: #76568a !important;
-      font-size: 30px !important;
-      line-height: 1 !important;
-      cursor: pointer !important;
-      pointer-events: auto !important;
-      position: relative !important;
-      z-index: 30 !important;
-      box-shadow: 0 4px 14px rgba(55,42,60,.08) !important;
-    }
-    dialog.app-dialog label,
-    dialog.finance-dialog label,
-    dialog.crefito-dialog .section-label {
-      display: grid !important;
-      gap: 7px !important;
-      margin-bottom: 14px !important;
-    }
-    dialog.app-dialog input,
-    dialog.app-dialog select,
-    dialog.app-dialog textarea,
-    dialog.finance-dialog input,
-    dialog.finance-dialog select,
-    dialog.finance-dialog textarea,
-    dialog.crefito-dialog input,
-    dialog.crefito-dialog select,
-    dialog.crefito-dialog textarea {
-      width: 100% !important;
-      box-sizing: border-box !important;
-      border-radius: 14px !important;
-    }
-    /* Escolhas: compactas e respiráveis, como os cards da Casa */
-    dialog.crefito-dialog .choice-group {
-      display: grid !important;
-      grid-template-columns: 1fr 1fr !important;
-      gap: 8px !important;
-    }
-    dialog.crefito-dialog .choice-group label {
-      display: flex !important;
-      align-items: center !important;
-      gap: 8px !important;
-      padding: 10px 11px !important;
-      margin: 0 !important;
-      border: 1px solid #eadfe6 !important;
-      border-radius: 12px !important;
-      background: #fff !important;
-      font-weight: 600 !important;
-      font-size: 14px !important;
-    }
-    dialog.crefito-dialog .choice-group input {
-      width: auto !important;
-      margin: 0 !important;
-    }
-    dialog.app-dialog .modal-actions,
-    dialog.finance-dialog .modal-actions,
-    dialog.crefito-dialog .work-actions {
-      display: flex !important;
-      gap: 10px !important;
-      justify-content: flex-end !important;
-      padding-top: 4px !important;
-    }
-    dialog.app-dialog .secondary,
-    dialog.finance-dialog .secondary,
-    dialog.crefito-dialog .work-cancel {
-      border-radius: 999px !important;
-    }
-    dialog.app-dialog .primary,
-    dialog.finance-dialog .primary,
-    dialog.crefito-dialog .work-save {
-      border-radius: 999px !important;
-    }
-    @media (max-width: 560px) {
-      dialog.app-dialog,
-      dialog.finance-dialog,
-      dialog.crefito-dialog {
-        width: 92vw !important;
-        max-width: 92vw !important;
-        max-height: 84vh !important;
-        border-radius: 24px !important;
-      }
-      dialog.app-dialog .modal-card,
-      dialog.finance-dialog .modal-card,
-      dialog.crefito-dialog .dialog-card {
-        max-height: 84vh !important;
-        padding: 20px !important;
-      }
-      dialog.app-dialog .modal-head,
-      dialog.finance-dialog .modal-head,
-      dialog.crefito-dialog .dialog-head {
-        top: -20px !important;
-      }
-      dialog.crefito-dialog .choice-group {
-        grid-template-columns: 1fr 1fr !important;
-      }
-    }
-  `;
-  if(!document.getElementById('minha-vida-modal-global-style')){
-    const st=document.createElement('style');
-    st.id='minha-vida-modal-global-style';
-    st.textContent=css;
-    document.head.appendChild(st);
-  }
-})();
