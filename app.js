@@ -139,32 +139,18 @@ function mvCurrentBlock(){
  return ['Espaço livre','agora','Você não precisa preencher cada minuto.','free'];
 }
 function activityDaysLabel(days){return ["Dom","Seg","Ter","Qua","Qui","Sex","Sáb"].filter((_,i)=>days.includes(i)).join(" · ")}
+function formatDuration(mins){const n=Math.max(0,Math.round(+mins||0));if(n<60)return `${n} min`;const h=Math.floor(n/60),m=n%60;return m?`${h}h${String(m).padStart(2,"0")}`:`${h}h`;}
+function durationOptions(selected=60){const vals=[5,10,15,20,30,45,60,90,120,180,240,360,480];return vals.map(v=>`<option value="${v}" ${+selected===v?'selected':''}>${formatDuration(v)}</option>`).join('')+`<option value="custom" ${!vals.includes(+selected)?'selected':''}>Personalizada…</option>`;}
+function sessionOptions(selected=60){return [10,15,20,30,45,60,90,120,180].map(v=>`<option value="${v}" ${+selected===v?'selected':''}>${formatDuration(v)}</option>`).join('');}
 function mvPendingCandidates(minutes,day){
  const items=loadPendencias().filter(p=>!p.done);
- return items.map(p=>{
-  const total=Math.max(5,+p.durationMinutes||35);
-  const fractionable=p.fractionable!==false;
-  const allowed=Array.isArray(p.days)?p.days.includes(day):true;
-  if(!allowed)return null;
-  if(total<=minutes)return {id:"pending-"+p.id,name:p.title,module:"Pendências",minutes:total,priority:+p.priority||3,dueDate:p.due||p.dueDate,fractionable,detail:total+" min"};
-  if(fractionable && minutes>=10)return {id:"pending-"+p.id,name:p.title,module:"Pendências",minutes:minutes,priority:(+p.priority||3)+1,dueDate:p.due||p.dueDate,fractionable:true,detail:`sessão de ${minutes} min · total ${total} min`};
-  return null;
- }).filter(Boolean);
-}
+ return items.map(p=>{const total=Math.max(5,+p.durationMinutes||35),fractionable=p.fractionable!==false,allowed=Array.isArray(p.days)?p.days.includes(day):true;if(!allowed)return null;if(total<=minutes)return {id:"pending-"+p.id,name:p.title,module:"Pendências",minutes:total,priority:+p.priority||3,dueDate:p.due||p.dueDate,fractionable,detail:formatDuration(total)};if(fractionable){const minSession=Math.max(5,+p.sessionMinMinutes||10),ideal=Math.max(minSession,+p.sessionMinutes||60);if(minutes>=minSession){const session=Math.min(minutes,ideal);return {id:"pending-"+p.id,name:p.title,module:"Pendências",minutes:session,priority:(+p.priority||3)+1,dueDate:p.due||p.dueDate,fractionable:true,detail:`sessão ${formatDuration(session)} · total ${formatDuration(total)}`};}}return null;}).filter(Boolean);}
 function mvProjectCandidates(minutes,day){
  const ideas=loadIdeias();
- return ideas.filter(p=>p.type==="projeto").map(p=>{
-  const session=Math.max(10,+p.sessionMinutes||60),total=Math.max(session,+p.totalMinutes||session),fractionable=p.fractionable!==false;
-  const days=Array.isArray(p.days)&&p.days.length?p.days:[0,6];
-  if(!days.includes(day))return null;
-  if(session<=minutes)return {id:"project-"+p.id,name:p.title,module:"Projeto",minutes:session,priority:+p.priority||4,dueDate:p.dueDate,detail:`sessão ${session} min · ${total} min totais`};
-  if(fractionable && minutes>=10)return {id:"project-"+p.id,name:p.title,module:"Projeto",minutes,priority:(+p.priority||4)+1,dueDate:p.dueDate,detail:`sessão de ${minutes} min · ${total} min totais`};
-  return null;
- }).filter(Boolean);
-}
+ return ideas.filter(p=>p.type==="projeto").map(p=>{const session=Math.max(10,+p.sessionMinutes||60),total=Math.max(session,+p.totalMinutes||session),fractionable=p.fractionable!==false,minSession=Math.max(5,+p.sessionMinMinutes||10),days=Array.isArray(p.days)&&p.days.length?p.days:[0,6];if(!days.includes(day))return null;if(session<=minutes)return {id:"project-"+p.id,name:p.title,module:"Projeto",minutes:session,priority:+p.priority||4,dueDate:p.dueDate,detail:`sessão ${formatDuration(session)} · ${formatDuration(total)} totais`};if(fractionable&&minutes>=minSession){const use=Math.min(minutes,session);return {id:"project-"+p.id,name:p.title,module:"Projeto",minutes:use,priority:(+p.priority||4)+1,dueDate:p.dueDate,detail:`sessão ${formatDuration(use)} · ${formatDuration(total)} totais`};}return null;}).filter(Boolean);}
 function mvActivitySuggestions(minutes,day=mvDow()){
  const acts=loadActivities(),now=new Date();
- let candidates=acts.filter(a=>a.active!==false&&a.id!=="remote"&&(!a.days||a.days.includes(day))).map(a=>({...a,detail:`${a.minutes} min`})).filter(a=>a.minutes<=minutes);
+ let candidates=acts.filter(a=>a.active!==false&&a.id!=="remote"&&(!a.days||a.days.includes(day))).map(a=>{if(a.minutes<=minutes)return {...a,detail:formatDuration(a.minutes)};if(a.fraction!==false){const minSession=Math.max(5,+a.sessionMinMinutes||10);if(minutes>=minSession){const use=Math.min(minutes,+a.sessionMinutes||a.minutes);return {...a,minutes:use,detail:`sessão ${formatDuration(use)} · total ${formatDuration(a.minutes)}`};}}return null;}).filter(Boolean);
  candidates.push(...mvPendingCandidates(minutes,day));
  candidates.push(...mvProjectCandidates(minutes,day));
  try{
@@ -181,10 +167,10 @@ function mvSuggestBlock(win){
 }
 function openActivityEditor(id){
  const acts=loadActivities(),a=acts.find(x=>x.id===id)||acts[0];if(!a)return;const dlg=document.createElement('dialog');
- dlg.innerHTML=`<form method="dialog" class="modal-card" id="activityEditForm"><div class="modal-head"><div><div class="eyebrow">✏️ ATIVIDADE</div><h2>Editar atividade</h2></div><button class="icon-btn" value="cancel">×</button></div><label>Nome<input id="aeName" value="${escapeHtml(a.name)}"></label><div class="form-grid"><label>Duração real estimada (min)<input id="aeMin" type="number" min="5" max="480" step="5" value="${a.minutes}"></label><label>Prioridade<select id="aePri"><option value="1">Baixa</option><option value="2">Normal</option><option value="3">Importante</option><option value="5">Prioridade alta</option></select></label></div><label>Dias em que pode aparecer<input id="aeDays" value="${activityDaysLabel(a.days||[])}" readonly><small class="note">Para simplificar, use o botão abaixo para marcar/desmarcar os dias.</small></label><div class="day-toggle-grid">${[1,2,3,4,5,6,0].map(day=>`<button type="button" class="day-toggle ${(a.days||[]).includes(day)?'on':''}" data-aeday="${day}">${["Dom","Seg","Ter","Qua","Qui","Sex","Sáb"][day]}</button>`).join('')}</div><label>Horário/janela preferencial (opcional)<input id="aeTime" value="${escapeHtml(a.preferredTime||"")}" placeholder="Ex.: tarde / 14:30–15:10"></label><label class="check-line"><input id="aeFraction" type="checkbox" ${a.fraction!==false?"checked":""}> Pode usar parte da janela</label><div class="modal-actions"><div class="grow"></div><button type="button" class="secondary" id="cancelAe">Cancelar</button><button class="primary" value="default">Salvar</button></div></form>`;
- document.body.appendChild(dlg);dlg.querySelector('#aePri').value=a.priority||2;dlg.showModal();dlg.querySelector('#cancelAe').onclick=()=>{dlg.close();dlg.remove()};
+ dlg.innerHTML=`<form method="dialog" class="modal-card" id="activityEditForm"><div class="modal-head"><div><div class="eyebrow">✏️ ATIVIDADE</div><h2>Editar atividade</h2></div><button class="icon-btn" value="cancel">×</button></div><label>Nome<input id="aeName" value="${escapeHtml(a.name)}"></label><div class="form-grid"><label>Duração total<select id="aeMin">${durationOptions(a.minutes)}</select><input id="aeMinCustom" class="duration-custom" type="number" min="5" max="480" step="5" value="${a.minutes}" style="display:none"></label><label>Prioridade<select id="aePri"><option value="1">Baixa</option><option value="2">Normal</option><option value="3">Importante</option><option value="5">Prioridade alta</option></select></label></div><label>Dias em que pode aparecer<input id="aeDays" value="${activityDaysLabel(a.days||[])}" readonly><small class="note">Para simplificar, use o botão abaixo para marcar/desmarcar os dias.</small></label><div class="day-toggle-grid">${[1,2,3,4,5,6,0].map(day=>`<button type="button" class="day-toggle ${(a.days||[]).includes(day)?'on':''}" data-aeday="${day}">${["Dom","Seg","Ter","Qua","Qui","Sex","Sáb"][day]}</button>`).join('')}</div><label>Horário/janela preferencial (opcional)<input id="aeTime" value="${escapeHtml(a.preferredTime||"")}" placeholder="Ex.: tarde / 14:30–15:10"></label><label class="check-line"><input id="aeFraction" type="checkbox" ${a.fraction!==false?"checked":""}> Pode usar parte da janela</label><div class="form-grid" id="aeSessionFields" style="display:${a.fraction!==false?"grid":"none"}"><label>Sessão ideal<select id="aeSession">${sessionOptions(a.sessionMinutes||a.minutes)}</select></label><label>Sessão mínima<select id="aeSessionMin">${sessionOptions(a.sessionMinMinutes||10)}</select></label></div><div class="modal-actions"><div class="grow"></div><button type="button" class="secondary" id="cancelAe">Cancelar</button><button class="primary" value="default">Salvar</button></div></form>`;
+ document.body.appendChild(dlg);dlg.querySelector('#aePri').value=a.priority||2;dlg.querySelector('#aeMin').addEventListener('change',()=>{dlg.querySelector('#aeMinCustom').style.display=dlg.querySelector('#aeMin').value==='custom'?'block':'none'});dlg.querySelector('#aeFraction').addEventListener('change',()=>{dlg.querySelector('#aeSessionFields').style.display=dlg.querySelector('#aeFraction').checked?'grid':'none'});dlg.showModal();dlg.querySelector('#cancelAe').onclick=()=>{dlg.close();dlg.remove()};
  dlg.querySelectorAll('[data-aeday]').forEach(b=>b.onclick=()=>b.classList.toggle('on'));
- dlg.querySelector('#activityEditForm').addEventListener('submit',e=>{e.preventDefault();a.name=dlg.querySelector('#aeName').value.trim()||a.name;a.minutes=Math.max(5,+dlg.querySelector('#aeMin').value||a.minutes);a.priority=+dlg.querySelector('#aePri').value;a.preferredTime=dlg.querySelector('#aeTime').value.trim();a.fraction=dlg.querySelector('#aeFraction').checked;a.days=[...dlg.querySelectorAll('.day-toggle.on')].map(b=>+b.dataset.aeday);saveActivities(acts);dlg.close();dlg.remove();renderMeuDia()});
+ dlg.querySelector('#activityEditForm').addEventListener('submit',e=>{e.preventDefault();a.name=dlg.querySelector('#aeName').value.trim()||a.name;const ms=dlg.querySelector('#aeMin').value;a.minutes=Math.max(5,ms==='custom'?(+dlg.querySelector('#aeMinCustom').value||a.minutes):(+ms||a.minutes));a.priority=+dlg.querySelector('#aePri').value;a.preferredTime=dlg.querySelector('#aeTime').value.trim();a.fraction=dlg.querySelector('#aeFraction').checked;a.sessionMinutes=a.fraction?(+dlg.querySelector('#aeSession').value||a.minutes):a.minutes;a.sessionMinMinutes=a.fraction?(+dlg.querySelector('#aeSessionMin').value||10):a.minutes;a.days=[...dlg.querySelectorAll('.day-toggle.on')].map(b=>+b.dataset.aeday);saveActivities(acts);dlg.close();dlg.remove();renderMeuDia()});
 }
 function openFreeTimeLog(){
  const dlg=document.createElement('dialog');dlg.innerHTML=`<form method="dialog" class="modal-card" id="freeLogForm"><div class="modal-head"><div><div class="eyebrow">🌿 TEMPO LIVRE PROTEGIDO</div><h2>Registrar o que você fez</h2></div><button class="icon-btn" value="cancel">×</button></div><p class="note">Se você usou um período que estava protegido para uma atividade, registramos o tempo. Depois o Meu Dia pode sugerir recuperar esse descanso.</p><label>Atividade<input id="flName" required placeholder="Ex.: organizei uma gaveta"></label><label>Tempo usado (min)<input id="flMin" type="number" min="5" max="240" value="20"></label><div class="modal-actions"><div class="grow"></div><button type="button" class="secondary" id="cancelFl">Cancelar</button><button class="primary" value="default">Registrar</button></div></form>`;document.body.appendChild(dlg);dlg.showModal();dlg.querySelector('#cancelFl').onclick=()=>{dlg.close();dlg.remove()};dlg.querySelector('#freeLogForm').addEventListener('submit',e=>{e.preventDefault();const logs=mvProtectedLogs();logs.push({id:uid(),date:todayISO(),name:dlg.querySelector('#flName').value.trim(),minutes:+dlg.querySelector('#flMin').value||0,protectedTimeUsed:true});localStorage.setItem(MV_TIMELOG_KEY,JSON.stringify(logs));dlg.close();dlg.remove();renderMeuDia()});
@@ -227,7 +213,7 @@ function renderMeuDia(){
  <section class="now-card ${b[3]}"><div class="card-kicker">AGORA</div><div class="now-title">${escapeHtml(b[0])}</div><div class="now-time">${escapeHtml(b[1])}</div><p>${escapeHtml(b[2])}</p></section>
  <section class="day-section"><div class="section-head"><h2>O que importa hoje</h2><span class="soft-count">${focus.length}</span></div>${focus.map((x,i)=>`<div class="focus-row"><span class="focus-dot">${i+1}</span><div><strong>${escapeHtml(x[0])}</strong><small>${escapeHtml(x[1])}</small></div></div>`).join('')}</section>
  <section class="day-section"><div class="section-head"><div><h2>Seu dia, sem excesso</h2><small>Compromissos protegem. Janelas sugerem.</small></div><button type="button" class="text-btn" onclick="openWorkRemoteEditor()">editar trabalho remoto</button></div><div class="timeline">
- <div><b>05:16–08:00</b><span>Manhã protegida</span></div><div><b>08:00–14:00</b><span>Trabalho oficial</span></div>${fixed}<div><b>${remote?remoteRange(w):'janela editável'}</b><span>Trabalho remoto · ${remote?remoteLabel(remote.minutes):'defina uma janela'} · contínuo</span></div>${(w===2||w===4)&&!wp.therapyWeek?'<div><b>19:00–22:15</b><span>MBA · noite protegida</span></div>':''}${w===3&&wp.therapyWeek?`<div><b>${wp.therapyTime||'horário a definir'}</b><span>Terapia · semana de terapia</span></div>`:''}</div></section>
+ <div><b>05:16–08:00</b><span>Manhã protegida</span></div>${fixed}<div><b>${remote?remoteRange(w):'janela editável'}</b><span>Trabalho remoto · ${remote?remoteLabel(remote.minutes):'defina uma janela'} · contínuo</span></div>${(w===2||w===4)&&!wp.therapyWeek?'<div><b>19:00–22:15</b><span>MBA · noite protegida</span></div>':''}${w===3&&wp.therapyWeek?`<div><b>${wp.therapyTime||'horário a definir'}</b><span>Terapia · semana de terapia</span></div>`:''}</div></section>
  ${renderSmartSuggestions()}
  ${renderRituaisHojeV13()}
  ${renderMeuDiaExercicio()}
@@ -366,6 +352,7 @@ function render() {
 }
 
 window.addEventListener("hashchange", render);
+document.addEventListener("DOMContentLoaded",()=>{const moduleMenuEl=document.getElementById("moduleMenu");if(moduleMenuEl){moduleMenuEl.querySelectorAll(".module-links a").forEach(a=>a.addEventListener("click",()=>setTimeout(()=>{if(moduleMenuEl.open)moduleMenuEl.close()},0)));}});
 
 function renderPendencias() {
   const all = loadPendencias();
@@ -425,7 +412,7 @@ function cardHtml(p) {
         <div class="pending-main">
           <div class="pending-title ${p.done?"done-text":""}">${escapeHtml(p.title)}</div>
           <div class="meta">
-            <span class="pill">${escapeHtml(p.category)}</span><span class="pill">⏱ ${p.durationMinutes||35} min</span>${p.fractionable===false?'<span class="pill">bloco único</span>':'<span class="pill">fracionável</span>'}${due}
+            <span class="pill">${escapeHtml(p.category)}</span><span class="pill">⏱ ${formatDuration(p.durationMinutes||35)}</span>${p.fractionable===false?'<span class="pill">bloco único</span>':'<span class="pill">fracionável</span>'}${due}
           </div>
           ${p.note ? `<p class="note">${escapeHtml(p.note)}</p>` : ""}
         </div>
@@ -455,9 +442,12 @@ function openModal(id=null) {
   document.querySelector("#pendingTitle").value = p?.title || "";
   document.querySelector("#pendingCategory").value = p?.category || "Pessoal";
   document.querySelector("#pendingDue").value = p?.due || "";
-  document.querySelector("#pendingDuration").value = p?.durationMinutes || 35;
+  const total=p?.durationMinutes||35, standard=[5,10,15,20,30,45,60,90,120,180,240,360,480], ds=document.querySelector("#pendingDuration");
+  ds.innerHTML=durationOptions(total); ds.value=standard.includes(+total)?String(total):"custom"; document.querySelector("#pendingDurationCustom").value=total; document.querySelector("#pendingDurationCustom").style.display=ds.value==="custom"?"block":"none";
   document.querySelector("#pendingPriority").value = p?.priority || 3;
-  document.querySelector("#pendingFraction").checked = p?.fractionable !== false;
+  document.querySelector("#pendingWorkMode").value = p?.fractionable === false ? "single" : "fraction";
+  document.querySelector("#pendingSession").value = String(p?.sessionMinutes||60); document.querySelector("#pendingSessionMin").value = String(p?.sessionMinMinutes||10);
+  document.querySelector("#pendingSessionFields").style.display=p?.fractionable===false?"none":"grid";
   document.querySelector("#pendingNote").value = p?.note || "";
   document.querySelector("#deletePendingBtn").hidden = !p;
   dialog.showModal();
@@ -469,6 +459,9 @@ function closeModal() {
   state.editingId = null;
 }
 document.querySelector("#cancelPendingBtn").onclick = closeModal;
+document.querySelector("#pendingDuration").addEventListener("change",()=>{const s=document.querySelector("#pendingDuration"),c=document.querySelector("#pendingDurationCustom");c.style.display=s.value==="custom"?"block":"none";});
+document.querySelector("#pendingWorkMode").addEventListener("change",()=>{document.querySelector("#pendingSessionFields").style.display=document.querySelector("#pendingWorkMode").value==="fraction"?"grid":"none";});
+
 document.querySelector("#deletePendingBtn").onclick = () => {
   if (!state.editingId) return;
   if (confirm("Excluir esta pendência?")) {
@@ -480,12 +473,10 @@ document.querySelector("#deletePendingBtn").onclick = () => {
 form.addEventListener("submit", e => {
   e.preventDefault();
   const items = loadPendencias();
-  const data = {
-    title: document.querySelector("#pendingTitle").value.trim(),
-    category: document.querySelector("#pendingCategory").value,
-    due: document.querySelector("#pendingDue").value,
-    note: document.querySelector("#pendingNote").value.trim()
-  };
+  const durSel=document.querySelector("#pendingDuration").value;
+  const durationMinutes=durSel==="custom"?Math.max(5,+document.querySelector("#pendingDurationCustom").value||35):+durSel;
+  const fractionable=document.querySelector("#pendingWorkMode").value==="fraction";
+  const data={title:document.querySelector("#pendingTitle").value.trim(),category:document.querySelector("#pendingCategory").value,due:document.querySelector("#pendingDue").value,note:document.querySelector("#pendingNote").value.trim(),durationMinutes,priority:+document.querySelector("#pendingPriority").value||3,fractionable,sessionMinutes:fractionable?(+document.querySelector("#pendingSession").value||60):durationMinutes,sessionMinMinutes:fractionable?(+document.querySelector("#pendingSessionMin").value||10):durationMinutes};
   if (!data.title) return;
   if (state.editingId) {
     const i = items.findIndex(p => p.id===state.editingId);
@@ -630,14 +621,14 @@ function openIdeaModal(id=null) {
         <div class="eyebrow">🧩 PLANEJAMENTO DO PROJETO</div>
         <div class="form-grid">
           <label>Prazo<input id="ideaDueDate" type="date" value="${escapeHtml(p?.dueDate||"")}"></label>
-          <label>Esforço total (min)<input id="ideaTotalMin" type="number" min="10" step="10" value="${p?.totalMinutes||360}"></label>
+          <label>Esforço total<select id="ideaTotalMin">${durationOptions(p?.totalMinutes||360)}</select><input id="ideaTotalCustom" class="duration-custom" type="number" min="10" max="960" step="10" value="${p?.totalMinutes||360}" style="display:none"></label>
         </div>
         <div class="form-grid">
-          <label>Sessão sugerida (min)<input id="ideaSessionMin" type="number" min="10" step="10" value="${p?.sessionMinutes||60}"></label>
+          <label>Sessão ideal<select id="ideaSessionMin">${sessionOptions(p?.sessionMinutes||60)}</select></label>
           <label>Prioridade<select id="ideaPriority"><option value="1">Baixa</option><option value="2">Normal</option><option value="3">Importante</option><option value="5">Alta</option></select></label>
         </div>
         <label>Frequência desejada<input id="ideaFrequency" value="${escapeHtml(p?.frequency||"1x por semana")}" placeholder="Ex.: 3x/semana · a cada 2 dias"></label>
-        <label class="check-line"><input id="ideaFraction" type="checkbox" ${p?.fractionable!==false?"checked":""}> Pode ser feito em sessões menores</label>
+        <label class="check-line"><input id="ideaFraction" type="checkbox" ${p?.fractionable!==false?"checked":""}> Pode ser feito em sessões menores</label><label>Sessão mínima<select id="ideaSessionMinMin">${sessionOptions(p?.sessionMinMinutes||10)}</select></label>
         <div class="day-toggle-grid">${[1,2,3,4,5,6,0].map(day=>`<button type="button" class="day-toggle project-day ${(p?.days||[0,6]).includes(day)?'on':''}" data-pday="${day}">${["Dom","Seg","Ter","Qua","Qui","Sex","Sáb"][day]}</button>`).join('')}</div>
       </div>
       <label>
@@ -658,6 +649,7 @@ function openIdeaModal(id=null) {
   d.showModal();
   if(d.querySelector("#ideaPriority")) d.querySelector("#ideaPriority").value=p?.priority||3;
   d.querySelector("#ideaType").addEventListener("change",()=>{d.querySelector("#projectPlanning").style.display=d.querySelector("#ideaType").value==="projeto"?"block":"none"});
+  d.querySelector("#ideaTotalMin").addEventListener("change",()=>{d.querySelector("#ideaTotalCustom").style.display=d.querySelector("#ideaTotalMin").value==="custom"?"block":"none"});
   d.querySelectorAll("[data-pday]").forEach(b=>b.onclick=()=>b.classList.toggle("on"));
   d.querySelector("#cancelIdeaBtn").onclick = () => { d.close(); d.remove(); };
   if (p) d.querySelector("#deleteIdeaBtn").onclick = () => {
@@ -676,8 +668,10 @@ function openIdeaModal(id=null) {
     };
     if(data.type==="projeto"){
       data.dueDate=d.querySelector("#ideaDueDate").value;
-      data.totalMinutes=Math.max(10,+d.querySelector("#ideaTotalMin").value||360);
+      const totalSel=d.querySelector("#ideaTotalMin").value;
+      data.totalMinutes=Math.max(10,totalSel==="custom"?(+d.querySelector("#ideaTotalCustom").value||360):(+totalSel||360));
       data.sessionMinutes=Math.max(10,+d.querySelector("#ideaSessionMin").value||60);
+      data.sessionMinMinutes=Math.max(5,+d.querySelector("#ideaSessionMinMin").value||10);
       data.priority=+d.querySelector("#ideaPriority").value||3;
       data.frequency=d.querySelector("#ideaFrequency").value.trim()||"1x por semana";
       data.fractionable=d.querySelector("#ideaFraction").checked;

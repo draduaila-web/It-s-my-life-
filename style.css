@@ -658,3 +658,5 @@ h2 { margin:0; font-size:22px; letter-spacing:-.02em; }
 .project-planning{margin:10px 0;padding:14px;border-radius:18px;background:linear-gradient(135deg,#f8f0f7,#eef6f3);border:1px solid var(--line)}
 .project-planning .eyebrow{margin-bottom:8px}.project-planning .day-toggle-grid{margin-top:8px}
 .project-planning .check-line{margin-top:10px}
+
+.duration-custom{box-sizing:border-box}.bottom-nav{grid-template-columns:repeat(4,minmax(0,1fr))!important}.bottom-nav>a:nth-child(1),.bottom-nav>a:nth-child(2),.bottom-nav>a:nth-child(3),.bottom-nav>button:nth-child(4){display:flex!important;visibility:visible!important;opacity:1!important}
