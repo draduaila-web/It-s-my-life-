@@ -987,7 +987,7 @@ function ensureWorkStyles(){
  .work-front-v12 .crefito-logo{width:80px!important;height:68px!important;}
  .work-front-v12 .bec-logo{width:72px!important;height:72px!important;}
  .work-front-v12 .tiktok-logo{width:68px!important;height:68px!important;border-radius:16px!important;}
- .work-front-v12 .work-copy{display:grid!important;gap:3px!important;min-width:0;}
+ .work-front-v12 .work-copy{display:grid!important;gap:3px!important;min-width:0;text-align:left!important}.work-front-v12 button.work-card{font:inherit;color:#40384a!important;border:1px solid rgba(92,72,104,.12)!important;width:100%!important;appearance:none!important;-webkit-appearance:none!important}.work-front-v12 button.work-card *{pointer-events:none!important}
  .work-front-v12 .work-copy strong{font-size:19px!important;color:#40384a!important;line-height:1.15!important;}
  .work-front-v12 .work-copy span{font-size:14px!important;color:#817783!important;line-height:1.3!important;}
  .work-front-v12 .work-card:active{transform:scale(.985)}
@@ -1004,14 +1004,14 @@ function renderTrabalho(){
    <span class="work-icon work-logo-wrap"><img class="work-logo official-logo crefito-logo" src="crefito11-logo.png" alt="CREFITO-11"></span>
    <span class="work-copy"><strong>CREFITO-11</strong><span>Trabalho oficial · 08:00–14:00</span></span>
   </article>
-  <article class="card work-card work-card-bec" data-work-route="trabalho-bec" role="button" tabindex="0">
+  <button type="button" class="card work-card work-card-bec" data-work-route="trabalho-bec">
    <span class="work-icon work-logo-wrap"><img class="work-logo official-logo bec-logo" src="bec-logo.png" alt="BEC"></span>
    <span class="work-copy"><strong>BEC</strong><span>Empresa, projetos e operações.</span></span>
-  </article>
-  <article class="card work-card work-card-tiktok" data-work-route="trabalho-tiktok" role="button" tabindex="0">
+  </button>
+  <button type="button" class="card work-card work-card-tiktok" data-work-route="trabalho-tiktok">
    <span class="work-icon work-logo-wrap"><img class="work-logo official-logo tiktok-logo" src="tiktok-logo.png" alt="TikTok"></span>
    <span class="work-copy"><strong>TikTok</strong><span>Conteúdo, ideias e presença digital.</span></span>
-  </article>
+  </button>
  </section>
  <section class="card work-note"><strong>Menos decisões · mais clareza</strong><span>Cada frente tem seu próprio espaço. O que for realmente importante pode depois alimentar o Meu Dia.</span></section>`;
  window.openWorkRoute=(route)=>{
@@ -1020,9 +1020,10 @@ function renderTrabalho(){
    else render();
  };
  document.querySelectorAll("[data-work-route]").forEach(card=>{
-   const route=card.dataset.workRoute;
-   card.onclick=(e)=>{e.preventDefault();e.stopPropagation();window.openWorkRoute(route)};
-   card.onkeydown=(e)=>{ if(e.key==="Enter"||e.key===" "){e.preventDefault();window.openWorkRoute(route);} };
+   const route=card.getAttribute("data-work-route");
+   const go=(e)=>{ if(e){e.preventDefault();e.stopPropagation();} state.route=route; location.hash=route; };
+   card.addEventListener("click",go,{capture:true});
+   card.addEventListener("touchend",go,{capture:true,passive:false});
  });
 }
 
