@@ -168,9 +168,8 @@ function ensureMainNavigation() {
   const more = nav.querySelector('[data-more]');
   if (more) more.onclick = (e) => {
     e.preventDefault();
-    const moduleMenu = document.getElementById('moduleMenu');
-    if (!moduleMenu) return;
-    if (!moduleMenu.open) moduleMenu.showModal();
+    e.stopPropagation();
+    openMainModuleMenu();
   };
   const moduleMenu = document.getElementById('moduleMenu');
 
@@ -221,6 +220,58 @@ function ensureMainNavigation() {
       };
     });
   }
+}
+
+function openMainModuleMenu() {
+  // Busca o menu no momento do toque. Isso evita falhas na primeira abertura
+  // quando o DOM ainda está sendo montado ou quando uma versão antiga foi
+  // mantida pelo cache do Safari.
+  let menu = document.getElementById('moduleMenu');
+  if (!menu) {
+    // Se a versão do HTML ainda não tiver o dialog, cria uma versão funcional
+    // usando a mesma lista oficial de módulos.
+    menu = document.createElement('dialog');
+    menu.id = 'moduleMenu';
+    menu.innerHTML = `
+      <div class="sheet-head"><strong>MINHA VIDA</strong><button type="button" aria-label="Fechar">✕</button></div>
+      <div class="module-links"></div>`;
+    document.body.appendChild(menu);
+    const st = document.createElement('style');
+    st.textContent = `#moduleMenu{border:0;border-radius:28px;padding:0;width:min(92vw,520px);max-height:82vh;background:#fffaf6;color:#3f3745;box-shadow:0 20px 60px rgba(50,35,55,.25)}#moduleMenu::backdrop{background:rgba(55,45,55,.42);backdrop-filter:blur(5px)}#moduleMenu .sheet-head{display:flex;align-items:center;justify-content:space-between;padding:22px 24px 16px;font-size:24px}#moduleMenu .sheet-head button{border:0;background:transparent;font-size:30px;color:#76578b;padding:8px;cursor:pointer}#moduleMenu .module-links{display:grid;gap:10px;padding:0 16px 20px;overflow:auto}#moduleMenu .module-links a{display:block;padding:18px 20px;border-radius:22px;text-decoration:none;color:#17131a;font-size:21px;font-weight:600}#moduleMenu .module-links a:nth-child(1){background:#f6e0e7}#moduleMenu .module-links a:nth-child(2){background:#eee4f7}#moduleMenu .module-links a:nth-child(3){background:#e2f0e9}#moduleMenu .module-links a:nth-child(4){background:#f8e9b9}#moduleMenu .module-links a:nth-child(5){background:#dfebf7}#moduleMenu .module-links a:nth-child(6){background:#f7dfd1}#moduleMenu .module-links a:nth-child(7){background:#f4dfeb}#moduleMenu .module-links a:nth-child(8){background:#e8e0f4}#moduleMenu .module-links a:nth-child(9){background:#e2f0e9}#moduleMenu .module-links a:nth-child(10){background:#f8edc9}`;
+    document.head.appendChild(st);
+  }
+  ensureMainNavigation();
+  menu = document.getElementById('moduleMenu');
+  if (!menu) return;
+  const links = menu.querySelector('.module-links');
+  if (links && !links.children.length) {
+    const desired = [['meu-dia','💜 Meu Dia'],['pendencias','📝 Pendências'],['ideias','💡 Criação & Ideias'],['trabalho','💼 Trabalho'],['estudos','📚 Estudos / CEBRASPE'],['financeiro','💰 Financeiro'],['casa','🏠 Casa'],['exercicios','🏃 Exercícios'],['alimentacao','🍽️ Alimentação'],['receitas','📖 Receitas']];
+    links.innerHTML = desired.map(([r,label]) => `<a href="#${r}">${label}</a>`).join('');
+  }
+  const close = menu.querySelector('.sheet-head button');
+  if (close) close.onclick = (e) => { e.preventDefault(); menu.close(); };
+  menu.querySelectorAll('.module-links a').forEach(link => {
+    link.onclick = (e) => {
+      e.preventDefault();
+      const href = link.getAttribute('href');
+      menu.close();
+      if (location.hash === href) render(); else location.hash = href;
+    };
+  });
+  if (!menu.open) menu.showModal();
+}
+
+// Delegação global: garante que o botão Mais funcione mesmo que a barra seja
+// reconstruída depois do primeiro carregamento.
+if (!window.__minhaVidaMoreDelegate) {
+  window.__minhaVidaMoreDelegate = true;
+  document.addEventListener('click', (e) => {
+    const btn = e.target.closest && e.target.closest('[data-more]');
+    if (!btn) return;
+    e.preventDefault();
+    e.stopPropagation();
+    openMainModuleMenu();
+  }, true);
 }
 
 function render() {
