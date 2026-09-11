@@ -1,4 +1,4 @@
-/* BERTH.A — Meu Dia v2 / Motor de Tempo v1.1 — identidade
+/* BERTH.A — Meu Dia v2 / Motor de Tempo v1.2 — joyful depth
    Camada aditiva: carregar DEPOIS de app.js, finance-v6.js e work-v12.js.
    Preserva chaves/rotas legadas para evitar perda de dados.
 */
@@ -105,23 +105,32 @@
     .topbar .eyebrow{
       text-transform:none!important;
       letter-spacing:0!important;
-      font-family:"Snell Roundhand","Bradley Hand",cursive!important;
-      font-size:17px!important;
-      line-height:1.05!important;
+      font-family:"Segoe Print","Bradley Hand","Chalkboard SE","Comic Sans MS",cursive!important;
+      font-size:18px!important;
+      line-height:1.08!important;
       font-weight:400!important;
-      color:#8a718f!important;
-      margin-top:2px!important;
+      color:#a05b83!important;
+      margin-top:5px!important;
       white-space:nowrap;
+      transform:rotate(-1deg);
+      transform-origin:left center;
     }
     #pageTitle{
       font-family:Inter,-apple-system,BlinkMacSystemFont,"SF Pro Display","Helvetica Neue",sans-serif!important;
-      font-size:23px!important;
-      font-weight:760!important;
-      letter-spacing:.02em!important;
-      color:#4b3f52!important;
-      margin-top:2px!important;
+      font-size:31px!important;
+      line-height:1!important;
+      font-weight:790!important;
+      letter-spacing:.025em!important;
+      color:#493b50!important;
+      margin-top:3px!important;
     }
     .bertha-brand{display:none!important}
+    #app .day-hero,#app .hero{
+      box-shadow:0 10px 28px rgba(91,69,98,.075)!important;
+    }
+    #app .day-hero h1,#app .hero h1{
+      color:#3f3545!important;
+    }
     .bertha-now{position:relative}
     .bertha-actions{display:flex;gap:9px;margin-top:14px;flex-wrap:wrap}
     .bertha-primary,.bertha-secondary,.bertha-focus button,.bertha-choice-grid button{border:0;border-radius:999px;padding:10px 14px;font-weight:800}
@@ -147,16 +156,17 @@
     /* Barra inferior: mesma presença visual para os quatro botões */
     .bottom-nav .nav-item{color:#6d6571!important;opacity:1!important}
     .bottom-nav .nav-item>svg,.bottom-nav .nav-item>.bertha-nav-mark{
-      width:22px;height:22px;display:block;margin:0 auto 3px;
+      width:24px;height:24px;display:block;margin:0 auto 4px;
     }
-    .bottom-nav .nav-item>span:last-child{font-size:11px!important;font-weight:650!important}
+    .bottom-nav .nav-item>span:last-child{font-size:11px!important;font-weight:700!important}
     .bertha-nav-mark{
       width:auto!important;
-      min-width:25px;
+      min-width:32px;
       display:flex!important;align-items:center;justify-content:center;
-      font-family:Inter,-apple-system,BlinkMacSystemFont,"SF Pro Display",sans-serif!important;
-      font-size:12px!important;font-weight:850!important;letter-spacing:-.04em!important;
-      color:#66506f!important;
+      font-family:Georgia,"Times New Roman",serif!important;
+      font-size:17px!important;font-weight:600!important;letter-spacing:-.08em!important;
+      color:#755579!important;
+      text-shadow:0 1px 0 rgba(255,255,255,.8);
     }
     .bottom-nav .nav-item.active,.bottom-nav .nav-item[aria-current="page"]{color:#8a5e92!important}
 
@@ -168,53 +178,75 @@
       font-size:21px;font-weight:760;letter-spacing:-.02em;
     }
     .bertha-menu-sub{
-      padding:0 0 16px!important;
-      color:#8a818c!important;
-      font-family:Inter,-apple-system,BlinkMacSystemFont,"SF Pro Text","Helvetica Neue",sans-serif!important;
+      padding:1px 0 17px!important;
+      color:#6f6573!important;
+      font-family:"Montserrat","Avenir Next",Inter,-apple-system,BlinkMacSystemFont,"SF Pro Text",sans-serif!important;
       font-size:13px!important;
       line-height:1.35!important;
       font-weight:300!important;
-      letter-spacing:.01em!important;
+      letter-spacing:.015em!important;
     }
     .module-links.bertha-module-cards{
       display:grid!important;
-      grid-template-columns:1fr 1fr!important;
-      gap:9px!important;
+      grid-template-columns:repeat(3,minmax(0,1fr))!important;
+      gap:10px!important;
     }
     .module-links.bertha-module-cards a{
-      min-height:58px!important;
+      min-height:92px!important;
       box-sizing:border-box;
       display:flex!important;
-      flex-direction:row!important;
+      flex-direction:column!important;
       align-items:center!important;
-      justify-content:flex-start!important;
-      gap:10px!important;
-      text-align:left!important;
-      padding:10px 12px!important;
-      border:1px solid rgba(92,72,104,.12)!important;
-      border-radius:16px!important;
-      background:rgba(255,255,255,.70)!important;
-      box-shadow:0 4px 14px rgba(73,56,78,.045)!important;
-      color:#554b59!important;
+      justify-content:center!important;
+      gap:8px!important;
+      text-align:center!important;
+      padding:11px 6px 10px!important;
+      border:1px solid rgba(92,72,104,.13)!important;
+      border-bottom-color:rgba(92,72,104,.22)!important;
+      border-radius:18px!important;
+      background:linear-gradient(180deg,rgba(255,255,255,.98),rgba(251,247,249,.96))!important;
+      box-shadow:
+        0 7px 0 rgba(109,87,115,.07),
+        0 11px 18px rgba(73,56,78,.08),
+        inset 0 1px 0 rgba(255,255,255,1)!important;
+      color:#4f4553!important;
       font-family:Inter,-apple-system,BlinkMacSystemFont,"SF Pro Text",sans-serif!important;
-      font-size:13px!important;
-      line-height:1.15!important;
-      font-weight:650!important;
+      font-size:11.5px!important;
+      line-height:1.12!important;
+      font-weight:720!important;
       text-decoration:none!important;
+      transition:transform .08s ease,box-shadow .08s ease;
     }
-    .module-links.bertha-module-cards a:active{transform:scale(.985);background:#faf5fa!important}
-    .module-links.bertha-module-cards a:last-child:nth-child(odd){grid-column:1 / -1}
+    .module-links.bertha-module-cards a:active{
+      transform:translateY(4px)!important;
+      box-shadow:0 3px 0 rgba(109,87,115,.06),0 6px 10px rgba(73,56,78,.06)!important;
+    }
+    .module-links.bertha-module-cards a:last-child:nth-child(odd){grid-column:auto!important}
     .bertha-menu-icon{
-      flex:0 0 30px;width:30px;height:30px;border-radius:10px;
+      flex:0 0 43px;width:43px;height:43px;border-radius:14px;
       display:grid;place-items:center;
-      background:#f4eef6;color:#765f7e;
+      background:#f7f2f6;
+      box-shadow:inset 0 0 0 1px rgba(92,72,104,.06);
     }
-    .bertha-menu-icon svg{width:17px;height:17px;display:block}
+    .bertha-menu-icon svg{width:24px;height:24px;display:block;stroke-width:1.8}
+    .module-links.bertha-module-cards a:nth-child(1) .bertha-menu-icon{color:#b75f87;background:#fbeaf2}
+    .module-links.bertha-module-cards a:nth-child(2) .bertha-menu-icon{color:#8065a6;background:#f0eafb}
+    .module-links.bertha-module-cards a:nth-child(3) .bertha-menu-icon{color:#548e84;background:#e9f6f2}
+    .module-links.bertha-module-cards a:nth-child(4) .bertha-menu-icon{color:#c17c62;background:#fff0e9}
+    .module-links.bertha-module-cards a:nth-child(5) .bertha-menu-icon{color:#5484ad;background:#eaf4fc}
+    .module-links.bertha-module-cards a:nth-child(6) .bertha-menu-icon{color:#b58642;background:#fff4dc}
+    .module-links.bertha-module-cards a:nth-child(7) .bertha-menu-icon{color:#9b668d;background:#f7eaf3}
+    .module-links.bertha-module-cards a:nth-child(8) .bertha-menu-icon{color:#6e75a5;background:#eeeffa}
+    .module-links.bertha-module-cards a:nth-child(9) .bertha-menu-icon{color:#4f9483;background:#e8f5f0}
     @media(max-width:380px){
       .bertha-focus button{padding:8px 10px}
       .bertha-time-row{grid-template-columns:20px 84px 1fr!important}
-      .topbar .eyebrow{font-size:15px!important}
-      .module-links.bertha-module-cards a{font-size:12.5px!important;padding:9px 10px!important}
+      .topbar .eyebrow{font-size:16px!important}
+      #pageTitle{font-size:28px!important}
+      .module-links.bertha-module-cards{gap:8px!important}
+      .module-links.bertha-module-cards a{font-size:10.5px!important;min-height:86px!important;padding:9px 4px!important}
+      .bertha-menu-icon{width:39px;height:39px;flex-basis:39px}
+      .bertha-menu-icon svg{width:22px;height:22px}
     }
     `;
   }
