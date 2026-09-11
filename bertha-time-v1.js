@@ -1,4 +1,4 @@
-/* BERTH.A — Meu Dia v2 / Motor de Tempo v1.6 — polish fix
+/* BERTH.A — Meu Dia v2 / Motor de Tempo v1.7 — typography and nav polish
    Camada aditiva: carregar DEPOIS de app.js, finance-v6.js e work-v12.js.
    Preserva chaves/rotas legadas para evitar perda de dados.
 */
@@ -611,6 +611,58 @@
       background:
         radial-gradient(circle at 24% 14%,rgba(255,255,255,.36),transparent 38%),
         linear-gradient(180deg,#edf3f7 0%,#f3f5f5 72%,#faf3ee 100%)!important}
+
+
+    /* BERTH.A v1.7 — tipografia e barra inferior */
+    /* Saudação: volta à linguagem tipográfica principal da interface */
+    #app .day-hero h1{
+      font-family:Montserrat,Inter,-apple-system,BlinkMacSystemFont,"SF Pro Display",sans-serif!important;
+      font-size:clamp(28px,7.4vw,32px)!important;
+      line-height:1.08!important;
+      font-weight:400!important;
+      letter-spacing:-.035em!important;
+      white-space:nowrap!important;
+      color:#3f3545!important;
+    }
+
+    /* Barra inferior: bege-rosado suave, integrada ao fundo sem ficar branca */
+    .bottom-nav{
+      background:rgba(250,239,235,.94)!important;
+      border:1px solid rgba(176,136,155,.16)!important;
+      box-shadow:
+        0 -1px 0 rgba(255,255,255,.62) inset,
+        0 9px 28px rgba(74,56,77,.10)!important;
+      backdrop-filter:blur(20px)!important;
+      -webkit-backdrop-filter:blur(20px)!important;
+    }
+
+    /* B•A limpo — sem imagem recortada, sem frase microscópica */
+    .bertha-nav-mark{
+      background:none!important;
+      width:auto!important;
+      min-width:48px!important;
+      height:auto!important;
+      display:inline-flex!important;
+      align-items:center!important;
+      justify-content:center!important;
+      gap:1px!important;
+      font-family:Georgia,"Times New Roman",serif!important;
+      font-size:29px!important;
+      line-height:1!important;
+      font-weight:400!important;
+      letter-spacing:-.08em!important;
+      color:#403747!important;
+      margin:0!important;
+      filter:none!important;
+    }
+    .bertha-nav-mark span{
+      color:#df846f!important;
+      font-size:.72em!important;
+      margin:0 1px!important;
+    }
+    .bottom-nav .nav-item[data-route="meu-dia"]>span:last-child{display:none!important}
+
+    /* Menu aprovado: congelado. Não alterar. */
 
     `;
   }
