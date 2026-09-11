@@ -26,7 +26,7 @@ self.addEventListener("activate", event => {
     caches.keys()
       .then(keys => Promise.all(
         keys
-          .filter(key => key.startsWith("minha-vida-") && key !== CACHE)
+          .filter(key => (key.startsWith("minha-vida-") || key.startsWith("bertha-")) && key !== CACHE)
           .map(key => caches.delete(key))
       ))
       .then(() => self.clients.claim())
