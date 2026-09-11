@@ -105,21 +105,27 @@
       .work12-task-actions{display:flex;align-items:flex-start;gap:6px}
       .work12-edit{border:0;background:#f4eef2;border-radius:50%;width:34px;height:34px;color:#6d6270}
       .work12-rule{margin:20px 0;padding:16px 18px;border-radius:20px;background:linear-gradient(135deg,#f5edf7,#eef5f2);color:#6e6470}
-      .work12-dialog{width:min(92vw,560px);max-width:560px;max-height:82vh;border:0;border-radius:28px;padding:0;background:#fffdfb;box-shadow:0 24px 70px rgba(55,42,60,.22)}
+      .work12-dialog{width:min(92vw,520px);max-width:520px;max-height:70vh;border:0;border-radius:24px;padding:0;background:#fffdfb;box-shadow:0 24px 70px rgba(55,42,60,.22)}
       .work12-dialog::backdrop{background:rgba(45,37,48,.34);backdrop-filter:blur(3px)}
-      .work12-form{padding:18px 20px 16px;max-height:82vh;overflow:auto;box-sizing:border-box}
-      .work12-form-head{display:flex;justify-content:space-between;align-items:flex-start;position:sticky;top:-18px;background:#fffdfb;z-index:3;padding:0 0 12px;margin-bottom:12px;border-bottom:1px solid #eee5e8}
-      .work12-form-head h2{margin:3px 0 0;font-size:25px;line-height:1.08}
-      .work12-form-head .eyebrow{font-size:11px}
-      .work12-x{border:0;background:#fbf8f7;border-radius:50%;width:42px;height:42px;min-width:42px;color:#77558a;font-size:24px;line-height:1}
-      .work12-form label{display:block;margin:0 0 10px;color:#756b77;font-weight:700;font-size:14px}
-      .work12-form input,.work12-form select,.work12-form textarea{width:100%;box-sizing:border-box;margin-top:5px;border:1px solid #e5dce1;border-radius:15px;padding:10px 12px;background:#fff;color:#40384a;font:inherit;min-height:44px}
-      .work12-form textarea{min-height:68px;resize:vertical}
-      .work12-grid2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
-      .work12-form-actions{display:flex;gap:9px;justify-content:flex-end;position:sticky;bottom:-16px;background:linear-gradient(to bottom,rgba(255,253,251,0),#fffdfb 16px);padding:22px 0 2px;margin-top:-4px;z-index:3}
-      .work12-secondary,.work12-primary{border:0;border-radius:999px;padding:11px 16px;font-weight:800;min-height:43px}
+      .work12-form{padding:14px 16px 12px;max-height:70vh;overflow:auto;box-sizing:border-box}
+      .work12-form-head{display:flex;justify-content:space-between;align-items:flex-start;position:sticky;top:-14px;background:#fffdfb;z-index:3;padding:0 0 9px;margin-bottom:9px;border-bottom:1px solid #eee5e8}
+      .work12-form-head h2{margin:2px 0 0;font-size:22px;line-height:1.05}
+      .work12-form-head .eyebrow{font-size:10px}
+      .work12-x{border:0;background:#fbf8f7;border-radius:50%;width:36px;height:36px;min-width:36px;color:#77558a;font-size:21px;line-height:1}
+      .work12-form label{display:block;margin:0 0 7px;color:#756b77;font-weight:700;font-size:13px}
+      .work12-form input,.work12-form select,.work12-form textarea{width:100%;box-sizing:border-box;margin-top:3px;border:1px solid #e5dce1;border-radius:13px;padding:8px 10px;background:#fff;color:#40384a;font:inherit;min-height:38px}
+      .work12-form textarea{min-height:56px;resize:vertical}
+      .work12-grid2{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+      .work12-more{margin:1px 0 6px;border:1px solid #eadfee;border-radius:14px;background:#faf6fb}
+      .work12-more summary{cursor:pointer;list-style:none;padding:9px 11px;color:#705680;font-weight:800;font-size:13px}
+      .work12-more summary::-webkit-details-marker{display:none}
+      .work12-more summary::after{content:'⌄';float:right}
+      .work12-more[open] summary::after{content:'⌃'}
+      .work12-more-body{padding:0 9px 3px}
+      .work12-form-actions{display:flex;gap:8px;justify-content:flex-end;position:sticky;bottom:-12px;background:linear-gradient(to bottom,rgba(255,253,251,0),#fffdfb 13px);padding:17px 0 1px;margin-top:-2px;z-index:3}
+      .work12-secondary,.work12-primary{border:0;border-radius:999px;padding:9px 14px;font-weight:800;min-height:38px}
       .work12-secondary{background:#eee4f7;color:#674e7b}.work12-primary{background:#d98daf;color:white}
-      @media(max-width:520px){.work12-dialog{width:92vw;max-height:80vh;border-radius:26px}.work12-form{padding:16px 18px 14px;max-height:80vh}.work12-form-head{top:-16px}.work12-grid2{grid-template-columns:1fr 1fr;gap:9px}.work12-form input,.work12-form select,.work12-form textarea{font-size:16px}}
+      @media(max-width:520px){.work12-dialog{width:92vw;max-height:68vh}.work12-form{max-height:68vh}.work12-form input,.work12-form select,.work12-form textarea{font-size:16px}}
     `;
     document.head.appendChild(s);
   }
@@ -249,11 +255,16 @@
     dlg.innerHTML=`<form class="work12-form" id="work12Form">
       <div class="work12-form-head"><div><div class="eyebrow">${cfg.icon} ${esc(cfg.name.toUpperCase())}</div><h2>${preset?'Editar tarefa':'Nova tarefa'}</h2></div><button type="button" class="work12-x" id="work12Close">×</button></div>
       <label>O que precisa ser feito?<input id="w12Title" required maxlength="150" value="${esc(p.title)}" placeholder="Ex.: revisar campanha"></label>
-      <label>Área<select id="w12Area"><option value="">Selecionar</option>${opts(areaOptions,p.area)}</select></label>
-      <div class="work12-grid2"><label>Quando<input id="w12Date" type="date" value="${esc(p.date)}"></label><label>Horário / janela<input id="w12Time" type="time" value="${esc(p.time)}"></label></div>
-      <div class="work12-grid2"><label>Duração<select id="w12Duration">${opts(['15 min','30 min','45 min','1h','1h30','2h'],p.duration)}</select></label><label>Frequência<select id="w12Frequency">${opts(['Única','Diária','Semanal','Quinzenal','Mensal','Conforme necessário'],p.frequency)}</select></label></div>
-      <div class="work12-grid2"><label>Prioridade<select id="w12Priority">${opts(['Baixa','Normal','Alta','Urgente'],p.priority)}</select></label><label>Status<select id="w12Status">${opts(['A fazer','Em andamento','Aguardando','Concluído','Pausado'],p.status)}</select></label></div>
-      <label>Observação<textarea id="w12Note" rows="2" maxlength="600" placeholder="Contexto ou próximo passo">${esc(p.note)}</textarea></label>
+      <div class="work12-grid2"><label>Área<select id="w12Area"><option value="">Selecionar</option>${opts(areaOptions,p.area)}</select></label><label>Quando<input id="w12Date" type="date" value="${esc(p.date)}"></label></div>
+      <div class="work12-grid2"><label>Duração<select id="w12Duration">${opts(['15 min','30 min','45 min','1h','1h30','2h'],p.duration)}</select></label><label>Prioridade<select id="w12Priority">${opts(['Baixa','Normal','Alta','Urgente'],p.priority)}</select></label></div>
+      <details class="work12-more" ${p.time || p.frequency!=='Única' || p.status!=='A fazer' || p.note ? 'open' : ''}>
+        <summary>Mais opções</summary>
+        <div class="work12-more-body">
+          <div class="work12-grid2"><label>Horário / janela<input id="w12Time" type="time" value="${esc(p.time)}"></label><label>Frequência<select id="w12Frequency">${opts(['Única','Diária','Semanal','Quinzenal','Mensal','Conforme necessário'],p.frequency)}</select></label></div>
+          <label>Status<select id="w12Status">${opts(['A fazer','Em andamento','Aguardando','Concluído','Pausado'],p.status)}</select></label>
+          <label>Observação<textarea id="w12Note" rows="2" maxlength="600" placeholder="Contexto ou próximo passo">${esc(p.note)}</textarea></label>
+        </div>
+      </details>
       <div class="work12-form-actions"><button type="button" class="work12-secondary" id="work12Cancel">Cancelar</button><button class="work12-primary" type="submit">Salvar</button></div>
     </form>`;
     document.body.appendChild(dlg); dlg.showModal();
