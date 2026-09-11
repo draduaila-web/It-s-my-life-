@@ -224,8 +224,6 @@
     dlg.querySelector('#finForm').addEventListener('submit',e=>{e.preventDefault();const data=loadFin();dlg.querySelectorAll('[data-ci]').forEach(card=>{const i=+card.dataset.ci,item=items[i],v=f=>card.querySelector(`[data-field="${f}"]`),include=v('include').checked;if(!include)return;const obj={id:uid(),name:item.name,value:item.value,date:v('date').value,category:v('category').value,type:v('type').value,payment:v('payment').value,account:v('account').value,behavior:v('behavior').value,installments:1,installmentCurrent:1,note:'Captura rápida',createdAt:Date.now()};const c=finCardByName(data,obj.account);obj.inBudget=c?c.inBudget!==false:true;obj.budgetImpact=!['invoice_payment','transfer','goal_contribution','commitment_payment'].includes(obj.type);data.transactions.push(obj);if(obj.category!==item.suggestedCategory){const key=merchantKey(item.name);if(key&&!data.rules.some(r=>normText(r.match||'')===key))data.rules.push({id:uid(),match:key,category:obj.category,behavior:obj.behavior,createdAt:Date.now()});}});saveFin(data);close();renderFinanceiroV6();});
   }
 
-
-
   function monthsUntil(deadline){
     const now=new Date(), end=deadline?new Date(deadline+'T12:00:00'):new Date(now.getFullYear(),11,31);
     if(end<now)return 1;
@@ -289,7 +287,7 @@
     dlg.querySelector('#goQuickFromPhoto').onclick=()=>{URL.revokeObjectURL(url);close();openQuickCapture();};dlg.querySelector('#finForm').addEventListener('submit',e=>{e.preventDefault();URL.revokeObjectURL(url);close();});
   }
 
-  window.MINHA_VIDA_FINANCE_VERSION='7.0';
+  window.MINHA_VIDA_FINANCE_VERSION='7.1-stable';
 
   // Se o Financeiro já estiver aberto quando a camada carregar, redesenha apenas ele.
   window.addEventListener('hashchange',()=>{if((location.hash||'').replace('#','')==='financeiro') setTimeout(renderFinanceiroV6,0);});
