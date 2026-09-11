@@ -1,4 +1,6 @@
-const CACHE = "minha-vida-v28";
+const CACHE = "minha-vida-v29";
+
+// Force-refresh of the current app bundle.
 
 const ASSETS = [
   "./",
