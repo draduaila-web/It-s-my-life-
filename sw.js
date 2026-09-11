@@ -1,4 +1,4 @@
-const CACHE = "minha-vida-v35-work-hotfix";
+const CACHE = "bertha-v36";
 
 const ASSETS = [
   "./",
@@ -8,8 +8,8 @@ const ASSETS = [
   "./finance-v6.js",
   "./work-v12.js",
   "./manifest.webmanifest",
-  "./icon-192.svg",
-  "./icon-512.svg"
+  "./bertha-icon-192.png",
+"./bertha-icon-512.png"
 ];
 
 self.addEventListener("install", event => {
