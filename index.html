@@ -1,51 +1,49 @@
 <!doctype html>
 <html lang="pt-BR">
 <head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-  <meta name="theme-color" content="#f8f6f8">
-  <meta name="apple-mobile-web-app-capable" content="yes">
-  <meta name="apple-mobile-web-app-status-bar-style" content="default">
-  <meta name="apple-mobile-web-app-title" content="Minha Vida">
-  <link rel="manifest" href="manifest.webmanifest">
-  <link rel="apple-touch-icon" href="icon-192.svg">
-  <link rel="stylesheet" href="style.css">
-  <title>💜 Minha Vida</title>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#f8f6f8">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="Minha Vida">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="apple-touch-icon" href="icon-192.svg">
+<link rel="stylesheet" href="style.css">
+<title>💜 Minha Vida</title>
 </head>
 <body>
-  <div class="app-shell">
-    <header class="topbar">
-      <button class="icon-btn" id="backBtn" aria-label="Voltar" hidden>‹</button>
-      <div>
-        <div class="eyebrow">MENOS DECISÕES • MAIS RITUAL</div>
-        <h1 id="pageTitle">💜 Meu Dia</h1>
-      </div>
-      <a class="icon-btn" id="homeBtn" aria-label="Início" href="#meu-dia">⌂</a>
-    </header>
-    <main id="app" class="content"></main>
-    <nav class="bottom-nav" aria-label="Navegação principal">
-      <a href="#meu-dia" aria-label="Meu Dia">💜<span>Meu Dia</span></a>
-      <a href="#pendencias" aria-label="Pendências">📝<span>Pendências</span></a>
-      <a href="#rituais" aria-label="Rituais">✨<span>Rituais</span></a>
-      <button type="button" aria-label="Mais" onclick="document.getElementById('moduleMenu').showModal()">☰<span>Mais</span></button>
-    </nav>
-  </div>
-  <dialog id="pendingDialog">
-    <form method="dialog" id="pendingForm" class="modal-card">
-      <div class="modal-head">
-        <div><div class="eyebrow" id="dialogEyebrow">NOVA PENDÊNCIA</div><h2 id="dialogTitle">Adicionar pendência</h2></div>
-        <button class="icon-btn" value="cancel" aria-label="Fechar">×</button>
-      </div>
-      <label>O que precisa sair da sua cabeça?<input id="pendingTitle" name="title" required maxlength="120" autocomplete="off" placeholder="Ex.: Resolver documento"></label>
-      <div class="form-grid"><label>Categoria<select id="pendingCategory"><option value="Pessoal">Pessoal</option><option value="Casa">Casa</option><option value="Henrique">Henrique</option><option value="Financeiro">Financeiro</option><option value="Trabalho">Trabalho</option><option value="Estudos">Estudos</option><option value="Compras">Compras</option><option value="Outros">Outros</option></select></label><label>Prazo<input id="pendingDue" type="date"></label></div>
-      <div class="form-grid"><label>Duração total<select id="pendingDuration"><option value="5">5 min</option><option value="10">10 min</option><option value="15">15 min</option><option value="20">20 min</option><option value="30">30 min</option><option value="45">45 min</option><option value="60">1h</option><option value="90">1h30</option><option value="120">2h</option><option value="180">3h</option><option value="240">4h</option><option value="360">6h</option><option value="480">8h</option><option value="custom">Personalizada…</option></select><input id="pendingDurationCustom" class="duration-custom" type="number" min="5" max="720" step="5" value="35" placeholder="Ex.: 75"></label><label>Prioridade<select id="pendingPriority"><option value="1">Baixa</option><option value="2">Normal</option><option value="3">Importante</option><option value="5">Alta</option></select></label></div>
-      <label>Como quero trabalhar nisso?<select id="pendingWorkMode"><option value="fraction">Em sessões menores</option><option value="single">Em um bloco único</option></select></label>
-      <div id="pendingSessionFields" class="form-grid"><label>Sessão ideal<select id="pendingSession">${sessionOptions(60)}</select></label><label>Sessão mínima<select id="pendingSessionMin">${sessionOptions(10)}</select></label></div>
-      <label>Observação <span class="muted">(opcional)</span><textarea id="pendingNote" rows="3" maxlength="300" placeholder="Algum detalhe que você não quer esquecer?"></textarea></label>
-      <div class="modal-actions"><button type="button" class="secondary" id="deletePendingBtn" hidden>Excluir</button><div class="grow"></div><button type="button" class="secondary" id="cancelPendingBtn">Cancelar</button><button class="primary" value="default">Salvar</button></div>
-    </form>
-  </dialog>
-  <script src="app.js"></script>
-  <dialog id="moduleMenu"><div class="module-sheet"><div class="sheet-head"><strong>MINHA VIDA</strong><button onclick="document.getElementById('moduleMenu').close()">×</button></div><div class="module-links"><a href="#pendencias">📝 Pendências</a><a href="#meu-dia">💜 Meu Dia</a><a href="#ideias">💡 Criação & Ideias</a><a href="#estudos">📚 Estudos / CEBRASPE</a><a href="#financeiro">💰 Financeiro</a><a href="#casa">🏠 Casa</a><a href="#exercicios">🏃 Exercícios</a><a href="#alimentacao">🍽️ Alimentação</a><a href="#receitas">📖 Receitas</a></div></div></dialog>
+<div class="app-shell">
+<header class="topbar">
+<button class="icon-btn" id="backBtn" aria-label="Voltar" hidden>‹</button>
+<div>
+<div class="eyebrow">MENOS DECISÕES • MAIS RITUAL</div>
+<h1 id="pageTitle">💜 Meu Dia</h1>
+</div>
+<a class="icon-btn" id="homeBtn" aria-label="Início" href="#meu-dia">⌂</a>
+</header>
+<main id="app" class="content"></main>
+<nav class="bottom-nav" aria-label="Navegação principal">
+<a href="#meu-dia" aria-label="Meu Dia">💜<span>Meu Dia</span></a>
+<a href="#pendencias" aria-label="Pendências">📝<span>Pendências</span></a>
+<a href="#rituais" aria-label="Rituais">✨<span>Rituais</span></a>
+<button type="button" aria-label="Mais" onclick="document.getElementById('moduleMenu').showModal()">☰<span>Mais</span></button>
+</nav>
+</div>
+<dialog id="pendingDialog">
+<form method="dialog" id="pendingForm" class="modal-card">
+<div class="modal-head">
+<div><div class="eyebrow" id="dialogEyebrow">NOVA PENDÊNCIA</div><h2 id="dialogTitle">Adicionar pendência</h2></div>
+<button class="icon-btn" value="cancel" aria-label="Fechar">×</button>
+</div>
+<label>O que precisa sair da sua cabeça?<input id="pendingTitle" name="title" required maxlength="120" autocomplete="off" placeholder="Ex.: Resolver documento"></label>
+<div class="form-grid"><label>Categoria<select id="pendingCategory"><option value="Pessoal">Pessoal</option><option value="Casa">Casa</option><option value="Henrique">Henrique</option><option value="Financeiro">Financeiro</option><option value="Trabalho">Trabalho</option><option value="Estudos">Estudos</option><option value="Compras">Compras</option><option value="Outros">Outros</option></select></label><label>Prazo<input id="pendingDue" type="date"></label></div>
+<label>Observação <span class="muted">(opcional)</span><textarea id="pendingNote" rows="3" maxlength="300" placeholder="Algum detalhe que você não quer esquecer?"></textarea></label>
+<div class="modal-actions"><button type="button" class="secondary" id="deletePendingBtn" hidden>Excluir</button><div class="grow"></div><button type="button" class="secondary" id="cancelPendingBtn">Cancelar</button><button class="primary" value="default">Salvar</button></div>
+</form>
+</dialog>
+<script src="app.js"></script>
+<dialog id="moduleMenu"><div class="module-sheet"><div class="sheet-head"><strong>MINHA VIDA</strong><button onclick="document.getElementById('moduleMenu').close()">×</button></div><div class="module-links"><a href="#pendencias">📝 Pendências</a><a href="#meu-dia">💜 Meu Dia</a><a href="#ideias">💡 Criação & Ideias</a><a href="#estudos">📚 Estudos / CEBRASPE</a><a href="#financeiro">💰 Financeiro</a><a href="#casa">🏠 Casa</a><a href="#exercicios">🏃 Exercícios</a><a href="#alimentacao">🍽️ Alimentação</a><a href="#receitas">📖 Receitas</a></div></div></dialog>
+<script src="finance-v6.js"></script>
 </body>
 </html>
