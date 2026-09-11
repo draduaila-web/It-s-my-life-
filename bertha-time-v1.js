@@ -1,4 +1,4 @@
-/* BERTH.A — Meu Dia v2 / Motor de Tempo v1
+/* BERTH.A — Meu Dia v2 / Motor de Tempo v1.1 — identidade
    Camada aditiva: carregar DEPOIS de app.js, finance-v6.js e work-v12.js.
    Preserva chaves/rotas legadas para evitar perda de dados.
 */
@@ -87,32 +87,193 @@
   function timeline(){ const m=minsNow(), w=new Date().getDay(); const status=(a,b,prot=false)=>prot?'—':m>=b?'✓':m>=a?'●':'○'; const ho={1:[1000,1120,'16:40–18:40'],2:[940,1060,'15:40–17:40'],3:[1000,1120,'16:40–18:40'],4:[940,1060,'15:40–17:40'],5:[940,1060,'15:40–17:40']}[w]; let rows=[[316,455,'05:16–07:35','Manhã protegida',true],[480,840,'08:00–14:00','Trabalho oficial',false]]; if(w===1||w===3) rows.push([880,970,'14:40–16:10','Janela estratégica',false]); if(ho) rows.push([ho[0],ho[1],ho[2],'Home office · duração planejada 2h',false]); rows.push([1140,1440,'19:00+','Noite protegida · descanso primeiro',true]); return rows.map(r=>`<div class="bertha-time-row"><i>${status(r[0],r[1],r[4])}</i><b>${r[2]}</b><span>${r[3]}</span></div>`).join(''); }
 
   function renderHome(){ const d=new Date(), greet=d.getHours()<12?'Bom dia':d.getHours()<18?'Boa tarde':'Boa noite'; const today=new Intl.DateTimeFormat('pt-BR',{weekday:'long',day:'numeric',month:'long'}).format(d); const tasks=sourcesToday().filter(x=>!doneToday(x.id)).slice(0,4); const free=currentSuggestion().free;
-    return `<section class="bertha-brand"><strong>BERTH.A</strong></section><section class="day-hero"><div class="eyebrow">MEU DIA</div><h1>${greet}, Duaila.</h1><p class="day-date">${today}</p></section>${nowCard()}<section class="day-section"><div class="section-head"><h2>O que importa hoje</h2><span class="soft-count">${tasks.length}</span></div>${tasks.length?tasks.map(x=>`<div class="focus-row bertha-focus"><span class="focus-dot">•</span><div><strong>${esc(x.title)}</strong><small>${esc(x.source)} · ${durationText(+x.minutes||30)}</small></div><button data-start="${esc(x.id)}">Começar</button></div>`).join(''):`<div class="bertha-empty">Seu essencial está em dia.</div>`}</section><section class="day-section"><div class="section-head"><h2>Seu dia, sem excesso</h2></div><div class="timeline bertha-timeline">${timeline()}</div></section>${free?`<section class="free-space"><div>☁️</div><strong>Espaço livre também faz parte do dia.</strong><p>Se nada precisa ser resolvido agora, não resolva.</p></section>`:''}`;
+    return `<section class="day-hero"><div class="eyebrow">MEU DIA</div><h1>${greet}, Duaila.</h1><p class="day-date">${today}</p></section>${nowCard()}<section class="day-section"><div class="section-head"><h2>O que importa hoje</h2><span class="soft-count">${tasks.length}</span></div>${tasks.length?tasks.map(x=>`<div class="focus-row bertha-focus"><span class="focus-dot">•</span><div><strong>${esc(x.title)}</strong><small>${esc(x.source)} · ${durationText(+x.minutes||30)}</small></div><button data-start="${esc(x.id)}">Começar</button></div>`).join(''):`<div class="bertha-empty">Seu essencial está em dia.</div>`}</section><section class="day-section"><div class="section-head"><h2>Seu dia, sem excesso</h2></div><div class="timeline bertha-timeline">${timeline()}</div></section>${free?`<section class="free-space"><div>☁️</div><strong>Espaço livre também faz parte do dia.</strong><p>Se nada precisa ser resolvido agora, não resolva.</p></section>`:''}`;
   }
 
-  function renderIdeal(){ const items=read(IDEAL_KEY,[]); return `<section class="bertha-brand"><strong>BERTH.A</strong></section><section class="hero"><div class="eyebrow">PREFERÊNCIAS</div><h2>Meu Dia Ideal</h2><p>O que você gostaria que coubesse na sua vida quando houver espaço. Não é uma agenda rígida.</p></section><button class="primary add-full" data-add-ideal>＋ Adicionar ao meu dia ideal</button><div class="list bertha-ideal-list">${items.map(x=>`<article class="card"><div><strong>${esc(x.title)}</strong><span>${({morning:'Manhã',afternoon:'Tarde',night:'Noite',flex:'Quando houver espaço'})[x.period]||'Flexível'} · ${durationText(+x.minutes||30)}${x.notify?' · 🔔':''}</span></div><button class="more" data-del-ideal="${x.id}">×</button></article>`).join('')||'<div class="bertha-empty">Ainda não há preferências. Comece com algo que você gostaria de viver com mais frequência.</div>'}</div>`; }
+  function renderIdeal(){ const items=read(IDEAL_KEY,[]); return `<section class="hero"><div class="eyebrow">PREFERÊNCIAS</div><h2>Meu Dia Ideal</h2><p>O que você gostaria que coubesse na sua vida quando houver espaço. Não é uma agenda rígida.</p></section><button class="primary add-full" data-add-ideal>＋ Adicionar ao meu dia ideal</button><div class="list bertha-ideal-list">${items.map(x=>`<article class="card"><div><strong>${esc(x.title)}</strong><span>${({morning:'Manhã',afternoon:'Tarde',night:'Noite',flex:'Quando houver espaço'})[x.period]||'Flexível'} · ${durationText(+x.minutes||30)}${x.notify?' · 🔔':''}</span></div><button class="more" data-del-ideal="${x.id}">×</button></article>`).join('')||'<div class="bertha-empty">Ainda não há preferências. Comece com algo que você gostaria de viver com mais frequência.</div>'}</div>`; }
   function addIdealDialog(){ const d=dialogBase('Adicionar ao Meu Dia Ideal',`<label class="bertha-field">O que você gostaria de fazer?<input data-title placeholder="Ex.: Ler um livro"></label><label class="bertha-field">Melhor período<select data-period><option value="morning">Manhã</option><option value="afternoon">Tarde</option><option value="night">Noite protegida</option><option value="flex">Quando houver espaço</option></select></label><label class="bertha-field">Duração<input data-minutes type="number" min="5" step="5" value="30"></label><label class="bertha-check"><input data-notify type="checkbox"> 🔔 Notificar</label><button class="bertha-primary bertha-full" data-save>Salvar</button>`); d.querySelector('[data-save]').onclick=()=>{const title=d.querySelector('[data-title]').value.trim();if(!title)return;const arr=read(IDEAL_KEY,[]);arr.push({id:`ideal-${Date.now()}`,title,period:d.querySelector('[data-period]').value,minutes:+d.querySelector('[data-minutes]').value||30,notify:d.querySelector('[data-notify]').checked,active:true});write(IDEAL_KEY,arr);d.close();d.remove();rerender()}; }
 
   function bindHome(){ document.querySelectorAll('[data-start]').forEach(b=>b.onclick=()=>{const x=sourcesToday().find(i=>i.id===b.dataset.start);if(x)startItem(x)}); document.querySelectorAll('[data-postpone]').forEach(b=>b.onclick=()=>{const x=sourcesToday().find(i=>i.id===b.dataset.postpone);if(x)postponeDialog(x)}); const f=document.querySelector('[data-finish-active]'); if(f)f.onclick=finishActive; }
   function bindIdeal(){ const a=document.querySelector('[data-add-ideal]');if(a)a.onclick=addIdealDialog;document.querySelectorAll('[data-del-ideal]').forEach(b=>b.onclick=()=>{write(IDEAL_KEY,read(IDEAL_KEY,[]).filter(x=>x.id!==b.dataset.delIdeal));rerender()}) }
 
-  function ensureStyles(){ if(document.getElementById('bertha-time-v1-style'))return; const s=document.createElement('style');s.id='bertha-time-v1-style';s.textContent=`
-  .bertha-brand{padding:8px 2px 12px}.bertha-brand strong{font-family:Georgia,serif;font-size:30px;letter-spacing:-1px;color:#4b3f52}.bertha-now{position:relative}.bertha-actions{display:flex;gap:9px;margin-top:14px;flex-wrap:wrap}.bertha-primary,.bertha-secondary,.bertha-focus button,.bertha-choice-grid button{border:0;border-radius:999px;padding:10px 14px;font-weight:800}.bertha-primary{background:#d989aa;color:#fff}.bertha-secondary,.bertha-focus button,.bertha-choice-grid button{background:#f1e9f5;color:#66506f}.bertha-focus{grid-template-columns:auto 1fr auto!important;align-items:center}.bertha-focus button{font-size:12px}.bertha-time-row{display:grid!important;grid-template-columns:22px 92px 1fr!important;gap:8px!important;align-items:start}.bertha-time-row i{font-style:normal;font-weight:900;color:#80629a}.bertha-empty{padding:16px;border:1px dashed rgba(92,72,104,.18);border-radius:18px;color:#817783}.bertha-dialog{border:0;border-radius:26px;padding:0;width:min(90vw,420px);background:#fffaf6;color:#40384a}.bertha-dialog::backdrop{background:rgba(50,40,52,.38);backdrop-filter:blur(4px)}.bertha-modal{padding:20px}.bertha-modal-head{display:flex;justify-content:space-between;align-items:center;font-size:20px;margin-bottom:14px}.bertha-modal-head button{border:0;background:transparent;font-size:28px}.bertha-muted{color:#817783}.bertha-choice-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin:12px 0}.bertha-field{display:grid;gap:6px;margin:12px 0;font-weight:700}.bertha-field input,.bertha-field select{width:100%;box-sizing:border-box;padding:12px;border:1px solid #e4dce5;border-radius:14px;background:white;font:inherit}.bertha-check{display:flex;gap:8px;align-items:center;margin:14px 0}.bertha-full{width:100%}.bertha-stack{display:grid;gap:9px;margin-top:16px}.bertha-nav-mark{font-weight:900;font-family:Georgia,serif;letter-spacing:-1px}.module-links.bertha-module-cards{display:grid!important;grid-template-columns:1fr 1fr!important;gap:10px!important}.module-links.bertha-module-cards a{min-height:76px;display:flex!important;align-items:center!important;justify-content:center!important;text-align:center!important;padding:12px!important;font-size:15px!important}.bertha-menu-sub{padding:0 24px 12px;color:#817783;font-size:13px}@media(max-width:380px){.bertha-focus button{padding:8px 10px}.bertha-time-row{grid-template-columns:20px 84px 1fr!important}}
-  `;document.head.appendChild(s); }
+  function ensureStyles(){
+    let s=document.getElementById('bertha-time-v1-style');
+    if(!s){s=document.createElement('style');s.id='bertha-time-v1-style';document.head.appendChild(s)}
+    s.textContent=`
+    /* BERTH.A — identidade funcional v2 */
+    .topbar>div{min-width:0}
+    .topbar .eyebrow{
+      text-transform:none!important;
+      letter-spacing:0!important;
+      font-family:"Snell Roundhand","Bradley Hand",cursive!important;
+      font-size:17px!important;
+      line-height:1.05!important;
+      font-weight:400!important;
+      color:#8a718f!important;
+      margin-top:2px!important;
+      white-space:nowrap;
+    }
+    #pageTitle{
+      font-family:Inter,-apple-system,BlinkMacSystemFont,"SF Pro Display","Helvetica Neue",sans-serif!important;
+      font-size:23px!important;
+      font-weight:760!important;
+      letter-spacing:.02em!important;
+      color:#4b3f52!important;
+      margin-top:2px!important;
+    }
+    .bertha-brand{display:none!important}
+    .bertha-now{position:relative}
+    .bertha-actions{display:flex;gap:9px;margin-top:14px;flex-wrap:wrap}
+    .bertha-primary,.bertha-secondary,.bertha-focus button,.bertha-choice-grid button{border:0;border-radius:999px;padding:10px 14px;font-weight:800}
+    .bertha-primary{background:#d989aa;color:#fff}
+    .bertha-secondary,.bertha-focus button,.bertha-choice-grid button{background:#f1e9f5;color:#66506f}
+    .bertha-focus{grid-template-columns:auto 1fr auto!important;align-items:center}
+    .bertha-focus button{font-size:12px}
+    .bertha-time-row{display:grid!important;grid-template-columns:22px 92px 1fr!important;gap:8px!important;align-items:start}
+    .bertha-time-row i{font-style:normal;font-weight:900;color:#80629a}
+    .bertha-empty{padding:16px;border:1px dashed rgba(92,72,104,.18);border-radius:18px;color:#817783}
+    .bertha-dialog{border:0;border-radius:26px;padding:0;width:min(90vw,420px);background:#fffaf6;color:#40384a}
+    .bertha-dialog::backdrop{background:rgba(50,40,52,.38);backdrop-filter:blur(4px)}
+    .bertha-modal{padding:20px}
+    .bertha-modal-head{display:flex;justify-content:space-between;align-items:center;font-size:20px;margin-bottom:2px}
+    .bertha-modal-head button{border:0;background:transparent;font-size:28px}
+    .bertha-muted{color:#817783}
+    .bertha-choice-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin:12px 0}
+    .bertha-field{display:grid;gap:6px;margin:12px 0;font-weight:700}
+    .bertha-field input,.bertha-field select{width:100%;box-sizing:border-box;padding:12px;border:1px solid #e4dce5;border-radius:14px;background:white;font:inherit}
+    .bertha-check{display:flex;gap:8px;align-items:center;margin:14px 0}
+    .bertha-full{width:100%}.bertha-stack{display:grid;gap:9px;margin-top:16px}
+
+    /* Barra inferior: mesma presença visual para os quatro botões */
+    .bottom-nav .nav-item{color:#6d6571!important;opacity:1!important}
+    .bottom-nav .nav-item>svg,.bottom-nav .nav-item>.bertha-nav-mark{
+      width:22px;height:22px;display:block;margin:0 auto 3px;
+    }
+    .bottom-nav .nav-item>span:last-child{font-size:11px!important;font-weight:650!important}
+    .bertha-nav-mark{
+      width:auto!important;
+      min-width:25px;
+      display:flex!important;align-items:center;justify-content:center;
+      font-family:Inter,-apple-system,BlinkMacSystemFont,"SF Pro Display",sans-serif!important;
+      font-size:12px!important;font-weight:850!important;letter-spacing:-.04em!important;
+      color:#66506f!important;
+    }
+    .bottom-nav .nav-item.active,.bottom-nav .nav-item[aria-current="page"]{color:#8a5e92!important}
+
+    /* Menu Início */
+    #berthaMore{width:min(92vw,430px)!important}
+    #berthaMore .bertha-modal{padding:20px 20px 18px}
+    #berthaMore .bertha-modal-head strong{
+      font-family:Inter,-apple-system,BlinkMacSystemFont,"SF Pro Display",sans-serif;
+      font-size:21px;font-weight:760;letter-spacing:-.02em;
+    }
+    .bertha-menu-sub{
+      padding:0 0 16px!important;
+      color:#8a818c!important;
+      font-family:Inter,-apple-system,BlinkMacSystemFont,"SF Pro Text","Helvetica Neue",sans-serif!important;
+      font-size:13px!important;
+      line-height:1.35!important;
+      font-weight:300!important;
+      letter-spacing:.01em!important;
+    }
+    .module-links.bertha-module-cards{
+      display:grid!important;
+      grid-template-columns:1fr 1fr!important;
+      gap:9px!important;
+    }
+    .module-links.bertha-module-cards a{
+      min-height:58px!important;
+      box-sizing:border-box;
+      display:flex!important;
+      flex-direction:row!important;
+      align-items:center!important;
+      justify-content:flex-start!important;
+      gap:10px!important;
+      text-align:left!important;
+      padding:10px 12px!important;
+      border:1px solid rgba(92,72,104,.12)!important;
+      border-radius:16px!important;
+      background:rgba(255,255,255,.70)!important;
+      box-shadow:0 4px 14px rgba(73,56,78,.045)!important;
+      color:#554b59!important;
+      font-family:Inter,-apple-system,BlinkMacSystemFont,"SF Pro Text",sans-serif!important;
+      font-size:13px!important;
+      line-height:1.15!important;
+      font-weight:650!important;
+      text-decoration:none!important;
+    }
+    .module-links.bertha-module-cards a:active{transform:scale(.985);background:#faf5fa!important}
+    .module-links.bertha-module-cards a:last-child:nth-child(odd){grid-column:1 / -1}
+    .bertha-menu-icon{
+      flex:0 0 30px;width:30px;height:30px;border-radius:10px;
+      display:grid;place-items:center;
+      background:#f4eef6;color:#765f7e;
+    }
+    .bertha-menu-icon svg{width:17px;height:17px;display:block}
+    @media(max-width:380px){
+      .bertha-focus button{padding:8px 10px}
+      .bertha-time-row{grid-template-columns:20px 84px 1fr!important}
+      .topbar .eyebrow{font-size:15px!important}
+      .module-links.bertha-module-cards a{font-size:12.5px!important;padding:9px 10px!important}
+    }
+    `;
+  }
+
+  const icon = (name) => {
+    const p={
+      tasks:'<path d="M8 6h10M8 12h10M8 18h10"/><path d="M4 6h.01M4 12h.01M4 18h.01"/>',
+      ritual:'<path d="M12 3v3M12 18v3M3 12h3M18 12h3"/><path d="M16.2 7.8l2.1-2.1M5.7 18.3l2.1-2.1M16.2 16.2l2.1 2.1M5.7 5.7l2.1 2.1"/><circle cx="12" cy="12" r="3.2"/>',
+      more:'<path d="M5 7h14M5 12h14M5 17h14"/>',
+      heart:'<path d="M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.6l-1-1a5.5 5.5 0 0 0-7.8 7.8l1 1L12 21l7.8-7.6 1-1a5.5 5.5 0 0 0 0-7.8z"/>',
+      briefcase:'<rect x="3" y="7" width="18" height="12" rx="2"/><path d="M8 7V5a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2M3 12h18"/>',
+      study:'<path d="M3 5.5A3.5 3.5 0 0 1 6.5 2H11v17H6.5A3.5 3.5 0 0 0 3 22V5.5zM21 5.5A3.5 3.5 0 0 0 17.5 2H13v17h4.5A3.5 3.5 0 0 1 21 22V5.5z"/>',
+      home:'<path d="M3 11.5L12 4l9 7.5"/><path d="M5.5 10v10h13V10M9.5 20v-6h5v6"/>',
+      move:'<circle cx="12" cy="4.5" r="2"/><path d="M9.5 9l2.5-2 2.5 2 2 4M12 11l-2 4-4 3M13 13l3 3 2 4"/>',
+      food:'<path d="M7 3v8M4.5 3v5a2.5 2.5 0 0 0 5 0V3M7 11v10M16 3v18M16 3c3 2 4 5 4 8h-4"/>',
+      recipe:'<path d="M5 3h11a3 3 0 0 1 3 3v15H7a2 2 0 0 1-2-2V3z"/><path d="M7 17h12M9 7h6M9 11h6"/>',
+      wallet:'<path d="M4 6h14a2 2 0 0 1 2 2v11H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/><path d="M16 11h5v4h-5a2 2 0 0 1 0-4z"/>',
+      idea:'<path d="M9 18h6M10 22h4"/><path d="M8.2 14.5A7 7 0 1 1 15.8 14.5c-1.2.8-1.8 1.7-1.8 3h-4c0-1.3-.6-2.2-1.8-3z"/>'
+    };
+    return `<svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">${p[name]||p.more}</svg>`;
+  };
 
   function nav(){
     const navs=[...document.querySelectorAll('.bottom-nav')]; let n=navs[0]; navs.slice(1).forEach(x=>x.remove()); if(!n){n=document.createElement('nav');n.className='bottom-nav';document.body.appendChild(n)}
-    n.innerHTML=`<a class="nav-item" data-route="meu-dia" href="#meu-dia" aria-label="Início"><span class="bertha-nav-mark">B•A</span><span>Início</span></a><a class="nav-item" data-route="pendencias" href="#pendencias" aria-label="Tarefas">📝<span>Tarefas</span></a><a class="nav-item" data-route="rituais" href="#rituais">✨<span>Rituais</span></a><button class="nav-item" type="button" data-bertha-more>☰<span>Mais</span></button>`;
+    n.innerHTML=`<a class="nav-item" data-route="meu-dia" href="#meu-dia" aria-label="Início"><span class="bertha-nav-mark">B•A</span><span>Início</span></a><a class="nav-item" data-route="pendencias" href="#pendencias" aria-label="Tarefas">${icon('tasks')}<span>Tarefas</span></a><a class="nav-item" data-route="rituais" href="#rituais">${icon('ritual')}<span>Rituais</span></a><button class="nav-item" type="button" data-bertha-more>${icon('more')}<span>Mais</span></button>`;
+    const route=(location.hash||'#meu-dia').slice(1)||'meu-dia';
+    n.querySelectorAll('[data-route]').forEach(a=>{if(a.dataset.route===route){a.classList.add('active');a.setAttribute('aria-current','page')}});
     const more=n.querySelector('[data-bertha-more]'); more.onclick=e=>{e.preventDefault();openMore()};
   }
-  function openMore(){ let d=document.getElementById('berthaMore'); if(d)d.remove(); d=document.createElement('dialog');d.id='berthaMore';d.className='bertha-dialog';d.innerHTML=`<div class="bertha-modal"><div class="bertha-modal-head"><strong>Início</strong><button data-close>×</button></div><div class="bertha-menu-sub">Tudo o que compõe sua BERTH.A.</div><div class="module-links bertha-module-cards">${[['dia-ideal','♡ Meu Dia Ideal'],['trabalho','💼 Trabalho'],['estudos','📚 Estudos'],['casa','🏠 Casa'],['exercicios','🏃 Exercícios'],['alimentacao','🍽️ Alimentação'],['receitas','📖 Receitas'],['financeiro','💰 Financeiro'],['ideias','💡 Criação & Ideias']].map(([r,l])=>`<a href="#${r}">${l}</a>`).join('')}</div></div>`;document.body.appendChild(d);d.querySelector('[data-close]').onclick=()=>{d.close();d.remove()};d.querySelectorAll('a').forEach(a=>a.onclick=()=>{d.close();d.remove()});d.showModal(); }
+
+  function openMore(){
+    let d=document.getElementById('berthaMore'); if(d)d.remove();
+    const modules=[
+      ['dia-ideal','heart','Meu Dia Ideal'],
+      ['trabalho','briefcase','Trabalho'],
+      ['estudos','study','Estudos'],
+      ['casa','home','Casa'],
+      ['exercicios','move','Exercícios'],
+      ['alimentacao','food','Alimentação'],
+      ['receitas','recipe','Receitas'],
+      ['financeiro','wallet','Financeiro'],
+      ['ideias','idea','Criação & Ideias']
+    ];
+    d=document.createElement('dialog');d.id='berthaMore';d.className='bertha-dialog';
+    d.innerHTML=`<div class="bertha-modal"><div class="bertha-modal-head"><strong>Início</strong><button data-close>×</button></div><div class="bertha-menu-sub">Everything in place. More room for life.</div><div class="module-links bertha-module-cards">${modules.map(([r,i,l])=>`<a href="#${r}"><span class="bertha-menu-icon">${icon(i)}</span><span>${l}</span></a>`).join('')}</div></div>`;
+    document.body.appendChild(d);
+    d.querySelector('[data-close]').onclick=()=>{d.close();d.remove()};
+    d.querySelectorAll('a').forEach(a=>a.onclick=()=>{d.close();d.remove()});
+    d.addEventListener('cancel',e=>{e.preventDefault();d.close();d.remove()});
+    d.addEventListener('click',e=>{if(e.target===d){d.close();d.remove()}});
+    d.showModal();
+  }
 
   const originalRender = window.render;
   function rerender(){
-    ensureStyles(); nav(); const route=(location.hash||'#meu-dia').slice(1)||'meu-dia'; const pt=document.querySelector('#pageTitle'); if(pt) pt.textContent = route==='meu-dia'?'BERTH.A':route==='pendencias'?'📝 Tarefas':route==='dia-ideal'?'♡ Meu Dia Ideal':pt.textContent;
+    ensureStyles(); nav(); const route=(location.hash||'#meu-dia').slice(1)||'meu-dia'; const pt=document.querySelector('#pageTitle'); const eyebrow=document.querySelector('.topbar .eyebrow'); if(eyebrow) eyebrow.textContent = route==='meu-dia'?'Out of your head. Into your life.':''; if(pt) pt.textContent = route==='meu-dia'?'BERTH.A':route==='pendencias'?'Tarefas':route==='dia-ideal'?'Meu Dia Ideal':pt.textContent;
     if(route==='meu-dia'){ document.getElementById('app').innerHTML=renderHome();bindHome();return; }
     if(route==='dia-ideal'){ document.getElementById('app').innerHTML=renderIdeal();bindIdeal();return; }
-    if(typeof originalRender==='function') originalRender(); nav(); if(route==='pendencias'){ const pt2=document.querySelector('#pageTitle');if(pt2)pt2.textContent='📝 Tarefas'; document.querySelectorAll('h1,h2,h3,strong,span,p').forEach(el=>{if(el.children.length===0)el.textContent=el.textContent.replace(/Pendências/g,'Tarefas').replace(/Pendência/g,'Tarefa')}); }
+    if(typeof originalRender==='function') originalRender(); nav(); if(route==='pendencias'){ const pt2=document.querySelector('#pageTitle');if(pt2)pt2.textContent='Tarefas'; document.querySelectorAll('h1,h2,h3,strong,span,p').forEach(el=>{if(el.children.length===0)el.textContent=el.textContent.replace(/Pendências/g,'Tarefas').replace(/Pendência/g,'Tarefa')}); }
   }
   window.render = rerender;
   window.renderMeuDia = renderHome;

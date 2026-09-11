@@ -1,0 +1,16 @@
+BERTH.A — ajuste visual/identidade v1.1
+
+Mudanças:
+- remove BERTH.A duplicado dentro do Meu Dia;
+- cabeçalho: BERTH.A + “Out of your head. Into your life.” em tratamento manuscrito;
+- menu Início: “Everything in place. More room for life.” em fonte fina;
+- menu em cards/botões claros e compactos;
+- ícones lineares uniformes no lugar dos emojis;
+- último card ocupa a largura inteira, eliminando o espaço vazio;
+- barra inferior com presença visual mais uniforme;
+- nenhuma chave de localStorage, rota ou lógica do Motor de Tempo foi alterada.
+
+Instalação:
+1) No GitHub, substitua o conteúdo do arquivo bertha-time-v1.js pelo conteúdo de bertha-time-v1.1.js (ou renomeie o arquivo para bertha-time-v1.js antes do upload).
+2) No index.html, troque apenas ?v=1 por ?v=1.1.
+3) No sw.js, altere o nome do cache para bertha-v38-identity e mantenha ./bertha-time-v1.js na lista.
