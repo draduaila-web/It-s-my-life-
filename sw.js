@@ -1,4 +1,4 @@
-const CACHE = "bertha-v36";
+const CACHE = "bertha-v37-time-engine";
 
 const ASSETS = [
   "./",
@@ -7,6 +7,7 @@ const ASSETS = [
   "./app.js",
   "./finance-v6.js",
   "./work-v12.js",
+  "./bertha-time-v1.js",
   "./manifest.webmanifest",
   "./bertha-icon-192.png",
 "./bertha-icon-512.png"
