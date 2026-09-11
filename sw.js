@@ -1,6 +1,6 @@
-const CACHE = "minha-vida-v33-finance-v71-stable";
+const CACHE = "minha-vida-v34-work-v12";
 const CORE = ["./","./style.css","./manifest.webmanifest","./icon-192.svg","./icon-512.svg"];
-const FRESH = ["./index.html","./app.js","./finance-v6.js"];
+const FRESH = ["./index.html","./app.js","./finance-v6.js","./work-v12.js"];
 
 self.addEventListener("install", e => e.waitUntil((async()=>{
   const c=await caches.open(CACHE);
@@ -11,13 +11,11 @@ self.addEventListener("install", e => e.waitUntil((async()=>{
   }
   await self.skipWaiting();
 })()));
-
 self.addEventListener("activate", e => e.waitUntil((async()=>{
   const keys=await caches.keys();
   await Promise.all(keys.filter(k=>k!==CACHE).map(k=>caches.delete(k)));
   await self.clients.claim();
 })()));
-
 self.addEventListener("fetch", e => {
   const u=new URL(e.request.url);
   const isFresh = FRESH.some(x => u.pathname.endsWith(x.replace('./','')));
