@@ -1,4 +1,4 @@
-const CACHE = "bertha-v39-joyful-depth";
+const CACHE = "bertha-v40-identity-fade";
 
 const ASSETS = [
   "./",
