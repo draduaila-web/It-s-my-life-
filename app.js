@@ -322,7 +322,7 @@ function render() {
   else renderPlaceholder();
 }
 
-window.addEventListener("hashchange", render);
+window.addEventListener("hashchange", render); window.addEventListener("popstate", render);
 
 function renderPendencias() {
   const all = loadPendencias();
@@ -997,7 +997,7 @@ function ensureWorkStyles(){
 }
 function renderTrabalho(){
  ensureWorkStyles();ensureCrefitoStyles();
- app.innerHTML=`<section class="hero work-front-hero"><div class="eyebrow">💼 TRABALHO</div><h2>Trabalho</h2><p>Um espaço separado para organizar minhas frentes profissionais.</p></section>
+ app.innerHTML=`<section class="hero work-front-hero"><div class="eyebrow">💼 TRABALHO</div><h2>Trabalho</h2><p>Um espaço separado para organizar minhas frentes profissionais, sem misturar trabalho com o Financeiro.</p></section>
  <div class="section-title">MINHAS FRENTES</div>
  <section class="work-grid work-front-v12">
   <article class="card work-card work-card-crefito" data-work-route="trabalho-crefito" role="button" tabindex="0" aria-label="Abrir CREFITO-11">
@@ -1013,18 +1013,17 @@ function renderTrabalho(){
    <span class="work-copy"><strong>TikTok</strong><span>Conteúdo, ideias e presença digital.</span></span>
   </article>
  </section>
- <section class="card work-note"><strong>Menos decisões · mais clareza</strong><span>Cada frente tem seu próprio espaço. As tarefas terão duração para poderem alimentar o Meu Dia.</span></section>`;
-
- const open = (route)=>{
-   state.route = route;
-   location.hash = "#" + route;
-   render();
- };
+ <section class="card work-note"><strong>Menos decisões · mais clareza</strong><span>Cada frente tem seu próprio espaço. O que for realmente importante pode depois alimentar o Meu Dia.</span></section>`;
  document.querySelectorAll("[data-work-route]").forEach(card=>{
-   card.addEventListener("click",()=>open(card.dataset.workRoute));
-   card.addEventListener("keydown",e=>{
-     if(e.key==="Enter" || e.key===" "){e.preventDefault();open(card.dataset.workRoute);}
-   });
+   const go=()=>{
+     const route=card.getAttribute("data-work-route");
+     state.route=route;
+     history.pushState({route},"","#"+route);
+     render();
+   };
+   card.addEventListener("click",go);
+   card.addEventListener("touchend",e=>{e.preventDefault();go();},{passive:false});
+   card.addEventListener("keydown",e=>{if(e.key==="Enter"||e.key===" "){e.preventDefault();go();}});
  });
 }
 const CREFITO_KEY="minha-vida.trabalho.crefito.v1";
@@ -1070,7 +1069,7 @@ function renderCrefito(){
  <section class="work-section"><div class="work-section-head"><h3>🗓️ Reuniões</h3><button class="work-add" data-add="reuniao">+ adicionar</button></div><div class="work-list">${upcoming.slice(0,5).map(item).join("")||`<div class="work-empty">Nenhuma reunião futura registrada.</div>`}</div></section>
  <section class="work-section"><div class="work-section-head"><h3>📝 Pautas & acompanhamentos</h3><button class="work-add" data-add="pauta">+ adicionar</button></div><div class="work-list">${all.filter(x=>x.kind==="pauta").slice(-5).reverse().map(item).join("")||`<div class="work-empty">Nenhuma pauta registrada ainda.</div>`}</div></section>
  <div class="work-rule">O que for realmente importante pode depois alimentar o Meu Dia. Registrar aqui não cria obrigação automaticamente.</div>`;
- document.getElementById("backWork").onclick=()=>{location.hash="trabalho"};document.querySelectorAll("[data-add]").forEach(b=>b.onclick=()=>openCrefitoItem(b.dataset.add));
+ const bw=document.getElementById("backWork"); if(bw) bw.onclick=()=>{history.pushState({route:"trabalho"},"","#trabalho");render();};document.querySelectorAll("[data-add]").forEach(b=>b.onclick=()=>openCrefitoItem(b.dataset.add));
 }
 const WORK_BEC_KEY="minha-vida.trabalho.bec.v1";
 const WORK_TIKTOK_KEY="minha-vida.trabalho.tiktok.v1";
