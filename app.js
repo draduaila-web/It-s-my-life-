@@ -303,8 +303,6 @@ function render() {
   document.querySelectorAll(".bottom-nav .nav-item").forEach(b =>
     b.classList.toggle("active", b.dataset.route === route)
   );
-  const topBack = document.querySelector("#backBtn");
-  if (topBack) topBack.hidden = (route === "meu-dia");
 
   if (route === "meu-dia") {
     app.innerHTML = renderMeuDia();
@@ -1016,15 +1014,15 @@ function renderTrabalho(){
  app.innerHTML=`<section class="hero work-front-hero"><div class="eyebrow">💼 TRABALHO</div><h2>Trabalho</h2><p>Um espaço separado para organizar minhas frentes profissionais, sem misturar trabalho com o Financeiro.</p></section>
  <div class="section-title">MINHAS FRENTES</div>
  <section class="work-grid work-front-v12">
-  <button type="button" class="card work-card work-card-crefito" data-work-route="trabalho-crefito" aria-label="Abrir CREFITO-11">
+  <button type="button" class="card work-card work-card-crefito" data-work-route="trabalho-crefito" onclick="window.openWorkRoute('trabalho-crefito'); return false;" aria-label="Abrir CREFITO-11">
    <span class="work-icon work-logo-wrap"><img class="work-logo official-logo crefito-logo" src="crefito11-logo.png" alt="CREFITO-11"></span>
    <span class="work-copy"><strong>CREFITO-11</strong><span>Trabalho oficial · 08:00–14:00</span></span>
   </button>
-  <button type="button" class="card work-card work-card-bec" data-work-route="trabalho-bec" aria-label="Abrir BEC">
+  <button type="button" class="card work-card work-card-bec" data-work-route="trabalho-bec" onclick="window.openWorkRoute('trabalho-bec'); return false;" aria-label="Abrir BEC">
    <span class="work-icon work-logo-wrap"><img class="work-logo official-logo bec-logo" src="bec-logo.png" alt="BEC"></span>
    <span class="work-copy"><strong>BEC</strong><span>Empresa, projetos e operações.</span></span>
   </button>
-  <button type="button" class="card work-card work-card-tiktok" data-work-route="trabalho-tiktok" aria-label="Abrir TikTok">
+  <button type="button" class="card work-card work-card-tiktok" data-work-route="trabalho-tiktok" onclick="window.openWorkRoute('trabalho-tiktok'); return false;" aria-label="Abrir TikTok">
    <span class="work-icon work-logo-wrap"><img class="work-logo official-logo tiktok-logo" src="tiktok-logo.png" alt="TikTok"></span>
    <span class="work-copy"><strong>TikTok</strong><span>Conteúdo, ideias e presença digital.</span></span>
   </button>
@@ -1033,8 +1031,8 @@ function renderTrabalho(){
  window.openWorkRoute=(route)=>{
    state.route=route;
    const hash="#"+route;
-   if(location.hash!==hash) location.hash=hash;
-   else render();
+   try{ history.replaceState(null,"",hash); }catch(e){ location.hash=route; }
+   render();
  };
  // Os cards principais usam links reais (#rota). Isso evita conflitos de toque
  // do Safari/iPhone com listeners duplicados e mantém a navegação nativa.
