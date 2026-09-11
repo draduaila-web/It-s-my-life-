@@ -997,16 +997,36 @@ function ensureWorkStyles(){
 }
 function renderTrabalho(){
  ensureWorkStyles();ensureCrefitoStyles();
- window.__workGo=(route)=>{ state.route=route; try{history.replaceState(null,"",location.pathname+"#"+route)}catch(e){location.hash=route} render(); };
- const card=(route,logo,name,desc,extra='')=>`<button type="button" class="card work-card ${extra}" data-work-route="${route}" onclick="window.__workGo('${route}')" ontouchend="window.__workGo('${route}')"><span class="work-icon work-logo-wrap"><img class="work-logo official-logo" src="${logo}" alt="${name}"></span><span class="work-copy"><strong>${name}</strong><span>${desc}</span></span></button>`;
- app.innerHTML=`<section class="hero work-front-hero"><div class="eyebrow">💼 TRABALHO</div><h2>Trabalho</h2><p>Um espaço separado para organizar minhas frentes profissionais, sem misturar trabalho com o Financeiro.</p></section>
- <div class="section-title">MINHAS FRENTES</div><section class="work-grid work-front-v12">
- ${card('trabalho-crefito','crefito11-logo.png','CREFITO-11','Trabalho oficial · 08:00–14:00','work-card-crefito')}
- ${card('trabalho-bec','bec-logo.png','BEC','Empresa, projetos e operações.','work-card-bec')}
- ${card('trabalho-tiktok','tiktok-logo.png','TikTok','Conteúdo, ideias e presença digital.','work-card-tiktok')}
- </section><section class="card work-note"><strong>Menos decisões · mais clareza</strong><span>Cada frente tem seu próprio espaço. O que for realmente importante pode depois alimentar o Meu Dia.</span></section>`;
-}
+ app.innerHTML=`<section class="hero work-front-hero"><div class="eyebrow">💼 TRABALHO</div><h2>Trabalho</h2><p>Um espaço separado para organizar minhas frentes profissionais.</p></section>
+ <div class="section-title">MINHAS FRENTES</div>
+ <section class="work-grid work-front-v12">
+  <article class="card work-card work-card-crefito" data-work-route="trabalho-crefito" role="button" tabindex="0" aria-label="Abrir CREFITO-11">
+   <span class="work-icon work-logo-wrap"><img class="work-logo official-logo crefito-logo" src="crefito11-logo.png" alt="CREFITO-11"></span>
+   <span class="work-copy"><strong>CREFITO-11</strong><span>Trabalho oficial · 08:00–14:00</span></span>
+  </article>
+  <article class="card work-card work-card-bec" data-work-route="trabalho-bec" role="button" tabindex="0" aria-label="Abrir BEC">
+   <span class="work-icon work-logo-wrap"><img class="work-logo official-logo bec-logo" src="bec-logo.png" alt="BEC"></span>
+   <span class="work-copy"><strong>BEC</strong><span>Empresa, projetos e operações.</span></span>
+  </article>
+  <article class="card work-card work-card-tiktok" data-work-route="trabalho-tiktok" role="button" tabindex="0" aria-label="Abrir TikTok">
+   <span class="work-icon work-logo-wrap"><img class="work-logo official-logo tiktok-logo" src="tiktok-logo.png" alt="TikTok"></span>
+   <span class="work-copy"><strong>TikTok</strong><span>Conteúdo, ideias e presença digital.</span></span>
+  </article>
+ </section>
+ <section class="card work-note"><strong>Menos decisões · mais clareza</strong><span>Cada frente tem seu próprio espaço. As tarefas terão duração para poderem alimentar o Meu Dia.</span></section>`;
 
+ const open = (route)=>{
+   state.route = route;
+   location.hash = "#" + route;
+   render();
+ };
+ document.querySelectorAll("[data-work-route]").forEach(card=>{
+   card.addEventListener("click",()=>open(card.dataset.workRoute));
+   card.addEventListener("keydown",e=>{
+     if(e.key==="Enter" || e.key===" "){e.preventDefault();open(card.dataset.workRoute);}
+   });
+ });
+}
 const CREFITO_KEY="minha-vida.trabalho.crefito.v1";
 function loadCrefito(){try{return JSON.parse(localStorage.getItem(CREFITO_KEY))||[]}catch{return[]}}
 function saveCrefito(x){localStorage.setItem(CREFITO_KEY,JSON.stringify(x))}
@@ -1027,7 +1047,6 @@ function openCrefitoItem(kind){
  <div class="form-grid"><label>Data<input id="cDate" type="date" value="${today}"></label>${kind==="reuniao"?`<label>Horário<input id="cTime" type="time"></label>`:`<label>Status<select id="cStatus"><option>Aberto</option><option>Em andamento</option><option>Concluído</option><option>Aguardando</option></select></label>`}</div>
  ${kind==="reuniao"?`<label>Status<select id="cStatus"><option>Agendada</option><option>Realizada</option><option>Cancelada</option></select></label>`:""}
  <label>Prioridade<select id="cPriority"><option>Normal</option><option>Alta</option><option>Baixa</option></select></label>
- <label>Quanto tempo<select id="cDuration"><option>15 min</option><option selected>30 min</option><option>45 min</option><option>1h</option><option>1h30</option><option>2h</option><option>3h</option><option>4h</option></select></label>
  <div class="choice-title">👥 Relaciona-se com</div><div class="choice-grid">${["Profissional","Empresa","Presidência","Jurídico","Tesouraria","Atendimento","TI / Informática","Outro setor"].map(x=>`<label class="choice"><input type="checkbox" name="rel" value="${x}"><span>${x}</span></label>`).join("")}</div>
  <label>Pessoa / contato<input id="cContact" maxlength="120" placeholder="Nome da pessoa, responsável ou contato (opcional)"></label>
  <div class="choice-title">🗂️ Sistemas / planilhas envolvidos</div><div class="choice-grid">${["Implanta","Siscaf","SEI","Excel / planilha","Google Sheets","Outro sistema"].map(x=>`<label class="choice"><input type="checkbox" name="sys" value="${x}"><span>${x}</span></label>`).join("")}</div>
@@ -1036,13 +1055,13 @@ function openCrefitoItem(kind){
  document.body.appendChild(dlg);dlg.showModal();
  const close=()=>{try{if(dlg.open)dlg.close()}finally{if(dlg.isConnected)dlg.remove()}};
  dlg.querySelector("#closeCrefitoX").onclick=e=>{e.preventDefault();e.stopPropagation();close()};dlg.querySelector("#cancelCrefito").onclick=e=>{e.preventDefault();e.stopPropagation();close()};dlg.addEventListener("cancel",e=>{e.preventDefault();close()});dlg.addEventListener("click",e=>{if(e.target===dlg)close()});
- dlg.querySelector("#crefitoForm").onsubmit=e=>{e.preventDefault();const arr=loadCrefito();const checked=n=>Array.from(dlg.querySelectorAll(`input[name="${n}"]:checked`)).map(x=>x.value);arr.push({id:uid(),kind,title:dlg.querySelector("#cTitle").value.trim(),date:dlg.querySelector("#cDate").value,status:dlg.querySelector("#cStatus")?.value||"Agendada",time:dlg.querySelector("#cTime")?.value||"",priority:dlg.querySelector("#cPriority").value,duration:dlg.querySelector("#cDuration").value,minutes:workTaskMinutes(dlg.querySelector("#cDuration").value),relations:checked("rel"),contact:dlg.querySelector("#cContact").value.trim(),systems:checked("sys"),note:dlg.querySelector("#cNote").value.trim(),createdAt:Date.now()});saveCrefito(arr);close();renderCrefito()};
+ dlg.querySelector("#crefitoForm").onsubmit=e=>{e.preventDefault();const arr=loadCrefito();const checked=n=>Array.from(dlg.querySelectorAll(`input[name="${n}"]:checked`)).map(x=>x.value);arr.push({id:uid(),kind,title:dlg.querySelector("#cTitle").value.trim(),date:dlg.querySelector("#cDate").value,status:dlg.querySelector("#cStatus")?.value||"Agendada",time:dlg.querySelector("#cTime")?.value||"",priority:dlg.querySelector("#cPriority").value,relations:checked("rel"),contact:dlg.querySelector("#cContact").value.trim(),systems:checked("sys"),note:dlg.querySelector("#cNote").value.trim(),createdAt:Date.now()});saveCrefito(arr);close();renderCrefito()};
 }
 function renderCrefito(){
  ensureWorkStyles();ensureCrefitoStyles();
  const all=loadCrefito(), today=new Date().toISOString().slice(0,10), open=all.filter(x=>x.status!=="Concluído"), upcoming=all.filter(x=>x.kind==="reuniao"&&x.date>=today).sort((a,b)=>(a.date+a.time).localeCompare(b.date+b.time));
  const labels={demanda:"Demanda",projeto:"Projeto",reuniao:"Reunião",pauta:"Pauta"};
- const item=x=>`<article class="card work-item"><div><strong>${escapeHtml(x.title)}</strong><small>${x.date?new Date(x.date+"T12:00:00").toLocaleDateString("pt-BR"):"Sem data"}${x.time?` · ${x.time}`:""} · ${labels[x.kind]} · ${x.priority} · ⏱️ ${escapeHtml(x.duration||"30 min")}</small>${(x.relations||[]).length?`<small>Relaciona-se: ${escapeHtml(x.relations.join(", "))}</small>`:""}${(x.systems||[]).length?`<small>Sistemas: ${escapeHtml(x.systems.join(", "))}</small>`:""}${x.contact?`<small>Contato: ${escapeHtml(x.contact)}</small>`:""}${x.note?`<small>${escapeHtml(x.note)}</small>`:""}</div><span class="work-badge">${x.status||"Agendada"}</span></article>`;
+ const item=x=>`<article class="card work-item"><div><strong>${escapeHtml(x.title)}</strong><small>${x.date?new Date(x.date+"T12:00:00").toLocaleDateString("pt-BR"):"Sem data"}${x.time?` · ${x.time}`:""} · ${labels[x.kind]} · ${x.priority}</small>${(x.relations||[]).length?`<small>Relaciona-se: ${escapeHtml(x.relations.join(", "))}</small>`:""}${(x.systems||[]).length?`<small>Sistemas: ${escapeHtml(x.systems.join(", "))}</small>`:""}${x.contact?`<small>Contato: ${escapeHtml(x.contact)}</small>`:""}${x.note?`<small>${escapeHtml(x.note)}</small>`:""}</div><span class="work-badge">${x.status||"Agendada"}</span></article>`;
  app.innerHTML=`<section class="hero"><div class="eyebrow">💼 TRABALHO</div><h2><img class="hero-brand-logo" src="https://www.crefito11.gov.br/arquivos/img_logo/logo.png" alt="CREFITO-11"> CREFITO-11</h2><p>Um espaço próprio para acompanhar o trabalho oficial, sem misturar com a vida pessoal.</p></section>
  <div class="work-subnav"><button class="work-back" id="backWork">← Trabalho</button><p class="work-subtitle">ROTINA OFICIAL · 08:00–14:00</p></div>
  <section class="work-summary"><div class="work-stat"><b>${open.length}</b><span>itens em aberto</span></div><div class="work-stat"><b>${upcoming.length}</b><span>reuniões futuras</span></div></section>
@@ -1055,12 +1074,12 @@ function renderCrefito(){
 }
 const WORK_BEC_KEY="minha-vida.trabalho.bec.v1";
 const WORK_TIKTOK_KEY="minha-vida.trabalho.tiktok.v1";
-const WORK_DURATIONS=["15 min","30 min","45 min","1h","1h30","2h","3h","4h"];
+const WORK_DURATIONS=["15 min","30 min","45 min","1h","1h30","2h"];
 const WORK_PRIORITIES=["Normal","Alta","Baixa"];
 const WORK_STATUSES=["A fazer","Em andamento","Concluído"];
 function loadWorkTasks(key){try{return JSON.parse(localStorage.getItem(key)||'[]')}catch{return[]}}
 function saveWorkTasks(key,items){localStorage.setItem(key,JSON.stringify(items))}
-function workTaskMinutes(v){return ({"15 min":15,"30 min":30,"45 min":45,"1h":60,"1h30":90,"2h":120,"3h":180,"4h":240}[v]||30)}
+function workTaskMinutes(v){return ({"15 min":15,"30 min":30,"45 min":45,"1h":60,"1h30":90,"2h":120}[v]||30)}
 function workTaskDateLabel(v){return v?new Date(v+'T12:00:00').toLocaleDateString('pt-BR'):"Sem data"}
 function ensureWorkTaskStyles(){
  if(document.getElementById('work-dialog-global-styles'))return;
@@ -1085,7 +1104,7 @@ function openWorkTaskModal(cfg, preset=null){
  document.body.appendChild(dlg);dlg.showModal();
  const close=()=>{try{if(dlg.open)dlg.close()}finally{dlg.remove()}};
  dlg.querySelector('#closeWorkTaskX').onclick=e=>{e.preventDefault();close()};dlg.querySelector('#cancelWorkTask').onclick=e=>{e.preventDefault();close()};dlg.addEventListener('cancel',e=>{e.preventDefault();close()});dlg.addEventListener('click',e=>{if(e.target===dlg)close()});
- dlg.querySelector('#workTaskForm').onsubmit=e=>{e.preventDefault();const arr=loadWorkTasks(cfg.key);const data={id:preset?.id||uid(),title:dlg.querySelector('#wtTitle').value.trim(),date:dlg.querySelector('#wtDate').value,duration:dlg.querySelector('#wtDuration').value,minutes:workTaskMinutes(dlg.querySelector('#wtDuration').value),priority:dlg.querySelector('#wtPriority').value,status:dlg.querySelector('#wtStatus').value,note:dlg.querySelector('#wtNote').value.trim(),createdAt:preset?.createdAt||Date.now(),updatedAt:Date.now(),source:cfg.name,group:cfg.group||preset?.group||''};if(!data.title)return;if(preset){const i=arr.findIndex(x=>x.id===preset.id);if(i>=0)arr[i]=data;else arr.push(data)}else arr.push(data);saveWorkTasks(cfg.key,arr);close();renderTrabalhoSub(cfg.kind)};
+ dlg.querySelector('#workTaskForm').onsubmit=e=>{e.preventDefault();const arr=loadWorkTasks(cfg.key);const data={id:preset?.id||uid(),title:dlg.querySelector('#wtTitle').value.trim(),date:dlg.querySelector('#wtDate').value,duration:dlg.querySelector('#wtDuration').value,minutes:workTaskMinutes(dlg.querySelector('#wtDuration').value),priority:dlg.querySelector('#wtPriority').value,status:dlg.querySelector('#wtStatus').value,note:dlg.querySelector('#wtNote').value.trim(),createdAt:preset?.createdAt||Date.now(),updatedAt:Date.now(),source:cfg.name};if(!data.title)return;if(preset){const i=arr.findIndex(x=>x.id===preset.id);if(i>=0)arr[i]=data;else arr.push(data)}else arr.push(data);saveWorkTasks(cfg.key,arr);close();renderTrabalhoSub(cfg.kind)};
 }
 function workTaskCard(x,cfg){return `<article class="card work-item work-task-item"><div><strong>${escapeHtml(x.title)}</strong><small>${workTaskDateLabel(x.date)} · ${escapeHtml(x.duration||'30 min')} · ${escapeHtml(x.priority||'Normal')}</small>${x.note?`<small>${escapeHtml(x.note)}</small>`:''}</div><div class="work-task-actions"><span class="work-badge">${escapeHtml(x.status||'A fazer')}</span><button class="mini-work-edit" data-work-edit="${escapeHtml(x.id)}" aria-label="Editar">✎</button></div></article>`}
 function renderWorkTaskArea(cfg){
@@ -1128,7 +1147,7 @@ function renderTrabalhoSub(kind){
  const cfg=cfgs[kind];
  const all=loadWorkTasks(cfg.key),done=all.filter(x=>x.status==='Concluído').length;
  const logo=`<img class="hero-brand-logo work-sub-logo" src="${cfg.logo}" alt="${cfg.name}">`;
- const actionBtn=(group,a)=>`<button type="button" class="work-action-chip" data-work-action="${escapeHtml(a)}" data-work-group="${escapeHtml(group)}" onclick="return false">${escapeHtml(a)}</button>`;
+ const actionBtn=(group,a)=>`<button type="button" class="work-action-chip" data-work-action="${escapeHtml(a)}" data-work-group="${escapeHtml(group)}">${escapeHtml(a)}</button>`;
  const groupsHtml=cfg.groups.map(g=>`
    <section class="card work-panel work-click-panel">
      <div class="panel-tag">${cfg.tag}</div>
