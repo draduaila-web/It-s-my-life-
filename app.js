@@ -280,9 +280,6 @@ function render() {
   const route = hash || state.route || "meu-dia";
   state.route = route;
 
-  const backBtn = document.querySelector("#backBtn");
-  if (backBtn) backBtn.hidden = !["trabalho-crefito", "trabalho-bec", "trabalho-tiktok"].includes(route);
-
   const pageTitle = document.querySelector("#pageTitle");
   if (pageTitle) {
     pageTitle.textContent =
@@ -324,17 +321,6 @@ function render() {
   else if (route === "trabalho-tiktok") renderTrabalhoSub("tiktok");
   else renderPlaceholder();
 }
-
-document.addEventListener("click", (e) => {
-  const workRouteEl = e.target.closest("[data-work-route]");
-  if (!workRouteEl) return;
-  const route = workRouteEl.getAttribute("data-work-route");
-  if (!route) return;
-  e.preventDefault();
-  state.route = route;
-  location.hash = route;
-  render();
-});
 
 window.addEventListener("hashchange", render);
 
@@ -970,7 +956,7 @@ function ensureFinanceStyles(){
  .finance-summary{background:linear-gradient(135deg,#edf5f2,#f2edf8);border:1px solid rgba(92,72,104,.10)}
  .finance-main{display:flex;align-items:center;gap:10px;flex-wrap:wrap}.finance-main strong{font-size:32px;display:block;width:100%}.finance-actions{display:flex;gap:16px}.text-btn{border:0;background:transparent;color:#77558a;font-weight:700;padding:0}
  .finance-metrics{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:16px}.finance-metrics>div{background:rgba(255,255,255,.62);border-radius:16px;padding:10px}.finance-metrics span{display:block;font-size:12px;color:#817783}.finance-metrics b{display:block;margin-top:4px;font-size:14px}
- .finance-dialog{appearance:none!important;-webkit-appearance:none!important;outline:0!important;border:0!important;max-width:620px!important;max-height:82vh!important;margin:auto!important;padding:0!important;border:0!important;border-radius:28px!important;background:#fffdfb!important;overflow:hidden!important;box-shadow:0 24px 70px rgba(55,42,60,.20)!important}.finance-dialog::backdrop{background:rgba(45,37,48,.34)!important;backdrop-filter:blur(3px)}.finance-dialog .modal-card{width:100%!important;max-width:none!important;max-height:82vh!important;box-sizing:border-box!important;overflow-y:auto!important;overflow-x:hidden!important;padding:24px!important}.finance-dialog .modal-head{position:sticky!important;top:-24px!important;z-index:5!important;background:#fffdfb!important;padding:0 0 18px!important;margin-bottom:18px!important}.finance-dialog .modal-head .icon-btn{width:48px!important;height:48px!important;min-width:48px!important;border-radius:50%!important;cursor:pointer!important;pointer-events:auto!important;z-index:20!important}.finance-dialog label{display:block!important;margin-bottom:16px!important}.finance-dialog input,.finance-dialog select{width:100%!important;box-sizing:border-box!important}.finance-dialog .form-grid{display:grid!important;grid-template-columns:1fr 1fr!important;gap:14px!important}@media(max-width:560px){.finance-dialog{width:92vw!important;max-width:92vw!important;max-height:84vh!important;border-radius:24px!important}.finance-dialog .modal-card{max-height:84vh!important;padding:20px!important}.finance-dialog .form-grid{grid-template-columns:1fr!important}.finance-dialog .modal-head{top:-20px!important}} .compact-btn{padding:9px 12px!important}.inner-list{margin-top:12px}.finance-row{position:relative;display:flex;align-items:center;justify-content:space-between;gap:10px}.finance-row>div{min-width:0}.finance-row b{white-space:nowrap}.mini-delete{border:0;background:transparent;color:#9a8e98;font-size:22px;padding:4px}.finance-cats{display:grid;gap:8px}.finance-cat{display:flex;justify-content:space-between;padding:10px 12px;border-radius:14px;background:#faf6f2}.finance-cat span{color:#655c67}.goal-toggle{min-width:38px}.goal-toggle.done{background:#e4f1eb}
+ .finance-dialog{width:min(92vw,620px)!important;max-width:620px!important;max-height:82vh!important;margin:auto!important;padding:0!important;border:0!important;border-radius:28px!important;background:#fffdfb!important;overflow:hidden!important;box-shadow:0 24px 70px rgba(55,42,60,.20)!important}.finance-dialog::backdrop{background:rgba(45,37,48,.34)!important;backdrop-filter:blur(3px)}.finance-dialog .modal-card{width:100%!important;max-width:none!important;max-height:82vh!important;box-sizing:border-box!important;overflow-y:auto!important;overflow-x:hidden!important;padding:24px!important}.finance-dialog .modal-head{position:sticky!important;top:-24px!important;z-index:5!important;background:#fffdfb!important;padding:0 0 18px!important;margin-bottom:18px!important}.finance-dialog .modal-head .icon-btn{width:48px!important;height:48px!important;min-width:48px!important;border-radius:50%!important;cursor:pointer!important;pointer-events:auto!important;z-index:20!important}.finance-dialog label{display:block!important;margin-bottom:16px!important}.finance-dialog input,.finance-dialog select{width:100%!important;box-sizing:border-box!important}.finance-dialog .form-grid{display:grid!important;grid-template-columns:1fr 1fr!important;gap:14px!important}@media(max-width:560px){.finance-dialog{width:92vw!important;max-width:92vw!important;max-height:84vh!important;border-radius:24px!important}.finance-dialog .modal-card{max-height:84vh!important;padding:20px!important}.finance-dialog .form-grid{grid-template-columns:1fr!important}.finance-dialog .modal-head{top:-20px!important}} .compact-btn{padding:9px 12px!important}.inner-list{margin-top:12px}.finance-row{position:relative;display:flex;align-items:center;justify-content:space-between;gap:10px}.finance-row>div{min-width:0}.finance-row b{white-space:nowrap}.mini-delete{border:0;background:transparent;color:#9a8e98;font-size:22px;padding:4px}.finance-cats{display:grid;gap:8px}.finance-cat{display:flex;justify-content:space-between;padding:10px 12px;border-radius:14px;background:#faf6f2}.finance-cat span{color:#655c67}.goal-toggle{min-width:38px}.goal-toggle.done{background:#e4f1eb}
  @media(max-width:420px){.finance-metrics{grid-template-columns:1fr}.panel-head{gap:8px}}
  `;document.head.appendChild(s);
 }
@@ -995,13 +981,13 @@ function ensureWorkStyles(){
  if(document.getElementById("work-v2-styles")) return;
  const s=document.createElement("style");s.id="work-v2-styles";s.textContent=`
  .work-grid{display:grid;gap:14px}.work-card{border:1px solid rgba(92,72,104,.12);text-align:left;display:grid;grid-template-columns:52px 1fr;grid-template-rows:auto auto;column-gap:12px;align-items:center;cursor:pointer;padding:18px!important}.work-card .work-icon{grid-row:1/3;font-size:32px}.work-card strong{font-size:19px}.work-card span:last-child{font-size:13px;color:#817783}.work-note{margin-top:16px;display:grid;gap:6px}.work-note span{color:#817783}.work-subnav{display:flex;align-items:center;gap:10px;margin:4px 0 18px}.work-back{border:0;background:#f1e9f5;color:#654b75;border-radius:999px;padding:9px 14px;font-weight:800}.work-subtitle{color:#817783;margin:0}.work-panels{display:grid;gap:12px}.work-panel{padding:18px!important;display:grid;gap:7px;border:1px solid rgba(92,72,104,.10)}.work-panel span{color:#817783;font-size:14px}.work-panel .panel-tag{justify-self:start;background:#f7f0e8;border-radius:999px;padding:6px 10px;font-size:12px;color:#756975;font-weight:700}.work-rule{margin-top:16px;padding:14px 16px;border-radius:18px;background:linear-gradient(135deg,#f5edf7,#eef5f2);color:#6e6470} .modal-brand-logo{width:28px;height:20px;object-fit:contain;vertical-align:middle}.hero h2{display:flex;align-items:center;gap:10px}.hero-brand-logo{width:42px;height:32px;object-fit:contain}.bec-mark{display:flex;align-items:center;justify-content:center;width:48px;height:48px;border-radius:14px;background:linear-gradient(135deg,#edf5f2,#f5edf7);color:#65795f;font-size:18px;font-weight:900;letter-spacing:-1px}.tiktok-mark{display:flex;align-items:center;justify-content:center;width:48px;height:48px;border-radius:14px;background:#111;color:#fff;font-size:28px;font-weight:900}
- .work-front-v12 .work-card{min-height:96px!important;background:#fffdfb!important;grid-template-columns:82px 1fr!important;grid-template-rows:1fr!important;column-gap:18px!important;padding:16px 18px!important;}
- .work-front-v12 .work-icon{grid-row:1!important;width:82px!important;height:76px!important;display:flex!important;align-items:center!important;justify-content:center!important;}
- .work-front-v12 .work-logo{display:block!important;width:76px!important;height:76px!important;object-fit:contain!important;}
- .work-front-v12 .crefito-logo{width:80px!important;height:68px!important;}
- .work-front-v12 .bec-logo{width:72px!important;height:72px!important;}
- .work-front-v12 .tiktok-logo{width:68px!important;height:68px!important;border-radius:16px!important;}
- .work-front-v12 .work-copy{display:grid!important;gap:3px!important;min-width:0;text-align:left!important}.work-front-v12 button.work-card{font:inherit;color:#40384a!important;border:1px solid rgba(92,72,104,.12)!important;width:100%!important;appearance:none!important;-webkit-appearance:none!important}.work-front-v12 button.work-card *{pointer-events:none!important}
+ .work-front-v12 .work-card{min-height:82px!important;background:#fffdfb!important;grid-template-columns:64px 1fr!important;grid-template-rows:1fr!important;column-gap:16px!important;padding:16px 18px!important;}
+ .work-front-v12 .work-icon{grid-row:1!important;width:64px!important;height:64px!important;display:flex!important;align-items:center!important;justify-content:center!important;}
+ .work-front-v12 .work-logo{display:block!important;width:64px!important;height:64px!important;object-fit:contain!important;}
+ .work-front-v12 .crefito-logo{width:64px!important;height:54px!important;}
+ .work-front-v12 .bec-logo{width:58px!important;height:58px!important;}
+ .work-front-v12 .tiktok-logo{width:58px!important;height:58px!important;border-radius:14px!important;}
+ .work-front-v12 .work-copy{display:grid!important;gap:3px!important;min-width:0;}
  .work-front-v12 .work-copy strong{font-size:19px!important;color:#40384a!important;line-height:1.15!important;}
  .work-front-v12 .work-copy span{font-size:14px!important;color:#817783!important;line-height:1.3!important;}
  .work-front-v12 .work-card:active{transform:scale(.985)}
@@ -1014,29 +1000,21 @@ function renderTrabalho(){
  app.innerHTML=`<section class="hero work-front-hero"><div class="eyebrow">💼 TRABALHO</div><h2>Trabalho</h2><p>Um espaço separado para organizar minhas frentes profissionais, sem misturar trabalho com o Financeiro.</p></section>
  <div class="section-title">MINHAS FRENTES</div>
  <section class="work-grid work-front-v12">
-  <a href="#trabalho-crefito" class="card work-card work-card-crefito" data-work-route="trabalho-crefito" aria-label="Abrir CREFITO-11">
+  <button class="card work-card work-card-crefito" data-work-route="trabalho-crefito">
    <span class="work-icon work-logo-wrap"><img class="work-logo official-logo crefito-logo" src="crefito11-logo.png" alt="CREFITO-11"></span>
    <span class="work-copy"><strong>CREFITO-11</strong><span>Trabalho oficial · 08:00–14:00</span></span>
-  </a>
-  <a href="#trabalho-bec" class="card work-card work-card-bec" data-work-route="trabalho-bec" aria-label="Abrir BEC">
+  </button>
+  <button class="card work-card work-card-bec" data-work-route="trabalho-bec">
    <span class="work-icon work-logo-wrap"><img class="work-logo official-logo bec-logo" src="bec-logo.png" alt="BEC"></span>
    <span class="work-copy"><strong>BEC</strong><span>Empresa, projetos e operações.</span></span>
-  </a>
-  <a href="#trabalho-tiktok" class="card work-card work-card-tiktok" data-work-route="trabalho-tiktok" aria-label="Abrir TikTok">
+  </button>
+  <button class="card work-card work-card-tiktok" data-work-route="trabalho-tiktok">
    <span class="work-icon work-logo-wrap"><img class="work-logo official-logo tiktok-logo" src="tiktok-logo.png" alt="TikTok"></span>
    <span class="work-copy"><strong>TikTok</strong><span>Conteúdo, ideias e presença digital.</span></span>
-  </a>
+  </button>
  </section>
  <section class="card work-note"><strong>Menos decisões · mais clareza</strong><span>Cada frente tem seu próprio espaço. O que for realmente importante pode depois alimentar o Meu Dia.</span></section>`;
- window.openWorkRoute=(route)=>{
-   state.route=route;
-   const hash="#"+route;
-   if(location.hash!==hash) location.hash=hash;
-   else render();
- };
- // Os cards principais usam links reais (#rota). Isso evita conflitos de toque
- // do Safari/iPhone com listeners duplicados e mantém a navegação nativa.
- window.openWorkRoute = window.openWorkRoute;
+ document.querySelectorAll("[data-work-route]").forEach(b=>b.onclick=()=>{location.hash=b.dataset.workRoute});
 }
 
 const CREFITO_KEY="minha-vida.trabalho.crefito.v1";
@@ -1045,9 +1023,9 @@ function saveCrefito(x){localStorage.setItem(CREFITO_KEY,JSON.stringify(x))}
 function ensureCrefitoStyles(){
  if(document.getElementById("crefito-v4-styles")) return;
  const s=document.createElement("style");s.id="crefito-v4-styles";s.textContent=`
- .work-card{text-decoration:none!important;color:#40384a!important;cursor:pointer!important;display:flex!important;align-items:center!important}.work-card strong{color:#40384a!important}.work-card span{color:#817783!important}.work-card .work-icon{display:flex;align-items:center;justify-content:center;width:52px;height:52px}.work-logo{width:48px;height:48px;object-fit:contain;display:block}.work-logo.bec{width:52px;height:52px;border-radius:14px;object-fit:contain}.tiktok-word{font-size:18px;font-weight:900;letter-spacing:-1px;color:#111;line-height:1}.tiktok-word i{font-style:normal;text-shadow:2px 0 #25f4ee,-2px 0 #fe2c55}
+ .work-card{color:#40384a!important}.work-card strong{color:#40384a!important}.work-card span{color:#817783!important}.work-card .work-icon{display:flex;align-items:center;justify-content:center;width:52px;height:52px}.work-logo{width:48px;height:48px;object-fit:contain;display:block}.work-logo.bec{width:52px;height:52px;border-radius:14px;object-fit:contain}.tiktok-word{font-size:18px;font-weight:900;letter-spacing:-1px;color:#111;line-height:1}.tiktok-word i{font-style:normal;text-shadow:2px 0 #25f4ee,-2px 0 #fe2c55}
  .work-summary{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;margin:14px 0 20px}.work-stat{padding:15px;border-radius:18px;background:#f7f0e8;border:1px solid rgba(92,72,104,.09)}.work-stat b{display:block;font-size:22px;color:#4b4350}.work-stat span{font-size:12px;color:#817783}.work-section{margin-top:18px}.work-section-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px}.work-section-head h3{margin:0}.work-add{border:0;border-radius:999px;background:#eee7f7;color:#654b75;padding:8px 13px;font-weight:800}.work-list{display:grid;gap:9px}.work-item{padding:14px 16px!important;display:grid;grid-template-columns:1fr auto;gap:5px}.work-item small{color:#817783}.work-badge{align-self:start;border-radius:999px;padding:5px 9px;background:#f7f0e8;color:#756975;font-size:11px;font-weight:800}.work-empty{padding:18px;border:1px dashed rgba(92,72,104,.18);border-radius:18px;color:#817783;text-align:center}.work-rule{margin-top:16px;padding:14px 16px;border-radius:18px;background:linear-gradient(135deg,#f5edf7,#eef5f2);color:#6e6470} .modal-brand-logo{width:28px;height:20px;object-fit:contain;vertical-align:middle}.hero h2{display:flex;align-items:center;gap:10px}.hero-brand-logo{width:42px;height:32px;object-fit:contain}.bec-mark{display:flex;align-items:center;justify-content:center;width:48px;height:48px;border-radius:14px;background:linear-gradient(135deg,#edf5f2,#f5edf7);color:#65795f;font-size:18px;font-weight:900;letter-spacing:-1px}.tiktok-mark{display:flex;align-items:center;justify-content:center;width:48px;height:48px;border-radius:14px;background:#111;color:#fff;font-size:28px;font-weight:900}
- .crefito-dialog{outline:none!important;border:0!important;max-width:620px!important;max-height:84vh!important;margin:auto!important;padding:0!important;border:0!important;border-radius:28px!important;background:#fffdfb!important;overflow:hidden!important;box-shadow:0 24px 70px rgba(55,42,60,.20)!important}.crefito-dialog::backdrop{background:rgba(45,37,48,.34)!important;backdrop-filter:blur(3px)}.crefito-dialog .modal-card{width:100%!important;max-width:none!important;max-height:84vh!important;box-sizing:border-box!important;overflow-y:auto!important;overflow-x:hidden!important;padding:24px!important}.crefito-dialog .modal-head{position:sticky!important;top:-24px!important;z-index:5!important;background:#fffdfb!important;padding:0 0 18px!important;margin-bottom:18px!important}.crefito-dialog .modal-head .icon-btn{width:48px!important;height:48px!important;min-width:48px!important;border-radius:50%!important;cursor:pointer!important;pointer-events:auto!important;z-index:20!important}.crefito-dialog label{display:block!important;margin-bottom:16px!important}.crefito-dialog input,.crefito-dialog select,.crefito-dialog textarea{width:100%!important;box-sizing:border-box!important}.crefito-dialog .form-grid{display:grid!important;grid-template-columns:1fr 1fr!important;gap:14px!important}.crefito-dialog .choice-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:0 0 16px}.crefito-dialog .choice-title{font-weight:800;color:#6f6672;margin:2px 0 8px}.crefito-dialog .choice{display:flex;align-items:center;gap:10px;border:1px solid #e6dce4;border-radius:14px;padding:11px 12px;background:#fff;font-weight:700;color:#6f6672;min-height:46px;box-sizing:border-box}.crefito-dialog .choice input{width:20px!important;height:20px!important;margin:0;accent-color:#80629a}.crefito-dialog .modal-actions{display:flex;gap:10px;justify-content:flex-end;padding-top:4px}.crefito-dialog .modal-actions .secondary{border:0;background:#f2ecef;color:#655b67;border-radius:999px;padding:10px 15px;font-weight:800}.crefito-dialog .modal-actions .primary{border:0;background:#d989aa;color:white;border-radius:999px;padding:10px 17px;font-weight:800}.crefito-dialog .modal-actions .grow{flex:1}@media(max-width:560px){.crefito-dialog{width:92vw!important;max-width:92vw!important;max-height:84vh!important;border-radius:24px!important}.crefito-dialog .modal-card{max-height:84vh!important;padding:20px!important}.crefito-dialog .form-grid,.crefito-dialog .choice-grid{grid-template-columns:1fr 1fr!important}.crefito-dialog .modal-head{top:-20px!important}}
+ .crefito-dialog{width:min(92vw,620px)!important;max-width:620px!important;max-height:84vh!important;margin:auto!important;padding:0!important;border:0!important;border-radius:28px!important;background:#fffdfb!important;overflow:hidden!important;box-shadow:0 24px 70px rgba(55,42,60,.20)!important}.crefito-dialog::backdrop{background:rgba(45,37,48,.34)!important;backdrop-filter:blur(3px)}.crefito-dialog .modal-card{width:100%!important;max-width:none!important;max-height:84vh!important;box-sizing:border-box!important;overflow-y:auto!important;overflow-x:hidden!important;padding:24px!important}.crefito-dialog .modal-head{position:sticky!important;top:-24px!important;z-index:5!important;background:#fffdfb!important;padding:0 0 18px!important;margin-bottom:18px!important}.crefito-dialog .modal-head .icon-btn{width:48px!important;height:48px!important;min-width:48px!important;border-radius:50%!important;cursor:pointer!important;pointer-events:auto!important;z-index:20!important}.crefito-dialog label{display:block!important;margin-bottom:16px!important}.crefito-dialog input,.crefito-dialog select,.crefito-dialog textarea{width:100%!important;box-sizing:border-box!important}.crefito-dialog .form-grid{display:grid!important;grid-template-columns:1fr 1fr!important;gap:14px!important}.crefito-dialog .choice-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:0 0 16px}.crefito-dialog .choice-title{font-weight:800;color:#6f6672;margin:2px 0 8px}.crefito-dialog .choice{display:flex;align-items:center;gap:10px;border:1px solid #e6dce4;border-radius:14px;padding:11px 12px;background:#fff;font-weight:700;color:#6f6672;min-height:46px;box-sizing:border-box}.crefito-dialog .choice input{width:20px!important;height:20px!important;margin:0;accent-color:#80629a}.crefito-dialog .modal-actions{display:flex;gap:10px;justify-content:flex-end;padding-top:4px}.crefito-dialog .modal-actions .secondary{border:0;background:#f2ecef;color:#655b67;border-radius:999px;padding:10px 15px;font-weight:800}.crefito-dialog .modal-actions .primary{border:0;background:#d989aa;color:white;border-radius:999px;padding:10px 17px;font-weight:800}.crefito-dialog .modal-actions .grow{flex:1}@media(max-width:560px){.crefito-dialog{width:92vw!important;max-width:92vw!important;max-height:84vh!important;border-radius:24px!important}.crefito-dialog .modal-card{max-height:84vh!important;padding:20px!important}.crefito-dialog .form-grid,.crefito-dialog .choice-grid{grid-template-columns:1fr 1fr!important}.crefito-dialog .modal-head{top:-20px!important}}
  `;document.head.appendChild(s)
 }
 function openCrefitoItem(kind){
@@ -1084,119 +1062,15 @@ function renderCrefito(){
  <div class="work-rule">O que for realmente importante pode depois alimentar o Meu Dia. Registrar aqui não cria obrigação automaticamente.</div>`;
  document.getElementById("backWork").onclick=()=>{location.hash="trabalho"};document.querySelectorAll("[data-add]").forEach(b=>b.onclick=()=>openCrefitoItem(b.dataset.add));
 }
-const WORK_BEC_KEY="minha-vida.trabalho.bec.v1";
-const WORK_TIKTOK_KEY="minha-vida.trabalho.tiktok.v1";
-const WORK_DURATIONS=["15 min","30 min","45 min","1h","1h30","2h"];
-const WORK_PRIORITIES=["Normal","Alta","Baixa"];
-const WORK_STATUSES=["A fazer","Em andamento","Concluído"];
-function loadWorkTasks(key){try{return JSON.parse(localStorage.getItem(key)||'[]')}catch{return[]}}
-function saveWorkTasks(key,items){localStorage.setItem(key,JSON.stringify(items))}
-function workTaskMinutes(v){return ({"15 min":15,"30 min":30,"45 min":45,"1h":60,"1h30":90,"2h":120}[v]||30)}
-function workTaskDateLabel(v){return v?new Date(v+'T12:00:00').toLocaleDateString('pt-BR'):"Sem data"}
-function ensureWorkTaskStyles(){
- if(document.getElementById('work-dialog-global-styles'))return;
- const gs=document.createElement('style');gs.id='work-dialog-global-styles';gs.textContent='dialog{outline:none!important}dialog:focus{outline:none!important}dialog::-webkit-backdrop{background:rgba(45,37,48,.34)}';document.head.appendChild(gs);
- if(document.getElementById('work-task-styles'))return;
- const s=document.createElement('style');s.id='work-task-styles';s.textContent=`
- .work-action-grid{display:flex;flex-wrap:wrap;gap:8px;margin:0 0 12px}.work-click-panel{cursor:pointer;transition:transform .15s ease,box-shadow .15s ease}.work-click-panel:active{transform:scale(.99)}.work-panel-main{display:grid;gap:5px;text-align:left;border:0;background:transparent;padding:0;color:#40384a;width:100%;font:inherit;cursor:pointer}.work-panel-main h3{margin:0;font-size:20px}.work-panel-main span{color:#756d78;font-size:14px;line-height:1.35}.work-click-panel .work-action-grid{margin-top:8px}.work-click-panel .work-action-chip{cursor:pointer}.work-action-chip{border:1px solid #e1d7e5;background:#fffdfb;color:#66586d;border-radius:999px;padding:9px 12px;font-weight:700;font-size:13px}.work-action-chip:active{transform:scale(.985)}
- .work-task-item{align-items:center}.work-task-actions{display:flex;align-items:center;gap:6px}.mini-work-edit{border:0;background:#f2ecef;color:#6d6270;border-radius:50%;width:32px;height:32px;font-size:16px}.work-sub-logo{width:42px!important;height:42px!important;object-fit:contain!important}.work-action-plan{display:grid;gap:5px;margin-bottom:16px}.work-action-plan strong{font-size:16px}.work-action-plan span{color:#756d78}.work-plan-panels{gap:14px}.work-plan-card{cursor:pointer}.work-plan-card .work-panel-main{pointer-events:auto}
- `;document.head.appendChild(s);
-}
-function openWorkTaskModal(cfg, preset=null){
- const dlg=document.createElement('dialog');dlg.className='finance-dialog';
- const isEdit=!!preset;
- const options=(arr,sel)=>arr.map(x=>`<option ${x===sel?'selected':''}>${x}</option>`).join('');
- const title=isEdit?'Editar tarefa':`Nova tarefa · ${cfg.name}`;
- dlg.innerHTML=`<form method="dialog" class="modal-card" id="workTaskForm"><div class="modal-head"><div><div class="eyebrow">💼 ${escapeHtml(cfg.name.toUpperCase())}</div><h2>${title}</h2></div><button type="button" class="icon-btn" id="closeWorkTaskX" aria-label="Fechar">×</button></div>
- <label>O que precisa ser feito?<input id="wtTitle" required maxlength="140" placeholder="Ex.: acompanhar campanha" value="${escapeHtml(preset?.title||'')}"></label>
- <div class="form-grid"><label>Quando<input id="wtDate" type="date" value="${preset?.date||todayISO()}"></label><label>Quanto tempo<select id="wtDuration">${options(WORK_DURATIONS,preset?.duration||'30 min')}</select></label></div>
- <div class="form-grid"><label>Prioridade<select id="wtPriority">${options(WORK_PRIORITIES,preset?.priority||'Normal')}</select></label><label>Status<select id="wtStatus">${options(WORK_STATUSES,preset?.status||'A fazer')}</select></label></div>
- <label>Observação<textarea id="wtNote" maxlength="500" placeholder="Opcional">${escapeHtml(preset?.note||'')}</textarea></label>
- <div class="modal-actions"><div class="grow"></div><button type="button" class="secondary" id="cancelWorkTask">Cancelar</button><button class="primary" value="default">Salvar</button></div></form>`;
- document.body.appendChild(dlg);dlg.showModal();
- const close=()=>{try{if(dlg.open)dlg.close()}finally{dlg.remove()}};
- dlg.querySelector('#closeWorkTaskX').onclick=e=>{e.preventDefault();close()};dlg.querySelector('#cancelWorkTask').onclick=e=>{e.preventDefault();close()};dlg.addEventListener('cancel',e=>{e.preventDefault();close()});dlg.addEventListener('click',e=>{if(e.target===dlg)close()});
- dlg.querySelector('#workTaskForm').onsubmit=e=>{e.preventDefault();const arr=loadWorkTasks(cfg.key);const data={id:preset?.id||uid(),title:dlg.querySelector('#wtTitle').value.trim(),date:dlg.querySelector('#wtDate').value,duration:dlg.querySelector('#wtDuration').value,minutes:workTaskMinutes(dlg.querySelector('#wtDuration').value),priority:dlg.querySelector('#wtPriority').value,status:dlg.querySelector('#wtStatus').value,note:dlg.querySelector('#wtNote').value.trim(),createdAt:preset?.createdAt||Date.now(),updatedAt:Date.now(),source:cfg.name};if(!data.title)return;if(preset){const i=arr.findIndex(x=>x.id===preset.id);if(i>=0)arr[i]=data;else arr.push(data)}else arr.push(data);saveWorkTasks(cfg.key,arr);close();renderTrabalhoSub(cfg.kind)};
-}
-function workTaskCard(x,cfg){return `<article class="card work-item work-task-item"><div><strong>${escapeHtml(x.title)}</strong><small>${workTaskDateLabel(x.date)} · ${escapeHtml(x.duration||'30 min')} · ${escapeHtml(x.priority||'Normal')}</small>${x.note?`<small>${escapeHtml(x.note)}</small>`:''}</div><div class="work-task-actions"><span class="work-badge">${escapeHtml(x.status||'A fazer')}</span><button class="mini-work-edit" data-work-edit="${escapeHtml(x.id)}" aria-label="Editar">✎</button></div></article>`}
-function renderWorkTaskArea(cfg){
- const all=loadWorkTasks(cfg.key), open=all.filter(x=>x.status!=='Concluído').sort((a,b)=>(a.date||'9999').localeCompare(b.date||'9999'));
- const actionButtons=cfg.actions.map(a=>`<button class="work-action-chip" data-work-action="${escapeHtml(a)}">${escapeHtml(a)}</button>`).join('');
- const taskHtml=open.slice(0,12).map(x=>workTaskCard(x,cfg)).join('')||`<div class="work-empty">Nenhuma tarefa em aberto ainda.</div>`;
- return `<section class="work-section"><div class="work-section-head"><h3>O que preciso fazer</h3><button class="work-add" id="addWorkTask">+ adicionar</button></div>
- <div class="work-action-grid">${actionButtons}</div><div class="work-list">${taskHtml}</div></section>`;
-}
 function renderTrabalhoSub(kind){
- if(kind==='crefito'){renderCrefito();return}
- ensureWorkStyles();ensureWorkTaskStyles();
- const cfgs={
-  bec:{
-   kind:'bec',key:WORK_BEC_KEY,name:'BEC',
-   desc:'Seu espaço para a empresa, projetos e operações.',tag:'EMPRESA',
-   logo:'bec-logo.png',
-   groups:[
-    {title:'Matrizia',desc:'Campanhas, matches e resultados.',actions:['Nova campanha','Acompanhar matches','Acompanhar campanha','Verificar resultados','Outro']},
-    {title:'Instagram',desc:'Conteúdo e divulgação.',actions:['Novo post','Novo story','Novo Reels','Impulsionar','Outro']},
-    {title:'Bling',desc:'Registrar uma tarefa operacional.',actions:['Nova tarefa']},
-    {title:'Desenvolvimento de produtos',desc:'Registrar o próximo passo de um desenvolvimento.',actions:['Nova tarefa']},
-    {title:'Novo projeto',desc:'Registrar uma ideia que virou ação.',actions:['Nova tarefa']}
-   ]
-  },
-  tiktok:{
-   kind:'tiktok',key:WORK_TIKTOK_KEY,name:'TikTok',
-   desc:'Seu espaço para conteúdo e presença digital.',tag:'CONTEÚDO',
-   logo:'tiktok-logo.png',
-   groups:[
-    {title:'Ideias',desc:'Guardar ideias antes de decidir quando publicar.',actions:['Definir ideia']},
-    {title:'Produção',desc:'Roteirizar, gravar e editar conteúdos.',actions:['Roteirizar','Gravar','Editar']},
-    {title:'Publicação',desc:'Publicar e reaproveitar conteúdos quando fizer sentido.',actions:['Publicar','Reaproveitar conteúdo']},
-    {title:'Comunidade',desc:'Responder e manter presença com quem acompanha.',actions:['Responder / comunidade']},
-    {title:'Análise',desc:'Ver o que funcionou e definir a próxima ação.',actions:['Analisar resultado','Planejar próxima semana']},
-    {title:'Outra tarefa',desc:'Qualquer ação que não esteja nas opções acima.',actions:['Outra tarefa']}
-   ]
-  }
- };
- const cfg=cfgs[kind];
- const all=loadWorkTasks(cfg.key),done=all.filter(x=>x.status==='Concluído').length;
- const logo=`<img class="hero-brand-logo work-sub-logo" src="${cfg.logo}" alt="${cfg.name}">`;
- const actionBtn=(group,a)=>`<button type="button" class="work-action-chip" data-work-action="${escapeHtml(a)}" data-work-group="${escapeHtml(group)}">${escapeHtml(a)}</button>`;
- const groupsHtml=cfg.groups.map(g=>`
-   <section class="card work-panel work-click-panel">
-     <div class="panel-tag">${cfg.tag}</div>
-     <button type="button" class="work-panel-main" data-work-group-main="${escapeHtml(g.title)}" aria-label="Adicionar tarefa em ${escapeHtml(g.title)}">
-       <h3>${escapeHtml(g.title)}</h3><span>${escapeHtml(g.desc)}</span>
-     </button>
-     <div class="work-action-grid">${g.actions.map(a=>actionBtn(g.title,a)).join('')}</div>
-   </section>`).join('');
- const taskHtml=renderWorkTaskArea(cfg);
- app.innerHTML=`<section class="hero"><div class="eyebrow">💼 TRABALHO</div><h2>${logo} ${cfg.name}</h2><p>${cfg.desc}</p></section>
- <div class="work-subnav"><button class="work-back" id="backWork">← Trabalho</button><p class="work-subtitle">${cfg.tag}</p></div>
- ${kind==='tiktok'?`<section class="work-section"><div class="work-section-head"><h3>Como organizar</h3></div><div class="work-panels work-plan-panels">${[
- ['1 · Clareza','Definir posicionamento, pilares e linguagem.'],
- ['2 · Banco de ideias','Capturar ideias sem precisar produzir na hora.'],
- ['3 · Produção','Roteirizar → gravar → editar.'],
- ['4 · Publicação','Publicar → reaproveitar quando fizer sentido.'],
- ['5 · Análise','Analisar resultados → definir próxima ação.']
- ].map(([t,d])=>`<section class="card work-panel work-click-panel work-plan-card" data-plan-title="${escapeHtml(t)}"><div class="panel-tag">CONTEÚDO</div><button type="button" class="work-panel-main"><h3>${escapeHtml(t)}</h3><span>${escapeHtml(d)}</span></button></section>`).join('')}</div></section>`:''}
- ${taskHtml}
- <section class="work-section"><div class="work-section-head"><h3>Áreas</h3><span class="work-badge">${done} concluídas</span></div><div class="work-panels">${groupsHtml}</div></section>
- <div class="work-rule">O objetivo é saber o que precisa ser feito e quanto tempo isso ocupa. O Meu Dia usa essas tarefas quando fizer sentido.</div>`;
- document.getElementById('backWork').onclick=()=>{location.hash='trabalho'};
- document.getElementById('addWorkTask').onclick=()=>openWorkTaskModal(cfg);
- const openTask=(title)=>openWorkTaskModal(cfg,{title:`${title} · `,date:todayISO(),duration:'30 min',priority:'Normal',status:'A fazer',note:''});
- document.querySelectorAll('[data-work-action]').forEach(b=>b.onclick=(e)=>{
-   e.preventDefault();e.stopPropagation();
-   const action=b.dataset.workAction, group=b.dataset.workGroup;
-   const presetTitle=(action==='Nova tarefa'||action==='Outra tarefa')?`${group} · `:`${group} · ${action}`;
-   openWorkTaskModal(cfg,{title:presetTitle,date:todayISO(),duration:'30 min',priority:'Normal',status:'A fazer',note:''});
- });
- document.querySelectorAll('[data-work-group-main]').forEach(b=>b.onclick=(e)=>{
-   e.preventDefault();e.stopPropagation();openTask(b.dataset.workGroupMain);
- });
- document.querySelectorAll('[data-plan-title]').forEach(card=>card.onclick=(e)=>{
-   e.preventDefault();e.stopPropagation();openTask(card.dataset.planTitle);
- });
- document.querySelectorAll('[data-work-edit]').forEach(b=>b.onclick=(e)=>{e.preventDefault();e.stopPropagation();const item=all.find(x=>x.id===b.dataset.workEdit);if(item)openWorkTaskModal(cfg,item)});
+ if(kind==="crefito"){renderCrefito();return}
+ ensureWorkStyles();
+ const cfg={
+  bec:{icon:`<span class="bec-mark">BEC</span>`,name:"BEC",desc:"Seu espaço para a empresa, projetos e operações.",tag:"EMPRESA",panels:[["📋 Demandas","Registrar o que precisa ser resolvido na operação da BEC."],["💡 Projetos","Manter projetos, ideias e próximos passos em um lugar próprio."],["📦 Produtos & serviços","Organizar iniciativas da BEC sem lançá-las automaticamente como gasto financeiro."]]},
+  tiktok:{icon:`<span class="tiktok-mark">♪</span>`,name:"TikTok",desc:"Seu espaço para conteúdo e presença digital.",tag:"CONTEÚDO",panels:[["💡 Ideias","Guardar ideias de vídeos e conteúdos antes de decidir quando publicar."],["🎬 Produção","Acompanhar conteúdos em preparação, gravação e edição."],["📅 Publicações","Organizar o que foi publicado e o que está planejado."]]}
+ }[kind];
+ app.innerHTML=`<section class="hero"><div class="eyebrow">💼 TRABALHO</div><h2>${cfg.icon} ${cfg.name}</h2><p>${cfg.desc}</p></section><div class="work-subnav"><button class="work-back" id="backWork">← Trabalho</button><p class="work-subtitle">${cfg.tag}</p></div><section class="work-panels">${cfg.panels.map(x=>`<article class="card work-panel"><span class="panel-tag">${cfg.tag}</span><h3>${x[0]}</h3><span>${x[1]}</span></article>`).join("")}</section><div class="work-rule">Nada aqui vira obrigação automaticamente. Primeiro organizamos; depois decidimos o que merece entrar no Meu Dia.</div>`;
+ document.getElementById("backWork").onclick=()=>{location.hash="trabalho"};
 }
 
 const CASA_KEY="minha-vida.casa.v1";
@@ -1417,15 +1291,12 @@ document.querySelector("#homeBtn").onclick = (e) => {
   render();
 };
 
-document.addEventListener("click", (e) => {
-  const btn = e.target.closest("#backBtn");
-  if (!btn) return;
-  e.preventDefault();
+document.querySelector("#backBtn").onclick = () => {
   if (state.route.startsWith("trabalho-")) { state.route="trabalho"; location.hash="trabalho"; render(); return; }
   state.route="meu-dia";
   location.hash = "meu-dia";
   render();
-});
+};
 
 if ("serviceWorker" in navigator) {
   window.addEventListener("load", () =>
