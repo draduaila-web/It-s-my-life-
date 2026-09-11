@@ -1,4 +1,4 @@
-/* BERTH.A — Meu Dia v2 / Motor de Tempo v1.4 — approved visual
+/* BERTH.A — Meu Dia v2 / Motor de Tempo v1.6 — polish fix
    Camada aditiva: carregar DEPOIS de app.js, finance-v6.js e work-v12.js.
    Preserva chaves/rotas legadas para evitar perda de dados.
 */
@@ -521,6 +521,96 @@
       #app .bertha-now{padding-right:124px!important}
       #app .day-hero::after,#app .bertha-now::after{right:12px;width:92px;font-size:8.6px}
     }
+
+
+    /* BERTH.A v1.6 — correções de polimento */
+    /* 1) Barra inferior: recupera a cápsula, sem fundo rosa atrás do B•A */
+    .bottom-nav{
+      background:rgba(255,250,246,.96)!important;
+      border:1px solid rgba(106,86,112,.13)!important;
+      box-shadow:0 8px 28px rgba(70,55,76,.10)!important;
+      backdrop-filter:blur(18px)!important;
+      -webkit-backdrop-filter:blur(18px)!important;
+      border-radius:28px!important;
+    }
+    .bottom-nav .nav-item{
+      background:transparent!important;
+      box-shadow:none!important;
+    }
+    .bottom-nav .nav-item.active,
+    .bottom-nav .nav-item[aria-current="page"]{
+      background:transparent!important;
+      box-shadow:none!important;
+    }
+
+    /* 2) Saudação: tipografia mais elegante e sem quebra ruim no iPhone */
+    #app .day-hero h1{
+      font-family:Didot,"Bodoni 72","Bodoni 72 Smallcaps",Georgia,"Times New Roman",serif!important;
+      font-size:clamp(29px,8vw,35px)!important;
+      line-height:1.02!important;
+      font-weight:400!important;
+      letter-spacing:-.025em!important;
+      white-space:nowrap!important;
+    }
+
+    /* No iPhone real, os textos decorativos laterais comprimiam o conteúdo.
+       Mantemos o visual limpo e priorizamos a hierarquia aprovada. */
+    @media(max-width:430px){
+      #app .day-hero{
+        padding-right:24px!important;
+        min-height:0!important;
+      }
+      #app .day-hero::after{display:none!important}
+      #app .bertha-now{
+        padding-right:24px!important;
+      }
+      #app .bertha-now::after{display:none!important}
+    }
+
+    /* 3) Menu: mesmo degradê aprovado, só com um pouco mais de luz */
+    .module-links.bertha-module-cards a{
+      box-shadow:
+        inset 0 1px 0 rgba(255,255,255,.86),
+        inset 0 10px 22px rgba(255,255,255,.16),
+        0 7px 0 rgba(102,82,106,.055),
+        0 11px 18px rgba(73,56,78,.055)!important;
+    }
+    .module-links.bertha-module-cards a:nth-child(1){
+      background:
+        radial-gradient(circle at 24% 14%,rgba(255,255,255,.46),transparent 38%),
+        linear-gradient(180deg,#f6c9d9 0%,#f8dce6 70%,#fae8eb 100%)!important}
+    .module-links.bertha-module-cards a:nth-child(2){
+      background:
+        radial-gradient(circle at 24% 14%,rgba(255,255,255,.44),transparent 38%),
+        linear-gradient(180deg,#dcc7ee 0%,#e8d9f2 70%,#f0e7f3 100%)!important}
+    .module-links.bertha-module-cards a:nth-child(3){
+      background:
+        radial-gradient(circle at 24% 14%,rgba(255,255,255,.44),transparent 38%),
+        linear-gradient(180deg,#c8e1f3 0%,#d9eaf6 70%,#e9f2f7 100%)!important}
+    .module-links.bertha-module-cards a:nth-child(4){
+      background:
+        radial-gradient(circle at 24% 14%,rgba(255,255,255,.42),transparent 38%),
+        linear-gradient(180deg,#f8dde6 0%,#fae8ec 72%,#fbefef 100%)!important}
+    .module-links.bertha-module-cards a:nth-child(5){
+      background:
+        radial-gradient(circle at 24% 14%,rgba(255,255,255,.42),transparent 38%),
+        linear-gradient(180deg,#e9ddf2 0%,#f0e8f5 72%,#f5eff4 100%)!important}
+    .module-links.bertha-module-cards a:nth-child(6){
+      background:
+        radial-gradient(circle at 24% 14%,rgba(255,255,255,.42),transparent 38%),
+        linear-gradient(180deg,#deebf5 0%,#eaf2f7 72%,#f2f6f6 100%)!important}
+    .module-links.bertha-module-cards a:nth-child(7){
+      background:
+        radial-gradient(circle at 24% 14%,rgba(255,255,255,.36),transparent 38%),
+        linear-gradient(180deg,#f8e9ec 0%,#faefef 72%,#fbf3ee 100%)!important}
+    .module-links.bertha-module-cards a:nth-child(8){
+      background:
+        radial-gradient(circle at 24% 14%,rgba(255,255,255,.36),transparent 38%),
+        linear-gradient(180deg,#f0eaf3 0%,#f4eff4 72%,#faf3ee 100%)!important}
+    .module-links.bertha-module-cards a:nth-child(9){
+      background:
+        radial-gradient(circle at 24% 14%,rgba(255,255,255,.36),transparent 38%),
+        linear-gradient(180deg,#edf3f7 0%,#f3f5f5 72%,#faf3ee 100%)!important}
 
     `;
   }
