@@ -1,4 +1,4 @@
-const     CACHE = "bertha-v48-tarefas-refino";
+const     CACHE = "bertha-v49-duration-width";
 
 const ASSETS = [
   "./",
