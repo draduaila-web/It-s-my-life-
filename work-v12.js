@@ -306,8 +306,9 @@
     else if(h==='trabalho-tiktok') renderWorkspace('tiktok');
   }
 
-  // Camada independente: re-renderiza apenas rotas de Trabalho.
-  window.addEventListener('hashchange',()=>setTimeout(route,0));
-  window.addEventListener('DOMContentLoaded',()=>setTimeout(route,0));
-  setTimeout(route,0);
+  // Trabalho é o único responsável pelas rotas #trabalho*.
+  // Render imediato evita a tela-placeholder antiga durante a navegação.
+  window.addEventListener('hashchange',route);
+  window.addEventListener('DOMContentLoaded',route);
+  route();
 })();

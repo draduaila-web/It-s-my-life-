@@ -216,6 +216,12 @@ function render() {
     return;
   }
 
+  // Trabalho é renderizado exclusivamente por work-v12.js.
+  // Evita o placeholder antigo aparecer antes da tela correta.
+  if (route === "trabalho" || route.startsWith("trabalho-")) {
+    return;
+  }
+
   if (route === "pendencias") renderPendencias();
   else if (route === "ideias") renderIdeias();
   else if (route === "rituais") renderRituais();
