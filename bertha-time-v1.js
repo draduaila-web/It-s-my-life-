@@ -1,4 +1,4 @@
-/* BERTH.A — Meu Dia v2 / Motor de Tempo v2.6 — aprendizagem global de duração
+/* BERTH.A — Meu Dia v2 / Motor de Tempo v2.7 — Estudos + aprendizagem global
    Camada aditiva: carregar DEPOIS de app.js, finance-v6.js e work-v12.js.
    Preserva chaves/rotas legadas para evitar perda de dados.
 */
@@ -201,6 +201,11 @@
     apply:applyLearnedDuration
   };
 
+
+  window.BerthaTimeEngine=window.BerthaTimeEngine||{};
+  window.BerthaTimeEngine.start=(item)=>startItem(item);
+  window.BerthaTimeEngine.finish=()=>finishActive();
+  window.BerthaTimeEngine.active=()=>engine().active;
 
   const engine = () => read(ENGINE_KEY,{active:null,history:[],snoozed:{}});
   const saveEngine = x => write(ENGINE_KEY,x);
