@@ -1,4 +1,4 @@
-/* BERTH.A — Meu Dia v2 / Motor de Tempo v2.2.2 — exclusão definitiva de ritual
+/* BERTH.A — Meu Dia v2 / Motor de Tempo v2.3 — Meu Dia Ideal refinado
    Camada aditiva: carregar DEPOIS de app.js, finance-v6.js e work-v12.js.
    Preserva chaves/rotas legadas para evitar perda de dados.
 */
@@ -1671,6 +1671,88 @@
     .bertha-full-schedule-row strong,.bertha-full-schedule-row small{display:block}
     .bertha-full-schedule-row strong{font-size:12px;color:#4d424d}
     .bertha-full-schedule-row small{margin-top:3px;font-size:10px;color:#8d818b}
+
+
+    /* v2.3 — Meu Dia Ideal: paleta BERTH.A + alinhamento do card */
+    #bertha-ideal-list .bertha-ideal-item,
+    .bertha-ideal-list .bertha-ideal-item,
+    [data-ideal-list] .bertha-ideal-item{
+      position:relative;
+      display:grid!important;
+      grid-template-columns:minmax(0,1fr) 34px!important;
+      grid-template-areas:"content remove"!important;
+      align-items:center!important;
+      gap:12px!important;
+      padding:16px 14px 16px 18px!important;
+      overflow:hidden;
+    }
+    #bertha-ideal-list .bertha-ideal-item>*:not(button):not([data-remove-ideal]),
+    .bertha-ideal-list .bertha-ideal-item>*:not(button):not([data-remove-ideal]),
+    [data-ideal-list] .bertha-ideal-item>*:not(button):not([data-remove-ideal]){
+      grid-area:content;
+      min-width:0;
+    }
+    #bertha-ideal-list .bertha-ideal-item button,
+    #bertha-ideal-list .bertha-ideal-item [data-remove-ideal],
+    .bertha-ideal-list .bertha-ideal-item button,
+    .bertha-ideal-list .bertha-ideal-item [data-remove-ideal],
+    [data-ideal-list] .bertha-ideal-item button,
+    [data-ideal-list] .bertha-ideal-item [data-remove-ideal]{
+      grid-area:remove!important;
+      align-self:center!important;
+      justify-self:center!important;
+      width:32px!important;
+      height:32px!important;
+      margin:0!important;
+      padding:0!important;
+      display:grid!important;
+      place-items:center!important;
+      line-height:1!important;
+    }
+    /* Fallback para o markup legado: mantém o X no canto direito mesmo se não houver classe no card */
+    .bertha-ideal-card{position:relative!important;padding-right:54px!important}
+    .bertha-ideal-card [data-remove-ideal],
+    .bertha-ideal-card .remove{
+      position:absolute!important;right:14px!important;top:50%!important;
+      transform:translateY(-50%)!important;margin:0!important
+    }
+
+    /* Rotação suave da paleta, restrita ao Meu Dia Ideal */
+    #bertha-ideal-list .bertha-ideal-item:nth-child(6n+1),
+    .bertha-ideal-list .bertha-ideal-item:nth-child(6n+1),
+    [data-ideal-list] .bertha-ideal-item:nth-child(6n+1){background:rgba(245,224,232,.68)!important}
+    #bertha-ideal-list .bertha-ideal-item:nth-child(6n+2),
+    .bertha-ideal-list .bertha-ideal-item:nth-child(6n+2),
+    [data-ideal-list] .bertha-ideal-item:nth-child(6n+2){background:rgba(232,226,246,.72)!important}
+    #bertha-ideal-list .bertha-ideal-item:nth-child(6n+3),
+    .bertha-ideal-list .bertha-ideal-item:nth-child(6n+3),
+    [data-ideal-list] .bertha-ideal-item:nth-child(6n+3){background:rgba(225,239,238,.72)!important}
+    #bertha-ideal-list .bertha-ideal-item:nth-child(6n+4),
+    .bertha-ideal-list .bertha-ideal-item:nth-child(6n+4),
+    [data-ideal-list] .bertha-ideal-item:nth-child(6n+4){background:rgba(248,232,219,.72)!important}
+    #bertha-ideal-list .bertha-ideal-item:nth-child(6n+5),
+    .bertha-ideal-list .bertha-ideal-item:nth-child(6n+5),
+    [data-ideal-list] .bertha-ideal-item:nth-child(6n+5){background:rgba(239,239,219,.72)!important}
+    #bertha-ideal-list .bertha-ideal-item:nth-child(6n),
+    .bertha-ideal-list .bertha-ideal-item:nth-child(6n),
+    [data-ideal-list] .bertha-ideal-item:nth-child(6n){background:rgba(228,235,247,.72)!important}
+
+    @media(max-width:480px){
+      #bertha-ideal-list .bertha-ideal-item,
+      .bertha-ideal-list .bertha-ideal-item,
+      [data-ideal-list] .bertha-ideal-item{
+        grid-template-columns:minmax(0,1fr) 32px!important;
+        gap:9px!important;
+      }
+    }
+
+
+    #bertha-ideal-list .bertha-ideal-item strong,
+    .bertha-ideal-list .bertha-ideal-item strong,
+    [data-ideal-list] .bertha-ideal-item strong{display:block;margin:0 0 4px!important}
+    #bertha-ideal-list .bertha-ideal-item small,
+    .bertha-ideal-list .bertha-ideal-item small,
+    [data-ideal-list] .bertha-ideal-item small{display:block;line-height:1.35}
 
     /* Menu aprovado: congelado. Não alterar. */
 
