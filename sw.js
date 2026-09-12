@@ -1,4 +1,4 @@
-const     CACHE = "bertha-v57-ideal-palette";
+const     CACHE = "bertha-v58-ideal-periods";
 
 const ASSETS = [
   "./",
