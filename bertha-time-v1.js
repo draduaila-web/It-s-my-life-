@@ -1,4 +1,4 @@
-/* BERTH.A — Meu Dia v2 / Motor de Tempo v2.2 — Rituais ciclo e exclusão
+/* BERTH.A — Meu Dia v2 / Motor de Tempo v2.2.1 — exclusão de ritual corrigida
    Camada aditiva: carregar DEPOIS de app.js, finance-v6.js e work-v12.js.
    Preserva chaves/rotas legadas para evitar perda de dados.
 */
@@ -733,7 +733,10 @@
   function applyHiddenRituals(){
     const hidden=hiddenRituals();
     hidden.forEach(id=>{
-      document.querySelectorAll(`[data-open-ritual="${id}"],[data-ritual="${id}"]`).forEach(el=>el.style.display='none');
+      document.querySelectorAll(`[data-open-ritual="${id}"],[data-ritual="${id}"]`).forEach(el=>{
+        const card=el.closest('.bertha-ritual-card')||el.closest('button')||el;
+        card.remove();
+      });
     });
   }
   function bindRituals(){
@@ -744,15 +747,38 @@
 
   const HIDDEN_RITUALS_KEY='bertha.ritual.hidden.v1';
   function hiddenRituals(){ return read(HIDDEN_RITUALS_KEY,[]); }
+  function restoreDefaultRitual(id){
+    const h=hiddenRituals().filter(x=>x!==id);
+    write(HIDDEN_RITUALS_KEY,h);
+  }
   function deleteRitual(id){
     if(!confirm('Excluir este ritual? Ele deixará de aparecer em Meus Rituais e de alimentar o Meu Dia.')) return;
+
     if(id==='capilar'||id==='autocuidado'){
-      const h=hiddenRituals(); if(!h.includes(id))h.push(id); write(HIDDEN_RITUALS_KEY,h);
+      const h=hiddenRituals();
+      if(!h.includes(id)) h.push(id);
+      write(HIDDEN_RITUALS_KEY,h);
     }else{
-      const customs=customRituals().filter(r=>r.id!==id); saveCustomRituals(customs);
-      const extras=ritualExtras().filter(e=>e.ritualId!==id); saveRitualExtras(extras);
+      const customs=customRituals().filter(r=>r.id!==id);
+      saveCustomRituals(customs);
+      const extras=ritualExtras().filter(e=>e.ritualId!==id);
+      saveRitualExtras(extras);
     }
-    location.hash='#rituais'; rerender();
+
+    // Ensure the deleted ritual is no longer the active route.
+    try{
+      if(location.hash!=='#rituais') history.replaceState(null,'','#rituais');
+    }catch(_){ location.hash='#rituais'; }
+
+    // Re-render, then explicitly hide/remove the deleted card as a fallback.
+    rerender();
+    setTimeout(()=>{
+      applyHiddenRituals();
+      document.querySelectorAll(`[data-open-ritual="${id}"],[data-ritual="${id}"]`).forEach(el=>{
+        const card=el.closest('.bertha-ritual-card')||el.closest('button')||el;
+        card.remove();
+      });
+    },0);
   }
 
   function bindRitualDetail(id){
