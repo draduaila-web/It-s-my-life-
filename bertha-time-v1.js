@@ -277,9 +277,14 @@
       const dv=Math.max(1,+x.durationValue||30), mins=x.durationUnit==='hours'?dv*60:dv;
       push({id:`casa:maintenance:${x.id}`,learningKey:`casa:maintenance:${String(x.name||'manutencao').toLowerCase()}`,source:'Casa · Manutenção',title:x.name||'Manutenção da casa',date:x.date,minutes:mins,configuredMinutes:mins,time:x.time||'',period:x.period||'flex',priority:x.priority||'normal',notify:!!x.notify,notifyOffset:x.notifyWhen||'',kind:'home-maintenance'});
     });
-    // Exercícios — rotina é janela, nunca horário rígido.
+    // Exercícios — Meu Dia reserva um espaço de Movimento; a atividade específica é escolhida no módulo.
     const ex=read('minha-vida.exercicios.v1',null); const dow=['Dom','Seg','Ter','Qua','Qui','Sex','Sáb'][new Date().getDay()];
-    if(ex && Array.isArray(ex.plans)) ex.plans.filter(p=>p.active!==false && (!(p.untilMode==='date'&&p.untilDate&&p.untilDate<today)) && (p.frequency!=='Dias específicos'||!p.days?.length||p.days.includes(dow))).forEach(p=>{ const dv=Math.max(1,+p.durationValue||parseMinutes(p.target)), mins=p.durationUnit==='hours'?dv*60:dv; const periods={morning:['05:16','07:35'],afternoon:['12:00','18:00'],evening:['18:00','22:00'],flex:['','']}; const w=periods[p.period||'flex']||periods.flex; push({id:`exercise:${p.id}`,learningKey:`exercise-plan-v2:${p.id}`,source:'Exercícios',title:p.name||'Movimento',date:today,minutes:mins,configuredMinutes:mins,time:p.time||'',period:p.period||'flex',windowStart:p.time?'':w[0],windowEnd:p.time?'':w[1],notify:!!p.notify,notifyOffset:p.notifyWhen||'',kind:'window'}); });
+    if(ex && Array.isArray(ex.plans)){
+      const candidates=ex.plans.filter(p=>p.active!==false && (!(p.untilMode==='date'&&p.untilDate&&p.untilDate<today)) && (p.frequency!=='Dias específicos'||!p.days?.length||p.days.includes(dow)));
+      candidates.sort((a,b)=>{const r=p=>p.frequency==='Dias específicos'?0:p.frequency==='X vezes por semana'?1:2;return r(a)-r(b)});
+      const p=candidates[0];
+      if(p){const dv=Math.max(1,+p.durationValue||parseMinutes(p.target)), mins=p.durationUnit==='hours'?dv*60:dv; const periods={morning:['05:16','07:35'],afternoon:['12:00','18:00'],evening:['18:00','22:00'],flex:['','']}; const w=periods[p.period||'flex']||periods.flex; push({id:'exercise:movement-slot',learningKey:'exercise:movement-slot',source:'Exercícios',title:'Movimento',subtitle:`Sugestão: ${p.name||'atividade'}`,date:today,minutes:mins,configuredMinutes:mins,time:p.time||'',period:p.period||'flex',windowStart:p.time?'':w[0],windowEnd:p.time?'':w[1],notify:!!p.notify,notifyOffset:p.notifyWhen||'',kind:'window'});}
+    }
     // Meu Dia Ideal — sugestões, não obrigações.
     read(IDEAL_KEY,[])
       .filter(x=>x.active!==false)
