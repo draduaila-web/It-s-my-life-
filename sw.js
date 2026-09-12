@@ -1,4 +1,4 @@
-const     CACHE = "bertha-v44-type-nav";
+const     CACHE = "bertha-v45-ba-fix";
 
 const ASSETS = [
   "./",
