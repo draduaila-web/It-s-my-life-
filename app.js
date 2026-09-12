@@ -1091,6 +1091,82 @@ const CASA_PRODUCT_CATALOG=[
 const CASA_INVENTORY_PRODUCTS=CASA_PRODUCT_CATALOG.map(x=>x.name);
 const CASA_INVENTORY_TOOLS=["Aspirador","Vassouras e escovas","Pá de lixo","Mop/esfregão com balde","Rodos e limpadores de vidro/box","Panos de microfibra","Esponjas e escovas","Espanador de penas","Lavadora/secadora LG Direct Drive 11/6 kg","Secador de calçados","Mangueiras — 2 unidades","Lavadora de alta pressão/WAP","Ferramenta de cabo longo para telas/mosquiteiros","Pia grande da edícula","Recipientes organizadores","Escovas para vaso sanitário e refil","Panos de algodão/microfibra e flanela","Panos próprios para secadora","Panos multiuso úmidos"];
 
+
+// BERTH.A v2.8.9 — Casa: procedimentos ligados ao inventário real da residência.
+// Mantém o catálogo como fonte de verdade e evita instruções genéricas quando já existe produto/acessório cadastrado.
+const CASA_REAL_PROCEDURE_KIT={
+ coz1:{products:["Coala Chá Branco Limpador Perfumado","Tudo Limpinho Porcelanex — quando o piso for porcelanato"],materials:["Aspirador","Mop/esfregão com balde","Panos de microfibra"]},
+ coz2:{products:["Qualitá Home Lava-Louças Líquido Coco","Cif Espuma Milagrosa — Derrete Gordura, quando necessário"],materials:["Esponjas e escovas","Panos de microfibra","Panos multiuso úmidos"]},
+ coz3:{products:["Qualitá Home Lava-Louças Líquido Coco","Cif Espuma Milagrosa — Derrete Gordura, quando houver gordura"],materials:["Panos multiuso úmidos","Panos de microfibra","Esponjas e escovas"]},
+ lim1:{products:[],materials:["Aspirador","Vassouras e escovas","Pá de lixo","Panos de microfibra"]},
+ lim2:{products:["Coala Chá Branco Limpador Perfumado","Tudo Limpinho Tudax Limpeza Pesada — quando necessário"],materials:["Aspirador","Vassouras e escovas","Mop/esfregão com balde","Panos de microfibra"]},
+ lim3:{products:["Coala Chá Branco Limpador Perfumado","Tudo Limpinho Porcelanex — nos pisos compatíveis"],materials:["Aspirador","Mop/esfregão com balde","Panos de microfibra"]},
+ lim4:{products:["Tudo Limpinho Tudax Limpeza Pesada","Tudo Limpinho Limpador Clorado — somente em superfícies compatíveis","Tudo Limpinho Rejuntec","Tudo Limpinho Ultra Box","Tudo Limpinho Porcelanex","Tudo Limpinho Álcool Perfumado — Glamour de Shopping"],materials:["Aspirador","Vassouras e escovas","Pá de lixo","Mop/esfregão com balde","Panos de microfibra","Esponjas e escovas","Rodos e limpadores de vidro/box","Espanador de penas"]},
+ roup1:{products:[],materials:["Recipientes organizadores"]},
+ roup2:{products:["Sabão para roupas","Amaciante concentrado"],materials:["Lavadora/secadora LG Direct Drive 11/6 kg","Recipientes organizadores"]},
+ roup3:{products:["Sabão adequado para roupas delicadas"],materials:["Lavadora/secadora LG Direct Drive 11/6 kg","Recipientes organizadores"]},
+ roup4:{products:["Produto tira-manchas compatível com o tecido"],materials:["Esponjas e escovas","Panos de algodão/microfibra e flanela"]},
+ roup5:{products:["Tudo Limpinho Finisher Fresh Bouquet — se compatível com o uso desejado"],materials:["Lavadora/secadora LG Direct Drive 11/6 kg","Panos próprios para secadora"]},
+ roup6:{products:["Sabão para roupas","Amaciante concentrado","Vinagre de álcool — conforme a rotina registrada"],materials:["Lavadora/secadora LG Direct Drive 11/6 kg","Recipientes organizadores"]},
+ roup7:{products:["Sabão para roupas","Amaciante concentrado"],materials:["Lavadora/secadora LG Direct Drive 11/6 kg","Recipientes organizadores"]},
+ roup8:{products:["Água","Amaciante concentrado — na misturinha já registrada"],materials:["Panos de algodão/microfibra e flanela","Recipientes organizadores"]},
+ roup9:{products:[],materials:["Recipientes organizadores"]},
+ roup10:{products:["Coala Chá Branco Limpador Perfumado — somente em superfície compatível e bem diluído"],materials:["Panos de microfibra","Espanador de penas","Recipientes organizadores"]}
+};
+Object.entries(CASA_REAL_PROCEDURE_KIT).forEach(([id,kit])=>{if(CASA_HOW[id])Object.assign(CASA_HOW[id],kit)});
+
+const CASA_MANUAL_REAL_KIT={
+ "manual-coz-bancada":{products:["Cif Espuma Milagrosa — Derrete Gordura","Qualitá Home Lava-Louças Líquido Coco — para manutenção leve"],materials:["Panos multiuso úmidos","Panos de microfibra","Esponjas e escovas"]},
+ "manual-coz-pia":{products:["Qualitá Home Lava-Louças Líquido Coco"],materials:["Esponjas e escovas","Panos de microfibra"]},
+ "manual-coz-fogao":{products:["Cif Espuma Milagrosa — Derrete Gordura","Tudo Limpinho Flotalim Extra Forte — para gordura pesada e superfície compatível"],materials:["Panos de microfibra","Esponjas e escovas"]},
+ "manual-coz-armarios":{products:["Cif Espuma Milagrosa — Derrete Gordura, se compatível","Coala Chá Branco Limpador Perfumado — para manutenção compatível"],materials:["Panos de microfibra","Panos multiuso úmidos"]},
+ "manual-coz-piso":{products:["Coala Chá Branco Limpador Perfumado","Tudo Limpinho Porcelanex — se for porcelanato"],materials:["Aspirador","Vassouras e escovas","Mop/esfregão com balde"]},
+ "manual-sala-poeira":{products:["GloDePeroba — Jasmine — apenas em móveis/superfícies indicadas"],materials:["Espanador de penas","Panos de microfibra","Panos multiuso úmidos"]},
+ "manual-sala-sofa":{products:["HIKO Fabric Refresher — somente conforme rótulo, depois da limpeza"],materials:["Aspirador","Panos de microfibra"]},
+ "manual-sala-esteira":{products:["Lysol — lenços desinfetantes — apenas em superfícies compatíveis"],materials:["Panos de microfibra"]},
+ "manual-sala-livros":{products:[],materials:["Espanador de penas","Panos de algodão/microfibra e flanela"]},
+ "manual-sala-porcelanato":{products:["Tudo Limpinho Porcelanex","Coala Chá Branco Limpador Perfumado — manutenção leve"],materials:["Aspirador","Vassouras e escovas","Mop/esfregão com balde"]},
+ "manual-quarto-cama":{products:["HIKO Fabric Refresher — opcional, conforme rótulo"],materials:["Recipientes organizadores","Panos de microfibra"]},
+ "manual-quarto-poeira":{products:["GloDePeroba — Jasmine — em móveis indicados"],materials:["Espanador de penas","Panos de microfibra"]},
+ "manual-quarto-piso":{products:["Coala Chá Branco Limpador Perfumado","Tudo Limpinho Porcelanex — se compatível"],materials:["Aspirador","Vassouras e escovas","Mop/esfregão com balde"]},
+ "manual-quarto-espelhos":{products:["Tudo Limpinho Álcool Perfumado — Glamour de Shopping — somente se compatível com vidro/espelho"],materials:["Rodos e limpadores de vidro/box","Panos de microfibra"]},
+ "manual-banheiro-bancada":{products:["Aromasil Saponáceo Cremoso Cloro 3 em 1 — se compatível","Tudo Limpinho Ultra Clean — substituição futura compatível"],materials:["Esponjas e escovas","Panos de microfibra"]},
+ "manual-banheiro-vaso":{products:["Ypê Tira Limo — Cloro Ativo em Gel","Tudo Limpinho Limpador Clorado — substituição futura, conforme rótulo"],materials:["Escovas para vaso sanitário e refil","Panos de microfibra"]},
+ "manual-banheiro-box":{products:["UAU Blindex Box","Cif Espuma Milagrosa — Extermina Limo","Tudo Limpinho Ultra Box — substituição futura"],materials:["Rodos e limpadores de vidro/box","Esponjas e escovas","Panos de microfibra"]},
+ "manual-banheiro-piso":{products:["Cif Espuma Milagrosa — Extermina Limo — em áreas compatíveis","Ypê Tira Limo — Cloro Ativo em Gel — quando necessário","Tudo Limpinho Rejuntec — para rejuntes","Tudo Limpinho Limpador Clorado — substituição futura compatível"],materials:["Vassouras e escovas","Mop/esfregão com balde","Esponjas e escovas"]},
+ "manual-lav-maquina":{products:[],materials:["Lavadora/secadora LG Direct Drive 11/6 kg","Panos de microfibra"]},
+ "manual-lav-tanque":{products:["Qualitá Home Lava-Louças Líquido Coco","Tudo Limpinho Ultra Clean — para sujeira aderida e superfície compatível"],materials:["Esponjas e escovas","Panos de microfibra"]},
+ "manual-lav-panos":{products:["Sabão para roupas","Álcool líquido 70% — somente na receita específica dos panos multiuso","Amaciante concentrado — conforme receita/uso"],materials:["Lavadora/secadora LG Direct Drive 11/6 kg","Panos multiuso úmidos","Panos próprios para secadora"]},
+ "manual-lav-organizacao":{products:[],materials:["Recipientes organizadores"]},
+ "manual-calcados":{products:[],materials:["Vassouras e escovas","Panos de microfibra","Secador de calçados"]},
+ "manual-calcados-piso":{products:["Coala Chá Branco Limpador Perfumado","Tudo Limpinho Porcelanex — se compatível"],materials:["Aspirador","Vassouras e escovas","Mop/esfregão com balde"]},
+ "manual-rouparia-prateleiras":{products:["GloDePeroba — Jasmine — apenas em superfícies indicadas"],materials:["Espanador de penas","Panos de microfibra"]},
+ "manual-rouparia-enxoval":{products:[],materials:["Recipientes organizadores"]},
+ "manual-varanda-residuos":{products:["Tudo Limpinho Petklin — após recolher os resíduos, conforme rótulo"],materials:["Pá de lixo","Vassouras e escovas"]},
+ "manual-varanda-poeira":{products:[],materials:["Vassouras e escovas","Pá de lixo","Aspirador"]},
+ "manual-varanda-pedra":{products:["Tudo Limpinho Petklin — na área dos animais, conforme rótulo","Tudo Limpinho Tudax Limpeza Pesada — quando compatível"],materials:["Vassouras e escovas","Mangueiras — 2 unidades","Lavadora de alta pressão/WAP"]},
+ "manual-varanda-moveis":{products:["GloDePeroba — Jasmine — em madeira compatível","Coala Chá Branco Limpador Perfumado — em superfícies laváveis compatíveis"],materials:["Panos de microfibra"]},
+ "manual-garagem-piso":{products:["Tudo Limpinho Tudax Limpeza Pesada","Tudo Limpinho Querosene — Sabão Spray — apenas em sujeira compatível e conforme rótulo"],materials:["Vassouras e escovas","Mangueiras — 2 unidades","Lavadora de alta pressão/WAP"]},
+ "manual-garagem-cantos":{products:["Tudo Limpinho Tudax Limpeza Pesada"],materials:["Vassouras e escovas","Mangueiras — 2 unidades"]},
+ "manual-janelas-vidros":{products:["Tudo Limpinho Álcool Perfumado — Glamour de Shopping — se compatível"],materials:["Rodos e limpadores de vidro/box","Panos de microfibra"]},
+ "manual-janelas-grades":{products:["Coala Chá Branco Limpador Perfumado — se compatível"],materials:["Vassouras e escovas","Panos de microfibra"]},
+ "manual-janelas-telas":{products:[],materials:["Ferramenta de cabo longo para telas/mosquiteiros"]},
+ "manual-jardim-folhas":{products:[],materials:["Vassouras e escovas","Pá de lixo"]},
+ "manual-jardim-cimento":{products:["Tudo Limpinho Tudax Limpeza Pesada — quando necessário e compatível"],materials:["Vassouras e escovas","Mangueiras — 2 unidades","Lavadora de alta pressão/WAP"]},
+ "manual-jardim-animais":{products:["Tudo Limpinho Petklin — após a retirada dos resíduos, conforme rótulo"],materials:["Pá de lixo","Vassouras e escovas"]},
+ "manual-piscina-superficie":{products:[],materials:["Peneira/limpador de piscina"]},
+ "manual-piscina-bordas":{products:["Produto próprio e compatível com a piscina — não substituir automaticamente por limpador doméstico"],materials:["Esponjas e escovas","Panos de microfibra"]},
+ "manual-piscina-agua":{products:["Produtos próprios de tratamento da piscina — conforme rótulo"],materials:["Medidores próprios da piscina"]},
+ "manual-edicula-escritorio":{products:[],materials:["Ferramentas apropriadas"]},
+ "manual-edicula-escritorio-piso":{products:["Coala Chá Branco Limpador Perfumado","Tudo Limpinho Porcelanex — se compatível"],materials:["Espanador de penas","Aspirador","Vassouras e escovas","Mop/esfregão com balde"]},
+ "manual-deposito-org":{products:[],materials:["Recipientes organizadores","Panos de microfibra","Vassouras e escovas"]},
+ "manual-deposito-piso":{products:["Coala Chá Branco Limpador Perfumado","Tudo Limpinho Tudax Limpeza Pesada — quando necessário"],materials:["Aspirador","Vassouras e escovas","Mop/esfregão com balde"]},
+ "manual-edicula-pia":{products:["Qualitá Home Lava-Louças Líquido Coco"],materials:["Esponjas e escovas","Panos de microfibra","Pia grande da edícula"]},
+ "manual-edicula-varanda":{products:["Tudo Limpinho Tudax Limpeza Pesada — quando necessário","Tudo Limpinho Petklin — se usada pelos animais"],materials:["Vassouras e escovas","Mangueiras — 2 unidades","Lavadora de alta pressão/WAP"]},
+ "manual-edicula-marcenaria":{products:[],materials:["Aspirador","Vassouras e escovas","Panos de microfibra"]}
+};
+CASA_MANUAL_PROCEDURES.forEach(proc=>{const kit=CASA_MANUAL_REAL_KIT[proc.id];if(kit)Object.assign(proc,kit)});
+
 const CASA_WEB=[
  ["🧹 Dicas de limpeza","https://www.google.com/search?q=dicas+de+limpeza+da+casa"],
  ["👕 Cuidados com roupas","https://www.google.com/search?q=dicas+cuidados+com+roupas+lavagem+secagem"],
