@@ -1,4 +1,4 @@
-const     CACHE = "bertha-v62-estudos";
+const CACHE = "bertha-v63-repeat-global";
 
 const ASSETS = [
   "./",
