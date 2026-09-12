@@ -1116,8 +1116,16 @@ document.querySelector("#homeBtn").onclick = (e) => {
 };
 
 document.querySelector("#backBtn").onclick = () => {
+  const route=(location.hash||"").replace("#","");
+  // Dentro de uma frente de Trabalho, voltar retorna à tela Trabalho,
+  // e não à Home.
+  if (route.startsWith("trabalho-")) {
+    state.route="trabalho";
+    location.hash="trabalho";
+    return;
+  }
   state.route="meu-dia";
-  location.hash = "meu-dia";
+  location.hash="meu-dia";
   render();
 };
 
