@@ -270,6 +270,13 @@
     });
     // CREFITO — itens datados em aberto.
     read('minha-vida.trabalho.crefito.v1',[]).forEach(x=>{ if(x.status==='Concluído'||(x.date&&x.date!==today)) return; push({id:`crefito:${x.id}`,source:'CREFITO-11',title:x.title||'Trabalho',date:x.date||today,minutes:+x.minutes||30,time:x.time||'',priority:x.priority||'Normal',kind:'work'}); });
+    // Casa — somente manutenções realmente datadas entram no Meu Dia. Rotinas permanecem disponíveis no módulo Casa para evitar uma avalanche de microtarefas.
+    const casa=read('minha-vida.casa.v1',null);
+    if(casa && Array.isArray(casa.maintenance)) casa.maintenance.forEach(x=>{
+      if(x.status==='concluida'||x.status==='Concluído'||!x.date||x.date>today) return;
+      const dv=Math.max(1,+x.durationValue||30), mins=x.durationUnit==='hours'?dv*60:dv;
+      push({id:`casa:maintenance:${x.id}`,learningKey:`casa:maintenance:${String(x.name||'manutencao').toLowerCase()}`,source:'Casa · Manutenção',title:x.name||'Manutenção da casa',date:x.date,minutes:mins,configuredMinutes:mins,time:x.time||'',period:x.period||'flex',priority:x.priority||'normal',notify:!!x.notify,notifyOffset:x.notifyWhen||'',kind:'home-maintenance'});
+    });
     // Exercícios — rotina é janela, nunca horário rígido.
     const ex=read('minha-vida.exercicios.v1',null); const dow=['Dom','Seg','Ter','Qua','Qui','Sex','Sáb'][new Date().getDay()];
     if(ex && Array.isArray(ex.plans)) ex.plans.filter(p=>p.active!==false && (!p.days?.length||p.days.includes(dow))).forEach(p=>push({id:`exercise:${p.id}`,source:'Exercícios',title:p.name||'Movimento',date:today,minutes:parseMinutes(p.target),windowStart:'05:16',windowEnd:'07:35',kind:'window'}));
@@ -350,6 +357,26 @@
     saveEngine(e);
     rerender();
   }
+  function syncCasaCompletion(active,end){
+    const id=String(active?.id||''); if(!id.startsWith('casa:'))return;
+    const casa=read('minha-vida.casa.v1',null); if(!casa)return;
+    const executions=read('minha-vida.casa.executions.v1',[]);
+    if(id.startsWith('casa:routine:')){
+      const ref=id.slice('casa:routine:'.length); let found=null,areaName='Casa';
+      (casa.areas||[]).some(a=>{const t=(a.tasks||[]).find(x=>String(x.id)===ref);if(t){found=t;areaName=a.title||'Casa';return true}return false});
+      if(found){found.done=true;found.completedAt=end;executions.push({id:`ce-${end}`,kind:'routine',refId:ref,title:found.name||active.title,area:areaName,completedAt:end});}
+    }else if(id.startsWith('casa:maintenance:')){
+      const ref=id.slice('casa:maintenance:'.length),m=(casa.maintenance||[]).find(x=>String(x.id)===ref);
+      if(m){m.lastCompletedAt=end;executions.push({id:`ce-${end}`,kind:'maintenance',refId:ref,title:m.name||active.title,area:m.area||'Casa',completedAt:end});
+        const f=m.frequency||'Única';
+        if(m.date && ['Diária','Semanal','Quinzenal','Mensal'].includes(f)){
+          const d=new Date(m.date+'T12:00:00'); if(f==='Diária')d.setDate(d.getDate()+1);if(f==='Semanal')d.setDate(d.getDate()+7);if(f==='Quinzenal')d.setDate(d.getDate()+14);if(f==='Mensal')d.setMonth(d.getMonth()+1);m.date=d.toISOString().slice(0,10);m.status='a_fazer';
+        }else m.status='concluida';
+      }
+    }
+    write('minha-vida.casa.v1',casa);write('minha-vida.casa.executions.v1',executions);
+  }
+
   function finishActive(){
     const e=engine(); if(!e.active)return;
     const active=e.active,end=Date.now(),real=Math.max(1,Math.round((end-active.startedAt)/60000));
@@ -359,6 +386,7 @@
       plannedMinutes:active.plannedMinutes,learnedMinutes:active.learnedMinutes||null,
       realMinutes:real,status:'done'});
     recordDurationLearning(active,real);
+    syncCasaCompletion(active,end);
     markRepeatConsumed(active);
     e.active=null; saveEngine(e); rerender();
     setTimeout(()=>repeatAfterFinishDialog(active,real),80);
