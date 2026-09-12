@@ -1,4 +1,4 @@
-const     CACHE = "bertha-v49-duration-width";
+const     CACHE = "bertha-v50-duration-responsive";
 
 const ASSETS = [
   "./",
