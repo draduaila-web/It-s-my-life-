@@ -1,4 +1,4 @@
-/* BERTH.A — Meu Dia v2 / Motor de Tempo v2.0 — Rituais
+/* BERTH.A — Meu Dia v2 / Motor de Tempo v2.1 — Rituais corrigidos
    Camada aditiva: carregar DEPOIS de app.js, finance-v6.js e work-v12.js.
    Preserva chaves/rotas legadas para evitar perda de dados.
 */
@@ -436,9 +436,9 @@
   function ritualIcon(key='sparkle'){ return RITUAL_ICONS[key]||RITUAL_ICONS.sparkle; }
 
   const CAPILLARY_WASHES={"31/08": {"shampoo": "t:r S10 Colors Even More — Grayish-Brown Color Protective Shampoo", "s10": "30–60 s de massagem • SEM PAUSA", "tratamento": "REPARAÇÃO\nKerasys Propolis Hair Bonding Pro Repair Treatment", "condicionador": "Mise en Scène Perfect Serum Styling Conditioner", "serum": "Mise en Scène Perfect Serum Original"}, "02/09": {"shampoo": "Elseve Cachos Longos dos Sonhos Shampoo Nutri-Preenchedor", "tratamento": "HIDRATAÇÃO\nMáscara Hidra + Reconstrução", "condicionador": "Elseve Cachos Longos dos Sonhos Condicionador Selador", "serum": "Mise en Scène Perfect Serum Hydrating"}, "04/09": {"shampoo": "Mise en Scène Perfect Serum Styling Shampoo", "tratamento": "NUTRIÇÃO\nPré-shampoo: óleo de semente de uva (20–30 min) → lavagem", "condicionador": "Mise en Scène Perfect Serum Styling Conditioner", "serum": "Mise en Scène Perfect Serum Original"}, "06/09": {"shampoo": "Elseve Cachos Longos dos Sonhos Shampoo Nutri-Preenchedor", "tratamento": "REPARAÇÃO\nKerasys Propolis Hair Bonding Pro Repair Treatment", "condicionador": "Elseve Cachos Longos dos Sonhos Condicionador Selador", "serum": "Mise en Scène Perfect Serum Styling"}, "08/09": {"shampoo": "t:r S10 Colors Even More — Grayish-Brown Color Protective Shampoo", "s10": "30–60 s de massagem • SEM PAUSA", "tratamento": "HIDRATAÇÃO\nMáscara Hidra + Reconstrução", "condicionador": "Mise en Scène Perfect Serum Styling Conditioner", "serum": "Mise en Scène Perfect Serum Hydrating"}, "10/09": {"shampoo": "Elseve Cachos Longos dos Sonhos Shampoo Nutri-Preenchedor", "tratamento": "ACIDIFICAÇÃO\nLola Tannic Acid Acidificante — 5 min, comprimento e pontas", "condicionador": "Elseve Cachos Longos dos Sonhos Condicionador Selador", "serum": "Mise en Scène Perfect Serum Original"}, "12/09": {"shampoo": "Mise en Scène Perfect Serum Styling Shampoo", "tratamento": "NUTRIÇÃO\nPré-shampoo: óleo de coco ou semente de uva (20–30 min)", "condicionador": "Mise en Scène Perfect Serum Styling Conditioner", "serum": "Mise en Scène Perfect Serum Hydrating"}, "14/09": {"shampoo": "Elseve Cachos Longos dos Sonhos Shampoo Nutri-Preenchedor", "tratamento": "PÓS-COR\nLavagem suave + condicionador; sem máscara pesada", "condicionador": "Mise en Scène Perfect Serum Styling Conditioner", "serum": "Mise en Scène Perfect Serum Original"}, "16/09": {"shampoo": "Mise en Scène Perfect Serum Styling Shampoo", "tratamento": "HIDRATAÇÃO\nMáscara Hidra + Reconstrução", "condicionador": "Mise en Scène Perfect Serum Styling Conditioner", "serum": "Mise en Scène Perfect Serum Hydrating"}, "18/09": {"shampoo": "Elseve Cachos Longos dos Sonhos Shampoo Nutri-Preenchedor", "tratamento": "REPARAÇÃO\nKerasys Propolis Hair Bonding Pro Repair Treatment", "condicionador": "Elseve Cachos Longos dos Sonhos Condicionador Selador", "serum": "Mise en Scène Perfect Serum Styling"}, "20/09": {"shampoo": "Mise en Scène Perfect Serum Styling Shampoo", "tratamento": "NUTRIÇÃO\nPré-shampoo: óleo de semente de uva (20–30 min)", "condicionador": "Mise en Scène Perfect Serum Styling Conditioner", "serum": "Mise en Scène Perfect Serum Original"}, "22/09": {"shampoo": "Elseve Cachos Longos dos Sonhos Shampoo Nutri-Preenchedor", "tratamento": "ACIDIFICAÇÃO\nLola Tannic Acid Acidificante — 5 min", "condicionador": "Elseve Cachos Longos dos Sonhos Condicionador Selador", "serum": "Mise en Scène Perfect Serum Hydrating"}, "24/09": {"shampoo": "t:r S10 Colors Even More — Grayish-Brown Color Protective Shampoo", "s10": "30–60 s de massagem • SEM PAUSA", "tratamento": "HIDRATAÇÃO\nMáscara Hidra + Reconstrução", "condicionador": "Mise en Scène Perfect Serum Styling Conditioner", "serum": "Mise en Scène Perfect Serum Styling"}, "26/09": {"shampoo": "Elseve Cachos Longos dos Sonhos Shampoo Nutri-Preenchedor", "tratamento": "REPARAÇÃO\nKerasys Propolis Hair Bonding Pro Repair Treatment", "condicionador": "Elseve Cachos Longos dos Sonhos Condicionador Selador", "serum": "Mise en Scène Perfect Serum Original"}, "28/09": {"shampoo": "Mise en Scène Perfect Serum Styling Shampoo", "tratamento": "NUTRIÇÃO\nPré-shampoo: óleo de girassol ou semente de uva (20–30 min)", "condicionador": "Mise en Scène Perfect Serum Styling Conditioner", "serum": "Mise en Scène Perfect Serum Hydrating"}, "30/09": {"shampoo": "Elseve Cachos Longos dos Sonhos Shampoo Nutri-Preenchedor", "tratamento": "HIDRATAÇÃO\nMáscara Hidra + Reconstrução", "condicionador": "Elseve Cachos Longos dos Sonhos Condicionador Selador", "serum": "Mise en Scène Perfect Serum Styling"}, "02/10": {"shampoo": "Mise en Scène Perfect Serum Styling Shampoo", "tratamento": "REPARAÇÃO\nKerasys Propolis Hair Bonding Pro Repair Treatment", "condicionador": "Mise en Scène Perfect Serum Styling Conditioner", "serum": "Mise en Scène Perfect Serum Original"}, "04/10": {"shampoo": "Elseve Cachos Longos dos Sonhos Shampoo Nutri-Preenchedor", "tratamento": "ACIDIFICAÇÃO\nLola Tannic Acid Acidificante — 5 min", "condicionador": "Elseve Cachos Longos dos Sonhos Condicionador Selador", "serum": "Mise en Scène Perfect Serum Hydrating"}, "06/10": {"shampoo": "Mise en Scène Perfect Serum Styling Shampoo", "tratamento": "NUTRIÇÃO\nPré-shampoo: óleo de semente de uva (20–30 min)", "condicionador": "Mise en Scène Perfect Serum Styling Conditioner", "serum": "Mise en Scène Perfect Serum Original"}, "08/10": {"shampoo": "Elseve Cachos Longos dos Sonhos Shampoo Nutri-Preenchedor", "tratamento": "HIDRATAÇÃO\nMáscara Hidra + Reconstrução", "condicionador": "Elseve Cachos Longos dos Sonhos Condicionador Selador", "serum": "Mise en Scène Perfect Serum Hydrating"}, "10/10": {"shampoo": "t:r S10 Colors Even More — Grayish-Brown Color Protective Shampoo", "s10": "30–60 s de massagem • SEM PAUSA", "tratamento": "REPARAÇÃO\nKerasys Propolis Hair Bonding Pro Repair Treatment", "condicionador": "Mise en Scène Perfect Serum Styling Conditioner", "serum": "Mise en Scène Perfect Serum Styling"}, "12/10": {"shampoo": "Elseve Cachos Longos dos Sonhos Shampoo Nutri-Preenchedor", "tratamento": "ACIDIFICAÇÃO\nLola Tannic Acid Acidificante — 5 min", "condicionador": "Elseve Cachos Longos dos Sonhos Condicionador Selador", "serum": "Mise en Scène Perfect Serum Original"}, "14/10": {"shampoo": "Mise en Scène Perfect Serum Styling Shampoo", "tratamento": "HIDRATAÇÃO\nMáscara Hidra + Reconstrução", "condicionador": "Mise en Scène Perfect Serum Hydrating", "serum": ""}};
-  const CAPILLARY_START=new Date(2026,7,31), CAPILLARY_END=new Date(2026,9,14);
+  const CAPILLARY_TEMPLATE_START=new Date(2026,7,31), CAPILLARY_START=new Date(2026,8,12), CAPILLARY_END=new Date(2026,9,14);
 
-  const SELFCARE_START=new Date(2026,7,30);
+  const SELFCARE_START=new Date(2026,8,12);
   const SELFCARE_CYCLE=[
     {title:'MEZZO BIOSCULPT',minutes:20,tasks:['Limpeza facial','Mezzo — 20 min','Hidratação']},
     {title:'DEPILAÇÃO',minutes:25,tasks:['Banho morno','Pernas + axilas','Virilha','Hidratação']},
@@ -469,6 +469,10 @@
   function ritualEvents(){ return read(RITUAL_EVENTS_KEY,[]); }
   function saveRitualEvents(v){ write(RITUAL_EVENTS_KEY,v); }
   function dateKey(d){ return `${String(d.getDate()).padStart(2,'0')}/${String(d.getMonth()+1).padStart(2,'0')}`; }
+  function dateLabelLong(d){
+    return d.toLocaleDateString('pt-BR',{day:'2-digit',month:'short'}).replace('.','').toUpperCase();
+  }
+  function capillaryCycleTotal(){ return Math.floor((CAPILLARY_END-CAPILLARY_START)/86400000)+1; }
   function dayStart(d){ return new Date(d.getFullYear(),d.getMonth(),d.getDate()); }
   function capillaryDay(d){ return Math.floor((dayStart(d)-CAPILLARY_START)/86400000)+1; }
   function capillaryEvent(d){
@@ -548,11 +552,11 @@
     const r=ritualCatalog().find(x=>x.id===id)||defaultRituals()[0], ev=ritualDetailData(id,new Date());
     const extras=ritualEvents().filter(x=>x.ritualId===id);
     let upcoming='';
-    for(let i=0;i<8;i++){const d=new Date();d.setDate(d.getDate()+i);const x=ritualDetailData(id,d);if(x)upcoming+=`<div class="bertha-ritual-upcoming"><span>${d.toLocaleDateString('pt-BR',{day:'2-digit',month:'short'}).replace('.','')}</span><div><strong>${esc(x.title)}</strong><small>${esc(x.subtitle||'')}</small></div></div>`;}
+    for(let i=1;i<=8;i++){const d=new Date();d.setDate(d.getDate()+i);const x=ritualDetailData(id,d);if(x)upcoming+=`<div class="bertha-ritual-upcoming"><span>${d.toLocaleDateString('pt-BR',{day:'2-digit',month:'short'}).replace('.','')}</span><div><strong>${esc(x.title)}</strong><small>${esc(x.subtitle||'')}</small></div></div>`;}
     return `<section class="bertha-ritual-page">
       <a class="bertha-back-link" href="#rituais">‹ Rituais</a>
       <section class="bertha-ritual-detail-hero"><span class="bertha-line-icon large">${ritualIcon(r.icon)}</span><div><div class="bertha-task-kicker">${esc(r.title).toUpperCase()}</div><h1>${id==='capilar'?'Seu cronograma, no lugar certo.':'Cuidar também é ritual.'}</h1><p>${esc(r.subtitle||'')}</p></div></section>
-      ${ev?`<section class="bertha-ritual-today"><div class="bertha-ritual-head"><div><span>HOJE${id==='capilar'?` · DIA ${capillaryDay(new Date())}`:` · DIA ${ev.cycleDay} / 14`}</span><h2>${esc(ev.title)}</h2><p>${esc(ev.subtitle||'')}</p></div><button type="button" data-config-ritual="${id}">Editar</button></div>
+      ${ev?`<section class="bertha-ritual-today"><div class="bertha-ritual-head"><div><span>HOJE · ${dateLabelLong(new Date())}</span><h2>${esc(ev.title)}</h2><p>${esc(ev.subtitle||'')}</p><small class="bertha-cycle-position">${id==='capilar'?`Dia ${capillaryDay(new Date())} de ${capillaryCycleTotal()}`:`Dia ${ev.cycleDay} de 14`}</small></div><button type="button" data-config-ritual="${id}">Editar</button></div>
         ${ev.optional?`<div class="bertha-free-note">Hoje é um espaço livre. A BERTH.A não transforma descanso em pendência.</div>`:`<div class="bertha-ritual-time">${durationText(ev.minutes)} · ${taskLabelPeriod(ritualSetting(id,ev.type).period||ev.period)}</div>`}
         <div class="bertha-check-steps">${(ev.tasks||[]).map(t=>`<label><input type="checkbox"><span>${esc(t)}</span></label>`).join('')}</div>
       </section>`:''}
@@ -560,8 +564,21 @@
       <div class="bertha-upcoming-list">${upcoming}</div>
       <div class="bertha-section-row"><span>CUIDADOS & EXTRAS</span><button type="button" data-add-ritual-event="${id}">＋ Adicionar</button></div>
       <div class="bertha-extra-list">${extras.length?extras.map(e=>`<button class="bertha-extra-card" data-edit-ritual-event="${e.id}"><span class="bertha-line-icon">${ritualIcon(e.icon||'sparkle')}</span><span><strong>${esc(e.title)}</strong><small>${esc(ritualRepeatLabel(e))} · ${durationText(e.minutes)}</small></span><b>›</b></button>`).join(''):`<div class="bertha-empty-soft">Você pode adicionar corte, coloração, procedimentos ou qualquer outro cuidado aqui.</div>`}</div>
+      ${cycleActionsHtml(id)}
     </section>`;
   }
+  function ritualDurationParts(e){
+    if(e.durationValue && e.durationUnit) return {value:e.durationValue,unit:e.durationUnit};
+    const mins=Number(e.minutes)||20;
+    if(mins%1440===0) return {value:mins/1440,unit:'days'};
+    if(mins%60===0) return {value:mins/60,unit:'hours'};
+    return {value:mins,unit:'minutes'};
+  }
+  function ritualDurationMinutes(value,unit){
+    const n=Math.max(1,Number(value)||1);
+    return unit==='days'?n*1440:unit==='hours'?n*60:n;
+  }
+
   function ritualRepeatLabel(e){
     if(e.repeat==='daily')return 'Todos os dias';
     if(e.repeat==='weekly')return 'Toda semana';
@@ -580,7 +597,19 @@
       <div class="bertha-task-modal-body">
         <label class="bertha-task-field"><span>O que você quer incluir?</span><input data-title value="${esc(x.title)}" placeholder="Ex.: Colorir raiz"></label>
         <div class="bertha-task-field"><span>Ícone</span><div class="bertha-icon-picker">${Object.keys(RITUAL_ICONS).map(k=>`<button type="button" data-icon="${k}" class="${x.icon===k?'active':''}">${ritualIcon(k)}</button>`).join('')}</div></div>
-        <div class="bertha-task-two"><label class="bertha-task-field"><span>Data <small>opcional</small></span><input data-date type="date" value="${x.date||''}"></label><label class="bertha-task-field"><span>Quanto tempo leva?</span><input data-minutes type="number" min="1" value="${x.minutes||20}"></label></div>
+        <div class="bertha-task-two bertha-ritual-date-duration">
+          <label class="bertha-task-field"><span>Data <small>opcional</small></span><input data-date type="date" value="${x.date||''}"></label>
+          <div class="bertha-task-field"><span>Quanto tempo leva?</span>
+            <div class="bertha-duration-input">
+              <input data-duration-value type="number" min="1" step="1" inputmode="numeric" value="${ritualDurationParts(x).value}">
+              <select data-duration-unit>
+                <option value="minutes" ${ritualDurationParts(x).unit==='minutes'?'selected':''}>minutos</option>
+                <option value="hours" ${ritualDurationParts(x).unit==='hours'?'selected':''}>horas</option>
+                <option value="days" ${ritualDurationParts(x).unit==='days'?'selected':''}>dias</option>
+              </select>
+            </div>
+          </div>
+        </div>
         <div class="bertha-task-field"><span>Quando pode acontecer?</span><div class="bertha-segment" data-period-group>${[['flex','Flexível'],['morning','Manhã'],['afternoon','Tarde'],['night','Noite']].map(([v,l])=>`<button type="button" data-period="${v}" class="${x.period===v?'active':''}">${l}</button>`).join('')}</div></div>
         <div class="bertha-task-two"><label class="bertha-task-field"><span>Horário <small>opcional</small></span><input data-time type="time" value="${x.time||''}"></label><div class="bertha-task-field"><span>Prioridade</span><div class="bertha-segment compact" data-priority-group>${[['Baixa','Baixa'],['Normal','Normal'],['Importante','Import.']].map(([v,l])=>`<button type="button" data-priority="${v}" class="${x.priority===v?'active':''}">${l}</button>`).join('')}</div></div></div>
         <label class="bertha-task-field"><span>Repetir</span><select data-repeat><option value="none">Não repetir</option><option value="daily">Todos os dias</option><option value="weekly">Toda semana</option><option value="weekdays">Dias úteis</option><option value="interval">A cada X dias</option></select></label>
@@ -604,7 +633,8 @@
     d.querySelectorAll('[data-priority]').forEach(b=>b.onclick=()=>d.querySelectorAll('[data-priority]').forEach(z=>z.classList.toggle('active',z===b)));
     d.querySelector('[data-save]').onclick=()=>{
       const title=d.querySelector('[data-title]').value.trim();if(!title){d.querySelector('[data-title]').focus();return;}
-      Object.assign(x,{title,icon:d.querySelector('[data-icon].active')?.dataset.icon||'sparkle',date:d.querySelector('[data-date]').value,minutes:+d.querySelector('[data-minutes]').value||20,period:d.querySelector('[data-period].active')?.dataset.period||'flex',time:d.querySelector('[data-time]').value,priority:d.querySelector('[data-priority].active')?.dataset.priority||'Normal',repeat:d.querySelector('[data-repeat]').value,intervalDays:+d.querySelector('[data-interval]').value||30,notify:d.querySelector('[data-notify]').checked,notifyOffset:d.querySelector('[data-notify-offset]').value,notifyTime:d.querySelector('[data-notify-time]').value,steps:d.querySelector('[data-steps]').value,note:d.querySelector('[data-note]').value});
+      const durationValue=+d.querySelector('[data-duration-value]').value||1, durationUnit=d.querySelector('[data-duration-unit]').value;
+      Object.assign(x,{title,icon:d.querySelector('[data-icon].active')?.dataset.icon||'sparkle',date:d.querySelector('[data-date]').value,durationValue,durationUnit,minutes:ritualDurationMinutes(durationValue,durationUnit),period:d.querySelector('[data-period].active')?.dataset.period||'flex',time:d.querySelector('[data-time]').value,priority:d.querySelector('[data-priority].active')?.dataset.priority||'Normal',repeat:d.querySelector('[data-repeat]').value,intervalDays:+d.querySelector('[data-interval]').value||30,notify:d.querySelector('[data-notify]').checked,notifyOffset:d.querySelector('[data-notify-offset]').value,notifyTime:d.querySelector('[data-notify-time]').value,steps:d.querySelector('[data-steps]').value,note:d.querySelector('[data-note]').value});
       if(x.repeat==='weekly') x.weekday=x.date?new Date(x.date+'T00:00:00').getDay():new Date().getDay();
       if(x.repeat==='interval'&&!x.startDate)x.startDate=x.date||iso(new Date());
       const arr=ritualEvents(),i=arr.findIndex(e=>e.id===x.id);if(i>=0)arr[i]=x;else arr.push(x);saveRitualEvents(arr);d.close();d.remove();rerender();
@@ -628,6 +658,43 @@
     d.querySelector('[data-save]').onclick=()=>{all[type]={...x,period:d.querySelector('[data-period].active')?.dataset.period||'flex',time:d.querySelector('[data-time]').value,priority:d.querySelector('[data-priority].active')?.dataset.priority||'Normal',notify:d.querySelector('[data-notify]').checked};write(key,all);d.close();d.remove();rerender();};d.showModal();
   }
 
+
+  const RITUAL_CYCLES_KEY='bertha.ritual.cycles.v1';
+  function ritualCycles(){ return read(RITUAL_CYCLES_KEY,{}); }
+  function saveRitualCycles(v){ write(RITUAL_CYCLES_KEY,v); }
+  function currentCycleState(id){
+    const all=ritualCycles();
+    return all[id]||{number:1,status:'active',mode:'template',revisions:[]};
+  }
+  function cloneCycle(id,review=false){
+    const all=ritualCycles(), prev=currentCycleState(id);
+    all[id]={...prev,number:(prev.number||1)+1,status:'active',mode:review?'review':'same',
+      revisions:[...(prev.revisions||[]),{from:prev.number||1,at:new Date().toISOString(),review}]};
+    saveRitualCycles(all);
+    if(review){
+      alert('Novo ciclo criado como cópia do anterior. Você pode alterar apenas o que quiser em Cuidados & Extras e nas configurações do ritual.');
+    }else{
+      alert('Novo ciclo criado repetindo a configuração anterior.');
+    }
+    rerender();
+  }
+  function endCycle(id){
+    const all=ritualCycles(), prev=currentCycleState(id);
+    all[id]={...prev,status:'ended',endedAt:new Date().toISOString()};
+    saveRitualCycles(all); rerender();
+  }
+  function cycleActionsHtml(id){
+    const c=currentCycleState(id);
+    return `<section class="bertha-cycle-actions">
+      <div><span>PRÓXIMO CICLO</span><h3>Ciclo ${c.number||1}</h3><p>Ao terminar, você pode repetir tudo, revisar uma cópia ou encerrar.</p></div>
+      <div class="bertha-cycle-buttons">
+        <button type="button" data-repeat-cycle="${id}">Repetir igual</button>
+        <button type="button" data-review-cycle="${id}">Revisar e repetir</button>
+        <button type="button" class="quiet" data-end-cycle="${id}">Encerrar</button>
+      </div>
+    </section>`;
+  }
+
   function fullCapillarySchedule(){
     let html='<div class="bertha-full-schedule">';for(let i=0;i<45;i++){const d=new Date(CAPILLARY_START);d.setDate(d.getDate()+i);const e=capillaryEvent(d);html+=`<div><b>Dia ${i+1} · ${d.toLocaleDateString('pt-BR')}</b><span>${esc(e.title)}${e.subtitle?' · '+esc(e.subtitle):''}</span></div>`;}html+='</div>';dialogBase('Cronograma capilar · 45 dias',html);
   }
@@ -646,6 +713,9 @@
     document.querySelector('[data-add-ritual-event]')?.addEventListener('click',()=>ritualEventDialog(id));
     document.querySelectorAll('[data-edit-ritual-event]').forEach(b=>b.onclick=()=>ritualEventDialog(id,b.dataset.editRitualEvent));
     document.querySelector('[data-full-capillary]')?.addEventListener('click',fullCapillarySchedule);
+    document.querySelector('[data-repeat-cycle]')?.addEventListener('click',()=>cloneCycle(id,false));
+    document.querySelector('[data-review-cycle]')?.addEventListener('click',()=>cloneCycle(id,true));
+    document.querySelector('[data-end-cycle]')?.addEventListener('click',()=>{if(confirm('Encerrar este ciclo? O histórico será preservado.')) endCycle(id);});
   }
 
   function bindHome(){ document.querySelectorAll('[data-start]').forEach(b=>b.onclick=()=>{const x=sourcesToday().find(i=>i.id===b.dataset.start);if(x)startItem(x)}); document.querySelectorAll('[data-postpone]').forEach(b=>b.onclick=()=>{const x=sourcesToday().find(i=>i.id===b.dataset.postpone);if(x)postponeDialog(x)}); const f=document.querySelector('[data-finish-active]'); if(f)f.onclick=finishActive; }
@@ -1483,6 +1553,35 @@
     .bertha-icon-picker{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}.bertha-icon-picker button{height:50px;border:1px solid rgba(110,90,116,.12);border-radius:14px;background:#fbf8f9;color:#8a7080;display:grid;place-items:center}.bertha-icon-picker button.active{background:#f2dce8;border-color:#d7a7bf}.bertha-icon-picker svg{width:24px;height:24px;fill:none;stroke:currentColor;stroke-width:1.5;stroke-linecap:round;stroke-linejoin:round}
     .bertha-schedule-note{padding:11px 12px;border-radius:14px;background:#f7f1f6;color:#887d89;font-size:11px;line-height:1.45}.bertha-delete-soft{border:0;background:transparent;color:#aa6675;font-weight:800;font-size:12px}
     .bertha-full-schedule{padding:12px 17px 22px;max-height:66vh;overflow:auto;display:grid;gap:7px}.bertha-full-schedule>div{padding:10px 12px;border-radius:14px;background:#fbf6f8;border:1px solid rgba(112,92,119,.08)}.bertha-full-schedule b{display:block;font-size:11px;color:#594d5c}.bertha-full-schedule span{display:block;margin-top:3px;color:#887c88;font-size:10px;line-height:1.35}
+
+
+    /* RITUAIS v2.1 — correções iPhone + início 12/09 */
+    .bertha-cycle-position{display:block;margin-top:5px;color:#9a8d98;font-size:10px;font-weight:600;letter-spacing:0}
+    .bertha-cycle-actions{margin-top:18px;padding:16px;border-radius:20px;background:linear-gradient(135deg,rgba(238,229,247,.70),rgba(250,244,239,.82));border:1px solid rgba(108,88,115,.10)}
+    .bertha-cycle-actions>div>span{display:block;color:#91748a;font-size:10px;font-weight:800;letter-spacing:.14em;margin-bottom:4px}
+    .bertha-cycle-actions h3{margin:0 0 5px;font-size:17px;color:#443948}
+    .bertha-cycle-actions p{margin:0;color:#877b87;font-size:11px;line-height:1.4}
+    .bertha-cycle-buttons{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:13px}
+    .bertha-cycle-buttons button{border:0;border-radius:13px;padding:10px 8px;background:#eaddeb;color:#6f557c;font-size:11px;font-weight:800}
+    .bertha-cycle-buttons button.quiet{grid-column:1/-1;background:rgba(255,255,255,.65);color:#897c88}
+    .bertha-ritual-dialog .bertha-task-modal{max-height:min(88vh,760px);overflow:hidden}
+    .bertha-ritual-dialog .bertha-task-modal-body{overflow-y:auto;-webkit-overflow-scrolling:touch;min-height:0}
+    .bertha-ritual-dialog .bertha-task-modal-actions{position:sticky;bottom:0;z-index:5;background:rgba(255,250,247,.98);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px)}
+    .bertha-ritual-dialog .bertha-task-field,.bertha-ritual-dialog .bertha-task-two>*{min-width:0}
+    .bertha-ritual-dialog input,.bertha-ritual-dialog select,.bertha-ritual-dialog textarea{max-width:100%;box-sizing:border-box}
+    .bertha-ritual-dialog .bertha-duration-input{display:grid;grid-template-columns:88px minmax(0,1fr);gap:8px;min-width:0}
+    .bertha-ritual-dialog .bertha-duration-input select{width:100%;min-width:0}
+    @media(max-width:480px){
+      .bertha-ritual-dialog{padding:10px!important}
+      .bertha-ritual-dialog .bertha-task-modal{width:min(100%,calc(100vw - 20px));max-height:90vh;border-radius:22px}
+      .bertha-ritual-date-duration{grid-template-columns:1fr!important}
+      .bertha-ritual-dialog .bertha-task-two{grid-template-columns:1fr!important}
+      .bertha-ritual-dialog .bertha-segment{grid-template-columns:repeat(2,minmax(0,1fr))}
+      .bertha-ritual-dialog .bertha-segment.compact{grid-template-columns:repeat(3,minmax(0,1fr))}
+      .bertha-ritual-dialog .bertha-icon-picker{grid-template-columns:repeat(4,minmax(0,1fr))}
+      .bertha-ritual-dialog .bertha-task-modal-head{padding-right:8px}
+      .bertha-ritual-dialog .bertha-task-modal-body{padding-bottom:18px}
+    }
 
     /* Menu aprovado: congelado. Não alterar. */
 
