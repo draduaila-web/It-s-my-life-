@@ -1,4 +1,4 @@
-/* BERTH.A — Meu Dia v2 / Motor de Tempo v2.3 — Meu Dia Ideal refinado
+/* BERTH.A — Meu Dia v2 / Motor de Tempo v2.4 — Meu Dia Ideal por períodos
    Camada aditiva: carregar DEPOIS de app.js, finance-v6.js e work-v12.js.
    Preserva chaves/rotas legadas para evitar perda de dados.
 */
@@ -93,6 +93,53 @@
 
   function renderHome(){ const d=new Date(), greet=d.getHours()<12?'Bom dia':d.getHours()<18?'Boa tarde':'Boa noite'; const today=new Intl.DateTimeFormat('pt-BR',{weekday:'long',day:'numeric',month:'long'}).format(d); const tasks=sourcesToday().filter(x=>!doneToday(x.id)).slice(0,4); const free=currentSuggestion().free;
     return `<section class="day-hero"><div class="eyebrow">MEU DIA</div><h1>${greet}, Duaila.</h1><p class="day-date">${today}</p></section>${nowCard()}<section class="day-section"><div class="section-head"><h2>O que importa hoje</h2><span class="soft-count">${tasks.length}</span></div>${tasks.length?tasks.map(x=>`<div class="focus-row bertha-focus"><span class="focus-dot">•</span><div><strong>${esc(x.title)}</strong><small>${esc(x.source)} · ${durationText(+x.minutes||30)}</small></div><button data-start="${esc(x.id)}">Começar</button></div>`).join(''):`<div class="bertha-empty">Seu essencial está em dia.</div>`}</section><section class="day-section"><div class="section-head"><h2>Seu dia, sem excesso</h2></div><div class="timeline bertha-timeline">${timeline()}</div></section>${free?`<section class="free-space"><div>☁️</div><strong>Espaço livre também faz parte do dia.</strong><p>Se nada precisa ser resolvido agora, não resolva.</p></section>`:''}`;
+  }
+
+
+  function idealZoneIcon(zone){
+    const icons={
+      morning:'<svg viewBox="0 0 24 24"><path d="M4 15h16M6 12a6 6 0 0 1 12 0M12 3v3M4.9 6.9l2.1 2.1M19.1 6.9L17 9"/></svg>',
+      afternoon:'<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M2 12h2M20 12h2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M19.1 4.9l-1.4 1.4M6.3 17.7l-1.4 1.4"/></svg>',
+      evening:'<svg viewBox="0 0 24 24"><path d="M20 15.5A8 8 0 0 1 8.5 4 8.5 8.5 0 1 0 20 15.5z"/></svg>',
+      flex:'<svg viewBox="0 0 24 24"><path d="M12 3l1.6 4.4L18 9l-4.4 1.6L12 15l-1.6-4.4L6 9l4.4-1.6L12 3zM19 15l.8 2.2L22 18l-2.2.8L19 21l-.8-2.2L16 18l2.2-.8L19 15z"/></svg>',
+      free:'<svg viewBox="0 0 24 24"><path d="M5 12h14M8 8l-3 4 3 4M16 8l3 4-3 4"/></svg>'
+    }; return icons[zone]||icons.flex;
+  }
+  function idealPeriodZone(item){
+    const p=String(item.period||item.when||item.window||'flex').toLowerCase();
+    if(p.includes('manh')||p==='morning')return 'morning';
+    if(p.includes('tard')||p==='afternoon')return 'afternoon';
+    if(p.includes('noit')||p==='evening'||p==='night')return 'evening';
+    if(p.includes('livre')||p.includes('proteg'))return 'free';
+    return 'flex';
+  }
+  function idealMeta(item){
+    const parts=[];
+    const f=item.frequency||item.freq||item.recurrence;
+    if(f)parts.push(String(f));
+    const m=Number(item.minutes||item.durationMinutes||item.duration);
+    if(m)parts.push(durationText(m));
+    if(item.notify)parts.push('Aviso');
+    return parts.join(' · ')||'Quando fizer sentido';
+  }
+  function buildIdealMap(items){
+    const zones=[
+      ['morning','Manhã','O que você gosta que caiba no começo do dia'],
+      ['afternoon','Tarde','Preferências para o meio do dia'],
+      ['evening','Noite','Cuidado, leitura e desacelerar'],
+      ['flex','Quando houver espaço','Sem horário obrigatório'],
+      ['free','Janelas livres','Espaço que não precisa ser preenchido']
+    ];
+    return `<div class="bertha-ideal-map">${zones.map(([key,title,sub])=>{
+      const arr=items.filter(x=>idealPeriodZone(x)===key);
+      return `<section class="bertha-ideal-zone ${key}">
+        <div class="bertha-ideal-zone-head"><div class="bertha-ideal-zone-icon">${idealZoneIcon(key)}</div><div><span>${title.toUpperCase()}</span><small>${sub}</small></div></div>
+        <div class="bertha-ideal-zone-items">
+          ${arr.length?arr.map(x=>`<div class="bertha-ideal-map-card"><div class="bertha-ideal-map-copy"><strong>${esc(x.title||x.name||'Preferência')}</strong><small>${esc(idealMeta(x))}</small></div><button type="button" class="bertha-ideal-remove" data-remove-ideal-map="${x.id}" aria-label="Remover">×</button></div>`).join(''):`<div class="bertha-ideal-zone-empty">${key==='free'?'Você também pode proteger espaço sem colocar nada nele.':'Nenhuma preferência aqui ainda.'}</div>`}
+        </div>
+        <button type="button" class="bertha-ideal-add-zone" data-add-ideal-zone="${key}">+ Adicionar aqui</button>
+      </section>`;
+    }).join('')}</div>`;
   }
 
   function renderIdeal(){ const items=read(IDEAL_KEY,[]); return `<section class="hero"><div class="eyebrow">PREFERÊNCIAS</div><h2>Meu Dia Ideal</h2><p>O que você gostaria que coubesse na sua vida quando houver espaço. Não é uma agenda rígida.</p></section><button class="primary add-full" data-add-ideal>＋ Adicionar ao meu dia ideal</button><div class="list bertha-ideal-list">${items.map(x=>`<article class="card"><div><strong>${esc(x.title)}</strong><span>${({morning:'Manhã',afternoon:'Tarde',night:'Noite',flex:'Quando houver espaço'})[x.period]||'Flexível'} · ${durationText(+x.minutes||30)}${x.notify?' · 🔔':''}</span></div><button class="more" data-del-ideal="${x.id}">×</button></article>`).join('')||'<div class="bertha-empty">Ainda não há preferências. Comece com algo que você gostaria de viver com mais frequência.</div>'}</div>`; }
@@ -799,7 +846,36 @@
   }
 
   function bindHome(){ document.querySelectorAll('[data-start]').forEach(b=>b.onclick=()=>{const x=sourcesToday().find(i=>i.id===b.dataset.start);if(x)startItem(x)}); document.querySelectorAll('[data-postpone]').forEach(b=>b.onclick=()=>{const x=sourcesToday().find(i=>i.id===b.dataset.postpone);if(x)postponeDialog(x)}); const f=document.querySelector('[data-finish-active]'); if(f)f.onclick=finishActive; }
-  function bindIdeal(){ const a=document.querySelector('[data-add-ideal]');if(a)a.onclick=addIdealDialog;document.querySelectorAll('[data-del-ideal]').forEach(b=>b.onclick=()=>{write(IDEAL_KEY,read(IDEAL_KEY,[]).filter(x=>x.id!==b.dataset.delIdeal));rerender()}) }
+
+  function enhanceIdealScreen(){
+    const route=String(location.hash||'').toLowerCase();
+    if(!route.includes('ideal'))return;
+    const items=read(IDEAL_KEY,[]);
+    const addBtn=[...document.querySelectorAll('button')].find(b=>b.textContent.includes('Adicionar ao meu dia ideal'));
+    if(!addBtn)return;
+    let host=addBtn.nextElementSibling;
+    if(!host)return;
+    host.outerHTML=`<div data-ideal-map-host>${buildIdealMap(items)}</div>`;
+    document.querySelectorAll('[data-remove-ideal-map]').forEach(b=>b.onclick=()=>{
+      const id=b.dataset.removeIdealMap;
+      write(IDEAL_KEY,read(IDEAL_KEY,[]).filter(x=>String(x.id)!==String(id)));
+      rerender();
+    });
+    document.querySelectorAll('[data-add-ideal-zone]').forEach(b=>b.onclick=()=>{
+      addBtn.click();
+      setTimeout(()=>{
+        const zone=b.dataset.addIdealZone;
+        const labels={morning:'Manhã',afternoon:'Tarde',evening:'Noite',flex:'Quando houver espaço',free:'Livre'};
+        document.querySelectorAll('[data-period]').forEach(p=>{
+          if(String(p.textContent).trim().toLowerCase()===String(labels[zone]).toLowerCase())p.click();
+        });
+      },0);
+    });
+  }
+
+
+  function bindIdeal(){
+    setTimeout(enhanceIdealScreen,0); const a=document.querySelector('[data-add-ideal]');if(a)a.onclick=addIdealDialog;document.querySelectorAll('[data-del-ideal]').forEach(b=>b.onclick=()=>{write(IDEAL_KEY,read(IDEAL_KEY,[]).filter(x=>x.id!==b.dataset.delIdeal));rerender()}) }
 
   function ensureStyles(){
     let s=document.getElementById('bertha-time-v1-style');
@@ -1753,6 +1829,34 @@
     #bertha-ideal-list .bertha-ideal-item small,
     .bertha-ideal-list .bertha-ideal-item small,
     [data-ideal-list] .bertha-ideal-item small{display:block;line-height:1.35}
+
+
+    /* v2.4 — MEU DIA IDEAL: mapa leve do dia */
+    .bertha-ideal-map{display:grid;gap:14px;margin-top:14px}
+    .bertha-ideal-zone{border:1px solid rgba(82,69,85,.08);border-radius:22px;padding:15px 14px 13px}
+    .bertha-ideal-zone.morning{background:linear-gradient(135deg,rgba(250,232,205,.82),rgba(250,242,220,.62))}
+    .bertha-ideal-zone.afternoon{background:linear-gradient(135deg,rgba(219,240,234,.78),rgba(225,237,247,.68))}
+    .bertha-ideal-zone.evening{background:linear-gradient(135deg,rgba(231,222,247,.80),rgba(240,229,243,.64))}
+    .bertha-ideal-zone.flex{background:linear-gradient(135deg,rgba(247,224,232,.72),rgba(247,235,221,.62))}
+    .bertha-ideal-zone.free{background:linear-gradient(135deg,rgba(224,238,247,.70),rgba(233,242,229,.66))}
+    .bertha-ideal-zone-head{display:flex;align-items:center;gap:10px;margin-bottom:10px}
+    .bertha-ideal-zone-icon{width:34px;height:34px;border-radius:11px;background:rgba(255,255,255,.62);display:grid;place-items:center;color:#806b82;flex:0 0 auto}
+    .bertha-ideal-zone-icon svg{width:18px;height:18px;fill:none;stroke:currentColor;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round}
+    .bertha-ideal-zone-head span{font-size:10px;letter-spacing:.14em;font-weight:800;color:#766b77}
+    .bertha-ideal-zone-head small{display:block;margin-top:2px;font-size:10px;color:#998e98;letter-spacing:0;font-weight:500}
+    .bertha-ideal-zone-items{display:grid;gap:8px}
+    .bertha-ideal-map-card{display:grid;grid-template-columns:minmax(0,1fr) 34px;align-items:center;gap:10px;padding:12px 10px 12px 14px;border-radius:16px;background:rgba(255,255,255,.66);border:1px solid rgba(86,73,89,.07)}
+    .bertha-ideal-map-copy{min-width:0}
+    .bertha-ideal-map-copy strong{display:block;font-size:13px;color:#403742;margin:0 0 3px}
+    .bertha-ideal-map-copy small{display:block;font-size:10px;color:#857a85;line-height:1.35}
+    .bertha-ideal-remove{width:32px;height:32px;border:0;border-radius:50%;background:rgba(255,255,255,.72);display:grid;place-items:center;color:#a38f9e;font-size:20px;line-height:1;padding:0;margin:0}
+    .bertha-ideal-zone-empty{padding:8px 3px 3px;color:#a0939e;font-size:10px;line-height:1.35}
+    .bertha-ideal-protected-note{font-size:10px;color:#7d7380;line-height:1.45;margin:0}
+    .bertha-ideal-add-zone{width:100%;border:0;border-radius:13px;background:rgba(255,255,255,.55);padding:9px;margin-top:9px;color:#796a7a;font-size:10px;font-weight:750}
+    @media(max-width:480px){
+      .bertha-ideal-map{gap:11px}
+      .bertha-ideal-zone{padding:13px 12px}
+    }
 
     /* Menu aprovado: congelado. Não alterar. */
 
