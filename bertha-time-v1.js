@@ -1,4 +1,4 @@
-/* BERTH.A — Meu Dia v2 / Motor de Tempo v2.8.3 — histórico de Estudos repetível
+/* BERTH.A — Meu Dia v2 / Motor de Tempo v2.8.5 — histórico de Estudos repetível
    Camada aditiva: carregar DEPOIS de app.js, finance-v6.js e work-v12.js.
    Preserva chaves/rotas legadas para evitar perda de dados.
 */
@@ -279,7 +279,7 @@
     });
     // Exercícios — rotina é janela, nunca horário rígido.
     const ex=read('minha-vida.exercicios.v1',null); const dow=['Dom','Seg','Ter','Qua','Qui','Sex','Sáb'][new Date().getDay()];
-    if(ex && Array.isArray(ex.plans)) ex.plans.filter(p=>p.active!==false && (!p.days?.length||p.days.includes(dow))).forEach(p=>push({id:`exercise:${p.id}`,source:'Exercícios',title:p.name||'Movimento',date:today,minutes:parseMinutes(p.target),windowStart:'05:16',windowEnd:'07:35',kind:'window'}));
+    if(ex && Array.isArray(ex.plans)) ex.plans.filter(p=>p.active!==false && (!(p.untilMode==='date'&&p.untilDate&&p.untilDate<today)) && (p.frequency!=='Dias específicos'||!p.days?.length||p.days.includes(dow))).forEach(p=>{ const dv=Math.max(1,+p.durationValue||parseMinutes(p.target)), mins=p.durationUnit==='hours'?dv*60:dv; const periods={morning:['05:16','07:35'],afternoon:['12:00','18:00'],evening:['18:00','22:00'],flex:['','']}; const w=periods[p.period||'flex']||periods.flex; push({id:`exercise:${p.id}`,learningKey:`exercise-plan-v2:${p.id}`,source:'Exercícios',title:p.name||'Movimento',date:today,minutes:mins,configuredMinutes:mins,time:p.time||'',period:p.period||'flex',windowStart:p.time?'':w[0],windowEnd:p.time?'':w[1],notify:!!p.notify,notifyOffset:p.notifyWhen||'',kind:'window'}); });
     // Meu Dia Ideal — sugestões, não obrigações.
     read(IDEAL_KEY,[])
       .filter(x=>x.active!==false)
