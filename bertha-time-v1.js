@@ -1,4 +1,4 @@
-/* BERTH.A — Meu Dia v2 / Motor de Tempo v2.8 — repetição inteligente global
+/* BERTH.A — Meu Dia v2 / Motor de Tempo v2.8.1 — refinamento Home + Estudos
    Camada aditiva: carregar DEPOIS de app.js, finance-v6.js e work-v12.js.
    Preserva chaves/rotas legadas para evitar perda de dados.
 */
@@ -2414,3 +2414,29 @@
   setInterval(()=>{if((location.hash==='#meu-dia'||!location.hash)&&document.visibilityState==='visible')rerender()},60000);
   ensureStyles(); setTimeout(rerender,0);
 })();
+
+
+  function hideHomeTopRightButtonOnHome(){
+    const hash=(location.hash||'#home').toLowerCase();
+    const isHome=hash==='#home'||hash==='#meu-dia'||hash===''||hash==='#';
+    document.documentElement.classList.toggle('bertha-is-home',isHome);
+  }
+  window.addEventListener('hashchange',hideHomeTopRightButtonOnHome);
+  setTimeout(hideHomeTopRightButtonOnHome,0);
+
+  (function installHomeTopRightHide(){
+    if(document.getElementById('bertha-home-topright-hide'))return;
+    const s=document.createElement('style');
+    s.id='bertha-home-topright-hide';
+    s.textContent=`
+      .bertha-is-home #homeBtn,
+      .bertha-is-home .bertha-home-btn,
+      .bertha-is-home [data-home-button],
+      .bertha-is-home .home-button,
+      .bertha-is-home .top-home-button{
+        display:none!important;
+      }
+    `;
+    document.head.appendChild(s);
+  })();
+
