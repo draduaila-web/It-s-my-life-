@@ -1,4 +1,4 @@
-const     CACHE = "bertha-v54-rituais-ciclo-exclusao";
+const     CACHE = "bertha-v55-rituais-delete-fix";
 
 const ASSETS = [
   "./",
