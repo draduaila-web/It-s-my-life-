@@ -1,4 +1,4 @@
-const     CACHE = "bertha-v59-ideal-programavel";
+const     CACHE = "bertha-v60-ideal-save-fix";
 
 const ASSETS = [
   "./",
