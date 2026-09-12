@@ -1,4 +1,4 @@
-/* BERTH.A — Meu Dia v2 / Motor de Tempo v2.2.1 — exclusão de ritual corrigida
+/* BERTH.A — Meu Dia v2 / Motor de Tempo v2.2.2 — exclusão definitiva de ritual
    Camada aditiva: carregar DEPOIS de app.js, finance-v6.js e work-v12.js.
    Preserva chaves/rotas legadas para evitar perda de dados.
 */
@@ -464,7 +464,11 @@
   }
   function ritualCatalog(){
     const custom=read(RITUALS_KEY,[]);
-    return [...defaultRituals(),...custom.filter(x=>!['capilar','autocuidado'].includes(x.id))];
+    const hidden=read('bertha.ritual.hidden.v1',[]);
+    return [
+      ...defaultRituals().filter(r=>!hidden.includes(r.id)),
+      ...custom.filter(x=>!['capilar','autocuidado'].includes(x.id))
+    ];
   }
   function ritualEvents(){ return read(RITUAL_EVENTS_KEY,[]); }
   function saveRitualEvents(v){ write(RITUAL_EVENTS_KEY,v); }
@@ -544,6 +548,7 @@
   }
 
   function ritualDetailData(id,d=new Date()){
+    if(read('bertha.ritual.hidden.v1',[]).includes(id)) return null;
     if(id==='capilar') return capillaryEvent(d);
     if(id==='autocuidado') return selfcareEvent(d);
     return null;
@@ -759,10 +764,10 @@
       if(!h.includes(id)) h.push(id);
       write(HIDDEN_RITUALS_KEY,h);
     }else{
-      const customs=customRituals().filter(r=>r.id!==id);
-      saveCustomRituals(customs);
-      const extras=ritualExtras().filter(e=>e.ritualId!==id);
-      saveRitualExtras(extras);
+      const customs=read(RITUALS_KEY,[]).filter(r=>String(r.id)!==String(id));
+      write(RITUALS_KEY,customs);
+      const extras=ritualEvents().filter(e=>String(e.ritualId)!==String(id));
+      saveRitualEvents(extras);
     }
 
     // Ensure the deleted ritual is no longer the active route.
