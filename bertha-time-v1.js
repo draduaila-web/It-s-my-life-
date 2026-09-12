@@ -1,4 +1,4 @@
-/* BERTH.A — Meu Dia v2 / Motor de Tempo v2.7 — Estudos + aprendizagem global
+/* BERTH.A — Meu Dia v2 / Motor de Tempo v2.8 — repetição inteligente global
    Camada aditiva: carregar DEPOIS de app.js, finance-v6.js e work-v12.js.
    Preserva chaves/rotas legadas para evitar perda de dados.
 */
@@ -6,6 +6,7 @@
   const ENGINE_KEY = 'bertha.time-engine.v1';
   const IDEAL_KEY = 'bertha.ideal-day.v1';
   const DURATION_LEARNING_KEY = 'bertha.duration-learning.v1';
+  const REPEAT_QUEUE_KEY = 'bertha.repeat-queue.v1';
   const esc = (s='') => String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[c]));
   const read = (k, fallback=[]) => { try { const v=JSON.parse(localStorage.getItem(k)); return v ?? fallback; } catch { return fallback; } };
   const write = (k,v) => localStorage.setItem(k,JSON.stringify(v));
@@ -202,6 +203,20 @@
   };
 
 
+
+  (function(){
+    if(document.getElementById('bertha-repeat-style'))return;
+    const s=document.createElement('style');s.id='bertha-repeat-style';
+    s.textContent=`dialog.bertha-repeat-dialog{border:0;padding:0;background:transparent;max-width:none}
+    .bertha-repeat-dialog::backdrop{background:rgba(54,45,58,.30);backdrop-filter:blur(3px)}
+    .bertha-repeat-card{position:relative;box-sizing:border-box;width:min(90vw,460px);background:#fffdfb;border-radius:26px;padding:22px;box-shadow:0 24px 70px rgba(60,48,66,.20)}
+    .bertha-repeat-card h2{margin:5px 42px 8px 0;font-size:24px}.bertha-repeat-card p{color:#756d77}
+    .bertha-repeat-card small{display:block;color:#938995;line-height:1.4;margin-top:12px}
+    .bertha-repeat-x{position:absolute;right:18px;top:18px;border:0;background:#f2ecfb;color:#745d88;width:38px;height:38px;border-radius:50%;font-size:23px}
+    .bertha-repeat-actions{display:flex;justify-content:flex-end;gap:8px;margin-top:18px}`;
+    document.head.appendChild(s);
+  })();
+
   window.BerthaTimeEngine=window.BerthaTimeEngine||{};
   window.BerthaTimeEngine.start=(item)=>startItem(item);
   window.BerthaTimeEngine.finish=()=>finishActive();
@@ -209,6 +224,27 @@
 
   const engine = () => read(ENGINE_KEY,{active:null,history:[],snoozed:{}});
   const saveEngine = x => write(ENGINE_KEY,x);
+
+
+  function repeatQueue(){ return read(REPEAT_QUEUE_KEY,[]); }
+  function saveRepeatQueue(v){ write(REPEAT_QUEUE_KEY,v); }
+  function repeatBaseId(item={}){ return String(item.repeatBaseId||item.id||durationLearningKey(item)); }
+  function enqueueRepeat(item={}){
+    const q=repeatQueue(),base=repeatBaseId(item),today=iso();
+    if(q.some(x=>x.repeatBaseId===base&&x.eligibleDate===today&&x.status==='eligible'))return;
+    q.push({...item,id:`repeat:${base}:${Date.now()}`,repeatBaseId:base,
+      learningKey:item.learningKey||durationLearningKey(item),
+      configuredMinutes:+item.configuredMinutes||+item.minutes||30,
+      minutes:effectiveDurationMinutes(item),eligibleDate:today,createdAt:Date.now(),
+      status:'eligible',repeated:true});
+    saveRepeatQueue(q.slice(-200));
+  }
+  function repeatCandidatesToday(){const t=iso();return repeatQueue().filter(x=>x.status==='eligible'&&(!x.eligibleDate||x.eligibleDate<=t));}
+  function markRepeatConsumed(item={}){
+    if(!item.repeated&&!String(item.id||'').startsWith('repeat:'))return;
+    const q=repeatQueue(),i=q.findIndex(x=>x.id===item.id);
+    if(i>=0){q[i]={...q[i],status:'done',completedAt:Date.now()};saveRepeatQueue(q);}
+  }
 
   function sourcesToday(){
     const today=iso(), out=[];
@@ -238,6 +274,7 @@
       .filter(x=>x.active!==false)
       .filter(x=>!(x.untilMode==='date' && x.untilDate && x.untilDate<today))
       .forEach(x=>push({id:`ideal:${x.id}`,source:'Meu Dia Ideal',title:x.title,minutes:+x.minutes||30,period:x.period||'flex',kind:'ideal'}));
+    repeatCandidatesToday().forEach(x=>push({...x,kind:x.kind||'repeat'}));
     return out;
   }
 
@@ -310,32 +347,41 @@
     rerender();
   }
   function finishActive(){
-    const e=engine();
-    if(!e.active)return;
-    const active=e.active;
-    const end=Date.now();
-    const real=Math.max(1,Math.round((end-active.startedAt)/60000));
-
-    e.history.unshift({
-      itemId:active.id,
-      learningKey:active.learningKey||durationLearningKey(active),
-      title:active.title,
-      source:active.source,
-      day:iso(),
-      startedAt:active.startedAt,
-      endedAt:end,
+    const e=engine(); if(!e.active)return;
+    const active=e.active,end=Date.now(),real=Math.max(1,Math.round((end-active.startedAt)/60000));
+    e.history.unshift({itemId:active.id,learningKey:active.learningKey||durationLearningKey(active),
+      title:active.title,source:active.source,day:iso(),startedAt:active.startedAt,endedAt:end,
       configuredMinutes:+active.configuredMinutes||+active.plannedMinutes||30,
-      plannedMinutes:active.plannedMinutes,
-      learnedMinutes:active.learnedMinutes||null,
-      realMinutes:real,
-      status:'done'
-    });
-
+      plannedMinutes:active.plannedMinutes,learnedMinutes:active.learnedMinutes||null,
+      realMinutes:real,status:'done'});
     recordDurationLearning(active,real);
-    e.active=null;
-    saveEngine(e);
-    rerender();
+    markRepeatConsumed(active);
+    e.active=null; saveEngine(e); rerender();
+    setTimeout(()=>repeatAfterFinishDialog(active,real),80);
   }
+
+
+  function repeatAfterFinishDialog(item,realMinutes){
+    const dlg=document.createElement('dialog');dlg.className='bertha-repeat-dialog';
+    dlg.innerHTML=`<div class="bertha-repeat-card">
+      <button class="bertha-repeat-x" type="button">×</button>
+      <div class="eyebrow">CONCLUÍDO</div>
+      <h2>${esc(item.title||'Atividade')}</h2>
+      <p>Tempo real: <strong>${durationText(realMinutes)}</strong>.</p>
+      <div class="bertha-repeat-actions">
+        <button type="button" class="secondary" data-done>Encerrar</button>
+        <button type="button" class="primary" data-again>Repetir</button>
+      </div>
+      <small>Repetir não começa agora. A atividade volta para as sugestões quando couber no seu dia.</small>
+    </div>`;
+    document.body.appendChild(dlg);
+    const close=()=>dlg.close();
+    dlg.querySelector('.bertha-repeat-x').onclick=close;
+    dlg.querySelector('[data-done]').onclick=close;
+    dlg.querySelector('[data-again]').onclick=()=>{enqueueRepeat(item);close();rerender();};
+    dlg.addEventListener('close',()=>dlg.remove(),{once:true});dlg.showModal();
+  }
+
   function pauseActive(next){
     const e=engine();
     if(e.active){
