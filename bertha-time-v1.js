@@ -1,4 +1,4 @@
-/* BERTH.A — Meu Dia v2 / Motor de Tempo v2.4 — Meu Dia Ideal por períodos
+/* BERTH.A — Meu Dia v2 / Motor de Tempo v2.5 — Meu Dia Ideal suave e programável
    Camada aditiva: carregar DEPOIS de app.js, finance-v6.js e work-v12.js.
    Preserva chaves/rotas legadas para evitar perda de dados.
 */
@@ -113,12 +113,33 @@
     if(p.includes('livre')||p.includes('proteg'))return 'free';
     return 'flex';
   }
+  function idealDurationMinutes(value,unit){
+    const n=Math.max(1,Number(value)||1);
+    return unit==='hours'?n*60:n;
+  }
+  function idealDurationParts(item){
+    if(item.durationValue && item.durationUnit) return {value:item.durationValue,unit:item.durationUnit};
+    const mins=Number(item.minutes||item.durationMinutes||item.duration)||30;
+    if(mins%60===0) return {value:mins/60,unit:'hours'};
+    return {value:mins,unit:'minutes'};
+  }
+  function idealUntilLabel(item){
+    if(!item.untilMode || item.untilMode==='ongoing') return 'Sem data final';
+    if(item.untilMode==='date' && item.untilDate){
+      try{return 'Até '+new Date(item.untilDate+'T12:00:00').toLocaleDateString('pt-BR',{day:'2-digit',month:'short',year:'numeric'}).replace('.','');}
+      catch(_){return 'Até '+item.untilDate;}
+    }
+    return '';
+  }
+
   function idealMeta(item){
     const parts=[];
     const f=item.frequency||item.freq||item.recurrence;
     if(f)parts.push(String(f));
     const m=Number(item.minutes||item.durationMinutes||item.duration);
     if(m)parts.push(durationText(m));
+    const until=idealUntilLabel(item);
+    if(until)parts.push(until);
     if(item.notify)parts.push('Aviso');
     return parts.join(' · ')||'Quando fizer sentido';
   }
@@ -143,7 +164,16 @@
   }
 
   function renderIdeal(){ const items=read(IDEAL_KEY,[]); return `<section class="hero"><div class="eyebrow">PREFERÊNCIAS</div><h2>Meu Dia Ideal</h2><p>O que você gostaria que coubesse na sua vida quando houver espaço. Não é uma agenda rígida.</p></section><button class="primary add-full" data-add-ideal>＋ Adicionar ao meu dia ideal</button><div class="list bertha-ideal-list">${items.map(x=>`<article class="card"><div><strong>${esc(x.title)}</strong><span>${({morning:'Manhã',afternoon:'Tarde',night:'Noite',flex:'Quando houver espaço'})[x.period]||'Flexível'} · ${durationText(+x.minutes||30)}${x.notify?' · 🔔':''}</span></div><button class="more" data-del-ideal="${x.id}">×</button></article>`).join('')||'<div class="bertha-empty">Ainda não há preferências. Comece com algo que você gostaria de viver com mais frequência.</div>'}</div>`; }
-  function addIdealDialog(){ const d=dialogBase('Adicionar ao Meu Dia Ideal',`<label class="bertha-field">O que você gostaria de fazer?<input data-title placeholder="Ex.: Ler um livro"></label><label class="bertha-field">Melhor período<select data-period><option value="morning">Manhã</option><option value="afternoon">Tarde</option><option value="night">Noite protegida</option><option value="flex">Quando houver espaço</option></select></label><label class="bertha-field">Duração<input data-minutes type="number" min="5" step="5" value="30"></label><label class="bertha-check"><input data-notify type="checkbox"> 🔔 Notificar</label><button class="bertha-primary bertha-full" data-save>Salvar</button>`); d.querySelector('[data-save]').onclick=()=>{const title=d.querySelector('[data-title]').value.trim();if(!title)return;const arr=read(IDEAL_KEY,[]);arr.push({id:`ideal-${Date.now()}`,title,period:d.querySelector('[data-period]').value,minutes:+d.querySelector('[data-minutes]').value||30,notify:d.querySelector('[data-notify]').checked,active:true});write(IDEAL_KEY,arr);d.close();d.remove();rerender()}; }
+  function addIdealDialog(){ const d=dialogBase('Adicionar ao Meu Dia Ideal',`<label class="bertha-field">O que você gostaria de fazer?<input data-title placeholder="Ex.: Ler um livro"></label><label class="bertha-field">Melhor período<select data-period><option value="morning">Manhã</option><option value="afternoon">Tarde</option><option value="night">Noite protegida</option><option value="flex">Quando houver espaço</option></select></label><label class="bertha-field">Duração<input data-minutes type="number" min="5" step="5" value="30"></label><div class="bertha-ideal-until">
+          <label><span>Até quando você quer incluir isso na sua rotina?</span>
+            <select data-ideal-until-mode>
+              <option value="ongoing">Sem data final</option>
+              <option value="date">Até uma data</option>
+            </select>
+          </label>
+          <label data-ideal-until-date-wrap hidden><span>Data final</span><input data-ideal-until-date type="date"></label>
+        </div>
+        <label class="bertha-check"><input data-notify type="checkbox"> 🔔 Notificar</label><button class="bertha-primary bertha-full" data-save>Salvar</button>`); d.querySelector('[data-save]').onclick=()=>{const title=d.querySelector('[data-title]').value.trim();if(!title)return;const arr=read(IDEAL_KEY,[]);arr.push({id:`ideal-${Date.now()}`,title,period:d.querySelector('[data-period]').value,durationValue:(+d.querySelector('[data-ideal-duration-value]')?.value||30),durationUnit:(d.querySelector('[data-ideal-duration-unit]')?.value||'minutes'),minutes:idealDurationMinutes((+d.querySelector('[data-ideal-duration-value]')?.value||30),(d.querySelector('[data-ideal-duration-unit]')?.value||'minutes')),untilMode:(d.querySelector('[data-ideal-until-mode]')?.value||'ongoing'),untilDate:(d.querySelector('[data-ideal-until-date]')?.value||''),notify:d.querySelector('[data-notify]').checked,active:true});write(IDEAL_KEY,arr);d.close();d.remove();rerender()}; }
 
 
   const TASKS_KEY='minha-vida.pendencias.v1';
@@ -862,19 +892,40 @@
       rerender();
     });
     document.querySelectorAll('[data-add-ideal-zone]').forEach(b=>b.onclick=()=>{
+      const zone=b.dataset.addIdealZone;
+      window.__berthaIdealRequestedZone=zone;
       addBtn.click();
       setTimeout(()=>{
-        const zone=b.dataset.addIdealZone;
-        const labels={morning:'Manhã',afternoon:'Tarde',evening:'Noite',flex:'Quando houver espaço',free:'Livre'};
-        document.querySelectorAll('[data-period]').forEach(p=>{
-          if(String(p.textContent).trim().toLowerCase()===String(labels[zone]).toLowerCase())p.click();
-        });
+        const modal=[...document.querySelectorAll('[role="dialog"],.modal,.bertha-modal,.bertha-dialog')].pop()||document;
+        const select=modal.querySelector('select[data-ideal-period],select[name="period"],select');
+        const map={morning:'morning',afternoon:'afternoon',evening:'evening',flex:'flex',free:'free'};
+        if(select){
+          [...select.options].forEach(o=>{
+            const t=String(o.textContent).trim().toLowerCase();
+            if((zone==='morning'&&t.includes('manh'))||(zone==='afternoon'&&t.includes('tard'))||(zone==='evening'&&t.includes('noit'))||(zone==='flex'&&(t.includes('espaço')||t.includes('flex')))||(zone==='free'&&(t.includes('livre')||t.includes('proteg')))){
+              select.value=o.value; select.dispatchEvent(new Event('change',{bubbles:true}));
+            }
+          });
+        }
       },0);
     });
   }
 
 
+  function bindIdealModalEnhancements(){
+    setTimeout(()=>{
+      const mode=document.querySelector('[data-ideal-until-mode]');
+      const wrap=document.querySelector('[data-ideal-until-date-wrap]');
+      if(mode&&wrap&&!mode.__berthaIdealUntilBound){
+        mode.__berthaIdealUntilBound=true;
+        const sync=()=>{wrap.hidden=mode.value!=='date';};
+        mode.addEventListener('change',sync); sync();
+      }
+    },0);
+  }
+
   function bindIdeal(){
+    bindIdealModalEnhancements();
     setTimeout(enhanceIdealScreen,0); const a=document.querySelector('[data-add-ideal]');if(a)a.onclick=addIdealDialog;document.querySelectorAll('[data-del-ideal]').forEach(b=>b.onclick=()=>{write(IDEAL_KEY,read(IDEAL_KEY,[]).filter(x=>x.id!==b.dataset.delIdeal));rerender()}) }
 
   function ensureStyles(){
@@ -1834,11 +1885,11 @@
     /* v2.4 — MEU DIA IDEAL: mapa leve do dia */
     .bertha-ideal-map{display:grid;gap:14px;margin-top:14px}
     .bertha-ideal-zone{border:1px solid rgba(82,69,85,.08);border-radius:22px;padding:15px 14px 13px}
-    .bertha-ideal-zone.morning{background:linear-gradient(135deg,rgba(250,232,205,.82),rgba(250,242,220,.62))}
-    .bertha-ideal-zone.afternoon{background:linear-gradient(135deg,rgba(219,240,234,.78),rgba(225,237,247,.68))}
-    .bertha-ideal-zone.evening{background:linear-gradient(135deg,rgba(231,222,247,.80),rgba(240,229,243,.64))}
-    .bertha-ideal-zone.flex{background:linear-gradient(135deg,rgba(247,224,232,.72),rgba(247,235,221,.62))}
-    .bertha-ideal-zone.free{background:linear-gradient(135deg,rgba(224,238,247,.70),rgba(233,242,229,.66))}
+    .bertha-ideal-zone.morning{background:linear-gradient(135deg,rgba(250,243,218,.78),rgba(249,246,232,.64))}
+    .bertha-ideal-zone.afternoon{background:linear-gradient(135deg,rgba(239,232,249,.72),rgba(248,244,225,.54))}
+    .bertha-ideal-zone.evening{background:linear-gradient(135deg,rgba(234,225,248,.76),rgba(244,238,249,.62))}
+    .bertha-ideal-zone.flex{background:linear-gradient(135deg,rgba(249,241,213,.72),rgba(239,231,249,.58))}
+    .bertha-ideal-zone.free{background:linear-gradient(135deg,rgba(239,232,249,.68),rgba(250,244,219,.60))}
     .bertha-ideal-zone-head{display:flex;align-items:center;gap:10px;margin-bottom:10px}
     .bertha-ideal-zone-icon{width:34px;height:34px;border-radius:11px;background:rgba(255,255,255,.62);display:grid;place-items:center;color:#806b82;flex:0 0 auto}
     .bertha-ideal-zone-icon svg{width:18px;height:18px;fill:none;stroke:currentColor;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round}
@@ -1857,6 +1908,16 @@
       .bertha-ideal-map{gap:11px}
       .bertha-ideal-zone{padding:13px 12px}
     }
+
+
+    .bertha-ideal-duration-input{display:grid;grid-template-columns:92px minmax(0,1fr);gap:9px}
+    .bertha-ideal-duration-input input,.bertha-ideal-duration-input select{width:100%;min-width:0;box-sizing:border-box}
+    .bertha-ideal-until{display:grid;gap:10px}
+    .bertha-ideal-until label{display:grid;gap:7px}
+    .bertha-ideal-until span{font-size:12px;font-weight:700;color:#4a4050}
+    .bertha-ideal-until select,.bertha-ideal-until input{width:100%;box-sizing:border-box}
+    [data-route="ideal"] .primary,
+    .bertha-ideal-page .primary{background:linear-gradient(135deg,#e7ddf5,#f4e9b9)!important;color:#5e5366!important}
 
     /* Menu aprovado: congelado. Não alterar. */
 
