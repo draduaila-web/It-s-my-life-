@@ -694,9 +694,6 @@ function openRitualModal(id=null) {
 const ESTUDOS_KEY="minha-vida.estudos.v1";
 const ESTUDOS_MAPAS_KEY="minha-vida.estudos.mapas.v1";
 const ESTUDOS_CONTENT_KEY="bertha.estudos.conteudos.v1";
-const ESTUDOS_REPEAT_KEY="bertha.estudos.repetir.v1";
-function loadStudyRepeats(){try{return JSON.parse(localStorage.getItem(ESTUDOS_REPEAT_KEY))||[]}catch{return[]}}
-function saveStudyRepeats(x){localStorage.setItem(ESTUDOS_REPEAT_KEY,JSON.stringify(x))}
 function loadEstudos(){try{return JSON.parse(localStorage.getItem(ESTUDOS_KEY))||{subjects:[],sessions:[],reviews:[],questions:[]}}catch{return{subjects:[],sessions:[],reviews:[],questions:[]}}}
 function saveEstudos(x){localStorage.setItem(ESTUDOS_KEY,JSON.stringify(x))}
 function loadMapasStatus(){try{return JSON.parse(localStorage.getItem(ESTUDOS_MAPAS_KEY))||{}}catch{return{}}}
@@ -708,39 +705,19 @@ function addDaysISO(ms,n){const d=new Date(ms);d.setDate(d.getDate()+n);return d
 function nextStepFor(a={}){if(!a.primeira)return{field:"primeira",label:"1ª volta"};if(!a.questoes)return{field:"questoes",label:"Questões"};if(!a.domino)return{field:"domino",label:"Domínio"};return{field:"done",label:"Dominado"}}
 function nextReviewFor(a={}){if(!a.primeiraAt)return null;for(const k of["r1","r3","r7","r15"])if(!a[k]&&a[k+"Due"])return{key:k,label:k.toUpperCase(),due:a[k+"Due"]};return null}
 function toggleMapa(id,f){const d=loadMapasStatus(),k=String(id),a={...(d[k]||{})};if(f==="primeira"&&!a.primeira){a.primeira=true;a.primeiraAt=Date.now();a.r1Due=addDaysISO(a.primeiraAt,1);a.r3Due=addDaysISO(a.primeiraAt,3);a.r7Due=addDaysISO(a.primeiraAt,7);a.r15Due=addDaysISO(a.primeiraAt,15)}else if(f==="primeira"){a.primeira=false;a.primeiraAt=null;["r1","r3","r7","r15"].forEach(x=>{delete a[x];delete a[x+"Due"]})}else if(f==="questoes")a.questoes=!a.questoes;else if(f==="domino"){if(!a.primeira||!a.questoes){alert("Complete primeiro a 1ª volta e as questões.");return}a.domino=!a.domino}saveMapasStatus({...d,[k]:a});renderEstudos()}
-function estudoSugestao(min=30){
- const repeats=loadStudyRepeats();
- if(repeats.length){const r=repeats[0];return{title:"Repetir estudo",text:"Você marcou este conteúdo para estudar novamente.",repeat:r,maps:[]}}
- const d=loadMapasStatus(),rev=TCDF_MAPAS.filter(x=>nextReviewFor(d[x.id])),due=TCDF_MAPAS.filter(x=>!d[x.id]?.domino);
- if(rev.length)return{title:"Revisão primeiro",text:"Há revisão prevista antes de abrir conteúdo novo.",maps:rev.slice(0,1)};
- return{title:min<=30?"Janela de 30 min":"Próximo conteúdo",text:"Escolha um mapa que caiba no tempo disponível.",maps:due.slice(0,1)}
-}
+function estudoSugestao(min=30){const d=loadMapasStatus(),rev=TCDF_MAPAS.filter(x=>nextReviewFor(d[x.id])),due=TCDF_MAPAS.filter(x=>!d[x.id]?.domino);if(rev.length)return{title:"Revisão primeiro",text:"Há revisão prevista antes de abrir conteúdo novo.",maps:rev.slice(0,1)};return{title:min<=30?"Janela de 30 min":"Próximo conteúdo",text:"Escolha um mapa que caiba no tempo disponível.",maps:due.slice(0,1)}}
 function studyNorm(v=""){return String(v).toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g,"")}
 function studyStatus(a={}){return a.domino?"dominio":a.questoes?"questoes":a.primeira?"primeira":"nao-iniciado"}
-function studySessionTitle(s={}){return s.subject||s.title||s.name||"Estudo"}
-function studySessionMapId(s={}){const m=studySessionTitle(s).match(/\bMapa\s*0*(\d{1,3})\b/i);if(!m)return null;const id=+m[1];return TCDF_MAPAS.some(x=>x.id===id)?id:null}
-function studySessionContentId(s={}){const t=studyNorm(studySessionTitle(s));const x=loadStudyContents().find(c=>studyNorm(c.title)===t||t.includes(studyNorm(c.title)));return x?.id||null}
-function queueStudyRepeat(s){
- const id=s.id||`legacy-${Date.now()}`, mapId=studySessionMapId(s),contentId=studySessionContentId(s),title=studySessionTitle(s),minutes=Math.max(1,+s.minutes||30);
- const q=loadStudyRepeats().filter(x=>x.sessionId!==id);q.push({id:`repeat-${Date.now()}`,sessionId:id,title,minutes,mapId,contentId,createdAt:Date.now()});saveStudyRepeats(q);
-}
-function removeStudyRepeat(id){saveStudyRepeats(loadStudyRepeats().filter(x=>x.id!==id))}
-function startRepeatedStudy(r){
- removeStudyRepeat(r.id);
- if(r.mapId){startMap(+r.mapId);return}
- if(r.contentId){startContent(r.contentId);return}
- startViaBertha({id:`study:repeat:${r.id}`,learningKey:`study:repeat:${studyNorm(r.title)}`,source:"Estudos",title:r.title||"Estudo",minutes:+r.minutes||30,configuredMinutes:+r.minutes||30,period:"flex",kind:"study"});
-}
 
 function renderEstudos(){
  const d=loadEstudos(),st=loadMapasStatus(),c=loadStudyContents(),first=TCDF_MAPAS.filter(x=>st[x.id]?.primeira).length,q=TCDF_MAPAS.filter(x=>st[x.id]?.questoes).length,dom=TCDF_MAPAS.filter(x=>st[x.id]?.domino).length,sug=estudoSugestao(30);
  app.innerHTML=`<section class="hero"><div class="eyebrow">ESTUDOS</div><h2>Aprender, sem carregar tudo na cabeça.</h2><p>Escolha o conteúdo. A BERTH.A cuida do tempo, do progresso e das próximas sugestões.</p></section>
  <div class="study-v10-stats"><div><b>${d.sessions.length}</b><span>sessões</span></div><div><b>${dom}</b><span>dominados</span></div><div><b>260</b><span>mapas</span></div></div>
  <div class="study-section"><div class="section-heading"><div><div class="eyebrow">TCDF 2026</div><h3>Biblioteca de mapas</h3></div><button class="secondary" id="viewMaps">Ver mapas</button></div><div class="card study-v10-summary"><div><strong>260 mapas cadastrados</strong><span>${first} em 1ª volta · ${q} com questões · ${dom} dominados</span></div><button class="secondary" id="searchMaps">⌕ Buscar</button></div></div>
- <div class="study-section"><div class="section-heading"><div><div class="eyebrow">SUGESTÃO INTELIGENTE</div><h3>${escapeHtml(sug.title)}</h3></div></div><div class="card"><p>${escapeHtml(sug.text)}</p>${sug.repeat?`<button class="primary" data-start-repeat="${escapeHtml(sug.repeat.id)}">Começar · ${escapeHtml(sug.repeat.mapId?`Mapa ${String(sug.repeat.mapId).padStart(3,"0")}`:sug.repeat.title)}</button>`:(sug.maps[0]?`<button class="primary" data-start-map="${sug.maps[0].id}">Começar · Mapa ${String(sug.maps[0].id).padStart(3,"0")}</button>`:"")}</div></div>
+ <div class="study-section"><div class="section-heading"><div><div class="eyebrow">SUGESTÃO INTELIGENTE</div><h3>${escapeHtml(sug.title)}</h3></div></div><div class="card"><p>${escapeHtml(sug.text)}</p>${sug.maps[0]?`<button class="primary" data-start-map="${sug.maps[0].id}">Começar · Mapa ${String(sug.maps[0].id).padStart(3,"0")}</button>`:""}</div></div>
  <div class="study-section"><div class="section-heading"><div><div class="eyebrow">OUTROS ESTUDOS</div><h3>Outros conteúdos</h3></div><button class="secondary" id="addContent">＋ Conteúdo</button></div><div class="list">${c.length?c.map(contentCard).join(""):`<div class="empty compact"><strong>Nenhum conteúdo adicionado.</strong><span>Cadastre MBA, Tarot, aulas, áudios ou outros estudos online.</span></div>`}</div></div>
  <div class="study-section"><div class="section-heading"><div><div class="eyebrow">HISTÓRICO</div><h3>Estudos realizados</h3></div><button class="secondary" id="pastStudy">＋ Registrar passado</button></div><div class="list">${d.sessions.length?d.sessions.slice().reverse().slice(0,8).map(sessionHtml).join(""):`<div class="empty compact"><strong>Nenhum estudo registrado.</strong><span>Começar → Concluir mede o tempo automaticamente.</span></div>`}</div></div>`;
- document.querySelector("#viewMaps")?.addEventListener("click",()=>openMaps(false));document.querySelector("#searchMaps")?.addEventListener("click",()=>openMaps(true));document.querySelector("[data-start-map]")?.addEventListener("click",e=>startMap(+e.currentTarget.dataset.startMap));document.querySelector("[data-start-repeat]")?.addEventListener("click",e=>{const r=loadStudyRepeats().find(x=>x.id===e.currentTarget.dataset.startRepeat);if(r)startRepeatedStudy(r)});document.querySelector("#addContent")?.addEventListener("click",()=>contentDialog());document.querySelector("#pastStudy")?.addEventListener("click",pastDialog);document.querySelectorAll("[data-content-start]").forEach(b=>b.onclick=()=>startContent(b.dataset.contentStart));document.querySelectorAll("[data-content-open]").forEach(b=>b.onclick=()=>openContent(b.dataset.contentOpen));document.querySelectorAll("[data-content-edit]").forEach(b=>b.onclick=()=>contentDialog(b.dataset.contentEdit));document.querySelectorAll("[data-content-delete]").forEach(b=>b.onclick=()=>deleteStudyContent(b.dataset.contentDelete));document.querySelectorAll("[data-session-open]").forEach(b=>b.onclick=()=>sessionDialog(b.dataset.sessionOpen));
+ document.querySelector("#viewMaps")?.addEventListener("click",()=>openMaps(false));document.querySelector("#searchMaps")?.addEventListener("click",()=>openMaps(true));document.querySelector("[data-start-map]")?.addEventListener("click",e=>startMap(+e.currentTarget.dataset.startMap));document.querySelector("#addContent")?.addEventListener("click",()=>contentDialog());document.querySelector("#pastStudy")?.addEventListener("click",pastDialog);document.querySelectorAll("[data-study-session]").forEach(card=>card.onclick=()=>openPastStudyActions(card.dataset.studySession));document.querySelectorAll("[data-content-start]").forEach(b=>b.onclick=()=>startContent(b.dataset.contentStart));document.querySelectorAll("[data-content-open]").forEach(b=>b.onclick=()=>openContent(b.dataset.contentOpen));document.querySelectorAll("[data-content-edit]").forEach(b=>b.onclick=()=>contentDialog(b.dataset.contentEdit));document.querySelectorAll("[data-content-delete]").forEach(b=>b.onclick=()=>deleteStudyContent(b.dataset.contentDelete));
 }
 function contentCard(x){return `<article class="card study-v10-content"><div><small>${escapeHtml(x.group||"ESTUDO")}</small><strong>${escapeHtml(x.title)}</strong><span>${x.minutes||60} min${x.note?" · "+escapeHtml(x.note):""}</span></div><div>${x.url?`<button class="secondary" data-content-open="${x.id}">Abrir conteúdo</button>`:""}<button class="primary" data-content-start="${x.id}">Começar</button><button class="secondary" data-content-edit="${x.id}">⋯</button><button class="study-v10-trash" data-content-delete="${x.id}" aria-label="Excluir conteúdo">×</button></div></article>`}
 function openMaps(focus){
@@ -766,18 +743,67 @@ function field(label,html){return `<label class="study-v10-field"><span>${label}
 function pastDialog(){
  const d=loadEstudos(),dlg=document.createElement("dialog");dlg.className="study-v10-dialog";dlg.innerHTML=`<div class="study-v10-modal"><div class="study-v10-head"><div><div class="eyebrow">HISTÓRICO</div><h2>Registrar estudo passado</h2><p>Para quando você estudou sem iniciar o timer.</p></div><button class="study-v10-x">×</button></div>${field("O que você estudou?",'<input data-title placeholder="Ex.: MBA · Gestão de Pessoas">')}${field("Data",`<input data-date type="date" value="${new Date().toISOString().slice(0,10)}">`)}${field("Tempo real",'<div class="study-v10-duration"><input data-dur type="number" min="1" value="30"><select data-unit><option value="minutes">minutos</option><option value="hours">horas</option></select></div>')}<div class="study-v10-actions"><button class="secondary" data-cancel>Cancelar</button><button class="primary" data-save>Salvar</button></div></div>`;document.body.appendChild(dlg);dlg.querySelector(".study-v10-x").onclick=()=>dlg.close();dlg.querySelector("[data-cancel]").onclick=()=>dlg.close();dlg.querySelector("[data-save]").onclick=()=>{const t=dlg.querySelector("[data-title]").value.trim();if(!t)return;const v=+dlg.querySelector("[data-dur]").value||30,u=dlg.querySelector("[data-unit]").value;d.sessions.push({id:`s-${Date.now()}`,subject:t,date:dlg.querySelector("[data-date]").value,minutes:u==="hours"?v*60:v});saveEstudos(d);dlg.close();renderEstudos()};dlg.onclose=()=>dlg.remove();dlg.showModal()
 }
-function sessionDialog(id){
- const d=loadEstudos(),s=d.sessions.find(x=>String(x.id)===String(id));if(!s)return;
- const title=studySessionTitle(s),mapId=studySessionMapId(s),dlg=document.createElement("dialog");dlg.className="study-v10-dialog";
- dlg.innerHTML=`<div class="study-v10-modal"><div class="study-v10-head"><div><div class="eyebrow">ESTUDO REALIZADO</div><h2>${escapeHtml(title)}</h2><p>${escapeHtml(s.date||"")} · ${+s.minutes||0} min</p></div><button class="study-v10-x">×</button></div><div class="study-history-note">O registro continua no histórico se você pedir para repetir. A BERTH.A devolve o conteúdo para a Sugestão inteligente.</div><div class="study-v10-actions"><button class="danger" data-delete-session>Excluir registro</button><button class="secondary" data-cancel>Cancelar</button><button class="primary" data-repeat-session>${mapId?`Repetir Mapa ${String(mapId).padStart(3,"0")}`:"Estudar novamente"}</button></div></div>`;
- document.body.appendChild(dlg);const close=()=>dlg.close();dlg.querySelector(".study-v10-x").onclick=close;dlg.querySelector("[data-cancel]").onclick=close;
- dlg.querySelector("[data-delete-session]").onclick=()=>{if(!confirm(`Excluir “${title}” do histórico?`))return;d.sessions=d.sessions.filter(x=>String(x.id)!==String(id));saveEstudos(d);saveStudyRepeats(loadStudyRepeats().filter(x=>String(x.sessionId)!==String(id)));dlg.close();renderEstudos()};
- dlg.querySelector("[data-repeat-session]").onclick=()=>{queueStudyRepeat(s);dlg.close();renderEstudos()};dlg.onclose=()=>dlg.remove();dlg.showModal();
+
+function openPastStudyActions(id){
+ const data=loadEstudos(),s=data.sessions.find(x=>String(x.id)===String(id));if(!s)return;
+ const dlg=document.createElement("dialog");dlg.className="study-v10-dialog";
+ dlg.innerHTML=`<div class="study-v10-modal">
+   <div class="study-v10-head"><div><div class="eyebrow">ESTUDO REALIZADO</div><h2>${escapeHtml(s.subject||s.title||"Estudo")}</h2><p>${escapeHtml(s.date||"")} · ${+s.minutes||0} min</p></div><button class="study-v10-x">×</button></div>
+   <p class="study-history-copy">O que você quer fazer com este registro?</p>
+   <div class="study-history-actions">
+     <button type="button" class="danger" data-delete-session>Excluir</button>
+     <button type="button" class="secondary" data-close-session>Fechar</button>
+     <button type="button" class="primary" data-repeat-session>Repetir</button>
+   </div>
+   <small class="study-history-help">Repetir não inicia agora. O estudo volta para as sugestões da BERTH.A quando couber no seu dia.</small>
+ </div>`;
+ document.body.appendChild(dlg);
+ const close=()=>dlg.close();
+ dlg.querySelector(".study-v10-x").onclick=close;
+ dlg.querySelector("[data-close-session]").onclick=close;
+ dlg.querySelector("[data-delete-session]").onclick=()=>{
+   if(!confirm(`Excluir “${s.subject||s.title||"Estudo"}” do histórico?`))return;
+   const fresh=loadEstudos();
+   fresh.sessions=fresh.sessions.filter(x=>String(x.id)!==String(id));
+   saveEstudos(fresh);
+   close();
+   setTimeout(renderEstudos,0);
+ };
+ dlg.querySelector("[data-repeat-session]").onclick=()=>{
+   const item={
+     id:`study:history:${s.id}`,
+     repeatBaseId:`study:history:${s.id}`,
+     learningKey:`study:history:${s.id}`,
+     source:"Estudos",
+     title:s.subject||s.title||"Estudo",
+     minutes:+s.minutes||30,
+     configuredMinutes:+s.minutes||30,
+     period:"flex",
+     kind:"study"
+   };
+   if(window.BerthaRepeat?.enqueue){
+     window.BerthaRepeat.enqueue(item);
+     close();
+     setTimeout(()=>{renderEstudos();alert("Pronto. Esse estudo voltou para as sugestões da BERTH.A.");},0);
+   }else{
+     alert("Atualize também bertha-time-v1.js para habilitar Repetir.");
+   }
+ };
+ dlg.onclose=()=>dlg.remove();
+ dlg.showModal();
 }
-function sessionHtml(s){const id=escapeHtml(String(s.id||""));return `<article class="card study-history-card" data-session-open="${id}" role="button" tabindex="0"><div><strong>${escapeHtml(studySessionTitle(s))}</strong><div class="study-meta">${escapeHtml(s.date||"")} · ${+s.minutes||0} min</div></div><span class="study-history-chevron">›</span></article>`}
+
+function sessionHtml(s){return `<article class="card study-history-card" data-study-session="${s.id}"><div><strong>${escapeHtml(s.subject||s.title||"Estudo")}</strong><div class="study-meta">${escapeHtml(s.date||"")} · ${+s.minutes||0} min</div></div><span class="study-history-chevron">›</span></article>`}
 
 (function(){if(document.getElementById("study-v10-css"))return;const s=document.createElement("style");s.id="study-v10-css";s.textContent=`
-.study-v10-stats{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin:12px 0 22px}.study-v10-stats div{background:linear-gradient(145deg,#fff9dc,#f2ecfb);border-radius:18px;padding:12px;text-align:center}.study-v10-stats b,.study-v10-stats span{display:block}.study-v10-stats b{font-size:20px}.study-v10-stats span{font-size:11px;color:#837985}.study-v10-summary,.study-v10-content{display:flex;justify-content:space-between;gap:12px;align-items:center}.study-v10-summary span,.study-v10-content span,.study-v10-content small,.study-v10-content strong{display:block}.study-v10-summary span,.study-v10-content span{font-size:12px;color:#887f89;margin-top:4px}.study-v10-content small{color:#8c72a6;font-weight:800;margin-bottom:4px}.study-v10-content>div:last-child{display:flex;gap:6px;flex-wrap:wrap}.study-v10-trash{border:0!important;background:#fff0f1!important;color:#a45d65!important;width:34px;height:34px;border-radius:50%!important;font-size:18px;font-weight:800;padding:0!important}.study-history-card{display:flex;align-items:center;justify-content:space-between;gap:12px;cursor:pointer;-webkit-tap-highlight-color:transparent}.study-history-card:active{transform:scale(.99)}.study-history-chevron{font-size:28px;line-height:1;color:#a493aa;font-weight:300}.study-history-note{padding:12px 14px;border-radius:16px;background:#f7f1fb;color:#716878;font-size:13px;line-height:1.4}
+.study-v10-stats{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin:12px 0 22px}.study-v10-stats div{background:linear-gradient(145deg,#fff9dc,#f2ecfb);border-radius:18px;padding:12px;text-align:center}.study-v10-stats b,.study-v10-stats span{display:block}.study-v10-stats b{font-size:20px}.study-v10-stats span{font-size:11px;color:#837985}.study-v10-summary,.study-v10-content{display:flex;justify-content:space-between;gap:12px;align-items:center}
+.study-history-card{display:flex;justify-content:space-between;align-items:center;gap:12px;cursor:pointer}
+.study-history-chevron{font-size:28px;line-height:1;color:#9a86aa}
+.study-history-copy{color:#766d78;margin:6px 0 16px}
+.study-history-actions{display:flex;justify-content:flex-end;gap:8px;flex-wrap:wrap}
+.study-history-actions .danger{margin-right:auto;border:0;border-radius:14px;padding:10px 14px;background:#fff0f1;color:#a45d65;font-weight:800}
+.study-history-help{display:block;color:#938995;line-height:1.4;margin-top:12px}
+.study-v10-summary span,.study-v10-content span,.study-v10-content small,.study-v10-content strong{display:block}.study-v10-summary span,.study-v10-content span{font-size:12px;color:#887f89;margin-top:4px}.study-v10-content small{color:#8c72a6;font-weight:800;margin-bottom:4px}.study-v10-content>div:last-child{display:flex;gap:6px;flex-wrap:wrap}.study-v10-trash{border:0!important;background:#fff0f1!important;color:#a45d65!important;width:34px;height:34px;border-radius:50%!important;font-size:18px;font-weight:800;padding:0!important}
 .study-v10-dialog{border:0;padding:0;background:transparent;max-width:none}.study-v10-dialog::backdrop{background:rgba(50,43,53,.30);backdrop-filter:blur(3px)}.study-v10-modal{box-sizing:border-box;width:min(92vw,520px);max-height:88vh;overflow:auto;background:#fffdfb;border-radius:28px;padding:20px;box-shadow:0 24px 70px rgba(60,48,66,.2)}.study-v10-modal.maplib{width:min(94vw,680px)}.study-v10-head{display:flex;justify-content:space-between;gap:12px;margin-bottom:16px}.study-v10-head h2{margin:3px 0 4px}.study-v10-head p{margin:0;color:#877e89;font-size:13px}.study-v10-x{border:0;background:#f2ecfb;color:#745d88;width:38px;height:38px;border-radius:50%;font-size:23px}.study-v10-field{display:block;margin:12px 0}.study-v10-field>span{display:block;font-size:12px;font-weight:800;margin-bottom:6px;color:#6d646f}.study-v10-field input,.study-v10-field select,.study-v10-field textarea,.study-v10-search input{box-sizing:border-box;width:100%;border:1px solid #e7dfe8;border-radius:15px;background:#fff;padding:12px;font:inherit}.study-v10-duration{display:grid;grid-template-columns:92px minmax(0,1fr);gap:8px}.study-v10-actions{display:flex;gap:8px;justify-content:flex-end;margin-top:17px}.study-v10-actions .danger{margin-right:auto;border:0;border-radius:14px;padding:10px;background:#fff0f1;color:#a45d65}.study-v10-search{display:flex;align-items:center;gap:8px;border:1px solid #e7dfe8;border-radius:16px;padding:0 11px}.study-v10-search input{border:0;padding-left:0}.study-v10-filters{display:flex;gap:6px;overflow:auto;padding:10px 0}.study-v10-filters button{white-space:nowrap;border:0;border-radius:999px;padding:8px 10px;background:#f7f3f8;color:#766d78;font-weight:800}.study-v10-filters button.active{background:#eee3fa;color:#705487}.study-v10-results{max-height:58vh;overflow:auto}.study-v10-count{font-size:12px;color:#8a818c;margin:4px 0 8px}.study-v10-map{border:1px solid #ece3ed;border-radius:18px;padding:13px;margin-bottom:8px;display:flex;justify-content:space-between;gap:12px}.study-v10-map small,.study-v10-map strong,.study-v10-map span,.study-v10-map em{display:block}.study-v10-map small{font-size:10px;color:#9377a4;font-weight:900}.study-v10-map strong{font-size:14px;margin-top:4px}.study-v10-map span,.study-v10-map em{font-size:11px;color:#857b87;margin-top:4px}.study-v10-map em{font-style:normal;color:#997e9d}.study-v10-mapactions{display:flex;gap:5px;align-items:center;flex-wrap:wrap}.study-v10-mapactions button{border:1px solid #dfd0e7;background:#f5eef8;color:#735787;border-radius:11px;min-width:34px;height:34px;font-weight:800}.study-v10-mapactions button.done{background:#e2f0e7;color:#52705d;border-color:#c8ddcf}.study-v10-mapactions .go{padding:0 9px;background:#fff4cc;color:#766127;border-color:#eadb9e}
 @media(max-width:480px){.study-v10-content,.study-v10-map{display:block}.study-v10-content>div:last-child,.study-v10-mapactions{margin-top:10px}.study-v10-modal{padding:17px;border-radius:24px}.study-v10-duration{grid-template-columns:92px minmax(0,1fr)}}`;document.head.appendChild(s)})();
 

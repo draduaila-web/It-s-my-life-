@@ -1,4 +1,4 @@
-/* BERTH.A — Meu Dia v2 / Motor de Tempo v2.8.1 — refinamento Home + Estudos
+/* BERTH.A — Meu Dia v2 / Motor de Tempo v2.8.3 — histórico de Estudos repetível
    Camada aditiva: carregar DEPOIS de app.js, finance-v6.js e work-v12.js.
    Preserva chaves/rotas legadas para evitar perda de dados.
 */
@@ -216,6 +216,10 @@
     .bertha-repeat-actions{display:flex;justify-content:flex-end;gap:8px;margin-top:18px}`;
     document.head.appendChild(s);
   })();
+
+  window.BerthaRepeat=window.BerthaRepeat||{};
+  window.BerthaRepeat.enqueue=(item)=>enqueueRepeat(item);
+  window.BerthaRepeat.queue=()=>repeatQueue();
 
   window.BerthaTimeEngine=window.BerthaTimeEngine||{};
   window.BerthaTimeEngine.start=(item)=>startItem(item);
