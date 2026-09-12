@@ -1,4 +1,4 @@
-/* BERTH.A — Meu Dia v2 / Motor de Tempo v1.8.1 — Tarefas refinadas
+/* BERTH.A — Meu Dia v2 / Motor de Tempo v1.8.2 — ajuste largura duração
    Camada aditiva: carregar DEPOIS de app.js, finance-v6.js e work-v12.js.
    Preserva chaves/rotas legadas para evitar perda de dados.
 */
@@ -1130,7 +1130,10 @@
     }
 
     .bertha-duration-input{
-      display:grid;grid-template-columns:84px minmax(0,1fr);gap:8px;
+      display:grid;
+      grid-template-columns:minmax(92px,.8fr) minmax(130px,1.2fr);
+      gap:8px;
+      min-width:0;
     }
     .bertha-duration-input input,.bertha-duration-input select{
       width:100%;height:48px;box-sizing:border-box;
@@ -1138,8 +1141,18 @@
       background:rgba(255,255,255,.86)!important;color:#433a47!important;
       font:500 15px/1.25 Inter,sans-serif!important;outline:0!important;box-shadow:none!important;
     }
-    .bertha-duration-input input{padding:0 12px!important;text-align:center}
-    .bertha-duration-input select{padding:0 12px!important}
+    .bertha-duration-input input{
+      padding:0 12px!important;
+      text-align:center;
+      min-width:0;
+    }
+    .bertha-duration-input select{
+      padding:0 34px 0 12px!important;
+      min-width:0;
+      width:100%;
+      white-space:nowrap;
+      text-overflow:clip;
+    }
     .bertha-duration-input input:focus,.bertha-duration-input select:focus{
       border-color:#dca1ba!important;box-shadow:0 0 0 3px rgba(220,161,186,.18)!important;
     }
@@ -1188,6 +1201,8 @@
     .bertha-danger-link{background:transparent;color:#b77b82;padding-left:0}
     @media(max-width:390px){
       .bertha-task-hero h1{font-size:26px!important}
+      .bertha-task-two:has(.bertha-duration-input){grid-template-columns:1fr!important}
+      .bertha-duration-input{grid-template-columns:minmax(96px,.75fr) minmax(150px,1.25fr)!important}
       .bertha-task-tools{grid-template-columns:minmax(0,1fr) 108px}
       .bertha-task-add{min-width:108px;padding:0 12px;font-size:14px}
       .bertha-task-two{grid-template-columns:1fr}
