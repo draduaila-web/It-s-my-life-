@@ -1,4 +1,4 @@
-const CACHE = "bertha-v67-work-recovered";
+const CACHE = "bertha-v68-work-route-fix";
 
 const ASSETS = [
   "./",
