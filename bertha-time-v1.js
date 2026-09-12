@@ -1,4 +1,4 @@
-/* BERTH.A — Meu Dia v2 / Motor de Tempo v2.1 — Rituais corrigidos
+/* BERTH.A — Meu Dia v2 / Motor de Tempo v2.2 — Rituais ciclo e exclusão
    Camada aditiva: carregar DEPOIS de app.js, finance-v6.js e work-v12.js.
    Preserva chaves/rotas legadas para evitar perda de dados.
 */
@@ -564,7 +564,8 @@
       <div class="bertha-upcoming-list">${upcoming}</div>
       <div class="bertha-section-row"><span>CUIDADOS & EXTRAS</span><button type="button" data-add-ritual-event="${id}">＋ Adicionar</button></div>
       <div class="bertha-extra-list">${extras.length?extras.map(e=>`<button class="bertha-extra-card" data-edit-ritual-event="${e.id}"><span class="bertha-line-icon">${ritualIcon(e.icon||'sparkle')}</span><span><strong>${esc(e.title)}</strong><small>${esc(ritualRepeatLabel(e))} · ${durationText(e.minutes)}</small></span><b>›</b></button>`).join(''):`<div class="bertha-empty-soft">Você pode adicionar corte, coloração, procedimentos ou qualquer outro cuidado aqui.</div>`}</div>
-      ${cycleActionsHtml(id)}
+      ${shouldShowCycleActions(id)?cycleActionsHtml(id):''}
+      <button type="button" class="bertha-delete-ritual" data-delete-ritual="${id}">Excluir ritual</button>
     </section>`;
   }
   function ritualDurationParts(e){
@@ -683,6 +684,15 @@
     all[id]={...prev,status:'ended',endedAt:new Date().toISOString()};
     saveRitualCycles(all); rerender();
   }
+  function shouldShowCycleActions(id){
+    const today=dayStart(new Date());
+    if(id==='autocuidado'){
+      const diff=Math.floor((today-SELFCARE_START)/86400000);
+      return diff>=13; // only on/after final day of the 14-day cycle
+    }
+    if(id==='capilar') return today>=dayStart(CAPILLARY_END);
+    return false;
+  }
   function cycleActionsHtml(id){
     const c=currentCycleState(id);
     return `<section class="bertha-cycle-actions">
@@ -695,6 +705,22 @@
     </section>`;
   }
 
+
+  function fullSelfcareSchedule(){
+    const d=modalShell('Ciclo de Autocuidado','14 dias');
+    let rows='';
+    for(let i=0;i<14;i++){
+      const date=new Date(SELFCARE_START); date.setDate(SELFCARE_START.getDate()+i);
+      const ev=selfcareEvent(date);
+      if(!ev)continue;
+      rows+=`<div class="bertha-full-schedule-row">
+        <span>${date.toLocaleDateString('pt-BR',{day:'2-digit',month:'short'}).replace('.','')}</span>
+        <div><strong>${esc(ev.title)}</strong><small>Dia ${i+1} de 14${ev.optional?' · Livre':` · ${durationText(ev.minutes)} · ${taskLabelPeriod(ritualSetting('autocuidado',ev.type).period||ev.period)}`}</small></div>
+      </div>`;
+    }
+    d.querySelector('.bertha-modal-content').innerHTML=`<div class="bertha-full-schedule">${rows}</div>`;
+  }
+
   function fullCapillarySchedule(){
     let html='<div class="bertha-full-schedule">';for(let i=0;i<45;i++){const d=new Date(CAPILLARY_START);d.setDate(d.getDate()+i);const e=capillaryEvent(d);html+=`<div><b>Dia ${i+1} · ${d.toLocaleDateString('pt-BR')}</b><span>${esc(e.title)}${e.subtitle?' · '+esc(e.subtitle):''}</span></div>`;}html+='</div>';dialogBase('Cronograma capilar · 45 dias',html);
   }
@@ -704,18 +730,41 @@
     document.body.appendChild(d);d.querySelectorAll('[data-close]').forEach(b=>b.onclick=()=>{d.close();d.remove()});d.querySelectorAll('[data-icon]').forEach(b=>b.onclick=()=>d.querySelectorAll('[data-icon]').forEach(z=>z.classList.toggle('active',z===b)));d.querySelector('[data-save]').onclick=()=>{const title=d.querySelector('[data-title]').value.trim();if(!title)return;const arr=read(RITUALS_KEY,[]),id='ritual-'+Date.now();arr.push({id,title,subtitle:d.querySelector('[data-subtitle]').value.trim(),icon:d.querySelector('[data-icon].active')?.dataset.icon||'sparkle'});write(RITUALS_KEY,arr);d.close();d.remove();location.hash='#ritual-'+id;};d.showModal();
   }
 
+  function applyHiddenRituals(){
+    const hidden=hiddenRituals();
+    hidden.forEach(id=>{
+      document.querySelectorAll(`[data-open-ritual="${id}"],[data-ritual="${id}"]`).forEach(el=>el.style.display='none');
+    });
+  }
   function bindRituals(){
+    applyHiddenRituals();
     document.querySelectorAll('[data-open-ritual]').forEach(b=>b.onclick=()=>location.hash='#ritual-'+b.dataset.openRitual);
     document.querySelector('[data-new-ritual]')?.addEventListener('click',newRitualDialog);
   }
+
+  const HIDDEN_RITUALS_KEY='bertha.ritual.hidden.v1';
+  function hiddenRituals(){ return read(HIDDEN_RITUALS_KEY,[]); }
+  function deleteRitual(id){
+    if(!confirm('Excluir este ritual? Ele deixará de aparecer em Meus Rituais e de alimentar o Meu Dia.')) return;
+    if(id==='capilar'||id==='autocuidado'){
+      const h=hiddenRituals(); if(!h.includes(id))h.push(id); write(HIDDEN_RITUALS_KEY,h);
+    }else{
+      const customs=customRituals().filter(r=>r.id!==id); saveCustomRituals(customs);
+      const extras=ritualExtras().filter(e=>e.ritualId!==id); saveRitualExtras(extras);
+    }
+    location.hash='#rituais'; rerender();
+  }
+
   function bindRitualDetail(id){
     document.querySelector('[data-config-ritual]')?.addEventListener('click',()=>ritualSettingsDialog(id));
     document.querySelector('[data-add-ritual-event]')?.addEventListener('click',()=>ritualEventDialog(id));
     document.querySelectorAll('[data-edit-ritual-event]').forEach(b=>b.onclick=()=>ritualEventDialog(id,b.dataset.editRitualEvent));
     document.querySelector('[data-full-capillary]')?.addEventListener('click',fullCapillarySchedule);
+    document.querySelector('[data-full-selfcare]')?.addEventListener('click',fullSelfcareSchedule);
     document.querySelector('[data-repeat-cycle]')?.addEventListener('click',()=>cloneCycle(id,false));
     document.querySelector('[data-review-cycle]')?.addEventListener('click',()=>cloneCycle(id,true));
     document.querySelector('[data-end-cycle]')?.addEventListener('click',()=>{if(confirm('Encerrar este ciclo? O histórico será preservado.')) endCycle(id);});
+    document.querySelector('[data-delete-ritual]')?.addEventListener('click',()=>deleteRitual(id));
   }
 
   function bindHome(){ document.querySelectorAll('[data-start]').forEach(b=>b.onclick=()=>{const x=sourcesToday().find(i=>i.id===b.dataset.start);if(x)startItem(x)}); document.querySelectorAll('[data-postpone]').forEach(b=>b.onclick=()=>{const x=sourcesToday().find(i=>i.id===b.dataset.postpone);if(x)postponeDialog(x)}); const f=document.querySelector('[data-finish-active]'); if(f)f.onclick=finishActive; }
@@ -1582,6 +1631,15 @@
       .bertha-ritual-dialog .bertha-task-modal-head{padding-right:8px}
       .bertha-ritual-dialog .bertha-task-modal-body{padding-bottom:18px}
     }
+
+
+    .bertha-delete-ritual{display:block;width:100%;margin:18px 0 4px;padding:12px;border:1px solid rgba(143,103,118,.16);border-radius:14px;background:rgba(255,255,255,.55);color:#a36d7d;font-size:11px;font-weight:750}
+    .bertha-full-schedule{display:grid;gap:9px}
+    .bertha-full-schedule-row{display:grid;grid-template-columns:82px minmax(0,1fr);gap:10px;align-items:center;padding:12px;border:1px solid rgba(108,88,115,.10);border-radius:16px;background:rgba(255,255,255,.66)}
+    .bertha-full-schedule-row>span{font-size:10px;font-weight:800;letter-spacing:.08em;color:#a06f87;text-transform:uppercase}
+    .bertha-full-schedule-row strong,.bertha-full-schedule-row small{display:block}
+    .bertha-full-schedule-row strong{font-size:12px;color:#4d424d}
+    .bertha-full-schedule-row small{margin-top:3px;font-size:10px;color:#8d818b}
 
     /* Menu aprovado: congelado. Não alterar. */
 
