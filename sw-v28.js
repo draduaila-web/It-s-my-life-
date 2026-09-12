@@ -1,4 +1,4 @@
-const CACHE = "minha-vida-v28";
+const CACHE = "bertha-v74-casa-functional";
 const ASSETS = ["./","./index.html","./style.css","./app.js","./manifest.webmanifest","./icon-192.svg","./icon-512.svg"];
 
 self.addEventListener("install", event => {
