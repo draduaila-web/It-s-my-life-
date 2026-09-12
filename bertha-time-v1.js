@@ -1,4 +1,4 @@
-/* BERTH.A — Meu Dia v2 / Motor de Tempo v2.5 — Meu Dia Ideal suave e programável
+/* BERTH.A — Meu Dia v2 / Motor de Tempo v2.5.1 — Meu Dia Ideal salvar e duração corrigidos
    Camada aditiva: carregar DEPOIS de app.js, finance-v6.js e work-v12.js.
    Preserva chaves/rotas legadas para evitar perda de dados.
 */
@@ -106,6 +106,7 @@
     }; return icons[zone]||icons.flex;
   }
   function idealPeriodZone(item){
+    if(item.sourceZone) return item.sourceZone;
     const p=String(item.period||item.when||item.window||'flex').toLowerCase();
     if(p.includes('manh')||p==='morning')return 'morning';
     if(p.includes('tard')||p==='afternoon')return 'afternoon';
@@ -164,16 +165,96 @@
   }
 
   function renderIdeal(){ const items=read(IDEAL_KEY,[]); return `<section class="hero"><div class="eyebrow">PREFERÊNCIAS</div><h2>Meu Dia Ideal</h2><p>O que você gostaria que coubesse na sua vida quando houver espaço. Não é uma agenda rígida.</p></section><button class="primary add-full" data-add-ideal>＋ Adicionar ao meu dia ideal</button><div class="list bertha-ideal-list">${items.map(x=>`<article class="card"><div><strong>${esc(x.title)}</strong><span>${({morning:'Manhã',afternoon:'Tarde',night:'Noite',flex:'Quando houver espaço'})[x.period]||'Flexível'} · ${durationText(+x.minutes||30)}${x.notify?' · 🔔':''}</span></div><button class="more" data-del-ideal="${x.id}">×</button></article>`).join('')||'<div class="bertha-empty">Ainda não há preferências. Comece com algo que você gostaria de viver com mais frequência.</div>'}</div>`; }
-  function addIdealDialog(){ const d=dialogBase('Adicionar ao Meu Dia Ideal',`<label class="bertha-field">O que você gostaria de fazer?<input data-title placeholder="Ex.: Ler um livro"></label><label class="bertha-field">Melhor período<select data-period><option value="morning">Manhã</option><option value="afternoon">Tarde</option><option value="night">Noite protegida</option><option value="flex">Quando houver espaço</option></select></label><label class="bertha-field">Duração<input data-minutes type="number" min="5" step="5" value="30"></label><div class="bertha-ideal-until">
-          <label><span>Até quando você quer incluir isso na sua rotina?</span>
-            <select data-ideal-until-mode>
-              <option value="ongoing">Sem data final</option>
-              <option value="date">Até uma data</option>
-            </select>
-          </label>
-          <label data-ideal-until-date-wrap hidden><span>Data final</span><input data-ideal-until-date type="date"></label>
+  function addIdealDialog(){
+    const requested=window.__berthaIdealRequestedZone||'';
+    const zoneToPeriod={morning:'morning',afternoon:'afternoon',evening:'night',flex:'flex',free:'flex'};
+    const initialPeriod=zoneToPeriod[requested]||'morning';
+
+    const d=dialogBase('Adicionar ao Meu Dia Ideal',`
+      <label class="bertha-field">O que você gostaria de fazer?
+        <input data-title placeholder="Ex.: Ler um livro">
+      </label>
+
+      <label class="bertha-field">Melhor período
+        <select data-period>
+          <option value="morning" ${initialPeriod==='morning'?'selected':''}>Manhã</option>
+          <option value="afternoon" ${initialPeriod==='afternoon'?'selected':''}>Tarde</option>
+          <option value="night" ${initialPeriod==='night'?'selected':''}>Noite</option>
+          <option value="flex" ${initialPeriod==='flex'?'selected':''}>Quando houver espaço</option>
+        </select>
+      </label>
+
+      <div class="bertha-field">
+        <span>Duração</span>
+        <div class="bertha-ideal-duration-input">
+          <input data-ideal-duration-value type="number" min="1" step="1" inputmode="numeric" value="30">
+          <select data-ideal-duration-unit>
+            <option value="minutes">minutos</option>
+            <option value="hours">horas</option>
+          </select>
         </div>
-        <label class="bertha-check"><input data-notify type="checkbox"> 🔔 Notificar</label><button class="bertha-primary bertha-full" data-save>Salvar</button>`); d.querySelector('[data-save]').onclick=()=>{const title=d.querySelector('[data-title]').value.trim();if(!title)return;const arr=read(IDEAL_KEY,[]);arr.push({id:`ideal-${Date.now()}`,title,period:d.querySelector('[data-period]').value,durationValue:(+d.querySelector('[data-ideal-duration-value]')?.value||30),durationUnit:(d.querySelector('[data-ideal-duration-unit]')?.value||'minutes'),minutes:idealDurationMinutes((+d.querySelector('[data-ideal-duration-value]')?.value||30),(d.querySelector('[data-ideal-duration-unit]')?.value||'minutes')),untilMode:(d.querySelector('[data-ideal-until-mode]')?.value||'ongoing'),untilDate:(d.querySelector('[data-ideal-until-date]')?.value||''),notify:d.querySelector('[data-notify]').checked,active:true});write(IDEAL_KEY,arr);d.close();d.remove();rerender()}; }
+      </div>
+
+      <div class="bertha-ideal-until">
+        <label>
+          <span>Até quando você quer incluir isso na sua rotina?</span>
+          <select data-ideal-until-mode>
+            <option value="ongoing">Sem data final</option>
+            <option value="date">Até uma data</option>
+          </select>
+        </label>
+        <label data-ideal-until-date-wrap hidden>
+          <span>Data final</span>
+          <input data-ideal-until-date type="date">
+        </label>
+      </div>
+
+      <label class="bertha-check">
+        <input data-notify type="checkbox"> Notificar
+      </label>
+
+      <button class="bertha-primary bertha-full" data-save>Salvar</button>
+    `);
+
+    const mode=d.querySelector('[data-ideal-until-mode]');
+    const dateWrap=d.querySelector('[data-ideal-until-date-wrap]');
+    const syncUntil=()=>{ if(dateWrap) dateWrap.hidden=mode?.value!=='date'; };
+    mode?.addEventListener('change',syncUntil);
+    syncUntil();
+
+    d.querySelector('[data-save]').onclick=()=>{
+      const title=d.querySelector('[data-title]')?.value.trim();
+      if(!title) return;
+
+      const durationValue=Math.max(1,+d.querySelector('[data-ideal-duration-value]')?.value||30);
+      const durationUnit=d.querySelector('[data-ideal-duration-unit]')?.value||'minutes';
+      const period=d.querySelector('[data-period]')?.value||initialPeriod;
+      const untilMode=mode?.value||'ongoing';
+      const untilDate=untilMode==='date' ? (d.querySelector('[data-ideal-until-date]')?.value||'') : '';
+
+      const arr=read(IDEAL_KEY,[]);
+      arr.push({
+        id:`ideal-${Date.now()}`,
+        title,
+        period,
+        sourceZone: requested || (period==='night'?'evening':period),
+        durationValue,
+        durationUnit,
+        minutes:idealDurationMinutes(durationValue,durationUnit),
+        untilMode,
+        untilDate,
+        notify:!!d.querySelector('[data-notify]')?.checked,
+        active:true
+      });
+      write(IDEAL_KEY,arr);
+      window.__berthaIdealRequestedZone=null;
+
+      try{ d.close?.(); }catch(_){}
+      d.remove();
+      rerender();
+      setTimeout(enhanceIdealScreen,0);
+    };
+  }
 
 
   const TASKS_KEY='minha-vida.pendencias.v1';
@@ -1918,6 +1999,21 @@
     .bertha-ideal-until select,.bertha-ideal-until input{width:100%;box-sizing:border-box}
     [data-route="ideal"] .primary,
     .bertha-ideal-page .primary{background:linear-gradient(135deg,#e7ddf5,#f4e9b9)!important;color:#5e5366!important}
+
+
+    [data-ideal-until-date-wrap][hidden]{display:none!important}
+    .bertha-ideal-duration-input{
+      display:grid!important;
+      grid-template-columns:92px minmax(0,1fr)!important;
+      gap:10px!important;
+      align-items:stretch!important;
+    }
+    .bertha-ideal-duration-input input,
+    .bertha-ideal-duration-input select{
+      width:100%!important;
+      min-width:0!important;
+      box-sizing:border-box!important;
+    }
 
     /* Menu aprovado: congelado. Não alterar. */
 
