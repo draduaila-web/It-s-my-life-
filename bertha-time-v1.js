@@ -1,4 +1,4 @@
-/* BERTH.A — Meu Dia v2 / Motor de Tempo v1.8.2 — ajuste largura duração
+/* BERTH.A — Meu Dia v2 / Motor de Tempo v1.8.3 — duração responsiva
    Camada aditiva: carregar DEPOIS de app.js, finance-v6.js e work-v12.js.
    Preserva chaves/rotas legadas para evitar perda de dados.
 */
@@ -1099,7 +1099,7 @@
     .bertha-task-modal-body{
       overflow:auto;-webkit-overflow-scrolling:touch;padding:17px 20px 8px;
     }
-    .bertha-task-field{display:grid;gap:7px;margin:0 0 15px}
+    .bertha-task-field{display:grid;gap:7px;margin:0 0 15px;min-width:0}
     .bertha-task-field>span{
       color:#716674;font-size:13px;font-weight:700;
     }
@@ -1199,10 +1199,21 @@
     .bertha-task-cancel{background:#eee5f4;color:#725a82}
     .bertha-task-save{background:#d78ead;color:white;min-width:92px}
     .bertha-danger-link{background:transparent;color:#b77b82;padding-left:0}
+    @media(max-width:480px){
+      .bertha-task-two:has(.bertha-duration-input){
+        grid-template-columns:1fr!important;
+      }
+      .bertha-duration-input{
+        grid-template-columns:88px minmax(0,1fr)!important;
+        width:100%!important;
+      }
+      .bertha-duration-input select{
+        width:100%!important;
+        min-width:0!important;
+      }
+    }
     @media(max-width:390px){
       .bertha-task-hero h1{font-size:26px!important}
-      .bertha-task-two:has(.bertha-duration-input){grid-template-columns:1fr!important}
-      .bertha-duration-input{grid-template-columns:minmax(96px,.75fr) minmax(150px,1.25fr)!important}
       .bertha-task-tools{grid-template-columns:minmax(0,1fr) 108px}
       .bertha-task-add{min-width:108px;padding:0 12px;font-size:14px}
       .bertha-task-two{grid-template-columns:1fr}
