@@ -1,10 +1,11 @@
-/* BERTH.A — Meu Dia v2 / Motor de Tempo v2.5.1 — Meu Dia Ideal salvar e duração corrigidos
+/* BERTH.A — Meu Dia v2 / Motor de Tempo v2.6 — aprendizagem global de duração
    Camada aditiva: carregar DEPOIS de app.js, finance-v6.js e work-v12.js.
    Preserva chaves/rotas legadas para evitar perda de dados.
 */
 (() => {
   const ENGINE_KEY = 'bertha.time-engine.v1';
   const IDEAL_KEY = 'bertha.ideal-day.v1';
+  const DURATION_LEARNING_KEY = 'bertha.duration-learning.v1';
   const esc = (s='') => String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[c]));
   const read = (k, fallback=[]) => { try { const v=JSON.parse(localStorage.getItem(k)); return v ?? fallback; } catch { return fallback; } };
   const write = (k,v) => localStorage.setItem(k,JSON.stringify(v));
@@ -13,12 +14,200 @@
   const hhmm = (ts) => new Date(ts).toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'});
   const durationText = m => m>=60 ? (m%60 ? `${Math.floor(m/60)}h${String(m%60).padStart(2,'0')}` : `${m/60}h`) : `${m} min`;
   const parseMinutes = v => { if(typeof v==='number') return v; const s=String(v||''); const h=(s.match(/(\d+)\s*h/)||[])[1]; const m=(s.match(/(\d+)\s*min/)||[])[1]; return (+(h||0)*60)+ +(m||0) || 30; };
+
+  /* ---------------------------------------------------------
+     MOTOR GLOBAL DE APRENDIZAGEM DE DURAÇÃO
+     Regra:
+     - 0–2 conclusões: usa o tempo configurado.
+     - 3+ conclusões consistentes: passa a usar tempo aprendido.
+     - outliers têm peso reduzido/saem da amostra robusta.
+     - máximo de 12 execuções recentes por atividade.
+     - arredondamento de sugestão para blocos de 5 min.
+     - mantém sempre planejado x aprendido x última execução.
+     --------------------------------------------------------- */
+  function durationLearningStore(){
+    return read(DURATION_LEARNING_KEY,{version:1,items:{}});
+  }
+  function saveDurationLearningStore(v){
+    write(DURATION_LEARNING_KEY,v);
+  }
+  function normalizedLearningText(v=''){
+    return String(v).toLowerCase()
+      .normalize('NFD').replace(/[\u0300-\u036f]/g,'')
+      .replace(/\d{4}-\d{2}-\d{2}/g,'')
+      .replace(/[^a-z0-9]+/g,'-')
+      .replace(/^-+|-+$/g,'')
+      .slice(0,120);
+  }
+  function durationLearningKey(item={}){
+    if(item.learningKey) return String(item.learningKey);
+
+    const id=String(item.id||'');
+    // Eventos de rituais recebem IDs datados; removemos a data para o
+    // aprendizado continuar entre ciclos/dias.
+    let m=id.match(/^ritual:capilar:\d{4}-\d{2}-\d{2}:(.+)$/);
+    if(m) return `ritual:capilar:${m[1]}`;
+    m=id.match(/^ritual-extra:(.+):\d{4}-\d{2}-\d{2}$/);
+    if(m) return `ritual-extra:${m[1]}`;
+    if(/^ritual:autocuidado:\d{4}-\d{2}-\d{2}$/.test(id)){
+      return `ritual:autocuidado:${normalizedLearningText(item.title||'autocuidado')}`;
+    }
+
+    // IDs estáveis de tarefas, trabalho, exercícios, Meu Dia Ideal etc.
+    if(id) return id;
+
+    // Fallback para módulos futuros que ainda não tenham ID próprio.
+    return `activity:${normalizedLearningText(item.source||'geral')}:${normalizedLearningText(item.title||'atividade')}`;
+  }
+  function median(values){
+    const a=[...values].sort((x,y)=>x-y);
+    if(!a.length) return 0;
+    const mid=Math.floor(a.length/2);
+    return a.length%2 ? a[mid] : (a[mid-1]+a[mid])/2;
+  }
+  function roundLearningMinutes(v){
+    if(v<=10) return Math.max(1,Math.round(v));
+    return Math.max(5,Math.round(v/5)*5);
+  }
+  function computeDurationLearning(samples=[],configuredMinutes=30){
+    const recent=samples
+      .filter(x=>Number.isFinite(+x.realMinutes) && +x.realMinutes>0)
+      .slice(-12);
+
+    if(recent.length<3){
+      return {
+        count:recent.length,
+        learned:false,
+        learnedMinutes:null,
+        suggestedMinutes:+configuredMinutes||30,
+        confidence:'collecting',
+        lastMinutes:recent.length ? +recent[recent.length-1].realMinutes : null
+      };
+    }
+
+    const vals=recent.map(x=>+x.realMinutes);
+    const med=median(vals);
+
+    // Faixa robusta: tolera variação real, mas elimina interrupções/acidentes.
+    const tolerance=Math.max(10,med*0.50);
+    let robust=recent.filter(x=>Math.abs(+x.realMinutes-med)<=tolerance);
+    if(robust.length<3) robust=recent;
+
+    const robustVals=robust.map(x=>+x.realMinutes);
+    const robustMedian=median(robustVals);
+    const spread=Math.max(...robustVals)-Math.min(...robustVals);
+    const consistent=spread<=Math.max(10,robustMedian*0.30);
+
+    // Peso crescente para execuções mais recentes.
+    let weighted=0, weights=0;
+    robust.forEach((x,i)=>{
+      const w=1+i*0.18;
+      weighted+=(+x.realMinutes)*w;
+      weights+=w;
+    });
+    const avg=weighted/weights;
+    const learnedMinutes=roundLearningMinutes(avg);
+
+    // Com 3–5 execuções só libera a aprendizagem quando houver consistência.
+    // A partir de 6 execuções, a amostra robusta já é suficiente.
+    const learned=(robust.length>=3 && (consistent || recent.length>=6));
+
+    return {
+      count:recent.length,
+      usableCount:robust.length,
+      learned,
+      learnedMinutes:learned ? learnedMinutes : null,
+      suggestedMinutes:learned ? learnedMinutes : (+configuredMinutes||30),
+      confidence:!learned?'collecting':recent.length>=10?'stable':recent.length>=6?'good':'initial',
+      lastMinutes:+recent[recent.length-1].realMinutes,
+      medianMinutes:roundLearningMinutes(robustMedian),
+      spreadMinutes:Math.round(spread)
+    };
+  }
+  function durationProfile(item={}){
+    const configured=Math.max(1,+item.configuredMinutes||+item.originalMinutes||+item.minutes||+item.plannedMinutes||30);
+    const key=durationLearningKey(item);
+    const store=durationLearningStore();
+    const rec=store.items?.[key];
+    const samples=Array.isArray(rec?.samples)?rec.samples:[];
+    const calc=computeDurationLearning(samples,configured);
+    return {
+      key,
+      configuredMinutes:configured,
+      ...calc
+    };
+  }
+  function effectiveDurationMinutes(item={}){
+    return durationProfile(item).suggestedMinutes;
+  }
+  function recordDurationLearning(item={},realMinutes){
+    const real=Math.max(1,Math.round(+realMinutes||0));
+    if(!real) return;
+
+    const key=durationLearningKey(item);
+    const configured=Math.max(1,+item.configuredMinutes||+item.originalMinutes||+item.minutes||+item.plannedMinutes||30);
+    const store=durationLearningStore();
+    store.items=store.items||{};
+    const current=store.items[key]||{
+      key,
+      source:item.source||'',
+      title:item.title||'',
+      configuredMinutes:configured,
+      samples:[]
+    };
+
+    current.source=item.source||current.source||'';
+    current.title=item.title||current.title||'';
+    current.configuredMinutes=configured;
+    current.samples=Array.isArray(current.samples)?current.samples:[];
+    current.samples.push({
+      at:new Date().toISOString(),
+      realMinutes:real,
+      configuredMinutes:configured
+    });
+    current.samples=current.samples.slice(-12);
+
+    const calc=computeDurationLearning(current.samples,configured);
+    current.count=calc.count;
+    current.learned=calc.learned;
+    current.learnedMinutes=calc.learnedMinutes;
+    current.suggestedMinutes=calc.suggestedMinutes;
+    current.confidence=calc.confidence;
+    current.lastMinutes=calc.lastMinutes;
+    current.updatedAt=new Date().toISOString();
+
+    store.items[key]=current;
+    saveDurationLearningStore(store);
+  }
+  function applyLearnedDuration(item={}){
+    const profile=durationProfile(item);
+    return {
+      ...item,
+      learningKey:profile.key,
+      configuredMinutes:profile.configuredMinutes,
+      learnedMinutes:profile.learnedMinutes,
+      durationConfidence:profile.confidence,
+      durationSamples:profile.count,
+      minutes:profile.suggestedMinutes
+    };
+  }
+
+  // API global: qualquer módulo atual ou futuro pode consultar o mesmo motor.
+  window.BerthaDurationLearning={
+    key:durationLearningKey,
+    profile:durationProfile,
+    effectiveMinutes:effectiveDurationMinutes,
+    record:recordDurationLearning,
+    apply:applyLearnedDuration
+  };
+
+
   const engine = () => read(ENGINE_KEY,{active:null,history:[],snoozed:{}});
   const saveEngine = x => write(ENGINE_KEY,x);
 
   function sourcesToday(){
     const today=iso(), out=[];
-    const push=(x)=>{ if(x && x.title) out.push(x); };
+    const push=(x)=>{ if(x && x.title) out.push(applyLearnedDuration(x)); };
     // Tarefas (rota/chave interna legada: pendencias)
     read('minha-vida.pendencias.v1',[]).forEach(x=>{
       if(x.done||x.completed) return;
@@ -40,7 +229,10 @@
     const ex=read('minha-vida.exercicios.v1',null); const dow=['Dom','Seg','Ter','Qua','Qui','Sex','Sáb'][new Date().getDay()];
     if(ex && Array.isArray(ex.plans)) ex.plans.filter(p=>p.active!==false && (!p.days?.length||p.days.includes(dow))).forEach(p=>push({id:`exercise:${p.id}`,source:'Exercícios',title:p.name||'Movimento',date:today,minutes:parseMinutes(p.target),windowStart:'05:16',windowEnd:'07:35',kind:'window'}));
     // Meu Dia Ideal — sugestões, não obrigações.
-    read(IDEAL_KEY,[]).filter(x=>x.active!==false).forEach(x=>push({id:`ideal:${x.id}`,source:'Meu Dia Ideal',title:x.title,minutes:+x.minutes||30,period:x.period||'flex',kind:'ideal',notify:!!x.notify}));
+    read(IDEAL_KEY,[])
+      .filter(x=>x.active!==false)
+      .filter(x=>!(x.untilMode==='date' && x.untilDate && x.untilDate<today))
+      .forEach(x=>push({id:`ideal:${x.id}`,source:'Meu Dia Ideal',title:x.title,minutes:+x.minutes||30,period:x.period||'flex',kind:'ideal'}));
     return out;
   }
 
@@ -56,28 +248,111 @@
     return true;
   }
   function doneToday(id){ return engine().history.some(h=>h.itemId===id && h.day===iso() && h.status==='done'); }
-  function candidates(){ return sourcesToday().filter(x=>!doneToday(x.id)).filter(isEligible); }
+  function nextFixedMinutes(list){
+    const now=minsNow();
+    const future=list
+      .map(x=>x.time?timeToM(x.time):null)
+      .filter(x=>x!==null && x>now)
+      .sort((a,b)=>a-b);
+    return future.length ? Math.max(0,future[0]-now) : null;
+  }
+  function candidates(){
+    const list=sourcesToday().filter(x=>!doneToday(x.id)).filter(isEligible);
+    const available=nextFixedMinutes(sourcesToday());
+    if(available===null) return list;
+
+    // Atividades flexíveis que não cabem antes do próximo horário fixo
+    // permanecem no sistema, mas vão para o fim da fila de sugestões.
+    return [...list].sort((a,b)=>{
+      const afit=a.time ? 1 : ((+a.minutes||30)<=available ? 0 : 2);
+      const bfit=b.time ? 1 : ((+b.minutes||30)<=available ? 0 : 2);
+      return afit-bfit;
+    });
+  }
   function protectedBlock(){ const m=minsNow(); if(m>=316&&m<455) return {label:'Manhã protegida',range:'05:16–07:35'}; if(m>=1140) return {label:'Noite protegida',range:'19:00+'}; return null; }
   function currentSuggestion(){
     const e=engine(); if(e.active) return {active:e.active};
     const list=candidates();
     const fixed=list.filter(x=>x.time).sort((a,b)=>timeToM(a.time)-timeToM(b.time));
-    if(fixed.length) return {item:fixed[0]};
-    const work=list.find(x=>x.kind==='work'); if(work) return {item:work};
-    const task=list.find(x=>x.kind==='task'); if(task) return {item:task};
-    const ritual=list.find(x=>x.kind==='ritual'); if(ritual) return {item:ritual};
-    const window=list.find(x=>x.kind==='window'); if(window) return {item:window};
-    const ideal=list.find(x=>x.kind==='ideal'); if(ideal) return {item:ideal};
+    if(fixed.length && timeToM(fixed[0].time)<=minsNow()) return {item:fixed[0]};
+
+    const allSources=sourcesToday();
+    const available=nextFixedMinutes(allSources);
+    const fits=x=>available===null || (+x.minutes||30)<=available;
+    const pick=kind=>list.find(x=>x.kind===kind && fits(x)) || list.find(x=>x.kind===kind);
+
+    const work=pick('work'); if(work) return {item:work};
+    const task=pick('task'); if(task) return {item:task};
+    const ritual=pick('ritual'); if(ritual) return {item:ritual};
+    const window=pick('window'); if(window) return {item:window};
+    const ideal=pick('ideal'); if(ideal) return {item:ideal};
     return {free:true};
   }
 
   function startItem(item){
     const e=engine();
     if(e.active){ conflictDialog(item); return; }
-    e.active={...item,startedAt:Date.now(),plannedMinutes:+item.minutes||30}; saveEngine(e); rerender();
+
+    const prepared=applyLearnedDuration(item);
+    e.active={
+      ...prepared,
+      startedAt:Date.now(),
+      plannedMinutes:+prepared.minutes||30,
+      configuredMinutes:+prepared.configuredMinutes||+item.minutes||30,
+      learningKey:prepared.learningKey
+    };
+    saveEngine(e);
+    rerender();
   }
-  function finishActive(){ const e=engine(); if(!e.active)return; const end=Date.now(), real=Math.max(1,Math.round((end-e.active.startedAt)/60000)); e.history.unshift({itemId:e.active.id,title:e.active.title,source:e.active.source,day:iso(),startedAt:e.active.startedAt,endedAt:end,plannedMinutes:e.active.plannedMinutes,realMinutes:real,status:'done'}); e.active=null; saveEngine(e); rerender(); }
-  function pauseActive(next){ const e=engine(); if(e.active){ const end=Date.now(); e.history.unshift({itemId:e.active.id,title:e.active.title,source:e.active.source,day:iso(),startedAt:e.active.startedAt,endedAt:end,plannedMinutes:e.active.plannedMinutes,realMinutes:Math.max(1,Math.round((end-e.active.startedAt)/60000)),status:'paused'}); e.active=null; saveEngine(e); } startItem(next); }
+  function finishActive(){
+    const e=engine();
+    if(!e.active)return;
+    const active=e.active;
+    const end=Date.now();
+    const real=Math.max(1,Math.round((end-active.startedAt)/60000));
+
+    e.history.unshift({
+      itemId:active.id,
+      learningKey:active.learningKey||durationLearningKey(active),
+      title:active.title,
+      source:active.source,
+      day:iso(),
+      startedAt:active.startedAt,
+      endedAt:end,
+      configuredMinutes:+active.configuredMinutes||+active.plannedMinutes||30,
+      plannedMinutes:active.plannedMinutes,
+      learnedMinutes:active.learnedMinutes||null,
+      realMinutes:real,
+      status:'done'
+    });
+
+    recordDurationLearning(active,real);
+    e.active=null;
+    saveEngine(e);
+    rerender();
+  }
+  function pauseActive(next){
+    const e=engine();
+    if(e.active){
+      const end=Date.now();
+      e.history.unshift({
+        itemId:e.active.id,
+        learningKey:e.active.learningKey||durationLearningKey(e.active),
+        title:e.active.title,
+        source:e.active.source,
+        day:iso(),
+        startedAt:e.active.startedAt,
+        endedAt:end,
+        configuredMinutes:+e.active.configuredMinutes||+e.active.plannedMinutes||30,
+        plannedMinutes:e.active.plannedMinutes,
+        realMinutes:Math.max(1,Math.round((end-e.active.startedAt)/60000)),
+        status:'paused'
+      });
+      e.active=null;
+      saveEngine(e);
+    }
+    startItem(next);
+  }
   function snoozeItem(item,minutes){ const e=engine(); e.snoozed=e.snoozed||{}; e.snoozed[item.id]=Date.now()+minutes*60000; saveEngine(e); rerender(); }
 
   function dialogBase(title,body){ const d=document.createElement('dialog'); d.className='bertha-dialog'; d.innerHTML=`<div class="bertha-modal"><div class="bertha-modal-head"><strong>${esc(title)}</strong><button data-close>×</button></div>${body}</div>`; document.body.appendChild(d); d.querySelector('[data-close]').onclick=()=>{d.close();d.remove()}; d.addEventListener('cancel',e=>{e.preventDefault();d.close();d.remove()}); d.addEventListener('click',e=>{if(e.target===d){d.close();d.remove()}}); d.showModal(); return d; }

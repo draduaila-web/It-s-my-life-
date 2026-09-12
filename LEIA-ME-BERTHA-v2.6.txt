@@ -1,0 +1,43 @@
+BERTH.A v2.6 — Motor global de aprendizagem de duração
+
+O QUE ENTROU
+• Uma única métrica de duração para TODO o aplicativo.
+• Tarefas, Rituais, Trabalho, Exercícios, Meu Dia Ideal e módulos futuros
+  usam o mesmo motor.
+• Cada conclusão registra:
+  - duração configurada
+  - duração usada na sugestão
+  - duração real
+  - início e fim
+• Pausas NÃO treinam a métrica.
+• 0–2 execuções: BERTH.A mantém o tempo configurado.
+• A partir da 3ª execução consistente: começa a sugerir o tempo aprendido.
+• Execuções muito fora do padrão são filtradas pela amostra robusta.
+• A métrica considera até 12 execuções recentes e dá mais peso às mais novas.
+• Sugestões são arredondadas para blocos práticos de 5 minutos.
+• O valor original nunca é apagado.
+• O Meu Dia passa a usar a duração aprendida para avaliar o que cabe
+  antes do próximo compromisso fixo.
+• Preferências do Meu Dia Ideal vencidas por data deixam de ser sugeridas.
+• API global disponível aos próximos módulos:
+  window.BerthaDurationLearning
+
+EXEMPLO
+Estudos configurado: 60 min
+Execuções: 41, 39, 40 min
+Após a 3ª conclusão consistente:
+duração sugerida/aprendida = 40 min
+duração configurada continua = 60 min
+
+CHAVE DE DADOS
+bertha.duration-learning.v1
+
+INSTALAÇÃO
+1. Substitua bertha-time-v1.js
+2. index.html: bertha-time-v1.js?v=2.6
+3. sw.js: const CACHE = "bertha-v61-duration-learning";
+4. Commit
+
+ÁREAS VISUAIS CONGELADAS
+Home, Tarefas, Rituais e Meu Dia Ideal não foram redesenhados.
+Esta versão altera o motor de tempo/aprendizado, não a identidade visual.
