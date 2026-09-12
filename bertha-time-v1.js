@@ -1,4 +1,4 @@
-/* BERTH.A — Meu Dia v2 / Motor de Tempo v1.8 — Tarefas + identidade BERTH.A
+/* BERTH.A — Meu Dia v2 / Motor de Tempo v1.8.1 — Tarefas refinadas
    Camada aditiva: carregar DEPOIS de app.js, finance-v6.js e work-v12.js.
    Preserva chaves/rotas legadas para evitar perda de dados.
 */
@@ -100,6 +100,29 @@
   function taskLabelPeriod(p){
     return ({morning:'Manhã',afternoon:'Tarde',night:'Noite',flex:'Flexível',specific:'Horário específico'})[p]||'Flexível';
   }
+
+  function taskDurationParts(x){
+    const unit=x.durationUnit;
+    const value=Number(x.durationValue);
+    if(unit && value>0) return {value,unit};
+    const mins=parseMinutes(x.minutes||x.duration||30);
+    if(mins>=1440 && mins%1440===0) return {value:mins/1440,unit:'days'};
+    if(mins>=60 && mins%60===0) return {value:mins/60,unit:'hours'};
+    return {value:mins,unit:'minutes'};
+  }
+  function taskDurationMinutes(value,unit){
+    const n=Math.max(1,Number(value)||1);
+    if(unit==='days') return n*1440;
+    if(unit==='hours') return n*60;
+    return n;
+  }
+  function taskDurationPretty(value,unit){
+    const n=Number(value)||1;
+    if(unit==='days') return `${n} ${n===1?'dia':'dias'}`;
+    if(unit==='hours') return `${n} ${n===1?'hora':'horas'}`;
+    return `${n} min`;
+  }
+
   function taskLabelPriority(p){
     const v=String(p||'Normal').toLowerCase();
     if(v.includes('import')) return 'Importante';
@@ -109,7 +132,8 @@
   function taskMeta(x){
     const bits=[];
     if(x.dueDate||x.due) bits.push(`Prazo ${esc((x.dueDate||x.due).split('-').reverse().join('/'))}`);
-    bits.push(durationText(parseMinutes(x.minutes||x.duration||30)));
+    const dp=taskDurationParts(x);
+    bits.push(taskDurationPretty(dp.value,dp.unit));
     const per=taskLabelPeriod(x.period);
     bits.push(x.time ? `${per} · ${esc(x.time)}` : per);
     bits.push(taskLabelPriority(x.priority));
@@ -202,12 +226,17 @@
               <span>Prazo <small>opcional</small></span>
               <input data-due type="date" value="${esc(x.dueDate||x.due||'')}">
             </label>
-            <label class="bertha-task-field">
+            <div class="bertha-task-field">
               <span>Quanto tempo leva?</span>
-              <select data-minutes>
-                ${[5,10,15,20,30,45,60,90,120].map(m=>`<option value="${m}" ${parseMinutes(x.minutes||x.duration||30)===m?'selected':''}>${durationText(m)}</option>`).join('')}
-              </select>
-            </label>
+              <div class="bertha-duration-input">
+                <input data-duration-value type="number" min="1" step="1" inputmode="numeric" value="${taskDurationParts(x).value}">
+                <select data-duration-unit>
+                  <option value="minutes" ${taskDurationParts(x).unit==='minutes'?'selected':''}>minutos</option>
+                  <option value="hours" ${taskDurationParts(x).unit==='hours'?'selected':''}>horas</option>
+                  <option value="days" ${taskDurationParts(x).unit==='days'?'selected':''}>dias</option>
+                </select>
+              </div>
+            </div>
           </div>
 
           <div class="bertha-task-field">
@@ -249,12 +278,18 @@
             <label class="bertha-task-field bertha-notify-when" ${x.notify?'':'hidden'}>
               <span>Quando avisar?</span>
               <select data-notify-offset>
-                <option value="at-time" ${(x.notifyOffset||'at-time')==='at-time'?'selected':''}>No horário</option>
+                <option value="at-time" ${(x.notifyOffset||'at-time')==='at-time'?'selected':''}>No horário da tarefa</option>
                 <option value="10" ${String(x.notifyOffset)==='10'?'selected':''}>10 min antes</option>
                 <option value="30" ${String(x.notifyOffset)==='30'?'selected':''}>30 min antes</option>
                 <option value="60" ${String(x.notifyOffset)==='60'?'selected':''}>1 hora antes</option>
+                <option value="period-start" ${String(x.notifyOffset)==='period-start'?'selected':''}>No início do período</option>
+                <option value="custom-time" ${String(x.notifyOffset)==='custom-time'?'selected':''}>Em um horário escolhido</option>
               </select>
-              <small class="bertha-notify-note">A BERTH.A já guarda essa escolha. O aviso com o app fechado será ativado quando conectarmos o Web Push.</small>
+              <label class="bertha-notify-custom" ${String(x.notifyOffset)==='custom-time'?'':'hidden'}>
+                <span>Horário do aviso</span>
+                <input data-notify-time type="time" value="${esc(x.notifyTime||'')}">
+              </label>
+              <small class="bertha-notify-note">Se a tarefa não tiver horário, use “No início do período” ou escolha um horário para o aviso.</small>
             </label>
           </div>
 
@@ -291,7 +326,12 @@
     });
     const notify=d.querySelector('[data-notify]');
     const notifyWhen=d.querySelector('.bertha-notify-when');
+    const notifyOffset=d.querySelector('[data-notify-offset]');
+    const notifyCustom=d.querySelector('.bertha-notify-custom');
+    const syncNotifyCustom=()=>{ if(notifyCustom) notifyCustom.hidden=notifyOffset.value!=='custom-time'; };
     notify.onchange=()=>notifyWhen.hidden=!notify.checked;
+    notifyOffset.onchange=syncNotifyCustom;
+    syncNotifyCustom();
 
     d.querySelector('[data-save]').onclick=()=>{
       const title=d.querySelector('[data-title]').value.trim();
@@ -304,13 +344,16 @@
         name:title,
         category:d.querySelector('[data-category]').value,
         dueDate:d.querySelector('[data-due]').value,
-        minutes:+d.querySelector('[data-minutes]').value||30,
+        durationValue:+d.querySelector('[data-duration-value]').value||1,
+        durationUnit:d.querySelector('[data-duration-unit]').value,
+        minutes:taskDurationMinutes(d.querySelector('[data-duration-value]').value,d.querySelector('[data-duration-unit]').value),
         period,
         time:d.querySelector('[data-time]').value,
         priority,
         repeat:d.querySelector('[data-repeat]').value,
         notify:notify.checked,
         notifyOffset:d.querySelector('[data-notify-offset]').value,
+        notifyTime:d.querySelector('[data-notify-time]')?.value||'',
         note:d.querySelector('[data-note]').value.trim(),
         done:taskIsDone(existing||{}),
         completed:taskIsDone(existing||{}),
@@ -1085,6 +1128,32 @@
       background:#f2dbe7;color:#9f5f80;border-color:rgba(201,130,164,.24);
       box-shadow:inset 0 0 0 1px rgba(255,255,255,.5);
     }
+
+    .bertha-duration-input{
+      display:grid;grid-template-columns:84px minmax(0,1fr);gap:8px;
+    }
+    .bertha-duration-input input,.bertha-duration-input select{
+      width:100%;height:48px;box-sizing:border-box;
+      border:1px solid rgba(112,92,119,.14)!important;border-radius:15px!important;
+      background:rgba(255,255,255,.86)!important;color:#433a47!important;
+      font:500 15px/1.25 Inter,sans-serif!important;outline:0!important;box-shadow:none!important;
+    }
+    .bertha-duration-input input{padding:0 12px!important;text-align:center}
+    .bertha-duration-input select{padding:0 12px!important}
+    .bertha-duration-input input:focus,.bertha-duration-input select:focus{
+      border-color:#dca1ba!important;box-shadow:0 0 0 3px rgba(220,161,186,.18)!important;
+    }
+    .bertha-notify-custom{
+      display:grid;gap:6px;margin-top:9px;
+    }
+    .bertha-notify-custom[hidden]{display:none!important}
+    .bertha-notify-custom span{font-size:12px;font-weight:700;color:#716674}
+    .bertha-notify-custom input{
+      width:100%;height:46px;box-sizing:border-box;padding:0 12px;
+      border:1px solid rgba(112,92,119,.14);border-radius:14px;
+      background:rgba(255,255,255,.88);color:#433a47;font:500 15px Inter,sans-serif;
+    }
+
     .bertha-notify-box{
       margin:2px 0 15px;padding:12px;border:1px solid rgba(112,92,119,.10);border-radius:17px;
       background:linear-gradient(135deg,rgba(246,238,251,.72),rgba(255,245,239,.72));
