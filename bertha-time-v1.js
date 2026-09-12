@@ -347,6 +347,26 @@
     return {free:true};
   }
 
+  function exercisePlansForMovement(){
+    const ex=read('minha-vida.exercicios.v1',null); if(!ex||!Array.isArray(ex.plans))return {plans:[],suggested:null};
+    const today=iso(),dow=['Dom','Seg','Ter','Qua','Qui','Sex','Sáb'][new Date().getDay()];
+    const active=ex.plans.filter(p=>p&&p.active!==false&&!(p.untilMode==='date'&&p.untilDate&&p.untilDate<today));
+    const due=p=>p.frequency==='Dias específicos'?(!Array.isArray(p.days)||!p.days.length||p.days.includes(dow)):true;
+    const ranked=active.filter(due).sort((a,b)=>{const r=x=>x.frequency==='Dias específicos'?0:x.frequency==='X vezes por semana'?1:2;return r(a)-r(b)});
+    return {plans:active,suggested:ranked[0]||active[0]||null};
+  }
+  function exercisePlanMinutes(p){const n=Math.max(1,+p.durationValue||parseMinutes(p.target)||30);return p.durationUnit==='hours'?n*60:n;}
+  function startMovementPlan(p,suggested){
+    if(!p)return;
+    startItem({id:`exercise:${p.id}`,learningKey:`exercise-plan-v3:${p.id}`,source:'Exercícios',title:p.name||'Movimento',category:p.type||'Outro',minutes:exercisePlanMinutes(p),configuredMinutes:exercisePlanMinutes(p),period:p.period||'flex',kind:'exercise',exercisePlanId:p.id,fromMovementSlot:true,plannedExerciseId:suggested?.id||p.id,plannedExerciseName:suggested?.name||p.name||'Movimento',plannedExerciseMinutes:suggested?exercisePlanMinutes(suggested):exercisePlanMinutes(p)});
+  }
+  function movementChoiceDialog(){
+    const {plans,suggested}=exercisePlansForMovement();
+    if(!plans.length){const d=dialogBase('Movimento','<p class="bertha-muted">Nenhuma atividade ativa está cadastrada em Exercícios.</p><div class="bertha-stack"><button class="bertha-primary" data-close2>Fechar</button></div>');d.querySelector('[data-close2]').onclick=()=>{d.close();d.remove()};return;}
+    const rows=plans.map(p=>`<button type="button" class="bertha-movement-choice" data-ex-plan="${esc(p.id)}"><span><strong>${esc(p.name||'Movimento')}</strong><small>${esc(p.type||'Outro')} · ${durationText(exercisePlanMinutes(p))}${suggested&&String(suggested.id)===String(p.id)?' · Sugestão de hoje':''}</small></span><b>Começar</b></button>`).join('');
+    const d=dialogBase('O que você quer fazer agora?',`${suggested?`<p class="bertha-muted">Sugestão da BERTH.A: <strong>${esc(suggested.name)}</strong>. Você pode escolher qualquer atividade.</p>`:''}<div class="bertha-movement-list">${rows}</div>`);
+    d.querySelectorAll('[data-ex-plan]').forEach(b=>b.onclick=()=>{const p=plans.find(x=>String(x.id)===String(b.dataset.exPlan));d.close();d.remove();startMovementPlan(p,suggested)});
+  }
   function startItem(item){
     const e=engine();
     if(e.active){ conflictDialog(item); return; }
@@ -382,6 +402,15 @@
     write('minha-vida.casa.v1',casa);write('minha-vida.casa.executions.v1',executions);
   }
 
+  function syncExerciseCompletion(active,end,real){
+    if(!active?.fromMovementSlot||!active.exercisePlanId)return;
+    const ex=read('minha-vida.exercicios.v1',null);if(!ex||!Array.isArray(ex.plans))return;
+    ex.sessions=Array.isArray(ex.sessions)?ex.sessions:[];
+    const p=ex.plans.find(x=>String(x.id)===String(active.exercisePlanId));if(!p)return;
+    const planned=ex.plans.find(x=>String(x.id)===String(active.plannedExerciseId));
+    ex.sessions.push({id:`ex-${end}`,planId:p.id,name:p.name||active.title,category:p.type||active.category||'Outro',duration:`${real} min`,minutes:real,date:iso(),note:'Tempo real',plannedName:planned?.name||active.plannedExerciseName||p.name,plannedMinutes:planned?exercisePlanMinutes(planned):(+active.plannedExerciseMinutes||exercisePlanMinutes(p)),substituted:!!planned&&String(planned.id)!==String(p.id),createdAt:end});
+    write('minha-vida.exercicios.v1',ex);
+  }
   function finishActive(){
     const e=engine(); if(!e.active)return;
     const active=e.active,end=Date.now(),real=Math.max(1,Math.round((end-active.startedAt)/60000));
@@ -392,6 +421,7 @@
       realMinutes:real,status:'done'});
     recordDurationLearning(active,real);
     syncCasaCompletion(active,end);
+    syncExerciseCompletion(active,end,real);
     markRepeatConsumed(active);
     e.active=null; saveEngine(e); rerender();
     setTimeout(()=>repeatAfterFinishDialog(active,real),80);
@@ -1319,7 +1349,7 @@
     document.querySelector('[data-delete-ritual]')?.addEventListener('click',()=>deleteRitual(id));
   }
 
-  function bindHome(){ document.querySelectorAll('[data-start]').forEach(b=>b.onclick=()=>{const x=sourcesToday().find(i=>i.id===b.dataset.start);if(x)startItem(x)}); document.querySelectorAll('[data-postpone]').forEach(b=>b.onclick=()=>{const x=sourcesToday().find(i=>i.id===b.dataset.postpone);if(x)postponeDialog(x)}); const f=document.querySelector('[data-finish-active]'); if(f)f.onclick=finishActive; }
+  function bindHome(){ document.querySelectorAll('[data-start]').forEach(b=>b.onclick=()=>{const x=sourcesToday().find(i=>i.id===b.dataset.start);if(x){if(x.id==='exercise:movement-slot')movementChoiceDialog();else startItem(x)}}); document.querySelectorAll('[data-postpone]').forEach(b=>b.onclick=()=>{const x=sourcesToday().find(i=>i.id===b.dataset.postpone);if(x)postponeDialog(x)}); const f=document.querySelector('[data-finish-active]'); if(f)f.onclick=finishActive; }
 
   function enhanceIdealScreen(){
     const route=String(location.hash||'').toLowerCase();
@@ -2475,5 +2505,7 @@
       }
     `;
     document.head.appendChild(s);
-  })();
+  
+  const movementStyle=document.createElement('style');movementStyle.textContent=`.bertha-movement-list{display:grid;gap:10px;margin-top:14px}.bertha-movement-choice{width:100%;display:flex;align-items:center;justify-content:space-between;gap:12px;text-align:left;padding:14px;border:1px solid rgba(90,70,110,.14);border-radius:16px;background:#fff}.bertha-movement-choice span{display:grid;gap:3px}.bertha-movement-choice small{font-weight:400;opacity:.68}.bertha-movement-choice b{white-space:nowrap}`;document.head.appendChild(movementStyle);
+})();
 
