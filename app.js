@@ -1,3 +1,4 @@
+// BERTH.A v2.8.10 — Casa: dados reais, modal padrão e horários abaixo das rotinas.
 const STORAGE_KEY = "minha-vida.pendencias.v1";
 const state = {
   route: "meu-dia",
@@ -912,6 +913,7 @@ function ensureCasaManualStyles(){
  .casa-inventory .chip-list{display:flex;flex-wrap:wrap;gap:8px;margin-top:10px}.casa-inventory .chip-list .pill{white-space:normal;height:auto;padding:7px 10px;line-height:1.25}.inventory-tools-head{margin-top:22px;padding-top:18px;border-top:1px solid rgba(80,60,90,.10)}.casa-product-list{display:grid;gap:8px;margin-top:12px}.casa-product-row{display:flex;align-items:flex-start;justify-content:space-between;gap:10px;padding:10px 0;border-top:1px solid rgba(80,60,90,.08)}.casa-product-row div{display:grid;gap:3px}.casa-product-row small{font-size:10px;opacity:.7}
  .casa-web-card{background:linear-gradient(135deg,#FFF8F1,#F4EEF8 55%,#EDF7F3)}.casa-web-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;margin-top:12px}.casa-web-link{display:flex;justify-content:space-between;align-items:center;gap:8px;text-decoration:none;color:inherit;background:rgba(255,255,255,.82);border:1px solid rgba(120,100,120,.10);border-radius:15px;padding:11px 12px;font-size:11px;font-weight:800}
  .casa-shopping-card{padding:16px}.casa-mini-shopping{display:grid;gap:7px}.casa-mini-shop-row{display:flex;align-items:center;gap:8px;padding:9px 10px;border-radius:13px;background:#fff}.casa-mini-shop-row label{display:flex!important;align-items:center!important;gap:8px!important;margin:0!important;flex:1}.casa-mini-shop-row input{width:auto!important;margin:0!important}.casa-mini-shop-row.done span{text-decoration:line-through;opacity:.5}
+ .casa-editor-overlay{padding:18px;align-items:flex-end}.casa-editor-card{width:min(100%,620px);max-height:88vh;overflow:auto;border:none!important;outline:none!important;box-shadow:0 -12px 40px rgba(60,45,70,.14)}.casa-editor-form{display:grid;gap:14px;margin-top:16px}.casa-editor-form label{display:grid;gap:7px;font-weight:750;color:#6f6673}.casa-editor-form label small{font-weight:500;opacity:.72}.casa-editor-form input,.casa-editor-form textarea{width:100%;box-sizing:border-box;border:1px solid rgba(120,100,120,.16);border-radius:16px;background:#fffdfb;padding:13px 14px;font:inherit;color:inherit;resize:vertical}.casa-editor-form textarea{line-height:1.45}.casa-editor-form .modal-actions{position:sticky;bottom:0;background:linear-gradient(to top,#fffdfb 78%,rgba(255,253,251,0));padding-top:14px;display:grid;grid-template-columns:1fr 1.25fr;gap:10px}@media(max-width:420px){.casa-editor-overlay{padding:0;align-items:flex-end}.casa-editor-card{border-radius:28px 28px 0 0!important;max-height:91vh;padding-bottom:calc(18px + env(safe-area-inset-bottom))}}
  @media(max-width:420px){.casa-web-grid{grid-template-columns:1fr}}@media(max-width:380px){.casa-schedule-row{grid-template-columns:76px 1fr}.casa-time{font-size:10px}}
  `;document.head.appendChild(s);
 }
@@ -1222,24 +1224,37 @@ const CASA_HOW_CUSTOM_KEY="minha-vida.casa.how.v1";
 const CASA_SHOP_KEY="minha-vida.compras.casa.v1";
 function loadCasaHowCustom(){try{return JSON.parse(localStorage.getItem(CASA_HOW_CUSTOM_KEY)||"{}")}catch{return {}}}
 function saveCasaHowCustom(x){localStorage.setItem(CASA_HOW_CUSTOM_KEY,JSON.stringify(x))}
-function casaHowData(id){const base=CASA_HOW[id];if(!base)return null;const custom=loadCasaHowCustom()[id];if(!custom)return base;return {...base,...custom,products:Array.isArray(custom.products)?custom.products:base.products,materials:Array.isArray(custom.materials)?custom.materials:base.materials,steps:Array.isArray(custom.steps)?custom.steps:base.steps};}
+function casaHowData(id){
+ const base=CASA_HOW[id];if(!base)return null;
+ const all=loadCasaHowCustom(),custom=all[id];
+ if(!custom)return base;
+ const cp=Array.isArray(custom.products)?custom.products:[];
+ const cm=Array.isArray(custom.materials)?custom.materials:[];
+ const staleP=["Detergente neutro","Detergente neutro ou produto adequado ao piso","Água","Sabão para roupas","Amaciante, se desejado"];
+ const staleM=["Pano de microfibra","Mop/pano de microfibra","Vassoura/aspirador","Balde"];
+ const stale=(cp.length&&cp.every(x=>staleP.includes(x)))||(cm.length&&cm.every(x=>staleM.includes(x)));
+ if(stale){delete all[id];saveCasaHowCustom(all);return base;}
+ return {...base,...custom,products:Array.isArray(custom.products)?custom.products:base.products,materials:Array.isArray(custom.materials)?custom.materials:base.materials,steps:Array.isArray(custom.steps)?custom.steps:base.steps};
+}
 function loadCasaShopping(){try{return JSON.parse(localStorage.getItem(CASA_SHOP_KEY)||"[]")}catch{return []}}
 function saveCasaShopping(x){localStorage.setItem(CASA_SHOP_KEY,JSON.stringify(x))}
 function addCasaShopping(name,source){name=(name||"").trim();if(!name)return;const items=loadCasaShopping();if(!items.some(x=>x.name.toLowerCase()===name.toLowerCase()))items.push({id:uid(),name,source:source||"Casa",createdAt:Date.now(),done:false});saveCasaShopping(items);}
 function removeCasaShopping(id){saveCasaShopping(loadCasaShopping().filter(x=>x.id!==id))}
 function casaHowList(text){return String(text||"").split(/\n|;/).map(x=>x.trim()).filter(Boolean)}
 function openCasaHowEditor(id){
- const h=casaHowData(id);if(!h)return;const dlg=document.createElement("dialog");
- dlg.innerHTML=`<form method="dialog" class="modal-card" id="casaHowEdit"><div class="modal-head"><div><div class="eyebrow">🏠 CASA</div><h2>Editar como fazer</h2></div><button class="icon-btn" value="cancel">×</button></div>
+ const h=casaHowData(id);if(!h)return;
+ const o=document.createElement("div");o.className="mv-how-overlay casa-editor-overlay";
+ o.innerHTML=`<div class="mv-how casa-editor-card"><button type="button" class="mv-how-x" id="cancelChX">×</button><div class="eyebrow">CASA</div><h2>Editar como fazer</h2><form id="casaHowEdit" class="casa-editor-form">
  <label>Nome<input id="chTitle" value="${escapeHtml(h.title)}"></label>
  <label>Tempo estimado<input id="chTime" value="${escapeHtml(h.time)}"></label>
- <label>🧴 Produtos <small>um por linha</small><textarea id="chProducts" rows="5">${escapeHtml(h.products.join("\\n"))}</textarea></label>
- <label>🧰 Utensílios / materiais <small>um por linha</small><textarea id="chMaterials" rows="5">${escapeHtml(h.materials.join("\\n"))}</textarea></label>
- <label>Passo a passo <small>um passo por linha</small><textarea id="chSteps" rows="8">${escapeHtml(h.steps.join("\\n"))}</textarea></label>
+ <label>🧴 Produtos <small>um por linha</small><textarea id="chProducts" rows="5">${escapeHtml(h.products.join("\n"))}</textarea></label>
+ <label>🧰 Utensílios / materiais <small>um por linha</small><textarea id="chMaterials" rows="5">${escapeHtml(h.materials.join("\n"))}</textarea></label>
+ <label>Passo a passo <small>um passo por linha</small><textarea id="chSteps" rows="8">${escapeHtml(h.steps.join("\n"))}</textarea></label>
  <label>💡 Dica<textarea id="chTip" rows="3">${escapeHtml(h.tip)}</textarea></label>
- <div class="modal-actions"><div class="grow"></div><button type="button" class="secondary" id="cancelCh">Cancelar</button><button class="primary" value="default">Salvar alterações</button></div></form>`;
- document.body.appendChild(dlg);dlg.showModal();dlg.querySelector("#cancelCh").onclick=()=>{dlg.close();dlg.remove()};
- dlg.querySelector("#casaHowEdit").addEventListener("submit",e=>{e.preventDefault();const all=loadCasaHowCustom();all[id]={title:dlg.querySelector("#chTitle").value.trim()||h.title,time:dlg.querySelector("#chTime").value.trim()||h.time,products:casaHowList(dlg.querySelector("#chProducts").value),materials:casaHowList(dlg.querySelector("#chMaterials").value),steps:casaHowList(dlg.querySelector("#chSteps").value),tip:dlg.querySelector("#chTip").value.trim()||h.tip};saveCasaHowCustom(all);dlg.close();dlg.remove();openCasaHow(id)});
+ <div class="modal-actions"><button type="button" class="secondary" id="cancelCh">Cancelar</button><button class="primary" type="submit">Salvar alterações</button></div></form></div>`;
+ document.body.appendChild(o);
+ const close=()=>o.remove();o.querySelector("#cancelCh").onclick=close;o.querySelector("#cancelChX").onclick=close;o.addEventListener("click",e=>{if(e.target===o)close()});
+ o.querySelector("#casaHowEdit").addEventListener("submit",e=>{e.preventDefault();const all=loadCasaHowCustom();all[id]={title:o.querySelector("#chTitle").value.trim()||h.title,time:o.querySelector("#chTime").value.trim()||h.time,products:casaHowList(o.querySelector("#chProducts").value),materials:casaHowList(o.querySelector("#chMaterials").value),steps:casaHowList(o.querySelector("#chSteps").value),tip:o.querySelector("#chTip").value.trim()||h.tip};saveCasaHowCustom(all);close();openCasaHow(id)});
 }
 
 function openCasaHow(id){
@@ -1272,11 +1287,11 @@ function renderCasa(){
  app.innerHTML=`<section class="hero"><h2>🏠 Casa</h2><p>Uma casa funcional, sem transformar a manutenção em uma segunda jornada.</p></section>
  <div class="home-principle card"><span class="eyebrow">REGRA DA CASA</span><strong>Agrupar. Delegar. Adiar quando puder.</strong><p>Não espalhar microtarefas pelo dia. O essencial entra em blocos; o resto pode esperar.</p></div>
  <div class="home-summary"><div class="card"><span>Rotinas</span><b>${all.length}</b></div><div class="card"><span>Feitas agora</span><b>${done}</b></div></div>
- <div class="section-title">⏰ HORÁRIOS DA CASA</div>
- <div class="card casa-schedule-card"><p class="note">Os horários são o ponto de partida da rotina. Eles organizam a casa sem deixar que ela organize você.</p><div class="casa-schedule">${all.filter(t=>casaTime(t.id) && casaTime(t.id)!="ao fim do ciclo").slice().sort((a,b)=>String(casaTime(a.id)).localeCompare(String(casaTime(b.id)))).map(t=>`<div class="casa-schedule-row"><span class="casa-time">${escapeHtml(casaTime(t.id))}</span><strong>${escapeHtml(t.name)}</strong></div>`).join("")}</div></div>
  <div class="section-title">ROTINAS</div>
  <div class="list">${d.areas.map(a=>`<div class="card home-area"><div class="panel-head"><h3>${a.icon} ${escapeHtml(a.title)}</h3><span class="pill">${a.tasks.length}</span></div>
  ${a.tasks.length?a.tasks.map(t=>`<div class="home-task-wrap"><label class="home-task ${t.done?"done":""}"><input type="checkbox" data-casa-task="${a.id}|${t.id}" ${t.done?"checked":""}><span><strong>${escapeHtml(t.name)}</strong><small>⏱️ ${escapeHtml(casaDuration(t.id))} · ⏰ ${escapeHtml(casaTime(t.id))} · ${escapeHtml(t.freq)} · ${escapeHtml(t.when)}</small></span></label><div class="home-task-actions">${CASA_HOW[t.id]?`<button type="button" class="home-how" data-casa-how="${t.id}">Como fazer →</button>`:""}<button type="button" class="home-edit" data-casa-edit="${t.id}">Editar</button></div></div>`).join(""):`<p class="note">Sem rotina cadastrada. Mantemos espaço para incluir apenas o que realmente for necessário.</p>`}</div>`).join("")}</div>
+ <div class="section-title">⏰ HORÁRIOS DA CASA</div>
+ <div class="card casa-schedule-card"><p class="note">Esses horários são referências para encaixe no dia — não uma agenda rígida.</p><div class="casa-schedule">${all.filter(t=>casaTime(t.id) && casaTime(t.id)!="ao fim do ciclo").slice().sort((a,b)=>String(casaTime(a.id)).localeCompare(String(casaTime(b.id)))).map(t=>`<div class="casa-schedule-row"><span class="casa-time">${escapeHtml(casaTime(t.id))}</span><strong>${escapeHtml(t.name)}</strong></div>`).join("")}</div></div>
  <div class="section-title">📖 MANUAL DA CASA · PROCEDIMENTOS</div><div class="list">${renderCasaManual()}</div><div class="section-title">🧪 RECEITAS DA CASA</div><div class="list">${renderCasaRecipes()}</div><div class="section-title">🧴 INVENTÁRIO DA CASA</div>${renderCasaInventory()}
  <div class="section-title">💡 DICAS PARA A CASA</div>
  <div class="card casa-web-card"><p class="note">Quando quiser aprofundar uma tarefa, abra um caminho para a internet. O conteúdo externo é complementar; o essencial continua dentro da BERTH.A.</p><div class="casa-web-grid">${CASA_WEB.map(([label,url])=>`<a class="casa-web-link" href="${url}" target="_blank" rel="noopener">${label}<span>↗</span></a>`).join("")}</div></div>
