@@ -1,0 +1,18 @@
+BERTH.A v2.8.22 — RECUPERAÇÃO DA NAVEGAÇÃO
+
+Objetivo: restaurar a barra inferior e as rotas (inclusive Exercícios) sem perder a lógica funcional aprovada da v2.8.18.
+
+Arquivos novos com nomes inéditos para evitar cache antigo:
+- app-v2.8.22.js
+- bertha-time-v2.8.22.js
+
+No index.html use:
+<script src="app-v2.8.22.js?v=2822"></script>
+<script src="bertha-time-v2.8.22.js?v=2822"></script>
+
+Mantenha work-v12.js e finance-v6.js como estão.
+
+No sw.js use um cache novo, por exemplo:
+const CACHE = "bertha-v86-recovery-2822";
+
+Mudança principal: app-v2.8.22.js é a base funcional estável v2.8.18; o motor de tempo foi impedido de reconstruir ou assumir a navegação inferior. A navegação global volta a ser responsabilidade exclusiva do app.
