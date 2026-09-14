@@ -10,6 +10,15 @@
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="apple-touch-icon" sizes="512x512" href="bertha-icon-512.png">
 <link rel="stylesheet" href="style.css">
+<style id="bertha-v2856-idea-modal-radius">
+/* v2.8.56 — ajuste cirúrgico: contorno externo do modal Criação & Ideias.
+   O JS injeta .study-v10-modal depois do CSS principal e, no iPhone, força 24px.
+   Este seletor específico + !important vence essa regra sem alterar outros modais. */
+#ideaDialog #ideaForm.bertha-modal.study-v10-modal {
+  border-radius: 40px !important;
+  overflow: hidden !important;
+}
+</style>
 <title>BERTH.A</title>
 </head>
 <body>
@@ -44,7 +53,7 @@
 </form>
 </dialog>
 
-<script src="app-v2.8.55.js?v=2855"></script>
+<script src="app-v2.8.56.js?v=2856"></script>
 
 <dialog id="moduleMenu">
 <div class="module-sheet">
@@ -65,7 +74,7 @@
 </dialog>
 
 <script src="work-v12.js?v=12.4"></script>
-<script src="bertha-time-v2.8.55.js?v=2855"></script>
+<script src="bertha-time-v2.8.56.js?v=2856"></script>
 
 </body>
 </html>
