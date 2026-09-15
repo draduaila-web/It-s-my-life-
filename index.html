@@ -99,7 +99,7 @@ window.berthaSchedulePush = async function(item){
         done();
       }));
     } catch (_) {}
-    return {ok:false,message:'Diagnóstico push — Service Worker: ' + swState + '; assinatura nativa: ' + nativePush + '; token OneSignal: ' + osToken + '; optedIn: ' + osOptedIn + '; Subscription ID: ausente. Envie este aviso.'};
+    return {ok:false,message:'Diagnóstico v80 — Service Worker: ' + swState + '; assinatura nativa: ' + nativePush + '; token OneSignal: ' + osToken + '; optedIn: ' + osOptedIn + '; Subscription ID: ausente. Envie este aviso.'};
   }
   const date = item.dueDate || new Date().toISOString().slice(0,10);
   let notifyTime = item.notifyTime || '';
@@ -187,7 +187,7 @@ window.OneSignalDeferred.push(async function(OneSignal){
 </dialog>
 
 <script src="work-v12.js?v=12.4"></script>
-<script src="bertha-time-v2.8.76.js?v=2877"></script>
+<script src="bertha-time-v2.8.80.js?v=2880"></script>
 
 </body>
 </html>
