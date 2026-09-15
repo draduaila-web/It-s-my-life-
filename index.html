@@ -136,7 +136,7 @@ window.berthaSchedulePush = async function(item){
     } catch (error) { optInResult = (error?.name || 'Error') + ': ' + (error?.message || String(error)); }
     const initErr = window.berthaOneSignalInitError || 'nenhum';
     const permission = (typeof Notification !== 'undefined' ? Notification.permission : 'indisponível');
-    return {ok:false,message:'Diagnóstico v85 — permissão: ' + permission + '; SW: ' + swState + '; scope: ' + swScope + '; script: ' + swScript + '; assinatura nativa: ' + nativePush + '; token: ' + osToken + '; optedIn: ' + osOptedIn + '; optIn: ' + optInResult + '; init: ' + initErr + '; Subscription ID: ausente. Envie este aviso.'};
+    return {ok:false,message:'Diagnóstico v86 — permissão: ' + permission + '; SW: ' + swState + '; scope: ' + swScope + '; script: ' + swScript + '; assinatura nativa: ' + nativePush + '; token: ' + osToken + '; optedIn: ' + osOptedIn + '; optIn: ' + optInResult + '; init: ' + initErr + '; Subscription ID: ausente. Envie este aviso.'};
   }
   const date = item.dueDate || new Date().toISOString().slice(0,10);
   let notifyTime = item.notifyTime || '';
@@ -156,6 +156,130 @@ window.berthaSchedulePush = async function(item){
   if(!response.ok) return {ok:false,message:data?.error || 'A tarefa foi salva, mas o servidor não aceitou o agendamento.'};
   return {ok:!!data.ok, data};
 };
+
+window.berthaPushStageReport = async function(item){
+  const stages = [];
+  const add = (name, value) => stages.push(name + "=" + value);
+  const timeoutValue = Symbol("timeout");
+  const wait = async (promise, ms) => {
+    try {
+      return await Promise.race([
+        Promise.resolve(promise),
+        new Promise(resolve => setTimeout(() => resolve(timeoutValue), ms))
+      ]);
+    } catch (e) {
+      return {__error: (e?.name || "Error") + ": " + (e?.message || String(e))};
+    }
+  };
+
+  add("permission", (typeof Notification !== "undefined" ? Notification.permission : "indisponível"));
+
+  let reg = null;
+  try {
+    reg = await navigator.serviceWorker.getRegistration("/It-s-my-life-/");
+    add("SW", reg ? (reg.active ? "ativo" : reg.waiting ? "waiting" : reg.installing ? "installing" : "registrado") : "ausente");
+    add("scope", reg?.scope || "—");
+    add("script", (reg?.active || reg?.waiting || reg?.installing)?.scriptURL || "—");
+    if (reg?.pushManager) {
+      const nativeSub = await wait(reg.pushManager.getSubscription(), 1500);
+      if (nativeSub === timeoutValue) add("nativeSub", "TIMEOUT");
+      else if (nativeSub?.__error) add("nativeSub", nativeSub.__error);
+      else add("nativeSub", nativeSub ? "criada" : "ausente");
+    } else add("nativeSub", "PushManager ausente");
+  } catch (e) {
+    add("SW", (e?.name || "Error") + ": " + (e?.message || String(e)));
+  }
+
+  let OneSignalObj = null;
+  const deferredProbe = await wait(new Promise(resolve => {
+    try {
+      window.OneSignalDeferred.push(async function(OneSignal){ resolve(OneSignal); });
+    } catch (e) { resolve({__probeError:e}); }
+  }), 2000);
+
+  if (deferredProbe === timeoutValue) {
+    add("SDK", "Deferred TIMEOUT");
+  } else if (deferredProbe?.__probeError) {
+    add("SDK", (deferredProbe.__probeError?.name || "Error") + ": " + (deferredProbe.__probeError?.message || String(deferredProbe.__probeError)));
+  } else {
+    OneSignalObj = deferredProbe;
+    add("SDK", "callback OK");
+  }
+
+  add("initError", window.berthaOneSignalInitError || "nenhum");
+
+  let subscriptionId = null;
+  if (OneSignalObj) {
+    try {
+      add("supported", OneSignalObj.Notifications.isPushSupported() ? "sim" : "não");
+      add("OSpermission", OneSignalObj.Notifications.permission ? "sim" : "não");
+      add("optedInAntes", OneSignalObj.User.PushSubscription.optedIn ? "sim" : "não");
+      add("tokenAntes", OneSignalObj.User.PushSubscription.token ? "presente" : "ausente");
+      add("idAntes", OneSignalObj.User.PushSubscription.id || "ausente");
+
+      const opt = await wait(OneSignalObj.User.PushSubscription.optIn(), 3000);
+      if (opt === timeoutValue) add("optIn", "TIMEOUT 3s");
+      else if (opt?.__error) add("optIn", opt.__error);
+      else add("optIn", "resolveu");
+
+      await new Promise(r => setTimeout(r, 700));
+      add("optedInDepois", OneSignalObj.User.PushSubscription.optedIn ? "sim" : "não");
+      add("tokenDepois", OneSignalObj.User.PushSubscription.token ? "presente" : "ausente");
+      subscriptionId = OneSignalObj.User.PushSubscription.id || null;
+      add("idDepois", subscriptionId || "ausente");
+    } catch (e) {
+      add("OneSignal", (e?.name || "Error") + ": " + (e?.message || String(e)));
+    }
+  }
+
+  if (!subscriptionId) {
+    return {ok:false, message:"Diagnóstico v86\n" + stages.join("\n")};
+  }
+
+  // Only test the backend after a real OneSignal subscription exists.
+  try {
+    const date = item.dueDate || new Date().toISOString().slice(0,10);
+    let notifyTime = item.notifyTime || "";
+    if (item.notifyOffset === "period-start") notifyTime = ({morning:"05:16",afternoon:"12:00",night:"18:00",evening:"18:00"})[item.period] || "";
+    if (!notifyTime) notifyTime = item.time || "";
+    if (!notifyTime) return {ok:false,message:"Diagnóstico v86\n" + stages.join("\n") + "\nbackend=não chamado: sem horário"};
+    const [h,m] = notifyTime.split(":").map(Number);
+    const [y,mo,d] = date.split("-").map(Number);
+    const when = new Date(y,mo-1,d,h,m,0,0);
+    if (/^(10|30|60)$/.test(String(item.notifyOffset))) when.setMinutes(when.getMinutes()-Number(item.notifyOffset));
+    if (when.getTime() <= Date.now()+15000) return {ok:false,message:"Diagnóstico v86\n" + stages.join("\n") + "\nbackend=não chamado: horário não está no futuro"};
+
+    const backendResult = await wait(fetch(window.BERTHA_PUSH_BACKEND + "/api/push", {
+      method:"POST",
+      headers:{"Content-Type":"application/json"},
+      body:JSON.stringify({
+        title:"BERTH.A",
+        message:item.title || item.name || "Você tem uma tarefa agora.",
+        subscriptionId,
+        sendAfter:when.toISOString(),
+        url:"https://draduaila-web.github.io/It-s-my-life/"
+      })
+    }), 4000);
+
+    if (backendResult === timeoutValue) {
+      add("backend", "TIMEOUT 4s");
+      return {ok:false,message:"Diagnóstico v86\n" + stages.join("\n")};
+    }
+    if (backendResult?.__error) {
+      add("backend", backendResult.__error);
+      return {ok:false,message:"Diagnóstico v86\n" + stages.join("\n")};
+    }
+    const body = await backendResult.json().catch(()=>({}));
+    add("backendHTTP", String(backendResult.status));
+    add("backend", body?.ok ? "OK" : (body?.error || "resposta sem ok"));
+    return {ok:!!body?.ok, message:"Diagnóstico v86\n" + stages.join("\n"), data:body};
+  } catch (e) {
+    add("backend", (e?.name || "Error") + ": " + (e?.message || String(e)));
+    return {ok:false,message:"Diagnóstico v86\n" + stages.join("\n")};
+  }
+};
+window.berthaSchedulePush = window.berthaPushStageReport;
+
 window.OneSignalDeferred.push(async function(OneSignal){
   try {
     OneSignal.Debug.setLogLevel('trace');
@@ -234,7 +358,7 @@ window.OneSignalDeferred.push(async function(OneSignal){
 </dialog>
 
 <script src="work-v12.js?v=12.4"></script>
-<script src="bertha-time-v2.8.84.js?v=2884"></script>
+<script src="bertha-time-v2.8.86.js?v=2886"></script>
 
 </body>
 </html>
