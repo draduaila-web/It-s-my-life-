@@ -1050,12 +1050,12 @@
           try {
             const scheduled=await Promise.race([
               window.berthaSchedulePush(item),
-              new Promise(resolve=>setTimeout(()=>resolve({ok:false,message:'Diagnóstico v87\nfluxoCompleto=TIMEOUT 12s'}),12000))
+              new Promise(resolve=>setTimeout(()=>resolve({ok:false,message:'Diagnóstico v88\nfluxoCompleto=TIMEOUT 12s'}),12000))
             ]);
             if(!scheduled?.ok){ alert(scheduled?.message||'A tarefa foi salva, mas o aviso não foi agendado.'); }
           } catch(error){
             console.warn('BERTH.A schedule push',error);
-            alert('Diagnóstico v87\nerro='+(error?.name||'Error')+': '+(error?.message||String(error)));
+            alert('Diagnóstico v88\nerro='+(error?.name||'Error')+': '+(error?.message||String(error)));
           }
         },0);
       }
