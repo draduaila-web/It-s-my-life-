@@ -105,7 +105,7 @@ window.berthaSchedulePush = async function(item){
     let osOptedIn = 'não';
     let optInResult = 'sem erro capturado';
     try {
-      const reg = await navigator.serviceWorker.getRegistration('/It-s-my-life-/push/onesignal/');
+      const reg = await navigator.serviceWorker.getRegistration('/It-s-my-life-/');
       if (reg) {
         swState = reg.active ? 'ativo' : (reg.installing ? 'instalando' : (reg.waiting ? 'aguardando' : 'registrado'));
         swScope = reg.scope || '—';
@@ -136,7 +136,7 @@ window.berthaSchedulePush = async function(item){
     } catch (error) { optInResult = (error?.name || 'Error') + ': ' + (error?.message || String(error)); }
     const initErr = window.berthaOneSignalInitError || 'nenhum';
     const permission = (typeof Notification !== 'undefined' ? Notification.permission : 'indisponível');
-    return {ok:false,message:'Diagnóstico v84 — permissão: ' + permission + '; SW: ' + swState + '; scope: ' + swScope + '; script: ' + swScript + '; assinatura nativa: ' + nativePush + '; token: ' + osToken + '; optedIn: ' + osOptedIn + '; optIn: ' + optInResult + '; init: ' + initErr + '; Subscription ID: ausente. Envie este aviso.'};
+    return {ok:false,message:'Diagnóstico v85 — permissão: ' + permission + '; SW: ' + swState + '; scope: ' + swScope + '; script: ' + swScript + '; assinatura nativa: ' + nativePush + '; token: ' + osToken + '; optedIn: ' + osOptedIn + '; optIn: ' + optInResult + '; init: ' + initErr + '; Subscription ID: ausente. Envie este aviso.'};
   }
   const date = item.dueDate || new Date().toISOString().slice(0,10);
   let notifyTime = item.notifyTime || '';
@@ -161,8 +161,8 @@ window.OneSignalDeferred.push(async function(OneSignal){
     OneSignal.Debug.setLogLevel('trace');
     await OneSignal.init({
       appId: "18d49ac6-cdad-4780-8437-cbdcd025a680",
-      serviceWorkerPath: "It-s-my-life-/push/onesignal/OneSignalSDKWorker.js",
-      serviceWorkerParam: { scope: "/It-s-my-life-/push/onesignal/" },
+      serviceWorkerPath: "It-s-my-life-/sw.js",
+      serviceWorkerParam: { scope: "/It-s-my-life-/" },
       autoResubscribe: true,
       welcomeNotification: { disable: true }
     });
