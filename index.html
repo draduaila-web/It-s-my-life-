@@ -24,6 +24,9 @@
 <script>
 window.OneSignalDeferred = window.OneSignalDeferred || [];
 window.berthaPushReady = false;
+window.berthaOneSignalInitError = '';
+window.berthaOneSignalOptInError = '';
+window.berthaPushChangeTrace = '';
 window.berthaGetPushSubscriptionId = async function(){
   return new Promise((resolve)=>{
     window.OneSignalDeferred.push(async function(OneSignal){
@@ -44,8 +47,13 @@ window.berthaGetPushSubscriptionId = async function(){
         const existingId = OneSignal.User.PushSubscription.id || null;
         if (existingId) { finish(existingId); return; }
         OneSignal.User.PushSubscription.addEventListener('change', onChange);
-        if (OneSignal.Notifications.permission && !OneSignal.User.PushSubscription.optedIn) {
-          await OneSignal.User.PushSubscription.optIn();
+        if (OneSignal.Notifications.permission && !OneSignal.User.PushSubscription.token) {
+          try {
+            await OneSignal.User.PushSubscription.optIn();
+          } catch (error) {
+            window.berthaOneSignalOptInError = (error?.name || 'Error') + ': ' + (error?.message || String(error));
+            console.warn('BERTH.A OneSignal optIn', error);
+          }
         }
         const afterOptInId = OneSignal.User.PushSubscription.id || null;
         if (afterOptInId) { finish(afterOptInId); return; }
@@ -63,7 +71,14 @@ window.berthaRequestPushPermission = async function(){
       try {
         if (!OneSignal.Notifications.isPushSupported()) { resolve({ok:false,reason:'unsupported'}); return; }
         await OneSignal.Notifications.requestPermission();
-        if (OneSignal.Notifications.permission) await OneSignal.User.PushSubscription.optIn();
+        if (OneSignal.Notifications.permission) {
+          try {
+            await OneSignal.User.PushSubscription.optIn();
+          } catch (error) {
+            window.berthaOneSignalOptInError = (error?.name || 'Error') + ': ' + (error?.message || String(error));
+            throw error;
+          }
+        }
         const ok = !!OneSignal.Notifications.permission && !!OneSignal.User.PushSubscription.optedIn;
         window.berthaPushReady = ok;
         const subscriptionId = ok ? await window.berthaGetPushSubscriptionId() : null;
@@ -80,26 +95,45 @@ window.berthaSchedulePush = async function(item){
   const subscriptionId = await window.berthaGetPushSubscriptionId();
   if (!subscriptionId) {
     let swState = 'não registrado';
+    let swScope = '—';
+    let swScript = '—';
     let nativePush = 'não verificada';
     let osToken = 'ausente';
     let osOptedIn = 'não';
+    let optInResult = 'sem erro capturado';
     try {
       const reg = await navigator.serviceWorker.getRegistration('/It-s-my-life-/push/onesignal/');
       if (reg) {
         swState = reg.active ? 'ativo' : (reg.installing ? 'instalando' : (reg.waiting ? 'aguardando' : 'registrado'));
-        try { nativePush = (await reg.pushManager.getSubscription()) ? 'criada' : 'ausente'; } catch (_) { nativePush = 'erro'; }
+        swScope = reg.scope || '—';
+        swScript = (reg.active || reg.waiting || reg.installing)?.scriptURL || '—';
+        try { nativePush = (await reg.pushManager.getSubscription()) ? 'criada' : 'ausente'; } catch (error) { nativePush = 'erro ' + (error?.name || ''); }
       }
-    } catch (_) {}
+    } catch (error) { swState = 'erro ' + (error?.name || ''); }
     try {
-      await new Promise((done)=>window.OneSignalDeferred.push(function(OneSignal){
+      await new Promise((done)=>window.OneSignalDeferred.push(async function(OneSignal){
         try {
           osToken = OneSignal.User.PushSubscription.token ? 'presente' : 'ausente';
           osOptedIn = OneSignal.User.PushSubscription.optedIn ? 'sim' : 'não';
-        } catch (_) {}
+          if (!OneSignal.User.PushSubscription.token) {
+            try {
+              await OneSignal.User.PushSubscription.optIn();
+              optInResult = 'optIn resolveu sem exceção';
+            } catch (error) {
+              window.berthaOneSignalOptInError = (error?.name || 'Error') + ': ' + (error?.message || String(error));
+              optInResult = window.berthaOneSignalOptInError;
+            }
+          }
+          await new Promise(r=>setTimeout(r,1200));
+          osToken = OneSignal.User.PushSubscription.token ? 'presente' : 'ausente';
+          osOptedIn = OneSignal.User.PushSubscription.optedIn ? 'sim' : 'não';
+        } catch (error) { optInResult = (error?.name || 'Error') + ': ' + (error?.message || String(error)); }
         done();
       }));
-    } catch (_) {}
-    return {ok:false,message:'Diagnóstico v82 — Service Worker: ' + swState + '; assinatura nativa: ' + nativePush + '; token OneSignal: ' + osToken + '; optedIn: ' + osOptedIn + '; Subscription ID: ausente. Envie este aviso.'};
+    } catch (error) { optInResult = (error?.name || 'Error') + ': ' + (error?.message || String(error)); }
+    const initErr = window.berthaOneSignalInitError || 'nenhum';
+    const permission = (typeof Notification !== 'undefined' ? Notification.permission : 'indisponível');
+    return {ok:false,message:'Diagnóstico v83 — permissão: ' + permission + '; SW: ' + swState + '; scope: ' + swScope + '; script: ' + swScript + '; assinatura nativa: ' + nativePush + '; token: ' + osToken + '; optedIn: ' + osOptedIn + '; optIn: ' + optInResult + '; init: ' + initErr + '; Subscription ID: ausente. Envie este aviso.'};
   }
   const date = item.dueDate || new Date().toISOString().slice(0,10);
   let notifyTime = item.notifyTime || '';
@@ -121,6 +155,7 @@ window.berthaSchedulePush = async function(item){
 };
 window.OneSignalDeferred.push(async function(OneSignal){
   try {
+    OneSignal.Debug.setLogLevel('trace');
     await OneSignal.init({
       appId: "18d49ac6-cdad-4780-8437-cbdcd025a680",
       serviceWorkerPath: "It-s-my-life-/push/onesignal/OneSignalSDKWorker.js",
@@ -128,8 +163,17 @@ window.OneSignalDeferred.push(async function(OneSignal){
       autoResubscribe: true,
       welcomeNotification: { disable: true }
     });
+    try {
+      OneSignal.User.PushSubscription.addEventListener('change', function(event){
+        const c = event?.current || {};
+        window.berthaPushChangeTrace = 'id=' + (c.id || '—') + ', token=' + (c.token ? 'sim' : 'não') + ', optedIn=' + (c.optedIn ? 'sim' : 'não');
+      });
+    } catch (_) {}
     window.berthaPushReady = !!OneSignal.Notifications.permission && !!OneSignal.User.PushSubscription.optedIn;
-  } catch (error) { console.warn('BERTH.A OneSignal init', error); }
+  } catch (error) {
+    window.berthaOneSignalInitError = (error?.name || 'Error') + ': ' + (error?.message || String(error));
+    console.warn('BERTH.A OneSignal init', error);
+  }
 });
 </script>
 <title>BERTH.A</title>
