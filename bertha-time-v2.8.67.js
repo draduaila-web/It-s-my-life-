@@ -1085,6 +1085,16 @@
   const RITUAL_EVENTS_KEY='bertha.ritual.events.v2';
   const CAPILLARY_SETTINGS_KEY='bertha.ritual.capilar.settings.v2';
   const SELFCARE_SETTINGS_KEY='bertha.ritual.autocuidado.settings.v2';
+  const RITUAL_PRODUCTS_KEY='bertha.ritual.products.v1';
+  const SHARED_SHOP_KEY_RITUAL='minha-vida.compras.v1';
+  function ritualProductsStore(){ return read(RITUAL_PRODUCTS_KEY,{}); }
+  function saveRitualProductsStore(v){ write(RITUAL_PRODUCTS_KEY,v); }
+  function ritualProductKey(id,ev){ return id==='autocuidado'?`autocuidado:${String(ev?.title||'geral').toLowerCase()}`:id==='capilar'?`capilar:${ev?.type||'geral'}`:`custom:${id}`; }
+  function capillaryProductsFromEvent(ev){ if(!ev)return[];const out=[];(ev.tasks||[]).forEach(t=>{const z=String(t||'');if(/^(Shampoo|Condicionador|Sérum):/i.test(z))out.push(z.replace(/^[^:]+:\s*/, '').trim());if(/^Finalização:/i.test(z))z.replace(/^Finalização:\s*/i,'').split('→').map(x=>x.trim()).filter(Boolean).forEach(x=>out.push(x));});return [...new Set(out.filter(Boolean))]; }
+  function ritualProducts(id,ev,r){const st=ritualProductsStore(),key=ritualProductKey(id,ev);if(Array.isArray(st[key]))return st[key];if(id==='capilar')return capillaryProductsFromEvent(ev);if(id!=='autocuidado'&&Array.isArray(r?.products))return r.products;return[];}
+  function addRitualProductToShopping(name,source){name=String(name||'').trim();if(!name)return false;let items=[];try{items=JSON.parse(localStorage.getItem(SHARED_SHOP_KEY_RITUAL)||'[]')||[]}catch{}const key=name.toLocaleLowerCase('pt-BR');if(items.some(x=>!x.done&&String(x.name||x.title||x.item||'').trim().toLocaleLowerCase('pt-BR')===key))return false;items.push({id:`ritual-shop-${Date.now()}-${Math.random().toString(36).slice(2,7)}`,name,source,category:'Autocuidado',cycle:'monthly',createdAt:Date.now(),done:false});localStorage.setItem(SHARED_SHOP_KEY_RITUAL,JSON.stringify(items));return true;}
+  function ritualProductsHtml(id,ev,r){const products=ritualProducts(id,ev,r),source=id==='autocuidado'?`Rituais › Autocuidado › ${ev?.title||r.title}`:`Rituais › ${r.title}`;return `<div class="bertha-section-row"><span>PRODUTOS</span><button type="button" data-edit-ritual-products="${id}">Editar</button></div><div class="bertha-extra-list">${products.length?products.map(x=>`<div class="bertha-extra-card"><span class="bertha-line-icon">${ritualIcon('sparkle')}</span><span><strong>${esc(x)}</strong><small>Produto deste cuidado</small></span><button type="button" data-ritual-buy-name="${esc(x)}" data-ritual-buy-source="${esc(source)}">+ lista</button></div>`).join(''):`<div class="bertha-empty-soft">Nenhum produto específico cadastrado. Toque em Editar para adicionar.</div>`}</div>`;}
+  function ritualProductsDialog(id,ev,r){const key=ritualProductKey(id,ev),current=ritualProducts(id,ev,r),d=document.createElement('dialog');d.className='bertha-dialog bertha-task-dialog';d.innerHTML=`<form class="bertha-task-modal" method="dialog"><div class="bertha-task-modal-head"><div><span>RITUAIS · PRODUTOS</span><h2>${esc(id==='autocuidado'?(ev?.title||'Autocuidado'):r.title)}</h2></div><button type="button" data-close>×</button></div><div class="bertha-task-modal-body"><label class="bertha-task-field"><span>Produtos usados <small>um por linha</small></span><textarea data-products rows="9" placeholder="Ex.: Nome do shampoo\nNome do condicionador">${esc(current.join('\n'))}</textarea></label><div class="bertha-schedule-note">Os nomes ficam salvos neste cuidado. Depois, use “+ lista” para mandar o produto à Lista de Compras sem criar duplicatas pendentes.</div></div><div class="bertha-task-modal-actions"><span></span><div><button class="bertha-task-cancel" type="button" data-close>Cancelar</button><button class="bertha-task-save" type="button" data-save>Salvar</button></div></div></form>`;document.body.appendChild(d);d.querySelectorAll('[data-close]').forEach(b=>b.onclick=()=>{d.close();d.remove()});d.querySelector('[data-save]').onclick=()=>{const vals=d.querySelector('[data-products]').value.split('\n').map(x=>x.trim()).filter(Boolean),st=ritualProductsStore();st[key]=[...new Set(vals)];saveRitualProductsStore(st);if(id!=='capilar'&&id!=='autocuidado'){const arr=read(RITUALS_KEY,[]),i=arr.findIndex(x=>x.id===id);if(i>=0){arr[i].products=st[key];write(RITUALS_KEY,arr)}}d.close();d.remove();rerender();};d.showModal();}
 
   const RITUAL_ICONS={
     hair:`<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 20c-2.8-1.5-4.2-4-4.2-7.2C3.8 7.9 7.2 4 12 4c4.6 0 8.2 3.6 8.2 8.2 0 3.2-1.6 6-4.2 7.8"/><path d="M8.2 19.8c2.2-2.5 2.8-5.4 2.1-8.8M12.1 20c1.8-2.6 2.2-5.5 1.2-8.8M16 19.8c1.1-2.3 1.2-4.8.2-7.4"/><path d="M5.3 9.1c3.1.2 5.5-1.4 6.7-4.8 1.4 3.2 3.6 4.8 6.8 5"/></svg>`,
@@ -1196,19 +1206,6 @@
     return out;
   }
 
-  function registerLifeCompletion(area,title,minutes=0){
-    const e=engine(), now=Date.now();
-    e.history.unshift({itemId:`manual:${area}:${now}`,title,source:area==='autocuidado'?'Autocuidado':'Rituais',category:area==='autocuidado'?'Autocuidado':'Rituais',day:iso(),startedAt:now,endedAt:now,configuredMinutes:+minutes||0,plannedMinutes:+minutes||0,realMinutes:+minutes||0,status:'done',manual:true});
-    write(ENGINE_KEY,e);
-  }
-  function selfcareRegisterItems(){
-    const seen=new Map(); SELFCARE_CYCLE.filter(x=>!x.optional).forEach(x=>{if(!seen.has(x.title))seen.set(x.title,x)}); return [...seen.values()];
-  }
-  function manualRegisterListHtml(id,r){
-    const items=id==='autocuidado'?selfcareRegisterItems():[{title:r.title,minutes:15}];
-    return `<div class="bertha-section-row"><span>REGISTRAR REALIZADO</span></div><div class="bertha-extra-list">${items.map((x,i)=>`<button class="bertha-extra-card" type="button" data-register-life="${id==='autocuidado'?'autocuidado':'rituais'}" data-register-title="${esc(x.title)}" data-register-minutes="${+x.minutes||0}"><span class="bertha-line-icon">${ritualIcon(id==='autocuidado'?'selfcare':(r.icon||'sparkle'))}</span><span><strong>${esc(x.title)}</strong><small>Registrar como realizado hoje</small></span><b>+</b></button>`).join('')}</div>`;
-  }
-
   function renderRituals(){
     const cards=ritualCatalog().map(r=>`
       <button class="bertha-ritual-card" type="button" data-open-ritual="${r.id}">
@@ -1237,11 +1234,11 @@
     return `<section class="bertha-ritual-page">
       <a class="bertha-back-link" href="#rituais">‹ Rituais</a>
       <section class="bertha-ritual-detail-hero"><span class="bertha-line-icon large">${ritualIcon(r.icon)}</span><div><div class="bertha-task-kicker">${esc(r.title).toUpperCase()}</div><h1>${id==='capilar'?'Seu cronograma, no lugar certo.':'Cuidar também é ritual.'}</h1><p>${esc(r.subtitle||'')}</p></div></section>
-      ${manualRegisterListHtml(id,r)}
       ${ev?`<section class="bertha-ritual-today"><div class="bertha-ritual-head"><div><span>HOJE · ${dateLabelLong(new Date())}</span><h2>${esc(ev.title)}</h2><p>${esc(ev.subtitle||'')}</p><small class="bertha-cycle-position">${id==='capilar'?`Dia ${capillaryDay(new Date())} de ${capillaryCycleTotal()}`:`Dia ${ev.cycleDay} de 14`}</small></div><button type="button" data-config-ritual="${id}">Editar</button></div>
         ${ev.optional?`<div class="bertha-free-note">Hoje é um espaço livre. A BERTH.A não transforma descanso em pendência.</div>`:`<div class="bertha-ritual-time">${durationText(ev.minutes)} · ${taskLabelPeriod(ritualSetting(id,ev.type).period||ev.period)}</div>`}
         <div class="bertha-check-steps">${(ev.tasks||[]).map(t=>`<label><input type="checkbox"><span>${esc(t)}</span></label>`).join('')}</div>
       </section>`:''}
+      ${ritualProductsHtml(id,ev,r)}
       <div class="bertha-section-row"><span>PRÓXIMOS DIAS</span>${id==='capilar'?'<button type="button" data-full-capillary>Ver 45 dias</button>':''}</div>
       <div class="bertha-upcoming-list">${upcoming}</div>
       <div class="bertha-section-row"><span>CUIDADOS & EXTRAS</span><button type="button" data-add-ritual-event="${id}">＋ Adicionar</button></div>
@@ -1408,8 +1405,8 @@
   }
   function newRitualDialog(){
     const d=document.createElement('dialog');d.className='bertha-dialog bertha-task-dialog';
-    d.innerHTML=`<form class="bertha-task-modal" method="dialog"><div class="bertha-task-modal-head"><div><span>RITUAIS</span><h2>Novo ritual</h2></div><button type="button" data-close>×</button></div><div class="bertha-task-modal-body"><label class="bertha-task-field"><span>Nome do ritual</span><input data-title placeholder="Ex.: Sono"></label><div class="bertha-task-field"><span>Ícone</span><div class="bertha-icon-picker">${Object.keys(RITUAL_ICONS).map((k,i)=>`<button type="button" data-icon="${k}" class="${i===0?'active':''}">${ritualIcon(k)}</button>`).join('')}</div></div><label class="bertha-task-field"><span>Descrição <small>opcional</small></span><input data-subtitle placeholder="O que faz parte deste ritual?"></label></div><div class="bertha-task-modal-actions"><span></span><div><button class="bertha-task-cancel" type="button" data-close>Cancelar</button><button class="bertha-task-save" type="button" data-save>Criar</button></div></div></form>`;
-    document.body.appendChild(d);d.querySelectorAll('[data-close]').forEach(b=>b.onclick=()=>{d.close();d.remove()});d.querySelectorAll('[data-icon]').forEach(b=>b.onclick=()=>d.querySelectorAll('[data-icon]').forEach(z=>z.classList.toggle('active',z===b)));d.querySelector('[data-save]').onclick=()=>{const title=d.querySelector('[data-title]').value.trim();if(!title)return;const arr=read(RITUALS_KEY,[]),id='ritual-'+Date.now();arr.push({id,title,subtitle:d.querySelector('[data-subtitle]').value.trim(),icon:d.querySelector('[data-icon].active')?.dataset.icon||'sparkle'});write(RITUALS_KEY,arr);d.close();d.remove();location.hash='#ritual-'+id;};d.showModal();
+    d.innerHTML=`<form class="bertha-task-modal" method="dialog"><div class="bertha-task-modal-head"><div><span>RITUAIS</span><h2>Novo ritual</h2></div><button type="button" data-close>×</button></div><div class="bertha-task-modal-body"><label class="bertha-task-field"><span>Nome do ritual</span><input data-title placeholder="Ex.: Sono"></label><div class="bertha-task-field"><span>Ícone</span><div class="bertha-icon-picker">${Object.keys(RITUAL_ICONS).map((k,i)=>`<button type="button" data-icon="${k}" class="${i===0?'active':''}">${ritualIcon(k)}</button>`).join('')}</div></div><label class="bertha-task-field"><span>Descrição <small>opcional</small></span><input data-subtitle placeholder="O que faz parte deste ritual?"></label><label class="bertha-task-field"><span>Etapas <small>opcional · uma por linha</small></span><textarea data-custom-steps rows="4" placeholder="Ex.: Preparar o ambiente"></textarea></label><label class="bertha-task-field"><span>Produtos <small>opcional · um por linha</small></span><textarea data-custom-products rows="4" placeholder="Ex.: Nome do produto"></textarea></label></div><div class="bertha-task-modal-actions"><span></span><div><button class="bertha-task-cancel" type="button" data-close>Cancelar</button><button class="bertha-task-save" type="button" data-save>Criar</button></div></div></form>`;
+    document.body.appendChild(d);d.querySelectorAll('[data-close]').forEach(b=>b.onclick=()=>{d.close();d.remove()});d.querySelectorAll('[data-icon]').forEach(b=>b.onclick=()=>d.querySelectorAll('[data-icon]').forEach(z=>z.classList.toggle('active',z===b)));d.querySelector('[data-save]').onclick=()=>{const title=d.querySelector('[data-title]').value.trim();if(!title)return;const arr=read(RITUALS_KEY,[]),id='ritual-'+Date.now();arr.push({id,title,subtitle:d.querySelector('[data-subtitle]').value.trim(),icon:d.querySelector('[data-icon].active')?.dataset.icon||'sparkle',steps:d.querySelector('[data-custom-steps]').value.split('\n').map(x=>x.trim()).filter(Boolean),products:d.querySelector('[data-custom-products]').value.split('\n').map(x=>x.trim()).filter(Boolean)});write(RITUALS_KEY,arr);d.close();d.remove();location.hash='#ritual-'+id;};d.showModal();
   }
 
   function applyHiddenRituals(){
@@ -1464,7 +1461,6 @@
   }
 
   function bindRitualDetail(id){
-    document.querySelectorAll('[data-register-life]').forEach(b=>b.onclick=()=>{registerLifeCompletion(b.dataset.registerLife,b.dataset.registerTitle,+b.dataset.registerMinutes||0);const old=b.querySelector('small');if(old)old.textContent='Registrado hoje';b.disabled=true;});
     document.querySelector('[data-config-ritual]')?.addEventListener('click',()=>ritualSettingsDialog(id));
     document.querySelector('[data-add-ritual-event]')?.addEventListener('click',()=>ritualEventDialog(id));
     document.querySelectorAll('[data-edit-ritual-event]').forEach(b=>b.onclick=()=>ritualEventDialog(id,b.dataset.editRitualEvent));
@@ -1473,6 +1469,8 @@
     document.querySelector('[data-repeat-cycle]')?.addEventListener('click',()=>cloneCycle(id,false));
     document.querySelector('[data-review-cycle]')?.addEventListener('click',()=>cloneCycle(id,true));
     document.querySelector('[data-end-cycle]')?.addEventListener('click',()=>{if(confirm('Encerrar este ciclo? O histórico será preservado.')) endCycle(id);});
+    document.querySelectorAll('[data-edit-ritual-products]').forEach(b=>b.onclick=()=>{const rid=b.dataset.editRitualProducts,r=ritualCatalog().find(x=>x.id===rid)||defaultRituals()[0],ev=ritualDetailData(rid,new Date());ritualProductsDialog(rid,ev,r)});
+    document.querySelectorAll('[data-ritual-buy-name]').forEach(b=>b.onclick=()=>{const added=addRitualProductToShopping(b.dataset.ritualBuyName,b.dataset.ritualBuySource);b.textContent=added?'na lista':'já está';b.disabled=true;});
     document.querySelector('[data-delete-ritual]')?.addEventListener('click',()=>deleteRitual(id));
   }
 
