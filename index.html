@@ -99,7 +99,7 @@ window.berthaSchedulePush = async function(item){
         done();
       }));
     } catch (_) {}
-    return {ok:false,message:'Diagnóstico v81 — Service Worker: ' + swState + '; assinatura nativa: ' + nativePush + '; token OneSignal: ' + osToken + '; optedIn: ' + osOptedIn + '; Subscription ID: ausente. Envie este aviso.'};
+    return {ok:false,message:'Diagnóstico v82 — Service Worker: ' + swState + '; assinatura nativa: ' + nativePush + '; token OneSignal: ' + osToken + '; optedIn: ' + osOptedIn + '; Subscription ID: ausente. Envie este aviso.'};
   }
   const date = item.dueDate || new Date().toISOString().slice(0,10);
   let notifyTime = item.notifyTime || '';
