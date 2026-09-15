@@ -19,6 +19,38 @@
   overflow: hidden !important;
 }
 </style>
+
+<script src="https://cdn.onesignal.com/sdks/web/v16/OneSignalSDK.page.js" defer></script>
+<script>
+window.OneSignalDeferred = window.OneSignalDeferred || [];
+window.berthaPushReady = false;
+window.berthaRequestPushPermission = async function(){
+  return new Promise((resolve)=>{
+    window.OneSignalDeferred.push(async function(OneSignal){
+      try {
+        if (!OneSignal.Notifications.isPushSupported()) { resolve({ok:false,reason:'unsupported'}); return; }
+        await OneSignal.Notifications.requestPermission();
+        if (OneSignal.Notifications.permission) await OneSignal.User.PushSubscription.optIn();
+        const ok = !!OneSignal.Notifications.permission && !!OneSignal.User.PushSubscription.optedIn;
+        window.berthaPushReady = ok;
+        resolve({ok, subscriptionId: OneSignal.User.PushSubscription.id || null});
+      } catch (error) { console.warn('BERTH.A push permission', error); resolve({ok:false,reason:'error'}); }
+    });
+  });
+};
+window.OneSignalDeferred.push(async function(OneSignal){
+  try {
+    await OneSignal.init({
+      appId: "18d49ac6-cdad-4780-8437-cbdcd025a680",
+      serviceWorkerPath: "It-s-my-life-/push/onesignal/OneSignalSDKWorker.js",
+      serviceWorkerParam: { scope: "/It-s-my-life-/push/onesignal/" },
+      autoResubscribe: true,
+      welcomeNotification: { disable: true }
+    });
+    window.berthaPushReady = !!OneSignal.Notifications.permission && !!OneSignal.User.PushSubscription.optedIn;
+  } catch (error) { console.warn('BERTH.A OneSignal init', error); }
+});
+</script>
 <title>BERTH.A</title>
 </head>
 <body>
@@ -53,7 +85,7 @@
 </form>
 </dialog>
 
-<script src="app-v2.8.73.js?v=2871"></script>
+<script src="app-v2.8.74.js?v=2874"></script>
 
 <dialog id="moduleMenu">
 <div class="module-sheet">
@@ -74,7 +106,7 @@
 </dialog>
 
 <script src="work-v12.js?v=12.4"></script>
-<script src="bertha-time-v2.8.73.js?v=2871"></script>
+<script src="bertha-time-v2.8.74.js?v=2871"></script>
 
 </body>
 </html>
