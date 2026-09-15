@@ -27,6 +27,9 @@ window.berthaPushReady = false;
 window.berthaOneSignalInitError = '';
 window.berthaOneSignalOptInError = '';
 window.berthaPushChangeTrace = '';
+window.berthaWithTimeout = function(promise, ms, label){
+  return Promise.race([promise, new Promise((_,reject)=>setTimeout(()=>reject(new Error((label||'operação')+' TIMEOUT após '+ms+'ms')),ms))]);
+};
 window.berthaGetPushSubscriptionId = async function(){
   return new Promise((resolve)=>{
     window.OneSignalDeferred.push(async function(OneSignal){
@@ -49,7 +52,7 @@ window.berthaGetPushSubscriptionId = async function(){
         OneSignal.User.PushSubscription.addEventListener('change', onChange);
         if (OneSignal.Notifications.permission && !OneSignal.User.PushSubscription.token) {
           try {
-            await OneSignal.User.PushSubscription.optIn();
+            await window.berthaWithTimeout(OneSignal.User.PushSubscription.optIn(), 4000, 'optIn');
           } catch (error) {
             window.berthaOneSignalOptInError = (error?.name || 'Error') + ': ' + (error?.message || String(error));
             console.warn('BERTH.A OneSignal optIn', error);
@@ -73,7 +76,7 @@ window.berthaRequestPushPermission = async function(){
         await OneSignal.Notifications.requestPermission();
         if (OneSignal.Notifications.permission) {
           try {
-            await OneSignal.User.PushSubscription.optIn();
+            await window.berthaWithTimeout(OneSignal.User.PushSubscription.optIn(), 4000, 'optIn');
           } catch (error) {
             window.berthaOneSignalOptInError = (error?.name || 'Error') + ': ' + (error?.message || String(error));
             throw error;
@@ -117,7 +120,7 @@ window.berthaSchedulePush = async function(item){
           osOptedIn = OneSignal.User.PushSubscription.optedIn ? 'sim' : 'não';
           if (!OneSignal.User.PushSubscription.token) {
             try {
-              await OneSignal.User.PushSubscription.optIn();
+              await window.berthaWithTimeout(OneSignal.User.PushSubscription.optIn(), 4000, 'optIn');
               optInResult = 'optIn resolveu sem exceção';
             } catch (error) {
               window.berthaOneSignalOptInError = (error?.name || 'Error') + ': ' + (error?.message || String(error));
@@ -133,7 +136,7 @@ window.berthaSchedulePush = async function(item){
     } catch (error) { optInResult = (error?.name || 'Error') + ': ' + (error?.message || String(error)); }
     const initErr = window.berthaOneSignalInitError || 'nenhum';
     const permission = (typeof Notification !== 'undefined' ? Notification.permission : 'indisponível');
-    return {ok:false,message:'Diagnóstico v83 — permissão: ' + permission + '; SW: ' + swState + '; scope: ' + swScope + '; script: ' + swScript + '; assinatura nativa: ' + nativePush + '; token: ' + osToken + '; optedIn: ' + osOptedIn + '; optIn: ' + optInResult + '; init: ' + initErr + '; Subscription ID: ausente. Envie este aviso.'};
+    return {ok:false,message:'Diagnóstico v84 — permissão: ' + permission + '; SW: ' + swState + '; scope: ' + swScope + '; script: ' + swScript + '; assinatura nativa: ' + nativePush + '; token: ' + osToken + '; optedIn: ' + osOptedIn + '; optIn: ' + optInResult + '; init: ' + initErr + '; Subscription ID: ausente. Envie este aviso.'};
   }
   const date = item.dueDate || new Date().toISOString().slice(0,10);
   let notifyTime = item.notifyTime || '';
@@ -231,7 +234,7 @@ window.OneSignalDeferred.push(async function(OneSignal){
 </dialog>
 
 <script src="work-v12.js?v=12.4"></script>
-<script src="bertha-time-v2.8.80.js?v=2880"></script>
+<script src="bertha-time-v2.8.84.js?v=2884"></script>
 
 </body>
 </html>
