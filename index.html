@@ -24,11 +24,40 @@
 <script>
 window.OneSignalDeferred = window.OneSignalDeferred || [];
 window.berthaPushReady = false;
+window.berthaGetPushSubscriptionId = async function(){
+  return new Promise((resolve)=>{
+    window.OneSignalDeferred.push(async function(OneSignal){
+      try {
+        if (OneSignal.Notifications.permission && !OneSignal.User.PushSubscription.optedIn) await OneSignal.User.PushSubscription.optIn();
+        resolve(OneSignal.User.PushSubscription.id || null);
+      } catch (error) {
+        console.warn('BERTH.A push subscription', error);
+        resolve(null);
+      }
+    });
+  });
+};
 window.berthaRequestPushPermission = async function(){
   return new Promise((resolve)=>{
-    
+    window.OneSignalDeferred.push(async function(OneSignal){
+      try {
+        if (!OneSignal.Notifications.isPushSupported()) { resolve({ok:false,reason:'unsupported'}); return; }
+        await OneSignal.Notifications.requestPermission();
+        if (OneSignal.Notifications.permission) await OneSignal.User.PushSubscription.optIn();
+        const ok = !!OneSignal.Notifications.permission && !!OneSignal.User.PushSubscription.optedIn;
+        window.berthaPushReady = ok;
+        resolve({ok, subscriptionId: OneSignal.User.PushSubscription.id || null});
+      } catch (error) {
+        console.warn('BERTH.A push permission', error);
+        resolve({ok:false,reason:'error'});
+      }
+    });
+  });
+};
 window.BERTHA_PUSH_BACKEND = 'https://berth-a-push-backend-xgqhse.v2.appdeploy.ai';
 window.berthaSchedulePush = async function(item){
+  const subscriptionId = await window.berthaGetPushSubscriptionId();
+  if (!subscriptionId) return {ok:false,message:'Não encontrei a assinatura de notificações deste iPhone. Abra o BERTH.A pela Tela de Início e confirme as notificações.'};
   const date = item.dueDate || new Date().toISOString().slice(0,10);
   let notifyTime = item.notifyTime || '';
   if (item.notifyOffset === 'period-start') notifyTime = ({morning:'05:16',afternoon:'12:00',night:'18:00',evening:'18:00'})[item.period] || '';
@@ -40,30 +69,12 @@ window.berthaSchedulePush = async function(item){
   if (/^(10|30|60)$/.test(String(item.notifyOffset))) when.setMinutes(when.getMinutes()-Number(item.notifyOffset));
   if (when.getTime() <= Date.now()+15000) return {ok:false,message:'O horário do aviso precisa estar no futuro.'};
   const response = await fetch(window.BERTHA_PUSH_BACKEND + '/api/push', {
-    method:'POST',
-    headers:{'Content-Type':'application/json'},
-    body:JSON.stringify({
-      title:'BERTH.A',
-      message:item.title || item.name || 'Você tem uma tarefa agora.',
-      sendAfter:when.toISOString(),
-      url:'https://draduaila-web.github.io/It-s-my-life/'
-    })
+    method:'POST', headers:{'Content-Type':'application/json'},
+    body:JSON.stringify({title:'BERTH.A',message:item.title || item.name || 'Você tem uma tarefa agora.',subscriptionId,sendAfter:when.toISOString(),url:'https://draduaila-web.github.io/It-s-my-life/'})
   });
-  if(!response.ok) return {ok:false,message:'A tarefa foi salva, mas o servidor não aceitou o agendamento.'};
-  const data=await response.json();
+  const data = await response.json().catch(()=>({}));
+  if(!response.ok) return {ok:false,message:data?.error || 'A tarefa foi salva, mas o servidor não aceitou o agendamento.'};
   return {ok:!!data.ok, data};
-};
-window.OneSignalDeferred.push(async function(OneSignal){
-      try {
-        if (!OneSignal.Notifications.isPushSupported()) { resolve({ok:false,reason:'unsupported'}); return; }
-        await OneSignal.Notifications.requestPermission();
-        if (OneSignal.Notifications.permission) await OneSignal.User.PushSubscription.optIn();
-        const ok = !!OneSignal.Notifications.permission && !!OneSignal.User.PushSubscription.optedIn;
-        window.berthaPushReady = ok;
-        resolve({ok, subscriptionId: OneSignal.User.PushSubscription.id || null});
-      } catch (error) { console.warn('BERTH.A push permission', error); resolve({ok:false,reason:'error'}); }
-    });
-  });
 };
 window.OneSignalDeferred.push(async function(OneSignal){
   try {
@@ -133,7 +144,7 @@ window.OneSignalDeferred.push(async function(OneSignal){
 </dialog>
 
 <script src="work-v12.js?v=12.4"></script>
-<script src="bertha-time-v2.8.75.js?v=2871"></script>
+<script src="bertha-time-v2.8.76.js?v=2876"></script>
 
 </body>
 </html>
