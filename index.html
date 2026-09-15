@@ -80,11 +80,26 @@ window.berthaSchedulePush = async function(item){
   const subscriptionId = await window.berthaGetPushSubscriptionId();
   if (!subscriptionId) {
     let swState = 'não registrado';
+    let nativePush = 'não verificada';
+    let osToken = 'ausente';
+    let osOptedIn = 'não';
     try {
       const reg = await navigator.serviceWorker.getRegistration('/It-s-my-life-/push/onesignal/');
-      if (reg) swState = reg.active ? 'ativo' : (reg.installing ? 'instalando' : (reg.waiting ? 'aguardando' : 'registrado'));
+      if (reg) {
+        swState = reg.active ? 'ativo' : (reg.installing ? 'instalando' : (reg.waiting ? 'aguardando' : 'registrado'));
+        try { nativePush = (await reg.pushManager.getSubscription()) ? 'criada' : 'ausente'; } catch (_) { nativePush = 'erro'; }
+      }
     } catch (_) {}
-    return {ok:false,message:'O iPhone autorizou notificações, mas o OneSignal ainda não criou a assinatura. Service Worker: ' + swState + '. Envie este aviso para o diagnóstico.'};
+    try {
+      await new Promise((done)=>window.OneSignalDeferred.push(function(OneSignal){
+        try {
+          osToken = OneSignal.User.PushSubscription.token ? 'presente' : 'ausente';
+          osOptedIn = OneSignal.User.PushSubscription.optedIn ? 'sim' : 'não';
+        } catch (_) {}
+        done();
+      }));
+    } catch (_) {}
+    return {ok:false,message:'Diagnóstico push — Service Worker: ' + swState + '; assinatura nativa: ' + nativePush + '; token OneSignal: ' + osToken + '; optedIn: ' + osOptedIn + '; Subscription ID: ausente. Envie este aviso.'};
   }
   const date = item.dueDate || new Date().toISOString().slice(0,10);
   let notifyTime = item.notifyTime || '';
@@ -108,7 +123,7 @@ window.OneSignalDeferred.push(async function(OneSignal){
   try {
     await OneSignal.init({
       appId: "18d49ac6-cdad-4780-8437-cbdcd025a680",
-      serviceWorkerPath: "/It-s-my-life-/push/onesignal/OneSignalSDKWorker.js",
+      serviceWorkerPath: "push/onesignal/OneSignalSDKWorker.js",
       serviceWorkerParam: { scope: "/It-s-my-life-/push/onesignal/" },
       autoResubscribe: true,
       welcomeNotification: { disable: true }
