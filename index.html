@@ -27,12 +27,32 @@ window.berthaPushReady = false;
 window.berthaGetPushSubscriptionId = async function(){
   return new Promise((resolve)=>{
     window.OneSignalDeferred.push(async function(OneSignal){
+      let settled = false;
+      let timer = null;
+      const finish = (id)=>{
+        if (settled) return;
+        settled = true;
+        if (timer) clearTimeout(timer);
+        try { OneSignal.User.PushSubscription.removeEventListener('change', onChange); } catch (_) {}
+        resolve(id || null);
+      };
+      const onChange = (event)=>{
+        const id = event?.current?.id || OneSignal.User.PushSubscription.id || null;
+        if (id) finish(id);
+      };
       try {
-        if (OneSignal.Notifications.permission && !OneSignal.User.PushSubscription.optedIn) await OneSignal.User.PushSubscription.optIn();
-        resolve(OneSignal.User.PushSubscription.id || null);
+        const existingId = OneSignal.User.PushSubscription.id || null;
+        if (existingId) { finish(existingId); return; }
+        OneSignal.User.PushSubscription.addEventListener('change', onChange);
+        if (OneSignal.Notifications.permission && !OneSignal.User.PushSubscription.optedIn) {
+          await OneSignal.User.PushSubscription.optIn();
+        }
+        const afterOptInId = OneSignal.User.PushSubscription.id || null;
+        if (afterOptInId) { finish(afterOptInId); return; }
+        timer = setTimeout(()=>finish(OneSignal.User.PushSubscription.id || null), 10000);
       } catch (error) {
         console.warn('BERTH.A push subscription', error);
-        resolve(null);
+        finish(null);
       }
     });
   });
@@ -46,7 +66,8 @@ window.berthaRequestPushPermission = async function(){
         if (OneSignal.Notifications.permission) await OneSignal.User.PushSubscription.optIn();
         const ok = !!OneSignal.Notifications.permission && !!OneSignal.User.PushSubscription.optedIn;
         window.berthaPushReady = ok;
-        resolve({ok, subscriptionId: OneSignal.User.PushSubscription.id || null});
+        const subscriptionId = ok ? await window.berthaGetPushSubscriptionId() : null;
+        resolve({ok:ok && !!subscriptionId, subscriptionId});
       } catch (error) {
         console.warn('BERTH.A push permission', error);
         resolve({ok:false,reason:'error'});
@@ -144,7 +165,7 @@ window.OneSignalDeferred.push(async function(OneSignal){
 </dialog>
 
 <script src="work-v12.js?v=12.4"></script>
-<script src="bertha-time-v2.8.76.js?v=2876"></script>
+<script src="bertha-time-v2.8.76.js?v=2877"></script>
 
 </body>
 </html>
