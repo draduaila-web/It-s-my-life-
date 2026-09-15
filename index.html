@@ -26,7 +26,34 @@ window.OneSignalDeferred = window.OneSignalDeferred || [];
 window.berthaPushReady = false;
 window.berthaRequestPushPermission = async function(){
   return new Promise((resolve)=>{
-    window.OneSignalDeferred.push(async function(OneSignal){
+    
+window.BERTHA_PUSH_BACKEND = 'https://berth-a-push-backend-xgqhse.v2.appdeploy.ai';
+window.berthaSchedulePush = async function(item){
+  const date = item.dueDate || new Date().toISOString().slice(0,10);
+  let notifyTime = item.notifyTime || '';
+  if (item.notifyOffset === 'period-start') notifyTime = ({morning:'05:16',afternoon:'12:00',night:'18:00',evening:'18:00'})[item.period] || '';
+  if (!notifyTime) notifyTime = item.time || '';
+  if (!notifyTime) return {ok:false,message:'Defina um horário para a tarefa ou para o aviso.'};
+  const [h,m] = notifyTime.split(':').map(Number);
+  const [y,mo,d] = date.split('-').map(Number);
+  const when = new Date(y,mo-1,d,h,m,0,0);
+  if (/^(10|30|60)$/.test(String(item.notifyOffset))) when.setMinutes(when.getMinutes()-Number(item.notifyOffset));
+  if (when.getTime() <= Date.now()+15000) return {ok:false,message:'O horário do aviso precisa estar no futuro.'};
+  const response = await fetch(window.BERTHA_PUSH_BACKEND + '/api/push', {
+    method:'POST',
+    headers:{'Content-Type':'application/json'},
+    body:JSON.stringify({
+      title:'BERTH.A',
+      message:item.title || item.name || 'Você tem uma tarefa agora.',
+      sendAfter:when.toISOString(),
+      url:'https://draduaila-web.github.io/It-s-my-life/'
+    })
+  });
+  if(!response.ok) return {ok:false,message:'A tarefa foi salva, mas o servidor não aceitou o agendamento.'};
+  const data=await response.json();
+  return {ok:!!data.ok, data};
+};
+window.OneSignalDeferred.push(async function(OneSignal){
       try {
         if (!OneSignal.Notifications.isPushSupported()) { resolve({ok:false,reason:'unsupported'}); return; }
         await OneSignal.Notifications.requestPermission();
@@ -106,7 +133,7 @@ window.OneSignalDeferred.push(async function(OneSignal){
 </dialog>
 
 <script src="work-v12.js?v=12.4"></script>
-<script src="bertha-time-v2.8.74.js?v=2871"></script>
+<script src="bertha-time-v2.8.75.js?v=2871"></script>
 
 </body>
 </html>
