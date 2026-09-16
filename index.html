@@ -136,7 +136,7 @@ window.berthaSchedulePush = async function(item){
     } catch (error) { optInResult = (error?.name || 'Error') + ': ' + (error?.message || String(error)); }
     const initErr = window.berthaOneSignalInitError || 'nenhum';
     const permission = (typeof Notification !== 'undefined' ? Notification.permission : 'indisponível');
-    return {ok:false,message:'Diagnóstico v91 — permissão: ' + permission + '; SW: ' + swState + '; scope: ' + swScope + '; script: ' + swScript + '; assinatura nativa: ' + nativePush + '; token: ' + osToken + '; optedIn: ' + osOptedIn + '; optIn: ' + optInResult + '; init: ' + initErr + '; Subscription ID: ausente. Envie este aviso.'};
+    return {ok:false,message:'Diagnóstico v92 — permissão: ' + permission + '; SW: ' + swState + '; scope: ' + swScope + '; script: ' + swScript + '; assinatura nativa: ' + nativePush + '; token: ' + osToken + '; optedIn: ' + osOptedIn + '; optIn: ' + optInResult + '; init: ' + initErr + '; Subscription ID: ausente. Envie este aviso.'};
   }
   const date = item.dueDate || new Date().toISOString().slice(0,10);
   let notifyTime = item.notifyTime || '';
@@ -233,7 +233,7 @@ window.berthaPushStageReport = async function(item){
   }
 
   if (!subscriptionId) {
-    return {ok:false, message:"Diagnóstico v91\n" + stages.join("\n")};
+    return {ok:false, message:"Diagnóstico v92\n" + stages.join("\n")};
   }
 
   // Only test the backend after a real OneSignal subscription exists.
@@ -264,23 +264,23 @@ window.berthaPushStageReport = async function(item){
 
     if (backendResult === timeoutValue) {
       add("backend", "TIMEOUT 4s");
-      return {ok:false,message:"Diagnóstico v91\n" + stages.join("\n")};
+      return {ok:false,message:"Diagnóstico v92\n" + stages.join("\n")};
     }
     if (backendResult?.__error) {
       add("backend", backendResult.__error);
-      return {ok:false,message:"Diagnóstico v91\n" + stages.join("\n")};
+      return {ok:false,message:"Diagnóstico v92\n" + stages.join("\n")};
     }
     if (backendResult.type === "opaque") {
       add("backend", "enviado (no-cors)");
-      return {ok:true, message:"Diagnóstico v91\n" + stages.join("\n")};
+      return {ok:true, message:"Diagnóstico v92\n" + stages.join("\n")};
     }
     const body = await backendResult.json().catch(()=>({}));
     add("backendHTTP", String(backendResult.status));
     add("backend", body?.ok ? "OK" : (body?.error || "resposta sem ok"));
-    return {ok:!!body?.ok, message:"Diagnóstico v91\n" + stages.join("\n"), data:body};
+    return {ok:!!body?.ok, message:"Diagnóstico v92\n" + stages.join("\n"), data:body};
   } catch (e) {
     add("backend", (e?.name || "Error") + ": " + (e?.message || String(e)));
-    return {ok:false,message:"Diagnóstico v91\n" + stages.join("\n")};
+    return {ok:false,message:"Diagnóstico v92\n" + stages.join("\n")};
   }
 };
 window.berthaSchedulePush = window.berthaPushStageReport;
@@ -310,7 +310,7 @@ window.OneSignalDeferred.push(async function(OneSignal){
 </script>
 <title>BERTH.A</title>
 </head>
-<body><div id="bertha-v91-badge" style="position:fixed;right:10px;top:10px;z-index:99999;font:600 11px -apple-system,sans-serif;padding:5px 7px;border-radius:8px;background:#2b2630;color:#fff">v91</div>
+<body><div id="bertha-v92-badge" style="position:fixed;right:10px;top:10px;z-index:99999;font:600 11px -apple-system,sans-serif;padding:5px 7px;border-radius:8px;background:#2b2630;color:#fff">v92</div>
 <div class="app-shell">
 <header class="topbar">
 <button class="icon-btn" id="backBtn" aria-label="Voltar" hidden>‹</button>
@@ -363,20 +363,26 @@ window.OneSignalDeferred.push(async function(OneSignal){
 </dialog>
 
 <script src="work-v12.js?v=12.4"></script>
-<script src="bertha-time-v2.8.91.js?v=2891"></script>
+<script src="bertha-time-v2.8.92.js?v=2892"></script>
 
-<div style="position:fixed;left:10px;bottom:92px;z-index:99999"><button id="bertha-v91-push-btn" type="button" style="border:0;border-radius:12px;padding:10px 13px;background:#2b2630;color:#fff;font:600 13px -apple-system,sans-serif">TESTAR PUSH AGORA</button></div>
+<div style="position:fixed;left:10px;bottom:92px;z-index:99999"><button id="bertha-v92-push-btn" type="button" style="border:0;border-radius:12px;padding:10px 13px;background:#2b2630;color:#fff;font:600 13px -apple-system,sans-serif">TESTAR PUSH AGORA</button></div>
 <script>
 (function(){
- const btn=document.getElementById('bertha-v91-push-btn'); if(!btn)return;
+ const btn=document.getElementById('bertha-v92-push-btn'); if(!btn)return;
  btn.addEventListener('click',async function(){
-  btn.disabled=true;btn.textContent='TESTANDO...';const lines=['BERTH.A v91 — teste independente'];
+  btn.disabled=true;btn.textContent='TESTANDO...';const lines=['BERTH.A v92 — teste independente'];
   try{
    lines.push('permission='+Notification.permission);let id='';
    await Promise.race([new Promise(resolve=>{window.OneSignalDeferred=window.OneSignalDeferred||[];window.OneSignalDeferred.push(async function(OneSignal){try{id=OneSignal.User?.PushSubscription?.id||'';lines.push('subscriptionId='+(id?'presente':'ausente'));}catch(e){lines.push('onesignal='+String(e))}resolve();});}),new Promise((_,reject)=>setTimeout(()=>reject(new Error('OneSignal timeout')),3000))]);
    if(!id)throw new Error('Subscription ID ausente');
-   const r=await Promise.race([fetch(window.BERTHA_PUSH_BACKEND+'/api/push',{method:'POST',mode:'no-cors',headers:{'Content-Type':'text/plain;charset=UTF-8'},body:JSON.stringify({message:'Teste BERTH.A v91',subscriptionId:id})}),new Promise((_,reject)=>setTimeout(()=>reject(new Error('backend timeout')),5000))]);
-   lines.push('backend=enviado');lines.push('resposta='+(r.type||'desconhecida'));alert(lines.join('\n'));
+   const r=await Promise.race([fetch(window.BERTHA_PUSH_BACKEND+'/api/push',{method:'POST',headers:{'Content-Type':'text/plain;charset=UTF-8','Accept':'application/json'},body:JSON.stringify({message:'Teste BERTH.A v92',subscriptionId:id})}),new Promise((_,reject)=>setTimeout(()=>reject(new Error('backend timeout')),5000))]);
+   lines.push('backendHTTP='+r.status);
+   const raw=await r.text();
+   let data={}; try{data=raw?JSON.parse(raw):{}}catch(_){data={raw:raw}}
+   lines.push('backend='+(data.ok?'OK':(data.error||'sem ok')));
+   if(data.notificationId) lines.push('notificationId='+data.notificationId);
+   if(data.detail) lines.push('detail='+String(data.detail).slice(0,500));
+   alert(lines.join('\n'));
   }catch(e){lines.push('ERRO='+String(e));alert(lines.join('\n'))}
   finally{btn.disabled=false;btn.textContent='TESTAR PUSH AGORA';}
  });
