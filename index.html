@@ -93,7 +93,7 @@ window.berthaRequestPushPermission = async function(){
     });
   });
 };
-window.BERTHA_PUSH_BACKEND = 'https://berth-a-push-backend-xgqhse.v2.appdeploy.ai';
+window.BERTHA_PUSH_BACKEND = 'https://push.duailaledur.com.br';
 window.berthaSchedulePush = async function(item){
   const subscriptionId = await window.berthaGetPushSubscriptionId();
   if (!subscriptionId) {
@@ -136,7 +136,7 @@ window.berthaSchedulePush = async function(item){
     } catch (error) { optInResult = (error?.name || 'Error') + ': ' + (error?.message || String(error)); }
     const initErr = window.berthaOneSignalInitError || 'nenhum';
     const permission = (typeof Notification !== 'undefined' ? Notification.permission : 'indisponível');
-    return {ok:false,message:'Diagnóstico v93 — permissão: ' + permission + '; SW: ' + swState + '; scope: ' + swScope + '; script: ' + swScript + '; assinatura nativa: ' + nativePush + '; token: ' + osToken + '; optedIn: ' + osOptedIn + '; optIn: ' + optInResult + '; init: ' + initErr + '; Subscription ID: ausente. Envie este aviso.'};
+    return {ok:false,message:'Diagnóstico v94 — permissão: ' + permission + '; SW: ' + swState + '; scope: ' + swScope + '; script: ' + swScript + '; assinatura nativa: ' + nativePush + '; token: ' + osToken + '; optedIn: ' + osOptedIn + '; optIn: ' + optInResult + '; init: ' + initErr + '; Subscription ID: ausente. Envie este aviso.'};
   }
   const date = item.dueDate || new Date().toISOString().slice(0,10);
   let notifyTime = item.notifyTime || '';
@@ -233,7 +233,7 @@ window.berthaPushStageReport = async function(item){
   }
 
   if (!subscriptionId) {
-    return {ok:false, message:"Diagnóstico v93\n" + stages.join("\n")};
+    return {ok:false, message:"Diagnóstico v94\n" + stages.join("\n")};
   }
 
   // Only test the backend after a real OneSignal subscription exists.
@@ -264,23 +264,23 @@ window.berthaPushStageReport = async function(item){
 
     if (backendResult === timeoutValue) {
       add("backend", "TIMEOUT 4s");
-      return {ok:false,message:"Diagnóstico v93\n" + stages.join("\n")};
+      return {ok:false,message:"Diagnóstico v94\n" + stages.join("\n")};
     }
     if (backendResult?.__error) {
       add("backend", backendResult.__error);
-      return {ok:false,message:"Diagnóstico v93\n" + stages.join("\n")};
+      return {ok:false,message:"Diagnóstico v94\n" + stages.join("\n")};
     }
     if (backendResult.type === "opaque") {
       add("backend", "enviado (no-cors)");
-      return {ok:true, message:"Diagnóstico v93\n" + stages.join("\n")};
+      return {ok:true, message:"Diagnóstico v94\n" + stages.join("\n")};
     }
     const body = await backendResult.json().catch(()=>({}));
     add("backendHTTP", String(backendResult.status));
     add("backend", body?.ok ? "OK" : (body?.error || "resposta sem ok"));
-    return {ok:!!body?.ok, message:"Diagnóstico v93\n" + stages.join("\n"), data:body};
+    return {ok:!!body?.ok, message:"Diagnóstico v94\n" + stages.join("\n"), data:body};
   } catch (e) {
     add("backend", (e?.name || "Error") + ": " + (e?.message || String(e)));
-    return {ok:false,message:"Diagnóstico v93\n" + stages.join("\n")};
+    return {ok:false,message:"Diagnóstico v94\n" + stages.join("\n")};
   }
 };
 window.berthaSchedulePush = window.berthaPushStageReport;
@@ -310,7 +310,7 @@ window.OneSignalDeferred.push(async function(OneSignal){
 </script>
 <title>BERTH.A</title>
 </head>
-<body><div id="bertha-v93-badge" style="position:fixed;right:10px;top:10px;z-index:99999;font:600 11px -apple-system,sans-serif;padding:5px 7px;border-radius:8px;background:#2b2630;color:#fff">v93</div>
+<body><div id="bertha-v94-badge" style="position:fixed;right:10px;top:10px;z-index:99999;font:600 11px -apple-system,sans-serif;padding:5px 7px;border-radius:8px;background:#2b2630;color:#fff">v94</div>
 <div class="app-shell">
 <header class="topbar">
 <button class="icon-btn" id="backBtn" aria-label="Voltar" hidden>‹</button>
@@ -363,15 +363,15 @@ window.OneSignalDeferred.push(async function(OneSignal){
 </dialog>
 
 <script src="work-v12.js?v=12.4"></script>
-<script src="bertha-time-v2.8.93.js?v=2893"></script>
+<script src="bertha-time-v2.8.94.js?v=2894"></script>
 
-<div style="position:fixed;left:10px;bottom:92px;z-index:99999"><button id="bertha-v93-push-btn" type="button" style="border:0;border-radius:12px;padding:10px 13px;background:#2b2630;color:#fff;font:600 13px -apple-system,sans-serif">TESTAR PUSH AGORA</button></div>
+<div style="position:fixed;left:10px;bottom:92px;z-index:99999"><button id="bertha-v94-push-btn" type="button" style="border:0;border-radius:12px;padding:10px 13px;background:#2b2630;color:#fff;font:600 13px -apple-system,sans-serif">TESTAR PUSH AGORA</button></div>
 <script>
 (function(){
- const btn=document.getElementById('bertha-v93-push-btn'); if(!btn)return;
- const backendOrigin='https://berth-a-push-backend-xgqhse.v2.appdeploy.ai';
+ const btn=document.getElementById('bertha-v94-push-btn'); if(!btn)return;
+ const backendOrigin='https://push.duailaledur.com.br';
  btn.addEventListener('click',async function(){
-  btn.disabled=true;btn.textContent='TESTANDO...';const lines=['BERTH.A v93 — transporte sem fetch'];
+  btn.disabled=true;btn.textContent='TESTANDO...';const lines=['BERTH.A v94 — transporte sem fetch'];
   try{
    lines.push('permission='+Notification.permission);let id='';
    await Promise.race([new Promise(resolve=>{window.OneSignalDeferred=window.OneSignalDeferred||[];window.OneSignalDeferred.push(async function(OneSignal){try{id=OneSignal.User?.PushSubscription?.id||'';lines.push('subscriptionId='+(id?'presente':'ausente'));}catch(e){lines.push('onesignal='+String(e))}resolve();});}),new Promise((_,reject)=>setTimeout(()=>reject(new Error('OneSignal timeout')),3000))]);
@@ -380,7 +380,7 @@ window.OneSignalDeferred.push(async function(OneSignal){
    frame.name='berthaPushFrame'+Date.now();frame.style.display='none';document.body.appendChild(frame);
    const form=document.createElement('form');
    form.method='POST';form.action=backendOrigin+'/api/push-form';form.target=frame.name;form.style.display='none';
-   const fields={message:'Teste BERTH.A v93',title:'BERTH.A',subscriptionId:id};
+   const fields={message:'Teste BERTH.A v94',title:'BERTH.A',subscriptionId:id};
    Object.entries(fields).forEach(([name,value])=>{const input=document.createElement('input');input.type='hidden';input.name=name;input.value=value;form.appendChild(input);});
    document.body.appendChild(form);
    const result=await new Promise((resolve,reject)=>{
