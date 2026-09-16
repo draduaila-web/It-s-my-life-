@@ -93,201 +93,35 @@ window.berthaRequestPushPermission = async function(){
     });
   });
 };
-window.BERTHA_PUSH_BACKEND = 'https://push.duailaledur.com.br';
+window.BERTHA_PUSH_BACKEND = 'https://ouxellokvigbdeeyvvfv.supabase.co/functions/v1/bertha-push';
 window.berthaSchedulePush = async function(item){
   const subscriptionId = await window.berthaGetPushSubscriptionId();
-  if (!subscriptionId) {
-    let swState = 'não registrado';
-    let swScope = '—';
-    let swScript = '—';
-    let nativePush = 'não verificada';
-    let osToken = 'ausente';
-    let osOptedIn = 'não';
-    let optInResult = 'sem erro capturado';
-    try {
-      const reg = await navigator.serviceWorker.getRegistration('/It-s-my-life-/');
-      if (reg) {
-        swState = reg.active ? 'ativo' : (reg.installing ? 'instalando' : (reg.waiting ? 'aguardando' : 'registrado'));
-        swScope = reg.scope || '—';
-        swScript = (reg.active || reg.waiting || reg.installing)?.scriptURL || '—';
-        try { nativePush = (await reg.pushManager.getSubscription()) ? 'criada' : 'ausente'; } catch (error) { nativePush = 'erro ' + (error?.name || ''); }
-      }
-    } catch (error) { swState = 'erro ' + (error?.name || ''); }
-    try {
-      await new Promise((done)=>window.OneSignalDeferred.push(async function(OneSignal){
-        try {
-          osToken = OneSignal.User.PushSubscription.token ? 'presente' : 'ausente';
-          osOptedIn = OneSignal.User.PushSubscription.optedIn ? 'sim' : 'não';
-          if (!OneSignal.User.PushSubscription.token) {
-            try {
-              await window.berthaWithTimeout(OneSignal.User.PushSubscription.optIn(), 4000, 'optIn');
-              optInResult = 'optIn resolveu sem exceção';
-            } catch (error) {
-              window.berthaOneSignalOptInError = (error?.name || 'Error') + ': ' + (error?.message || String(error));
-              optInResult = window.berthaOneSignalOptInError;
-            }
-          }
-          await new Promise(r=>setTimeout(r,1200));
-          osToken = OneSignal.User.PushSubscription.token ? 'presente' : 'ausente';
-          osOptedIn = OneSignal.User.PushSubscription.optedIn ? 'sim' : 'não';
-        } catch (error) { optInResult = (error?.name || 'Error') + ': ' + (error?.message || String(error)); }
-        done();
-      }));
-    } catch (error) { optInResult = (error?.name || 'Error') + ': ' + (error?.message || String(error)); }
-    const initErr = window.berthaOneSignalInitError || 'nenhum';
-    const permission = (typeof Notification !== 'undefined' ? Notification.permission : 'indisponível');
-    return {ok:false,message:'Diagnóstico v95 — permissão: ' + permission + '; SW: ' + swState + '; scope: ' + swScope + '; script: ' + swScript + '; assinatura nativa: ' + nativePush + '; token: ' + osToken + '; optedIn: ' + osOptedIn + '; optIn: ' + optInResult + '; init: ' + initErr + '; Subscription ID: ausente. Envie este aviso.'};
-  }
-  const date = item.dueDate || new Date().toISOString().slice(0,10);
-  let notifyTime = item.notifyTime || '';
-  if (item.notifyOffset === 'period-start') notifyTime = ({morning:'05:16',afternoon:'12:00',night:'18:00',evening:'18:00'})[item.period] || '';
-  if (!notifyTime) notifyTime = item.time || '';
-  if (!notifyTime) return {ok:false,message:'Defina um horário para a tarefa ou para o aviso.'};
-  const [h,m] = notifyTime.split(':').map(Number);
-  const [y,mo,d] = date.split('-').map(Number);
-  const when = new Date(y,mo-1,d,h,m,0,0);
-  if (/^(10|30|60)$/.test(String(item.notifyOffset))) when.setMinutes(when.getMinutes()-Number(item.notifyOffset));
-  if (when.getTime() <= Date.now()+15000) return {ok:false,message:'O horário do aviso precisa estar no futuro.'};
-  const response = await fetch(window.BERTHA_PUSH_BACKEND + '/api/push', {
-    method:'POST', headers:{'Content-Type':'application/json'},
-    body:JSON.stringify({title:'BERTH.A',message:item.title || item.name || 'Você tem uma tarefa agora.',subscriptionId,sendAfter:when.toISOString(),url:'https://draduaila-web.github.io/It-s-my-life/'})
-  });
-  const data = await response.json().catch(()=>({}));
-  if(!response.ok) return {ok:false,message:data?.error || 'A tarefa foi salva, mas o servidor não aceitou o agendamento.'};
-  return {ok:!!data.ok, data};
+  if (!subscriptionId) return {ok:false,message:'Não foi possível ativar o aviso. Verifique se as notificações do BERTH.A estão permitidas no iPhone.'};
+  const localDate=()=>{const n=new Date(),p=v=>String(v).padStart(2,'0');return `${n.getFullYear()}-${p(n.getMonth()+1)}-${p(n.getDate())}`;};
+  const date=item.dueDate||localDate();
+  const offset=String(item.notifyOffset||'at-time');
+  let notifyTime='';
+  if(offset==='custom-time') notifyTime=item.notifyTime||'';
+  else if(offset==='period-start') notifyTime=({morning:'05:16',afternoon:'12:00',night:'18:00',evening:'18:00'})[item.period]||'';
+  else notifyTime=item.time||'';
+  if(!notifyTime) return {ok:false,message:'A tarefa foi salva, mas falta definir um horário para o aviso.'};
+  const [h,m]=notifyTime.split(':').map(Number),[y,mo,d]=date.split('-').map(Number);
+  if(![y,mo,d,h,m].every(Number.isFinite)) return {ok:false,message:'A tarefa foi salva, mas a data ou o horário do aviso não é válido.'};
+  const when=new Date(y,mo-1,d,h,m,0,0);
+  if(/^(10|30|60)$/.test(offset)) when.setMinutes(when.getMinutes()-Number(offset));
+  if(when.getTime()<=Date.now()+15000) return {ok:false,message:'A tarefa foi salva, mas o horário escolhido para o aviso já passou.'};
+  try{
+    const ctrl=new AbortController(),timer=setTimeout(()=>ctrl.abort(),10000);let response;
+    try{response=await fetch(window.BERTHA_PUSH_BACKEND,{method:'POST',headers:{'Content-Type':'application/json'},signal:ctrl.signal,body:JSON.stringify({title:'BERTH.A',message:item.title||item.name||'Você tem uma tarefa agora.',subscriptionId,sendAfter:when.toISOString()})});}
+    finally{clearTimeout(timer);}
+    const data=await response.json().catch(()=>({}));
+    if(!response.ok||!data?.ok) return {ok:false,message:'A tarefa foi salva, mas o aviso não pôde ser agendado agora.'};
+    return {ok:true,notificationId:data.notificationId||'',scheduledFor:when.toISOString()};
+  }catch(error){console.warn('BERTH.A schedule push',error);return {ok:false,message:'A tarefa foi salva, mas o aviso não pôde ser agendado agora.'};}
 };
-
-window.berthaPushStageReport = async function(item){
-  const stages = [];
-  const add = (name, value) => stages.push(name + "=" + value);
-  const timeoutValue = Symbol("timeout");
-  const wait = async (promise, ms) => {
-    try {
-      return await Promise.race([
-        Promise.resolve(promise),
-        new Promise(resolve => setTimeout(() => resolve(timeoutValue), ms))
-      ]);
-    } catch (e) {
-      return {__error: (e?.name || "Error") + ": " + (e?.message || String(e))};
-    }
-  };
-
-  add("permission", (typeof Notification !== "undefined" ? Notification.permission : "indisponível"));
-
-  let reg = null;
-  try {
-    reg = await navigator.serviceWorker.getRegistration("/It-s-my-life-/");
-    add("SW", reg ? (reg.active ? "ativo" : reg.waiting ? "waiting" : reg.installing ? "installing" : "registrado") : "ausente");
-    add("scope", reg?.scope || "—");
-    add("script", (reg?.active || reg?.waiting || reg?.installing)?.scriptURL || "—");
-    if (reg?.pushManager) {
-      const nativeSub = await wait(reg.pushManager.getSubscription(), 1500);
-      if (nativeSub === timeoutValue) add("nativeSub", "TIMEOUT");
-      else if (nativeSub?.__error) add("nativeSub", nativeSub.__error);
-      else add("nativeSub", nativeSub ? "criada" : "ausente");
-    } else add("nativeSub", "PushManager ausente");
-  } catch (e) {
-    add("SW", (e?.name || "Error") + ": " + (e?.message || String(e)));
-  }
-
-  let OneSignalObj = null;
-  const deferredProbe = await wait(new Promise(resolve => {
-    try {
-      window.OneSignalDeferred.push(async function(OneSignal){ resolve(OneSignal); });
-    } catch (e) { resolve({__probeError:e}); }
-  }), 2000);
-
-  if (deferredProbe === timeoutValue) {
-    add("SDK", "Deferred TIMEOUT");
-  } else if (deferredProbe?.__probeError) {
-    add("SDK", (deferredProbe.__probeError?.name || "Error") + ": " + (deferredProbe.__probeError?.message || String(deferredProbe.__probeError)));
-  } else {
-    OneSignalObj = deferredProbe;
-    add("SDK", "callback OK");
-  }
-
-  add("initError", window.berthaOneSignalInitError || "nenhum");
-
-  let subscriptionId = null;
-  if (OneSignalObj) {
-    try {
-      add("supported", OneSignalObj.Notifications.isPushSupported() ? "sim" : "não");
-      add("OSpermission", OneSignalObj.Notifications.permission ? "sim" : "não");
-      add("optedInAntes", OneSignalObj.User.PushSubscription.optedIn ? "sim" : "não");
-      add("tokenAntes", OneSignalObj.User.PushSubscription.token ? "presente" : "ausente");
-      add("idAntes", OneSignalObj.User.PushSubscription.id || "ausente");
-
-      const opt = await wait(OneSignalObj.User.PushSubscription.optIn(), 3000);
-      if (opt === timeoutValue) add("optIn", "TIMEOUT 3s");
-      else if (opt?.__error) add("optIn", opt.__error);
-      else add("optIn", "resolveu");
-
-      await new Promise(r => setTimeout(r, 700));
-      add("optedInDepois", OneSignalObj.User.PushSubscription.optedIn ? "sim" : "não");
-      add("tokenDepois", OneSignalObj.User.PushSubscription.token ? "presente" : "ausente");
-      subscriptionId = OneSignalObj.User.PushSubscription.id || null;
-      add("idDepois", subscriptionId || "ausente");
-    } catch (e) {
-      add("OneSignal", (e?.name || "Error") + ": " + (e?.message || String(e)));
-    }
-  }
-
-  if (!subscriptionId) {
-    return {ok:false, message:"Diagnóstico v95\n" + stages.join("\n")};
-  }
-
-  // Only test the backend after a real OneSignal subscription exists.
-  try {
-    const date = item.dueDate || new Date().toISOString().slice(0,10);
-    let notifyTime = item.notifyTime || "";
-    if (item.notifyOffset === "period-start") notifyTime = ({morning:"05:16",afternoon:"12:00",night:"18:00",evening:"18:00"})[item.period] || "";
-    if (!notifyTime) notifyTime = item.time || "";
-    /* v90 immediate diagnostic: ignore notifyTime */
-    const [h,m] = notifyTime.split(":").map(Number);
-    const [y,mo,d] = date.split("-").map(Number);
-    const when = new Date(y,mo-1,d,h,m,0,0);
-    if (/^(10|30|60)$/.test(String(item.notifyOffset))) when.setMinutes(when.getMinutes()-Number(item.notifyOffset));
-    /* v90 immediate diagnostic: ignore future-time guard */
-
-    const backendResult = await wait(fetch(window.BERTHA_PUSH_BACKEND + "/api/push", {
-      method:"POST",
-      mode:"no-cors",
-      headers:{"Content-Type":"text/plain;charset=UTF-8"},
-      body:JSON.stringify({
-        title:"BERTH.A",
-        message:item.title || item.name || "Você tem uma tarefa agora.",
-        subscriptionId,
-        diagnosticImmediate:true,
-        url:"https://draduaila-web.github.io/It-s-my-life/"
-      })
-    }), 4000);
-
-    if (backendResult === timeoutValue) {
-      add("backend", "TIMEOUT 4s");
-      return {ok:false,message:"Diagnóstico v95\n" + stages.join("\n")};
-    }
-    if (backendResult?.__error) {
-      add("backend", backendResult.__error);
-      return {ok:false,message:"Diagnóstico v95\n" + stages.join("\n")};
-    }
-    if (backendResult.type === "opaque") {
-      add("backend", "enviado (no-cors)");
-      return {ok:true, message:"Diagnóstico v95\n" + stages.join("\n")};
-    }
-    const body = await backendResult.json().catch(()=>({}));
-    add("backendHTTP", String(backendResult.status));
-    add("backend", body?.ok ? "OK" : (body?.error || "resposta sem ok"));
-    return {ok:!!body?.ok, message:"Diagnóstico v95\n" + stages.join("\n"), data:body};
-  } catch (e) {
-    add("backend", (e?.name || "Error") + ": " + (e?.message || String(e)));
-    return {ok:false,message:"Diagnóstico v95\n" + stages.join("\n")};
-  }
-};
-window.berthaSchedulePush = window.berthaPushStageReport;
 
 window.OneSignalDeferred.push(async function(OneSignal){
   try {
-    OneSignal.Debug.setLogLevel('trace');
     await OneSignal.init({
       appId: "18d49ac6-cdad-4780-8437-cbdcd025a680",
       serviceWorkerPath: "It-s-my-life-/sw.js",
@@ -310,7 +144,7 @@ window.OneSignalDeferred.push(async function(OneSignal){
 </script>
 <title>BERTH.A</title>
 </head>
-<body><div id="bertha-v95-badge" style="position:fixed;right:10px;top:10px;z-index:99999;font:600 11px -apple-system,sans-serif;padding:5px 7px;border-radius:8px;background:#2b2630;color:#fff">v95</div>
+<body>
 <div class="app-shell">
 <header class="topbar">
 <button class="icon-btn" id="backBtn" aria-label="Voltar" hidden>‹</button>
@@ -363,30 +197,6 @@ window.OneSignalDeferred.push(async function(OneSignal){
 </dialog>
 
 <script src="work-v12.js?v=12.4"></script>
-<script src="bertha-time-v2.8.95.js?v=2895"></script>
-
-<div style="position:fixed;left:10px;bottom:92px;z-index:99999"><button id="bertha-v95-push-btn" type="button" style="border:0;border-radius:12px;padding:10px 13px;background:#2b2630;color:#fff;font:600 13px -apple-system,sans-serif">TESTAR PUSH AGORA</button></div>
-<script>
-(function(){
- const btn=document.getElementById('bertha-v95-push-btn'); if(!btn)return;
- const endpoint='https://ouxellokvigbdeeyvvfv.supabase.co/functions/v1/bertha-push';
- btn.addEventListener('click',async function(){
-  btn.disabled=true;btn.textContent='TESTANDO...';const lines=['BERTH.A v95 — Supabase'];
-  try{
-   lines.push('permission='+Notification.permission);let id='';
-   await Promise.race([new Promise(resolve=>{window.OneSignalDeferred=window.OneSignalDeferred||[];window.OneSignalDeferred.push(async function(OneSignal){try{id=OneSignal.User?.PushSubscription?.id||'';lines.push('subscriptionId='+(id?'presente':'ausente'));}catch(e){lines.push('onesignal='+String(e))}resolve();});}),new Promise((_,reject)=>setTimeout(()=>reject(new Error('OneSignal timeout')),3000))]);
-   if(!id)throw new Error('Subscription ID ausente');
-   const ctrl=new AbortController(), timer=setTimeout(()=>ctrl.abort(),10000); let r;
-   try{r=await fetch(endpoint,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({title:'BERTH.A',message:'Teste BERTH.A v95',subscriptionId:id}),signal:ctrl.signal});}finally{clearTimeout(timer)}
-   lines.push('HTTP='+r.status); const raw=await r.text(); let data={}; try{data=raw?JSON.parse(raw):{}}catch(_){data={raw}}
-   lines.push('backend='+(data.ok?'OK':(data.error||'sem ok')));
-   if(data.notificationId)lines.push('notificationId='+data.notificationId);
-   if(data.status)lines.push('OneSignalHTTP='+data.status);
-   if(data.detail)lines.push('detail='+JSON.stringify(data.detail).slice(0,500));
-   alert(lines.join('\n'));
-  }catch(e){lines.push('ERRO='+String(e));alert(lines.join('\n'))}
-  finally{btn.disabled=false;btn.textContent='TESTAR PUSH AGORA';}
- });
-})();
-</script></body>
+<script src="bertha-time-v2.8.96.js?v=2896"></script>
+</body>
 </html>
