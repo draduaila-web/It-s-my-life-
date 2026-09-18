@@ -1,6 +1,6 @@
 importScripts("https://cdn.onesignal.com/sdks/web/v16/OneSignalSDK.sw.js");
 
-const CACHE = "bertha-v129";
+const CACHE = "bertha-v130";
 
 self.addEventListener("install", event => {
   event.waitUntil(self.skipWaiting());
