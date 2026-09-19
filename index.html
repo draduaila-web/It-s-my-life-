@@ -6,10 +6,10 @@
 <meta name="theme-color" content="#f8f6f8">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
-<meta name="apple-mobile-web-app-title" content="BERTH.A">
+<meta name="apple-mobile-web-app-title" content="BERTH.A HML">
 <link rel="manifest" href="manifest.webmanifest">
-<link rel="apple-touch-icon" sizes="512x512" href="bertha-icon-512.png">
-<link rel="stylesheet" href="style.css">
+<link rel="apple-touch-icon" sizes="512x512" href="../bertha-icon-512.png">
+<link rel="stylesheet" href="../style.css">
 <style id="bertha-v2857-idea-modal-radius">
 /* v2.8.57 — preserva o ajuste cirúrgico: contorno externo do modal Criação & Ideias.
    O JS injeta .study-v10-modal depois do CSS principal e, no iPhone, força 24px.
@@ -20,129 +20,43 @@
 }
 </style>
 
-<script src="https://cdn.onesignal.com/sdks/web/v16/OneSignalSDK.page.js" defer></script>
 <script>
-window.OneSignalDeferred = window.OneSignalDeferred || [];
-window.berthaPushReady = false;
-window.berthaOneSignalInitError = '';
-window.berthaOneSignalOptInError = '';
-window.berthaPushChangeTrace = '';
-window.berthaWithTimeout = function(promise, ms, label){
-  return Promise.race([promise, new Promise((_,reject)=>setTimeout(()=>reject(new Error((label||'operação')+' TIMEOUT após '+ms+'ms')),ms))]);
-};
-window.berthaGetPushSubscriptionId = async function(){
-  return new Promise((resolve)=>{
-    window.OneSignalDeferred.push(async function(OneSignal){
-      let settled = false;
-      let timer = null;
-      const finish = (id)=>{
-        if (settled) return;
-        settled = true;
-        if (timer) clearTimeout(timer);
-        try { OneSignal.User.PushSubscription.removeEventListener('change', onChange); } catch (_) {}
-        resolve(id || null);
-      };
-      const onChange = (event)=>{
-        const id = event?.current?.id || OneSignal.User.PushSubscription.id || null;
-        if (id) finish(id);
-      };
-      try {
-        const existingId = OneSignal.User.PushSubscription.id || null;
-        if (existingId) { finish(existingId); return; }
-        OneSignal.User.PushSubscription.addEventListener('change', onChange);
-        if (OneSignal.Notifications.permission && !OneSignal.User.PushSubscription.token) {
-          try {
-            await window.berthaWithTimeout(OneSignal.User.PushSubscription.optIn(), 4000, 'optIn');
-          } catch (error) {
-            window.berthaOneSignalOptInError = (error?.name || 'Error') + ': ' + (error?.message || String(error));
-            console.warn('BERTH.A OneSignal optIn', error);
-          }
-        }
-        const afterOptInId = OneSignal.User.PushSubscription.id || null;
-        if (afterOptInId) { finish(afterOptInId); return; }
-        timer = setTimeout(()=>finish(OneSignal.User.PushSubscription.id || null), 10000);
-      } catch (error) {
-        console.warn('BERTH.A push subscription', error);
-        finish(null);
-      }
-    });
-  });
-};
-window.berthaRequestPushPermission = async function(){
-  return new Promise((resolve)=>{
-    window.OneSignalDeferred.push(async function(OneSignal){
-      try {
-        if (!OneSignal.Notifications.isPushSupported()) { resolve({ok:false,reason:'unsupported'}); return; }
-        await OneSignal.Notifications.requestPermission();
-        if (OneSignal.Notifications.permission) {
-          try {
-            await window.berthaWithTimeout(OneSignal.User.PushSubscription.optIn(), 4000, 'optIn');
-          } catch (error) {
-            window.berthaOneSignalOptInError = (error?.name || 'Error') + ': ' + (error?.message || String(error));
-            throw error;
-          }
-        }
-        const ok = !!OneSignal.Notifications.permission && !!OneSignal.User.PushSubscription.optedIn;
-        window.berthaPushReady = ok;
-        const subscriptionId = ok ? await window.berthaGetPushSubscriptionId() : null;
-        resolve({ok:ok && !!subscriptionId, subscriptionId});
-      } catch (error) {
-        console.warn('BERTH.A push permission', error);
-        resolve({ok:false,reason:'error'});
-      }
-    });
-  });
-};
-window.BERTHA_PUSH_BACKEND = 'https://ouxellokvigbdeeyvvfv.supabase.co/functions/v1/bertha-push';
-window.berthaSchedulePush = async function(item){
-  const subscriptionId = await window.berthaGetPushSubscriptionId();
-  if (!subscriptionId) return {ok:false,message:'Não foi possível ativar o aviso. Verifique se as notificações do BERTH.A estão permitidas no iPhone.'};
-  const localDate=()=>{const n=new Date(),p=v=>String(v).padStart(2,'0');return `${n.getFullYear()}-${p(n.getMonth()+1)}-${p(n.getDate())}`;};
-  const date=item.dueDate||localDate();
-  const offset=String(item.notifyOffset||'at-time');
-  let notifyTime='';
-  if(offset==='custom-time') notifyTime=item.notifyTime||'';
-  else if(offset==='period-start') notifyTime=({morning:'05:16',afternoon:'12:00',night:'18:00',evening:'18:00'})[item.period]||'';
-  else notifyTime=item.time||'';
-  if(!notifyTime) return {ok:false,message:'A tarefa foi salva, mas falta definir um horário para o aviso.'};
-  const [h,m]=notifyTime.split(':').map(Number),[y,mo,d]=date.split('-').map(Number);
-  if(![y,mo,d,h,m].every(Number.isFinite)) return {ok:false,message:'A tarefa foi salva, mas a data ou o horário do aviso não é válido.'};
-  const when=new Date(y,mo-1,d,h,m,0,0);
-  if(/^(10|30|60)$/.test(offset)) when.setMinutes(when.getMinutes()-Number(offset));
-  if(when.getTime()<=Date.now()+15000) return {ok:false,message:'A tarefa foi salva, mas o horário escolhido para o aviso já passou.'};
+(function(){
+  const PREFIX='bertha-hml::';
+  const raw=window.localStorage;
+  const keys=()=>{const a=[];for(let i=0;i<raw.length;i++){const k=raw.key(i);if(k&&k.startsWith(PREFIX))a.push(k.slice(PREFIX.length));}return a;};
+  window.berthaHmlStorage={
+    getItem:key=>raw.getItem(PREFIX+key),
+    setItem:(key,value)=>raw.setItem(PREFIX+key,String(value)),
+    removeItem:key=>raw.removeItem(PREFIX+key),
+    clear:()=>keys().forEach(k=>raw.removeItem(PREFIX+k)),
+    key:i=>keys()[i]??null,
+    get length(){return keys().length},
+    entries:()=>{const out={};keys().forEach(k=>out[k]=raw.getItem(PREFIX+k));return out;}
+  };
+  // v2.8.177 — trava de isolamento: toda leitura/escrita funcional da HML passa pelo namespace acima.
+  // A sentinela confirma no carregamento que o wrapper não escreve na chave bruta usada pela produção.
   try{
-    const ctrl=new AbortController(),timer=setTimeout(()=>ctrl.abort(),10000);let response;
-    try{response=await fetch(window.BERTHA_PUSH_BACKEND,{method:'POST',headers:{'Content-Type':'application/json'},signal:ctrl.signal,body:JSON.stringify({title:'BERTH.A',message:item.title||item.name||'Você tem uma tarefa agora.',subscriptionId,sendAfter:when.toISOString()})});}
-    finally{clearTimeout(timer);}
-    const data=await response.json().catch(()=>({}));
-    if(!response.ok||!data?.ok) return {ok:false,message:'A tarefa foi salva, mas o aviso não pôde ser agendado agora.'};
-    return {ok:true,notificationId:data.notificationId||'',scheduledFor:when.toISOString()};
-  }catch(error){console.warn('BERTH.A schedule push',error);return {ok:false,message:'A tarefa foi salva, mas o aviso não pôde ser agendado agora.'};}
-};
-
-window.OneSignalDeferred.push(async function(OneSignal){
-  try {
-    await OneSignal.init({
-      appId: "18d49ac6-cdad-4780-8437-cbdcd025a680",
-      serviceWorkerPath: "It-s-my-life-/sw.js",
-      serviceWorkerParam: { scope: "/It-s-my-life-/" },
-      autoResubscribe: true,
-      welcomeNotification: { disable: true }
-    });
-    try {
-      OneSignal.User.PushSubscription.addEventListener('change', function(event){
-        const c = event?.current || {};
-        window.berthaPushChangeTrace = 'id=' + (c.id || '—') + ', token=' + (c.token ? 'sim' : 'não') + ', optedIn=' + (c.optedIn ? 'sim' : 'não');
-      });
-    } catch (_) {}
-    window.berthaPushReady = !!OneSignal.Notifications.permission && !!OneSignal.User.PushSubscription.optedIn;
-  } catch (error) {
-    window.berthaOneSignalInitError = (error?.name || 'Error') + ': ' + (error?.message || String(error));
-    console.warn('BERTH.A OneSignal init', error);
+    const sentinel='__bertha_hml_isolation__';
+    window.berthaHmlStorage.setItem(sentinel,'ok');
+    if(raw.getItem(sentinel)!==null) throw new Error('Falha no isolamento do armazenamento');
+    window.berthaHmlStorage.removeItem(sentinel);
+    window.__BERTHA_HML_STORAGE_ISOLATED__=true;
+  }catch(e){
+    window.__BERTHA_HML_STORAGE_ISOLATED__=false;
+    console.error('[BERTH.A HML] armazenamento não isolado',e);
   }
-});
+  // Push real fica neutralizado na homologação. O fluxo interno pode ser testado sem disparar notificações.
+  window.berthaPushReady=true;
+  window.berthaRequestPushPermission=async()=>({ok:true,homologacao:true});
+  window.berthaGetPushSubscriptionId=async()=> 'HOMOLOGACAO';
+  window.berthaSchedulePush=async(item)=>({ok:true,homologacao:true,notificationId:'HML-NO-PUSH',scheduledFor:null});
+  // Homologação: valida a regra e o estado, mas não envia push real.
+  window.berthaScheduleBillReminder=async(bill)=>({ok:true,homologacao:true,billId:bill?.id||'',firstTime:bill?.reminderTime||'09:00',repeatTime:bill?.repeatIfPending===false?'':(bill?.repeatReminderTime||'21:30')});
+  window.berthaResolveBillReminder=async(info)=>({ok:true,homologacao:true,resolved:true,billId:info?.billId||''});
+})();
 </script>
-<title>BERTH.A</title>
+<title>BERTH.A · Homologação</title>
 
 <style id="bertha-v2897-release">
 /* v2.8.100 — Criação & Ideias: alinhamento definitivo do bloco BERTA; fundo luminoso preservado. */
@@ -321,7 +235,12 @@ body:has(#pendingDialog[open]){overflow:hidden!important;overscroll-behavior:non
 @media(max-width:480px){#pendingDialog #pendingForm.modal-card{width:calc(100vw - 24px)!important;max-height:calc(100dvh - 24px)!important;border-radius:26px!important}}
 </style>
 </head>
-<body>
+
+<style id="bertha-hml-marker">
+body.bertha-hml::before{content:"HOMOLOGAÇÃO";position:fixed;z-index:99999;top:max(8px,env(safe-area-inset-top));right:10px;padding:6px 9px;border-radius:999px;background:rgba(61,55,68,.82);color:#fff;font:800 9px/1 system-ui,-apple-system,sans-serif;letter-spacing:.14em;pointer-events:none;box-shadow:0 4px 16px rgba(45,39,49,.10)}
+.bertha-more-data-actions [data-hml-reset]{grid-column:1/-1;background:#fffaf3!important;color:#8b7379!important;border:1px solid rgba(126,104,116,.12)!important}
+</style>
+<body class="bertha-hml">
 <div class="app-shell">
 <header class="topbar">
 <button class="icon-btn" id="backBtn" aria-label="Voltar" hidden>‹</button>
@@ -371,29 +290,30 @@ body:has(#pendingDialog[open]){overflow:hidden!important;overscroll-behavior:non
 (function(){
   const APP_PREFIXES=['bertha.','minha-vida.'];
   const isAppKey=k=>APP_PREFIXES.some(p=>String(k).startsWith(p));
-  function collect(){const data={};for(let i=0;i<localStorage.length;i++){const k=localStorage.key(i);if(k&&isAppKey(k))data[k]=localStorage.getItem(k);}return data;}
+  function collect(){const all=window.berthaHmlStorage.entries(),data={};Object.keys(all).filter(isAppKey).forEach(k=>data[k]=all[k]);return data;}
   function exportBackup(){
-    const payload={format:'BERTHA_BACKUP',version:1,createdAt:new Date().toISOString(),appVersion:'2.8.176',data:collect()};
+    const payload={format:'BERTHA_BACKUP',version:1,createdAt:new Date().toISOString(),environment:'HOMOLOGACAO',appVersion:'2.8.178-hml',data:collect()};
     const blob=new Blob([JSON.stringify(payload,null,2)],{type:'application/json'}),url=URL.createObjectURL(blob),a=document.createElement('a');
-    const d=new Date(),pad=n=>String(n).padStart(2,'0');a.href=url;a.download=`BERTHA_backup_${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}_${pad(d.getHours())}-${pad(d.getMinutes())}.json`;document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),1000);
+    const d=new Date(),pad=n=>String(n).padStart(2,'0');a.href=url;a.download=`BERTHA_HOMOLOGACAO_${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}_${pad(d.getHours())}-${pad(d.getMinutes())}.json`;document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),1000);
   }
   async function importBackup(file){
     let payload;try{payload=JSON.parse(await file.text())}catch{alert('Este arquivo não é um backup BERTH.A válido.');return;}
     if(!payload||payload.format!=='BERTHA_BACKUP'||!payload.data||typeof payload.data!=='object'){alert('Este arquivo não é um backup BERTH.A válido.');return;}
     const keys=Object.keys(payload.data).filter(isAppKey);if(!keys.length){alert('O backup não contém dados BERTH.A.');return;}
-    if(!confirm(`Restaurar ${keys.length} conjuntos de dados? Os dados atuais da BERTH.A serão substituídos pelos dados deste backup.`))return;
-    const current=[];for(let i=0;i<localStorage.length;i++){const k=localStorage.key(i);if(k&&isAppKey(k))current.push(k);}current.forEach(k=>localStorage.removeItem(k));
-    keys.forEach(k=>localStorage.setItem(k,String(payload.data[k])));alert('Backup restaurado. A BERTH.A será recarregada agora.');location.reload();
+    if(!confirm(`Carregar ${keys.length} conjuntos de dados na HOMOLOGAÇÃO? A BERTH.A de produção não será alterada.`))return;
+    window.berthaHmlStorage.clear();keys.forEach(k=>window.berthaHmlStorage.setItem(k,String(payload.data[k])));alert('Backup carregado somente na homologação.');location.reload();
   }
+  function resetHomologacao(){if(!confirm('Apagar somente os dados de teste da homologação? A produção não será alterada.'))return;window.berthaHmlStorage.clear();alert('Homologação limpa.');location.reload();}
   window.__berthaExportBackup=exportBackup;
   window.__berthaImportBackup=importBackup;
+  window.__berthaResetHomologacao=resetHomologacao;
   document.addEventListener('DOMContentLoaded',()=>{
     const ex=document.getElementById('berthaBackupExport'),im=document.getElementById('berthaBackupImport'),fi=document.getElementById('berthaBackupFile');
     if(ex)ex.onclick=exportBackup;if(im&&fi)im.onclick=()=>fi.click();if(fi)fi.onchange=()=>{const f=fi.files&&fi.files[0];if(f)importBackup(f);fi.value='';};
   });
 })();
 </script>
-<script src="app-v2.8.176.js?v=28760"></script>
+<script src="app-v2.8.185.js?v=28850hml1"></script>
 
 <dialog id="moduleMenu">
 <div class="module-sheet">
@@ -419,7 +339,7 @@ body:has(#pendingDialog[open]){overflow:hidden!important;overscroll-behavior:non
 </div>
 </dialog>
 
-<script src="work-v12.js?v=28710.0"></script>
-<script src="bertha-time-v2.8.176.js?v=28760"></script>
+<script src="work-v12.js?v=28710hml2"></script>
+<script src="bertha-time-v2.8.185.js?v=28850hml1"></script>
 </body>
 </html>

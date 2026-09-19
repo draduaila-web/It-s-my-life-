@@ -8,8 +8,8 @@
   };
   const uid = () => `${Date.now()}-${Math.random().toString(16).slice(2)}`;
   const esc = (s='') => String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[c]));
-  const read = (key) => { try { return JSON.parse(localStorage.getItem(key)||'[]'); } catch { return []; } };
-  const save = (key,items) => localStorage.setItem(key, JSON.stringify(items));
+  const read = (key) => { try { return JSON.parse(window.berthaHmlStorage.getItem(key)||'[]'); } catch { return []; } };
+  const save = (key,items) => window.berthaHmlStorage.setItem(key, JSON.stringify(items));
 
   const KEYS = {
     crefito:'minha-vida.trabalho.crefito.v1',
@@ -93,7 +93,7 @@
     }
   }
   function recordWorkCompletion(engineId,x,cfg,end,real){
-    try{const key='bertha.time-engine.v1',e=JSON.parse(localStorage.getItem(key)||'{"active":null,"history":[],"snoozed":{}}');e.history=Array.isArray(e.history)?e.history:[];if(!e.history.some(h=>String(h.itemId)===String(engineId)&&h.status==='done'&&Math.abs((+h.endedAt||0)-end)<2000)){e.history.unshift({itemId:engineId,learningKey:engineId,title:x.title||'Trabalho',source:`Trabalho · ${cfg.name}`,day:TODAY(),startedAt:end-real*60000,endedAt:end,configuredMinutes:taskMinutes(x),plannedMinutes:taskMinutes(x),realMinutes:real,status:'done',category:x.area||cfg.name});localStorage.setItem(key,JSON.stringify(e));}}catch{}
+    try{const key='bertha.time-engine.v1',e=JSON.parse(window.berthaHmlStorage.getItem(key)||'{"active":null,"history":[],"snoozed":{}}');e.history=Array.isArray(e.history)?e.history:[];if(!e.history.some(h=>String(h.itemId)===String(engineId)&&h.status==='done'&&Math.abs((+h.endedAt||0)-end)<2000)){e.history.unshift({itemId:engineId,learningKey:engineId,title:x.title||'Trabalho',source:`Trabalho · ${cfg.name}`,day:TODAY(),startedAt:end-real*60000,endedAt:end,configuredMinutes:taskMinutes(x),plannedMinutes:taskMinutes(x),realMinutes:real,status:'done',category:x.area||cfg.name});window.berthaHmlStorage.setItem(key,JSON.stringify(e));}}catch{}
   }
   function completeWorkTask(kind,cfg,id){
     const arr=tasks(cfg),i=arr.findIndex(x=>String(x.id)===String(id));if(i<0)return;const x=arr[i],engineId=workEngineId(kind,x.id),active=window.BerthaTimeEngine?.active?.();
