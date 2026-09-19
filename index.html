@@ -298,6 +298,28 @@ window.OneSignalDeferred.push(async function(OneSignal){
 @media (min-width:700px){.casa-how-overlay{align-items:center}.casa-how-modal{border-radius:32px}}
 </style>
 
+
+<style id="bertha-task-modal-v152">
+/* BERTH.A Modal System v1 — Tarefas / Planos. Sobrescreve legado rosa sem alterar lógica. */
+#pendingDialog{border:0!important;padding:0!important;background:transparent!important;max-width:none!important;width:auto!important}
+#pendingDialog::backdrop{background:rgba(53,48,52,.30)!important;backdrop-filter:blur(5px);-webkit-backdrop-filter:blur(5px)}
+#pendingDialog #pendingForm.modal-card{box-sizing:border-box!important;width:min(calc(100vw - 24px),520px)!important;max-height:calc(100dvh - 24px)!important;overflow:auto!important;overscroll-behavior:contain!important;margin:auto!important;border-radius:28px!important;background:#fbf7f0!important;border:1px solid rgba(145,119,91,.10)!important;padding:20px!important;box-shadow:0 22px 58px rgba(47,37,58,.15)!important}
+#pendingDialog .modal-head{margin:-20px -20px 18px!important;padding:20px!important;background:linear-gradient(135deg,rgba(255,250,226,.92),rgba(239,205,176,.55))!important;border-bottom:1px solid rgba(177,132,88,.09)!important;align-items:flex-start!important}
+#pendingDialog .modal-head .eyebrow{font-size:10px!important;letter-spacing:.18em!important;font-weight:800!important;color:#9b7458!important}
+#pendingDialog .modal-head h2{font-size:23px!important;line-height:1.1!important;font-weight:560!important;letter-spacing:-.025em!important;color:#3d3947!important;margin:6px 0 0!important}
+#pendingDialog .modal-head .icon-btn{width:38px!important;height:38px!important;min-width:38px!important;border-radius:50%!important;border:1px solid rgba(116,102,96,.10)!important;background:rgba(251,248,242,.78)!important;color:#827b80!important;box-shadow:none!important;outline:none!important;font-size:25px!important}
+#pendingDialog label{display:block!important;color:#655f67!important;font-size:12px!important;font-weight:740!important;margin:12px 0!important}
+#pendingDialog input,#pendingDialog select,#pendingDialog textarea{box-sizing:border-box!important;width:100%!important;min-width:0!important;max-width:100%!important;font-size:16px!important;color:#3e3d4b!important;background:#fffdfa!important;border:1px solid rgba(145,119,91,.14)!important;border-radius:15px!important;box-shadow:none!important;outline:none!important}
+#pendingDialog input,#pendingDialog select{min-height:48px!important;padding:11px 13px!important}
+#pendingDialog textarea{min-height:82px!important;padding:12px 13px!important;resize:vertical!important}
+#pendingDialog input:focus,#pendingDialog select:focus,#pendingDialog textarea:focus{border-color:rgba(202,144,99,.42)!important;box-shadow:0 0 0 3px rgba(238,194,150,.12)!important}
+#pendingDialog .form-grid{display:grid!important;grid-template-columns:1fr!important;gap:0!important}
+#pendingDialog .modal-actions{position:sticky!important;bottom:-20px!important;margin:18px -20px -20px!important;padding:13px 20px calc(13px + env(safe-area-inset-bottom))!important;background:rgba(251,247,240,.96)!important;backdrop-filter:blur(10px)!important;-webkit-backdrop-filter:blur(10px)!important;border-top:1px solid rgba(145,119,91,.09)!important;gap:9px!important}
+#pendingDialog .modal-actions .secondary{background:rgba(255,255,255,.78)!important;color:#706972!important;border:1px solid rgba(145,119,91,.12)!important;border-radius:15px!important}
+#pendingDialog .modal-actions .primary{background:linear-gradient(135deg,#fbefc5 0%,#e8bd88 52%,#cf8f67 100%)!important;color:#fff!important;border:0!important;border-radius:15px!important;box-shadow:none!important}
+body:has(#pendingDialog[open]){overflow:hidden!important;overscroll-behavior:none!important}
+@media(max-width:480px){#pendingDialog #pendingForm.modal-card{width:calc(100vw - 24px)!important;max-height:calc(100dvh - 24px)!important;border-radius:26px!important}}
+</style>
 </head>
 <body>
 <div class="app-shell">
@@ -331,7 +353,7 @@ window.OneSignalDeferred.push(async function(OneSignal){
 </form>
 </dialog>
 
-<script src="app-v2.8.151.js?v=31500"></script>
+<script src="app-v2.8.152.js?v=31520"></script>
 
 <dialog id="moduleMenu">
 <div class="module-sheet">
@@ -352,6 +374,6 @@ window.OneSignalDeferred.push(async function(OneSignal){
 </dialog>
 
 <script src="work-v12.js?v=16.0"></script>
-<script src="bertha-time-v2.8.151.js?v=31500"></script>
+<script src="bertha-time-v2.8.152.js?v=31520"></script>
 </body>
 </html>
