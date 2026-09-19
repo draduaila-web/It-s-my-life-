@@ -1,0 +1,330 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#f8f6f8">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="BERTH.A HML">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="apple-touch-icon" sizes="512x512" href="../bertha-icon-512.png">
+<link rel="stylesheet" href="../style.css">
+<style id="bertha-v2857-idea-modal-radius">
+/* v2.8.57 — preserva o ajuste cirúrgico: contorno externo do modal Criação & Ideias.
+   O JS injeta .study-v10-modal depois do CSS principal e, no iPhone, força 24px.
+   Este seletor específico + !important vence essa regra sem alterar outros modais. */
+#ideaDialog #ideaForm.bertha-modal.study-v10-modal {
+  border-radius: 40px !important;
+  overflow: hidden !important;
+}
+</style>
+
+<script>
+(function(){
+  const PREFIX='bertha-hml::';
+  const raw=window.localStorage;
+  const keys=()=>{const a=[];for(let i=0;i<raw.length;i++){const k=raw.key(i);if(k&&k.startsWith(PREFIX))a.push(k.slice(PREFIX.length));}return a;};
+  window.berthaHmlStorage={
+    getItem:key=>raw.getItem(PREFIX+key),
+    setItem:(key,value)=>raw.setItem(PREFIX+key,String(value)),
+    removeItem:key=>raw.removeItem(PREFIX+key),
+    clear:()=>keys().forEach(k=>raw.removeItem(PREFIX+k)),
+    key:i=>keys()[i]??null,
+    get length(){return keys().length},
+    entries:()=>{const out={};keys().forEach(k=>out[k]=raw.getItem(PREFIX+k));return out;}
+  };
+  // Push real fica neutralizado na homologação. O fluxo interno pode ser testado sem disparar notificações.
+  window.berthaPushReady=true;
+  window.berthaRequestPushPermission=async()=>({ok:true,homologacao:true});
+  window.berthaGetPushSubscriptionId=async()=> 'HOMOLOGACAO';
+  window.berthaSchedulePush=async(item)=>({ok:true,homologacao:true,notificationId:'HML-NO-PUSH',scheduledFor:null});
+})();
+</script>
+<title>BERTH.A · Homologação</title>
+
+<style id="bertha-v2897-release">
+/* v2.8.100 — Criação & Ideias: alinhamento definitivo do bloco BERTA; fundo luminoso preservado. */
+</style>
+
+<style id="bertha-v28108-recipes">
+/* v2.8.108 — Receitas: look pêssego + blush, hero e Hoje no padrão BERTH.A */
+.recipe-hero{position:relative;overflow:hidden;border:1px solid rgba(126,104,116,.14);border-radius:28px;padding:28px 30px 27px;margin:0 0 18px;background:radial-gradient(circle at 18% 18%,rgba(246,194,189,.26),transparent 34%),radial-gradient(circle at 83% 76%,rgba(240,180,197,.18),transparent 38%),linear-gradient(120deg,rgba(255,250,244,.94),rgba(252,239,234,.62));box-shadow:0 12px 34px rgba(101,75,84,.045)}
+.recipe-hero .eyebrow{color:#a55f78;letter-spacing:.18em}.recipe-hero h2{margin:14px 0 8px;font-size:34px;line-height:1.05;font-weight:650;letter-spacing:-.035em;color:#34333f}.recipe-hero p{margin:0;max-width:82%;font-size:16px;line-height:1.45;color:#77717b}.recipe-hero-icon{position:absolute;right:28px;top:27px;width:42px;height:42px;color:#aaa3aa;opacity:.7}.recipe-hero-icon svg{width:100%;height:100%;fill:none;stroke:currentColor;stroke-width:1.15}
+.recipe-today{padding:18px 18px 8px!important;background:radial-gradient(circle at 92% 12%,rgba(243,186,196,.17),transparent 32%),radial-gradient(circle at 8% 90%,rgba(246,200,175,.18),transparent 35%),rgba(255,252,248,.86)!important;border:1px solid rgba(156,117,127,.12)!important;box-shadow:0 10px 30px rgba(90,66,75,.04)!important}.recipe-today-head{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;margin-bottom:7px}.recipe-today-head h3{margin:4px 0 0;font-size:21px}.recipe-today-head a{font-size:12px;color:#9b6176;text-decoration:none;padding:6px 0}.recipe-meal{display:grid;grid-template-columns:28px minmax(0,1fr);gap:10px;padding:13px 0;border-top:1px solid rgba(106,87,95,.08)}.recipe-meal-icon{width:24px;height:24px;color:#a9657d}.recipe-meal-icon svg{width:100%;height:100%;fill:none;stroke:currentColor;stroke-width:1.5;stroke-linecap:round}.recipe-meal-copy small{display:block;color:#8c838a;font-size:11px;margin-bottom:2px}.recipe-meal-copy strong{font-size:14px;color:#39363d}.recipe-meal-actions{grid-column:2;display:flex;gap:6px;flex-wrap:wrap;margin-top:3px}.recipe-meal-actions button{border:1px solid rgba(169,101,125,.17);background:linear-gradient(120deg,rgba(250,220,216,.45),rgba(246,213,225,.35));color:#8d5b6e;border-radius:999px;padding:7px 10px;font-size:11px;font-weight:750;box-shadow:none}.recipe-meal-actions .recipe-view{width:30px;padding:5px;font-size:18px;background:transparent}.recipe-meal.done{opacity:.68}
+.recipe-tools{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:10px;margin:16px 0}.recipe-tools input{min-width:0;font-size:16px!important;border:1px solid rgba(110,91,100,.13);background:rgba(255,255,255,.56);border-radius:18px;padding:13px 15px}.recipe-tools button,#toggleAllRecipes{border:1px solid rgba(169,101,125,.13);background:linear-gradient(120deg,rgba(248,213,202,.58),rgba(242,203,220,.48));color:#8e5269;border-radius:18px;padding:12px 15px;font-weight:800;box-shadow:0 7px 20px rgba(120,76,91,.04)}
+.recipe-library-head{display:flex;justify-content:space-between;align-items:end;margin:20px 2px 10px}.recipe-library-head h3{margin:3px 0 0;font-size:21px}.recipe-library-head button{font-size:12px;padding:8px 11px;border-radius:999px}.recipe-category-row{display:flex;gap:7px;overflow:auto;padding:2px 1px 10px;scrollbar-width:none}.recipe-category-row::-webkit-scrollbar{display:none}.recipe-category-row button{white-space:nowrap;border:1px solid rgba(115,94,103,.12);background:rgba(255,255,255,.48);color:#777078;border-radius:999px;padding:8px 11px;font-size:11px}.recipe-category-row button.active{background:linear-gradient(120deg,rgba(248,213,202,.58),rgba(242,203,220,.48));color:#8e5269}
+.recipe-card{background:radial-gradient(circle at 90% 10%,rgba(244,202,211,.10),transparent 32%),rgba(255,253,250,.82)!important;border:1px solid rgba(120,99,108,.10)!important;box-shadow:0 8px 25px rgba(76,58,66,.035)!important}.recipe-card .favorite{background:transparent!important;border:0!important;color:#a9657d!important;font-size:23px!important}.recipe-card .secondary{background:rgba(247,224,220,.46)!important;color:#865c6b!important;border:1px solid rgba(169,101,125,.10)!important;box-shadow:none!important}.recipe-freezer{margin-top:18px;background:radial-gradient(circle at 90% 20%,rgba(199,214,232,.13),transparent 38%),rgba(255,252,247,.76)!important}.recipe-freezer .eyebrow{color:#8a7d84}
+.recipe-dialog .study-v10-modal{background:linear-gradient(155deg,#fffaf5,#fff7f5)!important}.recipe-choice-stack{display:grid;gap:10px}.recipe-choice{display:grid;grid-template-columns:38px 1fr;gap:11px;text-align:left;align-items:center;border:1px solid rgba(159,110,126,.12);background:linear-gradient(120deg,rgba(252,228,220,.38),rgba(249,221,230,.28));border-radius:20px;padding:14px;color:#403a40}.recipe-choice strong,.recipe-choice small{display:block}.recipe-choice small{margin-top:3px;color:#8c8188}.recipe-line-icon{display:grid;place-items:center;width:34px;height:34px;border:1px solid rgba(169,101,125,.15);border-radius:50%;color:#9c6075;background:rgba(255,255,255,.35);font-size:20px}.recipe-pick{display:block;width:100%;text-align:left;margin-bottom:8px}.recipe-pick strong,.recipe-pick small{display:block}.recipe-nutrition-box{margin:8px 0 16px;padding:14px;border:1px solid rgba(159,110,126,.11);border-radius:20px;background:linear-gradient(120deg,rgba(250,225,218,.30),rgba(246,220,230,.22))}.recipe-nutrition-head{display:flex;gap:10px;align-items:center;margin-bottom:12px}.recipe-nutrition-head strong,.recipe-nutrition-head small{display:block}.recipe-nutrition-head small{color:#8b8188;margin-top:2px}.recipe-nutri-line{display:inline-block;margin-left:6px;color:#986176}.recipe-modal-actions{display:flex;gap:8px;flex-wrap:wrap}.recipe-dialog input,.recipe-dialog select,.recipe-dialog textarea{font-size:16px!important}
+@media(max-width:430px){.recipe-hero{padding:24px 24px 23px}.recipe-hero h2{font-size:31px}.recipe-hero p{max-width:78%;font-size:15px}.recipe-hero-icon{right:22px;top:23px;width:36px}.recipe-tools{grid-template-columns:1fr auto}.recipe-tools button{padding:11px 12px;font-size:12px}}
+</style>
+
+<style id="bertha-v28109-recipe-modals">
+/* v2.8.109 — Receitas: modais unificados, leves e estáveis no iPhone */
+.recipe-dialog{padding:14px!important;background:rgba(66,55,60,.30)!important;backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px)}
+.recipe-dialog .study-v10-modal{width:min(100%,560px)!important;max-height:calc(100dvh - 28px)!important;overflow:auto!important;box-sizing:border-box!important;padding:22px!important;border-radius:30px!important;background:linear-gradient(155deg,#fffaf6 0%,#fff8f5 58%,#fff9f7 100%)!important;box-shadow:0 22px 60px rgba(70,54,62,.16)!important}
+.recipe-dialog .study-v10-head{align-items:flex-start!important;gap:14px!important;margin-bottom:20px!important}.recipe-dialog .study-v10-head h2{margin:5px 0 5px!important;line-height:1.08!important}.recipe-dialog .study-v10-head p{margin:0!important;line-height:1.35!important}
+.recipe-dialog .study-v10-x{-webkit-appearance:none!important;appearance:none!important;-webkit-tap-highlight-color:transparent!important;outline:none!important;box-shadow:none!important;flex:0 0 auto!important;background:rgba(255,255,255,.44)!important;color:#716b70!important;border:1px solid rgba(105,94,100,.13)!important}.recipe-dialog .study-v10-x:focus,.recipe-dialog .study-v10-x:focus-visible,.recipe-dialog .study-v10-x:active{outline:none!important;box-shadow:none!important;background:rgba(255,255,255,.58)!important;color:#625d61!important}
+.recipe-dialog form>label,.recipe-dialog .form-grid>label{display:flex!important;flex-direction:column!important;align-items:stretch!important;gap:6px!important;width:100%!important;margin:0 0 14px!important;font-size:13px!important;font-weight:700!important;color:#554b51!important;box-sizing:border-box!important}
+.recipe-dialog .form-grid{display:grid!important;grid-template-columns:1fr 1fr!important;gap:12px!important;align-items:start!important}.recipe-dialog .form-grid>label{margin-bottom:0!important}
+.recipe-dialog input,.recipe-dialog select,.recipe-dialog textarea{display:block!important;width:100%!important;max-width:100%!important;min-width:0!important;box-sizing:border-box!important;margin:0!important;padding:12px 13px!important;border:1px solid rgba(110,88,98,.13)!important;border-radius:14px!important;background:rgba(255,255,255,.64)!important;color:#4c4449!important;font-size:16px!important;line-height:1.3!important;box-shadow:none!important}
+.recipe-dialog textarea{resize:vertical!important;min-height:116px!important}.recipe-dialog select{min-height:46px!important}.recipe-dialog .muted{font-weight:500!important;color:#9a8f95!important}
+.recipe-dialog .recipe-nutrition-box{margin:4px 0 16px!important;padding:15px!important;background:linear-gradient(125deg,rgba(252,231,223,.35),rgba(248,226,234,.22))!important;border:1px solid rgba(159,110,126,.10)!important}.recipe-dialog .recipe-nutrition-box .form-grid{margin-top:10px!important}
+.recipe-dialog .recipe-detail-card{background:linear-gradient(145deg,rgba(255,255,255,.62),rgba(255,248,244,.78))!important;border:1px solid rgba(130,103,113,.10)!important;box-shadow:none!important;border-radius:22px!important;padding:18px!important}.recipe-dialog .recipe-detail-card h3{font-size:18px!important;margin:0 0 10px!important}.recipe-dialog .recipe-detail-card h3:not(:first-child){margin-top:18px!important}.recipe-dialog .recipe-detail-card li{line-height:1.42!important;margin:3px 0!important}.recipe-dialog .recipe-detail-card p{line-height:1.42!important}
+.recipe-dialog .recipe-modal-actions,.recipe-dialog .modal-actions{display:flex!important;gap:8px!important;flex-wrap:wrap!important;align-items:center!important;margin-top:14px!important}.recipe-dialog .recipe-modal-actions button,.recipe-dialog .modal-actions button{border:1px solid rgba(160,101,124,.12)!important;background:linear-gradient(120deg,rgba(250,226,218,.46),rgba(248,221,231,.34))!important;color:#87566a!important;box-shadow:none!important;border-radius:15px!important;font-weight:750!important;padding:11px 14px!important}.recipe-dialog .recipe-modal-actions .primary,.recipe-dialog .modal-actions .primary{background:linear-gradient(120deg,rgba(241,190,179,.58),rgba(229,171,195,.52))!important;color:#74485a!important}.recipe-dialog .recipe-choice{box-shadow:none!important}.recipe-dialog .recipe-line-icon{background:rgba(255,255,255,.30)!important}
+@media(max-width:430px){.recipe-dialog{padding:10px!important}.recipe-dialog .study-v10-modal{padding:20px 18px!important;border-radius:28px!important}.recipe-dialog .form-grid{grid-template-columns:1fr!important;gap:0!important}.recipe-dialog .form-grid>label{margin-bottom:14px!important}.recipe-dialog .recipe-modal-actions button{flex:1 1 auto!important}.recipe-dialog .modal-actions .grow{display:none!important}}
+</style>
+<style id="bertha-exercise-v120">
+.exercise-hero{position:relative;overflow:hidden;margin:0 0 18px;padding:26px 28px 27px;border-radius:28px;border:1px solid rgba(120,103,160,.13);background:radial-gradient(circle at 18% 16%,rgba(214,202,247,.32),transparent 36%),radial-gradient(circle at 84% 78%,rgba(247,207,185,.24),transparent 38%),linear-gradient(125deg,rgba(251,248,255,.96),rgba(247,240,251,.82) 56%,rgba(255,247,240,.84));box-shadow:0 11px 32px rgba(82,63,108,.045)}
+.exercise-hero .eyebrow{color:#775f9d;font-size:12px;font-weight:750;letter-spacing:.18em}.exercise-hero h2{margin:14px 0 8px;font-size:32px;line-height:1.06;letter-spacing:-.035em;font-weight:500;color:#33313d;max-width:78%}.exercise-hero p{margin:0;max-width:78%;font-size:16px;line-height:1.45;color:#77717b}.exercise-hero-icon{position:absolute;right:27px;top:26px;width:39px;height:39px;color:#aaa4ad;opacity:.66}.exercise-hero-icon svg{width:100%;height:100%;fill:none;stroke:currentColor;stroke-width:1.2;stroke-linejoin:round;stroke-linecap:round}
+.exercise-focus{background:radial-gradient(circle at 86% 14%,rgba(244,199,177,.22),transparent 34%),linear-gradient(130deg,rgba(242,237,252,.88),rgba(252,244,239,.82))!important;border:1px solid rgba(120,103,160,.1)!important;box-shadow:0 9px 28px rgba(82,63,108,.04)!important;padding:24px!important}.exercise-focus>strong{display:block;font-size:24px;line-height:1.15;margin:8px 0 8px;color:#37333e}.exercise-focus p{margin:0 0 16px;color:#817986;line-height:1.45}.exercise-focus-actions{display:flex;gap:9px;flex-wrap:wrap;align-items:center}.exercise-focus-actions .primary,.exercise-plan-actions .secondary,.exercise-add{background:linear-gradient(135deg,rgba(225,211,247,.92),rgba(247,211,190,.82))!important;color:#6d567d!important;border:1px solid rgba(120,103,160,.08)!important;box-shadow:none!important}.exercise-focus-actions .secondary{background:rgba(255,255,255,.45)!important;color:#755b87!important;border:1px solid rgba(121,98,151,.14)!important}.exercise-focus-actions .text-btn{padding:9px 4px!important;font-weight:650!important;color:#866f91!important}
+.exercise-plan-list{gap:12px!important}.exercise-plan{background:linear-gradient(120deg,rgba(255,255,255,.87),rgba(251,247,252,.88))!important;border:1px solid rgba(122,105,154,.09)!important;box-shadow:0 8px 24px rgba(82,63,108,.03)!important;padding:19px 20px!important}.exercise-plan-main strong{font-size:18px}.exercise-plan-main span,.exercise-plan-main small{display:block;color:#88818b;margin-top:4px}.exercise-plan-actions{display:flex;flex-direction:column;align-items:stretch;gap:8px;min-width:130px}.exercise-plan-actions .pill{background:rgba(245,225,208,.7)!important;color:#8b756c!important;text-align:center}.exercise-external-link{display:inline-block!important;margin-top:10px!important;color:#765d91!important;font-size:12.5px!important;font-weight:650!important;text-decoration:none}.exercise-add{margin-top:12px!important}.exercise-session{background:rgba(255,255,255,.72)!important}.exercise-note{margin-top:14px;background:linear-gradient(125deg,rgba(246,221,207,.72),rgba(238,228,250,.62))!important;border:1px solid rgba(126,105,151,.08)!important;box-shadow:none!important}.exercise-note p{margin-bottom:0;color:#7e7680}.exercise-other-list{display:grid;gap:10px;margin-top:18px}.exercise-other-list button{border:1px solid rgba(121,98,151,.11);border-radius:18px;background:linear-gradient(120deg,rgba(250,244,253,.9),rgba(255,246,239,.88));padding:15px 16px;text-align:left;color:#39343f;font:inherit}.exercise-other-list strong,.exercise-other-list span{display:block}.exercise-other-list span{font-size:13px;color:#8c838d;margin-top:3px}
+@media(max-width:430px){.exercise-hero{padding:24px 24px 24px}.exercise-hero h2{font-size:29px;max-width:80%}.exercise-hero p{font-size:15px}.exercise-hero-icon{right:22px;top:23px;width:34px}.exercise-plan{gap:12px!important}.exercise-plan-actions{min-width:112px}.exercise-focus>strong{font-size:22px}}
+</style>
+
+<style id="bertha-exercise-modal-v120">
+/* v2.8.120 — modal Exercícios alinhado ao padrão BERTH.A */
+#exForm.bertha-modal.study-v10-modal,#quickExForm.bertha-modal.study-v10-modal,.exercise-other-modal.bertha-modal.study-v10-modal{
+  width:min(100%,560px)!important;max-height:calc(100dvh - 28px)!important;overflow:auto!important;box-sizing:border-box!important;
+  padding:22px 20px 20px!important;border-radius:30px!important;
+  background:linear-gradient(155deg,#fffaf7 0%,#fbf7ff 54%,#fff8f2 100%)!important;
+  box-shadow:0 22px 60px rgba(72,58,88,.15)!important;
+}
+#exForm .bertha-modal-head,#quickExForm .bertha-modal-head,.exercise-other-modal .bertha-modal-head{align-items:flex-start!important;gap:14px!important;margin-bottom:18px!important}
+#exForm .bertha-modal-head h2,#quickExForm .bertha-modal-head h2,.exercise-other-modal .bertha-modal-head h2{margin:5px 0 2px!important;line-height:1.08!important}
+#exForm .bertha-modal-head button[data-close],#quickExForm .bertha-modal-head button[data-close],.exercise-other-modal .bertha-modal-head button[data-close]{
+  -webkit-appearance:none!important;appearance:none!important;-webkit-tap-highlight-color:transparent!important;outline:none!important;box-shadow:none!important;
+  flex:0 0 44px!important;width:44px!important;height:44px!important;border-radius:50%!important;padding:0!important;
+  display:grid!important;place-items:center!important;background:rgba(255,255,255,.42)!important;color:#77717b!important;
+  border:1px solid rgba(101,91,108,.13)!important;font-size:28px!important;font-weight:350!important;line-height:1!important;
+}
+#exForm .bertha-modal-head button[data-close]:focus,#exForm .bertha-modal-head button[data-close]:focus-visible,#quickExForm .bertha-modal-head button[data-close]:focus,#quickExForm .bertha-modal-head button[data-close]:focus-visible,.exercise-other-modal .bertha-modal-head button[data-close]:focus,.exercise-other-modal .bertha-modal-head button[data-close]:focus-visible{outline:none!important;box-shadow:none!important;background:rgba(255,255,255,.58)!important}
+#exForm input,#exForm select,#exForm textarea,#quickExForm input,#quickExForm select,#quickExForm textarea{font-size:16px!important;border-radius:18px!important;background:rgba(255,255,255,.72)!important;border:1px solid rgba(122,104,149,.12)!important;box-shadow:none!important}
+#exForm textarea,#quickExForm textarea{resize:vertical!important;line-height:1.4!important}
+#exForm .study-v10-field,#quickExForm .study-v10-field{margin-bottom:14px!important}
+#exForm .form-grid{display:grid!important;grid-template-columns:1fr 1fr!important;gap:12px!important}
+#exForm #eDays{gap:8px!important;margin:2px 0 16px!important}
+#exForm #eDays label{padding:8px 10px!important;border-radius:999px!important;background:rgba(238,229,250,.58)!important;border:1px solid rgba(121,98,151,.10)!important;color:#765f87!important;font-size:13px!important}
+#exForm #eDays input{width:16px!important;height:16px!important;margin:0!important;accent-color:#8e74aa!important}
+#exForm label:has(#eNotify){justify-content:space-between!important;padding:11px 14px!important;border-radius:18px!important;background:linear-gradient(120deg,rgba(239,230,251,.58),rgba(249,230,219,.48))!important;border:1px solid rgba(121,98,151,.10)!important}
+#exForm #eNotify{width:22px!important;height:22px!important;margin:0!important;accent-color:#8e74aa!important}
+#exForm .study-v10-actions,#quickExForm .study-v10-actions{position:sticky!important;bottom:-20px!important;margin:18px -20px -20px!important;padding:14px 20px calc(14px + env(safe-area-inset-bottom))!important;background:linear-gradient(180deg,rgba(255,250,247,.72),rgba(255,250,247,.98) 35%)!important;backdrop-filter:blur(14px)!important;z-index:3!important;gap:10px!important}
+#exForm .study-v10-actions .primary,#quickExForm .study-v10-actions .primary{background:linear-gradient(135deg,rgba(223,209,247,.96),rgba(245,202,183,.91))!important;color:#684f77!important;border:1px solid rgba(122,102,151,.08)!important;box-shadow:none!important}
+#exForm .study-v10-actions .secondary,#quickExForm .study-v10-actions .secondary{background:rgba(255,255,255,.46)!important;color:#75697b!important;border:1px solid rgba(105,94,100,.12)!important;box-shadow:none!important}
+#exForm .study-v10-actions .danger{background:transparent!important;color:#a96872!important;border:1px solid rgba(169,104,114,.18)!important;box-shadow:none!important;margin-right:auto!important}
+.exercise-other-list button{background:linear-gradient(120deg,rgba(240,232,251,.68),rgba(251,235,225,.58))!important;border:1px solid rgba(121,98,151,.10)!important}
+@media(max-width:430px){
+  #exForm.bertha-modal.study-v10-modal,#quickExForm.bertha-modal.study-v10-modal,.exercise-other-modal.bertha-modal.study-v10-modal{padding:20px 18px 18px!important;border-radius:28px!important}
+  #exForm .form-grid{grid-template-columns:1fr 1fr!important;gap:10px!important}
+  #exForm .study-v10-actions,#quickExForm .study-v10-actions{margin:18px -18px -18px!important;padding-left:18px!important;padding-right:18px!important;bottom:-18px!important}
+}
+</style>
+
+
+<style id="bertha-exercise-checkbox-v121">
+#exForm #eDays label{position:relative;padding-left:34px!important;min-height:34px!important;display:inline-flex!important;align-items:center!important}
+#exForm #eDays input{position:absolute!important;left:9px!important;top:50%!important;transform:translateY(-50%)!important;-webkit-appearance:none!important;appearance:none!important;width:17px!important;height:17px!important;border-radius:6px!important;border:1.3px solid rgba(116,91,139,.34)!important;background:rgba(255,255,255,.72)!important;margin:0!important}
+#exForm #eDays input:checked{background:linear-gradient(135deg,#b79bd0,#e7b7a3)!important;border-color:transparent!important}
+#exForm #eDays input:checked:after{content:"";position:absolute;left:5px;top:2.5px;width:4px;height:8px;border:solid rgba(255,255,255,.96);border-width:0 1.6px 1.6px 0;transform:rotate(45deg)}
+#exForm label:has(#eNotify){display:flex!important;align-items:center!important;gap:12px!important;justify-content:flex-start!important}
+#exForm #eNotify{-webkit-appearance:none!important;appearance:none!important;width:20px!important;height:20px!important;border-radius:7px!important;border:1.3px solid rgba(116,91,139,.34)!important;background:rgba(255,255,255,.72)!important;position:relative!important;flex:0 0 20px!important}
+#exForm #eNotify:checked{background:linear-gradient(135deg,#b79bd0,#e7b7a3)!important;border-color:transparent!important}
+#exForm #eNotify:checked:after{content:"";position:absolute;left:6px;top:3px;width:4px;height:8px;border:solid #fff;border-width:0 1.6px 1.6px 0;transform:rotate(45deg)}
+</style>
+
+<style id="casa-v124-polish">
+/* BERTH.A v2.8.124 — Casa: navegador de rotinas + modais unificados */
+#casa-sec-rotinas .casa-section-body{padding-top:14px}
+.casa-routine-browser{display:grid;gap:12px}
+.casa-routine-select{display:flex;align-items:center;gap:10px;padding:10px 14px;border:1px solid rgba(126,102,111,.15);border-radius:18px;background:linear-gradient(135deg,rgba(250,228,232,.72),rgba(227,239,228,.78));box-shadow:0 7px 22px rgba(78,60,69,.035)}
+.casa-routine-select>span{width:22px;height:22px;display:grid;place-items:center;color:#9d6f80;flex:0 0 auto}
+.casa-routine-select svg{width:20px;height:20px}
+.casa-routine-select select{width:100%;min-width:0;border:0!important;background:transparent!important;box-shadow:none!important;padding:7px 30px 7px 2px!important;font-size:16px!important;color:#4a4248;outline:none;font-weight:650}
+.casa-routine-groups{display:grid;gap:10px}
+.casa-routine-group{border:1px solid rgba(117,101,109,.12);border-radius:20px;background:rgba(255,252,249,.82);overflow:hidden;box-shadow:0 8px 24px rgba(71,59,65,.025)}
+.casa-routine-group>summary{list-style:none;display:flex;align-items:center;justify-content:space-between;gap:12px;padding:15px 16px;cursor:pointer;color:#3d3741}
+.casa-routine-group>summary::-webkit-details-marker{display:none}
+.casa-routine-group>summary>span:first-child{display:flex;align-items:center;gap:11px;min-width:0}
+.casa-routine-group>summary strong{font-size:17px;line-height:1.2}
+.casa-routine-group>summary:after{content:'⌄';font-size:19px;color:#978f94;margin-left:2px;transition:transform .18s ease}
+.casa-routine-group[open]>summary:after{transform:rotate(180deg)}
+.casa-routine-count{margin-left:auto;min-width:32px;height:28px;padding:0 9px;border-radius:999px;display:inline-grid;place-items:center;background:#f3e7d8;color:#7d7168;font-size:13px;font-weight:700}
+.casa-routine-group-body{border-top:1px solid rgba(117,101,109,.10);padding:0 14px 4px;background:linear-gradient(180deg,rgba(255,253,251,.95),rgba(247,250,246,.68))}
+.casa-routine-group .home-task-wrap{padding:15px 0;border-bottom:1px solid rgba(117,101,109,.10)}
+.casa-routine-group .home-task-wrap:last-child{border-bottom:0}
+.casa-routine-group .home-task-actions{display:flex;justify-content:flex-end;align-items:center;gap:8px;flex-wrap:wrap;margin:8px 0 0}
+.casa-routine-group .home-how,.casa-routine-group .home-edit{border:0;background:transparent;color:#9b6f7f;font-weight:700;padding:8px 4px;font-size:14px}
+.casa-routine-group .home-edit{padding:8px 12px;border-radius:999px;background:rgba(245,233,240,.85);color:#825d78}
+.casa-routine-group .casa-task-exec{display:flex;gap:10px;flex-wrap:wrap;margin-top:10px}
+.casa-routine-group .casa-task-start,.casa-routine-group .casa-task-finish,.casa-routine-group .casa-task-reopen{border:0;border-radius:999px;padding:10px 15px;font-weight:700;font-size:14px}
+.casa-routine-group .casa-task-start{background:linear-gradient(135deg,#eddcf5,#f5ded6);color:#735980}
+.casa-routine-group .casa-task-finish{background:linear-gradient(135deg,#e2f0e5,#eef5e9);color:#5c7562}
+.casa-routine-group .casa-task-reopen{background:linear-gradient(135deg,#f4e6eb,#e8f0e8);color:#765e6b}
+.casa-routine-empty{margin-top:4px}
+
+/* Casa overlays / dialogs */
+.casa-how-overlay{position:fixed;inset:0;z-index:9999;background:rgba(49,42,46,.28);backdrop-filter:blur(7px);-webkit-backdrop-filter:blur(7px);display:flex;align-items:flex-end;justify-content:center;padding:18px}
+.casa-how-modal{position:relative;width:min(100%,680px);max-height:min(86dvh,860px);overflow:auto;background:#fffaf7;border:1px solid rgba(126,102,111,.12);border-radius:30px;padding:26px 22px 24px;box-shadow:0 24px 70px rgba(68,51,59,.18)}
+.casa-how-modal .eyebrow{color:#9b6f7f;letter-spacing:.17em;margin-bottom:7px}
+.casa-how-modal h2{font-size:29px;line-height:1.12;margin:0 58px 14px 0;color:#312d35}
+.casa-modal-x,.casa-dialog .study-v10-x,.casa-dialog .icon-btn{width:46px!important;height:46px!important;min-width:46px;border-radius:50%!important;border:1px solid rgba(95,87,92,.12)!important;background:#f5f1ef!important;color:#6e686c!important;display:grid!important;place-items:center!important;font-size:28px!important;font-weight:400!important;box-shadow:none!important;outline:none!important}
+.casa-how-modal>.casa-modal-x{position:absolute;right:18px;top:18px}
+.casa-how-meta{display:flex;gap:8px;margin:0 0 18px;color:#837a80}
+.casa-how-meta span{display:inline-flex;align-items:center;gap:6px;background:linear-gradient(135deg,rgba(248,226,232,.76),rgba(230,239,229,.78));padding:8px 11px;border-radius:999px;font-size:13px}
+.casa-how-meta svg{width:17px;height:17px}
+.casa-how-section{padding:15px 0;border-top:1px solid rgba(117,101,109,.10)}
+.casa-how-section h3{font-size:16px;margin:0 0 10px;color:#443d46}
+.casa-how-section ul,.casa-how-section ol{margin:0;padding-left:22px;display:grid;gap:8px}
+.casa-how-section li{color:#554d55;line-height:1.45}
+.casa-how-section ul li{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;padding-left:0;list-style:none}
+.casa-buy-mini{flex:0 0 auto;border:0;border-radius:999px;background:rgba(246,229,238,.82);color:#946778;padding:7px 10px;font-size:12px}
+.casa-how-tip{margin-top:14px;padding:15px 16px;border-radius:18px;background:linear-gradient(135deg,rgba(248,228,232,.68),rgba(231,241,231,.72));color:#554d55}
+.casa-how-tip strong{color:#775e68}
+.casa-how-tip p{margin:5px 0 0}
+.casa-how-footer{display:flex;justify-content:flex-end;padding-top:18px}
+.casa-how-footer .secondary{border:0;border-radius:16px;padding:11px 15px;background:linear-gradient(135deg,#eadcf3,#f4ddd6);color:#735a7b;font-weight:700}
+
+.casa-dialog{border:0!important;background:transparent!important;padding:0!important;max-width:none!important;width:auto!important}
+.casa-dialog::backdrop{background:rgba(49,42,46,.28);backdrop-filter:blur(7px);-webkit-backdrop-filter:blur(7px)}
+.casa-dialog .casa-modal-card{width:min(calc(100vw - 32px),680px)!important;max-height:88dvh!important;overflow:auto!important;margin:auto!important;border-radius:30px!important;background:#fffaf7!important;border:1px solid rgba(126,102,111,.12)!important;padding:24px!important;box-shadow:0 24px 70px rgba(68,51,59,.18)!important}
+.casa-dialog .modal-head,.casa-dialog .study-v10-head{align-items:flex-start!important}
+.casa-dialog label{font-weight:700;color:#5f555e;gap:7px}
+.casa-dialog input,.casa-dialog select,.casa-dialog textarea{font-size:16px!important;min-height:48px;border:1px solid rgba(126,102,111,.16)!important;background:#fffdfb!important;border-radius:16px!important;box-shadow:none!important;color:#3c3741!important}
+.casa-dialog textarea{min-height:100px;padding-top:12px!important}
+.casa-dialog .modal-actions,.casa-dialog .study-v10-actions{position:sticky;bottom:-24px;margin:20px -24px -24px;padding:14px 24px calc(14px + env(safe-area-inset-bottom));background:rgba(255,250,247,.96);backdrop-filter:blur(10px);border-top:1px solid rgba(126,102,111,.10);gap:10px}
+.casa-dialog .primary{border:0!important;background:linear-gradient(135deg,#d9c5e9,#edc9c0)!important;color:#654f6b!important;border-radius:16px!important;font-weight:800!important}
+.casa-dialog .secondary{border:0!important;background:#f2ecef!important;color:#705d6c!important;border-radius:16px!important;font-weight:700!important}
+@media (min-width:700px){.casa-how-overlay{align-items:center}.casa-how-modal{border-radius:32px}}
+</style>
+
+
+<style id="bertha-task-modal-v152">
+/* BERTH.A Modal System v1 — Tarefas / Planos. Sobrescreve legado rosa sem alterar lógica. */
+#pendingDialog{border:0!important;padding:0!important;background:transparent!important;max-width:none!important;width:auto!important}
+#pendingDialog::backdrop{background:rgba(53,48,52,.30)!important;backdrop-filter:blur(5px);-webkit-backdrop-filter:blur(5px)}
+#pendingDialog #pendingForm.modal-card{box-sizing:border-box!important;width:min(calc(100vw - 24px),520px)!important;max-height:calc(100dvh - 24px)!important;overflow:auto!important;overscroll-behavior:contain!important;margin:auto!important;border-radius:28px!important;background:#fbf7f0!important;border:1px solid rgba(145,119,91,.10)!important;padding:20px!important;box-shadow:0 22px 58px rgba(47,37,58,.15)!important}
+#pendingDialog .modal-head{margin:-20px -20px 18px!important;padding:20px!important;background:linear-gradient(135deg,rgba(255,250,226,.92),rgba(239,205,176,.55))!important;border-bottom:1px solid rgba(177,132,88,.09)!important;align-items:flex-start!important}
+#pendingDialog .modal-head .eyebrow{font-size:10px!important;letter-spacing:.18em!important;font-weight:800!important;color:#9b7458!important}
+#pendingDialog .modal-head h2{font-size:23px!important;line-height:1.1!important;font-weight:560!important;letter-spacing:-.025em!important;color:#3d3947!important;margin:6px 0 0!important}
+#pendingDialog .modal-head .icon-btn{width:38px!important;height:38px!important;min-width:38px!important;border-radius:50%!important;border:1px solid rgba(116,102,96,.10)!important;background:rgba(251,248,242,.78)!important;color:#827b80!important;box-shadow:none!important;outline:none!important;font-size:25px!important}
+#pendingDialog label{display:block!important;color:#655f67!important;font-size:12px!important;font-weight:740!important;margin:12px 0!important}
+#pendingDialog input,#pendingDialog select,#pendingDialog textarea{box-sizing:border-box!important;width:100%!important;min-width:0!important;max-width:100%!important;font-size:16px!important;color:#3e3d4b!important;background:#fffdfa!important;border:1px solid rgba(145,119,91,.14)!important;border-radius:15px!important;box-shadow:none!important;outline:none!important}
+#pendingDialog input,#pendingDialog select{min-height:48px!important;padding:11px 13px!important}
+#pendingDialog textarea{min-height:82px!important;padding:12px 13px!important;resize:vertical!important}
+#pendingDialog input:focus,#pendingDialog select:focus,#pendingDialog textarea:focus{border-color:rgba(202,144,99,.42)!important;box-shadow:0 0 0 3px rgba(238,194,150,.12)!important}
+#pendingDialog .form-grid{display:grid!important;grid-template-columns:1fr!important;gap:0!important}
+#pendingDialog .modal-actions{position:sticky!important;bottom:-20px!important;margin:18px -20px -20px!important;padding:13px 20px calc(13px + env(safe-area-inset-bottom))!important;background:rgba(251,247,240,.96)!important;backdrop-filter:blur(10px)!important;-webkit-backdrop-filter:blur(10px)!important;border-top:1px solid rgba(145,119,91,.09)!important;gap:9px!important}
+#pendingDialog .modal-actions .secondary{background:rgba(255,255,255,.78)!important;color:#706972!important;border:1px solid rgba(145,119,91,.12)!important;border-radius:15px!important}
+#pendingDialog .modal-actions .primary{background:linear-gradient(135deg,#fbefc5 0%,#e8bd88 52%,#cf8f67 100%)!important;color:#fff!important;border:0!important;border-radius:15px!important;box-shadow:none!important}
+body:has(#pendingDialog[open]){overflow:hidden!important;overscroll-behavior:none!important}
+@media(max-width:480px){#pendingDialog #pendingForm.modal-card{width:calc(100vw - 24px)!important;max-height:calc(100dvh - 24px)!important;border-radius:26px!important}}
+</style>
+</head>
+
+<style id="bertha-hml-marker">
+body.bertha-hml::before{content:"HOMOLOGAÇÃO";position:fixed;z-index:99999;top:max(8px,env(safe-area-inset-top));right:10px;padding:6px 9px;border-radius:999px;background:rgba(61,55,68,.82);color:#fff;font:800 9px/1 system-ui,-apple-system,sans-serif;letter-spacing:.14em;pointer-events:none;box-shadow:0 4px 16px rgba(45,39,49,.10)}
+.bertha-more-data-actions [data-hml-reset]{grid-column:1/-1;background:#fffaf3!important;color:#8b7379!important;border:1px solid rgba(126,104,116,.12)!important}
+</style>
+<body class="bertha-hml">
+<div class="app-shell">
+<header class="topbar">
+<button class="icon-btn" id="backBtn" aria-label="Voltar" hidden>‹</button>
+<div>
+<div class="eyebrow">MENOS DECISÕES • MAIS RITUAL</div>
+<h1 id="pageTitle">💜 Meu Dia</h1>
+</div>
+<a class="icon-btn" id="homeBtn" aria-label="Início" href="#meu-dia">⌂</a>
+</header>
+<main id="app" class="content"></main>
+<nav class="bottom-nav" aria-label="Navegação principal">
+<a href="#meu-dia" aria-label="Meu Dia">💜<span>Meu Dia</span></a>
+<a href="#pendencias" aria-label="Pendências">📝<span>Pendências</span></a>
+<a href="#rituais" aria-label="Rituais">✨<span>Rituais</span></a>
+<button type="button" aria-label="Mais" onclick="document.getElementById('moduleMenu').showModal()">☰<span>Mais</span></button>
+</nav>
+</div>
+
+<dialog id="pendingDialog">
+<form method="dialog" id="pendingForm" class="modal-card">
+<div class="modal-head">
+<div><div class="eyebrow" id="dialogEyebrow">NOVA PENDÊNCIA</div><h2 id="dialogTitle">Adicionar pendência</h2></div>
+<button class="icon-btn" value="cancel" aria-label="Fechar">×</button>
+</div>
+<label>O que precisa sair da sua cabeça?<input id="pendingTitle" name="title" required maxlength="120" autocomplete="off" placeholder="Ex.: Resolver documento"></label>
+<div class="form-grid"><label>Categoria<select id="pendingCategory"><option value="Pessoal">Pessoal</option><option value="Casa">Casa</option><option value="Henrique">Henrique</option><option value="Financeiro">Financeiro</option><option value="Trabalho">Trabalho</option><option value="Estudos">Estudos</option><option value="Compras">Compras</option><option value="Outros">Outros</option></select></label><label>Prazo<input id="pendingDue" type="date"></label></div>
+<label>Observação <span class="muted">(opcional)</span><textarea id="pendingNote" rows="3" maxlength="300" placeholder="Algum detalhe que você não quer esquecer?"></textarea></label>
+<div class="modal-actions"><button type="button" class="secondary" id="deletePendingBtn" hidden>Excluir</button><div class="grow"></div><button type="button" class="secondary" id="cancelPendingBtn">Cancelar</button><button class="primary" value="default">Salvar</button></div>
+</form>
+</dialog>
+
+
+<style id="bertha-task-modal-v153-final">
+#pendingDialog[open] #pendingForm.modal-card{background:#fbf7f0!important;border:1px solid rgba(177,132,88,.10)!important}
+#pendingDialog[open] .modal-head{background:linear-gradient(135deg,rgba(255,252,232,.98) 0%,rgba(247,226,198,.90) 56%,rgba(224,170,128,.62) 100%)!important;border-bottom:1px solid rgba(177,132,88,.10)!important}
+#pendingDialog[open] .modal-head .eyebrow{color:#9b7458!important}
+#pendingDialog[open] .modal-head h2{color:#3d3947!important}
+#pendingDialog[open] input,#pendingDialog[open] select,#pendingDialog[open] textarea{background:#fffdfa!important;border-color:rgba(177,132,88,.14)!important}
+#pendingDialog[open] .modal-actions{background:rgba(251,247,240,.97)!important;border-top:1px solid rgba(177,132,88,.09)!important}
+#pendingDialog[open] .modal-actions .primary{background:linear-gradient(135deg,#fff1bd 0%,#e8bd88 52%,#cb855f 100%)!important;color:#fff!important}
+#pendingDialog[open] .modal-head .icon-btn{background:rgba(255,252,245,.82)!important;border-color:rgba(132,105,86,.10)!important;color:#7e777a!important}
+</style>
+<style id="bertha-v28176-backup">
+.bertha-data-tools{margin-top:14px;padding-top:14px;border-top:1px solid rgba(112,96,104,.10);display:grid;grid-template-columns:1fr 1fr;gap:8px}.bertha-data-title{grid-column:1/-1;font-size:10px;letter-spacing:.16em;font-weight:800;color:#9b8d95;margin:0 2px 2px}.bertha-data-tools button{appearance:none;border:1px solid rgba(126,104,116,.10);border-radius:15px;background:#fffaf3;color:#625862;padding:11px 10px;font:inherit;font-size:12px;font-weight:750}.bertha-data-tools button:first-of-type{background:linear-gradient(135deg,rgba(250,218,203,.72),rgba(245,197,180,.66));color:#7d5448}
+</style>
+<script>
+(function(){
+  const APP_PREFIXES=['bertha.','minha-vida.'];
+  const isAppKey=k=>APP_PREFIXES.some(p=>String(k).startsWith(p));
+  function collect(){const all=window.berthaHmlStorage.entries(),data={};Object.keys(all).filter(isAppKey).forEach(k=>data[k]=all[k]);return data;}
+  function exportBackup(){
+    const payload={format:'BERTHA_BACKUP',version:1,createdAt:new Date().toISOString(),environment:'HOMOLOGACAO',appVersion:'2.8.176-hml',data:collect()};
+    const blob=new Blob([JSON.stringify(payload,null,2)],{type:'application/json'}),url=URL.createObjectURL(blob),a=document.createElement('a');
+    const d=new Date(),pad=n=>String(n).padStart(2,'0');a.href=url;a.download=`BERTHA_HOMOLOGACAO_${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}_${pad(d.getHours())}-${pad(d.getMinutes())}.json`;document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),1000);
+  }
+  async function importBackup(file){
+    let payload;try{payload=JSON.parse(await file.text())}catch{alert('Este arquivo não é um backup BERTH.A válido.');return;}
+    if(!payload||payload.format!=='BERTHA_BACKUP'||!payload.data||typeof payload.data!=='object'){alert('Este arquivo não é um backup BERTH.A válido.');return;}
+    const keys=Object.keys(payload.data).filter(isAppKey);if(!keys.length){alert('O backup não contém dados BERTH.A.');return;}
+    if(!confirm(`Carregar ${keys.length} conjuntos de dados na HOMOLOGAÇÃO? A BERTH.A de produção não será alterada.`))return;
+    window.berthaHmlStorage.clear();keys.forEach(k=>window.berthaHmlStorage.setItem(k,String(payload.data[k])));alert('Backup carregado somente na homologação.');location.reload();
+  }
+  function resetHomologacao(){if(!confirm('Apagar somente os dados de teste da homologação? A produção não será alterada.'))return;window.berthaHmlStorage.clear();alert('Homologação limpa.');location.reload();}
+  window.__berthaExportBackup=exportBackup;
+  window.__berthaImportBackup=importBackup;
+  window.__berthaResetHomologacao=resetHomologacao;
+  document.addEventListener('DOMContentLoaded',()=>{
+    const ex=document.getElementById('berthaBackupExport'),im=document.getElementById('berthaBackupImport'),fi=document.getElementById('berthaBackupFile');
+    if(ex)ex.onclick=exportBackup;if(im&&fi)im.onclick=()=>fi.click();if(fi)fi.onchange=()=>{const f=fi.files&&fi.files[0];if(f)importBackup(f);fi.value='';};
+  });
+})();
+</script>
+<script src="app-v2.8.176.js?v=28760hml2"></script>
+
+<dialog id="moduleMenu">
+<div class="module-sheet">
+<div class="sheet-head"><strong>MINHA VIDA</strong><button onclick="document.getElementById('moduleMenu').close()">×</button></div>
+<div class="module-links">
+<a href="#pendencias">📝 Pendências</a>
+<a href="#meu-dia">💜 Meu Dia</a>
+<a href="#ideias">💡 Criação & Ideias</a>
+<a href="#trabalho">💼 Trabalho</a>
+<a href="#estudos">📚 Estudos / CEBRASPE</a>
+<a href="#financeiro">💰 Financeiro</a>
+<a href="#casa">🏠 Casa</a>
+<a href="#exercicios">🏃 Exercícios</a>
+<a href="#alimentacao">🍽️ Alimentação</a>
+<a href="#receitas">📖 Receitas</a>
+<div class="bertha-data-tools" aria-label="Dados da BERTH.A">
+  <div class="bertha-data-title">SEUS DADOS</div>
+  <button type="button" id="berthaBackupExport">Exportar backup</button>
+  <button type="button" id="berthaBackupImport">Restaurar backup</button>
+  <input type="file" id="berthaBackupFile" accept="application/json,.json" hidden>
+</div>
+</div>
+</div>
+</dialog>
+
+<script src="work-v12.js?v=28710hml2"></script>
+<script src="bertha-time-v2.8.176.js?v=28760hml2"></script>
+</body>
+</html>
