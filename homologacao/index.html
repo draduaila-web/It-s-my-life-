@@ -34,6 +34,18 @@
     get length(){return keys().length},
     entries:()=>{const out={};keys().forEach(k=>out[k]=raw.getItem(PREFIX+k));return out;}
   };
+  // v2.8.177 — trava de isolamento: toda leitura/escrita funcional da HML passa pelo namespace acima.
+  // A sentinela confirma no carregamento que o wrapper não escreve na chave bruta usada pela produção.
+  try{
+    const sentinel='__bertha_hml_isolation__';
+    window.berthaHmlStorage.setItem(sentinel,'ok');
+    if(raw.getItem(sentinel)!==null) throw new Error('Falha no isolamento do armazenamento');
+    window.berthaHmlStorage.removeItem(sentinel);
+    window.__BERTHA_HML_STORAGE_ISOLATED__=true;
+  }catch(e){
+    window.__BERTHA_HML_STORAGE_ISOLATED__=false;
+    console.error('[BERTH.A HML] armazenamento não isolado',e);
+  }
   // Push real fica neutralizado na homologação. O fluxo interno pode ser testado sem disparar notificações.
   window.berthaPushReady=true;
   window.berthaRequestPushPermission=async()=>({ok:true,homologacao:true});
@@ -277,7 +289,7 @@ body.bertha-hml::before{content:"HOMOLOGAÇÃO";position:fixed;z-index:99999;top
   const isAppKey=k=>APP_PREFIXES.some(p=>String(k).startsWith(p));
   function collect(){const all=window.berthaHmlStorage.entries(),data={};Object.keys(all).filter(isAppKey).forEach(k=>data[k]=all[k]);return data;}
   function exportBackup(){
-    const payload={format:'BERTHA_BACKUP',version:1,createdAt:new Date().toISOString(),environment:'HOMOLOGACAO',appVersion:'2.8.176-hml',data:collect()};
+    const payload={format:'BERTHA_BACKUP',version:1,createdAt:new Date().toISOString(),environment:'HOMOLOGACAO',appVersion:'2.8.177-hml',data:collect()};
     const blob=new Blob([JSON.stringify(payload,null,2)],{type:'application/json'}),url=URL.createObjectURL(blob),a=document.createElement('a');
     const d=new Date(),pad=n=>String(n).padStart(2,'0');a.href=url;a.download=`BERTHA_HOMOLOGACAO_${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}_${pad(d.getHours())}-${pad(d.getMinutes())}.json`;document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),1000);
   }
@@ -298,7 +310,7 @@ body.bertha-hml::before{content:"HOMOLOGAÇÃO";position:fixed;z-index:99999;top
   });
 })();
 </script>
-<script src="app-v2.8.176.js?v=28760hml2"></script>
+<script src="app-v2.8.177.js?v=28770hml1"></script>
 
 <dialog id="moduleMenu">
 <div class="module-sheet">
@@ -325,6 +337,6 @@ body.bertha-hml::before{content:"HOMOLOGAÇÃO";position:fixed;z-index:99999;top
 </dialog>
 
 <script src="work-v12.js?v=28710hml2"></script>
-<script src="bertha-time-v2.8.176.js?v=28760hml2"></script>
+<script src="bertha-time-v2.8.177.js?v=28770hml1"></script>
 </body>
 </html>
