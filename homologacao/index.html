@@ -289,7 +289,7 @@ body.bertha-hml::before{content:"HOMOLOGAÇÃO";position:fixed;z-index:99999;top
   const isAppKey=k=>APP_PREFIXES.some(p=>String(k).startsWith(p));
   function collect(){const all=window.berthaHmlStorage.entries(),data={};Object.keys(all).filter(isAppKey).forEach(k=>data[k]=all[k]);return data;}
   function exportBackup(){
-    const payload={format:'BERTHA_BACKUP',version:1,createdAt:new Date().toISOString(),environment:'HOMOLOGACAO',appVersion:'2.8.177-hml',data:collect()};
+    const payload={format:'BERTHA_BACKUP',version:1,createdAt:new Date().toISOString(),environment:'HOMOLOGACAO',appVersion:'2.8.178-hml',data:collect()};
     const blob=new Blob([JSON.stringify(payload,null,2)],{type:'application/json'}),url=URL.createObjectURL(blob),a=document.createElement('a');
     const d=new Date(),pad=n=>String(n).padStart(2,'0');a.href=url;a.download=`BERTHA_HOMOLOGACAO_${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}_${pad(d.getHours())}-${pad(d.getMinutes())}.json`;document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),1000);
   }
@@ -310,7 +310,7 @@ body.bertha-hml::before{content:"HOMOLOGAÇÃO";position:fixed;z-index:99999;top
   });
 })();
 </script>
-<script src="app-v2.8.177.js?v=28770hml1"></script>
+<script src="app-v2.8.178.js?v=28780hml1"></script>
 
 <dialog id="moduleMenu">
 <div class="module-sheet">
@@ -337,6 +337,6 @@ body.bertha-hml::before{content:"HOMOLOGAÇÃO";position:fixed;z-index:99999;top
 </dialog>
 
 <script src="work-v12.js?v=28710hml2"></script>
-<script src="bertha-time-v2.8.177.js?v=28770hml1"></script>
+<script src="bertha-time-v2.8.178.js?v=28780hml1"></script>
 </body>
 </html>
