@@ -364,7 +364,7 @@ body:has(#pendingDialog[open]){overflow:hidden!important;overscroll-behavior:non
 #pendingDialog[open] .modal-actions .primary{background:linear-gradient(135deg,#fff1bd 0%,#e8bd88 52%,#cb855f 100%)!important;color:#fff!important}
 #pendingDialog[open] .modal-head .icon-btn{background:rgba(255,252,245,.82)!important;border-color:rgba(132,105,86,.10)!important;color:#7e777a!important}
 </style>
-<style id="bertha-v28175-backup">
+<style id="bertha-v28176-backup">
 .bertha-data-tools{margin-top:14px;padding-top:14px;border-top:1px solid rgba(112,96,104,.10);display:grid;grid-template-columns:1fr 1fr;gap:8px}.bertha-data-title{grid-column:1/-1;font-size:10px;letter-spacing:.16em;font-weight:800;color:#9b8d95;margin:0 2px 2px}.bertha-data-tools button{appearance:none;border:1px solid rgba(126,104,116,.10);border-radius:15px;background:#fffaf3;color:#625862;padding:11px 10px;font:inherit;font-size:12px;font-weight:750}.bertha-data-tools button:first-of-type{background:linear-gradient(135deg,rgba(250,218,203,.72),rgba(245,197,180,.66));color:#7d5448}
 </style>
 <script>
@@ -373,7 +373,7 @@ body:has(#pendingDialog[open]){overflow:hidden!important;overscroll-behavior:non
   const isAppKey=k=>APP_PREFIXES.some(p=>String(k).startsWith(p));
   function collect(){const data={};for(let i=0;i<localStorage.length;i++){const k=localStorage.key(i);if(k&&isAppKey(k))data[k]=localStorage.getItem(k);}return data;}
   function exportBackup(){
-    const payload={format:'BERTHA_BACKUP',version:1,createdAt:new Date().toISOString(),appVersion:'2.8.175',data:collect()};
+    const payload={format:'BERTHA_BACKUP',version:1,createdAt:new Date().toISOString(),appVersion:'2.8.176',data:collect()};
     const blob=new Blob([JSON.stringify(payload,null,2)],{type:'application/json'}),url=URL.createObjectURL(blob),a=document.createElement('a');
     const d=new Date(),pad=n=>String(n).padStart(2,'0');a.href=url;a.download=`BERTHA_backup_${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}_${pad(d.getHours())}-${pad(d.getMinutes())}.json`;document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),1000);
   }
@@ -385,13 +385,15 @@ body:has(#pendingDialog[open]){overflow:hidden!important;overscroll-behavior:non
     const current=[];for(let i=0;i<localStorage.length;i++){const k=localStorage.key(i);if(k&&isAppKey(k))current.push(k);}current.forEach(k=>localStorage.removeItem(k));
     keys.forEach(k=>localStorage.setItem(k,String(payload.data[k])));alert('Backup restaurado. A BERTH.A será recarregada agora.');location.reload();
   }
+  window.__berthaExportBackup=exportBackup;
+  window.__berthaImportBackup=importBackup;
   document.addEventListener('DOMContentLoaded',()=>{
     const ex=document.getElementById('berthaBackupExport'),im=document.getElementById('berthaBackupImport'),fi=document.getElementById('berthaBackupFile');
     if(ex)ex.onclick=exportBackup;if(im&&fi)im.onclick=()=>fi.click();if(fi)fi.onchange=()=>{const f=fi.files&&fi.files[0];if(f)importBackup(f);fi.value='';};
   });
 })();
 </script>
-<script src="app-v2.8.175.js?v=28750"></script>
+<script src="app-v2.8.176.js?v=28760"></script>
 
 <dialog id="moduleMenu">
 <div class="module-sheet">
@@ -418,6 +420,6 @@ body:has(#pendingDialog[open]){overflow:hidden!important;overscroll-behavior:non
 </dialog>
 
 <script src="work-v12.js?v=28710.0"></script>
-<script src="bertha-time-v2.8.175.js?v=28750"></script>
+<script src="bertha-time-v2.8.176.js?v=28760"></script>
 </body>
 </html>
