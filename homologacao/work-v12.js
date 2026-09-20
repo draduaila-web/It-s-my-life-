@@ -385,3 +385,16 @@
   window.addEventListener('DOMContentLoaded',route);
   route();
 })();
+
+/* BERTH.A v2.8.208 — Trabalho: acabamento visual homologação */
+(function(){
+  const s=document.createElement('style'); s.id='work-v208-polish'; s.textContent=`
+    .work13-hero-mark{width:52px!important;height:48px!important;color:#a29ca3!important;opacity:.58!important}
+    .work13-hero-mark svg{width:48px!important;height:38px!important;stroke-width:1.25!important}
+    @media(max-width:520px){.work13-hero{grid-template-columns:minmax(0,1fr) 52px!important}.work13-hero-mark{width:48px!important;height:44px!important}.work13-hero-mark svg{width:44px!important;height:35px!important}}
+    .work12-check{gap:10px!important;color:#6f696f!important}
+    .work12-check input[type=checkbox]{appearance:none!important;-webkit-appearance:none!important;width:20px!important;height:20px!important;min-width:20px!important;min-height:20px!important;border:1.5px solid #b9b0bb!important;border-radius:7px!important;background:#fffdfa!important;display:grid!important;place-items:center!important;box-shadow:none!important;accent-color:transparent!important}
+    .work12-check input[type=checkbox]:checked{background:linear-gradient(135deg,#d9c9ea 0%,#efd9c8 100%)!important;border-color:#b9a6c4!important}
+    .work12-check input[type=checkbox]:checked:after{content:'✓';font-size:12px;line-height:1;color:#675a72;font-weight:800}
+  `; document.head.appendChild(s);
+})();
