@@ -123,28 +123,18 @@ function renderFinanceRemindersMeuDia(){
  return `<section class="day-section home-fin-reminders"><div class="section-head"><h2>Contas para lembrar</h2><a href="#financeiro">ver financeiro</a></div>${rows}</section>`;
 }
 function exerciseSuggestionForMeuDia(){
- const d=loadEx(), today=new Date().toISOString().slice(0,10), now=new Date();
+ const d=loadEx(), today=new Date().toISOString().slice(0,10);
  const doneToday=new Set(d.sessions.filter(s=>s.date===today).map(s=>String(s.planId||'')));
- const activePlans=d.plans.filter(p=>p.active!==false&&!doneToday.has(String(p.id)));
- if(!activePlans.length)return '';
  const activeCycles=d.cycles.filter(c=>c.active!==false).filter(c=>{
-   const start=new Date((c.startDate||today)+'T12:00:00');
-   const end=new Date(start); end.setDate(end.getDate()+Math.max(1,+c.weeks||4)*7);
-   return now>=start&&now<end;
+   const start=new Date(c.startDate+'T12:00:00'), end=new Date(start); end.setDate(end.getDate()+Math.max(1,+c.weeks||4)*7);
+   const now=new Date(); return now>=start && now<end;
  });
+ const due=d.plans.filter(p=>exDueToday(p,d)&&!doneToday.has(String(p.id)));
+ if(!due.length)return '';
  let p=null,c=null;
- for(const cycle of activeCycles){
-   const linked=activePlans.filter(x=>String(x.cycleId||'')===String(cycle.id));
-   if(!linked.length)continue;
-   linked.sort((a,b)=>{
-     const at=Math.max(1,+a.weeklyTarget||1), bt=Math.max(1,+b.weeklyTarget||1);
-     return (exWeeklyDone(a,d)/at)-(exWeeklyDone(b,d)/bt);
-   });
-   p=linked.find(x=>exDueToday(x,d))||linked[0]; c=cycle; break;
- }
- if(!p)p=activePlans.find(x=>exDueToday(x,d))||null;
- if(!p)return '';
- if(!c&&p.cycleId)c=d.cycles.find(x=>String(x.id)===String(p.cycleId)&&x.active!==false)||null;
+ for(const cycle of activeCycles){p=due.find(x=>String(x.cycleId||'')===String(cycle.id));if(p){c=cycle;break}}
+ if(!p)p=due[0];
+ if(!c&&p.cycleId)c=d.cycles.find(x=>String(x.id)===String(p.cycleId));
  const cycleMeta=c?exerciseCycleProgress(c,d):null;
  const kicker=c?`CICLO · ${escapeHtml(c.name)} · semana ${Math.min(c.weeks,cycleMeta?.week||1)}/${c.weeks}`:'MOVIMENTO SUGERIDO';
  const why=p.frequency==='X vezes por semana'?`${exWeeklyDone(p,d)}/${Math.max(1,+p.weeklyTarget||1)} feitos nesta semana`:p.frequency==='Dias específicos'?'Programado para hoje':'Cabe no seu dia quando fizer sentido';
