@@ -22,8 +22,13 @@
     bec:'bertha.work.notes.bec.v1',
     tiktok:'bertha.work.notes.tiktok.v1'
   };
-  const notes = (kind) => read(NOTE_KEYS[kind]);
-  const persistNotes = (kind,arr) => save(NOTE_KEYS[kind],arr);
+  const CUSTOM_FRONTS_KEY='bertha.work.fronts.v1';
+  const customFronts=()=>read(CUSTOM_FRONTS_KEY);
+  const saveCustomFronts=(arr)=>save(CUSTOM_FRONTS_KEY,arr);
+  const frontKey=(id)=>`minha-vida.trabalho.custom.${id}.v1`;
+  const noteKey=(kind)=>NOTE_KEYS[kind]||`bertha.work.notes.custom.${kind}.v1`;
+  const notes = (kind) => read(noteKey(kind));
+  const persistNotes = (kind,arr) => save(noteKey(kind),arr);
 
   const WORK = {
     crefito:{
@@ -65,6 +70,15 @@
     }
   };
 
+  function customCfg(kind){
+    const f=customFronts().find(x=>String(x.id)===String(kind));
+    if(!f)return null;
+    const areas=(Array.isArray(f.areas)?f.areas:[]).map(x=>String(x||'').trim()).filter(Boolean);
+    return {name:f.name||'Trabalho',icon:'work',tag:f.tag||'TRABALHO',desc:f.desc||'Tarefas, projetos e acompanhamentos.',key:frontKey(f.id),groups:(areas.length?areas:['Geral']).map(a=>[a,['Nova tarefa']]),custom:true,id:f.id};
+  }
+  function getCfg(kind){return WORK[kind]||customCfg(kind);}
+  function allFronts(){return [...Object.keys(WORK).map(id=>({id,cfg:WORK[id],custom:false})),...customFronts().map(f=>({id:f.id,cfg:customCfg(f.id),custom:true})).filter(x=>x.cfg)];}
+
   function workSvg(kind='work'){
     const icons={
       work:`<svg viewBox="0 0 64 48" aria-hidden="true"><path d="M9 13h18c7 0 7 9 14 9h14"/><path d="M9 24h13c7 0 7 11 15 11h18"/><path d="M9 35h18"/></svg>`,
@@ -74,8 +88,8 @@
     };
     return icons[kind]||icons.work;
   }
-  function workKindForCfg(cfg){return Object.keys(WORK).find(k=>WORK[k]===cfg)||'crefito';}
-  function workEngineId(kind,id){return kind==='crefito'?`crefito:${id}`:`minha-vida.trabalho.${kind}.v1:${id}`;}
+  function workKindForCfg(cfg){if(cfg?.custom&&cfg.id)return cfg.id;return Object.keys(WORK).find(k=>WORK[k]===cfg)||'crefito';}
+  function workEngineId(kind,id,cfg){if(cfg?.custom)return `${cfg.key}:${id}`;return kind==='crefito'?`crefito:${id}`:`minha-vida.trabalho.${kind}.v1:${id}`;}
   function taskMinutes(x){
     if(+x.minutes>0)return +x.minutes;
     const v=String(x.duration||'30 min').toLowerCase();
@@ -84,9 +98,9 @@
   }
   function startWorkTask(kind,cfg,id){
     const arr=tasks(cfg),i=arr.findIndex(x=>String(x.id)===String(id));if(i<0)return;
-    const x=arr[i],minutes=taskMinutes(x),engineId=workEngineId(kind,x.id);
+    const x=arr[i],minutes=taskMinutes(x),engineId=workEngineId(kind,x.id,cfg);
     if(window.BerthaTimeEngine?.start){
-      window.BerthaTimeEngine.start({id:engineId,learningKey:engineId,source:`Trabalho · ${cfg.name}`,title:x.title||'Trabalho',minutes,configuredMinutes:minutes,date:x.date||'',time:x.time||'',period:String(x.period||'Flexível').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace('manha','morning').replace('tarde','afternoon').replace('noite','night').replace('flexivel','flex'),priority:x.priority||'Normal',kind:'work',workKind:kind,workTaskId:x.id});
+      window.BerthaTimeEngine.start({id:engineId,learningKey:engineId,source:`Trabalho · ${cfg.name}`,title:x.title||'Trabalho',minutes,configuredMinutes:minutes,date:x.date||'',time:x.time||'',period:String(x.period||'Flexível').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace('manha','morning').replace('tarde','afternoon').replace('noite','night').replace('flexivel','flex'),priority:x.priority||'Normal',kind:'work',workKind:kind,workTaskId:x.id,workStorageKey:cfg.key});
       setTimeout(()=>{const active=window.BerthaTimeEngine?.active?.();if(active&&String(active.id)===engineId){const a=tasks(cfg),j=a.findIndex(t=>String(t.id)===String(id));if(j>=0){a[j]={...a[j],status:'Em andamento',startedAt:active.startedAt||Date.now(),updatedAt:Date.now()};persist(cfg,a);renderWorkspace(kind)}}},120);
     }else{
       arr[i]={...x,status:'Em andamento',startedAt:Date.now(),updatedAt:Date.now()};persist(cfg,arr);renderWorkspace(kind);
@@ -96,7 +110,7 @@
     try{const key='bertha.time-engine.v1',e=JSON.parse(window.berthaHmlStorage.getItem(key)||'{"active":null,"history":[],"snoozed":{}}');e.history=Array.isArray(e.history)?e.history:[];if(!e.history.some(h=>String(h.itemId)===String(engineId)&&h.status==='done'&&Math.abs((+h.endedAt||0)-end)<2000)){e.history.unshift({itemId:engineId,learningKey:engineId,title:x.title||'Trabalho',source:`Trabalho · ${cfg.name}`,day:TODAY(),startedAt:end-real*60000,endedAt:end,configuredMinutes:taskMinutes(x),plannedMinutes:taskMinutes(x),realMinutes:real,status:'done',category:x.area||cfg.name});window.berthaHmlStorage.setItem(key,JSON.stringify(e));}}catch{}
   }
   function completeWorkTask(kind,cfg,id){
-    const arr=tasks(cfg),i=arr.findIndex(x=>String(x.id)===String(id));if(i<0)return;const x=arr[i],engineId=workEngineId(kind,x.id),active=window.BerthaTimeEngine?.active?.();
+    const arr=tasks(cfg),i=arr.findIndex(x=>String(x.id)===String(id));if(i<0)return;const x=arr[i],engineId=workEngineId(kind,x.id,cfg),active=window.BerthaTimeEngine?.active?.();
     if(active&&String(active.id)===engineId){window.BerthaTimeEngine.finish();setTimeout(()=>renderWorkspace(kind),120);return;}
     const end=Date.now(),st=x.startedAt||end,real=Math.max(1,Math.round((end-st)/60000));arr[i]={...x,status:'Concluído',completedAt:end,actualMinutes:real,updatedAt:end};persist(cfg,arr);recordWorkCompletion(engineId,x,cfg,end,real);renderWorkspace(kind);
   }
@@ -119,6 +133,12 @@
       .work12-arrow{font-size:24px;color:#b3a7b4}
       .work12-note{margin-top:18px;padding:18px 20px!important}
       .work12-note p{margin:7px 0 0;color:#817783}
+      .work12-front-add{margin-top:12px;width:100%;border:1px dashed rgba(112,104,122,.22);background:rgba(255,252,246,.58);border-radius:24px;padding:15px 18px;color:#786d7b;font:inherit;font-weight:800;text-align:center}
+      .work12-front-edit{border:0;background:rgba(238,229,244,.82);color:#755d84;border-radius:999px;padding:8px 11px;font-weight:800;margin-left:auto}
+      .work12-front-dialog{position:fixed;left:50%;top:50%;transform:translate(-50%,-50%);width:min(92vw,500px);max-height:78svh;margin:0;border:0;border-radius:28px;padding:0;background:#fbf7ef;box-shadow:0 28px 80px rgba(55,43,62,.20);overflow:hidden}
+      .work12-front-dialog::backdrop{background:rgba(48,39,49,.32);backdrop-filter:blur(3px)}
+      .work12-front-form{padding:20px;display:grid;gap:14px;max-height:78svh;overflow:auto;-webkit-overflow-scrolling:touch}
+      .work12-front-form label{display:grid;gap:7px;font-size:12px;font-weight:800;color:#746c75}.work12-front-form input,.work12-front-form textarea,.work12-front-form select{font:inherit;font-size:16px;border:1px solid rgba(103,91,108,.13);border-radius:16px;background:#fffdfa;padding:12px 13px;color:#40384a}.work12-front-form textarea{resize:vertical}
       .work12-back{border:0;background:#f0e6f6;color:#715486;border-radius:999px;padding:10px 14px;font-weight:800}
       .work12-subhead{display:flex;align-items:center;gap:12px;margin:0 0 18px}
       .work12-subhero{display:flex;gap:14px;align-items:center;margin:0 0 20px}
@@ -243,27 +263,40 @@
   function renderHome(){
     injectStyles();
     const a=APP(); if(!a) return;
+    const fronts=allFronts();
+    const cards=fronts.map(({id,cfg,custom},idx)=>`<button type="button" class="work12-front" data-work12-go="${esc(id)}">
+      <span class="work12-icon">${workSvg(custom?'work':id)}</span><span><strong>${esc(cfg.name)}</strong><small>${esc(cfg.tag||cfg.desc||'Trabalho')}</small></span><span class="work12-arrow">›</span>
+    </button>`).join('');
     a.innerHTML=`
       <section class="work13-hero">
         <div><div class="work13-kicker">TRABALHO</div><h2>Know what’s next.<br>Live what’s now.</h2><p>A BERTH.A organiza. Você age.</p></div>
         <span class="work13-hero-mark">${workSvg('work')}</span>
       </section>
       <div class="work13-section-label">MINHAS FRENTES</div>
-      <section class="work12-fronts">
-        <button type="button" class="work12-front" data-work12-go="crefito">
-          <span class="work12-icon">${workSvg('crefito')}</span><span><strong>CREFITO-11</strong><small>Trabalho oficial · 08:00–14:00</small></span><span class="work12-arrow">›</span>
-        </button>
-        <button type="button" class="work12-front" data-work12-go="bec">
-          <span class="work12-icon">${workSvg('bec')}</span><span><strong>BEC</strong><small>Empresa, projetos e operações</small></span><span class="work12-arrow">›</span>
-        </button>
-        <button type="button" class="work12-front" data-work12-go="tiktok">
-          <span class="work12-icon">${workSvg('tiktok')}</span><span><strong>TikTok</strong><small>Conteúdo, produção e presença digital</small></span><span class="work12-arrow">›</span>
-        </button>
-      </section>
+      <section class="work12-fronts">${cards||'<div class="work12-empty">Cadastre sua primeira frente de trabalho.</div>'}</section>
+      <button type="button" class="work12-front-add" id="work12AddFront">＋ Nova frente de trabalho</button>
       <section class="work13-bridge"><div><strong>Menos decisões · mais foco</strong><small>Cada frente tem seu próprio espaço. Depois, as tarefas importantes podem entrar no Meu Dia.</small></div><a href="#meu-dia">Meu Dia →</a></section>`;
-    a.querySelectorAll('[data-work12-go]').forEach(b=>{
-      b.onclick=()=>{ location.hash = '#trabalho-'+b.dataset.work12Go; };
-    });
+    a.querySelectorAll('[data-work12-go]').forEach(b=>{b.onclick=()=>{ location.hash = '#trabalho-'+b.dataset.work12Go; };});
+    document.getElementById('work12AddFront').onclick=()=>openFrontModal();
+  }
+
+  function openFrontModal(frontId=null){
+    injectStyles();
+    const all=customFronts(),x=frontId?all.find(f=>String(f.id)===String(frontId)):null;
+    const dlg=document.createElement('dialog');dlg.className='work12-front-dialog';
+    const areas=Array.isArray(x?.areas)?x.areas.join('\n'):'';
+    dlg.innerHTML=`<form class="work12-front-form">
+      <div class="work12-form-head"><div><div class="eyebrow">TRABALHO</div><h2>${x?'Editar frente':'Nova frente de trabalho'}</h2></div><button type="button" class="work12-x" data-close>×</button></div>
+      <label>Nome<input data-name maxlength="60" value="${esc(x?.name||'')}" placeholder="Ex.: Clínica, Empresa, Consultório"></label>
+      <label>Tipo<select data-tag><option ${x?.tag==='TRABALHO'?'selected':''}>TRABALHO</option><option ${x?.tag==='EMPRESA'?'selected':''}>EMPRESA</option><option ${x?.tag==='AUTÔNOMO'?'selected':''}>AUTÔNOMO</option><option ${x?.tag==='CONTEÚDO'?'selected':''}>CONTEÚDO</option><option ${x?.tag==='PROJETO'?'selected':''}>PROJETO</option></select></label>
+      <label>Descrição <small style="font-weight:500">opcional</small><input data-desc maxlength="140" value="${esc(x?.desc||'')}" placeholder="O que acontece nesta frente?"></label>
+      <label>Áreas <small style="font-weight:500">opcional · uma por linha</small><textarea data-areas rows="4" placeholder="Ex.: Clientes\nAdministrativo\nConteúdo">${esc(areas)}</textarea></label>
+      <div class="work12-form-actions">${x?'<button type="button" class="work12-secondary" data-delete>Excluir</button>':''}<button type="button" class="work12-secondary" data-close>Cancelar</button><button type="submit" class="work12-primary">Salvar</button></div>
+    </form>`;
+    document.body.appendChild(dlg);dlg.showModal();
+    const close=()=>{try{dlg.close()}catch{}dlg.remove()};dlg.querySelectorAll('[data-close]').forEach(b=>b.onclick=close);dlg.addEventListener('cancel',e=>{e.preventDefault();close()});
+    dlg.querySelector('form').onsubmit=e=>{e.preventDefault();const name=dlg.querySelector('[data-name]').value.trim();if(!name){dlg.querySelector('[data-name]').focus();return}const id=x?.id||`front-${Date.now()}`;const data={id,name,tag:dlg.querySelector('[data-tag]').value,desc:dlg.querySelector('[data-desc]').value.trim(),areas:dlg.querySelector('[data-areas]').value.split(/\n|,/).map(v=>v.trim()).filter(Boolean),createdAt:x?.createdAt||Date.now(),updatedAt:Date.now()};const i=all.findIndex(f=>String(f.id)===String(id));if(i>=0)all[i]=data;else all.push(data);saveCustomFronts(all);close();location.hash='#trabalho-'+id;renderWorkspace(id)};
+    if(x)dlg.querySelector('[data-delete]').onclick=()=>{if(!confirm('Excluir esta frente de trabalho e suas tarefas?'))return;saveCustomFronts(all.filter(f=>String(f.id)!==String(x.id)));window.berthaHmlStorage.removeItem(frontKey(x.id));window.berthaHmlStorage.removeItem(noteKey(x.id));close();location.hash='#trabalho';renderHome()};
   }
 
   function groupDesc(name){
@@ -299,13 +332,13 @@
 
   function renderWorkspace(kind){
     injectStyles();
-    const cfg=WORK[kind], a=APP(); if(!cfg||!a) return;
+    const cfg=getCfg(kind), a=APP(); if(!cfg||!a) return;
     const all=tasks(cfg), open=all.filter(x=>x.status!=='Concluído'), done=all.filter(x=>x.status==='Concluído');
     const ns=notes(kind);
     const mins=x=>{ const v=String(x.duration||'30 min'); if(v.includes('h')){const m=v.match(/(\d+)h(?:(\d+))?/);return m?Number(m[1])*60+Number(m[2]||0):60;} return parseInt(v)||30; };
     const totalMin=open.reduce((sum,x)=>sum+mins(x),0);
     a.innerHTML=`
-      <div class="work12-subhead"><button class="work12-back" id="work12Back">← Trabalho</button><span class="work13-subtag">${esc(cfg.tag)}</span></div>
+      <div class="work12-subhead"><button class="work12-back" id="work12Back">← Trabalho</button><span class="work13-subtag">${esc(cfg.tag)}</span>${cfg.custom?'<button class="work12-front-edit" id="work12EditFront">Editar frente</button>':''}</div>
       <section class="work12-subhero"><span class="work12-icon">${workSvg(kind)}</span><div><span class="work13-subkicker">TRABALHO · ${esc(cfg.name.toUpperCase())}</span><h2>${esc(cfg.name)}</h2><p>${esc(cfg.desc)}</p></div></section>
       <section class="work12-summary"><div class="work12-stat"><b>${open.length}</b><span>tarefas em aberto</span></div><div class="work12-stat"><b>${totalMin<60?totalMin+' min':(totalMin/60).toFixed(totalMin%60?1:0).replace('.',',')+' h'}</b><span>tempo conhecido</span></div></section>
       <section class="work12-section"><div class="work12-section-head"><h3>Notas rápidas</h3><button class="work12-add" id="work12AddNote">+ nota</button></div>
@@ -320,6 +353,7 @@
       </div></section>
       <div class="work12-rule">Nota é para não esquecer. Tarefa é o que precisa ser executado. Ao concluir, a tarefa sai da lista ativa e permanece no histórico.</div>`;
     document.getElementById('work12Back').onclick=()=>location.hash='#trabalho';
+    if(cfg.custom)document.getElementById('work12EditFront').onclick=()=>openFrontModal(kind);
     document.getElementById('work12Add').onclick=()=>openModal(cfg,null);
     document.getElementById('work12AddNote').onclick=()=>openNoteModal(kind,cfg);
     a.querySelectorAll('[data-work12-action]').forEach(b=>b.onclick=()=>{ const g=b.dataset.work12Group,act=b.dataset.work12Action; const title=(act==='Nova tarefa'||act==='Outra tarefa'||act==='Outro')?`${g} · `:`${g} · ${act}`; openModal(cfg,{title,area:g,date:TODAY(),duration:'30 min',frequency:'Única',priority:'Normal',status:'A fazer'}); });
@@ -373,15 +407,13 @@
       const data={...p,id:p.id||uid(),title:dlg.querySelector('#w12Title').value.trim(),area:dlg.querySelector('#w12Area').value.trim(),date:dlg.querySelector('#w12Date').value,time:dlg.querySelector('#w12Time').value,period:dlg.querySelector('#w12Period').value,duration,minutes,frequency:dlg.querySelector('#w12Frequency').value,priority:dlg.querySelector('#w12Priority').value,status:dlg.querySelector('#w12Status').value,notify:notify.checked,notifyWhen:dlg.querySelector('#w12NotifyWhen').value,note:dlg.querySelector('#w12Note').value.trim(),source:cfg.name,updatedAt:Date.now(),createdAt:p.createdAt||Date.now()};
       if(data.status==='Concluído'&&!data.completedAt)data.completedAt=Date.now();const i=arr.findIndex(x=>String(x.id)===String(data.id));if(i>=0)arr[i]=data;else arr.push(data);persist(cfg,arr);
       if(p._noteId&&p._noteKind)persistNotes(p._noteKind,notes(p._noteKind).filter(n=>String(n.id)!==String(p._noteId)));
-      close();renderWorkspace(Object.keys(WORK).find(k=>WORK[k]===cfg));};
+      close();renderWorkspace(workKindForCfg(cfg));};
   }
 
   function route(){
     const h=(location.hash||'').replace('#','');
     if(h==='trabalho') renderHome();
-    else if(h==='trabalho-crefito') renderWorkspace('crefito');
-    else if(h==='trabalho-bec') renderWorkspace('bec');
-    else if(h==='trabalho-tiktok') renderWorkspace('tiktok');
+    else if(h.startsWith('trabalho-')) renderWorkspace(h.slice('trabalho-'.length));
   }
 
   // Trabalho é o único responsável pelas rotas #trabalho*.
