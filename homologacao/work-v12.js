@@ -335,7 +335,7 @@
   function openNoteModal(kind,cfg){
     const dlg=document.createElement('dialog');dlg.className='work12-dialog';
     dlg.innerHTML=`<form class="work12-form"><div class="work12-form-head"><div><div class="eyebrow">TRABALHO · ${esc(cfg.name.toUpperCase())}</div><h2>Nota rápida</h2></div><button type="button" class="work12-x">×</button></div><label>Título<input id="w12NoteTitle" maxlength="100" placeholder="Ex.: perguntar ao jurídico"></label><label>Anotação<textarea id="w12NoteText" rows="4" maxlength="800" placeholder="Escreva sem precisar transformar isso em tarefa agora."></textarea></label><div class="work12-form-actions"><button type="button" class="work12-secondary" data-cancel>Cancelar</button><button class="work12-primary" type="submit">Salvar nota</button></div></form>`;
-    document.body.appendChild(dlg);dlg.showModal();const close=()=>{try{dlg.close()}catch{}dlg.remove()};dlg.querySelector('.work12-x').onclick=close;dlg.querySelector('[data-cancel]').onclick=close;dlg.addEventListener('cancel',e=>{e.preventDefault();close()});dlg.querySelector('form').onsubmit=e=>{e.preventDefault();const title=dlg.querySelector('#w12NoteTitle').value.trim(),text=dlg.querySelector('#w12NoteText').value.trim();if(!title&&!text)return;const arr=notes(kind);arr.unshift({id:uid(),title,text,createdAt:Date.now()});persistNotes(kind,arr);close();renderWorkspace(kind)};
+    document.body.appendChild(dlg);dlg.showModal();requestAnimationFrame(()=>{const f=dlg.querySelector('.work12-form');if(f)f.scrollTop=0;});const close=()=>{try{dlg.close()}catch{}dlg.remove()};dlg.querySelector('.work12-x').onclick=close;dlg.querySelector('[data-cancel]').onclick=close;dlg.addEventListener('cancel',e=>{e.preventDefault();close()});dlg.querySelector('form').onsubmit=e=>{e.preventDefault();const title=dlg.querySelector('#w12NoteTitle').value.trim(),text=dlg.querySelector('#w12NoteText').value.trim();if(!title&&!text)return;const arr=notes(kind);arr.unshift({id:uid(),title,text,createdAt:Date.now()});persistNotes(kind,arr);close();renderWorkspace(kind)};
   }
 
   function openModal(cfg,preset){
@@ -355,7 +355,12 @@
         <div class="work12-grid2"><label>Quando pode acontecer?<select id="w12Period">${opts(['Flexível','Manhã','Tarde','Noite'],p.period)}</select></label><label>Horário opcional<input id="w12Time" type="time" value="${esc(p.time)}"></label></div>
         <label>Frequência<select id="w12Frequency">${opts(['Única','Diária','Semanal','Quinzenal','Mensal','Conforme necessário'],p.frequency)}</select></label>
         <label>Status<select id="w12Status">${opts(['A fazer','Em andamento','Aguardando','Concluído','Pausado'],p.status)}</select></label>
-        <label class="work12-check"><input id="w12Notify" type="checkbox" ${p.notify?'checked':''}> Me avisar?</label>
+        <div class="work12-notify-box">
+          <label class="work12-toggle-row">
+            <div><strong>Me avisar?</strong><span>Guardar preferência de lembrete</span></div>
+            <input id="w12Notify" type="checkbox" ${p.notify?'checked':''}><i></i>
+          </label>
+        </div>
         <label id="w12NotifyWrap" ${p.notify?'':'hidden'}>Quando avisar?<select id="w12NotifyWhen">${opts(['No horário da tarefa','10 min antes','30 min antes','1 hora antes','No início do período','Em um horário escolhido'],p.notifyWhen)}</select></label>
         <label>Observação<textarea id="w12Note" rows="2" maxlength="600" placeholder="Contexto ou próximo passo">${esc(p.note)}</textarea></label>
       </div></details>
@@ -396,5 +401,16 @@
     .work12-check input[type=checkbox]{appearance:none!important;-webkit-appearance:none!important;width:20px!important;height:20px!important;min-width:20px!important;min-height:20px!important;border:1.5px solid #b9b0bb!important;border-radius:7px!important;background:#fffdfa!important;display:grid!important;place-items:center!important;box-shadow:none!important;accent-color:transparent!important}
     .work12-check input[type=checkbox]:checked{background:linear-gradient(135deg,#d9c9ea 0%,#efd9c8 100%)!important;border-color:#b9a6c4!important}
     .work12-check input[type=checkbox]:checked:after{content:'✓';font-size:12px;line-height:1;color:#675a72;font-weight:800}
+    .work12-dialog{position:fixed!important;left:50%!important;top:50%!important;right:auto!important;bottom:auto!important;transform:translate(-50%,-50%)!important;margin:0!important;width:min(92vw,520px)!important;height:min(72svh,720px)!important;max-height:min(72svh,720px)!important;overflow:hidden!important;overscroll-behavior:contain!important}
+    .work12-form{height:100%!important;max-height:none!important;overflow-y:auto!important;overscroll-behavior:contain!important;-webkit-overflow-scrolling:touch!important}
+    .work12-form-head{top:-17px!important}.work12-form-actions{bottom:-17px!important}
+    .work12-notify-box{margin:4px 0 10px;padding:12px 13px;border:1px solid rgba(126,117,140,.10);border-radius:16px;background:rgba(255,253,249,.72)}
+    .work12-toggle-row{display:grid!important;grid-template-columns:1fr auto!important;gap:12px!important;align-items:center!important;position:relative!important;margin:0!important}
+    .work12-toggle-row>div{display:grid;gap:2px}.work12-toggle-row strong{font-size:14px;color:#68626a}.work12-toggle-row span{font-size:11px;font-weight:500;color:#918991}
+    .work12-toggle-row input{position:absolute!important;opacity:0!important;pointer-events:none!important;width:1px!important;height:1px!important}
+    .work12-toggle-row i{width:42px;height:24px;border-radius:999px;background:#d9d2da;position:relative;display:block;transition:.18s ease;box-shadow:inset 0 0 0 1px rgba(109,94,116,.06)}
+    .work12-toggle-row i:after{content:'';position:absolute;width:20px;height:20px;left:2px;top:2px;border-radius:50%;background:#fff;box-shadow:0 1px 4px rgba(70,57,77,.18);transition:.18s ease}
+    .work12-toggle-row input:checked+i{background:linear-gradient(135deg,#b9a6d8 0%,#d9c5df 58%,#ead7c5 100%)}.work12-toggle-row input:checked+i:after{transform:translateX(18px)}
+    @media(max-width:520px){.work12-dialog{height:min(74svh,720px)!important;max-height:min(74svh,720px)!important}}
   `; document.head.appendChild(s);
 })();
