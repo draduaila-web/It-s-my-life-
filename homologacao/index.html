@@ -234,6 +234,21 @@
 body:has(#pendingDialog[open]){overflow:hidden!important;overscroll-behavior:none!important}
 @media(max-width:480px){#pendingDialog #pendingForm.modal-card{width:calc(100vw - 24px)!important;max-height:calc(100dvh - 24px)!important;border-radius:26px!important}}
 </style>
+
+<style id="bertha-exercise-v217">
+/* v2.8.217 — Exercícios: ciclos, ícones, edição de registro e modais estáveis */
+.exercise-icon{width:42px;height:42px;flex:0 0 42px;display:grid;place-items:center;border-radius:15px;background:linear-gradient(135deg,rgba(225,211,247,.96),rgba(247,211,190,.88));color:#715a82;border:1px solid rgba(120,103,160,.08)}
+.exercise-icon svg{width:25px;height:25px;fill:none;stroke:currentColor;stroke-width:1.55;stroke-linecap:round;stroke-linejoin:round}
+.exercise-plan-main{display:grid!important;grid-template-columns:42px minmax(0,1fr)!important;gap:12px!important;align-items:start!important}.exercise-plan-copy{min-width:0}.exercise-plan-copy strong{display:block!important}.exercise-plan-copy span,.exercise-plan-copy small{display:block!important}
+.exercise-cycle-list{display:grid;gap:12px}.exercise-cycle{padding:18px 19px!important;background:linear-gradient(125deg,rgba(255,255,255,.88),rgba(247,241,253,.82),rgba(255,246,239,.82))!important;border:1px solid rgba(121,98,151,.10)!important}.exercise-cycle-head{display:flex;gap:12px;align-items:center}.exercise-cycle-copy{min-width:0;flex:1}.exercise-cycle-copy strong,.exercise-cycle-copy span,.exercise-cycle-copy small{display:block}.exercise-cycle-copy span{margin-top:3px;color:#817986}.exercise-cycle-copy small{margin-top:4px;color:#9a909a}.exercise-cycle-progress{height:6px;margin-top:12px;background:rgba(122,104,149,.09);border-radius:999px;overflow:hidden}.exercise-cycle-progress i{display:block;height:100%;border-radius:inherit;background:linear-gradient(90deg,#b79bd0,#e7b7a3)}
+.exercise-session{cursor:pointer}.exercise-session-actions{display:flex;gap:6px;align-items:center}.exercise-session-actions button{border:0;background:transparent;color:#8a7c8d;font:inherit;padding:6px 8px}.exercise-session-actions .exercise-edit{font-size:12px;font-weight:750;border:1px solid rgba(121,98,151,.10);border-radius:999px;background:rgba(243,235,250,.55)}
+.bertha-dialog.exercise-dialog{position:fixed!important;left:50%!important;top:10px!important;right:auto!important;bottom:auto!important;transform:translateX(-50%)!important;margin:0!important;width:min(calc(100vw - 20px),560px)!important;max-width:560px!important;max-height:calc(100dvh - 20px)!important;overflow:hidden!important;border-radius:30px!important}
+.bertha-dialog.exercise-dialog>form,.bertha-dialog.exercise-dialog>.bertha-modal{width:100%!important;max-height:calc(100dvh - 20px)!important;overflow-y:auto!important;overscroll-behavior:contain!important;-webkit-overflow-scrolling:touch!important;box-sizing:border-box!important}
+.bertha-dialog.exercise-dialog .study-v10-actions{position:static!important;bottom:auto!important;margin:18px -20px -20px!important}
+#exForm #eWeeklyWrap{margin-top:-4px;margin-bottom:14px}.exercise-cycle-picker select{width:100%}
+@media(max-width:430px){.bertha-dialog.exercise-dialog{top:8px!important;width:calc(100vw - 16px)!important;max-height:calc(100dvh - 16px)!important}.bertha-dialog.exercise-dialog>form,.bertha-dialog.exercise-dialog>.bertha-modal{max-height:calc(100dvh - 16px)!important}.exercise-plan-main{grid-template-columns:38px minmax(0,1fr)!important}.exercise-icon{width:38px;height:38px;flex-basis:38px;border-radius:14px}.exercise-icon svg{width:23px;height:23px}}
+</style>
+
 </head>
 
 <style id="bertha-hml-marker">
@@ -292,7 +307,7 @@ body.bertha-hml::before{content:"HOMOLOGAÇÃO";position:fixed;z-index:99999;top
   const isAppKey=k=>APP_PREFIXES.some(p=>String(k).startsWith(p));
   function collect(){const all=window.berthaHmlStorage.entries(),data={};Object.keys(all).filter(isAppKey).forEach(k=>data[k]=all[k]);return data;}
   function exportBackup(){
-    const payload={format:'BERTHA_BACKUP',version:1,createdAt:new Date().toISOString(),environment:'HOMOLOGACAO',appVersion:'2.8.216-hml',data:collect()};
+    const payload={format:'BERTHA_BACKUP',version:1,createdAt:new Date().toISOString(),environment:'HOMOLOGACAO',appVersion:'2.8.217-hml',data:collect()};
     const blob=new Blob([JSON.stringify(payload,null,2)],{type:'application/json'}),url=URL.createObjectURL(blob),a=document.createElement('a');
     const d=new Date(),pad=n=>String(n).padStart(2,'0');a.href=url;a.download=`BERTHA_HOMOLOGACAO_${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}_${pad(d.getHours())}-${pad(d.getMinutes())}.json`;document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),1000);
   }
@@ -313,7 +328,7 @@ body.bertha-hml::before{content:"HOMOLOGAÇÃO";position:fixed;z-index:99999;top
   });
 })();
 </script>
-<script src="app-v2.8.216-more-bertha.js?v=21601hml"></script>
+<script src="app-v2.8.217-exercicios-ciclos.js?v=21701hml"></script>
 
 <dialog id="moduleMenu">
 <div class="module-sheet">
@@ -340,6 +355,6 @@ body.bertha-hml::before{content:"HOMOLOGAÇÃO";position:fixed;z-index:99999;top
 </dialog>
 
 <script src="work-v12.js?v=21601hml"></script>
-<script src="bertha-time-v2.8.216-more-bertha.js?v=21601hml"></script>
+<script src="bertha-time-v2.8.217-exercicios-ciclos.js?v=21701hml"></script>
 </body>
 </html>
