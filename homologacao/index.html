@@ -297,6 +297,53 @@ body:has(#pendingDialog[open]){overflow:hidden!important;overscroll-behavior:non
  .bertha-dialog.exercise-dialog,.bertha-dialog.exercise-dialog[open]{left:8px!important;right:8px!important;width:auto!important;height:calc(100svh - 16px)!important;max-height:calc(100svh - 16px)!important}
 }
 </style>
+
+<style id="bertha-exercise-v221-anchor">
+/* v2.8.221 — modal de Exercícios ancorado: página não se move; painel não recentraliza */
+html.exercise-modal-locked{overflow:hidden!important;overscroll-behavior:none!important}
+body.exercise-modal-locked{overflow:hidden!important;overscroll-behavior:none!important}
+.bertha-dialog.exercise-dialog,
+.bertha-dialog.exercise-dialog[open]{
+  position:fixed!important;
+  inset:0!important;
+  left:var(--exercise-vv-left,0px)!important;
+  top:var(--exercise-vv-top,0px)!important;
+  right:auto!important;bottom:auto!important;
+  width:100vw!important;height:100svh!important;
+  max-width:none!important;max-height:none!important;
+  margin:0!important;
+  padding:max(10px,env(safe-area-inset-top)) 8px max(10px,env(safe-area-inset-bottom))!important;
+  border:0!important;
+  box-sizing:border-box!important;
+  background:transparent!important;
+  overflow:hidden!important;
+  overscroll-behavior:none!important;
+  touch-action:auto!important;
+  transform:none!important;
+  animation:none!important;transition:none!important;
+  align-items:flex-start!important;
+  justify-content:center!important;
+}
+.bertha-dialog.exercise-dialog[open]{display:flex!important}
+.bertha-dialog.exercise-dialog::backdrop{overscroll-behavior:none!important}
+.bertha-dialog.exercise-dialog>form.bertha-modal,
+.bertha-dialog.exercise-dialog>.bertha-modal{
+  flex:0 1 auto!important;
+  width:min(calc(100vw - 16px),620px)!important;
+  height:auto!important;
+  max-height:calc(100svh - max(20px,env(safe-area-inset-top)) - max(20px,env(safe-area-inset-bottom)))!important;
+  margin:0!important;
+  overflow-y:auto!important;overflow-x:hidden!important;
+  overscroll-behavior-y:contain!important;
+  -webkit-overflow-scrolling:touch!important;
+  touch-action:pan-y!important;
+  transform:none!important;animation:none!important;transition:none!important;
+}
+.bertha-dialog.exercise-dialog input,
+.bertha-dialog.exercise-dialog select,
+.bertha-dialog.exercise-dialog textarea{scroll-margin-top:96px!important;scroll-margin-bottom:120px!important}
+</style>
+
 </head>
 
 <style id="bertha-hml-marker">
@@ -376,7 +423,7 @@ body.bertha-hml::before{content:"HOMOLOGAÇÃO";position:fixed;z-index:99999;top
   });
 })();
 </script>
-<script src="app-v2.8.220-exercicios-modal-travado.js?v=21901hml"></script>
+<script src="app-v2.8.221-exercicios-modal-ancorado.js?v=22101hml"></script>
 
 <dialog id="moduleMenu">
 <div class="module-sheet">
@@ -403,6 +450,6 @@ body.bertha-hml::before{content:"HOMOLOGAÇÃO";position:fixed;z-index:99999;top
 </dialog>
 
 <script src="work-v12.js?v=21601hml"></script>
-<script src="bertha-time-v2.8.220-exercicios-modal-travado.js?v=21901hml"></script>
+<script src="bertha-time-v2.8.221-exercicios-modal-ancorado.js?v=22101hml"></script>
 </body>
 </html>
