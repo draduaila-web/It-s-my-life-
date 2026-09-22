@@ -742,3 +742,9 @@ h2 { margin:0; font-size:22px; letter-spacing:-.02em; }
   background:linear-gradient(135deg,#f2a27d 0%,#eb9275 56%,#df846f 100%)!important;
   color:#fff!important;font-weight:800!important;
 }
+
+/* BERTH.A RC2 — Próximas receitas / escolha antecipada */
+.home-recipes-shortcut-wrap{display:grid!important;gap:8px!important}
+.home-recipes-next{background:linear-gradient(135deg,rgba(235,225,246,.58),rgba(218,235,249,.52))!important}
+.recipe-upcoming{margin-top:10px!important;background:radial-gradient(circle at 92% 12%,rgba(222,207,244,.19),transparent 32%),radial-gradient(circle at 8% 90%,rgba(215,235,249,.20),transparent 35%),rgba(255,252,248,.88)!important}
+.recipe-upcoming .recipe-meal-actions button[data-future-other]{background:linear-gradient(120deg,rgba(232,219,247,.55),rgba(218,237,250,.48))!important;color:#765f88!important}

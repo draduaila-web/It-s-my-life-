@@ -1,0 +1,10 @@
+BERTH.A — RC2 PRÓXIMAS RECEITAS
+
+Base: RC1 estável, preservada.
+Alteração funcional:
+- Meu Dia mantém “Receitas do dia” e adiciona “Próximas receitas”.
+- Próximas receitas abre o planejamento de amanhã.
+- “Escolher outra” altera somente a escolha planejada para a data futura; NÃO marca como realizada e NÃO alimenta o progresso.
+- No dia seguinte, a receita antecipadamente escolhida passa a ser a receita exibida para aquele dia.
+- “Fiz esta” / “Fiz outra” continuam sendo as ações que registram a execução real e alimentam Meu Progresso.
+- Nenhuma alteração em produção.
