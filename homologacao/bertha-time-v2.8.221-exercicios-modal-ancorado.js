@@ -3945,7 +3945,8 @@
     .bertha-goal-dialog.goal-trabalho{--goal-a:#e9def5;--goal-b:#dff0ea;--goal-ink:#706b86;--goal-ring:rgba(122,117,141,.18)}
     .bertha-goal-dialog.goal-casa{--goal-a:#f5e0e8;--goal-b:#e1eee6;--goal-ink:#746e83;--goal-ring:rgba(123,117,138,.18)}
     .bertha-goal-dialog.goal-rituais{--goal-a:#f8efd1;--goal-b:#e9def5;--goal-ink:#7d6d87;--goal-ring:rgba(131,113,140,.18)}
-    .bertha-goal-dialog .bertha-primary{background:linear-gradient(135deg,var(--goal-a),var(--goal-b))!important;color:var(--goal-ink)!important;border:1px solid var(--goal-ring)!important;box-shadow:none!important}
+    /* RC12 — seletor deliberadamente mais específico que a regra global .bertha-dialog .bertha-stack .bertha-primary. */
+    .bertha-goal-dialog .bertha-stack .bertha-primary{background:linear-gradient(135deg,var(--goal-a),var(--goal-b))!important;color:var(--goal-ink)!important;border:1px solid var(--goal-ring)!important;box-shadow:none!important}
     .bertha-goal-dialog .bertha-goal-fields input:focus{border-color:var(--goal-ink)!important;box-shadow:0 0 0 3px var(--goal-ring)!important;outline:none!important}
     /* v2.8.148 — Meu Dia Ideal final: modal padrão + intensidade do hero */
     .bertha-ideal-hero{filter:saturate(1.10) contrast(1.015)}
