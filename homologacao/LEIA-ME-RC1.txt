@@ -1,0 +1,9 @@
+BERTH.A — HOMOLOGAÇÃO 2.8.221 RC1 ESTÁVEL
+
+Objetivo: correção cirúrgica sem tocar na produção.
+1. Mantém a base funcional 2.8.221.
+2. Mantém o CSS real congelado dentro de /homologacao/.
+3. Corrige somente a apresentação do card AGORA / EM ANDAMENTO.
+4. Se existir uma sessão ativa claramente obsoleta (>6h ou >6x o planejado), ela NÃO é concluída nem lançada no histórico. O objeto original é preservado em bertha.time-engine.recovery-stale-active.v1 e apenas engine.active é neutralizado.
+5. Nenhuma rotina de limpeza de dados foi adicionada.
+6. Produção/raiz não deve ser alterada.

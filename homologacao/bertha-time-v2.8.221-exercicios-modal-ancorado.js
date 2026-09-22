@@ -12,6 +12,25 @@
   const esc = (s='') => String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[c]));
   const read = (k, fallback=[]) => { try { const v=JSON.parse(window.berthaHmlStorage.getItem(k)); return v ?? fallback; } catch { return fallback; } };
   const write = (k,v) => window.berthaHmlStorage.setItem(k,JSON.stringify(v));
+
+  /* RECOVERY 221-RC1 — neutraliza somente sessão ativa claramente obsoleta.
+     O registro é preservado em uma chave de recuperação; histórico e dados dos módulos não são alterados. */
+  (() => {
+    try {
+      const e = read(ENGINE_KEY,{active:null,history:[],snoozed:{}});
+      const a = e && e.active;
+      if(!a || !Number.isFinite(+a.startedAt)) return;
+      const elapsed = Math.max(0, Math.floor((Date.now()-(+a.startedAt))/60000));
+      const planned = Math.max(1, +(a.plannedMinutes||a.minutes||30));
+      const staleLimit = Math.max(360, planned*6); // nunca encerra automaticamente uma sessão recente
+      if(elapsed <= staleLimit) return;
+      write('bertha.time-engine.recovery-stale-active.v1', {
+        recoveredAt: Date.now(), elapsedMinutes: elapsed, active: a
+      });
+      e.active = null;
+      write(ENGINE_KEY,e);
+    } catch(_) {}
+  })();
   const iso = (d=new Date()) => { const x=new Date(d.getTime()-d.getTimezoneOffset()*60000); return x.toISOString().slice(0,10); };
   const minsNow = () => { const d=new Date(); return d.getHours()*60+d.getMinutes(); };
   const hhmm = (ts) => new Date(ts).toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'});
