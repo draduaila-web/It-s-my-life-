@@ -1,0 +1,6 @@
+BERTH.A RC3 — Ajustes de Receitas
+
+1. Nomes e rendimento das receitas no seletor sem azul; paleta BERTH.A.
+2. Informação nutricional passa a aceitar e exibir Proteínas (g), sem alterar receitas antigas.
+3. Meu Dia: atalho “Receitas de amanhã”, mantendo escolha antecipada sem alimentar progresso até a execução.
+4. Sem fotos e sem alteração dos dados existentes.
