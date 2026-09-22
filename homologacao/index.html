@@ -9,32 +9,7 @@
 <meta name="apple-mobile-web-app-title" content="BERTH.A HML">
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="apple-touch-icon" sizes="512x512" href="../bertha-icon-512.png">
-<link rel="stylesheet" href="../style.css?v=rollback221-226">
-<script id="bertha-rollback-221-bootstrap">
-(function(){
-  const KEY='bertha.rollback.221.v226';
-  async function hardReset(){
-    try{
-      if('caches' in window){
-        const keys=await caches.keys();
-        await Promise.all(keys.filter(k=>k.startsWith('hml-bertha-')).map(k=>caches.delete(k)));
-      }
-      if('serviceWorker' in navigator){
-        const regs=await navigator.serviceWorker.getRegistrations();
-        await Promise.all(regs.map(r=>r.unregister()));
-      }
-      sessionStorage.setItem(KEY,'1');
-      const u=new URL(location.href);
-      if(u.searchParams.get('rollback')!=='221'){
-        u.searchParams.set('rollback','221');
-        location.replace(u.toString());
-      }
-    }catch(e){ console.warn('[BERTH.A rollback 221]',e); }
-  }
-  if(sessionStorage.getItem(KEY)!=='1') hardReset();
-})();
-</script>
-
+<link rel="stylesheet" href="../style.css">
 <style id="bertha-v2857-idea-modal-radius">
 /* v2.8.57 — preserva o ajuste cirúrgico: contorno externo do modal Criação & Ideias.
    O JS injeta .study-v10-modal depois do CSS principal e, no iPhone, força 24px.
@@ -259,116 +234,6 @@
 body:has(#pendingDialog[open]){overflow:hidden!important;overscroll-behavior:none!important}
 @media(max-width:480px){#pendingDialog #pendingForm.modal-card{width:calc(100vw - 24px)!important;max-height:calc(100dvh - 24px)!important;border-radius:26px!important}}
 </style>
-
-<style id="bertha-exercise-v217">
-/* v2.8.217 — Exercícios: ciclos, ícones, edição de registro e modais estáveis */
-.exercise-icon{width:42px;height:42px;flex:0 0 42px;display:grid;place-items:center;border-radius:15px;background:linear-gradient(135deg,rgba(225,211,247,.96),rgba(247,211,190,.88));color:#715a82;border:1px solid rgba(120,103,160,.08)}
-.exercise-icon svg{width:25px;height:25px;display:block!important;margin:auto!important;overflow:visible!important;fill:none;stroke:currentColor;stroke-width:1.55;stroke-linecap:round;stroke-linejoin:round;vector-effect:non-scaling-stroke}
-.exercise-plan-main{display:grid!important;grid-template-columns:42px minmax(0,1fr)!important;gap:12px!important;align-items:start!important}.exercise-plan-copy{min-width:0}.exercise-plan-copy strong{display:block!important}.exercise-plan-copy span,.exercise-plan-copy small{display:block!important}
-.exercise-cycle-list{display:grid;gap:12px}.exercise-cycle{padding:18px 19px!important;background:linear-gradient(125deg,rgba(255,255,255,.88),rgba(247,241,253,.82),rgba(255,246,239,.82))!important;border:1px solid rgba(121,98,151,.10)!important}.exercise-cycle-head{display:flex;gap:12px;align-items:center}.exercise-cycle-copy{min-width:0;flex:1}.exercise-cycle-copy strong,.exercise-cycle-copy span,.exercise-cycle-copy small{display:block}.exercise-cycle-copy span{margin-top:3px;color:#817986}.exercise-cycle-copy small{margin-top:4px;color:#9a909a}.exercise-cycle-progress{height:6px;margin-top:12px;background:rgba(122,104,149,.09);border-radius:999px;overflow:hidden}.exercise-cycle-progress i{display:block;height:100%;border-radius:inherit;background:linear-gradient(90deg,#b79bd0,#e7b7a3)}
-.exercise-session{cursor:pointer}.exercise-session-actions{display:flex;gap:6px;align-items:center}.exercise-session-actions button{border:0;background:transparent;color:#8a7c8d;font:inherit;padding:6px 8px}.exercise-session-actions .exercise-edit{font-size:12px;font-weight:750;border:1px solid rgba(121,98,151,.10);border-radius:999px;background:rgba(243,235,250,.55)}
-.bertha-dialog.exercise-dialog{position:fixed!important;left:50%!important;top:max(10px,env(safe-area-inset-top))!important;right:auto!important;bottom:auto!important;transform:translate3d(-50%,0,0)!important;margin:0!important;width:min(calc(100vw - 20px),560px)!important;max-width:560px!important;max-height:calc(100svh - 20px)!important;height:auto!important;overflow:hidden!important;border-radius:30px!important;will-change:auto!important;contain:layout paint!important}
-.bertha-dialog.exercise-dialog>form,.bertha-dialog.exercise-dialog>.bertha-modal{width:100%!important;max-height:calc(100svh - 20px)!important;overflow-y:auto!important;overscroll-behavior:contain!important;-webkit-overflow-scrolling:touch!important;box-sizing:border-box!important;transform:none!important;animation:none!important;scrollbar-gutter:stable!important}
-.bertha-dialog.exercise-dialog .study-v10-actions{position:static!important;bottom:auto!important;margin:18px -20px -20px!important}
-#exForm #eWeeklyWrap{margin-top:-4px;margin-bottom:14px}.exercise-cycle-picker select{width:100%}
-@media(max-width:430px){.bertha-dialog.exercise-dialog{top:max(8px,env(safe-area-inset-top))!important;width:calc(100vw - 16px)!important;max-height:calc(100svh - 16px)!important}.bertha-dialog.exercise-dialog>form,.bertha-dialog.exercise-dialog>.bertha-modal{max-height:calc(100svh - 16px)!important}.exercise-plan-main{grid-template-columns:38px minmax(0,1fr)!important}.exercise-icon{width:38px;height:38px;flex-basis:38px;border-radius:14px}.exercise-icon svg{width:23px;height:23px}}
-</style>
-
-
-<style id="bertha-exercise-v218">
-/* v2.8.219 — Ícones escolhíveis nos treinos + modal Exercícios estabilizado */
-.exercise-icon{overflow:hidden}.exercise-icon svg{display:block;transform:none!important}.exercise-plan-main .exercise-icon{align-self:start}.exercise-cycle-modal .bertha-modal-head .eyebrow{color:#765f94!important}.exercise-cycle-modal .primary{background:linear-gradient(135deg,#d9c8f0 0%,#ead1df 48%,#f2cbb8 100%)!important;color:#654f77!important;border:1px solid rgba(111,88,139,.10)!important;box-shadow:none!important}.exercise-cycle-modal .secondary{background:rgba(255,255,255,.62)!important;color:#6d6271!important;border:1px solid rgba(105,89,121,.12)!important}.exercise-cycle-section{margin:0 0 18px}.exercise-cycle-label{display:block;font-size:14px;font-weight:750;color:#625a65;margin:0 0 9px}.exercise-cycle-help,.exercise-field-help{display:block;margin:0 0 10px;color:#9a919b;font-size:12.5px;line-height:1.4}.exercise-field-help{margin:7px 2px 0}.exercise-icon-picker{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:9px}.exercise-icon-choice{border:1px solid rgba(112,93,135,.10);background:rgba(255,255,255,.56);border-radius:18px;padding:10px 7px 9px;display:grid;place-items:center;gap:6px;color:#76667e;font:inherit}.exercise-icon-choice>span{width:42px;height:42px;border-radius:14px;display:grid;place-items:center;background:linear-gradient(135deg,rgba(216,201,241,.96),rgba(244,207,188,.88));color:#6c5680}.exercise-icon-choice svg{width:24px;height:24px;fill:none;stroke:currentColor;stroke-width:1.55;stroke-linecap:round;stroke-linejoin:round}.exercise-icon-choice small{font-size:11px;color:#8d848e}.exercise-icon-choice.selected{border-color:rgba(117,89,148,.30);box-shadow:0 0 0 2px rgba(218,201,240,.25);background:linear-gradient(135deg,rgba(240,232,250,.78),rgba(252,240,233,.74))}.exercise-unit-input{position:relative}.exercise-unit-input input{padding-right:82px!important}.exercise-unit-input span{position:absolute;right:17px;top:50%;transform:translateY(-50%);font-size:14px;color:#8e858f;pointer-events:none}.exercise-plan-picker{display:grid;gap:8px}.exercise-plan-picker label{display:grid;grid-template-columns:auto 34px minmax(0,1fr);gap:9px;align-items:center;padding:10px 12px;border-radius:16px;background:rgba(255,255,255,.48);border:1px solid rgba(112,93,135,.08)}.exercise-plan-picker input{width:18px;height:18px}.exercise-plan-picker .exercise-icon.mini{width:34px;height:34px;flex-basis:34px;border-radius:12px}.exercise-plan-picker .exercise-icon.mini svg{width:20px;height:20px}.exercise-plan-picker strong,.exercise-plan-picker small{display:block}.exercise-plan-picker strong{font-size:14px}.exercise-plan-picker small{margin-top:2px;font-size:11.5px;color:#958c96}.cycle-duration-grid{align-items:start}
-@media(max-width:430px){.exercise-icon-picker{grid-template-columns:repeat(3,1fr)}.exercise-cycle-modal .bertha-modal-head p{font-size:14px!important;line-height:1.42!important}}
-/* v2.8.219 — freeze visual position of exercise dialogs on iPhone + explicit icon choice for plans */
-.bertha-dialog.exercise-dialog[open]{inset:auto!important;left:50%!important;right:auto!important;bottom:auto!important;transition:none!important;animation:none!important}
-.bertha-dialog.exercise-dialog,.bertha-dialog.exercise-dialog *{scroll-behavior:auto!important}
-.exercise-plan-icon-section{padding-top:2px}.exercise-plan-icon-section .exercise-icon-picker{margin-top:2px}.exercise-icon-choice>span svg{display:block!important;margin:auto!important;transform:none!important}
-.exercise-plan .exercise-icon,.exercise-plan-picker .exercise-icon{display:grid!important;place-items:center!important;padding:0!important}
-.exercise-plan .exercise-icon svg,.exercise-plan-picker .exercise-icon svg{position:static!important;inset:auto!important;transform:none!important}
-
-</style>
-
-<style id="bertha-exercise-v220-freeze">
-/* v2.8.220 — quadro externo do modal fixo; somente o painel interno rola */
-.bertha-dialog.exercise-dialog,
-.bertha-dialog.exercise-dialog[open]{
-  position:fixed!important;
-  left:8px!important; right:8px!important;
-  top:max(8px,env(safe-area-inset-top))!important;
-  bottom:auto!important;
-  width:auto!important; max-width:none!important;
-  height:calc(100svh - 16px)!important;
-  max-height:calc(100svh - 16px)!important;
-  margin:0!important; padding:0!important;
-  transform:none!important;
-  overflow:hidden!important;
-  overscroll-behavior:none!important;
-  touch-action:none!important;
-  animation:none!important; transition:none!important;
-}
-.bertha-dialog.exercise-dialog>form,
-.bertha-dialog.exercise-dialog>.bertha-modal{
-  height:100%!important; max-height:100%!important;
-  overflow-y:auto!important; overflow-x:hidden!important;
-  overscroll-behavior-y:contain!important;
-  -webkit-overflow-scrolling:auto!important;
-  touch-action:pan-y!important;
-  transform:none!important; animation:none!important; transition:none!important;
-}
-.exercise-icon svg{overflow:visible!important}
-.exercise-plan .exercise-icon svg,
-.exercise-plan-picker .exercise-icon svg{width:24px!important;height:24px!important;display:block!important;margin:auto!important}
-@media(max-width:430px){
- .bertha-dialog.exercise-dialog,.bertha-dialog.exercise-dialog[open]{left:8px!important;right:8px!important;width:auto!important;height:calc(100svh - 16px)!important;max-height:calc(100svh - 16px)!important}
-}
-</style>
-
-<style id="bertha-exercise-v221-anchor">
-/* v2.8.221 — modal de Exercícios ancorado: página não se move; painel não recentraliza */
-html.exercise-modal-locked{overflow:hidden!important;overscroll-behavior:none!important}
-body.exercise-modal-locked{overflow:hidden!important;overscroll-behavior:none!important}
-.bertha-dialog.exercise-dialog,
-.bertha-dialog.exercise-dialog[open]{
-  position:fixed!important;
-  inset:0!important;
-  left:var(--exercise-vv-left,0px)!important;
-  top:var(--exercise-vv-top,0px)!important;
-  right:auto!important;bottom:auto!important;
-  width:100vw!important;height:100svh!important;
-  max-width:none!important;max-height:none!important;
-  margin:0!important;
-  padding:max(10px,env(safe-area-inset-top)) 8px max(10px,env(safe-area-inset-bottom))!important;
-  border:0!important;
-  box-sizing:border-box!important;
-  background:transparent!important;
-  overflow:hidden!important;
-  overscroll-behavior:none!important;
-  touch-action:auto!important;
-  transform:none!important;
-  animation:none!important;transition:none!important;
-  align-items:flex-start!important;
-  justify-content:center!important;
-}
-.bertha-dialog.exercise-dialog[open]{display:flex!important}
-.bertha-dialog.exercise-dialog::backdrop{overscroll-behavior:none!important}
-.bertha-dialog.exercise-dialog>form.bertha-modal,
-.bertha-dialog.exercise-dialog>.bertha-modal{
-  flex:0 1 auto!important;
-  width:min(calc(100vw - 16px),620px)!important;
-  height:auto!important;
-  max-height:calc(100svh - max(20px,env(safe-area-inset-top)) - max(20px,env(safe-area-inset-bottom)))!important;
-  margin:0!important;
-  overflow-y:auto!important;overflow-x:hidden!important;
-  overscroll-behavior-y:contain!important;
-  -webkit-overflow-scrolling:touch!important;
-  touch-action:pan-y!important;
-  transform:none!important;animation:none!important;transition:none!important;
-}
-.bertha-dialog.exercise-dialog input,
-.bertha-dialog.exercise-dialog select,
-.bertha-dialog.exercise-dialog textarea{scroll-margin-top:96px!important;scroll-margin-bottom:120px!important}
-</style>
-
 </head>
 
 <style id="bertha-hml-marker">
@@ -427,7 +292,7 @@ body.bertha-hml::before{content:"HOMOLOGAÇÃO";position:fixed;z-index:99999;top
   const isAppKey=k=>APP_PREFIXES.some(p=>String(k).startsWith(p));
   function collect(){const all=window.berthaHmlStorage.entries(),data={};Object.keys(all).filter(isAppKey).forEach(k=>data[k]=all[k]);return data;}
   function exportBackup(){
-    const payload={format:'BERTHA_BACKUP',version:1,createdAt:new Date().toISOString(),environment:'HOMOLOGACAO',appVersion:'2.8.217-hml',data:collect()};
+    const payload={format:'BERTHA_BACKUP',version:1,createdAt:new Date().toISOString(),environment:'HOMOLOGACAO',appVersion:'2.8.216-hml',data:collect()};
     const blob=new Blob([JSON.stringify(payload,null,2)],{type:'application/json'}),url=URL.createObjectURL(blob),a=document.createElement('a');
     const d=new Date(),pad=n=>String(n).padStart(2,'0');a.href=url;a.download=`BERTHA_HOMOLOGACAO_${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}_${pad(d.getHours())}-${pad(d.getMinutes())}.json`;document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),1000);
   }
@@ -448,7 +313,7 @@ body.bertha-hml::before{content:"HOMOLOGAÇÃO";position:fixed;z-index:99999;top
   });
 })();
 </script>
-<script src="app-v2.8.221-exercicios-modal-ancorado.js?v=226rollback221"></script>
+<script src="app-v2.8.216-more-bertha.js?v=21601hml"></script>
 
 <dialog id="moduleMenu">
 <div class="module-sheet">
@@ -474,7 +339,7 @@ body.bertha-hml::before{content:"HOMOLOGAÇÃO";position:fixed;z-index:99999;top
 </div>
 </dialog>
 
-<script src="work-v12.js?v=226rollback221"></script>
-<script src="bertha-time-v2.8.221-exercicios-modal-ancorado.js?v=226rollback221"></script>
+<script src="work-v12.js?v=21601hml"></script>
+<script src="bertha-time-v2.8.216-more-bertha.js?v=21601hml"></script>
 </body>
 </html>
