@@ -491,3 +491,65 @@
     @media(max-width:520px){.work12-dialog{height:min(74svh,720px)!important;max-height:min(74svh,720px)!important}}
   `; document.head.appendChild(s);
 })();
+
+/* BERTH.A v2.8.221 RC10 — Trabalho: respiro + degradê oficial lilás/menta */
+(function(){
+  const s=document.createElement('style');
+  s.id='work-rc10-lilas-menta-respiro';
+  s.textContent=`
+    /* Hero: mesma família do print, apenas um tom acima; sem amarelo */
+    .work13-hero{
+      margin-bottom:34px!important;
+      background:linear-gradient(125deg,rgba(238,228,250,.92) 0%,rgba(239,235,251,.88) 48%,rgba(218,244,235,.88) 100%)!important;
+      border-color:rgba(123,104,154,.11)!important;
+    }
+    .work13-hero:after{background:rgba(255,255,255,.24)!important}
+    .work13-section-label{margin:0 2px 17px!important}
+    .work12-fronts{gap:18px!important}
+
+    /* Cards continuam creme; somente o campo do ícone recebe o degradê oficial */
+    .work12-front{
+      background:linear-gradient(135deg,rgba(255,252,246,.96),rgba(252,249,243,.93))!important;
+      grid-template-columns:47px 1fr 20px!important;
+      padding:18px 18px!important;
+    }
+    .work12-front:nth-child(n){background:linear-gradient(135deg,rgba(255,252,246,.96),rgba(252,249,243,.93))!important}
+    .work12-front .work12-icon{
+      width:46.56px!important;height:46.56px!important;border-radius:15px!important;
+      background:linear-gradient(125deg,rgba(238,228,250,.88),rgba(218,244,235,.86))!important;
+      color:#75609a!important;border:1px solid rgba(117,96,153,.07)!important;
+    }
+    .work12-front:nth-child(n) .work12-icon{color:#75609a!important}
+    .work12-front .work12-icon svg{width:27.16px!important;height:27.16px!important;stroke-width:1.55!important}
+
+    /* CTA e modais usam exatamente a mesma linguagem cromática */
+    .work12-front-add{
+      margin-top:20px!important;
+      background:linear-gradient(125deg,rgba(238,228,250,.72),rgba(218,244,235,.70))!important;
+      border-color:rgba(123,104,154,.22)!important;color:#715d8f!important;
+    }
+    .work12-front-dialog,.work12-dialog,.work12-form,.work12-form-head{
+      background:linear-gradient(125deg,rgba(249,245,253,.985),rgba(239,248,244,.985))!important;
+    }
+    .work12-form-actions{background:linear-gradient(to bottom,rgba(244,247,247,0),rgba(241,247,244,.98) 13px)!important}
+    .work12-primary,.work12-secondary,.work12-more,.work12-notify-box{
+      background:linear-gradient(125deg,rgba(238,228,250,.82),rgba(218,244,235,.80))!important;
+      color:#67577f!important;border-color:rgba(123,104,154,.10)!important;
+    }
+    .work14-icon-option,.work14-icon-option.selected{
+      background:linear-gradient(125deg,rgba(238,228,250,.78),rgba(218,244,235,.76))!important;
+      color:#75609a!important;
+    }
+    .work14-icon-option span{width:30.07px!important;height:30.07px!important}
+    .work14-icon-option svg{width:26.19px!important;height:26.19px!important}
+
+    /* Respiro final para a barra fixa não disputar com o conteúdo */
+    .work13-bridge{margin-top:28px!important;margin-bottom:128px!important}
+    @media(max-width:520px){
+      .work13-hero{margin-top:10px!important;margin-bottom:34px!important}
+      .work12-fronts{gap:18px!important}
+      .work12-front-add{margin-top:20px!important}
+    }
+  `;
+  document.head.appendChild(s);
+})();
