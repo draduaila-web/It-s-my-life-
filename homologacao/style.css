@@ -1,0 +1,691 @@
+* { box-sizing: border-box; }
+:root {
+  --bg: #fff8f3;
+  --surface: rgba(255,255,255,.94);
+  --surface-strong: #fff;
+  --ink: #3f3845;
+  --muted: #817782;
+  --line: #eadde3;
+  --lavender: #b99bd6;
+  --lavender-dark: #80628f;
+  --lavender-pale: #eee4f7;
+  --success: #79b59d;
+  --danger: #d4879a;
+  --rose: #e7a1b8;
+  --rose-pale: #f9e6ed;
+  --shadow: 0 12px 35px rgba(91,67,86,.08);
+  --radius: 22px;
+}
+
+/* MINHA VIDA — candy pastel system */
+:root {
+  --pink-soft: #f8dce7;
+  --pink-strong: #d987a5;
+  --lilac-soft: #eee3f7;
+  --mint-soft: #dff1e9;
+  --mint-strong: #78aa96;
+  --blue-soft: #dfeefa;
+  --blue-strong: #7599ba;
+  --yellow-soft: #fff0c9;
+  --yellow-strong: #c59b52;
+  --peach-soft: #fbe2d6;
+  --peach-strong: #d58d70;
+  --beige-soft: #f5e9dc;
+}
+html, body { margin:0; min-height:100%; background:var(--bg); color:var(--ink); font-family:-apple-system,BlinkMacSystemFont,"SF Pro Display","Helvetica Neue",Arial,sans-serif; }
+body { padding: env(safe-area-inset-top) 0 env(safe-area-inset-bottom); }
+button, input, select, textarea { font:inherit; }
+button { border:0; cursor:pointer; }
+.app-shell { max-width:720px; min-height:100dvh; margin:auto; display:flex; flex-direction:column; }
+.topbar { padding:18px 20px 14px; display:flex; align-items:center; gap:12px; position:sticky; top:0; z-index:5; background:linear-gradient(var(--bg) 78%, transparent); }
+.topbar > div { flex:1; }
+.eyebrow { font-size:10px; letter-spacing:.15em; color:var(--muted); font-weight:700; margin-bottom:5px; }
+h1 { margin:0; font-size:25px; letter-spacing:-.03em; font-weight:650; }
+h2 { margin:0; font-size:22px; letter-spacing:-.02em; }
+.icon-btn { width:40px; height:40px; border-radius:50%; background:var(--surface-strong); color:var(--lavender-dark); box-shadow:0 4px 16px rgba(0,0,0,.05); font-size:24px; display:grid; place-items:center; flex:none; }
+.content { flex:1; padding:8px 20px 100px; }
+.hero { padding:14px 2px 18px; }
+.hero h2 { font-size:30px; margin-bottom:7px; }
+.hero p { color:var(--muted); line-height:1.45; margin:0; max-width:520px; }
+.tabs { display:flex; gap:8px; margin:6px 0 17px; }
+.tab { padding:10px 15px; border-radius:999px; background:transparent; color:var(--muted); font-weight:650; }
+.tab.active { background:var(--lavender-pale); color:var(--lavender-dark); }
+.add-row { display:flex; gap:10px; margin-bottom:17px; }
+.primary { background:linear-gradient(135deg,#9a76ad,#80628f); color:#fff; padding:13px 17px; border-radius:15px; font-weight:700; box-shadow:0 8px 20px rgba(128,98,143,.18); }
+.secondary { background:var(--lavender-pale); color:var(--lavender-dark); padding:12px 15px; border-radius:14px; font-weight:650; }
+.search { flex:1; border:1px solid var(--line); background:var(--surface-strong); border-radius:15px; padding:12px 14px; outline:none; }
+.search:focus, input:focus, select:focus, textarea:focus { border-color:#cdb6df; box-shadow:0 0 0 3px rgba(185,155,214,.18); }
+.list { display:flex; flex-direction:column; gap:10px; }
+.card { background:var(--surface); border:1px solid rgba(234,223,229,.95); border-radius:var(--radius); padding:15px; box-shadow:var(--shadow); }
+.pending { display:flex; gap:12px; align-items:flex-start; }
+.check { width:26px; height:26px; border:1.5px solid #b9aeb9; border-radius:9px; background:#fff; display:grid; place-items:center; flex:none; margin-top:1px; color:#fff; }
+.check.done { background:var(--success); border-color:var(--success); }
+.check.done::after { content:"✓"; font-size:15px; font-weight:800; }
+.pending-main { flex:1; min-width:0; }
+.pending-title { font-size:16px; line-height:1.3; font-weight:650; }
+.done-text { color:#98929a; text-decoration:line-through; }
+.meta { display:flex; flex-wrap:wrap; gap:6px; margin-top:8px; }
+.pill { background:#f5edf3; color:#7d6d80; padding:5px 8px; border-radius:999px; font-size:11px; font-weight:650; }
+.pill.overdue { background:var(--rose-pale); color:var(--danger); }
+.pill.today { background:var(--lavender-pale); color:var(--lavender-dark); }
+.note { margin:9px 0 0; color:var(--muted); font-size:13px; line-height:1.4; }
+.more { color:#a09aa2; background:none; font-size:22px; padding:0 2px; }
+.empty { text-align:center; padding:48px 20px; color:var(--muted); }
+.empty .symbol { font-size:38px; margin-bottom:12px; }
+.empty strong { display:block; color:var(--ink); margin-bottom:5px; }
+.section-title { margin:24px 2px 10px; font-size:12px; letter-spacing:.12em; color:var(--muted); font-weight:800; }
+.module-grid { display:grid; grid-template-columns:1fr 1fr; gap:12px; }
+.module { background:var(--surface-strong); border:1px solid var(--line); border-radius:20px; padding:18px; min-height:118px; text-align:left; box-shadow:var(--shadow); }
+.module .emoji { font-size:24px; display:block; margin-bottom:13px; }
+.module strong { display:block; font-size:15px; }
+.module span { display:block; color:var(--muted); font-size:12px; margin-top:5px; line-height:1.35; }
+.bottom-nav { position:fixed; left:50%; transform:translateX(-50%); bottom:0; width:min(720px,100%); padding:9px 12px calc(9px + env(safe-area-inset-bottom)); background:rgba(255,248,243,.94); backdrop-filter:blur(18px); border-top:1px solid rgba(225,210,219,.8); display:flex; justify-content:space-around; z-index:10; }
+.nav-item { background:none; color:#9b8fa0; display:flex; flex-direction:column; align-items:center; gap:3px; font-size:17px; min-width:70px; }
+.nav-item span { font-size:10px; font-weight:700; }
+.nav-item.active { color:var(--lavender-dark); }
+.modal-card { width:min(92vw,560px); border:0; border-radius:26px; padding:0; background:#fff; box-shadow:0 30px 90px rgba(30,25,32,.25); }
+.modal-card::backdrop { background:rgba(38,31,40,.28); backdrop-filter:blur(3px); }
+.modal-head { padding:22px 22px 16px; display:flex; align-items:flex-start; gap:12px; border-bottom:1px solid var(--line); }
+.modal-head > div { flex:1; }
+.modal-card label { display:block; margin:16px 22px; font-size:12px; color:var(--muted); font-weight:700; }
+.modal-card input, .modal-card select, .modal-card textarea { display:block; width:100%; margin-top:7px; border:1px solid var(--line); border-radius:13px; padding:12px; color:var(--ink); background:#fff; outline:none; resize:vertical; }
+.form-grid { display:grid; grid-template-columns:1fr 1fr; }
+.form-grid label { margin-bottom:0; }
+.modal-actions { display:flex; align-items:center; gap:8px; padding:16px 22px 22px; }
+.grow { flex:1; }
+.muted { font-weight:500; }
+@media (max-width:430px) {
+  .content { padding-left:16px; padding-right:16px; }
+  .topbar { padding-left:16px; padding-right:16px; }
+  .hero h2 { font-size:27px; }
+  .form-grid { grid-template-columns:1fr; }
+  .form-grid label { margin-bottom:16px; }
+}
+.idea-symbol { width:26px; height:26px; display:grid; place-items:center; color:var(--lavender-dark); font-size:23px; flex:none; }
+.idea-card { cursor:pointer; }
+.idea-tabs { overflow-x:auto; scrollbar-width:none; }
+.idea-tabs::-webkit-scrollbar { display:none; }
+.ritual-grid { display:flex; flex-direction:column; gap:12px; }
+.ritual-card { width:100%; display:flex; align-items:center; gap:14px; text-align:left; padding:17px; border-radius:22px; background:#fff; border:1px solid var(--line); box-shadow:var(--shadow); color:var(--ink); }
+.ritual-card.featured { background:var(--lavender-pale); border-color:#e2d3e8; }
+.ritual-card > div { flex:1; }
+.ritual-card strong { display:block; font-size:16px; }
+.ritual-card span:not(.ritual-icon) { display:block; margin-top:5px; color:var(--muted); font-size:12px; line-height:1.35; }
+.ritual-card b { font-size:25px; font-weight:400; color:var(--muted); }
+.ritual-icon { width:34px; height:34px; border-radius:12px; display:grid; place-items:center; background:rgba(255,255,255,.8); color:var(--lavender-dark); font-size:21px; flex:none; }
+.ritual-icon.small { width:30px; height:30px; font-size:17px; }
+.backline { margin-bottom:10px; }
+.back-inline { background:none; color:var(--lavender-dark); font-weight:700; padding:0; }
+.capilar-panel { padding:18px; }
+.panel-head { display:flex; align-items:center; justify-content:space-between; gap:10px; }
+.panel-head h3 { margin:0; font-size:18px; }
+.capilar-steps { margin-top:17px; display:flex; flex-direction:column; }
+.capilar-step { display:flex; gap:12px; padding:12px 0; border-top:1px solid var(--line); }
+.capilar-step > span { width:25px; height:25px; border-radius:50%; background:var(--lavender-pale); color:var(--lavender-dark); display:grid; place-items:center; font-size:11px; font-weight:800; }
+.capilar-step strong { display:block; font-size:14px; }
+.capilar-step small { display:block; margin-top:4px; color:var(--muted); font-size:12px; line-height:1.4; }
+.big-note { min-height:24px; line-height:1.5; }
+.wash-list { display:flex; flex-wrap:wrap; gap:7px; }
+.step-edit { font-weight:700 !important; color:var(--ink) !important; }
+.step-edit textarea { font-weight:400; color:var(--ink); }
+.section-title.inner { margin:8px 22px 0; }
+.study-summary { display:grid; grid-template-columns:repeat(3,1fr); gap:9px; margin:0 0 24px; }
+.summary-card { background:#fff; border:1px solid var(--line); border-radius:18px; padding:14px 10px; text-align:center; box-shadow:var(--shadow); }
+.summary-card strong { display:block; font-size:21px; color:var(--lavender-dark); }
+.summary-card span { display:block; margin-top:4px; color:var(--muted); font-size:10px; font-weight:700; }
+.study-section { margin-top:24px; }
+.section-heading { display:flex; align-items:center; justify-content:space-between; gap:10px; margin:0 2px 10px; }
+.section-heading h3 { margin:0; font-size:18px; }
+.study-card { display:flex; align-items:center; gap:12px; }
+.study-card > div { flex:1; min-width:0; }
+.study-meta { display:block; color:var(--muted); font-size:12px; margin-top:5px; line-height:1.4; }
+.study-check { width:29px; height:29px; border-radius:50%; background:var(--lavender-pale); color:var(--lavender-dark); font-weight:800; font-size:16px; flex:none; }
+.study-check.done { background:var(--success); color:#fff; }
+.empty.compact { padding:28px 18px; }
+.money-hero { padding:20px; background:var(--lavender-pale); }
+.money-hero > strong { display:block; font-size:28px; margin-top:3px; }
+.money-grid { display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-top:20px; }
+.money-grid div { background:rgba(255,255,255,.75); border-radius:15px; padding:12px; }
+.money-grid span,.finance-row span,.excluded-card span { display:block; color:var(--muted); font-size:11px; margin-top:4px; line-height:1.35; }
+.finance-row { display:flex; align-items:center; gap:12px; }
+.finance-row > div { flex:1; min-width:0; }
+.finance-row > b { font-size:14px; white-space:nowrap; }
+.add-full { width:100%; margin-top:10px; }
+.goal-card { padding:18px; }
+.goal-list { margin-top:12px; }
+.goal-row { display:flex; align-items:center; gap:10px; padding:11px 0; border-top:1px solid var(--line); }
+.goal-row span { flex:1; font-size:13px; }
+.goal-row strong { font-size:12px; color:var(--lavender-dark); }
+.goal-toggle { width:28px;height:28px;border-radius:50%;background:var(--lavender-pale);color:var(--lavender-dark);font-weight:800; }
+.goal-toggle.done { background:var(--success);color:#fff; }
+.excluded-card { display:flex;align-items:center;gap:10px; }
+.excluded-card > div { flex:1; }
+.home-principle { padding:20px; background:var(--lavender-pale); }
+.home-principle strong { display:block; font-size:18px; margin:5px 0; }
+.home-principle p { margin:0; color:var(--muted); font-size:12px; line-height:1.45; }
+.home-summary { display:grid; grid-template-columns:1fr 1fr; gap:10px; margin:10px 0 20px; }
+.home-summary .card { padding:14px; }
+.home-summary span { display:block; color:var(--muted); font-size:11px; }
+.home-summary b { font-size:22px; }
+.home-area h3 { margin:0; }
+.home-task { display:flex; align-items:flex-start; gap:11px; padding:12px 0; border-top:1px solid var(--line); cursor:pointer; }
+.home-task input { margin-top:3px; accent-color:var(--lavender-dark); }
+.home-task span { flex:1; }
+.home-task strong { display:block; font-size:13px; font-weight:600; }
+.home-task small { display:block; color:var(--muted); font-size:10px; margin-top:3px; }
+.home-task.done strong { text-decoration:line-through; opacity:.55; }
+.maintenance-row { display:flex; align-items:center; gap:12px; }
+.maintenance-row > div { flex:1; }
+.maintenance-row span { display:block; color:var(--muted); font-size:11px; margin-top:4px; }
+.exercise-focus { padding:20px; background:var(--lavender-pale); }
+.exercise-focus strong { display:block; font-size:18px; margin:5px 0; }
+.exercise-focus p,.exercise-note p { color:var(--muted); font-size:12px; line-height:1.45; }
+.exercise-plan,.exercise-session { display:flex;align-items:center;gap:12px; }
+.exercise-plan>div,.exercise-session>div { flex:1; }
+.exercise-plan span,.exercise-plan small,.exercise-session span { display:block;color:var(--muted);font-size:11px;margin-top:4px; }
+.exercise-note { margin-top:14px; }
+.food-principle { padding:20px; background:var(--lavender-pale); }
+.food-principle strong { display:block; font-size:18px; margin:5px 0; }
+.food-principle p,.food-note p,.tomorrow-food p { color:var(--muted);font-size:12px;line-height:1.45; }
+.food-row { padding:11px 0;border-top:1px solid var(--line);display:grid;grid-template-columns:72px 1fr;gap:8px;position:relative; }
+.food-row>span { color:var(--muted);font-size:11px; }
+.food-row strong { font-size:12px;line-height:1.35; }
+.food-row small { grid-column:2;color:var(--muted);font-size:10px; }
+.food-checklist label { display:flex;gap:11px;padding:4px 0 14px; }
+.food-checklist input { margin-top:3px;accent-color:var(--lavender-dark); }
+.food-checklist label span { flex:1; }
+.food-checklist label strong,.food-checklist label small { display:block; }
+.food-checklist small { color:var(--muted);font-size:11px;margin-top:3px; }
+.food-rule { border-top:1px solid var(--line);padding:12px 0; }
+.food-rule b { display:block;font-size:12px; }
+.food-rule span { display:block;color:var(--muted);font-size:11px;line-height:1.4;margin-top:3px; }
+.tomorrow-food { padding:18px; }
+.tomorrow-food strong { display:block;margin-top:5px;font-size:16px; }
+.food-note { margin-top:12px;padding:16px; }
+.recipe-principle { padding:20px;background:var(--lavender-pale); }
+.recipe-principle strong { display:block;font-size:18px;margin:5px 0; }
+.recipe-principle p,.freezer-rule p { color:var(--muted);font-size:12px;line-height:1.45; }
+.recipe-filters { display:grid;grid-template-columns:1fr 110px;gap:8px;margin:12px 0; }
+.recipe-filters input,.recipe-filters select { min-width:0; }
+.recipe-card { padding:16px; }
+.recipe-main { display:flex;align-items:flex-start;gap:10px; }
+.recipe-main>div { flex:1; }
+.recipe-card h3 { margin:4px 0;font-size:15px; }
+.recipe-card span { color:var(--muted);font-size:11px; }
+.recipe-card p { margin:12px 0 0;font-size:11px;line-height:1.4; }
+.favorite { width:32px;height:32px;border-radius:50%;background:var(--lavender-pale);color:var(--lavender-dark);font-size:18px; }
+.favorite.active { background:var(--lavender-dark);color:white; }
+.freezer-rule { margin-top:12px;padding:16px; }
+.day-hero{padding:8px 2px 18px}.day-hero .eyebrow{font-size:.75rem;letter-spacing:.16em;font-weight:700;opacity:.68}.day-hero h1{font-size:1.9rem;line-height:1.12;margin:.45rem 0 .25rem;font-weight:650}.day-date{margin:0;text-transform:capitalize;opacity:.62}
+.now-card{border-radius:24px;padding:20px;margin:4px 0 22px;background:rgba(255,255,255,.9);border:1px solid rgba(121,82,143,.12);box-shadow:0 10px 30px rgba(90,55,85,.08)}.now-card.rest,.now-card.protected{background:rgba(244,233,249,.92)}.card-kicker{font-size:.68rem;letter-spacing:.16em;opacity:.55;font-weight:700}.now-title{font-size:1.35rem;font-weight:650;margin-top:5px}.now-time{font-size:.82rem;opacity:.58;margin-top:2px}.now-card p{margin:.65rem 0 0;line-height:1.45;opacity:.72}
+.day-section{margin:0 0 22px}.section-head{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:9px}.section-head h2{font-size:1rem;margin:0;font-weight:650}.section-head a{font-size:.78rem;opacity:.65;text-decoration:none}.soft-count{font-size:.72rem;border-radius:99px;padding:3px 8px;background:rgba(176,139,201,.16)}
+.focus-row{display:flex;gap:12px;align-items:center;padding:12px 4px;border-bottom:1px solid rgba(121,82,143,.09)}.focus-dot{width:26px;height:26px;border-radius:50%;display:grid;place-items:center;background:rgba(176,139,201,.16);font-size:.72rem}.focus-row strong,.compact-item strong{display:block;font-size:.88rem}.focus-row small,.compact-item small{display:block;font-size:.76rem;opacity:.58;margin-top:2px}
+.timeline{border-left:1px solid rgba(121,82,143,.15);margin-left:6px;padding-left:15px}.timeline div{padding:7px 0}.timeline b{display:inline-block;width:86px;font-size:.72rem;opacity:.58}.timeline span{font-size:.78rem;opacity:.76}.compact-item{padding:11px 4px;border-bottom:1px solid rgba(121,82,143,.09)}
+.quick-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:9px;margin:4px 0 22px}.quick-grid a{min-height:70px;border-radius:18px;border:1px solid rgba(121,82,143,.12);background:rgba(255,255,255,.84);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:5px;text-decoration:none;font-size:1.05rem}.quick-grid span{font-size:.7rem;opacity:.68}.free-space{text-align:center;padding:20px 10px 90px;opacity:.65}.free-space div{font-size:1.4rem;margin-bottom:5px}.free-space strong{font-size:.84rem}.free-space p{font-size:.76rem;margin:.35rem 0 0}
+.bottom-nav{position:fixed;left:10px;right:10px;bottom:10px;z-index:30;display:grid;grid-template-columns:repeat(4,1fr);padding:7px;border-radius:22px;background:rgba(255,248,243,.94);backdrop-filter:blur(16px);box-shadow:0 10px 35px rgba(70,45,70,.14);border:1px solid rgba(121,82,143,.12)}.bottom-nav a,.bottom-nav button{appearance:none;border:0;background:none;color:inherit;text-decoration:none;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;min-height:48px;font:inherit}.bottom-nav span{font-size:.65rem;opacity:.68}
+#moduleMenu{border:0;padding:0;background:transparent}#moduleMenu::backdrop{background:rgba(55,35,55,.22);backdrop-filter:blur(3px)}.module-sheet{background:#fff8f3;border-radius:25px 25px 0 0;padding:18px 18px 26px;width:min(100vw,520px);margin:0 auto}.sheet-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px}.sheet-head button{border:0;background:none;font-size:1.5rem}.module-links{display:grid;gap:5px}.module-links a{padding:15px 10px;border-radius:15px;text-decoration:none;color:inherit}
+
+
+/* Pastel identity by module — soft, feminine, never monochromatic */
+.food-principle { background:linear-gradient(135deg,var(--peach-soft),var(--yellow-soft)); }
+.tomorrow-food { background:linear-gradient(135deg,#fff1d6,var(--mint-soft)); }
+.recipe-principle { background:linear-gradient(135deg,var(--yellow-soft),var(--peach-soft)); }
+.exercise-focus { background:linear-gradient(135deg,var(--blue-soft),var(--lilac-soft)); }
+.home-principle { background:linear-gradient(135deg,var(--mint-soft),var(--blue-soft)); }
+.money-hero { background:linear-gradient(135deg,var(--blue-soft),var(--lilac-soft)); }
+.ritual-card.featured { background:linear-gradient(135deg,var(--pink-soft),var(--lilac-soft)); border-color:#ead5e1; }
+.ritual-icon { background:rgba(255,255,255,.72); }
+.study-summary .summary-card:nth-child(1) { background:var(--blue-soft); }
+.study-summary .summary-card:nth-child(2) { background:var(--lilac-soft); }
+.study-summary .summary-card:nth-child(3) { background:var(--mint-soft); }
+.study-summary .summary-card strong { color:var(--lavender-dark); }
+.module-grid .module:nth-child(4n+1) { background:linear-gradient(145deg,#fff,var(--pink-soft)); border-color:#efd9e3; }
+.module-grid .module:nth-child(4n+2) { background:linear-gradient(145deg,#fff,var(--lilac-soft)); border-color:#e5d9ee; }
+.module-grid .module:nth-child(4n+3) { background:linear-gradient(145deg,#fff,var(--mint-soft)); border-color:#d6e9df; }
+.module-grid .module:nth-child(4n+4) { background:linear-gradient(145deg,#fff,var(--yellow-soft)); border-color:#f0e2bd; }
+.tabs .tab:nth-child(1).active { background:var(--lilac-soft); color:var(--lavender-dark); }
+.tabs .tab:nth-child(2).active { background:var(--mint-soft); color:#5f8e7b; }
+.pill { background:var(--beige-soft); color:#846f63; }
+.pill.today { background:var(--blue-soft); color:#6486a5; }
+.pill.overdue { background:var(--pink-soft); color:var(--pink-strong); }
+.quick-grid a:nth-child(1) { background:var(--pink-soft); }
+.quick-grid a:nth-child(2) { background:var(--lilac-soft); }
+.quick-grid a:nth-child(3) { background:var(--mint-soft); }
+.now-card.rest { background:var(--mint-soft); }
+.now-card.protected { background:var(--lilac-soft); }
+.soft-count { background:rgba(185,155,214,.16); }
+.focus-dot { background:var(--yellow-soft); }
+.home-task input, .food-checklist input { accent-color:#d987a5; }
+.home-task:nth-child(3n+1) .check, .food-checklist label:nth-child(3n+1) input { accent-color:#78aa96; }
+.exercise-note { background:var(--peach-soft); }
+.food-note { background:var(--mint-soft); }
+.freezer-rule { background:var(--yellow-soft); }
+.add-full { background:linear-gradient(135deg,#d987a5,#b77998); }
+.secondary { background:var(--lilac-soft); color:var(--lavender-dark); }
+.capilar-step > span { background:var(--pink-soft); color:#9a6078; }
+.favorite { background:var(--yellow-soft); color:#a27c39; }
+.favorite.active { background:#d987a5; color:#fff; }
+.bottom-nav { border-color:rgba(190,158,181,.25); }
+.bottom-nav a:nth-child(1), .bottom-nav button:nth-child(1) { color:#b27691; }
+.bottom-nav a:nth-child(2), .bottom-nav button:nth-child(2) { color:#806f9d; }
+.bottom-nav a:nth-child(3), .bottom-nav button:nth-child(3) { color:#6e9b88; }
+.bottom-nav a:nth-child(4), .bottom-nav button:nth-child(4) { color:#6f92b2; }
+
+/* MINHA VIDA V4 — candy colors distribution */
+:root {
+  --bg: #fff8f1;
+  --surface: rgba(255,255,255,.96);
+  --surface-strong: #fffdfa;
+  --ink: #3f3745;
+  --muted: #827781;
+  --line: #eadfe0;
+  --lavender: #c7a8df;
+  --lavender-dark: #79558e;
+  --lavender-pale: #eee4f7;
+  --success: #78b69c;
+  --danger: #d88799;
+  --rose: #e9a0b7;
+  --rose-pale: #fae5ec;
+  --pink-soft: #f8dbe6;
+  --pink-strong: #d47f9f;
+  --lilac-soft: #eee2f8;
+  --mint-soft: #dff1e8;
+  --mint-strong: #6fa58e;
+  --blue-soft: #deedf8;
+  --blue-strong: #7198bc;
+  --yellow-soft: #fff0c8;
+  --yellow-strong: #c39b55;
+  --peach-soft: #fbe1d5;
+  --peach-strong: #d58a6f;
+  --beige-soft: #f4e8da;
+}
+
+/* The interface background stays calm; candy colors appear in purposeful accents. */
+.topbar { background:linear-gradient(var(--bg) 78%, transparent); }
+.icon-btn { color:var(--lavender-dark); }
+
+/* Primary actions are pink, not purple. */
+.primary {
+  background:linear-gradient(135deg,#e59ab3,#d47f9f);
+  box-shadow:0 8px 20px rgba(212,127,159,.20);
+}
+.secondary { background:var(--lilac-soft); color:var(--lavender-dark); }
+.search:focus, input:focus, select:focus, textarea:focus {
+  border-color:#e1aec0;
+  box-shadow:0 0 0 3px rgba(233,160,183,.18);
+}
+
+/* Pending tabs: open = lilac/pink, completed = mint. */
+.tabs .tab:nth-child(1).active { background:var(--pink-soft); color:#a45e7b; }
+.tabs .tab:nth-child(2).active { background:var(--mint-soft); color:#5e8e78; }
+
+/* Small information chips rotate through the candy palette. */
+.pill { background:var(--beige-soft); color:#826d62; }
+.pill.today { background:var(--blue-soft); color:#6688a7; }
+.pill.overdue { background:var(--pink-soft); color:#c06d8b; }
+
+/* Module cards become visibly multicolor while sharing the same structure. */
+.module-grid .module:nth-child(6n+1) { background:linear-gradient(145deg,#fffdfa,var(--pink-soft)); border-color:#efd6e0; }
+.module-grid .module:nth-child(6n+2) { background:linear-gradient(145deg,#fffdfa,var(--lilac-soft)); border-color:#e3d4ee; }
+.module-grid .module:nth-child(6n+3) { background:linear-gradient(145deg,#fffdfa,var(--mint-soft)); border-color:#d2e8dc; }
+.module-grid .module:nth-child(6n+4) { background:linear-gradient(145deg,#fffdfa,var(--yellow-soft)); border-color:#f0dfb7; }
+.module-grid .module:nth-child(6n+5) { background:linear-gradient(145deg,#fffdfa,var(--blue-soft)); border-color:#d3e4f1; }
+.module-grid .module:nth-child(6n+6) { background:linear-gradient(145deg,#fffdfa,var(--peach-soft)); border-color:#f0d5c8; }
+
+/* Repeated cards inside modules get gentle color anchors too. */
+.food-principle { background:linear-gradient(135deg,var(--peach-soft),var(--yellow-soft)); }
+.tomorrow-food { background:linear-gradient(135deg,var(--mint-soft),var(--blue-soft)); }
+.recipe-principle { background:linear-gradient(135deg,var(--yellow-soft),var(--peach-soft)); }
+.exercise-focus { background:linear-gradient(135deg,var(--blue-soft),var(--lilac-soft)); }
+.home-principle { background:linear-gradient(135deg,var(--mint-soft),var(--blue-soft)); }
+.money-hero { background:linear-gradient(135deg,var(--blue-soft),var(--pink-soft)); }
+.ritual-card.featured { background:linear-gradient(135deg,var(--pink-soft),var(--lilac-soft)); }
+
+/* Meu Dia: each quick action has its own pastel identity. */
+.quick-grid a:nth-child(1) { background:var(--pink-soft); border-color:#efd4df; }
+.quick-grid a:nth-child(2) { background:var(--lilac-soft); border-color:#e3d5ed; }
+.quick-grid a:nth-child(3) { background:var(--mint-soft); border-color:#d3e8dd; }
+.quick-grid a:nth-child(4) { background:var(--yellow-soft); border-color:#f0dfb8; }
+.quick-grid a:nth-child(5) { background:var(--blue-soft); border-color:#d3e4f0; }
+.quick-grid a:nth-child(6) { background:var(--peach-soft); border-color:#f0d5c8; }
+
+/* Gentle color rhythm for the daily timeline. */
+.timeline { border-left-color:rgba(121,85,142,.14); }
+.focus-dot { background:var(--yellow-soft); }
+.now-card { border-color:rgba(212,127,159,.14); }
+.now-card.rest { background:var(--mint-soft); }
+.now-card.protected { background:var(--lilac-soft); }
+
+/* Bottom navigation is warm and neutral; active state supplies the color. */
+.bottom-nav { background:rgba(255,248,241,.95); border-color:rgba(220,201,207,.78); }
+.bottom-nav a,.bottom-nav button { color:#8d7f8a; }
+.bottom-nav a.active,.bottom-nav button.active { color:var(--pink-strong); }
+
+/* Home/module sheet follows the same beige + candy language. */
+.module-sheet { background:#fff8f1; }
+.module-links a:nth-child(6n+1) { background:var(--pink-soft); }
+.module-links a:nth-child(6n+2) { background:var(--lilac-soft); }
+.module-links a:nth-child(6n+3) { background:var(--mint-soft); }
+.module-links a:nth-child(6n+4) { background:var(--yellow-soft); }
+.module-links a:nth-child(6n+5) { background:var(--blue-soft); }
+.module-links a:nth-child(6n+6) { background:var(--peach-soft); }
+
+/* Checkboxes use pink for completion, with mint reserved for completed/system states. */
+.check.done { background:var(--pink-strong); border-color:var(--pink-strong); }
+.home-task input, .food-checklist input { accent-color:var(--pink-strong); }
+
+/* Study summary uses blue / lilac / mint as a visual trio. */
+.study-summary .summary-card:nth-child(1) { background:var(--blue-soft); }
+.study-summary .summary-card:nth-child(2) { background:var(--lilac-soft); }
+.study-summary .summary-card:nth-child(3) { background:var(--mint-soft); }
+
+/* Capilar/ritual details: pink + lilac, never heavy purple. */
+.capilar-step > span { background:var(--pink-soft); color:#a45e7b; }
+.ritual-icon { color:var(--pink-strong); }
+
+/* MINHA VIDA V5 — Meu Dia candy cockpit */
+.day-hero{
+  padding:18px 18px 20px;
+  margin:2px 0 16px;
+  border-radius:28px;
+  background:linear-gradient(135deg,var(--beige-soft) 0%,#fff7f5 48%,var(--lilac-soft) 100%);
+  border:1px solid rgba(220,190,205,.55);
+  box-shadow:0 10px 28px rgba(105,72,92,.07);
+}
+.day-hero .eyebrow{color:#8f6880;opacity:1}
+.day-hero h1{color:#3f3845}
+.day-date{color:#7b6d78;opacity:1}
+
+.now-card{
+  border-radius:25px;
+  border:1px solid rgba(221,195,207,.7);
+  box-shadow:0 12px 30px rgba(100,70,90,.08);
+}
+.now-card.protected{background:linear-gradient(135deg,var(--pink-soft),#fff0f3)}
+.now-card.work{background:linear-gradient(135deg,var(--blue-soft),#f2f7fd)}
+.now-card.strategy{background:linear-gradient(135deg,var(--yellow-soft),#fff8e8)}
+.now-card.office{background:linear-gradient(135deg,var(--mint-soft),#f3fbf7)}
+.now-card.rest{background:linear-gradient(135deg,var(--lilac-soft),#faf6fd)}
+.now-card.free{background:linear-gradient(135deg,var(--beige-soft),#fffaf5)}
+.now-card .card-kicker{color:#806f7d;opacity:.82}
+
+.day-section .focus-row{
+  border:0;
+  border-radius:17px;
+  padding:12px 13px;
+  margin:7px 0;
+  background:rgba(255,255,255,.82);
+  box-shadow:0 4px 14px rgba(100,70,90,.045);
+}
+.day-section .focus-row:nth-child(2){background:linear-gradient(135deg,#fff1f5,var(--pink-soft))}
+.day-section .focus-row:nth-child(3){background:linear-gradient(135deg,#f5f0fb,var(--lilac-soft))}
+.day-section .focus-row:nth-child(4){background:linear-gradient(135deg,#f0faf6,var(--mint-soft))}
+.day-section .focus-row .focus-dot{color:#745b78}
+.day-section .focus-row:nth-child(2) .focus-dot{background:#f3c4d4}
+.day-section .focus-row:nth-child(3) .focus-dot{background:#d9c8ea}
+.day-section .focus-row:nth-child(4) .focus-dot{background:#bfe1d2}
+
+.timeline{border-left:0;margin-left:0;padding-left:0;display:flex;flex-direction:column;gap:7px}
+.timeline div{
+  padding:10px 12px;
+  border:0;
+  border-radius:15px;
+  background:rgba(255,255,255,.72);
+}
+.timeline div:nth-child(1){background:var(--pink-soft)}
+.timeline div:nth-child(2){background:var(--blue-soft)}
+.timeline div:nth-child(3){background:var(--yellow-soft)}
+.timeline div:nth-child(4){background:var(--mint-soft)}
+.timeline div:nth-child(5){background:var(--lilac-soft)}
+.timeline b{color:#746674;opacity:.82}
+.timeline span{color:#544b55;opacity:.82}
+
+.quick-grid a{border-color:rgba(205,185,198,.45);box-shadow:0 5px 16px rgba(90,65,85,.05)}
+.quick-grid a:nth-child(1){background:linear-gradient(145deg,#fff,var(--pink-soft))}
+.quick-grid a:nth-child(2){background:linear-gradient(145deg,#fff,var(--lilac-soft))}
+.quick-grid a:nth-child(3){background:linear-gradient(145deg,#fff,var(--yellow-soft))}
+.quick-grid a:nth-child(4){background:linear-gradient(145deg,#fff,var(--blue-soft))}
+.quick-grid a:nth-child(5){background:linear-gradient(145deg,#fff,var(--mint-soft))}
+.quick-grid a:nth-child(6){background:linear-gradient(145deg,#fff,var(--peach-soft))}
+
+.soft-count{background:var(--pink-soft);color:#9a6078}
+.free-space{padding-top:26px}
+.free-space div{color:#8e7aa0}
+
+/* MINHA VIDA V6 — Alimentação candy module */
+.food-hero{background:linear-gradient(135deg,var(--beige-soft),#fff5f7 52%,var(--mint-soft));border-radius:28px;padding:20px 18px;margin-bottom:14px;border:1px solid rgba(220,190,205,.5)}
+.food-hero .eyebrow{color:#9a657e;opacity:1}.food-hero h2{margin:.35rem 0}.food-hero p{max-width:42rem}
+.food-today{padding:18px;border-radius:24px;background:linear-gradient(135deg,var(--pink-soft),#fff5f7);border:1px solid rgba(212,127,159,.18);box-shadow:0 10px 24px rgba(100,70,90,.06);margin:14px 0 16px}.food-today strong{display:block;font-size:17px;line-height:1.3;margin:5px 0}.food-today small{display:block;color:var(--muted);font-size:11px;line-height:1.4}
+.food-link-row{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}.food-link{display:inline-flex;align-items:center;justify-content:center;text-decoration:none;border-radius:999px;padding:9px 12px;font-size:11px;font-weight:700;border:1px solid rgba(120,90,110,.12);color:#514653;background:#fff}.food-link.pink{background:#f7d9e5;color:#985d77}.food-link.blue{background:#dfeefa;color:#5d7f9f}.food-link.yellow{background:#fff0c9;color:#9a7a3e}.food-link.lilac{background:#eee2f8;color:#765b88}
+.food-week-tabs{display:grid;grid-template-columns:repeat(4,1fr);gap:7px;margin:12px 0 18px}.food-week-tab{border:0;border-radius:14px;padding:10px 5px;background:#fff;border:1px solid rgba(205,185,198,.45);color:#756976;font-weight:700;font-size:11px}.food-week-tab:nth-child(1).active{background:var(--pink-soft);color:#9a6078}.food-week-tab:nth-child(2).active{background:var(--lilac-soft);color:#765b88}.food-week-tab:nth-child(3).active{background:var(--mint-soft);color:#5e8e78}.food-week-tab:nth-child(4).active{background:var(--yellow-soft);color:#97773d}
+.food-menu-grid{display:grid;gap:10px}.food-meal-card{border-radius:20px;padding:15px;border:1px solid rgba(205,185,198,.38);box-shadow:0 5px 16px rgba(90,65,85,.045)}.food-meal-card.today{outline:2px solid rgba(212,127,159,.28)}.food-tone-0{background:linear-gradient(145deg,#fff,var(--pink-soft))}.food-tone-1{background:linear-gradient(145deg,#fff,var(--lilac-soft))}.food-tone-2{background:linear-gradient(145deg,#fff,var(--mint-soft))}.food-tone-3{background:linear-gradient(145deg,#fff,var(--yellow-soft))}.food-tone-4{background:linear-gradient(145deg,#fff,var(--blue-soft))}.food-tone-5{background:linear-gradient(145deg,#fff,var(--peach-soft))}
+.food-meal-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px}.food-meal-head span{font-size:12px;font-weight:800;color:#675c68}.food-meal-head b{font-size:9px;padding:4px 7px;border-radius:999px;background:#f3c4d4;color:#925b72}.food-meal-card small,.food-meal-card strong,.food-meal-card em{display:block}.food-meal-card small{font-size:10px;color:#756a75;margin-bottom:7px}.food-meal-card strong{font-size:13px;line-height:1.35}.food-meal-card em{font-style:normal;font-size:10px;color:#766b76;margin-top:7px}.food-meal-actions{display:flex;gap:7px;margin-top:11px}.food-meal-actions a{font-size:10px;font-weight:700;text-decoration:none;color:#655969;background:rgba(255,255,255,.72);padding:7px 9px;border-radius:999px}.food-pico{margin-top:12px;background:linear-gradient(135deg,var(--yellow-soft),var(--peach-soft));padding:16px}.food-pico strong{display:block;margin:4px 0}.food-pico p{margin:0;color:var(--muted);font-size:12px}.food-inspiration{padding:18px;background:linear-gradient(135deg,var(--blue-soft),var(--lilac-soft))}.food-inspiration strong{font-size:15px}.food-inspiration p{font-size:11px;color:var(--muted);line-height:1.45}.food-lunchbox{padding:16px;background:linear-gradient(135deg,var(--beige-soft),#fff9f2)}.food-lunchbox p{font-size:11px}.food-lunchbox div{padding:8px 0;border-top:1px solid rgba(205,185,198,.35);font-size:11px}.food-check-row{display:flex;gap:10px;padding:9px 0;border-bottom:1px solid var(--line);font-size:12px}.food-check-row:last-of-type{border-bottom:0}.food-check-row input{margin-top:2px;accent-color:var(--pink-strong)}.food-check-row span{flex:1}.food-check-row small{display:block;color:var(--muted);font-size:10px;line-height:1.4;margin-top:3px}.food-check-row.done span{text-decoration:line-through;opacity:.55}
+@media(max-width:380px){.food-week-tabs{gap:5px}.food-week-tab{font-size:10px}.food-meal-actions a{font-size:9px;padding:7px 8px}}
+
+/* MINHA VIDA V7 — Alimentação: cardápio editável + lista de mercado automática */
+.food-month-tabs{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin:12px 0 14px}
+.food-month-tab{border:0;border-radius:16px;padding:11px 6px;background:var(--beige-soft);color:var(--ink);font-weight:800;font-size:12px;box-shadow:var(--shadow-soft);cursor:pointer}
+.food-month-tab.active{background:var(--pink-soft);color:#7d3d58;box-shadow:0 7px 18px rgba(190,110,140,.14)}
+.food-month-tab:nth-child(2).active{background:var(--lilac-soft);color:#68558d}
+.food-month-tab:nth-child(3).active{background:var(--mint-soft);color:#3e7665}
+.food-month-tab:nth-child(4).active{background:var(--yellow-soft);color:#7a652f}
+.food-meal-line{display:flex;align-items:center;justify-content:space-between;gap:8px;margin:8px 0}
+.food-meal-line small,.food-meal-line strong{flex:1}
+.food-edit{border:0;border-radius:999px;padding:6px 10px;background:rgba(255,255,255,.78);color:var(--ink);font-size:11px;font-weight:800;box-shadow:0 2px 8px rgba(60,50,70,.07);cursor:pointer;white-space:nowrap}
+.food-control-row{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:14px 0}
+.food-big-link{border:0;border-radius:18px;padding:14px;text-align:center;text-decoration:none;font-weight:900;font-size:13px;cursor:pointer}
+.food-big-link.pink{background:var(--pink-soft);color:#7d3d58}
+.food-big-link.blue{background:var(--blue-soft);color:#48647f}
+.food-shopping-card{padding:16px}
+.food-shopping-head{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;margin-bottom:10px}
+.food-shopping-head strong{display:block;font-size:15px}
+.food-shopping-head p{margin:4px 0 0;color:var(--muted);font-size:12px;line-height:1.4}
+.food-count{min-width:42px;height:42px;border-radius:14px;background:var(--mint-soft);display:grid;place-items:center;font-weight:900;color:#3e7665}
+.food-shopping-list{display:grid;gap:7px}
+.food-shop-item{display:flex;align-items:center;gap:10px;padding:11px 12px;border-radius:14px;background:var(--beige-soft);cursor:pointer}
+.food-shop-item:nth-child(3n+1){background:var(--pink-soft)}
+.food-shop-item:nth-child(3n+2){background:var(--mint-soft)}
+.food-shop-item:nth-child(3n){background:var(--blue-soft)}
+.food-shop-item.done{opacity:.5;text-decoration:line-through}
+.food-shop-item input{width:18px;height:18px;accent-color:#8b6b82;flex:0 0 auto}
+.food-shop-item span{display:flex;flex-direction:column;gap:2px;min-width:0}
+.food-shop-item b{font-size:13px}
+.food-shop-item small{font-size:11px;color:var(--muted);line-height:1.35}
+.food-shopping-foot{margin-top:12px;padding-top:11px;border-top:1px solid rgba(80,60,80,.08);font-size:11px;color:var(--muted);line-height:1.45}
+.food-empty-month{text-align:center;padding:30px 20px;background:linear-gradient(135deg,var(--beige-soft),#fff7f9 60%,var(--mint-soft))}
+.food-empty-icon{font-size:34px;margin-bottom:8px}
+.food-empty-month strong{display:block;font-size:17px}
+.food-empty-month p{color:var(--muted);font-size:12px;line-height:1.5;margin:8px 0 16px}
+.food-modal-note{background:var(--yellow-soft);border-radius:14px;padding:11px 12px;color:#67582d;font-size:11px;line-height:1.45;margin-top:4px}
+.modal-card textarea{width:100%;box-sizing:border-box;border:1px solid rgba(70,50,70,.12);border-radius:12px;padding:10px;background:#fff;font:inherit;resize:vertical}
+@media (max-width:380px){.food-month-tabs{gap:5px}.food-month-tab{font-size:11px}.food-control-row{grid-template-columns:1fr}.food-edit{padding:5px 8px;font-size:10px}}
+
+/* =====================================================
+   💇‍♀️ COMO FAZER — CABELO
+   Identidade própria: azul-claro + menta + bege
+   ===================================================== */
+.hair-hero{background:linear-gradient(135deg,#EAF7F6 0%,#F7F1E7 55%,#E8F0FB 100%);border-radius:28px;padding:24px;margin-bottom:14px;border:1px solid rgba(110,150,160,.16)}
+.hair-hero h2{margin:5px 0 6px;font-size:28px}.hair-hero p{margin:0;line-height:1.5}
+.hair-today{background:#FFFDF8;border:1px solid rgba(70,90,100,.12);border-radius:24px;padding:18px;box-shadow:0 8px 25px rgba(70,90,100,.07)}
+.hair-kicker{font-size:11px;letter-spacing:.08em;font-weight:700;color:#62858A}.hair-title{font-size:22px;font-weight:800;margin:5px 0 12px}.hair-steps{display:grid;gap:9px}.hair-step{display:flex;gap:10px;align-items:flex-start;background:#EDF8F5;border-radius:15px;padding:11px 12px;line-height:1.42}.hair-step:nth-child(2n){background:#EDF3FB}.hair-step:nth-child(3n){background:#FFF4D9}.hair-step>span{min-width:24px;height:24px;border-radius:50%;display:grid;place-items:center;background:#fff;font-size:11px;font-weight:800}.hair-complete{width:100%;margin-top:13px;border:0;border-radius:14px;padding:12px;background:#F3C9D9;font-weight:800;color:#46343B}.hair-section{margin-top:14px}.hair-links{display:grid;grid-template-columns:1fr 1fr;gap:9px}.hair-links button{border:0;border-radius:16px;padding:14px;background:#DDF2EA;text-align:left;font-weight:700;color:#304641}.hair-links button:nth-child(2){background:#E9E1F5}.hair-links button:nth-child(3){background:#F7E8B8}.hair-list{display:grid;gap:8px}.hair-list-item{border:1px solid rgba(70,90,100,.1);background:#F8F3EA;border-radius:16px;padding:12px;text-align:left;display:grid;grid-template-columns:55px 1fr;gap:3px 10px}.hair-list-item strong{grid-row:1/3}.hair-list-item span{font-weight:800}.hair-list-item small{opacity:.72}.hair-dialog{border:0;border-radius:25px;padding:0;width:min(92vw,520px);background:#FFFDF8}.hair-dialog::backdrop{background:rgba(40,50,55,.35)}.hair-dialog-inner{padding:22px}.hair-dialog-inner h3{font-size:23px;margin:5px 0 14px}.hair-dialog-body{background:#EDF8F5;border-radius:18px;padding:15px;line-height:1.55;margin-bottom:14px}.hair-dialog-inner .primary{width:100%}
+@media(max-width:600px){.hair-links{grid-template-columns:1fr}.hair-hero h2{font-size:25px}.hair-step{font-size:13px}}
+
+/* RITUAIS DE HOJE / AUTOCUIDADO V13 */
+.mv-rh-v13{margin:14px 0;padding:16px;border-radius:24px;background:#FFF8F2;box-shadow:0 7px 24px rgba(40,30,40,.06)}.mv-rh-v13-head{display:flex;justify-content:space-between;align-items:center}.mv-rh-v13-head h2{margin:0;font-size:16px}.mv-rh-v13-head span{font-size:10px;opacity:.55}.mv-rh-v13-card{display:flex;gap:11px;padding:12px;margin-top:9px;border-radius:18px;background:#fff}.mv-rh-v13-card>span{font-size:23px}.mv-rh-v13-card>div{flex:1}.mv-rh-v13-card b,.mv-rh-v13-card small{display:block}.mv-rh-v13-card b{font-size:13px}.mv-rh-v13-card small{font-size:10px;opacity:.6;margin-top:3px}.mv-rh-v13-card button,.sc-actions button{border:0;border-radius:999px;padding:7px 10px;font-size:9px;font-weight:800;background:#F2D5E1;margin:8px 6px 0 0}.mv-rh-v13-card button+button,.sc-actions button+button{background:#DDEDF4}
+.selfcare-v13-today{background:#F8E8EF;border-radius:24px;padding:16px;margin:14px 0}.selfcare-v13-head{display:flex;justify-content:space-between;align-items:center}.selfcare-v13-head strong{font-size:15px}.selfcare-v13-card{display:flex;gap:11px;background:#fff;border-radius:18px;padding:12px;margin-top:10px}.sc-icon{font-size:23px}.selfcare-v13-card>div{flex:1}.selfcare-v13-card b,.selfcare-v13-card small{display:block}.selfcare-v13-card b{font-size:13px}.selfcare-v13-card small{font-size:10px;opacity:.6;margin-top:3px}.selfcare-v13-add{margin-top:14px}.selfcare-v13-add button{width:100%;border:0;border-radius:18px;padding:14px;background:#DDEDF4;font-weight:800}.selfcare-v13-add p{font-size:10px;opacity:.6;margin:7px}.selfcare-v13-cycle{margin-top:14px;padding:16px;border-radius:22px;background:#FFF5D8}.sc-cycle-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:8px;margin-top:12px}.sc-cycle-grid button{border:0;border-radius:14px;background:#fff;padding:10px;text-align:left}.sc-cycle-grid b{display:inline-block;width:20px;font-size:11px}.sc-cycle-grid span{font-size:10px}.mv-how-overlay{position:fixed;inset:0;z-index:99999;background:rgba(20,20,20,.25);display:flex;align-items:flex-end;padding:12px}.mv-how{width:min(520px,100%);max-height:86vh;overflow:auto;background:#FFFBF7;border-radius:25px;padding:20px;box-shadow:0 18px 55px rgba(0,0,0,.2)}.mv-how-x{float:right;border:0;background:transparent;font-size:27px}.mv-how h2{margin:6px 0 14px}.mv-how li{padding:6px 0;font-size:14px}.mv-how p{font-size:11px;opacity:.6}.mv-how label{display:block;font-size:11px;font-weight:700;margin:12px 0}.mv-how input,.mv-how textarea{display:block;width:100%;box-sizing:border-box;margin-top:5px;border:1px solid #ddd0d0;border-radius:12px;padding:10px;background:#fff;font:inherit}.mv-how textarea{min-height:110px}.mv-how .primary{border:0;border-radius:999px;padding:10px 15px;background:#F2C8D8;font-weight:800}
+
+/* V14 — home = Meu Dia + ritual navigation clarity */
+.ritual-today-hint{padding:14px 16px;border-radius:18px;background:linear-gradient(135deg,var(--mint-soft),var(--blue-soft));border:1px solid rgba(110,150,160,.14);display:flex;align-items:center;gap:8px;font-size:13px}
+.ritual-today-hint strong{font-size:12px}.ritual-today-hint span{font-size:10px;opacity:.65;margin-left:2px}
+@media(max-width:430px){.ritual-today-hint{display:block}.ritual-today-hint span{display:block;margin:4px 0 0 23px}}
+
+/* ===== EXERCÍCIOS — MOVIMENTO COMO RITUAL ===== */
+.exercise-hero{padding-bottom:12px}
+.exercise-hero h2{margin:6px 0 8px}
+.exercise-today{border:1px solid var(--line);border-radius:28px;padding:22px;margin:8px 0 18px;box-shadow:0 12px 30px rgba(70,55,70,.06)}
+.exercise-today.pink{background:linear-gradient(135deg,#fde5ef,#f4e7f8)}
+.exercise-today.blue{background:linear-gradient(135deg,#e4f3fb,#eee9fb)}
+.exercise-today.mint{background:linear-gradient(135deg,#e1f5ed,#e9f5f4)}
+.exercise-today.lavender{background:linear-gradient(135deg,#eee7fa,#f7e9f4)}
+.exercise-today.yellow{background:linear-gradient(135deg,#fff5cf,#fceadf)}
+.exercise-today.peach{background:linear-gradient(135deg,#ffe8dc,#f8e8f2)}
+.exercise-day strong{display:block;font-size:21px;margin-top:7px}
+.exercise-stack{display:grid;gap:10px;margin-top:18px}
+.exercise-slot{display:flex;align-items:center;gap:12px;background:rgba(255,255,255,.78);border:1px solid rgba(100,80,100,.10);border-radius:20px;padding:13px}
+.exercise-icon{width:42px;height:42px;border-radius:14px;display:grid;place-items:center;background:#fff;font-size:22px;flex:0 0 42px}
+.exercise-slot>div:nth-child(2){flex:1;min-width:0}
+.exercise-slot small{display:block;color:var(--muted);font-size:10px;letter-spacing:1.5px;font-weight:800}
+.exercise-slot strong{display:block;font-size:15px;margin:3px 0}
+.exercise-slot span{display:block;color:var(--muted);font-size:12px}
+.exercise-actions{display:flex;gap:6px;flex-direction:column}
+.mini-how,.mini-done{border:0;border-radius:12px;padding:7px 9px;font-weight:800;font-size:11px;white-space:nowrap}
+.mini-how{background:#fff0f6;color:#b36d96}.mini-done{background:#e8f2f8;color:#5589ad}.mini-done.is-done{background:#dff3e8;color:#4d9270}
+.exercise-counter{text-align:center;color:var(--muted);font-size:11px;margin-top:13px}
+.exercise-week,.exercise-toolkit,.exercise-history{margin-top:18px}
+.week-move{display:flex;align-items:center;gap:10px;padding:12px 4px;border-bottom:1px solid var(--line)}
+.week-move.today{background:rgba(245,232,244,.55);border-radius:15px;padding-left:10px;padding-right:10px}
+.week-day{font-weight:900;width:34px;text-transform:uppercase;color:var(--muted);font-size:11px}
+.week-main{flex:1;min-width:0}.week-main strong{display:block;font-size:13px}.week-main span{display:block;color:var(--muted);font-size:11px;line-height:1.35;margin-top:3px}.week-move>b{font-size:9px;color:#b36d96}
+.tool-pills{display:flex;flex-wrap:wrap;gap:8px}.tool-pills span{background:#fff;border:1px solid var(--line);border-radius:999px;padding:8px 11px;font-size:11px;color:var(--muted)}
+.exercise-rule{margin-top:18px;padding:18px 20px;border-radius:22px;background:linear-gradient(135deg,#f8e8f0,#eee9f8)}
+.exercise-rule strong{font-size:15px}.exercise-rule p{margin:7px 0 0;color:var(--muted);font-size:12px;line-height:1.5}
+.exercise-log{display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid var(--line)}.exercise-log>span{width:30px;height:30px;border-radius:50%;background:#e2f4e9;color:#4d9270;display:grid;place-items:center}.exercise-log strong{display:block;font-size:13px}.exercise-log small{display:block;color:var(--muted);font-size:11px;margin-top:2px}
+
+/* EXERCÍCIOS V17 — movimento pessoal, leve e colorido */
+.exercise-today{overflow:hidden}
+.exercise-day p{margin:8px 0 0;color:var(--muted);font-size:13px;line-height:1.45}
+.exercise-slot.done{background:rgba(231,248,239,.9);border-color:rgba(92,157,119,.18)}
+.exercise-slot-main{flex:1;min-width:0}
+.exercise-slot-main small{display:block;color:var(--muted);font-size:10px;letter-spacing:1.5px;font-weight:800}
+.exercise-slot-main strong{display:block;font-size:15px;margin:3px 0}
+.exercise-slot-main span{display:block;color:var(--muted);font-size:11px}
+.exercise-counter{display:flex;flex-direction:column;gap:3px;text-align:center}
+.exercise-counter b{font-size:14px;color:#7a5c8f}
+.exercise-counter span{font-size:11px;color:var(--muted)}
+.week-grid{display:grid;gap:9px}
+.week-move{display:flex;gap:12px;align-items:stretch;background:#fff;border:1px solid var(--line);border-radius:20px;padding:12px}
+.week-move.today{box-shadow:0 8px 22px rgba(80,60,80,.07);border-color:rgba(180,130,170,.3)}
+.week-day{width:48px;flex:0 0 48px;border-radius:14px;background:#f8f1eb;display:flex;flex-direction:column;align-items:center;justify-content:center;text-transform:uppercase;font-size:11px;color:#6e6470}
+.week-day span{font-size:8px;margin-top:4px;color:#a05d84;font-weight:800}
+.week-main{display:grid;grid-template-columns:1fr auto;column-gap:8px;flex:1;align-content:center}
+.week-main strong{font-size:13px}.week-main span{font-size:10px;color:var(--muted);text-align:right}
+.toolkit-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:9px}
+.tool-card{background:#fff;border:1px solid var(--line);border-radius:18px;padding:12px;display:grid;grid-template-columns:28px 1fr;column-gap:7px;align-items:center}
+.tool-card>span{grid-row:1/3;font-size:21px}.tool-card strong{font-size:12px}.tool-card small{font-size:10px;color:var(--muted)}
+.exercise-stretch{margin-top:18px;padding:17px 18px;border-radius:23px;background:linear-gradient(135deg,#e2f4ed,#e8eefb);border:1px solid var(--line)}
+.exercise-stretch>div{display:flex;gap:12px;align-items:flex-start}.exercise-big-icon{font-size:28px}.exercise-stretch strong{font-size:14px}.exercise-stretch p{margin:6px 0 0;color:var(--muted);font-size:11px;line-height:1.5}
+.day-exercise-card{background:linear-gradient(135deg,#fff1f6,#eaf4fb);border-radius:24px;padding:18px;margin-top:18px;border:1px solid var(--line)}
+.day-exercise-row{display:flex;align-items:center;gap:10px;background:rgba(255,255,255,.75);border-radius:16px;padding:10px;margin-top:8px}.day-exercise-row>span{font-size:19px}.day-exercise-row>div{flex:1}.day-exercise-row strong{display:block;font-size:12px}.day-exercise-row small{display:block;color:var(--muted);font-size:10px;margin-top:2px}.day-exercise-row>b{color:#7a5c8f}.exercise-open-link{display:block;text-align:center;margin-top:12px;font-size:12px;font-weight:800;color:#7a5c8f;text-decoration:none}
+@media(max-width:380px){.toolkit-grid{grid-template-columns:1fr}.exercise-actions{gap:4px}.mini-how,.mini-done{padding:7px 8px!important;font-size:10px!important}}
+
+
+/* V20 — barra principal fixa: Meu Dia + Pendências + Rituais + Mais */
+.bottom-nav {
+  left: 8px !important;
+  right: 8px !important;
+  width: auto !important;
+  max-width: none !important;
+  display: grid !important;
+  grid-template-columns: repeat(4, minmax(0, 1fr)) !important;
+  align-items: stretch !important;
+  box-sizing: border-box !important;
+  overflow: visible !important;
+}
+.bottom-nav > a, .bottom-nav > button {
+  min-width: 0 !important;
+  width: 100% !important;
+  box-sizing: border-box !important;
+  visibility: visible !important;
+  opacity: 1 !important;
+}
+.bottom-nav > a:nth-child(1), .bottom-nav > a:nth-child(2), .bottom-nav > a:nth-child(3), .bottom-nav > button:nth-child(4) {
+  display: flex !important;
+}
+
+/* CASA — procedimentos e caminhos externos */
+.home-task-wrap{border-top:1px solid var(--line);padding:0 0 8px}
+.home-task-wrap .home-task{border-top:0;margin:0}
+.home-how{margin:0 0 0 39px;border:0;background:transparent;padding:4px 0 5px;font-size:11px;font-weight:800;color:#9a6f82;cursor:pointer}
+.casa-how-meta{display:flex;gap:8px;margin:0 0 12px}
+.casa-how-meta span{display:inline-block;background:#F5E9EE;border-radius:999px;padding:6px 10px;font-size:11px;font-weight:700}
+.mv-how h3{font-size:12px;margin:18px 0 6px}
+.mv-how ul,.mv-how ol{margin-top:6px;padding-left:21px}
+.casa-how-tip{margin-top:16px;background:#FFF5D8;border-radius:16px;padding:12px}
+.casa-how-tip strong{font-size:12px}.casa-how-tip p{margin:5px 0 0!important;opacity:.8!important;font-size:11px!important}
+.casa-web-card{background:linear-gradient(135deg,#FFF8F1,#F4EEF8 55%,#EDF7F3)}
+.casa-web-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;margin-top:12px}
+.casa-web-link{display:flex;justify-content:space-between;align-items:center;gap:8px;text-decoration:none;color:inherit;background:rgba(255,255,255,.82);border:1px solid rgba(120,100,120,.10);border-radius:15px;padding:11px 12px;font-size:11px;font-weight:800}
+.casa-web-link span{font-size:14px;opacity:.65}
+@media(max-width:420px){.casa-web-grid{grid-template-columns:1fr}.home-how{margin-left:39px}}
+
+/* V23 — horários da casa */
+.casa-schedule-card{background:linear-gradient(135deg,#fff8f1,#eef7f5 52%,#f4eef8)}
+.casa-schedule{display:grid;gap:0;margin-top:12px}
+.casa-schedule-row{display:grid;grid-template-columns:88px 1fr;gap:10px;align-items:center;padding:9px 0;border-top:1px solid rgba(120,100,120,.10)}
+.casa-schedule-row:first-child{border-top:0}
+.casa-time{font-size:11px;font-weight:800;color:#8b6b80;background:rgba(255,255,255,.72);border-radius:10px;padding:6px 7px;text-align:center}
+@media(max-width:380px){.casa-schedule-row{grid-template-columns:76px 1fr}.casa-time{font-size:10px}}
+
+/* V25 — horários reais e editáveis do trabalho remoto */
+.text-btn{border:0;background:none;padding:4px 0;color:#80627b;font-size:11px;font-weight:800}
+.remote-edit-grid{display:grid;gap:8px;margin:12px 0}
+.remote-edit-row{display:grid;grid-template-columns:72px 92px 1fr;gap:7px;align-items:center;background:#faf7f7;border-radius:14px;padding:8px}
+.remote-edit-row strong{font-size:12px}.remote-edit-row input,.remote-edit-row select{min-width:0;width:100%;padding:9px;border:1px solid var(--line);border-radius:10px;background:#fff;font:inherit;font-size:11px}
+/* Smart time windows V26 */
+.suggestion-head-actions{display:flex;gap:8px;align-items:center;flex-wrap:wrap;justify-content:flex-end}
+.suggestion-block{margin-top:12px;padding:14px;border-radius:20px;background:#FFF8F3;border:1px solid rgba(190,158,181,.18)}
+.suggestion-head{display:flex;justify-content:space-between;gap:10px;align-items:center;margin-bottom:9px}.suggestion-head span{font-weight:800;font-size:12px}.suggestion-head small{font-size:10px;opacity:.62}
+.suggestion-list{display:grid;gap:7px}.suggestion-option{display:flex;align-items:center;gap:10px;width:100%;text-align:left;border:1px solid rgba(190,158,181,.16);border-radius:15px;padding:10px;background:#fff;font:inherit}.suggestion-option span:first-child{font-size:16px}.suggestion-option strong{display:block;font-size:12px}.suggestion-option small{display:block;font-size:10px;opacity:.6;margin-top:2px}.suggestion-best{border-color:rgba(217,135,165,.35);background:#FFF0F5}.suggestion-empty{font-size:11px;line-height:1.5;padding:8px 2px}.home-task-actions{display:flex;gap:6px;align-items:center;justify-content:flex-end;padding-bottom:3px}.home-edit{border:0;background:#F1E9F0;border-radius:999px;padding:6px 9px;font-size:10px;font-weight:700}.casa-how-meta{margin-bottom:8px}.casa-how-meta span{display:inline-block;background:#F1E9F0;border-radius:999px;padding:6px 9px;font-size:11px}.casa-how-tip{padding:12px;border-radius:16px;background:#FFF3D9;margin-top:14px}.casa-how-tip p{margin:5px 0 0}.week-edit-grid{display:grid;gap:9px;margin-top:12px}.week-edit-row{display:grid;grid-template-columns:1fr auto 1fr auto;align-items:center;gap:7px}.week-edit-row strong{font-size:12px}.week-edit-row input{min-width:0}.check-line{display:flex!important;align-items:center;gap:8px;font-size:12px!important}.check-line input{width:auto!important;margin:0!important}
+
+/* V27 — matriz semanal e edição real */
+.week-day-edit{padding:11px;border:1px solid var(--line);border-radius:17px;background:#fff}
+.week-day-edit>strong{display:block;font-size:12px;margin-bottom:7px}
+.week-window-list{display:grid;gap:7px}
+.week-window-row{display:grid;grid-template-columns:74px 18px 74px 1fr 28px;gap:5px;align-items:center}
+.week-window-row input{min-width:0!important;margin:0!important;padding:8px!important;font-size:10px!important}
+.week-window-row .more{font-size:18px}
+.mini{font-size:10px!important;padding:7px 9px!important;margin-top:7px}
+.day-toggle-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:5px;margin:8px 22px 15px}
+.day-toggle{padding:8px 3px;border-radius:10px;background:#f5edf3;color:var(--muted);font-size:10px;font-weight:800}
+.day-toggle.on{background:var(--mint-soft);color:#5d8b77}
+.activity-manager-list{display:grid;gap:7px;padding:0 22px 10px}
+.activity-manager-row{display:flex;align-items:center;justify-content:space-between;gap:10px;text-align:left;background:#faf7f7;border:1px solid var(--line);border-radius:15px;padding:11px}
+.activity-manager-row strong{display:block;font-size:12px}.activity-manager-row small{display:block;font-size:10px;color:var(--muted);margin-top:3px}.activity-manager-row b{font-size:10px;color:#8b6b80}
+.standalone{padding:18px;background:#f7f2f6;border-radius:18px}.rest-balance{margin-top:12px;padding:13px 14px;border-radius:17px;background:var(--mint-soft);color:#537a6a}.rest-balance strong,.rest-balance small{display:block}.rest-balance strong{font-size:12px}.rest-balance small{font-size:10px;margin-top:4px;opacity:.8}.protected-log-btn{width:100%;margin-top:10px}
+@media(max-width:420px){.week-window-row{grid-template-columns:66px 14px 66px 1fr 24px}.week-window-row input{font-size:9px!important}.day-toggle-grid{margin-left:16px;margin-right:16px}}
+
+/* V28 — sistema de encaixe: projetos, pendências e movimento */
+.project-planning{margin:10px 0;padding:14px;border-radius:18px;background:linear-gradient(135deg,#f8f0f7,#eef6f3);border:1px solid var(--line)}
+.project-planning .eyebrow{margin-bottom:8px}.project-planning .day-toggle-grid{margin-top:8px}
+.project-planning .check-line{margin-top:10px}
+
+.duration-custom{box-sizing:border-box}.bottom-nav{grid-template-columns:repeat(4,minmax(0,1fr))!important}.bottom-nav>a:nth-child(1),.bottom-nav>a:nth-child(2),.bottom-nav>a:nth-child(3),.bottom-nav>button:nth-child(4){display:flex!important;visibility:visible!important;opacity:1!important}
+
+/* V30 — Casa editável + lista de compras compartilhada */
+.casa-how-top-actions{display:flex;justify-content:flex-end;margin:-4px 0 10px}.casa-how-top-actions .secondary{border:0;border-radius:999px;padding:8px 12px;background:#F1E9F0;font-weight:800;font-size:11px}
+.mv-how li{display:flex;align-items:center;justify-content:space-between;gap:8px}.mv-how li>span{flex:1}.casa-buy-mini{border:0;border-radius:999px;background:#E7F1EE;padding:5px 8px;font-size:9px;font-weight:800;white-space:nowrap}.casa-buy-mini:disabled{opacity:.7}
+.casa-how-shopping-note{margin-top:14px;padding:12px;border-radius:16px;background:#EAF2F7;font-size:11px;line-height:1.45;color:var(--muted)}
+.casa-shopping-card{padding:16px}.casa-mini-shopping{display:grid;gap:7px}.casa-mini-shop-row{display:flex;align-items:center;gap:8px;padding:9px 10px;border-radius:13px;background:#fff}.casa-mini-shop-row label{display:flex!important;align-items:center!important;gap:8px!important;margin:0!important;flex:1}.casa-mini-shop-row input{width:auto!important;margin:0!important}.casa-mini-shop-row.done span{text-decoration:line-through;opacity:.5}.casa-mini-shopping .food-big-link{display:inline-flex;margin-top:8px}
+.food-shopping-subhead{font-size:11px;font-weight:900;letter-spacing:.06em;margin:13px 0 7px}.food-shop-item{position:relative}.food-shop-item .more{margin-left:auto;border:0;background:#F1E9F0;border-radius:999px;width:28px;height:28px}
+
+/* Casa — Manual vivo */
+.casa-manual-area{margin-bottom:14px}
+.casa-manual-list{display:grid;gap:0}
+.casa-manual-row{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:13px 0;border-top:1px solid rgba(80,60,90,.10)}
+.casa-manual-row>div{min-width:0;display:grid;gap:4px}
+.casa-manual-row strong{font-size:15px}
+.casa-manual-row small{color:#817985}
+.casa-manual-row .home-how{flex:0 0 auto}
+.casa-recipe{margin-bottom:14px}
+.casa-recipe h4{margin:14px 0 7px;font-size:13px;text-transform:uppercase;letter-spacing:.08em;color:#7f667b}
+.casa-recipe ul,.casa-recipe ol{margin:7px 0 0;padding-left:20px}
+.casa-recipe li{margin:6px 0}
+.casa-recipe li{display:flex;align-items:center;justify-content:space-between;gap:10px}
+.casa-recipe li span{flex:1}
+.casa-inventory .chip-list{display:flex;flex-wrap:wrap;gap:8px;margin-top:10px}
+.casa-inventory .chip-list .pill{white-space:normal;height:auto;padding:7px 10px;line-height:1.25}
+.inventory-tools-head{margin-top:22px;padding-top:18px;border-top:1px solid rgba(80,60,90,.10)}
+.casa-how-top-actions{margin:8px 0 12px}
+.casa-how-top-actions .secondary{width:100%}
+.casa-buy-mini{border:0;background:#f4e5ee;border-radius:999px;padding:6px 9px;font:inherit;font-size:12px;color:#865f79;white-space:nowrap}
+.casa-buy-mini:disabled{opacity:.7}
