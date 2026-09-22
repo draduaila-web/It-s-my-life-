@@ -1539,6 +1539,26 @@
     else if(area==='rituais'){copy='Quantos rituais por semana representam cuidado suficiente para você?';fields=goalField('Rituais por semana','sessionsPerWeek',g.sessionsPerWeek)}
     const d=dialogBase(`Referência · ${label}`,`<p class="note">${copy}</p><div class="bertha-goal-fields">${fields}</div><div class="bertha-stack"><button class="bertha-primary" data-goal-save>Salvar referência</button>${Object.keys(g).length?'<button class="bertha-secondary" data-goal-remove>Remover referência</button>':''}</div>`);
     d.classList.add('bertha-goal-dialog',`goal-${area}`);
+    // RC13 — aplica a paleta do próprio card diretamente no CTA.
+    // setProperty(..., 'important') evita que regras globais antigas do modal sobrescrevam a área.
+    const goalPalettes={
+      movimento:['#eadff5','#f7e2d6','#766b86','rgba(124,116,142,.18)'],
+      alimentacao:['#e3f0fa','#fff3c9','#738198','rgba(122,132,152,.18)'],
+      autocuidado:['#f6e1e9','#fff1dd','#806b81','rgba(135,111,134,.18)'],
+      estudos:['#e4f1fa','#f7e2d8','#697a94','rgba(111,125,149,.18)'],
+      projetos:['#e1eef9','#eee4f7','#756b89','rgba(125,116,143,.18)'],
+      trabalho:['#e9def5','#dff0ea','#706b86','rgba(122,117,141,.18)'],
+      casa:['#f5e0e8','#e1eee6','#746e83','rgba(123,117,138,.18)'],
+      rituais:['#f8efd1','#e9def5','#7d6d87','rgba(131,113,140,.18)']
+    };
+    const gp=goalPalettes[area]||goalPalettes.movimento;
+    const saveGoal=d.querySelector('[data-goal-save]');
+    if(saveGoal){
+      saveGoal.style.setProperty('background',`linear-gradient(135deg, ${gp[0]}, ${gp[1]})`,'important');
+      saveGoal.style.setProperty('color',gp[2],'important');
+      saveGoal.style.setProperty('border',`1px solid ${gp[3]}`,'important');
+      saveGoal.style.setProperty('box-shadow','none','important');
+    }
     d.querySelector('[data-goal-save]').onclick=()=>{const obj={area,label,updatedAt:Date.now()};d.querySelectorAll('[data-goal-field]').forEach(i=>{const v=Number(String(i.value||'').replace(',','.'));if(v>0)obj[i.dataset.goalField]=v});if(Object.keys(obj).length<=3)return;all[area]=obj;write(PROGRESS_GOALS_KEY,all);d.close();d.remove();rerender();setTimeout(enhanceIdealScreen,0)};
     d.querySelector('[data-goal-remove]')?.addEventListener('click',()=>{delete all[area];write(PROGRESS_GOALS_KEY,all);d.close();d.remove();rerender();setTimeout(enhanceIdealScreen,0)});
   }

@@ -1,4 +1,4 @@
-const CACHE = "hml-bertha-v221-rc12-ideal-modal-colors-specificity";
+const CACHE = "hml-bertha-v221-rc13-ideal-modal-colors-inline";
 self.addEventListener("install", event => event.waitUntil(self.skipWaiting()));
 self.addEventListener("activate", event => event.waitUntil((async()=>{
   const keys=await caches.keys();
