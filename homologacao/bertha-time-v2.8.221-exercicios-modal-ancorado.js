@@ -1538,6 +1538,7 @@
     else if(area==='casa'){copy='Use uma quantidade realista de rotinas essenciais por semana; não é uma meta de casa perfeita.';fields=goalField('Rotinas essenciais por semana','routinesPerWeek',g.routinesPerWeek)}
     else if(area==='rituais'){copy='Quantos rituais por semana representam cuidado suficiente para você?';fields=goalField('Rituais por semana','sessionsPerWeek',g.sessionsPerWeek)}
     const d=dialogBase(`Referência · ${label}`,`<p class="note">${copy}</p><div class="bertha-goal-fields">${fields}</div><div class="bertha-stack"><button class="bertha-primary" data-goal-save>Salvar referência</button>${Object.keys(g).length?'<button class="bertha-secondary" data-goal-remove>Remover referência</button>':''}</div>`);
+    d.classList.add('bertha-goal-dialog',`goal-${area}`);
     d.querySelector('[data-goal-save]').onclick=()=>{const obj={area,label,updatedAt:Date.now()};d.querySelectorAll('[data-goal-field]').forEach(i=>{const v=Number(String(i.value||'').replace(',','.'));if(v>0)obj[i.dataset.goalField]=v});if(Object.keys(obj).length<=3)return;all[area]=obj;write(PROGRESS_GOALS_KEY,all);d.close();d.remove();rerender();setTimeout(enhanceIdealScreen,0)};
     d.querySelector('[data-goal-remove]')?.addEventListener('click',()=>{delete all[area];write(PROGRESS_GOALS_KEY,all);d.close();d.remove();rerender();setTimeout(enhanceIdealScreen,0)});
   }
@@ -3931,6 +3932,21 @@
     .bertha-task-modal .bertha-secondary,
     .bertha-task-modal-body .bertha-secondary,
     .bertha-dialog .bertha-secondary{background:rgba(255,255,255,.7)!important;color:#6d6673!important;border:1px solid rgba(140,126,145,.12)!important}
+
+    /* RC11 — Meu Dia Ideal: cada modal de referência herda a paleta do próprio card/ícone.
+       Fundo e campos permanecem creme/neutros conforme Modal System BERTH.A v1. */
+    .bertha-goal-dialog .bertha-modal{background:#fbf7ef!important}
+    .bertha-goal-dialog .bertha-goal-fields input{font-size:16px!important;background:#fffdfa!important;color:#3e3d4b!important}
+    .bertha-goal-dialog.goal-movimento{--goal-a:#eadff5;--goal-b:#f7e2d6;--goal-ink:#766b86;--goal-ring:rgba(124,116,142,.18)}
+    .bertha-goal-dialog.goal-alimentacao{--goal-a:#e3f0fa;--goal-b:#fff3c9;--goal-ink:#738198;--goal-ring:rgba(122,132,152,.18)}
+    .bertha-goal-dialog.goal-autocuidado{--goal-a:#f6e1e9;--goal-b:#fff1dd;--goal-ink:#806b81;--goal-ring:rgba(135,111,134,.18)}
+    .bertha-goal-dialog.goal-estudos{--goal-a:#e4f1fa;--goal-b:#f7e2d8;--goal-ink:#697a94;--goal-ring:rgba(111,125,149,.18)}
+    .bertha-goal-dialog.goal-projetos{--goal-a:#e1eef9;--goal-b:#eee4f7;--goal-ink:#756b89;--goal-ring:rgba(125,116,143,.18)}
+    .bertha-goal-dialog.goal-trabalho{--goal-a:#e9def5;--goal-b:#dff0ea;--goal-ink:#706b86;--goal-ring:rgba(122,117,141,.18)}
+    .bertha-goal-dialog.goal-casa{--goal-a:#f5e0e8;--goal-b:#e1eee6;--goal-ink:#746e83;--goal-ring:rgba(123,117,138,.18)}
+    .bertha-goal-dialog.goal-rituais{--goal-a:#f8efd1;--goal-b:#e9def5;--goal-ink:#7d6d87;--goal-ring:rgba(131,113,140,.18)}
+    .bertha-goal-dialog .bertha-primary{background:linear-gradient(135deg,var(--goal-a),var(--goal-b))!important;color:var(--goal-ink)!important;border:1px solid var(--goal-ring)!important;box-shadow:none!important}
+    .bertha-goal-dialog .bertha-goal-fields input:focus{border-color:var(--goal-ink)!important;box-shadow:0 0 0 3px var(--goal-ring)!important;outline:none!important}
     /* v2.8.148 — Meu Dia Ideal final: modal padrão + intensidade do hero */
     .bertha-ideal-hero{filter:saturate(1.10) contrast(1.015)}
     .bertha-dialog:has(.bertha-ideal-modal-form) .bertha-modal{background:#fbf7ef!important;border-radius:28px!important;overflow:hidden!important}
