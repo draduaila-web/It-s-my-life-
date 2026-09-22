@@ -74,19 +74,45 @@
     const f=customFronts().find(x=>String(x.id)===String(kind));
     if(!f)return null;
     const areas=(Array.isArray(f.areas)?f.areas:[]).map(x=>String(x||'').trim()).filter(Boolean);
-    return {name:f.name||'Trabalho',icon:'work',tag:f.tag||'TRABALHO',desc:f.desc||'Tarefas, projetos e acompanhamentos.',key:frontKey(f.id),groups:(areas.length?areas:['Geral']).map(a=>[a,['Nova tarefa']]),custom:true,id:f.id};
+    return {name:f.name||'Trabalho',icon:f.icon||'work',tag:f.tag||'TRABALHO',desc:f.desc||'Tarefas, projetos e acompanhamentos.',key:frontKey(f.id),groups:(areas.length?areas:['Geral']).map(a=>[a,['Nova tarefa']]),custom:true,id:f.id};
   }
   function getCfg(kind){return WORK[kind]||customCfg(kind);}
   function allFronts(){return [...Object.keys(WORK).map(id=>({id,cfg:WORK[id],custom:false})),...customFronts().map(f=>({id:f.id,cfg:customCfg(f.id),custom:true})).filter(x=>x.cfg)];}
 
   function workSvg(kind='work'){
     const icons={
-      work:`<svg viewBox="0 0 64 48" aria-hidden="true"><path d="M9 13h18c7 0 7 9 14 9h14"/><path d="M9 24h13c7 0 7 11 15 11h18"/><path d="M9 35h18"/></svg>`,
+      work:`<svg viewBox="0 0 48 48" aria-hidden="true"><rect x="9" y="15" width="30" height="22" rx="4"/><path d="M18 15v-4h12v4M9 24h30M21 24v3h6v-3"/></svg>`,
       crefito:`<svg viewBox="0 0 48 48" aria-hidden="true"><path d="M12 13h24M12 24h24M12 35h24"/><path d="M18 9v30M30 9v30"/></svg>`,
       bec:`<svg viewBox="0 0 48 48" aria-hidden="true"><path d="M24 8c2.8 8.5 7.5 13.2 16 16-8.5 2.8-13.2 7.5-16 16-2.8-8.5-7.5-13.2-16-16 8.5-2.8 13.2-7.5 16-16Z"/><path d="M24 15v18M15 24h18"/></svg>`,
-      tiktok:`<svg viewBox="0 0 48 48" aria-hidden="true"><path d="M9 29c5-9 10-9 15 0s10 9 15 0"/><path d="M9 19c5-9 10-9 15 0s10 9 15 0"/></svg>`
+      tiktok:`<svg viewBox="0 0 48 48" aria-hidden="true"><path d="M17 11l20 13-20 13Z"/></svg>`,
+      laptop:`<svg viewBox="0 0 48 48" aria-hidden="true"><rect x="10" y="10" width="28" height="21" rx="3"/><path d="M7 36h34"/></svg>`,
+      chart:`<svg viewBox="0 0 48 48" aria-hidden="true"><path d="M10 38V25h7v13M21 38V17h7v21M32 38V10h7v28"/></svg>`,
+      people:`<svg viewBox="0 0 48 48" aria-hidden="true"><circle cx="19" cy="17" r="6"/><path d="M8 38c1-8 5-12 11-12s10 4 11 12M31 13c5 0 8 3 8 8M33 27c5 1 8 5 8 11"/></svg>`,
+      document:`<svg viewBox="0 0 48 48" aria-hidden="true"><rect x="12" y="7" width="24" height="34" rx="3"/><path d="M18 17h12M18 24h12M18 31h9"/></svg>`,
+      calendar:`<svg viewBox="0 0 48 48" aria-hidden="true"><rect x="8" y="11" width="32" height="29" rx="4"/><path d="M8 19h32M16 7v8M32 7v8M16 26h5M27 26h5M16 33h5"/></svg>`,
+      check:`<svg viewBox="0 0 48 48" aria-hidden="true"><rect x="9" y="9" width="30" height="30" rx="6"/><path d="m16 24 6 6 11-13"/></svg>`,
+      target:`<svg viewBox="0 0 48 48" aria-hidden="true"><circle cx="24" cy="24" r="15"/><circle cx="24" cy="24" r="8"/><circle cx="24" cy="24" r="2"/><path d="M35 13 42 6M35 13h7V6"/></svg>`,
+      idea:`<svg viewBox="0 0 48 48" aria-hidden="true"><path d="M16 29c-3-3-5-6-5-11a13 13 0 0 1 26 0c0 5-2 8-5 11-2 2-3 4-3 7H19c0-3-1-5-3-7Z"/><path d="M19 40h10M21 44h6"/></svg>`,
+      settings:`<svg viewBox="0 0 48 48" aria-hidden="true"><circle cx="24" cy="24" r="6"/><path d="M24 7v5M24 36v5M7 24h5M36 24h5M12 12l4 4M32 32l4 4M36 12l-4 4M16 32l-4 4"/></svg>`,
+      mail:`<svg viewBox="0 0 48 48" aria-hidden="true"><rect x="7" y="11" width="34" height="26" rx="4"/><path d="m9 14 15 12 15-12"/></svg>`,
+      phone:`<svg viewBox="0 0 48 48" aria-hidden="true"><path d="M15 8c-3 1-6 5-5 9 2 11 10 19 21 21 4 1 8-2 9-5l-8-6-5 5c-6-3-9-6-12-12l5-5Z"/></svg>`,
+      chat:`<svg viewBox="0 0 48 48" aria-hidden="true"><path d="M8 10h32v24H21l-9 7v-7H8Z"/><path d="M16 22h1M24 22h1M32 22h1"/></svg>`,
+      globe:`<svg viewBox="0 0 48 48" aria-hidden="true"><circle cx="24" cy="24" r="17"/><path d="M7 24h34M24 7c6 6 8 11 8 17s-2 11-8 17c-6-6-8-11-8-17s2-11 8-17Z"/></svg>`,
+      building:`<svg viewBox="0 0 48 48" aria-hidden="true"><path d="M10 41V10h21v31M31 20h8v21M7 41h35"/><path d="M16 17h4M24 17h2M16 24h4M24 24h2M16 31h4M24 31h2"/></svg>`,
+      folder:`<svg viewBox="0 0 48 48" aria-hidden="true"><path d="M6 14h15l4 5h17v20H6Z"/></svg>`,
+      link:`<svg viewBox="0 0 48 48" aria-hidden="true"><path d="M20 29l-3 3a8 8 0 0 1-11-11l7-7a8 8 0 0 1 11 0M28 19l3-3a8 8 0 0 1 11 11l-7 7a8 8 0 0 1-11 0M17 24h14"/></svg>`,
+      star:`<svg viewBox="0 0 48 48" aria-hidden="true"><path d="m24 7 5 11 12 1-9 8 3 12-11-6-11 6 3-12-9-8 12-1Z"/></svg>`
     };
     return icons[kind]||icons.work;
+  }
+  const WORK_ICON_OPTIONS=[
+    ['work','Maleta'],['laptop','Computador'],['chart','Resultados'],['people','Equipe'],['document','Documento'],
+    ['calendar','Agenda'],['check','Checklist'],['target','Meta'],['idea','Ideias'],['settings','Operações'],
+    ['mail','E-mail'],['phone','Telefone'],['chat','Atendimento'],['globe','Digital'],['building','Empresa'],
+    ['folder','Projetos'],['link','Parcerias'],['star','Destaque']
+  ];
+  function workIconPicker(selected='work'){
+    return `<div class="work14-icon-picker" data-work-icon-picker>${WORK_ICON_OPTIONS.map(([id,label])=>`<button type="button" class="work14-icon-option ${selected===id?'selected':''}" data-work-icon="${id}" aria-label="${label}"><span>${workSvg(id)}</span><small>${label}</small></button>`).join('')}</div>`;
   }
   function workKindForCfg(cfg){if(cfg?.custom&&cfg.id)return cfg.id;return Object.keys(WORK).find(k=>WORK[k]===cfg)||'crefito';}
   function workEngineId(kind,id,cfg){if(cfg?.custom)return `${cfg.key}:${id}`;return kind==='crefito'?`crefito:${id}`:`minha-vida.trabalho.${kind}.v1:${id}`;}
@@ -201,6 +227,23 @@
       .work12-duration{display:grid;grid-template-columns:88px minmax(0,1fr);gap:8px}.work12-duration input,.work12-duration select{margin-top:3px}
       @media(max-width:520px){.work12-dialog{width:92vw;max-height:68vh}.work12-form{max-height:68vh}.work12-form input,.work12-form select,.work12-form textarea{font-size:16px}}
     `;
+
+    s.textContent += `
+      /* RC9 · Trabalho alinhado à linguagem BERTH.A: lilás + menta */
+      .work12-front{background:linear-gradient(135deg,rgba(244,238,252,.86),rgba(231,248,241,.82))!important;border:1px solid rgba(123,104,154,.10)!important;box-shadow:0 7px 22px rgba(84,68,105,.035)!important}
+      .work12-front .work12-icon{width:48px!important;height:48px!important;border-radius:15px!important;background:linear-gradient(135deg,rgba(226,211,248,.94),rgba(211,242,229,.92))!important;color:#75609a!important;border:1px solid rgba(117,96,153,.08)!important}
+      .work12-front .work12-icon svg{width:28px!important;height:28px!important;fill:none!important;stroke:currentColor!important;stroke-width:1.8!important;stroke-linecap:round!important;stroke-linejoin:round!important}
+      .work12-front{grid-template-columns:48px 1fr 22px!important}.work12-front:nth-child(n) .work12-icon{color:#75609a!important}
+      .work12-front-add{background:linear-gradient(120deg,rgba(239,230,250,.62),rgba(221,245,234,.58))!important;border-color:rgba(123,104,154,.22)!important;color:#715d8f!important}
+      .work13-bridge{background:linear-gradient(135deg,rgba(239,230,250,.68),rgba(220,245,234,.62))!important;border-color:rgba(123,104,154,.09)!important}
+      .work12-front-dialog,.work12-dialog{background:#fbf8f2!important}
+      .work14-icon-field{display:grid;gap:8px}.work14-icon-label{font-size:12px;font-weight:800;color:#746c75}
+      .work14-icon-picker{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:8px;max-height:210px;overflow:auto;padding:2px;-webkit-overflow-scrolling:touch}
+      .work14-icon-option{border:1px solid rgba(119,100,149,.10);background:linear-gradient(135deg,rgba(239,230,250,.68),rgba(220,245,234,.62));border-radius:15px;min-height:76px;padding:8px 4px 6px;display:grid;place-items:center;gap:4px;color:#75609a;font:inherit}
+      .work14-icon-option span{width:31px;height:31px;display:grid;place-items:center}.work14-icon-option svg{width:27px;height:27px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+      .work14-icon-option small{font-size:9px;line-height:1.05;color:#756f7c;font-weight:650;text-align:center}.work14-icon-option.selected{outline:2px solid rgba(119,92,161,.42);background:linear-gradient(135deg,#e5d7f8,#d8f1e5);box-shadow:0 4px 12px rgba(94,74,120,.07)}
+      @media(max-width:520px){.work14-icon-picker{grid-template-columns:repeat(4,minmax(0,1fr))}.work14-icon-option{min-height:72px}}
+    `;
     document.head.appendChild(s);
     if(!document.getElementById('work-v13-visual')){
       const v=document.createElement('style');v.id='work-v13-visual';v.textContent=`
@@ -265,7 +308,7 @@
     const a=APP(); if(!a) return;
     const fronts=allFronts();
     const cards=fronts.map(({id,cfg,custom},idx)=>`<button type="button" class="work12-front" data-work12-go="${esc(id)}">
-      <span class="work12-icon">${workSvg(custom?'work':id)}</span><span><strong>${esc(cfg.name)}</strong><small>${esc(cfg.tag||cfg.desc||'Trabalho')}</small></span><span class="work12-arrow">›</span>
+      <span class="work12-icon">${workSvg(custom?(cfg.icon||'work'):id)}</span><span><strong>${esc(cfg.name)}</strong><small>${esc(cfg.tag||cfg.desc||'Trabalho')}</small></span><span class="work12-arrow">›</span>
     </button>`).join('');
     a.innerHTML=`
       <section class="work13-hero">
@@ -289,13 +332,15 @@
       <div class="work12-form-head"><div><div class="eyebrow">TRABALHO</div><h2>${x?'Editar frente':'Nova frente de trabalho'}</h2></div><button type="button" class="work12-x" data-close>×</button></div>
       <label>Nome<input data-name maxlength="60" value="${esc(x?.name||'')}" placeholder="Ex.: Clínica, Empresa, Consultório"></label>
       <label>Tipo<select data-tag><option ${x?.tag==='TRABALHO'?'selected':''}>TRABALHO</option><option ${x?.tag==='EMPRESA'?'selected':''}>EMPRESA</option><option ${x?.tag==='AUTÔNOMO'?'selected':''}>AUTÔNOMO</option><option ${x?.tag==='CONTEÚDO'?'selected':''}>CONTEÚDO</option><option ${x?.tag==='PROJETO'?'selected':''}>PROJETO</option></select></label>
+      <div class="work14-icon-field"><span class="work14-icon-label">Ícone</span>${workIconPicker(x?.icon||'work')}<input type="hidden" data-icon value="${esc(x?.icon||'work')}"></div>
       <label>Descrição <small style="font-weight:500">opcional</small><input data-desc maxlength="140" value="${esc(x?.desc||'')}" placeholder="O que acontece nesta frente?"></label>
       <label>Áreas <small style="font-weight:500">opcional · uma por linha</small><textarea data-areas rows="4" placeholder="Ex.: Clientes\nAdministrativo\nConteúdo">${esc(areas)}</textarea></label>
       <div class="work12-form-actions">${x?'<button type="button" class="work12-secondary" data-delete>Excluir</button>':''}<button type="button" class="work12-secondary" data-close>Cancelar</button><button type="submit" class="work12-primary">Salvar</button></div>
     </form>`;
     document.body.appendChild(dlg);dlg.showModal();
     const close=()=>{try{dlg.close()}catch{}dlg.remove()};dlg.querySelectorAll('[data-close]').forEach(b=>b.onclick=close);dlg.addEventListener('cancel',e=>{e.preventDefault();close()});
-    dlg.querySelector('form').onsubmit=e=>{e.preventDefault();const name=dlg.querySelector('[data-name]').value.trim();if(!name){dlg.querySelector('[data-name]').focus();return}const id=x?.id||`front-${Date.now()}`;const data={id,name,tag:dlg.querySelector('[data-tag]').value,desc:dlg.querySelector('[data-desc]').value.trim(),areas:dlg.querySelector('[data-areas]').value.split(/\n|,/).map(v=>v.trim()).filter(Boolean),createdAt:x?.createdAt||Date.now(),updatedAt:Date.now()};const i=all.findIndex(f=>String(f.id)===String(id));if(i>=0)all[i]=data;else all.push(data);saveCustomFronts(all);close();location.hash='#trabalho-'+id;renderWorkspace(id)};
+    dlg.querySelectorAll('[data-work-icon]').forEach(b=>b.onclick=()=>{dlg.querySelector('[data-icon]').value=b.dataset.workIcon;dlg.querySelectorAll('[data-work-icon]').forEach(x=>x.classList.toggle('selected',x===b));});
+    dlg.querySelector('form').onsubmit=e=>{e.preventDefault();const name=dlg.querySelector('[data-name]').value.trim();if(!name){dlg.querySelector('[data-name]').focus();return}const id=x?.id||`front-${Date.now()}`;const data={id,name,tag:dlg.querySelector('[data-tag]').value,icon:dlg.querySelector('[data-icon]').value||'work',desc:dlg.querySelector('[data-desc]').value.trim(),areas:dlg.querySelector('[data-areas]').value.split(/\n|,/).map(v=>v.trim()).filter(Boolean),createdAt:x?.createdAt||Date.now(),updatedAt:Date.now()};const i=all.findIndex(f=>String(f.id)===String(id));if(i>=0)all[i]=data;else all.push(data);saveCustomFronts(all);close();location.hash='#trabalho-'+id;renderWorkspace(id)};
     if(x)dlg.querySelector('[data-delete]').onclick=()=>{if(!confirm('Excluir esta frente de trabalho e suas tarefas?'))return;saveCustomFronts(all.filter(f=>String(f.id)!==String(x.id)));window.berthaHmlStorage.removeItem(frontKey(x.id));window.berthaHmlStorage.removeItem(noteKey(x.id));close();location.hash='#trabalho';renderHome()};
   }
 

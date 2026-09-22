@@ -1,4 +1,4 @@
-const CACHE = "hml-bertha-v221-rc8-study-icons-fix";
+const CACHE = "hml-bertha-v221-rc9-work-lilac-mint-icons";
 self.addEventListener("install", event => event.waitUntil(self.skipWaiting()));
 self.addEventListener("activate", event => event.waitUntil((async()=>{
   const keys=await caches.keys();
