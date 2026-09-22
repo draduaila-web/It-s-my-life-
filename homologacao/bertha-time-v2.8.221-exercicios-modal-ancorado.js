@@ -619,7 +619,7 @@
   }
 
   function syncExerciseCompletion(active,real,end){
-    if(!(active?.selectedPlanId || String(active?.id||'').startsWith('exercise:'))) return;
+    if(!(active?.selectedPlanId || active?.selectedCycleId || String(active?.id||'').startsWith('exercise:') || String(active?.id||'').startsWith('cycle:'))) return;
     const data=read('minha-vida.exercicios.v1',{plans:[],sessions:[]})||{plans:[],sessions:[]};
     data.sessions=Array.isArray(data.sessions)?data.sessions:[];
     const day=iso();
@@ -634,8 +634,8 @@
       plannedName:active.plannedName||active.title||'Movimento',
       plannedMinutes:+active.plannedMinutes||real,
       substituted:!!active.plannedItemId,
-      planId:active.selectedPlanId||String(active.id||'').replace(/^exercise:/,''),
-      cycleId:(data.plans||[]).find(p=>String(p.id)===String(active.selectedPlanId||String(active.id||'').replace(/^exercise:/,'')))?.cycleId||'',
+      planId:active.selectedPlanId||'',
+      cycleId:active.selectedCycleId||(data.plans||[]).find(p=>String(p.id)===String(active.selectedPlanId||String(active.id||'').replace(/^exercise:/,'')))?.cycleId||'',
       progressItemId:active.id||'',
       createdAt:end
     });
