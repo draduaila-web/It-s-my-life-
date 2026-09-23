@@ -1752,7 +1752,7 @@
   function taskDialog(existing=null){
     const x=existing||{};
     const d=document.createElement('dialog');
-    d.className='bertha-dialog bertha-task-dialog';
+    d.className='bertha-dialog bertha-task-dialog bertha-plans-task-dialog';
     d.innerHTML=`
       <form class="bertha-task-modal" method="dialog">
         <div class="bertha-task-modal-head">

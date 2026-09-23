@@ -9,7 +9,7 @@
 <meta name="apple-mobile-web-app-title" content="BERTH.A HML">
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="apple-touch-icon" sizes="512x512" href="../bertha-icon-512.png">
-<link rel="stylesheet" href="./style.css?v=221-rc14-planos-modais-estaveis">
+<link rel="stylesheet" href="./style.css?v=221-rc15-planos-tarefa-estavel">
 <script id="bertha-rollback-221-bootstrap">
 (function(){
   const KEY='bertha.hml.rc13.modalcolors.refresh';
@@ -427,6 +427,71 @@ body:has(#pendingDialog[open]),body:has(.commit-dialog[open]){
 }
 </style>
 
+
+<style id="bertha-plans-task-stable-rc15">
+/* RC15 — SOMENTE Planos > Adicionar/Editar tarefa.
+   O compromisso já ficou estável na RC14. A tarefa usa outro dialog, criado em bertha-time,
+   portanto recebe uma classe exclusiva para não tocar Rituais nem qualquer outro módulo. */
+html:has(.bertha-plans-task-dialog[open]),
+body:has(.bertha-plans-task-dialog[open]){
+  overflow:hidden!important;
+  overscroll-behavior:none!important;
+}
+.bertha-dialog.bertha-plans-task-dialog,
+.bertha-dialog.bertha-plans-task-dialog[open]{
+  position:fixed!important;
+  inset:0!important;
+  left:0!important;top:0!important;right:0!important;bottom:0!important;
+  width:100vw!important;height:100svh!important;
+  max-width:none!important;max-height:none!important;
+  margin:0!important;
+  padding:max(10px,env(safe-area-inset-top)) 12px max(10px,env(safe-area-inset-bottom))!important;
+  box-sizing:border-box!important;
+  border:0!important;border-radius:0!important;
+  background:transparent!important;
+  box-shadow:none!important;
+  overflow:hidden!important;
+  overscroll-behavior:none!important;
+  transform:none!important;
+  animation:none!important;
+  transition:none!important;
+  align-items:flex-start!important;
+  justify-content:center!important;
+}
+.bertha-dialog.bertha-plans-task-dialog[open]{display:flex!important}
+.bertha-plans-task-dialog>.bertha-task-modal{
+  flex:0 1 auto!important;
+  width:min(calc(100vw - 24px),460px)!important;
+  height:auto!important;
+  max-height:calc(100svh - max(20px,env(safe-area-inset-top)) - max(20px,env(safe-area-inset-bottom)))!important;
+  margin:0!important;
+  overflow:hidden!important;
+  border-radius:28px!important;
+  box-shadow:0 24px 70px rgba(54,42,58,.26)!important;
+  transform:none!important;
+  animation:none!important;
+  transition:none!important;
+  contain:layout paint!important;
+}
+.bertha-plans-task-dialog .bertha-task-modal-body{
+  flex:1 1 auto!important;
+  min-height:0!important;
+  overflow-y:auto!important;
+  overflow-x:hidden!important;
+  overscroll-behavior-y:contain!important;
+  -webkit-overflow-scrolling:touch!important;
+  touch-action:pan-y!important;
+}
+.bertha-plans-task-dialog .bertha-task-modal-head,
+.bertha-plans-task-dialog .bertha-task-modal-actions{flex:0 0 auto!important}
+.bertha-plans-task-dialog input,
+.bertha-plans-task-dialog select,
+.bertha-plans-task-dialog textarea{
+  scroll-margin-top:88px!important;
+  scroll-margin-bottom:116px!important;
+}
+</style>
+
 </head>
 
 <style id="bertha-hml-marker">
@@ -506,7 +571,7 @@ body.bertha-hml::before{content:"HOMOLOGAÇÃO";position:fixed;z-index:99999;top
   });
 })();
 </script>
-<script src="app-v2.8.221-exercicios-modal-ancorado.js?v=221-rc14-planos-modais-estaveis"></script>
+<script src="app-v2.8.221-exercicios-modal-ancorado.js?v=221-rc15-planos-tarefa-estavel"></script>
 
 <dialog id="moduleMenu">
 <div class="module-sheet">
@@ -532,7 +597,7 @@ body.bertha-hml::before{content:"HOMOLOGAÇÃO";position:fixed;z-index:99999;top
 </div>
 </dialog>
 
-<script src="work-v12.js?v=221-rc14-planos-modais-estaveis"></script>
-<script src="bertha-time-v2.8.221-exercicios-modal-ancorado.js?v=221-rc14-planos-modais-estaveis"></script>
+<script src="work-v12.js?v=221-rc15-planos-tarefa-estavel"></script>
+<script src="bertha-time-v2.8.221-exercicios-modal-ancorado.js?v=221-rc15-planos-tarefa-estavel"></script>
 </body>
 </html>
