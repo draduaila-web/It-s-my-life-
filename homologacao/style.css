@@ -955,3 +955,25 @@ dialog input,dialog select,dialog textarea{font-size:16px!important}
 .wish-select input:checked{background:linear-gradient(135deg,#caa7d7,#a8d3ca)!important;border-color:transparent!important;}
 .wish-select input:checked:after{content:'✓';position:absolute;inset:0;display:grid;place-items:center;color:white;font-size:13px;font-weight:800;}
 @media(max-width:560px){.fin-unified-dialog.wish-dialog>.modal-card,.fin-unified-dialog.fg-dialog>.modal-card{width:calc(100vw - 32px)!important;max-height:84dvh!important;padding:20px!important;border-radius:27px!important}.wish-head-actions{display:grid!important;grid-template-columns:1fr 1fr!important;width:100%!important}.wish-head-actions button{width:100%!important}}
+
+/* BERTH.A RC28 — Lista de Desejos: card alinhado ao padrão dos cards do Financeiro */
+.wish-card{
+  padding:15px!important;
+  border-radius:20px!important;
+  background:linear-gradient(140deg,rgba(248,244,252,.88),rgba(239,247,248,.82))!important;
+  border:1px solid rgba(104,88,120,.07)!important;
+  box-shadow:none!important;
+  color:#48414b!important;
+}
+.wish-card-top{display:flex!important;justify-content:space-between!important;gap:12px!important;align-items:flex-start!important;}
+.wish-card .eyebrow{color:#81728a!important;letter-spacing:.14em!important;}
+.wish-card h3{margin:2px 0 0!important;font-size:18px!important;color:#48414b!important;}
+.wish-card .fg-edit{padding:0!important;font-size:13px!important;color:#7b6d83!important;background:transparent!important;}
+.wish-tags{display:flex!important;gap:6px!important;flex-wrap:wrap!important;margin:12px 0 0!important;}
+.wish-tags span,.wish-goal-chip{font-size:10px!important;padding:5px 8px!important;border-radius:999px!important;background:rgba(255,255,255,.48)!important;color:#8c818e!important;border:0!important;}
+.wish-value{display:block!important;margin:12px 0 0!important;font-size:18px!important;line-height:1.15!important;color:#48414b!important;}
+.wish-card p{margin:8px 0 0!important;font-size:11px!important;line-height:1.45!important;color:#8a808b!important;}
+.wish-actions{display:flex!important;align-items:center!important;gap:8px!important;flex-wrap:wrap!important;margin:12px 0 0!important;padding-top:10px!important;border-top:1px solid rgba(95,78,106,.07)!important;}
+.wish-actions .secondary.tiny{min-height:34px!important;padding:7px 11px!important;border-radius:13px!important;background:rgba(238,230,248,.62)!important;color:#775d8b!important;border:0!important;}
+.wish-actions .wish-create-goal{margin-left:auto!important;}
+.wish-card.is-done{opacity:.68!important;}
