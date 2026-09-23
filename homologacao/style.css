@@ -1067,3 +1067,11 @@ dialog.fin-unified-dialog .modal-head,dialog.fin-unified-dialog .modal-actions{b
   -webkit-backdrop-filter:blur(12px)!important;
   border-top:1px solid rgba(177,124,118,.08)!important;
 }
+
+/* BERTH.A RC41 — Alimentação: botão "Fiz esta" respeita o contexto do módulo */
+dialog.food-context-dialog #chooseThisFood{
+  background:linear-gradient(135deg,#8db7d7 0%,#e6bf8d 100%)!important;
+  color:#fff!important;
+  border:0!important;
+  box-shadow:none!important;
+}
