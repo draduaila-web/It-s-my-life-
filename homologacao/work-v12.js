@@ -37,7 +37,7 @@
       key:KEYS.crefito,
       groups:[
         ['Demandas',['Nova demanda','Acompanhar demanda']],
-        ['Projetos',['Novo projeto','Próximo passo']],
+        ['Projetos',['Novo projeto','Acompanhar projeto']],
         ['Reuniões',['Preparar reunião','Participar de reunião','Registrar encaminhamentos']],
         ['Documentos & processos',['SEI / documento','Conferir processo','Despacho / resposta']],
         ['Acompanhamentos',['Cobrar retorno','Verificar andamento','Outro']]
@@ -463,9 +463,9 @@
 
   // Trabalho é o único responsável pelas rotas #trabalho*.
   // Render imediato evita a tela-placeholder antiga durante a navegação.
-  window.addEventListener('hashchange',route);
-  window.addEventListener('DOMContentLoaded',route);
-  route();
+  window.addEventListener('hashchange',()=>{route();setTimeout(route,0);setTimeout(route,80)});
+  window.addEventListener('DOMContentLoaded',()=>{route();setTimeout(route,0);setTimeout(route,80)});
+  route();setTimeout(route,0);
 })();
 
 /* BERTH.A v2.8.208 — Trabalho: acabamento visual homologação */
