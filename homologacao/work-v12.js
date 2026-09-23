@@ -460,6 +460,9 @@
     if(h==='trabalho') renderHome();
     else if(h.startsWith('trabalho-')) renderWorkspace(h.slice('trabalho-'.length));
   }
+  // RC43: expõe a renderização real para o roteador principal chamar depois de concluir a troca de rota.
+  // Evita depender da ordem dos listeners de hashchange no Safari/iPhone.
+  window.__BERTHA_WORK_ROUTE__=route;
 
   // Trabalho é o único responsável pelas rotas #trabalho*.
   // Render imediato evita a tela-placeholder antiga durante a navegação.

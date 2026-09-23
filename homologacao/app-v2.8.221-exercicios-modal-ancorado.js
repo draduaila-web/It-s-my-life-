@@ -283,6 +283,9 @@ function render() {
   // Trabalho é renderizado exclusivamente por work-v12.js.
   // Evita o placeholder antigo aparecer antes da tela correta.
   if (route === "trabalho" || route.startsWith("trabalho-")) {
+    // RC43: o módulo Trabalho renderiza depois que o roteador principal terminou sua atualização.
+    // Isso elimina a tela parcial que só se corrigia após recarregar a página no Safari.
+    requestAnimationFrame(()=>window.__BERTHA_WORK_ROUTE__?.());
     return;
   }
 
