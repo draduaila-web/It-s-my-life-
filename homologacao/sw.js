@@ -1,4 +1,4 @@
-const CACHE = "hml-bertha-v221-rc38-rituais-finance-structure-hml";
+const CACHE = "hml-bertha-v221-rc39-recipe-scroll-hml";
 self.addEventListener("install", event => event.waitUntil(self.skipWaiting()));
 self.addEventListener("activate", event => event.waitUntil((async()=>{
   const keys=await caches.keys();
