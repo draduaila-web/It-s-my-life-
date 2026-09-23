@@ -4674,3 +4674,84 @@
   `;
   document.head.appendChild(s);
 })();
+
+/* BERTH.A RC51 — correções cirúrgicas pós revisão iPhone */
+(function(){
+  if(document.getElementById('bertha-rc51-modal-corrections')) return;
+  const s=document.createElement('style');
+  s.id='bertha-rc51-modal-corrections';
+  s.textContent=`
+  /* TAREFAS — a cor do hero ocupa a superfície inteira */
+  html body dialog.bertha-plans-task-dialog>.bertha-task-modal{
+    background:linear-gradient(145deg,#fff4b9 0%,#fae9c8 48%,#f1cfb5 100%)!important;
+    border:1px solid rgba(185,139,84,.16)!important;
+  }
+  html body dialog.bertha-plans-task-dialog :is(.bertha-task-modal-head,.bertha-task-modal-body,.bertha-task-modal-actions){background:transparent!important;border:0!important;box-shadow:none!important}
+  html body dialog.bertha-plans-task-dialog .bertha-task-modal-actions{position:static!important}
+
+  /* RITUAIS — checkbox único, alinhado e do módulo */
+  html body dialog.bertha-ritual-dialog input[type=checkbox]{
+    appearance:none!important;-webkit-appearance:none!important;width:22px!important;min-width:22px!important;max-width:22px!important;height:22px!important;min-height:22px!important;
+    margin:0!important;padding:0!important;flex:0 0 22px!important;border-radius:7px!important;border:1.5px solid rgba(142,105,137,.34)!important;background:rgba(255,253,252,.82)!important;
+    display:inline-grid!important;place-content:center!important;vertical-align:middle!important;box-shadow:none!important;
+  }
+  html body dialog.bertha-ritual-dialog input[type=checkbox]:checked{background:linear-gradient(135deg,#dcaecb,#bda4df)!important;border-color:transparent!important}
+  html body dialog.bertha-ritual-dialog input[type=checkbox]:checked:after{content:'✓';font-size:14px;line-height:1;color:#fff;font-weight:800}
+  html body dialog.bertha-ritual-dialog label:has(input[type=checkbox]){display:flex!important;align-items:flex-start!important;gap:10px!important}
+
+  /* CRIAÇÃO — dialog imóvel; somente a superfície interna rola */
+  html body dialog#ideaDialog[open]{position:fixed!important;inset:0!important;width:100vw!important;height:100dvh!important;max-width:none!important;max-height:none!important;margin:0!important;padding:16px!important;border:0!important;border-radius:0!important;background:transparent!important;overflow:hidden!important;transform:none!important}
+  html body dialog#ideaDialog>#ideaForm{box-sizing:border-box!important;width:min(100%,520px)!important;max-width:520px!important;max-height:calc(100dvh - 32px)!important;margin:auto!important;overflow-y:auto!important;overflow-x:hidden!important;-webkit-overflow-scrolling:touch!important;overscroll-behavior:contain!important;padding:22px!important;border-radius:28px!important}
+  html body dialog#ideaDialog .modal-actions{position:static!important;inset:auto!important;margin-top:18px!important;padding:0!important;background:transparent!important;border:0!important;box-shadow:none!important}
+
+  /* RECEITAS — nada congelado sobre conteúdo: formulário inteiro rola e ações ficam no fim */
+  html body dialog#recipeFormDialog>#recipeForm{display:block!important;overflow-y:auto!important;max-height:calc(100dvh - 32px)!important;padding:22px!important}
+  html body dialog#recipeFormDialog #recipeForm>.modal-actions{position:static!important;inset:auto!important;margin:22px 0 0!important;padding:0!important;background:transparent!important;border:0!important;box-shadow:none!important}
+
+  /* ALIMENTAÇÃO — azul/mint/butter em fundo E nos dois botões; nunca herda rosa de Receitas */
+  html body dialog.food-context-dialog>.study-v10-modal,
+  html body dialog#recipeFormDialog.food-context-dialog>#recipeForm,
+  html body dialog.food-next-prep-dialog>.study-v10-modal{
+    background:linear-gradient(145deg,#eaf5fb 0%,#edf7f3 56%,#fbf1cf 100%)!important;border:1px solid rgba(103,151,183,.14)!important;
+  }
+  html body :is(dialog.food-context-dialog,dialog.food-next-prep-dialog) :is(.secondary,.primary,[type=submit]){
+    border:0!important;color:#667184!important;background:linear-gradient(135deg,#cfe7f3 0%,#d8ece4 55%,#f2e2b9 100%)!important;box-shadow:none!important;
+  }
+  html body :is(dialog.food-context-dialog,dialog.food-next-prep-dialog) :is(.primary,[type=submit]){color:#fff!important;background:linear-gradient(135deg,#9fc8e2 0%,#a9d4ca 55%,#dfc78f 100%)!important}
+
+  /* EXERCÍCIOS — tipografia do total volta à família do app + respiro lateral constante */
+  html body dialog.exercise-dialog .exercise-cycle-total strong{font-family:inherit!important;font-size:20px!important;font-weight:760!important;letter-spacing:-.01em!important}
+  @media(max-width:700px){
+    html body dialog.exercise-dialog[open]{padding:16px!important;box-sizing:border-box!important}
+    html body dialog.exercise-dialog[open]>.study-v10-modal{width:100%!important;max-width:620px!important;max-height:calc(100dvh - 32px)!important;margin:auto!important}
+  }
+
+  /* CASA — 16px reais de borda de tela; cancelar/fechar também na paleta Casa */
+  @media(max-width:700px){
+    html body :is(dialog.casa-dialog,dialog.casa-maint-dialog)[open]{padding:16px!important;box-sizing:border-box!important}
+    html body :is(dialog.casa-dialog,dialog.casa-maint-dialog)[open]>:is(.casa-modal-card,.casa-maint-modal,.study-v10-modal,.modal-card){width:100%!important;max-width:620px!important;max-height:calc(100dvh - 32px)!important;margin:auto!important}
+  }
+  html body :is(dialog.casa-dialog,dialog.casa-maint-dialog) .secondary{background:linear-gradient(135deg,#e5f2e7,#dcebdd)!important;color:#617064!important;border:1px solid rgba(118,151,125,.10)!important}
+  html body :is(dialog.casa-dialog,dialog.casa-maint-dialog) :is(.primary,[type=submit]){background:linear-gradient(115deg,#d8a5b3 0%,#d9b5b5 46%,#b9cfb9 100%)!important;color:#fff!important;border:0!important}
+
+  /* TRABALHO — restaura geometria compacta; conteúdo rola, ações pertencem ao fluxo */
+  html body dialog.work12-dialog[open],html body dialog.work12-front-dialog[open]{position:fixed!important;inset:0!important;width:100vw!important;height:100dvh!important;max-width:none!important;max-height:none!important;margin:0!important;padding:16px!important;border:0!important;border-radius:0!important;background:transparent!important;transform:none!important;overflow:hidden!important}
+  html body :is(dialog.work12-dialog,dialog.work12-front-dialog)>.work12-form{box-sizing:border-box!important;width:min(100%,520px)!important;height:auto!important;max-height:calc(100dvh - 32px)!important;margin:auto!important;padding:22px!important;overflow-y:auto!important;overflow-x:hidden!important;-webkit-overflow-scrolling:touch!important;overscroll-behavior:contain!important;border-radius:28px!important;background:linear-gradient(125deg,#f5edfb 0%,#efedf8 48%,#e4f4ee 100%)!important;border:1px solid rgba(120,104,151,.13)!important}
+  html body :is(dialog.work12-dialog,dialog.work12-front-dialog) :is(.work12-form-head,.work12-form-actions){position:static!important;inset:auto!important;background:transparent!important;border:0!important;box-shadow:none!important;padding-left:0!important;padding-right:0!important}
+  html body :is(dialog.work12-dialog,dialog.work12-front-dialog) .work12-form-actions{margin-top:18px!important;padding-bottom:0!important}
+  html body :is(dialog.work12-dialog,dialog.work12-front-dialog) .work12-secondary{background:linear-gradient(125deg,#eee4f8,#e4f3ed)!important;color:#67577f!important;border:0!important}
+  html body :is(dialog.work12-dialog,dialog.work12-front-dialog) .work12-primary{background:linear-gradient(125deg,#c7b1df,#a8d4c8)!important;color:#fff!important;border:0!important}
+  html body :is(dialog.work12-dialog,dialog.work12-front-dialog) .work12-more{background:rgba(255,255,255,.52)!important}
+
+  /* MEU DIA IDEAL — cópia literal da família cromática do hero */
+  html body dialog.bertha-dialog:has(.bertha-ideal-modal-form)>.bertha-modal,
+  html body dialog.bertha-goal-dialog>.bertha-modal{
+    background:linear-gradient(135deg,rgba(246,213,223,.92) 0%,rgba(252,246,239,.98) 27%,rgba(230,241,255,.98) 100%)!important;
+    border:1px solid rgba(152,165,189,.14)!important;
+  }
+  html body :is(dialog.bertha-dialog:has(.bertha-ideal-modal-form),dialog.bertha-goal-dialog) :is(.primary,.bertha-primary,[type=submit]){
+    background:linear-gradient(135deg,#e9bcc9 0%,#f0dfc8 46%,#bfd8ee 100%)!important;color:#fff!important;border:0!important;
+  }
+  `;
+  document.head.appendChild(s);
+})();
