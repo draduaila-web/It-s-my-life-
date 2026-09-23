@@ -1364,3 +1364,40 @@ html body dialog.recipe-dialog > .study-v10-modal{
   background:linear-gradient(145deg,rgba(255,246,243,.99) 0%,rgba(252,239,238,.98) 52%,rgba(250,232,235,.97) 100%)!important;
   border:1px solid rgba(181,126,137,.10)!important;
 }
+
+/* BERTH.A RC48 — correção efetiva: Referências + Receitas */
+/* Referências: reforço sobre o painel real criado por dialogBase. */
+html body dialog.bertha-goal-dialog > .bertha-modal{
+  background:
+    radial-gradient(circle at 12% 10%,rgba(255,236,217,.72),transparent 34%),
+    radial-gradient(circle at 88% 16%,rgba(226,218,248,.76),transparent 38%),
+    radial-gradient(circle at 82% 88%,rgba(214,239,233,.72),transparent 40%),
+    linear-gradient(145deg,rgba(253,242,244,.98) 0%,rgba(242,235,251,.98) 52%,rgba(226,243,239,.98) 100%)!important;
+  border:1px solid rgba(126,105,139,.12)!important;
+  border-radius:28px!important;
+  padding:24px!important;
+}
+html body dialog.bertha-goal-dialog .bertha-primary{
+  background:linear-gradient(110deg,#efcbd8 0%,#ded0f2 48%,#cde8df 100%)!important;
+  color:#665b70!important;
+}
+/* Nova/editar receita: superfície contínua rosa-pêssego; sem cabeçalho/rodapé brancos. */
+html body #recipeFormDialog > #recipeForm{
+  background:
+    radial-gradient(circle at 88% 8%,rgba(246,213,219,.46),transparent 34%),
+    radial-gradient(circle at 10% 90%,rgba(247,222,205,.50),transparent 38%),
+    linear-gradient(145deg,rgba(255,247,243,.99),rgba(252,237,237,.98) 52%,rgba(250,232,224,.97))!important;
+  border:1px solid rgba(181,126,137,.10)!important;
+}
+html body #recipeFormDialog > #recipeForm .study-v10-head,
+html body #recipeFormDialog > #recipeForm .modal-actions{
+  background:transparent!important;
+  border:0!important;
+  backdrop-filter:none!important;
+  -webkit-backdrop-filter:none!important;
+  box-shadow:none!important;
+}
+html body #recipeFormDialog > #recipeForm .primary{
+  background:linear-gradient(135deg,#efc9c5 0%,#e8b9a7 100%)!important;
+  color:#fff!important;border:0!important;
+}

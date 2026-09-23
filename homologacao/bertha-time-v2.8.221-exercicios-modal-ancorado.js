@@ -1538,10 +1538,14 @@
     else if(area==='casa'){copy='Rotinas e cuidados da Casa alimentam esta dimensão. A referência representa quanto das rotinas essenciais você deseja conseguir manter.';fields=goalField('Rotinas essenciais cumpridas (%)','targetPercent',g.targetPercent||80,'max="100"')}
     const d=dialogBase(`Referência · ${label}`,`<p class="note">${copy}</p><div class="bertha-goal-fields">${fields}</div><div class="bertha-stack"><button class="bertha-primary" data-goal-save>Salvar referência</button>${Object.keys(g).length?'<button class="bertha-secondary" data-goal-remove>Remover referência</button>':''}</div>`);
     d.classList.add('bertha-goal-dialog',`goal-${area}`);
-    const goalPalettes={autocuidado:['#f6e1e9','#eee3f7','#806b81','rgba(135,111,134,.18)'],intelectual:['#e4f1fa','#eee4f7','#697a94','rgba(111,125,149,.18)'],disciplina:['#e7f1eb','#eee4f7','#6f7d78','rgba(111,125,120,.18)'],financeiro:['#e9def5','#dff0ea','#706b86','rgba(122,117,141,.18)'],casa:['#f5e0e8','#e1eee6','#746e83','rgba(123,117,138,.18)']};
-    const gp=goalPalettes[area]||goalPalettes.autocuidado,modal=d.querySelector('.bertha-modal');
-    if(modal)modal.style.setProperty('background',`linear-gradient(145deg,rgba(251,247,239,.98),${gp[0]}99,${gp[1]}88)`,'important');
-    const saveGoal=d.querySelector('[data-goal-save]');if(saveGoal){saveGoal.style.setProperty('background',`linear-gradient(135deg, ${gp[0]}, ${gp[1]})`,'important');saveGoal.style.setProperty('color',gp[2],'important');saveGoal.style.setProperty('border',`1px solid ${gp[3]}`,'important');saveGoal.style.setProperty('box-shadow','none','important');}
+    /* RC48: todas as Referências usam a identidade multicolorida do Meu Dia Ideal.
+       A RC47 ainda aplicava uma paleta por área via style inline !important, que tinha
+       precedência sobre o CSS compartilhado e por isso a mudança não aparecia. */
+    const modal=d.querySelector('.bertha-modal');
+    const idealSurface='radial-gradient(circle at 12% 10%,rgba(255,236,217,.72),transparent 34%),radial-gradient(circle at 88% 16%,rgba(226,218,248,.76),transparent 38%),radial-gradient(circle at 82% 88%,rgba(214,239,233,.72),transparent 40%),linear-gradient(145deg,rgba(253,242,244,.98) 0%,rgba(242,235,251,.98) 52%,rgba(226,243,239,.98) 100%)';
+    const idealAction='linear-gradient(110deg,#efcbd8 0%,#ded0f2 48%,#cde8df 100%)';
+    if(modal){modal.style.setProperty('background',idealSurface,'important');modal.style.setProperty('border','1px solid rgba(126,105,139,.12)','important');}
+    const saveGoal=d.querySelector('[data-goal-save]');if(saveGoal){saveGoal.style.setProperty('background',idealAction,'important');saveGoal.style.setProperty('color','#665b70','important');saveGoal.style.setProperty('border','1px solid rgba(121,101,134,.10)','important');saveGoal.style.setProperty('box-shadow','none','important');}
     d.querySelector('[data-goal-save]').onclick=()=>{const obj={area,label,updatedAt:Date.now(),version:2};d.querySelectorAll('[data-goal-field]').forEach(i=>{const v=Math.min(100,Number(String(i.value||'').replace(',','.')));if(v>0)obj[i.dataset.goalField]=v});if(Object.keys(obj).length<=4)return;all[area]=obj;write(PROGRESS_GOALS_KEY,all);d.close();d.remove();rerender();setTimeout(enhanceIdealScreen,0)};
     d.querySelector('[data-goal-remove]')?.addEventListener('click',()=>{delete all[area];write(PROGRESS_GOALS_KEY,all);d.close();d.remove();rerender();setTimeout(enhanceIdealScreen,0)});
   }
