@@ -848,3 +848,25 @@ dialog[class*="finance" i] form,[class*="finance" i] .study-v10-modal{background
   background:#fffaf7!important;border:1px solid rgba(177,124,118,.16)!important;color:#8d6562!important;
 }
 @media(max-width:420px){.recipe-shopping-dialog .modal-actions{grid-template-columns:1fr!important}}
+
+/* BERTH.A RC19 — Exercícios: fechamento dos modais */
+@media (max-width:700px){
+  dialog.exercise-dialog{
+    position:fixed!important;left:50%!important;top:max(12px,env(safe-area-inset-top))!important;right:auto!important;bottom:auto!important;
+    transform:translateX(-50%)!important;margin:0!important;width:min(92vw,520px)!important;max-width:min(92vw,520px)!important;
+    max-height:calc(100svh - 24px - env(safe-area-inset-top))!important;overflow:hidden!important;
+  }
+  dialog.exercise-dialog>.bertha-modal,dialog.exercise-dialog>.study-v10-modal{
+    width:100%!important;max-height:calc(100svh - 24px - env(safe-area-inset-top))!important;overflow-y:auto!important;
+    -webkit-overflow-scrolling:touch!important;overscroll-behavior:contain!important;padding:22px!important;
+  }
+}
+.exercise-dialog .bertha-modal,.exercise-dialog .study-v10-modal{border:1px solid rgba(126,105,139,.10)!important;background:#fbf7f0!important}
+.exercise-dialog .bertha-modal-head{background:transparent!important;border:0!important;margin:0 0 16px!important;padding:0!important}
+.exercise-dialog .study-v10-actions{background:transparent!important;border:0!important;box-shadow:none!important;margin-top:18px!important;padding:0!important;gap:9px!important}
+.exercise-dialog .primary{background:linear-gradient(135deg,#d7c6ea,#edc9c9)!important;color:#5f5266!important;border-color:transparent!important}
+.exercise-dialog .secondary{background:#fffaf7!important;color:#6f6375!important;border-color:rgba(126,105,139,.14)!important}
+.exercise-cycle-dialog .exercise-cycle-section,.exercise-week-dialog .exercise-cycle-section{margin-left:0!important;margin-right:0!important}
+.exercise-week-dialog .exercise-week-warning{margin-left:0!important;margin-right:0!important}
+.exercise-edit-record-dialog .bertha-modal,.exercise-plan-dialog .bertha-modal,.exercise-quick-dialog .bertha-modal{padding:22px!important}
+.exercise-other-list button:focus:not(:focus-visible){outline:none!important;box-shadow:none!important}
