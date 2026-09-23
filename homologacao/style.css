@@ -1307,3 +1307,60 @@ input[type="checkbox"]:not(.switch-input):checked::after{
 .bertha-ritual-dialog .bertha-task-modal-actions{flex:0 0 auto!important;position:static!important}
 
 /* IMPORTANTE: .bertha-more-modal e qualquer drawer/menu ficam deliberadamente fora deste sistema. */
+
+/* BERTH.A RC47 — Meu Dia Ideal: referências multicoloridas + Receita restaurada */
+/* Referências: uma única linguagem visual, derivada do hero multicolorido do Meu Dia Ideal. */
+html body dialog.bertha-goal-dialog > .bertha-modal{
+  box-sizing:border-box!important;
+  width:min(620px,calc(100vw - 32px))!important;
+  max-height:calc(100dvh - env(safe-area-inset-top,0px) - env(safe-area-inset-bottom,0px) - 32px)!important;
+  padding:24px!important;
+  border-radius:28px!important;
+  overflow:auto!important;
+  -webkit-overflow-scrolling:touch!important;
+  background:
+    radial-gradient(circle at 12% 10%,rgba(255,236,217,.72),transparent 34%),
+    radial-gradient(circle at 88% 16%,rgba(226,218,248,.76),transparent 38%),
+    radial-gradient(circle at 82% 88%,rgba(214,239,233,.72),transparent 40%),
+    linear-gradient(145deg,rgba(253,242,244,.98) 0%,rgba(242,235,251,.98) 52%,rgba(226,243,239,.98) 100%)!important;
+  border:1px solid rgba(126,105,139,.12)!important;
+  box-shadow:0 22px 54px rgba(55,43,67,.16)!important;
+}
+html body dialog.bertha-goal-dialog .bertha-modal-head{
+  margin:0 0 18px!important;padding:0!important;background:transparent!important;
+  border:0!important;box-shadow:none!important;
+}
+html body dialog.bertha-goal-dialog .bertha-modal-head strong{color:#403747!important;font-size:20px!important;line-height:1.12!important}
+html body dialog.bertha-goal-dialog .bertha-modal-head button{
+  background:rgba(255,255,255,.36)!important;border:1px solid rgba(112,97,121,.08)!important;
+  color:#8d8390!important;box-shadow:none!important;
+}
+html body dialog.bertha-goal-dialog .note{color:#776d79!important;line-height:1.45!important;margin:0 0 16px!important}
+html body dialog.bertha-goal-dialog .bertha-goal-fields{margin:0 0 18px!important}
+html body dialog.bertha-goal-dialog .bertha-goal-fields input{
+  min-height:48px!important;border-radius:15px!important;background:rgba(255,253,249,.94)!important;
+  border:1px solid rgba(118,102,126,.12)!important;color:#403946!important;box-shadow:none!important;
+}
+html body dialog.bertha-goal-dialog .bertha-stack{gap:10px!important;margin:0!important}
+html body dialog.bertha-goal-dialog .bertha-stack .bertha-primary{
+  min-height:48px!important;border-radius:15px!important;
+  background:linear-gradient(110deg,#efcbd8 0%,#ded0f2 48%,#cde8df 100%)!important;
+  color:#665b70!important;border:1px solid rgba(121,101,134,.10)!important;box-shadow:none!important;
+}
+html body dialog.bertha-goal-dialog .bertha-stack .bertha-secondary{
+  min-height:44px!important;border-radius:15px!important;background:rgba(255,255,255,.50)!important;
+  color:#716776!important;border:1px solid rgba(121,101,134,.09)!important;box-shadow:none!important;
+}
+html body dialog.bertha-goal-dialog .bertha-goal-fields input:focus{
+  outline:none!important;border-color:rgba(130,108,145,.28)!important;
+  box-shadow:0 0 0 3px rgba(216,201,234,.42)!important;
+}
+
+/* Receita aberta: restaura a identidade rosa/pêssego do módulo Receitas.
+   Evita que a regra de contexto de Alimentação pinte o detalhe da receita de azul. */
+html body #foodRecipeDialog > .study-v10-modal,
+html body dialog.food-context-dialog .recipe-detail-modal,
+html body dialog.recipe-dialog > .study-v10-modal{
+  background:linear-gradient(145deg,rgba(255,246,243,.99) 0%,rgba(252,239,238,.98) 52%,rgba(250,232,235,.97) 100%)!important;
+  border:1px solid rgba(181,126,137,.10)!important;
+}
