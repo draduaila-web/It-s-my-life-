@@ -904,3 +904,28 @@ dialog[class*="finance" i] form,[class*="finance" i] .study-v10-modal{background
 dialog.bertha-exercise-dialog .bertha-modal{background:#fbf7ef!important;border:1px solid rgba(151,128,170,.10)!important;}
 dialog.bertha-exercise-dialog .bertha-primary{background:linear-gradient(135deg,#c9b4dc 0%,#e7b5b1 100%)!important;color:#fff!important;border:0!important;}
 dialog.bertha-exercise-dialog .bertha-secondary{background:linear-gradient(135deg,rgba(225,214,237,.92),rgba(247,221,216,.92))!important;color:#665a70!important;border:1px solid rgba(139,113,151,.08)!important;}
+
+/* BERTH.A RC25 — fechamento de homologação: consistência final do Modal System v1 */
+/* Financeiro: corpo único, sem cabeçalho/rodapé destacados */
+dialog.fin-unified-dialog>.modal-card,
+dialog.fin-planned-dialog>.modal-card{background:#fbf7f0!important;border:1px solid rgba(121,108,124,.10)!important;border-radius:26px!important;padding:20px!important;box-shadow:0 22px 64px rgba(58,44,63,.16)!important}
+dialog.fin-unified-dialog .modal-head,
+dialog.fin-planned-dialog .modal-head{position:static!important;inset:auto!important;margin:0 0 14px!important;padding:0!important;background:transparent!important;backdrop-filter:none!important;-webkit-backdrop-filter:none!important;border:0!important;box-shadow:none!important}
+dialog.fin-unified-dialog .modal-actions,
+dialog.fin-planned-dialog .modal-actions{position:static!important;inset:auto!important;margin:16px 0 0!important;padding:0!important;background:transparent!important;border:0!important;box-shadow:none!important;backdrop-filter:none!important;-webkit-backdrop-filter:none!important}
+/* Campos nunca devem provocar autozoom no Safari/iPhone */
+dialog input,dialog select,dialog textarea{font-size:16px!important}
+/* Componentes já migrados ao Modal System: mesma estabilidade estrutural */
+@media(max-width:700px){
+ dialog.fin-unified-dialog,dialog.fin-planned-dialog,dialog.exercise-dialog,dialog.recipe-dialog,
+ .food-next-prep-dialog,#chooseFoodDialog,#chooseFutureFoodDialog,#foodRecipeDialog{
+   position:fixed!important;left:50%!important;top:50%!important;right:auto!important;bottom:auto!important;
+   transform:translate(-50%,-50%)!important;margin:0!important;width:min(92vw,540px)!important;max-width:min(92vw,540px)!important;
+   max-height:82svh!important;overflow:hidden!important;overscroll-behavior:contain!important;padding:0!important;border:0!important;background:transparent!important;
+ }
+ dialog.fin-unified-dialog>*,dialog.fin-planned-dialog>*,dialog.exercise-dialog>*,dialog.recipe-dialog>*,
+ .food-next-prep-dialog>*,#chooseFoodDialog>*,#chooseFutureFoodDialog>*,#foodRecipeDialog>*{
+   box-sizing:border-box!important;width:100%!important;max-height:82svh!important;overflow-y:auto!important;
+   -webkit-overflow-scrolling:touch!important;overscroll-behavior:contain!important;margin:0!important;
+ }
+}
