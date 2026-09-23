@@ -2351,7 +2351,7 @@
   function ritualSettingsDialog(id){
     const ev=ritualDetailData(id,new Date()); if(!ev)return;
     const key=id==='capilar'?CAPILLARY_SETTINGS_KEY:SELFCARE_SETTINGS_KEY, all=read(key,{}), type=ev.type, x={...ritualDefaultSettings(id,type),...(all[type]||{})};
-    const d=document.createElement('dialog');d.className='bertha-dialog bertha-task-dialog';
+    const d=document.createElement('dialog');d.className='bertha-dialog bertha-task-dialog bertha-ritual-settings-dialog';
     d.innerHTML=`<form class="bertha-task-modal" method="dialog"><div class="bertha-task-modal-head"><div><span>RITUAL</span><h2>Configurar ${esc(id==='capilar'?'Ritual Capilar':'Autocuidado')}</h2></div><button type="button" data-close>×</button></div><div class="bertha-task-modal-body">
       <div class="bertha-task-field"><span>Quando pode acontecer?</span><div class="bertha-segment">${[['flex','Flexível'],['morning','Manhã'],['afternoon','Tarde'],['night','Noite']].map(([v,l])=>`<button type="button" data-period="${v}" class="${x.period===v?'active':''}">${l}</button>`).join('')}</div></div>
       <label class="bertha-task-field"><span>Horário <small>opcional</small></span><input data-time type="time" value="${x.time||''}"></label>
@@ -2446,15 +2446,26 @@
     d.showModal();
   }
 
+  function ritualFullScheduleDialog(title,eyebrow){
+    const d=document.createElement('dialog');
+    d.className='bertha-dialog bertha-task-dialog bertha-ritual-dialog bertha-full-ritual-dialog';
+    d.innerHTML=`<form class="bertha-task-modal" method="dialog"><div class="bertha-task-modal-head"><div><span>${esc(eyebrow||'RITUAIS')}</span><h2>${esc(title)}</h2></div><button type="button" data-close>×</button></div><div class="bertha-task-modal-body bertha-modal-content"></div></form>`;
+    document.body.appendChild(d);
+    d.querySelector('[data-close]').onclick=()=>{d.close();d.remove()};
+    d.addEventListener('cancel',e=>{e.preventDefault();d.close();d.remove()});
+    d.showModal();
+    return d;
+  }
+
   function fullSelfcareSchedule(){
-    const d=modalShell('Ciclo de Autocuidado','14 dias'),start=selfcareCurrentCycleStartIndex();let rows='';
+    const d=ritualFullScheduleDialog('Ciclo de Autocuidado','14 DIAS'),start=selfcareCurrentCycleStartIndex();let rows='';
     for(let j=0;j<14;j++){const k=start+j,ev=selfcareEventForIndex(k);if(!ev)continue;const date=ev.date;rows+=`<button type="button" class="bertha-full-schedule-row bertha-full-selfcare-edit" data-selfcare-occurrence="${k}"><span>${date.toLocaleDateString('pt-BR',{day:'2-digit',month:'short'}).replace('.','')}</span><div><strong>${esc(ev.title)}</strong><small>Dia ${ev.cycleDay} de 14${ev.optional?' · Livre':` · ${durationText(ev.minutes)} · ${taskLabelPeriod(ev.period||ritualSetting('autocuidado',ev.type).period||'night')}`}${ev.includeInMyDay===false?' · fora do Meu Dia':''}</small></div><b>›</b></button>`;}
     d.querySelector('.bertha-modal-content').innerHTML=`<div class="bertha-full-schedule">${rows}</div>`;
     d.querySelectorAll('[data-selfcare-occurrence]').forEach(b=>b.onclick=()=>{d.close();d.remove();selfcareOccurrenceEditor(b.dataset.selfcareOccurrence)});
   }
 
   function fullCapillarySchedule(){
-    const d=modalShell('Cronograma capilar','45 dias');let rows='';
+    const d=ritualFullScheduleDialog('Cronograma capilar','45 DIAS');let rows='';
     for(let k=0;k<capillaryCycleTotal();k++){const e=capillaryEventForIndex(k);if(!e)continue;const date=e.date;rows+=`<button type="button" class="bertha-full-schedule-row bertha-full-capillary-edit" data-capillary-occurrence="${k}"><span>${date.toLocaleDateString('pt-BR',{day:'2-digit',month:'short'}).replace('.','')}</span><div><strong>${esc(e.title)}</strong><small>Dia ${k+1} de ${capillaryCycleTotal()} · ${durationText(e.minutes)} · ${taskLabelPeriod(e.period||ritualSetting('capilar',e.type).period||'morning')}${e.includeInMyDay===false?' · fora do Meu Dia':''}</small></div><b>›</b></button>`;}
     d.querySelector('.bertha-modal-content').innerHTML=`<div class="bertha-full-schedule">${rows}</div>`;
     d.querySelectorAll('[data-capillary-occurrence]').forEach(b=>b.onclick=()=>{d.close();d.remove();capillaryOccurrenceEditor(b.dataset.capillaryOccurrence)});

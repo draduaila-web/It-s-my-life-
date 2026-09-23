@@ -881,3 +881,15 @@ dialog[class*="finance" i] form,[class*="finance" i] .study-v10-modal{background
 .casa-time-stack .casa-time{width:100%!important;text-align:center!important;justify-content:center!important}
 .casa-substitute-info label{display:block;margin-top:18px!important}.casa-substitute-info input{margin-top:7px!important}
 .casa-web-card #addCasaTip{margin:4px 0 14px!important}
+
+/* RC22 — Rituais: Modal System BERTH.A + cronogramas 45/14 dias funcionais */
+.bertha-ritual-settings-dialog,.bertha-full-ritual-dialog{padding:0!important;border:0!important;background:transparent!important;max-width:none!important;max-height:none!important}
+.bertha-ritual-settings-dialog>.bertha-task-modal,.bertha-full-ritual-dialog>.bertha-task-modal{width:min(620px,calc(100vw - 28px))!important;max-height:calc(100dvh - env(safe-area-inset-top,0px) - env(safe-area-inset-bottom,0px) - 36px)!important;margin:auto!important;background:#fbf7f0!important;border:1px solid rgba(121,108,124,.10)!important;border-radius:28px!important;overflow:hidden!important;display:flex!important;flex-direction:column!important;box-shadow:0 22px 60px rgba(76,61,69,.18)!important}
+.bertha-ritual-settings-dialog .bertha-task-modal-head,.bertha-full-ritual-dialog .bertha-task-modal-head{background:transparent!important;border:0!important;padding:22px 20px 12px!important;flex:0 0 auto!important}
+.bertha-ritual-settings-dialog .bertha-task-modal-body,.bertha-full-ritual-dialog .bertha-task-modal-body{padding:4px 20px 20px!important;overflow:auto!important;-webkit-overflow-scrolling:touch!important;overscroll-behavior:contain!important}
+.bertha-ritual-settings-dialog .bertha-task-modal-actions{position:static!important;background:transparent!important;border:0!important;box-shadow:none!important;padding:4px 20px 20px!important}
+.bertha-ritual-settings-dialog .bertha-task-save{background:linear-gradient(135deg,#d8c6e9,#efc9d2)!important;color:#62546a!important;border:0!important}
+.bertha-ritual-settings-dialog input:focus,.bertha-ritual-settings-dialog select:focus{border-color:#cdb7dc!important;box-shadow:0 0 0 3px rgba(205,183,220,.18)!important}
+.bertha-full-ritual-dialog .bertha-full-schedule{display:grid!important;gap:10px!important;padding-bottom:4px!important}
+.bertha-full-ritual-dialog .bertha-full-schedule-row{width:100%!important;text-align:left!important;border:1px solid rgba(121,108,124,.10)!important;background:#fffaf5!important;border-radius:18px!important;padding:13px 14px!important;display:grid!important;grid-template-columns:54px 1fr auto!important;gap:10px!important;align-items:center!important;color:#554b58!important}
+.bertha-full-ritual-dialog .bertha-full-schedule-row span{font-size:12px!important;font-weight:750!important;color:#8b778f!important}.bertha-full-ritual-dialog .bertha-full-schedule-row strong{display:block!important;font-size:14px!important}.bertha-full-ritual-dialog .bertha-full-schedule-row small{display:block!important;margin-top:3px!important;line-height:1.35!important;color:#8a7d87!important}.bertha-full-ritual-dialog .bertha-full-schedule-row b{font-size:20px!important;color:#b99fc6!important}
