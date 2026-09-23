@@ -2744,7 +2744,7 @@ function addSharedShoppingItem(name,source,category="Outros"){
 function openRecipeShoppingDialog(r){
  const old=document.querySelector('#recipeShoppingDialog');if(old)old.remove();
  const ingredients=(r?.ingredients||[]).filter(Boolean);
- const dlg=document.createElement('dialog');dlg.id='recipeShoppingDialog';dlg.className='study-v10-dialog';
+ const dlg=document.createElement('dialog');dlg.id='recipeShoppingDialog';dlg.className='study-v10-dialog recipe-dialog recipe-shopping-dialog';
  dlg.innerHTML=`<div class="study-v10-modal"><div class="study-v10-head"><div><div class="eyebrow">LISTA DE COMPRAS</div><h2>Adicionar ingredientes</h2><p>${escapeHtml(r?.name||'Receita')}</p></div><button type="button" class="study-v10-x" data-close>×</button></div>
  <div class="card"><p class="note">Desmarque o que você já tem em casa.</p><div class="casa-mini-shopping">${ingredients.map((x,i)=>`<div class="casa-mini-shop-row"><label><input type="checkbox" data-recipe-shop-item="${i}" checked><span>${escapeHtml(x)}</span></label></div>`).join('')||'<div class="empty compact"><strong>Sem ingredientes cadastrados.</strong></div>'}</div></div>
  <div class="modal-actions"><button type="button" class="secondary" data-close>Cancelar</button><div class="grow"></div><button type="button" class="primary" id="confirmRecipeShopping" ${ingredients.length?'':'disabled'}>Adicionar selecionados</button></div></div>`;

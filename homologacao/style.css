@@ -817,3 +817,34 @@ dialog[class*="finance" i] form,[class*="finance" i] .study-v10-modal{background
 
 /* RC17 — Alimentação/Receitas: programação da próxima cozinha e modal no padrão do módulo */
 .food-v115-routine{display:grid;gap:14px}.food-v115-routine .food-program-next{justify-self:stretch;min-height:44px;border-radius:16px;border:1px solid rgba(91,126,157,.18);background:linear-gradient(135deg,rgba(225,239,249,.95),rgba(255,239,213,.92));color:#547ca2;font-weight:750}.food-next-prep-dialog .study-v10-modal{background:#fffaf3}.food-next-prep-dialog .primary{background:linear-gradient(135deg,#8db7d7,#e6bf8d)!important;color:#fff!important}.food-next-prep-dialog input:focus{border-color:#8db7d7!important;box-shadow:0 0 0 3px rgba(141,183,215,.15)!important}
+
+
+/* BERTH.A RC18 — Receitas: fechamento visual dos modais e ações */
+.recipe-shopping-dialog .study-v10-modal,
+#chooseFoodDialog .study-v10-modal,
+#chooseFutureFoodDialog .study-v10-modal,
+#foodRecipeDialog .study-v10-modal{
+  padding:22px!important;
+  background:#fbf7f0!important;
+}
+.recipe-shopping-dialog .card{margin:12px 0 16px!important;padding:16px!important;background:rgba(255,253,249,.72)!important}
+.recipe-shopping-dialog .casa-mini-shop-row label{display:grid!important;grid-template-columns:22px minmax(0,1fr)!important;gap:10px!important;align-items:start!important}
+.recipe-shopping-dialog input[type=checkbox]{appearance:none!important;-webkit-appearance:none!important;width:20px!important;height:20px!important;margin:1px 0 0!important;border:1.5px solid #c5a8a4!important;border-radius:6px!important;background:#fffdfa!important}
+.recipe-shopping-dialog input[type=checkbox]:checked{background:linear-gradient(135deg,#efc9c5,#e6b9a9)!important;box-shadow:inset 0 0 0 4px #fffdfa!important}
+.recipe-shopping-dialog .modal-actions{display:grid!important;grid-template-columns:1fr 1fr!important;gap:10px!important;margin-top:14px!important}
+.recipe-shopping-dialog .modal-actions .grow{display:none!important}
+.recipe-shopping-dialog .modal-actions button{width:100%!important;min-height:44px!important;border-radius:14px!important;padding:10px 12px!important}
+#chooseFoodDialog #chooseExistingWrap{margin-top:14px!important}
+#chooseFoodDialog #chooseFoodSearch,#chooseFutureFoodDialog #chooseFutureFoodSearch{margin-top:10px!important;margin-bottom:12px!important}
+#chooseFoodDialog .recipe-choice-stack{display:grid!important;gap:10px!important;margin-top:12px!important}
+#chooseFoodDialog .recipe-choice{padding:14px!important;border-radius:16px!important}
+#foodRecipeDialog .recipe-detail-card{margin-top:12px!important;padding:16px!important}
+#foodRecipeDialog .recipe-modal-actions{margin-top:14px!important}
+.recipe-upcoming .recipe-meal-actions button[data-future-other]{
+  background:linear-gradient(135deg,#efc9c5,#e8b9a7)!important;
+  border-color:rgba(177,124,118,.12)!important;color:#fff!important;
+}
+.recipe-upcoming .recipe-meal-actions button[data-future-keep]{
+  background:#fffaf7!important;border:1px solid rgba(177,124,118,.16)!important;color:#8d6562!important;
+}
+@media(max-width:420px){.recipe-shopping-dialog .modal-actions{grid-template-columns:1fr!important}}
