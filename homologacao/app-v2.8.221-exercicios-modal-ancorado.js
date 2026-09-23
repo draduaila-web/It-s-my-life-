@@ -1242,18 +1242,18 @@ function ensureFinanceStyles(){
  @media(max-width:560px){dialog.fin-planned-dialog{width:calc(100vw - 24px)!important;max-height:calc(100dvh - 24px)!important;}dialog.fin-planned-dialog>.modal-card{max-height:calc(100dvh - 24px)!important;padding:18px!important;border-radius:24px!important;}dialog.fin-planned-dialog .modal-head{top:-18px!important;margin:-18px -18px 12px!important;padding:18px!important;}dialog.fin-planned-dialog .modal-actions{bottom:-18px!important;margin:14px -18px -18px!important;padding:12px 18px calc(12px + env(safe-area-inset-bottom))!important;}dialog.fin-planned-dialog .form-grid{grid-template-columns:1fr!important;gap:0!important;}}
  @media(max-width:420px){.finance-metrics{grid-template-columns:1fr}.panel-head{gap:8px}.planned-bill-row{grid-template-columns:1fr}.planned-bill-side{text-align:left}.planned-bill-actions{justify-content:flex-start}}
 /* BERTH.A v2.8.107 — Financeiro: modais unificados + iOS anti-autozoom */
-dialog.fin-unified-dialog>.modal-card{background:radial-gradient(ellipse at 12% 8%,rgba(166,211,242,.10),transparent 34%),radial-gradient(ellipse at 92% 76%,rgba(184,166,235,.10),transparent 38%),linear-gradient(145deg,rgba(255,251,245,.99),rgba(248,248,252,.985) 52%,rgba(246,244,252,.98))!important;border:1px solid rgba(123,158,194,.12)!important;box-shadow:0 26px 70px rgba(44,55,78,.18)!important}
-dialog.fin-unified-dialog .modal-head{align-items:flex-start!important;background:rgba(255,252,248,.91)!important}
-dialog.fin-unified-dialog .modal-head .eyebrow{color:#756487!important;font-size:11px!important;font-weight:760!important;letter-spacing:.18em!important}
+dialog.fin-unified-dialog>.modal-card{background:#fbf7f0!important;border:1px solid rgba(121,108,124,.10)!important;box-shadow:0 22px 64px rgba(58,44,63,.16)!important;border-radius:26px!important;padding:20px!important}
+dialog.fin-unified-dialog .modal-head{align-items:flex-start!important;background:transparent!important;border:0!important;box-shadow:none!important;margin:0 0 14px!important;padding:0!important;position:static!important}
+dialog.fin-unified-dialog .modal-head .eyebrow{color:#7b6685!important;font-size:11px!important;font-weight:760!important;letter-spacing:.18em!important}
 dialog.fin-unified-dialog .modal-head h2{font-size:25px!important;font-weight:540!important;letter-spacing:-.025em!important;line-height:1.12!important;color:#30313d!important}
-dialog.fin-unified-dialog .modal-head .icon-btn{background:rgba(238,230,248,.78)!important;color:#75598a!important;border:0!important}
+dialog.fin-unified-dialog .modal-head .icon-btn{background:rgba(255,255,255,.58)!important;color:#766d77!important;border:1px solid rgba(121,108,124,.10)!important;box-shadow:none!important;outline:none!important}
 dialog.fin-unified-dialog label{color:#77707c!important;font-size:14px!important;font-weight:680!important}
-dialog.fin-unified-dialog input,dialog.fin-unified-dialog select,dialog.fin-unified-dialog textarea{font-size:16px!important;line-height:1.25!important;color:#393641!important;background:rgba(255,255,255,.72)!important;border:1px solid rgba(125,104,145,.16)!important;box-shadow:none!important;-webkit-appearance:none}
+dialog.fin-unified-dialog input,dialog.fin-unified-dialog select,dialog.fin-unified-dialog textarea{font-size:16px!important;line-height:1.25!important;color:#393641!important;background:rgba(255,255,255,.72)!important;border:1px solid rgba(121,108,124,.14)!important;box-shadow:none!important;-webkit-appearance:none}
 dialog.fin-unified-dialog select{appearance:auto!important;-webkit-appearance:menulist!important}
-dialog.fin-unified-dialog input:focus,dialog.fin-unified-dialog select:focus,dialog.fin-unified-dialog textarea:focus{outline:2px solid rgba(126,161,207,.18)!important;outline-offset:1px!important;border-color:rgba(116,145,192,.26)!important}
-dialog.fin-unified-dialog .modal-actions{background:rgba(255,252,248,.92)!important}
-dialog.fin-unified-dialog .modal-actions .secondary{background:rgba(238,230,248,.72)!important;color:#775c8b!important;border:0!important}
-dialog.fin-unified-dialog .modal-actions .primary{background:linear-gradient(110deg,#9a73e5,#7e8fe5 58%,#7eb8d2)!important;color:#fff!important;border:0!important}
+dialog.fin-unified-dialog input:focus,dialog.fin-unified-dialog select:focus,dialog.fin-unified-dialog textarea:focus{outline:2px solid rgba(168,211,202,.22)!important;outline-offset:1px!important;border-color:rgba(202,167,215,.34)!important}
+dialog.fin-unified-dialog .modal-actions{position:static!important;inset:auto!important;margin:16px 0 0!important;padding:0!important;background:transparent!important;border:0!important;box-shadow:none!important;backdrop-filter:none!important;-webkit-backdrop-filter:none!important}
+dialog.fin-unified-dialog .modal-actions .secondary{background:rgba(238,229,247,.72)!important;color:#765b82!important;border:0!important}
+dialog.fin-unified-dialog .modal-actions .primary{background:linear-gradient(120deg,#caa7d7 0%,#b9b8d6 48%,#a8d3ca 100%)!important;color:#fff!important;border:0!important;box-shadow:none!important}
 dialog.fin-unified-dialog .fin-modal-x{touch-action:manipulation!important;-webkit-tap-highlight-color:transparent!important}
 
 
