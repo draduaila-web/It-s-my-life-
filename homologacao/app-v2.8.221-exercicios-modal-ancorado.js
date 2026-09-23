@@ -500,6 +500,24 @@ function projectBlocks(x){return (Array.isArray(x.sessionMinutes)?x.sessionMinut
 function projectRemaining(x){const total=Math.max(0,+x.totalMinutes||0),done=Math.max(0,+x.progressMinutes||0);return total?Math.max(0,total-done):0}
 function ideaSafeLink(url){try{const u=new URL(String(url||'').trim());return /^https?:$/.test(u.protocol)?u.href:''}catch(e){return ''}}
 
+const IDEA_ICONS=[
+  ['spark','Ideia','<path d="M12 3l1.5 4.2L18 9l-4.5 1.8L12 15l-1.5-4.2L6 9l4.5-1.8L12 3z"/><path d="M18.5 14.5l.8 2.2 2.2.8-2.2.8-.8 2.2-.8-2.2-2.2-.8 2.2-.8.8-2.2z"/>'],
+  ['bulb','Lâmpada','<path d="M9 18h6M10 21h4"/><path d="M8.2 14.5A6 6 0 1 1 15.8 14.5c-.9.7-1.4 1.5-1.6 2.5H9.8c-.2-1-.7-1.8-1.6-2.5z"/>'],
+  ['note','Nota','<path d="M6 4h12v16H6z"/><path d="M9 8h6M9 12h6M9 16h4"/>'],
+  ['pen','Escrita','<path d="M5 19l3.5-.8L18 8.7 15.3 6 5.8 15.5 5 19z"/><path d="M13.8 7.5l2.7 2.7"/>'],
+  ['palette','Criação','<path d="M12 4a8 8 0 1 0 0 16h1.2a1.8 1.8 0 0 0 0-3.6h-.7a1.5 1.5 0 0 1 0-3H16A4 4 0 0 0 20 9.4C20 6.4 16.4 4 12 4z"/><path d="M8 9h.01M11 7h.01M15 8h.01"/>'],
+  ['folder','Projeto','<path d="M3.5 7h6l2 2h9v10h-17z"/><path d="M3.5 7V5h6l2 2"/>'],
+  ['target','Meta','<circle cx="12" cy="12" r="8"/><circle cx="12" cy="12" r="4"/><path d="M12 12l6-6"/>'],
+  ['map','Plano','<path d="M4 6l5-2 6 2 5-2v14l-5 2-6-2-5 2z"/><path d="M9 4v14M15 6v14"/>'],
+  ['check','Checklist','<path d="M9 6h11M9 12h11M9 18h11"/><path d="M4 6l1 1 2-2M4 12l1 1 2-2M4 18l1 1 2-2"/>'],
+  ['calendar','Agenda','<rect x="4" y="5" width="16" height="15" rx="2"/><path d="M8 3v4M16 3v4M4 9h16"/>'],
+  ['home','Casa','<path d="M4 11l8-7 8 7v9h-6v-6h-4v6H4z"/>'],
+  ['briefcase','Trabalho','<rect x="3" y="7" width="18" height="12" rx="2"/><path d="M9 7V4h6v3M3 12h18"/>']
+];
+function ideaIconSvg(key){const it=IDEA_ICONS.find(x=>x[0]===key)||IDEA_ICONS[0];return `<svg class="idea-icon-svg" viewBox="0 0 24 24" aria-hidden="true">${it[2]}</svg>`}
+function ideaIconPicker(selected='spark'){return `<div class="idea-icon-picker" role="group" aria-label="Ícone">${IDEA_ICONS.map(([k,l])=>`<button type="button" class="idea-icon-choice ${k===selected?'active':''}" data-idea-icon="${k}" aria-label="${l}" title="${l}">${ideaIconSvg(k)}<span>${l}</span></button>`).join('')}</div><input type="hidden" id="ideaIcon" value="${selected}">`}
+function bindIdeaIconPicker(root){root.querySelectorAll('[data-idea-icon]').forEach(b=>b.onclick=()=>{root.querySelector('#ideaIcon').value=b.dataset.ideaIcon;root.querySelectorAll('[data-idea-icon]').forEach(x=>x.classList.toggle('active',x===b))})}
+
 function ensureIdeasV297Styles(){
   if(document.querySelector('#ideasV297Styles')) return;
   const st=document.createElement('style'); st.id='ideasV297Styles'; st.textContent=`
@@ -550,6 +568,14 @@ function ensureIdeasV297Styles(){
   #ideaDialog .idea-inline-spark{color:#6f9fc7;font-size:17px}
   #ideaDialog .modal-actions{border-top:0!important;margin-top:8px!important}
   #ideaDialog .modal-actions .secondary{background:rgba(239,241,246,.72)!important;color:#71778a!important;border:0!important}
+
+  .idea-icon-svg{width:22px;height:22px;display:block;fill:none;stroke:currentColor;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round}
+  .idea-symbol{width:38px;height:38px;border-radius:12px;display:grid;place-items:center;background:rgba(225,237,248,.72);flex:0 0 38px}
+  #ideaDialog .idea-icon-label{display:block;margin:2px 0 7px;color:#34394d;font-size:14px;font-weight:620}
+  #ideaDialog .idea-icon-picker{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px;margin:0 0 16px}
+  #ideaDialog .idea-icon-choice{min-width:0;min-height:62px;border:1px solid rgba(112,135,164,.14);border-radius:14px;background:rgba(255,255,255,.62);color:#708ba9;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:5px;padding:7px 4px}
+  #ideaDialog .idea-icon-choice span{font-size:10px;line-height:1.1;color:#72798b;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%}
+  #ideaDialog .idea-icon-choice.active{background:linear-gradient(120deg,rgba(213,235,249,.94),rgba(231,228,250,.86));border-color:rgba(102,153,204,.34);color:#4f86b7;box-shadow:0 0 0 2px rgba(119,172,218,.08)}
   @media(max-width:480px){.idea-hero{padding:20px!important}.idea-hero h2{font-size:28px!important}.idea-hero p{max-width:100%}#ideaDialog #ideaForm{padding:18px 18px max(28px,env(safe-area-inset-bottom))!important}}
   `; document.head.appendChild(st);
 }
@@ -562,14 +588,14 @@ function renderIdeias(){
   app.innerHTML=`
     <section class="hero idea-hero"><div class="idea-hero-kicker">CRIAÇÃO &amp; IDEIAS</div><h2>Create headroom for life.</h2><p>Você guarda. A BERTH.A ajuda a dar forma quando for a hora.</p><span class="idea-hero-mark" aria-hidden="true">◇</span></section>
     <div class="add-row"><input class="search" id="ideaSearch" placeholder="Buscar ideia..." autocomplete="off"><button class="primary" id="addIdeaBtn">＋ Adicionar</button></div>
-    <div class="tabs idea-tabs">${ideaTab('todas','Tudo',counts.todas)}${ideaTab('ideia','Ideias',counts.ideias)}${ideaTab('projeto','Projetos',counts.projetos)}${ideaTab('plano','Planos',counts.planos)}</div>
+    <div class="tabs idea-tabs">${ideaTab('todas','Tudo')}${ideaTab('ideia','Ideias')}${ideaTab('projeto','Projetos')}${ideaTab('plano','Planos')}</div>
     <div class="list" id="ideaList">${filtered.length?filtered.map(ideaCardHtml).join(''):ideaEmptyHtml()}</div>`;
   document.querySelector('#addIdeaBtn').onclick=()=>openIdeaModal();
   document.querySelector('#ideaSearch').oninput=e=>{const q=e.target.value.toLowerCase();document.querySelector('#ideaList').innerHTML=filtered.filter(x=>`${x.title} ${x.note||''} ${x.nextAction||''}`.toLowerCase().includes(q)).map(ideaCardHtml).join('')||ideaEmptyHtml();bindIdeaCards()};
   document.querySelectorAll('.idea-tab').forEach(b=>b.onclick=()=>{ideaFilter=b.dataset.filter;renderIdeias()});
   bindIdeaCards();
 }
-function ideaTab(filter,label,count){return `<button class="tab idea-tab ${ideaFilter===filter?'active':''}" data-filter="${filter}">${label}${count?` · ${count}`:''}</button>`}
+function ideaTab(filter,label){return `<button class="tab idea-tab ${ideaFilter===filter?'active':''}" data-filter="${filter}">${label}</button>`}
 function ideaCardHtml(x){
   const typeLabel=x.type==='projeto'?'Projeto':x.type==='plano'?'Plano':'Ideia';
   let extra='';
@@ -580,7 +606,7 @@ function ideaCardHtml(x){
     extra=`<div class="meta" style="margin-top:7px;gap:6px;flex-wrap:wrap">${estimate}${x.projectSuggestWindow?'<span class="pill">BERTA pode sugerir</span>':''}${x.nextAction?`<span class="pill">Próximo: ${escapeHtml(x.nextAction)}</span>`:''}</div>`;
   } else if(x.type==='plano' && x.planHorizon){ extra=`<div class="meta" style="margin-top:7px"><span class="pill">${escapeHtml(x.planHorizonLabel||x.planHorizon)}</span></div>`; }
   const link=ideaSafeLink(x.link);
-  return `<article class="card pending-card idea-card" data-idea-id="${x.id}"><div class="pending"><div class="idea-symbol">${x.type==='projeto'?'◌':x.type==='plano'?'⌁':'✦'}</div><div class="pending-main"><div class="pending-title">${escapeHtml(x.title)}</div><div class="meta"><span class="pill">${typeLabel}</span>${link?`<a class="pill idea-link" href="${escapeHtml(link)}" target="_blank" rel="noopener">↗ Abrir link</a>`:''}</div>${x.note?`<p class="note">${escapeHtml(x.note)}</p>`:''}${extra}</div><button class="more idea-more" aria-label="Editar">•••</button></div></article>`;
+  return `<article class="card pending-card idea-card" data-idea-id="${x.id}"><div class="pending"><div class="idea-symbol">${ideaIconSvg(x.icon||(x.type==='projeto'?'folder':x.type==='plano'?'map':'spark'))}</div><div class="pending-main"><div class="pending-title">${escapeHtml(x.title)}</div><div class="meta"><span class="pill">${typeLabel}</span>${link?`<a class="pill idea-link" href="${escapeHtml(link)}" target="_blank" rel="noopener">↗ Abrir link</a>`:''}</div>${x.note?`<p class="note">${escapeHtml(x.note)}</p>`:''}${extra}</div><button class="more idea-more" aria-label="Editar">•••</button></div></article>`;
 }
 function ideaEmptyHtml(){return `<div class="empty idea-empty"><div class="idea-spark" aria-hidden="true">◇</div><strong>Esse espaço está leve.</strong><span>Registre quando aparecer.<br>Nem toda ideia precisa virar tarefa.</span></div>`}
 function bindIdeaCards(){document.querySelectorAll('[data-idea-id]').forEach(card=>card.onclick=e=>{if(e.target.closest('.idea-link'))return;if(e.target.closest('.idea-more'))e.stopPropagation();openIdeaModal(card.dataset.ideaId)})}
@@ -595,6 +621,7 @@ function openIdeaModal(id=null){
     <div class="bertha-modal-head"><div><div class="eyebrow">CRIAÇÃO &amp; IDEIAS</div><h2 id="ideaModalTitle">${p?'Editar registro':'Nova entrada'}</h2><p class="idea-modal-sub">Guarde hoje. Dê forma quando for a hora.</p></div><button type="button" data-close aria-label="Fechar">×</button></div>
     <div class="idea-type-segments" role="group" aria-label="Tipo"><button type="button" data-idea-type="ideia">Ideia</button><button type="button" data-idea-type="plano">Plano</button><button type="button" data-idea-type="projeto">Projeto</button></div>
     <label class="idea-native-type">Tipo<select id="ideaType"><option value="ideia" ${type==='ideia'?'selected':''}>Ideia</option><option value="projeto" ${type==='projeto'?'selected':''}>Projeto</option><option value="plano" ${type==='plano'?'selected':''}>Plano</option></select></label>
+    <span class="idea-icon-label">Ícone</span>${ideaIconPicker(p?.icon||(type==='projeto'?'folder':type==='plano'?'map':'spark'))}
     <label>Nome<input id="ideaTitle" required maxlength="120" value="${escapeHtml(p?.title||'')}" placeholder="Ex.: Organizar projeto da casa"></label>
     <div id="ideaConditional"></div>
     <label>Link <span class="muted">(opcional)</span><input id="ideaLink" type="url" inputmode="url" autocapitalize="none" autocomplete="url" value="${escapeHtml(p?.link||'')}" placeholder="https://..."></label>
@@ -632,7 +659,7 @@ function openIdeaModal(id=null){
  #ideaDialog .project-shopping-row{display:flex;align-items:center;gap:8px;padding:7px 0;border-top:1px solid rgba(112,135,164,.10)}#ideaDialog .project-shopping-row label{display:flex!important;align-items:center!important;gap:10px!important;flex:1;margin:0!important;font-weight:520!important}#ideaDialog .project-shopping-row button{border:0;background:transparent;color:#8b91a0;font-size:20px;padding:4px 6px}.project-shopping-empty{opacity:.75}
 
 }`;document.head.appendChild(s)}
-  document.body.appendChild(d);d.showModal();
+  document.body.appendChild(d);d.showModal();bindIdeaIconPicker(d);
   d.querySelectorAll('[data-close]').forEach(b=>b.onclick=()=>{clearInterval(ideaTypeWatcher);d.close();d.remove()});
   d.addEventListener('click',e=>{if(e.target===d){clearInterval(ideaTypeWatcher);d.close();d.remove()}});
   const conditional=d.querySelector('#ideaConditional');
@@ -707,7 +734,7 @@ function openIdeaModal(id=null){
   if(p)d.querySelector('#deleteIdeaBtn').onclick=()=>{if(confirm('Excluir este registro?')){saveIdeias(loadIdeias().filter(x=>x.id!==p.id));d.close();d.remove();renderIdeias()}};
   d.querySelector('#ideaForm').addEventListener('submit',e=>{
     e.preventDefault();const items=loadIdeias(),t=d.querySelector('#ideaType').value;
-    let data={title:d.querySelector('#ideaTitle').value.trim(),type:t,link:d.querySelector('#ideaLink').value.trim(),note:d.querySelector('#ideaNote').value.trim()}; if(!data.title)return;
+    let data={title:d.querySelector('#ideaTitle').value.trim(),type:t,icon:d.querySelector('#ideaIcon')?.value||'spark',link:d.querySelector('#ideaLink').value.trim(),note:d.querySelector('#ideaNote').value.trim()}; if(!data.title)return;
     if(data.link&&!ideaSafeLink(data.link)){const linkInput=d.querySelector('#ideaLink');linkInput.setCustomValidity('Use um link começando com http:// ou https://');linkInput.reportValidity();return}else d.querySelector('#ideaLink').setCustomValidity('');
     if(t==='plano'){
       const h=d.querySelector('#planHorizon')?.value||'algum-dia';const labels={'esta-semana':'Esta semana','este-mes':'Este mês','data':'Até uma data','algum-dia':'Algum dia'};
