@@ -4439,3 +4439,179 @@
     .bertha-ritual-dialog .bertha-icon-picker button.active,.bertha-ritual-dialog .bertha-segment button.active{background:linear-gradient(135deg,rgba(247,217,231,.94),rgba(228,216,246,.96))!important;color:#765c79!important;border-color:rgba(160,111,143,.16)!important}
   `;document.head.appendChild(st);
 })();
+
+
+/* BERTH.A RC36 — Rituais: mesma arquitetura visual dos modais do Financeiro; identidade do módulo preservada. */
+(function installRitualModalRC36(){
+  if(document.getElementById('bertha-ritual-modal-rc36'))return;
+  const st=document.createElement('style');st.id='bertha-ritual-modal-rc36';st.textContent=`
+    dialog.bertha-ritual-dialog[open]{
+      box-sizing:border-box!important;position:fixed!important;inset:0!important;
+      width:min(92vw,540px)!important;height:auto!important;max-width:540px!important;
+      max-height:calc(100dvh - 28px)!important;margin:auto!important;padding:0!important;
+      border:0!important;outline:0!important;background:transparent!important;
+      overflow:visible!important;box-shadow:none!important;display:block!important;
+    }
+    dialog.bertha-ritual-dialog::backdrop{background:rgba(54,44,55,.28)!important;backdrop-filter:blur(3px)!important;-webkit-backdrop-filter:blur(3px)!important}
+    dialog.bertha-ritual-dialog[open]>.bertha-task-modal{
+      box-sizing:border-box!important;width:100%!important;max-width:none!important;
+      height:auto!important;min-height:0!important;max-height:calc(100dvh - 28px)!important;
+      margin:0!important;padding:20px!important;overflow:auto!important;overscroll-behavior:contain!important;
+      border:1px solid rgba(133,103,128,.10)!important;border-radius:26px!important;
+      background:linear-gradient(145deg,rgba(253,248,250,.99) 0%,rgba(249,241,246,.98) 48%,rgba(244,239,250,.97) 100%)!important;
+      box-shadow:0 22px 64px rgba(58,44,63,.16)!important;contain:none!important;
+    }
+    dialog.bertha-ritual-dialog .bertha-task-modal-head{
+      position:static!important;display:flex!important;align-items:flex-start!important;
+      margin:0 0 14px!important;padding:0!important;background:transparent!important;
+      border:0!important;box-shadow:none!important;backdrop-filter:none!important;-webkit-backdrop-filter:none!important;
+    }
+    dialog.bertha-ritual-dialog .bertha-task-modal-head span{margin-bottom:5px!important;color:#956f87!important;font-size:11px!important;font-weight:760!important;letter-spacing:.18em!important}
+    dialog.bertha-ritual-dialog .bertha-task-modal-head h2{margin:0!important;font-size:25px!important;font-weight:540!important;letter-spacing:-.025em!important;line-height:1.12!important;color:#30313d!important}
+    dialog.bertha-ritual-dialog .bertha-task-modal-head button[data-close]{
+      flex:0 0 40px!important;width:40px!important;height:40px!important;min-width:40px!important;min-height:40px!important;
+      padding:0!important;border:1px solid rgba(133,103,128,.10)!important;border-radius:50%!important;
+      background:rgba(255,255,255,.58)!important;color:#766d77!important;font-size:25px!important;line-height:1!important;
+      box-shadow:none!important;outline:none!important;
+    }
+    dialog.bertha-ritual-dialog .bertha-task-modal-body{
+      flex:none!important;min-height:0!important;overflow:visible!important;padding:0!important;background:transparent!important;
+    }
+    dialog.bertha-ritual-dialog .bertha-task-field{margin:12px 0!important}
+    dialog.bertha-ritual-dialog .bertha-task-field>span{color:#77707c!important;font-size:14px!important;font-weight:680!important}
+    dialog.bertha-ritual-dialog .bertha-task-field input,
+    dialog.bertha-ritual-dialog .bertha-task-field select,
+    dialog.bertha-ritual-dialog .bertha-task-field textarea,
+    dialog.bertha-ritual-dialog .bertha-duration-input input,
+    dialog.bertha-ritual-dialog .bertha-duration-input select,
+    dialog.bertha-ritual-dialog .bertha-notify-custom input{
+      box-sizing:border-box!important;width:100%!important;min-height:48px!important;font-size:16px!important;line-height:1.25!important;
+      color:#393641!important;background:rgba(255,255,255,.72)!important;border:1px solid rgba(133,103,128,.14)!important;
+      border-radius:15px!important;box-shadow:none!important;outline:0!important;
+    }
+    dialog.bertha-ritual-dialog .bertha-task-field input:focus,
+    dialog.bertha-ritual-dialog .bertha-task-field select:focus,
+    dialog.bertha-ritual-dialog .bertha-task-field textarea:focus,
+    dialog.bertha-ritual-dialog .bertha-duration-input input:focus,
+    dialog.bertha-ritual-dialog .bertha-duration-input select:focus{
+      outline:2px solid rgba(213,190,232,.24)!important;outline-offset:1px!important;
+      border-color:rgba(190,142,170,.34)!important;box-shadow:none!important;
+    }
+    dialog.bertha-ritual-dialog .bertha-segment button{
+      min-height:42px!important;background:rgba(255,255,255,.48)!important;color:#746d76!important;
+      border:1px solid rgba(133,103,128,.12)!important;border-radius:13px!important;box-shadow:none!important;
+    }
+    dialog.bertha-ritual-dialog .bertha-segment button.active{
+      background:linear-gradient(135deg,rgba(240,213,226,.92),rgba(224,211,241,.94))!important;
+      color:#765c79!important;border-color:rgba(160,111,143,.16)!important;box-shadow:none!important;
+    }
+    dialog.bertha-ritual-dialog .bertha-notify-box{
+      margin:4px 0 15px!important;padding:14px!important;border:1px solid rgba(133,103,128,.10)!important;border-radius:18px!important;
+      background:linear-gradient(125deg,rgba(249,239,245,.74),rgba(242,237,249,.72))!important;
+    }
+    dialog.bertha-ritual-dialog .bertha-toggle-row strong{color:#544b58!important;font-size:13px!important}
+    dialog.bertha-ritual-dialog .bertha-toggle-row span{color:#8a808c!important;font-size:11px!important}
+    dialog.bertha-ritual-dialog .bertha-toggle-row i{background:#e7dfe8!important}
+    dialog.bertha-ritual-dialog .bertha-toggle-row input:checked+i{background:linear-gradient(135deg,#c59bb6,#b5a5d2)!important}
+    dialog.bertha-ritual-dialog .bertha-schedule-note{
+      margin-top:10px!important;padding:13px 15px!important;border:1px solid rgba(133,103,128,.08)!important;border-radius:16px!important;
+      background:rgba(255,255,255,.38)!important;color:#887f8b!important;
+    }
+    dialog.bertha-ritual-dialog .bertha-task-modal-actions{
+      position:static!important;inset:auto!important;margin:16px 0 0!important;padding:0!important;
+      background:transparent!important;border:0!important;box-shadow:none!important;backdrop-filter:none!important;-webkit-backdrop-filter:none!important;
+    }
+    dialog.bertha-ritual-dialog .bertha-task-cancel{
+      background:rgba(240,231,244,.72)!important;color:#765b82!important;border:0!important;box-shadow:none!important;
+    }
+    dialog.bertha-ritual-dialog .bertha-task-save{
+      background:linear-gradient(120deg,#d7adc5 0%,#c8afd8 52%,#b8a7d5 100%)!important;
+      color:#fff!important;border:0!important;box-shadow:none!important;
+    }
+    dialog.bertha-ritual-dialog .bertha-icon-picker button.active{
+      background:linear-gradient(135deg,rgba(240,213,226,.92),rgba(224,211,241,.94))!important;color:#765c79!important;
+      border-color:rgba(160,111,143,.16)!important;box-shadow:none!important;
+    }
+    @media(max-width:560px){
+      dialog.bertha-ritual-dialog[open]{width:calc(100vw - 24px)!important;max-height:calc(100dvh - 24px)!important}
+      dialog.bertha-ritual-dialog[open]>.bertha-task-modal{max-height:calc(100dvh - 24px)!important;padding:18px!important;border-radius:24px!important}
+      dialog.bertha-ritual-dialog .bertha-task-modal-head{margin-bottom:12px!important}
+      dialog.bertha-ritual-dialog .bertha-task-modal-actions{margin-top:14px!important}
+    }
+  `;document.head.appendChild(st);
+})();
+
+
+/* BERTH.A RC37 — Rituais: Modal System Financeiro, somente identidade cromática do módulo. */
+(function installRitualModalRC37(){
+  if(document.getElementById('bertha-ritual-modal-rc37'))return;
+  const st=document.createElement('style');st.id='bertha-ritual-modal-rc37';st.textContent=`
+    body dialog.bertha-ritual-dialog[open]{
+      position:fixed!important;inset:0!important;display:block!important;
+      width:min(92vw,540px)!important;height:auto!important;max-width:540px!important;max-height:calc(100dvh - 28px)!important;
+      margin:auto!important;padding:0!important;border:0!important;background:transparent!important;overflow:visible!important;box-shadow:none!important;
+    }
+    body dialog.bertha-ritual-dialog::backdrop{background:rgba(54,44,55,.28)!important;backdrop-filter:blur(3px)!important;-webkit-backdrop-filter:blur(3px)!important}
+    body dialog.bertha-ritual-dialog[open] .bertha-task-modal{
+      display:block!important;box-sizing:border-box!important;position:static!important;
+      width:100%!important;max-width:none!important;height:auto!important;min-height:0!important;max-height:calc(100dvh - 28px)!important;
+      margin:0!important;padding:20px!important;overflow:auto!important;contain:none!important;
+      border:1px solid rgba(151,118,145,.10)!important;border-radius:26px!important;
+      background:linear-gradient(145deg,rgba(253,248,251,.99) 0%,rgba(249,241,247,.98) 48%,rgba(244,239,250,.97) 100%)!important;
+      box-shadow:0 22px 64px rgba(58,44,63,.16)!important;
+    }
+    body dialog.bertha-ritual-dialog .bertha-task-modal-head{
+      position:static!important;display:flex!important;align-items:flex-start!important;justify-content:space-between!important;
+      margin:0 0 14px!important;padding:0!important;background:transparent!important;border:0!important;border-bottom:0!important;
+      box-shadow:none!important;backdrop-filter:none!important;-webkit-backdrop-filter:none!important;
+    }
+    body dialog.bertha-ritual-dialog .bertha-task-modal-head span{margin:0 0 5px!important;color:#9a6f89!important;font-size:11px!important;font-weight:760!important;letter-spacing:.18em!important}
+    body dialog.bertha-ritual-dialog .bertha-task-modal-head h2{margin:0!important;font-size:25px!important;font-weight:540!important;letter-spacing:-.025em!important;line-height:1.12!important;color:#30313d!important}
+    body dialog.bertha-ritual-dialog .bertha-task-modal-head button[data-close]{
+      flex:0 0 40px!important;width:40px!important;height:40px!important;min-width:40px!important;min-height:40px!important;padding:0!important;
+      border:1px solid rgba(151,118,145,.10)!important;border-radius:50%!important;background:rgba(255,255,255,.58)!important;color:#766d77!important;
+      box-shadow:none!important;outline:0!important;font-size:25px!important;line-height:1!important;
+    }
+    body dialog.bertha-ritual-dialog .bertha-task-modal-body{
+      display:block!important;flex:none!important;min-height:0!important;max-height:none!important;overflow:visible!important;
+      margin:0!important;padding:0!important;background:transparent!important;border:0!important;box-shadow:none!important;
+    }
+    body dialog.bertha-ritual-dialog .bertha-task-field{margin:12px 0!important}
+    body dialog.bertha-ritual-dialog .bertha-task-field>span{color:#77707c!important;font-size:14px!important;font-weight:680!important}
+    body dialog.bertha-ritual-dialog .bertha-task-field input,
+    body dialog.bertha-ritual-dialog .bertha-task-field select,
+    body dialog.bertha-ritual-dialog .bertha-task-field textarea,
+    body dialog.bertha-ritual-dialog .bertha-duration-input input,
+    body dialog.bertha-ritual-dialog .bertha-duration-input select,
+    body dialog.bertha-ritual-dialog .bertha-notify-custom input{
+      box-sizing:border-box!important;width:100%!important;min-height:48px!important;font-size:16px!important;line-height:1.25!important;color:#393641!important;
+      background:rgba(255,255,255,.72)!important;border:1px solid rgba(151,118,145,.14)!important;border-radius:15px!important;box-shadow:none!important;
+    }
+    body dialog.bertha-ritual-dialog .bertha-task-field input:focus,
+    body dialog.bertha-ritual-dialog .bertha-task-field select:focus,
+    body dialog.bertha-ritual-dialog .bertha-task-field textarea:focus,
+    body dialog.bertha-ritual-dialog .bertha-duration-input input:focus,
+    body dialog.bertha-ritual-dialog .bertha-duration-input select:focus{outline:2px solid rgba(220,188,212,.23)!important;outline-offset:1px!important;border-color:rgba(191,143,174,.34)!important;box-shadow:none!important}
+    body dialog.bertha-ritual-dialog .bertha-segment button{min-height:42px!important;background:rgba(255,255,255,.48)!important;color:#746d76!important;border:1px solid rgba(151,118,145,.12)!important;border-radius:13px!important;box-shadow:none!important}
+    body dialog.bertha-ritual-dialog .bertha-segment button.active{background:linear-gradient(120deg,rgba(239,205,224,.94),rgba(218,201,239,.96))!important;color:#765c79!important;border-color:rgba(169,116,150,.18)!important;box-shadow:none!important}
+    body dialog.bertha-ritual-dialog .bertha-notify-box{margin:4px 0 15px!important;padding:14px!important;border:1px solid rgba(151,118,145,.10)!important;border-radius:18px!important;background:linear-gradient(120deg,rgba(247,226,238,.72),rgba(233,224,247,.74))!important}
+    body dialog.bertha-ritual-dialog .bertha-toggle-row strong{color:#544b58!important} body dialog.bertha-ritual-dialog .bertha-toggle-row span{color:#8a808c!important}
+    body dialog.bertha-ritual-dialog .bertha-toggle-row i{background:#e7dfe8!important} body dialog.bertha-ritual-dialog .bertha-toggle-row input:checked+i{background:linear-gradient(120deg,#cf9fbb,#b9a4d3)!important}
+    body dialog.bertha-ritual-dialog .bertha-schedule-note{margin-top:10px!important;padding:13px 15px!important;border:1px solid rgba(151,118,145,.08)!important;border-radius:16px!important;background:rgba(255,255,255,.38)!important;color:#887f8b!important}
+    body dialog.bertha-ritual-dialog .bertha-task-modal-actions{
+      position:static!important;display:flex!important;align-items:center!important;justify-content:space-between!important;inset:auto!important;
+      margin:16px 0 0!important;padding:0!important;background:transparent!important;border:0!important;border-top:0!important;
+      box-shadow:none!important;backdrop-filter:none!important;-webkit-backdrop-filter:none!important;
+    }
+    body dialog.bertha-ritual-dialog .bertha-task-modal-actions>div{margin-left:auto!important}
+    body dialog.bertha-ritual-dialog .bertha-task-cancel{background:rgba(241,232,244,.72)!important;color:#765b82!important;border:0!important;box-shadow:none!important}
+    body dialog.bertha-ritual-dialog .bertha-task-save{background:linear-gradient(120deg,#d7a9c3 0%,#c8acd9 52%,#b7a3d3 100%)!important;color:#fff!important;border:0!important;box-shadow:none!important}
+    body dialog.bertha-ritual-dialog .bertha-icon-picker button.active{background:linear-gradient(120deg,rgba(239,205,224,.94),rgba(218,201,239,.96))!important;color:#765c79!important;border-color:rgba(169,116,150,.18)!important;box-shadow:none!important}
+    @media(max-width:560px){
+      body dialog.bertha-ritual-dialog[open]{width:calc(100vw - 24px)!important;max-height:calc(100dvh - 24px)!important}
+      body dialog.bertha-ritual-dialog[open] .bertha-task-modal{max-height:calc(100dvh - 24px)!important;padding:18px!important;border-radius:24px!important}
+      body dialog.bertha-ritual-dialog .bertha-task-modal-head{margin-bottom:12px!important}
+      body dialog.bertha-ritual-dialog .bertha-task-modal-actions{margin-top:14px!important}
+    }
+  `;document.head.appendChild(st);
+})();
