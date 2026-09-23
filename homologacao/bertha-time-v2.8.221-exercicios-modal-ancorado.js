@@ -1500,76 +1500,49 @@
     }).join('')}</div>`;
   }
 
+  // RC46 — referências deixam de espelhar módulos e passam a representar dimensões da vida.
+  // Os módulos são evidências e podem alimentar mais de uma dimensão no Meu Progresso.
   const progressGoalAreas=[
-    ['movimento','Exercícios'],['alimentacao','Alimentação'],['autocuidado','Autocuidado'],['estudos','Estudos'],
-    ['projetos','Projetos'],['trabalho','Trabalho'],['casa','Casa'],['rituais','Rituais']
+    ['autocuidado','Autocuidado'],['intelectual','Intelectual'],['disciplina','Disciplina'],
+    ['financeiro','Financeiro'],['casa','Casa & organização']
   ];
   function progressGoals(){return read(PROGRESS_GOALS_KEY,{});}
   function nfmt(v){return String(v??'').replace('.',',')}
   function goalAreaIcon(area){
     const icons={
-      movimento:'<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3.8 10.3v3.4M6.6 8.2v7.6M9.4 10.1v3.8M14.6 10.1v3.8M17.4 8.2v7.6M20.2 10.3v3.4M9.4 12h5.2"/></svg>',
-      alimentacao:'<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 20c4.8-2.8 6.8-6.9 6.8-10.7-3.9 0-7.4 1.8-10.1 6-1.8 2.8-1.9 5.2-1.9 5.2s2.5-.1 5.2-1.9c4.2-2.7 6-6.2 6-10.1"/></svg>',
       autocuidado:'<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 19.8S5.5 15.7 5.5 10.2a3.8 3.8 0 0 1 6.5-2.7 3.8 3.8 0 0 1 6.5 2.7c0 5.5-6.5 9.6-6.5 9.6z"/></svg>',
-      estudos:'<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4.5 6.5h6c1.6 0 2.8 1.1 2.8 2.6v8.2c0-1.5-1.2-2.6-2.8-2.6h-6zM19.5 6.5h-6c-1.6 0-2.8 1.1-2.8 2.6v8.2c0-1.5 1.2-2.6 2.8-2.6h6z"/></svg>',
-      projetos:'<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 4v16M4 12h16M7.2 7.2l9.6 9.6M16.8 7.2l-9.6 9.6"/></svg>',
-      trabalho:'<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 7V5.9c0-.9.7-1.6 1.6-1.6h4.8c.9 0 1.6.7 1.6 1.6V7M4.5 8.5h15v8.8c0 .9-.7 1.6-1.6 1.6H6.1c-.9 0-1.6-.7-1.6-1.6zM4.5 11.4h15"/></svg>',
-      casa:'<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 10.3 12 4.8l7 5.5V19a1 1 0 0 1-1 1H6a1 1 0 0 1-1-1zM9.5 20v-4.7h5V20"/></svg>',
-      rituais:'<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3.5v2.3M12 18.2v2.3M5.2 5.2l1.6 1.6M17.2 17.2l1.6 1.6M3.5 12h2.3M18.2 12h2.3M5.2 18.8l1.6-1.6M17.2 6.8l1.6-1.6M12 8.7a3.3 3.3 0 1 0 0 6.6 3.3 3.3 0 0 0 0-6.6z"/></svg>'
-    };
-    return icons[area]||'';
+      intelectual:'<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4.5 6.5h6c1.6 0 2.8 1.1 2.8 2.6v8.2c0-1.5-1.2-2.6-2.8-2.6h-6zM19.5 6.5h-6c-1.6 0-2.8 1.1-2.8 2.6v8.2c0-1.5 1.2-2.6 2.8-2.6h6z"/></svg>',
+      disciplina:'<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 12.5l3.5 3.5L18 7.5"/><circle cx="12" cy="12" r="9"/></svg>',
+      financeiro:'<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 18.5V9.5M10 18.5V5.5M16 18.5v-6M3 19.5h18"/></svg>',
+      casa:'<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 10.3 12 4.8l7 5.5V19a1 1 0 0 1-1 1H6a1 1 0 0 1-1-1zM9.5 20v-4.7h5V20"/></svg>'
+    };return icons[area]||'';
   }
-
   function progressGoalLabel(area,g){
     if(!g)return 'Definir referência';
-    if(area==='movimento'){
-      const a=[]; if(g.sessionsPerWeek)a.push(`${nfmt(g.sessionsPerWeek)} sessões/sem`); if(g.minutesPerWeek)a.push(`${nfmt(g.minutesPerWeek)} min/sem`); return a.join(' · ')||'Definir referência';
-    }
-    if(area==='alimentacao')return g.adherencePercent?`${nfmt(g.adherencePercent)}% do planejamento`:'Definir referência';
-    if(area==='autocuidado')return g.sessionsPerWeek?`${nfmt(g.sessionsPerWeek)} momentos/sem`:'Definir referência';
-    if(area==='estudos')return g.hoursPerWeek?`${nfmt(g.hoursPerWeek)} h/sem`:'Definir referência';
-    if(area==='projetos')return g.onTimePercent?`${nfmt(g.onTimePercent)}% no prazo`:'Definir referência';
-    if(area==='trabalho')return g.prioritiesPerWeek?`${nfmt(g.prioritiesPerWeek)} prioridades/sem`:'Definir referência';
-    if(area==='casa')return g.routinesPerWeek?`${nfmt(g.routinesPerWeek)} rotinas/sem`:'Definir referência';
-    if(area==='rituais')return g.sessionsPerWeek?`${nfmt(g.sessionsPerWeek)} rituais/sem`:'Definir referência';
+    if(area==='autocuidado')return g.targetPercent?`${nfmt(g.targetPercent)}% de cuidado consistente`:'Definir referência';
+    if(area==='intelectual')return g.targetPercent?`${nfmt(g.targetPercent)}% de continuidade`:'Definir referência';
+    if(area==='disciplina')return g.targetPercent?`${nfmt(g.targetPercent)}% de consistência`:'Definir referência';
+    if(area==='financeiro')return g.onTimePercent?`${nfmt(g.onTimePercent)}% dos pagamentos em dia`:'Definir referência';
+    if(area==='casa')return g.targetPercent?`${nfmt(g.targetPercent)}% das rotinas essenciais`:'Definir referência';
     return 'Definir referência';
   }
-  function renderProgressGoals(){const goals=progressGoals();return `<section class="bertha-goals-block"><div class="bertha-goals-head"><span>REFERÊNCIAS POR ÁREA</span><strong>O que você espera conseguir manter?</strong></div><p class="bertha-goals-note">Cada área usa uma régua própria. Estas referências não criam tarefas; servem para comparar o que você gostaria de manter com o que realmente aconteceu.</p><div class="bertha-goals-grid">${progressGoalAreas.map(([id,label])=>`<button type="button" class="bertha-goal-card goal-${id}" data-progress-goal="${id}"><span class="bertha-goal-icon">${goalAreaIcon(id)}</span><span class="bertha-goal-text"><span>${label}</span><strong>${esc(progressGoalLabel(id,goals[id]))}</strong></span></button>`).join('')}</div></section>`;}
-  function goalField(label,key,value,attrs=''){return `<label class="bertha-field"><span>${label}</span><input data-goal-field="${key}" type="number" min="0" step="0.5" inputmode="decimal" value="${esc(value??'')}" ${attrs}></label>`}
+  function renderProgressGoals(){const goals=progressGoals();return `<section class="bertha-goals-block"><div class="bertha-goals-head"><span>REFERÊNCIAS DA MINHA VIDA</span><strong>O que significa estar bem para você?</strong></div><p class="bertha-goals-note">As referências são dimensões da vida, não módulos. Exercícios, Rituais, Alimentação, Estudos, Trabalho, Financeiro, Casa e outros registros funcionam como evidências e podem contribuir para mais de uma dimensão.</p><div class="bertha-goals-grid">${progressGoalAreas.map(([id,label])=>`<button type="button" class="bertha-goal-card goal-${id}" data-progress-goal="${id}"><span class="bertha-goal-icon">${goalAreaIcon(id)}</span><span class="bertha-goal-text"><span>${label}</span><strong>${esc(progressGoalLabel(id,goals[id]))}</strong></span></button>`).join('')}</div><p class="bertha-goals-note bertha-goals-link-note">A BERTH.A também aproveita os vínculos “faz referência a” dos módulos para interpretar o progresso sem contar a mesma ação duas vezes.</p></section>`;}
+  function goalField(label,key,value,attrs=''){return `<label class="bertha-field"><span>${label}</span><input data-goal-field="${key}" type="number" min="0" step="1" inputmode="decimal" value="${esc(value??'')}" ${attrs}></label>`}
   function openProgressGoalDialog(area){
     const label=(progressGoalAreas.find(x=>x[0]===area)||[])[1]||area,all=progressGoals(),g=all[area]||{};
     let copy='',fields='';
-    if(area==='movimento'){copy='Defina a frequência e, se quiser, também o volume semanal que representa uma boa rotina para você.';fields=goalField('Sessões por semana','sessionsPerWeek',g.sessionsPerWeek)+goalField('Minutos por semana (opcional)','minutesPerWeek',g.minutesPerWeek)}
-    else if(area==='alimentacao'){copy='Aqui a referência é aderência ao que foi planejado, não perfeição em cada refeição.';fields=goalField('Aderência ao planejamento (%)','adherencePercent',g.adherencePercent,'max="100" step="1"')}
-    else if(area==='autocuidado'){copy='Quantos momentos de autocuidado por semana fazem você sentir que essa área está sendo cuidada?';fields=goalField('Momentos por semana','sessionsPerWeek',g.sessionsPerWeek)}
-    else if(area==='estudos'){copy='Use tempo semanal como referência para não transformar cada sessão em obrigação.';fields=goalField('Horas por semana','hoursPerWeek',g.hoursPerWeek)}
-    else if(area==='projetos'){copy='A régua aqui é cumprir os projetos que têm prazo sem perder continuidade.';fields=goalField('Projetos concluídos no prazo (%)','onTimePercent',g.onTimePercent||100,'max="100" step="1"')}
-    else if(area==='trabalho'){copy='Defina quantas prioridades realmente importantes você espera concluir numa semana normal.';fields=goalField('Prioridades concluídas por semana','prioritiesPerWeek',g.prioritiesPerWeek)}
-    else if(area==='casa'){copy='Use uma quantidade realista de rotinas essenciais por semana; não é uma meta de casa perfeita.';fields=goalField('Rotinas essenciais por semana','routinesPerWeek',g.routinesPerWeek)}
-    else if(area==='rituais'){copy='Quantos rituais por semana representam cuidado suficiente para você?';fields=goalField('Rituais por semana','sessionsPerWeek',g.sessionsPerWeek)}
+    if(area==='autocuidado'){copy='Rituais, exercícios e alimentação podem alimentar esta dimensão. Defina o nível de consistência que representa sentir que você está se cuidando.';fields=goalField('Referência de consistência (%)','targetPercent',g.targetPercent||80,'max="100"')}
+    else if(area==='intelectual'){copy='Estudos, trabalho e projetos/criação podem contribuir aqui. A medida é continuidade em relação ao que você considera uma vida intelectualmente ativa.';fields=goalField('Referência de continuidade (%)','targetPercent',g.targetPercent||80,'max="100"')}
+    else if(area==='disciplina'){copy='Planos, compromissos, exercícios, alimentação, rituais e outras ações concluídas no contexto esperado alimentam esta dimensão.';fields=goalField('Referência de consistência (%)','targetPercent',g.targetPercent||80,'max="100"')}
+    else if(area==='financeiro'){copy='Pagamentos em dia, avanço das metas e organização financeira formam esta dimensão.';fields=goalField('Pagamentos em dia (%)','onTimePercent',g.onTimePercent||100,'max="100"')}
+    else if(area==='casa'){copy='Rotinas e cuidados da Casa alimentam esta dimensão. A referência representa quanto das rotinas essenciais você deseja conseguir manter.';fields=goalField('Rotinas essenciais cumpridas (%)','targetPercent',g.targetPercent||80,'max="100"')}
     const d=dialogBase(`Referência · ${label}`,`<p class="note">${copy}</p><div class="bertha-goal-fields">${fields}</div><div class="bertha-stack"><button class="bertha-primary" data-goal-save>Salvar referência</button>${Object.keys(g).length?'<button class="bertha-secondary" data-goal-remove>Remover referência</button>':''}</div>`);
     d.classList.add('bertha-goal-dialog',`goal-${area}`);
-    // RC13 — aplica a paleta do próprio card diretamente no CTA.
-    // setProperty(..., 'important') evita que regras globais antigas do modal sobrescrevam a área.
-    const goalPalettes={
-      movimento:['#eadff5','#f7e2d6','#766b86','rgba(124,116,142,.18)'],
-      alimentacao:['#e3f0fa','#fff3c9','#738198','rgba(122,132,152,.18)'],
-      autocuidado:['#f6e1e9','#fff1dd','#806b81','rgba(135,111,134,.18)'],
-      estudos:['#e4f1fa','#f7e2d8','#697a94','rgba(111,125,149,.18)'],
-      projetos:['#e1eef9','#eee4f7','#756b89','rgba(125,116,143,.18)'],
-      trabalho:['#e9def5','#dff0ea','#706b86','rgba(122,117,141,.18)'],
-      casa:['#f5e0e8','#e1eee6','#746e83','rgba(123,117,138,.18)'],
-      rituais:['#f8efd1','#e9def5','#7d6d87','rgba(131,113,140,.18)']
-    };
-    const gp=goalPalettes[area]||goalPalettes.movimento;
-    const saveGoal=d.querySelector('[data-goal-save]');
-    if(saveGoal){
-      saveGoal.style.setProperty('background',`linear-gradient(135deg, ${gp[0]}, ${gp[1]})`,'important');
-      saveGoal.style.setProperty('color',gp[2],'important');
-      saveGoal.style.setProperty('border',`1px solid ${gp[3]}`,'important');
-      saveGoal.style.setProperty('box-shadow','none','important');
-    }
-    d.querySelector('[data-goal-save]').onclick=()=>{const obj={area,label,updatedAt:Date.now()};d.querySelectorAll('[data-goal-field]').forEach(i=>{const v=Number(String(i.value||'').replace(',','.'));if(v>0)obj[i.dataset.goalField]=v});if(Object.keys(obj).length<=3)return;all[area]=obj;write(PROGRESS_GOALS_KEY,all);d.close();d.remove();rerender();setTimeout(enhanceIdealScreen,0)};
+    const goalPalettes={autocuidado:['#f6e1e9','#eee3f7','#806b81','rgba(135,111,134,.18)'],intelectual:['#e4f1fa','#eee4f7','#697a94','rgba(111,125,149,.18)'],disciplina:['#e7f1eb','#eee4f7','#6f7d78','rgba(111,125,120,.18)'],financeiro:['#e9def5','#dff0ea','#706b86','rgba(122,117,141,.18)'],casa:['#f5e0e8','#e1eee6','#746e83','rgba(123,117,138,.18)']};
+    const gp=goalPalettes[area]||goalPalettes.autocuidado,modal=d.querySelector('.bertha-modal');
+    if(modal)modal.style.setProperty('background',`linear-gradient(145deg,rgba(251,247,239,.98),${gp[0]}99,${gp[1]}88)`,'important');
+    const saveGoal=d.querySelector('[data-goal-save]');if(saveGoal){saveGoal.style.setProperty('background',`linear-gradient(135deg, ${gp[0]}, ${gp[1]})`,'important');saveGoal.style.setProperty('color',gp[2],'important');saveGoal.style.setProperty('border',`1px solid ${gp[3]}`,'important');saveGoal.style.setProperty('box-shadow','none','important');}
+    d.querySelector('[data-goal-save]').onclick=()=>{const obj={area,label,updatedAt:Date.now(),version:2};d.querySelectorAll('[data-goal-field]').forEach(i=>{const v=Math.min(100,Number(String(i.value||'').replace(',','.')));if(v>0)obj[i.dataset.goalField]=v});if(Object.keys(obj).length<=4)return;all[area]=obj;write(PROGRESS_GOALS_KEY,all);d.close();d.remove();rerender();setTimeout(enhanceIdealScreen,0)};
     d.querySelector('[data-goal-remove]')?.addEventListener('click',()=>{delete all[area];write(PROGRESS_GOALS_KEY,all);d.close();d.remove();rerender();setTimeout(enhanceIdealScreen,0)});
   }
   function bindProgressGoals(){document.querySelectorAll('[data-progress-goal]').forEach(b=>b.onclick=()=>openProgressGoalDialog(b.dataset.progressGoal));}
