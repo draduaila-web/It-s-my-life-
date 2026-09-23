@@ -254,8 +254,16 @@
   window.BerthaTimeEngine.start=(item)=>startItem(item);
   window.BerthaTimeEngine.finish=()=>finishActive();
   window.BerthaTimeEngine.active=()=>engine().active;
+  window.BerthaTimeEngine.actives=()=>engine().actives||[];
 
-  const engine = () => read(ENGINE_KEY,{active:null,history:[],snoozed:{}});
+  const engine = () => {
+    const e=read(ENGINE_KEY,{active:null,actives:[],history:[],snoozed:{}})||{};
+    e.history=Array.isArray(e.history)?e.history:[]; e.snoozed=e.snoozed||{};
+    e.actives=Array.isArray(e.actives)?e.actives:[];
+    if(e.active && !e.actives.some(a=>String(a.id)===String(e.active.id))) e.actives.unshift(e.active);
+    e.active=e.actives[0]||null;
+    return e;
+  };
   const saveEngine = x => write(ENGINE_KEY,x);
 
 
@@ -563,41 +571,47 @@
     return score;
   }
   function currentSuggestion(){
-    const e=engine(); if(e.active) return {active:e.active};
-    const list=candidates();
+    const e=engine(); const actives=e.actives||[];
+    const list=candidates().filter(x=>!actives.some(a=>String(a.id)===String(x.id)));
     const fixed=list.filter(x=>x.time).sort((a,b)=>timeToM(a.time)-timeToM(b.time));
-    if(fixed.length && timeToM(fixed[0].time)<=minsNow()) return {item:fixed[0]};
+    if(fixed.length && timeToM(fixed[0].time)<=minsNow()) return {actives,item:fixed[0]};
 
     const allSources=sourcesToday();
     const available=nextFixedMinutes(allSources);
     const ranked=[...list].sort((a,b)=>suggestionScore(b,available)-suggestionScore(a,available));
     const fitting=ranked.find(x=>available===null||(+x.minutes||30)<=available);
-    if(fitting)return {item:fitting};
+    if(fitting)return {actives,item:fitting};
     // Se nada couber antes do próximo compromisso fixo, protege a janela em vez de sobrecarregar.
-    if(available!==null)return {free:true};
-    return ranked.length?{item:ranked[0]}:{free:true};
+    if(available!==null)return {actives,free:true};
+    return ranked.length?{actives,item:ranked[0]}:{actives,free:true};
   }
 
   function startItem(item){
     const e=engine();
-    if(e.active){
-      if(String(e.active.id||'')===String(item?.id||'')){ rerender(); return; }
-      conflictDialog(item); return;
-    }
-
+    e.actives=Array.isArray(e.actives)?e.actives:[];
+    if(e.actives.some(a=>String(a.id||'')===String(item?.id||''))){ rerender(); return; }
     const prepared=applyLearnedDuration(item);
-    e.active={
+    const active={
       ...prepared,
       startedAt:Date.now(),
       plannedMinutes:+prepared.minutes||30,
       configuredMinutes:+prepared.configuredMinutes||+item.minutes||30,
       learningKey:prepared.learningKey
     };
+    e.actives.push(active); e.active=e.actives[0]||active;
     saveEngine(e);
     rerender();
   }
   function casaDay(ts=Date.now()){const d=new Date(ts),p=n=>String(n).padStart(2,'0');return `${d.getFullYear()}-${p(d.getMonth()+1)}-${p(d.getDate())}`;}
   function casaRoutineNext(freq,from){const f=String(freq||'').trim().toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,''),d=new Date(from);d.setHours(12,0,0,0);let days=0;if(f.includes('diario'))days=1;else{const m=f.match(/a cada\s+(\d+)\s+dias?/);if(m)days=Math.max(1,+m[1]);}if(!days&&f.includes('semanal')&&!f.includes('quinzenal'))days=7;if(!days&&f.includes('quinzenal'))days=14;if(days)d.setDate(d.getDate()+days);else if(f.includes('mensal'))d.setMonth(d.getMonth()+1);else return '';return casaDay(d.getTime());}
+  function syncTaskCompletion(active,real,end){
+    const id=String(active?.id||''); if(!id.startsWith('task:'))return;
+    const ref=id.slice('task:'.length),arr=read('minha-vida.pendencias.v1',[]),i=arr.findIndex(x=>String(x.id)===ref);
+    if(i<0)return;
+    arr[i]={...arr[i],done:true,completed:true,status:'Concluído',completedAt:end,actualMinutes:Math.max(1,+real||1),updatedAt:end};
+    write('minha-vida.pendencias.v1',arr);
+  }
+
   function syncCasaCompletion(active,end){
     const id=String(active?.id||''); if(!id.startsWith('casa:'))return;
     const casa=read('minha-vida.casa.v1',null); if(!casa)return;
@@ -693,25 +707,20 @@
     arr[i]=x;write(COMMITMENTS_KEY,arr);
   }
 
-  function finishActive(){
-    const e=engine(); if(!e.active)return;
-    const active=e.active,end=Date.now(),real=Math.max(1,Math.round((end-active.startedAt)/60000));
+  function finishActive(activeId=null){
+    const e=engine(),list=Array.isArray(e.actives)?e.actives:[]; if(!list.length)return;
+    const idx=activeId?list.findIndex(a=>String(a.id)===String(activeId)):0; if(idx<0)return;
+    const active=list[idx],end=Date.now(),real=Math.max(1,Math.round((end-active.startedAt)/60000));
     e.history.unshift({itemId:active.id,learningKey:active.learningKey||durationLearningKey(active),
       title:active.title,source:active.source,day:iso(),startedAt:active.startedAt,endedAt:end,
       configuredMinutes:+active.configuredMinutes||+active.plannedMinutes||30,
       plannedMinutes:active.plannedMinutes,plannedItemId:active.plannedItemId||null,
       plannedName:active.plannedName||null,selectedPlanId:active.selectedPlanId||null,category:active.category||null,
-      kind:active.kind||null,
-      learnedMinutes:active.learnedMinutes||null,realMinutes:real,status:'done'});
-    recordDurationLearning(active,real);
-    syncCasaCompletion(active,end);
-    syncExerciseCompletion(active,real,end);
-    syncStudyCompletion(active,real,end);
-    syncWorkCompletion(active,real,end);
-    syncProjectCompletion(active,real,end);
-    syncCommitmentCompletion(active,real,end);
-    markRepeatConsumed(active);
-    e.active=null; saveEngine(e); rerender();
+      kind:active.kind||null,learnedMinutes:active.learnedMinutes||null,realMinutes:real,status:'done'});
+    recordDurationLearning(active,real); syncTaskCompletion(active,real,end); syncCasaCompletion(active,end); syncExerciseCompletion(active,real,end);
+    syncStudyCompletion(active,real,end); syncWorkCompletion(active,real,end); syncProjectCompletion(active,real,end);
+    syncCommitmentCompletion(active,real,end); markRepeatConsumed(active);
+    e.actives.splice(idx,1); e.active=e.actives[0]||null; saveEngine(e); rerender();
     if(active.kind!=='commitment') setTimeout(()=>repeatAfterFinishDialog(active,real),80);
   }
 
@@ -775,9 +784,10 @@
   function postponeDialog(item){ const d=dialogBase('Adiar esta tarefa',`<p class="bertha-muted">${esc(item.title)}</p><div class="bertha-choice-grid"><button data-min="15">15 min</button><button data-min="30">30 min</button><button data-min="60">1 hora</button><button data-later>Deixar para depois</button></div><label class="bertha-field">Escolher horário<input type="time" data-time></label>`); d.querySelectorAll('[data-min]').forEach(b=>b.onclick=()=>{snoozeItem(item,+b.dataset.min);d.close();d.remove()}); d.querySelector('[data-later]').onclick=()=>{snoozeItem(item,180);d.close();d.remove()}; d.querySelector('[data-time]').onchange=e=>{const [h,m]=e.target.value.split(':').map(Number),now=new Date(),t=new Date();t.setHours(h,m,0,0);if(t<now)t.setDate(t.getDate()+1);const en=engine();en.snoozed=en.snoozed||{};en.snoozed[item.id]=t.getTime();saveEngine(en);d.close();d.remove();rerender()}; }
   function conflictDialog(item){ const a=engine().active; const d=dialogBase('Uma atividade já está em andamento',`<p><strong>${esc(a.title)}</strong> começou às ${hhmm(a.startedAt)}.</p><div class="bertha-stack"><button class="bertha-primary" data-finish>Concluir e começar esta</button><button class="bertha-secondary" data-pause>Pausar e começar esta</button></div>`); d.querySelector('[data-finish]').onclick=()=>{finishActive();d.close();d.remove();startItem(item)}; d.querySelector('[data-pause]').onclick=()=>{pauseActive(item);d.close();d.remove()}; }
 
-  function nowCard(){ const s=currentSuggestion();
-    if(s.active){ const a=s.active, elapsed=Math.max(0,Math.floor((Date.now()-a.startedAt)/60000)), end=new Date(a.startedAt+a.plannedMinutes*60000); return `<section class="now-card bertha-now active"><div class="card-kicker">AGORA · EM ANDAMENTO</div><div class="now-title">${esc(a.title)}</div><div class="now-time">${esc(a.source)} · ${elapsed} min</div><p>Previsto: ${durationText(a.plannedMinutes)} · término estimado ${hhmm(end)}</p><div class="bertha-actions"><button class="bertha-primary" data-finish-active>Concluir</button></div></section>`; }
-    if(s.item){ const x=s.item; return `<section class="now-card bertha-now"><div class="card-kicker">AGORA · ${esc(x.source).toUpperCase()}</div><div class="now-title">${esc(x.title)}</div><div class="now-time">${x.time?`previsto ${esc(x.time)} · `:''}${durationText(+x.minutes||30)}</div><p>${x.windowStart?`Pode acontecer entre ${x.windowStart} e ${x.windowEnd}.`:x.kind==='ideal'?'Uma sugestão do seu Dia Ideal — não uma obrigação.':'Está disponível para o seu dia.'}</p><div class="bertha-actions"><button class="bertha-primary" data-start="${esc(x.id)}">Começar agora</button><button class="bertha-secondary" data-postpone="${esc(x.id)}">Adiar</button></div></section>`; }
+  function nowCard(){ const s=currentSuggestion(), actives=s.actives||[];
+    const running=actives.map(a=>{const elapsed=Math.max(0,Math.floor((Date.now()-a.startedAt)/60000)),end=new Date(a.startedAt+a.plannedMinutes*60000);return `<section class="now-card bertha-now active"><div class="card-kicker">AGORA · EM ANDAMENTO</div><div class="now-title">${esc(a.title)}</div><div class="now-time">${esc(a.source)} · ${elapsed} min</div><p>Previsto: ${durationText(a.plannedMinutes)} · término estimado ${hhmm(end)}</p><div class="bertha-actions"><button class="bertha-primary" data-finish-active="${esc(a.id)}">Concluir</button></div></section>`}).join('');
+    if(s.item){const x=s.item;return `${running}<section class="now-card bertha-now"><div class="card-kicker">AGORA · ${esc(x.source).toUpperCase()}</div><div class="now-title">${esc(x.title)}</div><div class="now-time">${x.time?`previsto ${esc(x.time)} · `:''}${durationText(+x.minutes||30)}</div><p>${x.windowStart?`Pode acontecer entre ${x.windowStart} e ${x.windowEnd}.`:x.kind==='ideal'?'Uma sugestão do seu Dia Ideal — não uma obrigação.':'Está disponível para o seu dia.'}</p><div class="bertha-actions"><button class="bertha-primary" data-start="${esc(x.id)}">Começar agora</button><button class="bertha-secondary" data-postpone="${esc(x.id)}">Adiar</button></div></section>`;}
+    if(running)return running;
     return `<section class="now-card bertha-now free"><div class="card-kicker">AGORA</div><div class="now-title">Espaço livre</div><div class="now-time">agora</div><p><strong>Espaço livre também faz parte do dia.</strong><br>Se nada precisa ser resolvido agora, não resolva.</p></section>`;
   }
   function timeline(){ const m=minsNow(), w=new Date().getDay(); const status=(a,b,prot=false)=>prot?'—':m>=b?'✓':m>=a?'●':'○'; const ho={1:[1000,1120,'16:40–18:40'],2:[940,1060,'15:40–17:40'],3:[1000,1120,'16:40–18:40'],4:[940,1060,'15:40–17:40'],5:[940,1060,'15:40–17:40']}[w]; let rows=[[316,455,'05:16–07:35','Manhã protegida',true],[480,840,'08:00–14:00','Trabalho oficial',false]]; if(w===1||w===3) rows.push([880,970,'14:40–16:10','Janela estratégica',false]); if(ho) rows.push([ho[0],ho[1],ho[2],'Home office · duração planejada 2h',false]); rows.push([1140,1440,'19:00+','Noite protegida · descanso primeiro',true]); return rows.map(r=>`<div class="bertha-time-row"><i>${status(r[0],r[1],r[4])}</i><b>${r[2]}</b><span>${r[3]}</span></div>`).join(''); }
@@ -1415,7 +1425,7 @@
     document.head.appendChild(s);
   }
 
-  function renderHome(){ ensureHomeUtilityStyles(); ensureMeuDiaV168Styles(); const d=new Date(), greet=d.getHours()<12?'Bom dia':d.getHours()<18?'Boa tarde':'Boa noite'; const today=new Intl.DateTimeFormat('pt-BR',{weekday:'long',day:'numeric',month:'long'}).format(d); const raw=sourcesToday().filter(x=>!doneToday(x.id)); const scheduled=raw.filter(x=>x.time); const smartCasa=candidates().filter(x=>x.kind==='home-routine'||x.kind==='home-maintenance'); const nonCasa=raw.filter(x=>x.kind!=='home-routine'&&x.kind!=='home-maintenance'&&!x.time).sort((a,b)=>(Number(!!b.repeated)-Number(!!a.repeated))||((+b.repeatRequestedAt||0)-(+a.repeatRequestedAt||0))); const current=currentSuggestion(); const currentId=current?.item?.id||current?.active?.id||''; const flexPool=nonCasa.filter(x=>x.id!==currentId); const tasks=(smartCasa.length?[...flexPool.slice(0,3),smartCasa[0]]:flexPool.slice(0,4)); const free=current.free;
+  function renderHome(){ ensureHomeUtilityStyles(); ensureMeuDiaV168Styles(); const d=new Date(), greet=d.getHours()<12?'Bom dia':d.getHours()<18?'Boa tarde':'Boa noite'; const today=new Intl.DateTimeFormat('pt-BR',{weekday:'long',day:'numeric',month:'long'}).format(d); const raw=sourcesToday().filter(x=>!doneToday(x.id)); const scheduled=raw.filter(x=>x.time); const smartCasa=candidates().filter(x=>x.kind==='home-routine'||x.kind==='home-maintenance'); const nonCasa=raw.filter(x=>x.kind!=='home-routine'&&x.kind!=='home-maintenance'&&!x.time).sort((a,b)=>(Number(!!b.repeated)-Number(!!a.repeated))||((+b.repeatRequestedAt||0)-(+a.repeatRequestedAt||0))); const current=currentSuggestion(); const currentId=current?.item?.id||''; const activeIds=new Set((current?.actives||[]).map(a=>String(a.id))); const flexPool=nonCasa.filter(x=>x.id!==currentId&&!activeIds.has(String(x.id))); const tasks=(smartCasa.length?[...flexPool.slice(0,3),smartCasa[0]]:flexPool.slice(0,4)); const free=current.free;
     const financeReminders = renderFinanceRemindersHome();
     const shopCount=window.BerthaShopping?.pendingCount?.()||0; const healthRaw=window.BerthaShopping?.renderHealthMini?.()||''; const health=/Nenhum item cadastrado/i.test(healthRaw)?'':healthRaw;
     const utility=`<section class="home-utility-grid"><a class="home-utility-card" href="#compras"><span class="home-utility-icon">${homeUtilityIcon('bag')}</span><span class="home-utility-copy"><strong>Lista de Compras</strong><small>O que preciso adquirir?</small></span><span class="home-utility-count">${shopCount}</span></a><a class="home-utility-card" href="#progresso"><span class="home-utility-icon">${homeUtilityIcon('trend')}</span><span class="home-utility-copy"><strong>Meu Progresso</strong><small>Como estou caminhando?</small></span><span aria-hidden="true">›</span></a></section>`;
@@ -2576,6 +2586,7 @@
         ${plans.length?plans.map((p,i)=>`<button type="button" class="bertha-choice movement-choice" data-movement-plan="${esc(String(p.id))}"><span><strong>${esc(p.name||'Movimento')}</strong><small>${esc(p.type||'Outro')} · ${durationText(planMinutes(p))}${p.__today?' · sugestão de hoje':''}</small></span></button>`).join(''):'<div class="bertha-empty">Nenhum treino ativo cadastrado. Adicione opções no módulo Exercícios.</div>'}
       </div>
       <div class="bertha-actions"><button type="button" class="bertha-secondary" data-open-exercises>Ver meus exercícios</button></div>`);
+    d.classList.add('bertha-exercise-dialog');
     d.querySelectorAll('[data-movement-plan]').forEach(b=>b.onclick=()=>{
       const p=plans.find(x=>String(x.id)===String(b.dataset.movementPlan)); if(!p)return;
       const reserveMinutes=+reserve.minutes||30;
@@ -2590,7 +2601,7 @@
   }
   function startFromHome(item){ if(isMovementReserve(item)) openMovementSelector(item); else startItem(item); }
 
-  function bindHome(){ document.querySelectorAll('[data-start]').forEach(b=>b.onclick=()=>{const x=sourcesToday().find(i=>i.id===b.dataset.start);if(x)startFromHome(x)}); document.querySelectorAll('[data-postpone]').forEach(b=>b.onclick=()=>{const x=sourcesToday().find(i=>i.id===b.dataset.postpone);if(x)postponeDialog(x)}); const f=document.querySelector('[data-finish-active]'); if(f)f.onclick=finishActive; window.BerthaShopping?.bindHealthMini?.(); }
+  function bindHome(){ document.querySelectorAll('[data-start]').forEach(b=>b.onclick=()=>{const x=sourcesToday().find(i=>i.id===b.dataset.start);if(x)startFromHome(x)}); document.querySelectorAll('[data-postpone]').forEach(b=>b.onclick=()=>{const x=sourcesToday().find(i=>i.id===b.dataset.postpone);if(x)postponeDialog(x)}); document.querySelectorAll('[data-finish-active]').forEach(f=>f.onclick=()=>finishActive(f.dataset.finishActive)); window.BerthaShopping?.bindHealthMini?.(); }
 
   function enhanceIdealScreen(){
     const route=String(location.hash||'').toLowerCase();

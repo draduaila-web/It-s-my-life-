@@ -899,3 +899,8 @@ dialog[class*="finance" i] form,[class*="finance" i] .study-v10-modal{background
 .study-notify-box{margin:12px 0 14px;padding:12px 14px;border:1px solid rgba(91,125,158,.10);border-radius:16px;background:rgba(255,253,249,.72)}
 .study-notify-row{display:flex!important;align-items:center!important;justify-content:space-between!important;gap:12px!important;margin:0!important}.study-notify-row>span{display:grid;gap:2px}.study-notify-row strong{font-size:14px;color:#5c6870}.study-notify-row small{font-size:11px;color:#87919a;font-weight:500}.study-notify-row input{width:20px!important;height:20px!important;accent-color:#7ea9c5}.study-notify-box>label[data-map-notify-wrap],.study-notify-box>label[data-content-notify-wrap]{display:grid;gap:7px;margin-top:11px;color:#65737d;font-size:12px}.study-notify-box [hidden]{display:none!important}
 .study-v10-map{align-items:center!important}.study-v10-map .study-content-main{align-items:center!important}.study-v10-mapactions{align-items:center!important;align-self:center!important}.study-v10-mapactions button{display:inline-flex!important;align-items:center!important;justify-content:center!important}
+
+/* RC24 — Meu Dia: modal de escolha de movimento herda a identidade de Exercícios */
+dialog.bertha-exercise-dialog .bertha-modal{background:#fbf7ef!important;border:1px solid rgba(151,128,170,.10)!important;}
+dialog.bertha-exercise-dialog .bertha-primary{background:linear-gradient(135deg,#c9b4dc 0%,#e7b5b1 100%)!important;color:#fff!important;border:0!important;}
+dialog.bertha-exercise-dialog .bertha-secondary{background:linear-gradient(135deg,rgba(225,214,237,.92),rgba(247,221,216,.92))!important;color:#665a70!important;border:1px solid rgba(139,113,151,.08)!important;}
