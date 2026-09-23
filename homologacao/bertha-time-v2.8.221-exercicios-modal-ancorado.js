@@ -4666,3 +4666,34 @@
     }
   `;document.head.appendChild(st);
 })();
+
+/* BERTH.A RC42 — Planos/Tarefas: modal contínuo, preservando identidade amarela */
+(function(){
+  if(document.getElementById('bertha-rc42-task-modal-style')) return;
+  const s=document.createElement('style');
+  s.id='bertha-rc42-task-modal-style';
+  s.textContent=`
+    dialog.bertha-plans-task-dialog .bertha-task-modal{
+      background:radial-gradient(circle at 14% 3%,rgba(255,244,176,.42),transparent 36%),radial-gradient(circle at 96% 2%,rgba(239,190,145,.24),transparent 38%),linear-gradient(145deg,#fffaf3 0%,#fbf7ef 56%,#fff8ee 100%)!important;
+    }
+    dialog.bertha-plans-task-dialog .bertha-task-modal-head{
+      background:transparent!important;
+      border:0!important;
+      box-shadow:none!important;
+      padding-bottom:12px!important;
+    }
+    dialog.bertha-plans-task-dialog .bertha-task-modal-body{
+      background:transparent!important;
+      border:0!important;
+    }
+    dialog.bertha-plans-task-dialog .bertha-task-modal-actions{
+      background:transparent!important;
+      border:0!important;
+      box-shadow:none!important;
+      backdrop-filter:none!important;
+      -webkit-backdrop-filter:none!important;
+      padding-top:8px!important;
+    }
+  `;
+  document.head.appendChild(s);
+})();

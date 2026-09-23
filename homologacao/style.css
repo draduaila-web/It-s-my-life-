@@ -1075,3 +1075,11 @@ dialog.food-context-dialog #chooseThisFood{
   border:0!important;
   box-shadow:none!important;
 }
+
+/* BERTH.A RC42 — Alimentação: primário fiel à paleta azul + butter suave */
+dialog.food-context-dialog #chooseThisFood{
+  background:linear-gradient(135deg,#9fc8e2 0%,#c8d9dc 52%,#eadfca 100%)!important;
+  color:#fff!important;
+  border:0!important;
+  box-shadow:none!important;
+}

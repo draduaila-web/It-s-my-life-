@@ -1,4 +1,4 @@
-const CACHE = "hml-bertha-v221-rc41-food-primary-context-hml";
+const CACHE = "hml-bertha-v221-rc42-food-button-task-continuous-hml";
 self.addEventListener("install", event => event.waitUntil(self.skipWaiting()));
 self.addEventListener("activate", event => event.waitUntil((async()=>{
   const keys=await caches.keys();
