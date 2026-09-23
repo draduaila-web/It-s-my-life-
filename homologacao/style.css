@@ -870,3 +870,14 @@ dialog[class*="finance" i] form,[class*="finance" i] .study-v10-modal{background
 .exercise-week-dialog .exercise-week-warning{margin-left:0!important;margin-right:0!important}
 .exercise-edit-record-dialog .bertha-modal,.exercise-plan-dialog .bertha-modal,.exercise-quick-dialog .bertha-modal{padding:22px!important}
 .exercise-other-list button:focus:not(:focus-visible){outline:none!important;box-shadow:none!important}
+
+/* RC20 — Casa: acabamento da revisão geral */
+.casa-modal-card,.casa-maint-modal{border:0!important;box-shadow:0 22px 60px rgba(76,61,69,.18)!important;background:#fffaf5!important}
+.casa-maint-dialog{align-items:flex-start!important;padding:calc(env(safe-area-inset-top,0px) + 18px) 14px calc(env(safe-area-inset-bottom,0px) + 18px)!important;overflow:hidden!important}
+.casa-maint-modal{width:min(620px,calc(100vw - 28px))!important;max-height:calc(100dvh - env(safe-area-inset-top,0px) - env(safe-area-inset-bottom,0px) - 36px)!important;overflow:auto!important;overscroll-behavior:contain!important;margin:0 auto!important;border-radius:28px!important;padding:22px 18px 20px!important}
+.casa-maint-modal .primary,.casa-tip-dialog .primary{background:linear-gradient(135deg,#e8d4df,#d9e6d9)!important;color:#655661!important;border:0!important}
+.casa-schedule-row{grid-template-columns:100px minmax(0,1fr) auto!important;align-items:center!important}
+.casa-time-stack{display:flex!important;flex-direction:column!important;align-items:center!important;justify-content:center!important;gap:5px!important;text-align:center!important}
+.casa-time-stack .casa-time{width:100%!important;text-align:center!important;justify-content:center!important}
+.casa-substitute-info label{display:block;margin-top:18px!important}.casa-substitute-info input{margin-top:7px!important}
+.casa-web-card #addCasaTip{margin:4px 0 14px!important}
