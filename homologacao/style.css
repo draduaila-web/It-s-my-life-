@@ -985,3 +985,32 @@ dialog.fin-planned-dialog.fin-unified-dialog>.modal-card{
   background:linear-gradient(145deg,rgba(251,247,253,.99) 0%,rgba(245,240,250,.98) 48%,rgba(239,247,247,.97) 100%)!important;
 }
 dialog.fin-unified-dialog .modal-head,dialog.fin-unified-dialog .modal-actions{background:transparent!important;}
+
+/* BERTH.A RC32 — Lista de Desejos alinhada ao padrão visual do Financeiro */
+.wish-panel{
+  background:radial-gradient(circle at 92% 10%,rgba(122,203,193,.07),transparent 34%),linear-gradient(145deg,rgba(250,248,253,.96),rgba(247,244,252,.91))!important;
+  border:1px solid rgba(111,154,202,.14)!important;
+  border-radius:26px!important;
+  box-shadow:0 8px 24px rgba(72,56,96,.035)!important;
+}
+.wish-card{
+  background:radial-gradient(circle at 90% 8%,rgba(122,203,193,.045),transparent 30%),linear-gradient(145deg,rgba(250,248,253,.96),rgba(247,244,252,.92))!important;
+  border:1px solid rgba(111,154,202,.14)!important;
+  border-radius:20px!important;
+  box-shadow:none!important;
+}
+.wish-head-actions #wishGoal,
+.wish-actions .secondary.tiny{
+  background:rgba(238,230,248,.72)!important;
+  color:#74549a!important;
+  border:0!important;
+}
+.wish-head-actions #wishNew{
+  background:linear-gradient(135deg,#c9b4dc 0%,#a8d3ca 100%)!important;
+  color:#fff!important;
+  border:0!important;
+}
+.wish-tags span,.wish-goal-chip{
+  background:rgba(255,255,255,.62)!important;
+  color:#817789!important;
+}
