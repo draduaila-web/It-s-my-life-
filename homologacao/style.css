@@ -780,3 +780,37 @@ h2 { margin:0; font-size:22px; letter-spacing:-.02em; }
 /* RC7 Estudos — biblioteca de ícones */
 
 .study-icon-picker{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px}.study-icon-choice{border:1px solid rgba(91,125,158,.10);background:linear-gradient(135deg,rgba(224,239,248,.92),rgba(250,220,205,.82));border-radius:15px;min-height:72px;padding:8px 5px;color:#587185}.study-icon-choice.selected{box-shadow:0 0 0 2px rgba(102,142,170,.25) inset;background:linear-gradient(135deg,rgba(194,224,242,.98),rgba(247,201,179,.94))}.study-icon-choice span{display:flex;justify-content:center}.study-icon-choice svg,.study-item-icon svg{width:27px;height:27px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}.study-icon-choice small{display:block;margin-top:5px;font-size:9px;font-weight:800;line-height:1.05}.study-content-main{display:flex;align-items:center;gap:11px;min-width:0}.study-content-main>div{min-width:0}.study-item-icon{width:42px;height:42px;flex:0 0 42px;border-radius:14px;display:flex;align-items:center;justify-content:center;color:#587185;background:linear-gradient(135deg,rgba(207,230,245,.96),rgba(248,207,186,.90))}.study-v10-content strong,.study-v10-content small,.study-v10-content span{display:block}@media(max-width:480px){.study-icon-picker{grid-template-columns:repeat(3,minmax(0,1fr))}}
+
+
+/* BERTH.A RC16 — revisão geral: Modal System v1 / estabilização iPhone */
+@media (max-width: 700px){
+  dialog.work12-dialog,dialog.study-v10-dialog,dialog.bertha-dialog,#capilarDialog,#ideaDialog,
+  dialog[id*="casa" i],dialog[class*="finance" i]{
+    position:fixed!important;left:50%!important;top:50%!important;right:auto!important;bottom:auto!important;
+    transform:translate(-50%,-50%)!important;margin:0!important;width:min(92vw,520px)!important;
+    max-width:min(92vw,520px)!important;max-height:82svh!important;overflow:hidden!important;
+    overscroll-behavior:contain!important;padding:0!important;border:0!important;background:transparent!important;
+  }
+  dialog.work12-dialog>*,dialog.study-v10-dialog>*,dialog.bertha-dialog>*,#capilarDialog>*,#ideaDialog>*,
+  dialog[id*="casa" i]>*,dialog[class*="finance" i]>*{
+    box-sizing:border-box!important;width:100%!important;max-height:82svh!important;overflow-y:auto!important;
+    -webkit-overflow-scrolling:touch!important;overscroll-behavior:contain!important;margin:0!important;
+  }
+}
+/* estrutura contínua: sem tarja/rodapé destacado */
+.study-v10-head,.bertha-modal-head,.modal-head,.work12-form-head{background:transparent!important;border-bottom:0!important}
+.study-v10-actions,.modal-actions,.work12-form-actions,[class*="finance" i] .modal-actions{background:transparent!important;border-top:0!important;box-shadow:none!important}
+.study-v10-modal,.bertha-modal,.modal-card,.work12-form{background:#fbf7f0!important;border:1px solid rgba(121,108,124,.10)!important;border-radius:26px!important;padding:20px!important}
+.study-v10-modal>label,.bertha-modal>label,.modal-card>label{margin-left:0!important;margin-right:0!important}
+/* Estudos: ícones alinhados */
+.study-content-main{display:grid!important;grid-template-columns:42px minmax(0,1fr)!important;align-items:center!important;gap:12px!important}.study-item-icon{width:42px!important;height:42px!important;display:grid!important;place-items:center!important;align-self:center!important}.study-item-icon svg{width:26px!important;height:26px!important;display:block!important}
+/* Exercícios: identidade do módulo + respiro */
+.exercise-dialog .bertha-modal,.exercise-dialog .study-v10-modal{padding:20px!important;background:#fbf7f0!important}.exercise-dialog .primary{background:linear-gradient(135deg,#d7c6ea,#edc9c9)!important;color:#5f5266!important}.exercise-dialog .bertha-modal-head{margin-bottom:14px!important}.exercise-cycle-modal{padding:20px!important}
+/* Receitas: respiro, checkbox e botões coerentes */
+.recipe-dialog .study-v10-modal{padding:20px!important}.recipe-dialog input[type=checkbox]{appearance:none!important;-webkit-appearance:none!important;width:20px!important;height:20px!important;border:1.5px solid #c5a8a4!important;border-radius:6px!important;background:#fffdfa!important}.recipe-dialog input[type=checkbox]:checked{background:linear-gradient(135deg,#efc9c5,#e6b9a9)!important;box-shadow:inset 0 0 0 4px #fffdfa!important}.recipe-modal-actions{display:flex!important;gap:8px!important;flex-wrap:wrap!important}.recipe-modal-actions button{min-height:42px!important;border-radius:14px!important;padding:10px 14px!important}.recipe-dialog .primary{background:linear-gradient(135deg,#efc9c5,#e8b9a7)!important;color:#fff!important}.recipe-dialog .secondary{border-color:rgba(177,124,118,.16)!important;color:#8d6562!important;background:#fffaf7!important}
+/* Rituais */
+#capilarDialog .modal-card{background:#fbf7f0!important;padding:20px!important}#capilarDialog .primary{background:linear-gradient(135deg,#d8c6e9,#efc9d2)!important;color:#62546a!important}
+/* Financeiro: formulário contínuo */
+dialog[class*="finance" i] form,[class*="finance" i] .study-v10-modal{background:#fbf7f0!important}dialog[class*="finance" i] .modal-actions{position:static!important;margin-top:16px!important;padding:0!important}
+/* Trabalho: notas e formulários estáveis */
+.work12-note-day{display:flex!important;align-items:center!important;gap:10px!important;padding:10px 0!important}.work12-note-day input{width:20px!important;height:20px!important;flex:0 0 20px}.work12-note-day span{display:grid!important;gap:2px!important}.work12-note-day small{font-weight:500!important;color:#8d858e!important}

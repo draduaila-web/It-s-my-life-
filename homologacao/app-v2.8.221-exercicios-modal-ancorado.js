@@ -935,7 +935,7 @@ function studyIconPicker(selected='auto'){
 function bindStudyIconPicker(dlg,initial='auto'){dlg.dataset.studyIcon=initial||'auto';dlg.querySelectorAll('[data-study-icon]').forEach(b=>b.onclick=()=>{dlg.dataset.studyIcon=b.dataset.studyIcon;dlg.querySelectorAll('[data-study-icon]').forEach(x=>x.classList.toggle('selected',x===b));});}
 function studyMapDialog(id,onDone){
  const current=id!=null?studyMapById(id):null,dlg=document.createElement('dialog');dlg.className='study-v10-dialog study-module-dialog';
- const map=current||{id:nextStudyMapId(),bloco:'P1',materia:'',topico:'',semana:'S1',minutes:30,icon:'auto'};
+ const map=current||{id:nextStudyMapId(),bloco:'P1',materia:'',topico:'',semana:'S1',minutes:30,icon:'auto',notify:false,notifyWhen:'No início do período'};
  dlg.innerHTML=`<div class="study-v10-modal"><div class="study-v10-head"><div><div class="eyebrow">TCDF 2026</div><h2>${current?'Editar mapa':'Novo mapa'}</h2><p>${current?`Mapa ${String(map.id).padStart(3,'0')}`:'Ele entra na mesma biblioteca e na inteligência da BERTH.A.'}</p></div><button class="study-v10-x" type="button">×</button></div>
  ${field('Tema / título',`<input data-map-topic maxlength="180" value="${escapeHtml(map.topico||'')}" placeholder="Ex.: Controle da administração pública">`)}
  ${field('Matéria',`<input data-map-subject maxlength="120" value="${escapeHtml(map.materia||'')}" placeholder="Ex.: Direito Administrativo">`)}

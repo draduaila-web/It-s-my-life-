@@ -1,4 +1,4 @@
-const CACHE = "hml-bertha-v221-rc15-planos-tarefa-estavel";
+const CACHE = "hml-bertha-v221-rc16-planos-tarefa-estavel";
 self.addEventListener("install", event => event.waitUntil(self.skipWaiting()));
 self.addEventListener("activate", event => event.waitUntil((async()=>{
   const keys=await caches.keys();
