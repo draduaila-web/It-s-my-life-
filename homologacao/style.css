@@ -977,3 +977,11 @@ dialog input,dialog select,dialog textarea{font-size:16px!important}
 .wish-actions .secondary.tiny{min-height:34px!important;padding:7px 11px!important;border-radius:13px!important;background:rgba(238,230,248,.62)!important;color:#775d8b!important;border:0!important;}
 .wish-actions .wish-create-goal{margin-left:auto!important;}
 .wish-card.is-done{opacity:.68!important;}
+
+
+/* BERTH.A RC31 — Financeiro: devolve identidade lilás + menta sem alterar a estrutura estável da RC30 */
+dialog.fin-unified-dialog>.modal-card,
+dialog.fin-planned-dialog.fin-unified-dialog>.modal-card{
+  background:linear-gradient(145deg,rgba(251,247,253,.99) 0%,rgba(245,240,250,.98) 48%,rgba(239,247,247,.97) 100%)!important;
+}
+dialog.fin-unified-dialog .modal-head,dialog.fin-unified-dialog .modal-actions{background:transparent!important;}

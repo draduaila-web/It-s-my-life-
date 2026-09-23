@@ -1,4 +1,4 @@
-const CACHE = "hml-bertha-v221-rc30-finance-modal-system-hml";
+const CACHE = "hml-bertha-v221-rc31-finance-colors-hml";
 self.addEventListener("install", event => event.waitUntil(self.skipWaiting()));
 self.addEventListener("activate", event => event.waitUntil((async()=>{
   const keys=await caches.keys();
