@@ -977,3 +977,51 @@ dialog input,dialog select,dialog textarea{font-size:16px!important}
 .wish-actions .secondary.tiny{min-height:34px!important;padding:7px 11px!important;border-radius:13px!important;background:rgba(238,230,248,.62)!important;color:#775d8b!important;border:0!important;}
 .wish-actions .wish-create-goal{margin-left:auto!important;}
 .wish-card.is-done{opacity:.68!important;}
+
+/* BERTH.A RC29 — Financeiro: Modal System v1 + paleta do módulo */
+dialog.fin-unified-dialog{
+  box-sizing:border-box!important;border:0!important;outline:0!important;padding:0!important;margin:auto!important;
+  background:transparent!important;width:min(92vw,540px)!important;max-width:540px!important;
+  max-height:calc(100dvh - 28px)!important;overflow:visible!important;box-shadow:none!important;
+}
+dialog.fin-unified-dialog::backdrop{background:rgba(54,44,55,.30)!important;backdrop-filter:blur(4px)!important;-webkit-backdrop-filter:blur(4px)!important}
+dialog.fin-unified-dialog>.modal-card{
+  box-sizing:border-box!important;width:100%!important;max-width:none!important;max-height:calc(100dvh - 28px)!important;
+  overflow:auto!important;overscroll-behavior:contain!important;margin:0!important;padding:24px!important;border:1px solid rgba(111,154,202,.10)!important;
+  border-radius:28px!important;
+  background:radial-gradient(circle at 92% 8%,rgba(133,220,210,.10),transparent 32%),radial-gradient(circle at 12% 10%,rgba(150,190,244,.11),transparent 35%),linear-gradient(145deg,rgba(255,251,245,.99),rgba(248,247,252,.985) 54%,rgba(244,249,248,.98))!important;
+  box-shadow:0 26px 70px rgba(44,55,78,.18)!important;
+}
+dialog.fin-unified-dialog .modal-head{
+  position:relative!important;top:auto!important;z-index:auto!important;margin:0 0 22px!important;padding:0!important;
+  background:transparent!important;backdrop-filter:none!important;-webkit-backdrop-filter:none!important;border:0!important;
+  display:flex!important;align-items:flex-start!important;justify-content:space-between!important;gap:16px!important;
+}
+dialog.fin-unified-dialog .modal-head .eyebrow{color:#6652a0!important;font-size:11px!important;font-weight:760!important;letter-spacing:.18em!important}
+dialog.fin-unified-dialog .modal-head h2{margin:5px 0 0!important;font-size:25px!important;font-weight:560!important;letter-spacing:-.025em!important;line-height:1.12!important;color:#30313d!important}
+dialog.fin-unified-dialog .modal-head .icon-btn,
+dialog.fin-unified-dialog .fin-modal-x{flex:0 0 42px!important;width:42px!important;height:42px!important;min-width:42px!important;min-height:42px!important;border:0!important;border-radius:50%!important;background:rgba(238,230,248,.72)!important;color:#75598a!important;font-size:25px!important;line-height:1!important;padding:0!important;box-shadow:none!important;outline:none!important}
+dialog.fin-unified-dialog label{margin:14px 0!important;color:#67616e!important;font-size:14px!important;font-weight:680!important}
+dialog.fin-unified-dialog input,dialog.fin-unified-dialog select,dialog.fin-unified-dialog textarea{box-sizing:border-box!important;width:100%!important;min-height:50px!important;border:1px solid rgba(125,104,145,.14)!important;border-radius:17px!important;background:rgba(255,255,255,.76)!important;padding:13px 15px!important;font-size:16px!important;line-height:1.25!important;color:#393641!important;box-shadow:none!important}
+dialog.fin-unified-dialog textarea{min-height:88px!important;resize:vertical!important}
+dialog.fin-unified-dialog input:focus,dialog.fin-unified-dialog select:focus,dialog.fin-unified-dialog textarea:focus{outline:2px solid rgba(133,196,194,.20)!important;outline-offset:1px!important;border-color:rgba(110,174,177,.30)!important}
+dialog.fin-unified-dialog .form-grid{display:grid!important;grid-template-columns:1fr 1fr!important;gap:12px!important}
+dialog.fin-unified-dialog .modal-actions{
+  position:relative!important;bottom:auto!important;margin:22px 0 0!important;padding:0!important;background:transparent!important;
+  backdrop-filter:none!important;-webkit-backdrop-filter:none!important;border:0!important;display:flex!important;align-items:center!important;gap:10px!important;
+}
+dialog.fin-unified-dialog .modal-actions .secondary{background:rgba(235,225,247,.74)!important;color:#735b86!important;border:0!important;box-shadow:none!important}
+dialog.fin-unified-dialog .modal-actions .primary{
+  background:linear-gradient(110deg,#c9b8ec 0%,#b8d5e7 54%,#b9ded5 100%)!important;
+  color:#4f485b!important;border:0!important;box-shadow:0 8px 20px rgba(112,92,156,.10)!important;
+}
+dialog.fin-unified-dialog .modal-actions button{min-height:48px!important;border-radius:16px!important;font-size:16px!important;font-weight:750!important}
+dialog.fin-unified-dialog .fin-reminder-switch input:checked+i{background:linear-gradient(110deg,#c9b8ec,#b9ded5)!important}
+dialog.fin-unified-dialog .fg-editor-head .secondary,
+dialog.fin-unified-dialog .secondary.tiny{background:rgba(235,225,247,.74)!important;color:#735b86!important;border:0!important}
+@media(max-width:560px){
+ dialog.fin-unified-dialog{width:calc(100vw - 24px)!important;max-height:calc(100dvh - 24px)!important}
+ dialog.fin-unified-dialog>.modal-card{max-height:calc(100dvh - 24px)!important;padding:22px 20px!important;border-radius:26px!important}
+ dialog.fin-unified-dialog .form-grid{grid-template-columns:1fr!important;gap:0!important}
+ dialog.fin-unified-dialog .modal-actions{margin-top:20px!important}
+}
