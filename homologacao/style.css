@@ -1669,3 +1669,34 @@ html body dialog.bertha-goal-dialog :is(.primary,.bertha-primary,[type="submit"]
     margin:auto!important;border-radius:28px!important;transform:none!important;
   }
 }
+
+/* =========================================================
+   RC52 — Modal System: bordas + Tarefas sem amarelo + Casa
+   ========================================================= */
+/* Nova/Editar tarefa: identidade candy sem amarelo/ocre. */
+html body #pendingDialog[open] > #pendingForm.modal-card{
+  background:linear-gradient(145deg,#fcecf4 0%,#f1eafa 50%,#e9f1fb 100%)!important;
+  border:1.5px solid rgba(151,119,164,.24)!important;
+}
+html body #pendingDialog[open] .modal-head,html body #pendingDialog[open] .modal-actions{background:transparent!important;border:0!important;box-shadow:none!important}
+html body #pendingDialog[open] .modal-head .eyebrow{color:#98728e!important}
+html body #pendingDialog[open] :is(input,select,textarea){background:rgba(255,253,250,.9)!important;border:1.5px solid rgba(157,128,169,.25)!important;border-radius:16px!important;font-size:16px!important;box-shadow:none!important}
+html body #pendingDialog[open] :is(input,select,textarea):focus{border-color:rgba(150,117,170,.42)!important;box-shadow:0 0 0 3px rgba(185,157,204,.12)!important;outline:none!important}
+html body #pendingDialog[open] .modal-actions .primary{background:linear-gradient(135deg,#d9a9c8 0%,#b8a5df 55%,#9ebfe4 100%)!important;color:#fff!important;border:1.5px solid rgba(144,115,166,.18)!important}
+html body #pendingDialog[open] .modal-actions .secondary,html body #pendingDialog[open] .modal-head .icon-btn{background:rgba(255,253,250,.58)!important;border:1.5px solid rgba(157,128,169,.22)!important;color:#6f6671!important}
+
+/* Bordas do Modal System: visíveis e coerentes em todos os módulos revisados. */
+html body :is(.bertha-plans-task-dialog,.commit-dialog,.bertha-repeat-dialog,.bertha-ritual-dialog,.exercise-dialog,.recipe-dialog,.food-next-prep-dialog,.food-context-dialog,.shop-dialog,.close-purchase-dialog,.fin-unified-dialog,.casa-dialog,.casa-maint-dialog,.study-module-dialog,.idea-dialog,#ideaDialog,.work12-dialog,.work12-front-dialog,.bertha-goal-dialog,.bertha-dialog:has(.bertha-ideal-modal-form)) :is(input:not([type=checkbox]):not([type=radio]),select,textarea){border-width:1.5px!important;border-color:rgba(125,105,135,.22)!important}
+html body :is(.bertha-plans-task-dialog,.commit-dialog,.bertha-repeat-dialog,.bertha-ritual-dialog,.exercise-dialog,.recipe-dialog,.food-next-prep-dialog,.food-context-dialog,.shop-dialog,.close-purchase-dialog,.fin-unified-dialog,.casa-dialog,.casa-maint-dialog,.study-module-dialog,.idea-dialog,#ideaDialog,.work12-dialog,.work12-front-dialog,.bertha-goal-dialog,.bertha-dialog:has(.bertha-ideal-modal-form)) :is(.secondary,.pill,.seg-btn,.choice-btn,.icon-btn,.study-v10-x,.work12-x,.casa-modal-x){border-width:1.5px!important}
+html body :is(.casa-dialog,.casa-maint-dialog) :is(input:not([type=checkbox]),select,textarea,.secondary,.icon-btn,.casa-modal-x){border-color:rgba(154,119,132,.24)!important}
+html body .bertha-ritual-dialog :is(input:not([type=checkbox]),select,textarea,.secondary,.icon-btn){border-color:rgba(168,124,158,.24)!important}
+html body .exercise-dialog :is(input:not([type=checkbox]),select,textarea,.secondary,.icon-btn){border-color:rgba(148,125,169,.24)!important}
+html body .study-module-dialog :is(input:not([type=checkbox]),select,textarea,.secondary,.icon-btn){border-color:rgba(99,137,171,.23)!important}
+
+/* Casa — novos utensílios/equipamentos. */
+html body .casa-add-tool{width:100%;margin:10px 0 14px!important;background:linear-gradient(135deg,rgba(236,190,203,.45),rgba(188,220,196,.48))!important;border:1.5px solid rgba(154,119,132,.22)!important}
+html body .casa-custom-tools{display:grid;gap:8px;margin-top:12px}
+html body .casa-tool-row{border:1.5px solid rgba(154,119,132,.18)!important;border-radius:16px;padding:12px;background:rgba(255,253,250,.55)}
+html body .casa-tool-remove{width:36px;height:36px;border-radius:50%;border:1.5px solid rgba(154,119,132,.22);background:rgba(255,255,255,.55);color:#756b70;font-size:22px}
+html body .casa-tool-check{display:flex!important;align-items:center;gap:10px}
+html body .casa-tool-check input{width:22px!important;height:22px!important;min-width:22px!important}
