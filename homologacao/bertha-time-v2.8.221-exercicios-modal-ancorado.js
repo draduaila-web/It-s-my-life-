@@ -1500,76 +1500,53 @@
     }).join('')}</div>`;
   }
 
+  // RC46 — referências deixam de espelhar módulos e passam a representar dimensões da vida.
+  // Os módulos são evidências e podem alimentar mais de uma dimensão no Meu Progresso.
   const progressGoalAreas=[
-    ['movimento','Exercícios'],['alimentacao','Alimentação'],['autocuidado','Autocuidado'],['estudos','Estudos'],
-    ['projetos','Projetos'],['trabalho','Trabalho'],['casa','Casa'],['rituais','Rituais']
+    ['autocuidado','Autocuidado'],['intelectual','Intelectual'],['disciplina','Disciplina'],
+    ['financeiro','Financeiro'],['casa','Casa & organização']
   ];
   function progressGoals(){return read(PROGRESS_GOALS_KEY,{});}
   function nfmt(v){return String(v??'').replace('.',',')}
   function goalAreaIcon(area){
     const icons={
-      movimento:'<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3.8 10.3v3.4M6.6 8.2v7.6M9.4 10.1v3.8M14.6 10.1v3.8M17.4 8.2v7.6M20.2 10.3v3.4M9.4 12h5.2"/></svg>',
-      alimentacao:'<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 20c4.8-2.8 6.8-6.9 6.8-10.7-3.9 0-7.4 1.8-10.1 6-1.8 2.8-1.9 5.2-1.9 5.2s2.5-.1 5.2-1.9c4.2-2.7 6-6.2 6-10.1"/></svg>',
       autocuidado:'<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 19.8S5.5 15.7 5.5 10.2a3.8 3.8 0 0 1 6.5-2.7 3.8 3.8 0 0 1 6.5 2.7c0 5.5-6.5 9.6-6.5 9.6z"/></svg>',
-      estudos:'<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4.5 6.5h6c1.6 0 2.8 1.1 2.8 2.6v8.2c0-1.5-1.2-2.6-2.8-2.6h-6zM19.5 6.5h-6c-1.6 0-2.8 1.1-2.8 2.6v8.2c0-1.5 1.2-2.6 2.8-2.6h6z"/></svg>',
-      projetos:'<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 4v16M4 12h16M7.2 7.2l9.6 9.6M16.8 7.2l-9.6 9.6"/></svg>',
-      trabalho:'<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 7V5.9c0-.9.7-1.6 1.6-1.6h4.8c.9 0 1.6.7 1.6 1.6V7M4.5 8.5h15v8.8c0 .9-.7 1.6-1.6 1.6H6.1c-.9 0-1.6-.7-1.6-1.6zM4.5 11.4h15"/></svg>',
-      casa:'<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 10.3 12 4.8l7 5.5V19a1 1 0 0 1-1 1H6a1 1 0 0 1-1-1zM9.5 20v-4.7h5V20"/></svg>',
-      rituais:'<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3.5v2.3M12 18.2v2.3M5.2 5.2l1.6 1.6M17.2 17.2l1.6 1.6M3.5 12h2.3M18.2 12h2.3M5.2 18.8l1.6-1.6M17.2 6.8l1.6-1.6M12 8.7a3.3 3.3 0 1 0 0 6.6 3.3 3.3 0 0 0 0-6.6z"/></svg>'
-    };
-    return icons[area]||'';
+      intelectual:'<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4.5 6.5h6c1.6 0 2.8 1.1 2.8 2.6v8.2c0-1.5-1.2-2.6-2.8-2.6h-6zM19.5 6.5h-6c-1.6 0-2.8 1.1-2.8 2.6v8.2c0-1.5 1.2-2.6 2.8-2.6h6z"/></svg>',
+      disciplina:'<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 12.5l3.5 3.5L18 7.5"/><circle cx="12" cy="12" r="9"/></svg>',
+      financeiro:'<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 18.5V9.5M10 18.5V5.5M16 18.5v-6M3 19.5h18"/></svg>',
+      casa:'<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 10.3 12 4.8l7 5.5V19a1 1 0 0 1-1 1H6a1 1 0 0 1-1-1zM9.5 20v-4.7h5V20"/></svg>'
+    };return icons[area]||'';
   }
-
   function progressGoalLabel(area,g){
     if(!g)return 'Definir referência';
-    if(area==='movimento'){
-      const a=[]; if(g.sessionsPerWeek)a.push(`${nfmt(g.sessionsPerWeek)} sessões/sem`); if(g.minutesPerWeek)a.push(`${nfmt(g.minutesPerWeek)} min/sem`); return a.join(' · ')||'Definir referência';
-    }
-    if(area==='alimentacao')return g.adherencePercent?`${nfmt(g.adherencePercent)}% do planejamento`:'Definir referência';
-    if(area==='autocuidado')return g.sessionsPerWeek?`${nfmt(g.sessionsPerWeek)} momentos/sem`:'Definir referência';
-    if(area==='estudos')return g.hoursPerWeek?`${nfmt(g.hoursPerWeek)} h/sem`:'Definir referência';
-    if(area==='projetos')return g.onTimePercent?`${nfmt(g.onTimePercent)}% no prazo`:'Definir referência';
-    if(area==='trabalho')return g.prioritiesPerWeek?`${nfmt(g.prioritiesPerWeek)} prioridades/sem`:'Definir referência';
-    if(area==='casa')return g.routinesPerWeek?`${nfmt(g.routinesPerWeek)} rotinas/sem`:'Definir referência';
-    if(area==='rituais')return g.sessionsPerWeek?`${nfmt(g.sessionsPerWeek)} rituais/sem`:'Definir referência';
+    if(area==='autocuidado')return g.targetPercent?`${nfmt(g.targetPercent)}% de cuidado consistente`:'Definir referência';
+    if(area==='intelectual')return g.targetPercent?`${nfmt(g.targetPercent)}% de continuidade`:'Definir referência';
+    if(area==='disciplina')return g.targetPercent?`${nfmt(g.targetPercent)}% de consistência`:'Definir referência';
+    if(area==='financeiro')return g.onTimePercent?`${nfmt(g.onTimePercent)}% dos pagamentos em dia`:'Definir referência';
+    if(area==='casa')return g.targetPercent?`${nfmt(g.targetPercent)}% das rotinas essenciais`:'Definir referência';
     return 'Definir referência';
   }
-  function renderProgressGoals(){const goals=progressGoals();return `<section class="bertha-goals-block"><div class="bertha-goals-head"><span>REFERÊNCIAS POR ÁREA</span><strong>O que você espera conseguir manter?</strong></div><p class="bertha-goals-note">Cada área usa uma régua própria. Estas referências não criam tarefas; servem para comparar o que você gostaria de manter com o que realmente aconteceu.</p><div class="bertha-goals-grid">${progressGoalAreas.map(([id,label])=>`<button type="button" class="bertha-goal-card goal-${id}" data-progress-goal="${id}"><span class="bertha-goal-icon">${goalAreaIcon(id)}</span><span class="bertha-goal-text"><span>${label}</span><strong>${esc(progressGoalLabel(id,goals[id]))}</strong></span></button>`).join('')}</div></section>`;}
-  function goalField(label,key,value,attrs=''){return `<label class="bertha-field"><span>${label}</span><input data-goal-field="${key}" type="number" min="0" step="0.5" inputmode="decimal" value="${esc(value??'')}" ${attrs}></label>`}
+  function renderProgressGoals(){const goals=progressGoals();return `<section class="bertha-goals-block"><div class="bertha-goals-head"><span>REFERÊNCIAS DA MINHA VIDA</span><strong>O que significa estar bem para você?</strong></div><p class="bertha-goals-note">As referências são dimensões da vida, não módulos. Exercícios, Rituais, Alimentação, Estudos, Trabalho, Financeiro, Casa e outros registros funcionam como evidências e podem contribuir para mais de uma dimensão.</p><div class="bertha-goals-grid">${progressGoalAreas.map(([id,label])=>`<button type="button" class="bertha-goal-card goal-${id}" data-progress-goal="${id}"><span class="bertha-goal-icon">${goalAreaIcon(id)}</span><span class="bertha-goal-text"><span>${label}</span><strong>${esc(progressGoalLabel(id,goals[id]))}</strong></span></button>`).join('')}</div><p class="bertha-goals-note bertha-goals-link-note">A BERTH.A também aproveita os vínculos “faz referência a” dos módulos para interpretar o progresso sem contar a mesma ação duas vezes.</p></section>`;}
+  function goalField(label,key,value,attrs=''){return `<label class="bertha-field"><span>${label}</span><input data-goal-field="${key}" type="number" min="0" step="1" inputmode="decimal" value="${esc(value??'')}" ${attrs}></label>`}
   function openProgressGoalDialog(area){
     const label=(progressGoalAreas.find(x=>x[0]===area)||[])[1]||area,all=progressGoals(),g=all[area]||{};
     let copy='',fields='';
-    if(area==='movimento'){copy='Defina a frequência e, se quiser, também o volume semanal que representa uma boa rotina para você.';fields=goalField('Sessões por semana','sessionsPerWeek',g.sessionsPerWeek)+goalField('Minutos por semana (opcional)','minutesPerWeek',g.minutesPerWeek)}
-    else if(area==='alimentacao'){copy='Aqui a referência é aderência ao que foi planejado, não perfeição em cada refeição.';fields=goalField('Aderência ao planejamento (%)','adherencePercent',g.adherencePercent,'max="100" step="1"')}
-    else if(area==='autocuidado'){copy='Quantos momentos de autocuidado por semana fazem você sentir que essa área está sendo cuidada?';fields=goalField('Momentos por semana','sessionsPerWeek',g.sessionsPerWeek)}
-    else if(area==='estudos'){copy='Use tempo semanal como referência para não transformar cada sessão em obrigação.';fields=goalField('Horas por semana','hoursPerWeek',g.hoursPerWeek)}
-    else if(area==='projetos'){copy='A régua aqui é cumprir os projetos que têm prazo sem perder continuidade.';fields=goalField('Projetos concluídos no prazo (%)','onTimePercent',g.onTimePercent||100,'max="100" step="1"')}
-    else if(area==='trabalho'){copy='Defina quantas prioridades realmente importantes você espera concluir numa semana normal.';fields=goalField('Prioridades concluídas por semana','prioritiesPerWeek',g.prioritiesPerWeek)}
-    else if(area==='casa'){copy='Use uma quantidade realista de rotinas essenciais por semana; não é uma meta de casa perfeita.';fields=goalField('Rotinas essenciais por semana','routinesPerWeek',g.routinesPerWeek)}
-    else if(area==='rituais'){copy='Quantos rituais por semana representam cuidado suficiente para você?';fields=goalField('Rituais por semana','sessionsPerWeek',g.sessionsPerWeek)}
+    if(area==='autocuidado'){copy='Rituais, exercícios e alimentação podem alimentar esta dimensão. Defina o nível de consistência que representa sentir que você está se cuidando.';fields=goalField('Referência de consistência (%)','targetPercent',g.targetPercent||80,'max="100"')}
+    else if(area==='intelectual'){copy='Estudos, trabalho e projetos/criação podem contribuir aqui. A medida é continuidade em relação ao que você considera uma vida intelectualmente ativa.';fields=goalField('Referência de continuidade (%)','targetPercent',g.targetPercent||80,'max="100"')}
+    else if(area==='disciplina'){copy='Planos, compromissos, exercícios, alimentação, rituais e outras ações concluídas no contexto esperado alimentam esta dimensão.';fields=goalField('Referência de consistência (%)','targetPercent',g.targetPercent||80,'max="100"')}
+    else if(area==='financeiro'){copy='Pagamentos em dia, avanço das metas e organização financeira formam esta dimensão.';fields=goalField('Pagamentos em dia (%)','onTimePercent',g.onTimePercent||100,'max="100"')}
+    else if(area==='casa'){copy='Rotinas e cuidados da Casa alimentam esta dimensão. A referência representa quanto das rotinas essenciais você deseja conseguir manter.';fields=goalField('Rotinas essenciais cumpridas (%)','targetPercent',g.targetPercent||80,'max="100"')}
     const d=dialogBase(`Referência · ${label}`,`<p class="note">${copy}</p><div class="bertha-goal-fields">${fields}</div><div class="bertha-stack"><button class="bertha-primary" data-goal-save>Salvar referência</button>${Object.keys(g).length?'<button class="bertha-secondary" data-goal-remove>Remover referência</button>':''}</div>`);
     d.classList.add('bertha-goal-dialog',`goal-${area}`);
-    // RC13 — aplica a paleta do próprio card diretamente no CTA.
-    // setProperty(..., 'important') evita que regras globais antigas do modal sobrescrevam a área.
-    const goalPalettes={
-      movimento:['#eadff5','#f7e2d6','#766b86','rgba(124,116,142,.18)'],
-      alimentacao:['#e3f0fa','#fff3c9','#738198','rgba(122,132,152,.18)'],
-      autocuidado:['#f6e1e9','#fff1dd','#806b81','rgba(135,111,134,.18)'],
-      estudos:['#e4f1fa','#f7e2d8','#697a94','rgba(111,125,149,.18)'],
-      projetos:['#e1eef9','#eee4f7','#756b89','rgba(125,116,143,.18)'],
-      trabalho:['#e9def5','#dff0ea','#706b86','rgba(122,117,141,.18)'],
-      casa:['#f5e0e8','#e1eee6','#746e83','rgba(123,117,138,.18)'],
-      rituais:['#f8efd1','#e9def5','#7d6d87','rgba(131,113,140,.18)']
-    };
-    const gp=goalPalettes[area]||goalPalettes.movimento;
-    const saveGoal=d.querySelector('[data-goal-save]');
-    if(saveGoal){
-      saveGoal.style.setProperty('background',`linear-gradient(135deg, ${gp[0]}, ${gp[1]})`,'important');
-      saveGoal.style.setProperty('color',gp[2],'important');
-      saveGoal.style.setProperty('border',`1px solid ${gp[3]}`,'important');
-      saveGoal.style.setProperty('box-shadow','none','important');
-    }
-    d.querySelector('[data-goal-save]').onclick=()=>{const obj={area,label,updatedAt:Date.now()};d.querySelectorAll('[data-goal-field]').forEach(i=>{const v=Number(String(i.value||'').replace(',','.'));if(v>0)obj[i.dataset.goalField]=v});if(Object.keys(obj).length<=3)return;all[area]=obj;write(PROGRESS_GOALS_KEY,all);d.close();d.remove();rerender();setTimeout(enhanceIdealScreen,0)};
+    /* RC48: todas as Referências usam a identidade multicolorida do Meu Dia Ideal.
+       A RC47 ainda aplicava uma paleta por área via style inline !important, que tinha
+       precedência sobre o CSS compartilhado e por isso a mudança não aparecia. */
+    const modal=d.querySelector('.bertha-modal');
+    const idealSurface='radial-gradient(circle at 12% 10%,rgba(255,236,217,.72),transparent 34%),radial-gradient(circle at 88% 16%,rgba(226,218,248,.76),transparent 38%),radial-gradient(circle at 82% 88%,rgba(214,239,233,.72),transparent 40%),linear-gradient(145deg,rgba(253,242,244,.98) 0%,rgba(242,235,251,.98) 52%,rgba(226,243,239,.98) 100%)';
+    const idealAction='linear-gradient(110deg,#efcbd8 0%,#ded0f2 48%,#cde8df 100%)';
+    if(modal){modal.style.setProperty('background',idealSurface,'important');modal.style.setProperty('border','1px solid rgba(126,105,139,.12)','important');}
+    const saveGoal=d.querySelector('[data-goal-save]');if(saveGoal){saveGoal.style.setProperty('background',idealAction,'important');saveGoal.style.setProperty('color','#665b70','important');saveGoal.style.setProperty('border','1px solid rgba(121,101,134,.10)','important');saveGoal.style.setProperty('box-shadow','none','important');}
+    d.querySelector('[data-goal-save]').onclick=()=>{const obj={area,label,updatedAt:Date.now(),version:2};d.querySelectorAll('[data-goal-field]').forEach(i=>{const v=Math.min(100,Number(String(i.value||'').replace(',','.')));if(v>0)obj[i.dataset.goalField]=v});if(Object.keys(obj).length<=4)return;all[area]=obj;write(PROGRESS_GOALS_KEY,all);d.close();d.remove();rerender();setTimeout(enhanceIdealScreen,0)};
     d.querySelector('[data-goal-remove]')?.addEventListener('click',()=>{delete all[area];write(PROGRESS_GOALS_KEY,all);d.close();d.remove();rerender();setTimeout(enhanceIdealScreen,0)});
   }
   function bindProgressGoals(){document.querySelectorAll('[data-progress-goal]').forEach(b=>b.onclick=()=>openProgressGoalDialog(b.dataset.progressGoal));}
@@ -2057,7 +2034,7 @@
   function ritualProducts(id,ev,r){const st=ritualProductsStore(),key=ritualProductKey(id,ev);if(id==='autocuidado'&&Array.isArray(ev?.products)&&ev.products.length)return ev.products;if(id==='capilar'&&Array.isArray(ev?.products)&&ev.products.length)return ev.products;if(Array.isArray(st[key]))return st[key];if(id==='capilar')return capillaryProductsFromEvent(ev);if(id!=='autocuidado'&&Array.isArray(r?.products))return r.products;return[];}
   function addRitualProductToShopping(name,source){name=String(name||'').trim();if(!name)return false;let items=[];try{items=JSON.parse(window.berthaHmlStorage.getItem(SHARED_SHOP_KEY_RITUAL)||'[]')||[]}catch{}const key=name.toLocaleLowerCase('pt-BR');if(items.some(x=>!x.done&&String(x.name||x.title||x.item||'').trim().toLocaleLowerCase('pt-BR')===key))return false;items.push({id:`ritual-shop-${Date.now()}-${Math.random().toString(36).slice(2,7)}`,name,source,category:'Autocuidado',cycle:'monthly',createdAt:Date.now(),done:false});window.berthaHmlStorage.setItem(SHARED_SHOP_KEY_RITUAL,JSON.stringify(items));return true;}
   function ritualProductsHtml(id,ev,r){const products=ritualProducts(id,ev,r),source=id==='autocuidado'?`Rituais › Autocuidado › ${ev?.title||r.title}`:`Rituais › ${r.title}`;return `<div class="bertha-section-row"><span>PRODUTOS</span><button type="button" data-edit-ritual-products="${id}">Editar</button></div><div class="bertha-extra-list">${products.length?products.map(x=>`<div class="bertha-extra-card"><span class="bertha-line-icon">${ritualIcon('sparkle')}</span><span><strong>${esc(x)}</strong><small>Produto deste cuidado</small></span><button type="button" data-ritual-buy-name="${esc(x)}" data-ritual-buy-source="${esc(source)}">Adicionar à lista</button></div>`).join(''):`<div class="bertha-empty-soft">Nenhum produto específico cadastrado. Toque em Editar para adicionar.</div>`}</div>`;}
-  function ritualProductsDialog(id,ev,r){const key=ritualProductKey(id,ev),current=ritualProducts(id,ev,r),d=document.createElement('dialog');d.className='bertha-dialog bertha-task-dialog bertha-ritual-dialog';d.innerHTML=`<form class="bertha-task-modal" method="dialog"><div class="bertha-task-modal-head"><div><span>RITUAIS · PRODUTOS</span><h2>${esc(id==='autocuidado'?(ev?.title||'Autocuidado'):r.title)}</h2></div><button type="button" data-close>×</button></div><div class="bertha-task-modal-body"><label class="bertha-task-field"><span>Produtos usados <small>um por linha</small></span><textarea data-products rows="9" placeholder="Ex.: Nome do shampoo\nNome do condicionador">${esc(current.join('\n'))}</textarea></label><div class="bertha-schedule-note">Os nomes ficam salvos neste cuidado. Depois, use “+ lista” para mandar o produto à Lista de Compras sem criar duplicatas pendentes.</div></div><div class="bertha-task-modal-actions"><span></span><div><button class="bertha-task-cancel" type="button" data-close>Cancelar</button><button class="bertha-task-save" type="button" data-save>Salvar</button></div></div></form>`;document.body.appendChild(d);d.querySelectorAll('[data-close]').forEach(b=>b.onclick=()=>{d.close();d.remove()});d.querySelector('[data-save]').onclick=()=>{const vals=d.querySelector('[data-products]').value.split('\n').map(x=>x.trim()).filter(Boolean),st=ritualProductsStore();st[key]=[...new Set(vals)];saveRitualProductsStore(st);if(id!=='capilar'&&id!=='autocuidado'){const arr=read(RITUALS_KEY,[]),i=arr.findIndex(x=>x.id===id);if(i>=0){arr[i].products=st[key];write(RITUALS_KEY,arr)}}d.close();d.remove();rerender();};d.showModal();}
+  function ritualProductsDialog(id,ev,r){const key=ritualProductKey(id,ev),current=ritualProducts(id,ev,r),d=document.createElement('dialog');d.className='bertha-dialog bertha-task-dialog bertha-ritual-dialog fin-unified-dialog';d.innerHTML=`<form class="bertha-task-modal modal-card" method="dialog"><div class="bertha-task-modal-head modal-head"><div><span>RITUAIS · PRODUTOS</span><h2>${esc(id==='autocuidado'?(ev?.title||'Autocuidado'):r.title)}</h2></div><button type="button" data-close>×</button></div><div class="bertha-task-modal-body"><label class="bertha-task-field"><span>Produtos usados <small>um por linha</small></span><textarea data-products rows="9" placeholder="Ex.: Nome do shampoo\nNome do condicionador">${esc(current.join('\n'))}</textarea></label><div class="bertha-schedule-note">Os nomes ficam salvos neste cuidado. Depois, use “+ lista” para mandar o produto à Lista de Compras sem criar duplicatas pendentes.</div></div><div class="bertha-task-modal-actions modal-actions"><span></span><div><button class="bertha-task-cancel secondary" type="button" data-close>Cancelar</button><button class="bertha-task-save primary" type="button" data-save>Salvar</button></div></div></form>`;document.body.appendChild(d);d.querySelectorAll('[data-close]').forEach(b=>b.onclick=()=>{d.close();d.remove()});d.querySelector('[data-save]').onclick=()=>{const vals=d.querySelector('[data-products]').value.split('\n').map(x=>x.trim()).filter(Boolean),st=ritualProductsStore();st[key]=[...new Set(vals)];saveRitualProductsStore(st);if(id!=='capilar'&&id!=='autocuidado'){const arr=read(RITUALS_KEY,[]),i=arr.findIndex(x=>x.id===id);if(i>=0){arr[i].products=st[key];write(RITUALS_KEY,arr)}}d.close();d.remove();rerender();};d.showModal();}
 
   const RITUAL_ICONS={
     sparkle:`<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3.5c.7 4.3 2.2 5.8 6.5 6.5-4.3.7-5.8 2.2-6.5 6.5-.7-4.3-2.2-5.8-6.5-6.5 4.3-.7 5.8-2.2 6.5-6.5Z"/><path d="M18.5 15.5c.3 2 1 2.7 3 3-2 .3-2.7 1-3 3-.3-2-1-2.7-3-3 2-.3 2.7-1 3-3Z"/></svg>`,
@@ -2303,9 +2280,9 @@
     const ritual=ritualCatalog().find(x=>x.id===ritualId);
     const x=existing?{...existing}:{id:uid(),ritualId,ritualTitle:ritual?.title||'Ritual',title:'',icon:'sparkle',date:'',minutes:20,period:'flex',time:'',priority:'Normal',repeat:'none',intervalDays:30,notify:false,notifyOffset:'at-time',notifyTime:'',note:'',steps:'',products:[]};
     const originalEventDate=existing?(existing.date||existing.startDate||''):'';
-    const d=document.createElement('dialog');d.className='bertha-dialog bertha-task-dialog bertha-ritual-dialog';
-    d.innerHTML=`<form class="bertha-task-modal" method="dialog">
-      <div class="bertha-task-modal-head"><div><span>${esc((ritual?.title||'Ritual').toUpperCase())}</span><h2>${existing?'Editar cuidado':'Adicionar cuidado'}</h2></div><button type="button" data-close>×</button></div>
+    const d=document.createElement('dialog');d.className='bertha-dialog bertha-task-dialog bertha-ritual-dialog fin-unified-dialog';
+    d.innerHTML=`<form class="bertha-task-modal modal-card" method="dialog">
+      <div class="bertha-task-modal-head modal-head"><div><span>${esc((ritual?.title||'Ritual').toUpperCase())}</span><h2>${existing?'Editar cuidado':'Adicionar cuidado'}</h2></div><button type="button" data-close>×</button></div>
       <div class="bertha-task-modal-body">
         <label class="bertha-task-field"><span>O que você quer incluir?</span><input data-title value="${esc(x.title)}" placeholder="Ex.: Colorir raiz"></label>
         <div class="bertha-task-field"><span>Ícone</span><div class="bertha-icon-picker">${RITUAL_ICON_KEYS.map(k=>`<button type="button" data-icon="${k}" class="${x.icon===k?'active':''}">${ritualIcon(k)}</button>`).join('')}</div></div>
@@ -2334,7 +2311,7 @@
         </div>
         <label class="bertha-task-field"><span>Observação <small>opcional</small></span><textarea data-note>${esc(x.note||'')}</textarea></label>
       </div>
-      <div class="bertha-task-modal-actions">${existing?'<button class="bertha-delete-soft" type="button" data-delete>Excluir</button>':'<span></span>'}<div><button class="bertha-task-cancel" type="button" data-close>Cancelar</button><button class="bertha-task-save" type="button" data-save>Salvar</button></div></div>
+      <div class="bertha-task-modal-actions modal-actions">${existing?'<button class="bertha-delete-soft" type="button" data-delete>Excluir</button>':'<span></span>'}<div><button class="bertha-task-cancel secondary" type="button" data-close>Cancelar</button><button class="bertha-task-save primary" type="button" data-save>Salvar</button></div></div>
     </form>`;
     document.body.appendChild(d);if(existing)bindRitualMoveScope(d);
     d.querySelector('[data-repeat]').value=x.repeat||'none';
@@ -2361,14 +2338,14 @@
   function ritualSettingsDialog(id){
     const ev=ritualDetailData(id,new Date()); if(!ev)return;
     const key=id==='capilar'?CAPILLARY_SETTINGS_KEY:SELFCARE_SETTINGS_KEY, all=read(key,{}), type=ev.type, x={...ritualDefaultSettings(id,type),...(all[type]||{})};
-    const d=document.createElement('dialog');d.className='bertha-dialog bertha-task-dialog bertha-ritual-dialog bertha-ritual-settings-dialog';
-    d.innerHTML=`<form class="bertha-task-modal" method="dialog"><div class="bertha-task-modal-head"><div><span>RITUAL</span><h2>Configurar ${esc(id==='capilar'?'Ritual Capilar':'Autocuidado')}</h2></div><button type="button" data-close>×</button></div><div class="bertha-task-modal-body">
+    const d=document.createElement('dialog');d.className='bertha-dialog bertha-task-dialog bertha-ritual-dialog bertha-ritual-settings-dialog fin-unified-dialog';
+    d.innerHTML=`<form class="bertha-task-modal modal-card" method="dialog"><div class="bertha-task-modal-head modal-head"><div><span>RITUAL</span><h2>Configurar ${esc(id==='capilar'?'Ritual Capilar':'Autocuidado')}</h2></div><button type="button" data-close>×</button></div><div class="bertha-task-modal-body">
       <div class="bertha-task-field"><span>Quando pode acontecer?</span><div class="bertha-segment">${[['flex','Flexível'],['morning','Manhã'],['afternoon','Tarde'],['night','Noite']].map(([v,l])=>`<button type="button" data-period="${v}" class="${x.period===v?'active':''}">${l}</button>`).join('')}</div></div>
       <label class="bertha-task-field"><span>Horário <small>opcional</small></span><input data-time type="time" value="${x.time||''}"></label>
       <div class="bertha-task-field"><span>Prioridade</span><div class="bertha-segment">${['Baixa','Normal','Importante'].map(v=>`<button type="button" data-priority="${v}" class="${x.priority===v?'active':''}">${v}</button>`).join('')}</div></div>
       <div class="bertha-notify-box"><label class="bertha-toggle-row"><div><strong>Me avisar?</strong><span>Guardar preferência de lembrete</span></div><input data-notify type="checkbox" ${x.notify?'checked':''}><i></i></label></div>
       <div class="bertha-schedule-note">${id==='capilar'?'O cronograma-base de 45 dias permanece preservado. Corte, coloração e outros cuidados entram em “Cuidados & extras”.':'O ciclo-base de 14 dias continua automaticamente. Novos cuidados podem ser adicionados sem alterar o ciclo.'}</div>
-    </div><div class="bertha-task-modal-actions"><span></span><div><button class="bertha-task-cancel" type="button" data-close>Cancelar</button><button class="bertha-task-save" type="button" data-save>Salvar</button></div></div></form>`;
+    </div><div class="bertha-task-modal-actions modal-actions"><span></span><div><button class="bertha-task-cancel secondary" type="button" data-close>Cancelar</button><button class="bertha-task-save primary" type="button" data-save>Salvar</button></div></div></form>`;
     document.body.appendChild(d);d.querySelectorAll('[data-close]').forEach(b=>b.onclick=()=>{d.close();d.remove()});d.querySelectorAll('[data-period]').forEach(b=>b.onclick=()=>d.querySelectorAll('[data-period]').forEach(z=>z.classList.toggle('active',z===b)));d.querySelectorAll('[data-priority]').forEach(b=>b.onclick=()=>d.querySelectorAll('[data-priority]').forEach(z=>z.classList.toggle('active',z===b)));
     d.querySelector('[data-save]').onclick=()=>{all[type]={...x,period:d.querySelector('[data-period].active')?.dataset.period||'flex',time:d.querySelector('[data-time]').value,priority:d.querySelector('[data-priority].active')?.dataset.priority||'Normal',notify:d.querySelector('[data-notify]').checked};write(key,all);d.close();d.remove();rerender();};d.showModal();
   }
@@ -2422,8 +2399,8 @@
 
   function selfcareOccurrenceEditor(index){
     const k=Math.max(0,Number(index)||0),x=selfcareEventForIndex(k),n=x.cycleDay,products=ritualProducts('autocuidado',x,defaultRituals()[1]),oldISO=iso(x.date);
-    const d=document.createElement('dialog');d.className='bertha-dialog bertha-task-dialog bertha-ritual-dialog';
-    d.innerHTML=`<form class="bertha-task-modal" method="dialog"><div class="bertha-task-modal-head"><div><span>AUTOCUIDADO · DIA ${n}/14</span><h2>Editar cuidado</h2></div><button type="button" data-close>×</button></div><div class="bertha-task-modal-body">
+    const d=document.createElement('dialog');d.className='bertha-dialog bertha-task-dialog bertha-ritual-dialog fin-unified-dialog';
+    d.innerHTML=`<form class="bertha-task-modal modal-card" method="dialog"><div class="bertha-task-modal-head modal-head"><div><span>AUTOCUIDADO · DIA ${n}/14</span><h2>Editar cuidado</h2></div><button type="button" data-close>×</button></div><div class="bertha-task-modal-body">
       <label class="bertha-task-field"><span>Data</span><input data-date type="date" value="${oldISO}"></label>
       ${ritualMoveScopeHtml()}
       <label class="bertha-task-field"><span>Nome</span><input data-title value="${esc(x.title||'')}"></label>
@@ -2432,15 +2409,15 @@
       <label class="bertha-task-field"><span>Produtos <small>um por linha</small></span><textarea data-products rows="6" placeholder="Ex.: Nome do produto">${esc(products.join('\n'))}</textarea></label>
       <div class="bertha-notify-box"><label class="bertha-toggle-row"><div><strong>Disponível para o Meu Dia?</strong><span>A BERTA pode considerar este cuidado quando chegar o dia dele.</span></div><input data-myday type="checkbox" ${x.includeInMyDay!==false?'checked':''}><i></i></label></div>
       <div class="bertha-schedule-note">Você pode mover só esta ocorrência ou deslocar todo o ciclo mantendo os mesmos intervalos.</div>
-    </div><div class="bertha-task-modal-actions"><span></span><div><button class="bertha-task-cancel" type="button" data-close>Cancelar</button><button class="bertha-task-save" type="button" data-save>Salvar</button></div></div></form>`;
+    </div><div class="bertha-task-modal-actions modal-actions"><span></span><div><button class="bertha-task-cancel secondary" type="button" data-close>Cancelar</button><button class="bertha-task-save primary" type="button" data-save>Salvar</button></div></div></form>`;
     document.body.appendChild(d);bindRitualMoveScope(d);d.querySelectorAll('[data-close]').forEach(b=>b.onclick=()=>{d.close();d.remove()});d.querySelectorAll('[data-period]').forEach(b=>b.onclick=()=>d.querySelectorAll('[data-period]').forEach(z=>z.classList.toggle('active',z===b)));
     d.querySelector('[data-save]').onclick=()=>{const all=selfcareTemplateStore(),vals=ritualLines(d.querySelector('[data-products]').value),newISO=d.querySelector('[data-date]').value||oldISO,scope=d.querySelector('[data-scope].active')?.dataset.scope||'one';all[String(n)]={title:d.querySelector('[data-title]').value.trim()||x.title,minutes:Math.max(0,+d.querySelector('[data-minutes]').value||0),period:d.querySelector('[data-period].active')?.dataset.period||'night',tasks:ritualLines(d.querySelector('[data-steps]').value),products:vals,includeInMyDay:d.querySelector('[data-myday]').checked,optional:!!x.optional};saveSelfcareTemplateStore(all);if(newISO!==oldISO)moveRitualOccurrence('autocuidado',k,newISO,scope);const st=ritualProductsStore();st[ritualProductKey('autocuidado',x)]=vals;saveRitualProductsStore(st);d.close();d.remove();rerender();};d.showModal();
   }
 
   function capillaryOccurrenceEditor(index){
     const k=Math.max(0,Math.min(capillaryCycleTotal()-1,Number(index)||0)),x=capillaryEventForIndex(k);if(!x)return;const n=k+1,products=ritualProducts('capilar',x,defaultRituals()[0]),oldISO=iso(x.date);
-    const d=document.createElement('dialog');d.className='bertha-dialog bertha-task-dialog bertha-ritual-dialog';
-    d.innerHTML=`<form class="bertha-task-modal" method="dialog"><div class="bertha-task-modal-head"><div><span>RITUAL CAPILAR · DIA ${n}/${capillaryCycleTotal()}</span><h2>Editar cuidado</h2></div><button type="button" data-close>×</button></div><div class="bertha-task-modal-body">
+    const d=document.createElement('dialog');d.className='bertha-dialog bertha-task-dialog bertha-ritual-dialog fin-unified-dialog';
+    d.innerHTML=`<form class="bertha-task-modal modal-card" method="dialog"><div class="bertha-task-modal-head modal-head"><div><span>RITUAL CAPILAR · DIA ${n}/${capillaryCycleTotal()}</span><h2>Editar cuidado</h2></div><button type="button" data-close>×</button></div><div class="bertha-task-modal-body">
       <label class="bertha-task-field"><span>Data</span><input data-date type="date" value="${oldISO}"></label>
       ${ritualMoveScopeHtml()}
       <label class="bertha-task-field"><span>Nome</span><input data-title value="${esc(x.title||'')}"></label>
@@ -2450,7 +2427,7 @@
       <label class="bertha-task-field"><span>Produtos <small>um por linha</small></span><textarea data-products rows="6" placeholder="Ex.: Nome do produto">${esc(products.join('\n'))}</textarea></label>
       <div class="bertha-notify-box"><label class="bertha-toggle-row"><div><strong>Disponível para o Meu Dia?</strong><span>A BERTA pode considerar este cuidado quando chegar o dia dele.</span></div><input data-myday type="checkbox" ${x.includeInMyDay!==false?'checked':''}><i></i></label></div>
       <div class="bertha-schedule-note">Você pode mover só esta ocorrência ou deslocar todo o ciclo mantendo os mesmos intervalos.</div>
-    </div><div class="bertha-task-modal-actions"><span></span><div><button class="bertha-task-cancel" type="button" data-close>Cancelar</button><button class="bertha-task-save" type="button" data-save>Salvar</button></div></div></form>`;
+    </div><div class="bertha-task-modal-actions modal-actions"><span></span><div><button class="bertha-task-cancel secondary" type="button" data-close>Cancelar</button><button class="bertha-task-save primary" type="button" data-save>Salvar</button></div></div></form>`;
     document.body.appendChild(d);bindRitualMoveScope(d);d.querySelectorAll('[data-close]').forEach(b=>b.onclick=()=>{d.close();d.remove()});d.querySelectorAll('[data-period]').forEach(b=>b.onclick=()=>d.querySelectorAll('[data-period]').forEach(z=>z.classList.toggle('active',z===b)));
     d.querySelector('[data-save]').onclick=()=>{const all=capillaryTemplateStore(),vals=ritualLines(d.querySelector('[data-products]').value),newISO=d.querySelector('[data-date]').value||oldISO,scope=d.querySelector('[data-scope].active')?.dataset.scope||'one';all[String(n)]={title:d.querySelector('[data-title]').value.trim()||x.title,subtitle:d.querySelector('[data-subtitle]').value.trim(),minutes:Math.max(0,+d.querySelector('[data-minutes]').value||0),period:d.querySelector('[data-period].active')?.dataset.period||'morning',tasks:ritualLines(d.querySelector('[data-steps]').value),products:vals,includeInMyDay:d.querySelector('[data-myday]').checked};saveCapillaryTemplateStore(all);if(newISO!==oldISO)moveRitualOccurrence('capilar',k,newISO,scope);d.close();d.remove();rerender();};
     d.showModal();
@@ -2458,8 +2435,8 @@
 
   function ritualFullScheduleDialog(title,eyebrow){
     const d=document.createElement('dialog');
-    d.className='bertha-dialog bertha-task-dialog bertha-ritual-dialog bertha-full-ritual-dialog';
-    d.innerHTML=`<form class="bertha-task-modal" method="dialog"><div class="bertha-task-modal-head"><div><span>${esc(eyebrow||'RITUAIS')}</span><h2>${esc(title)}</h2></div><button type="button" data-close>×</button></div><div class="bertha-task-modal-body bertha-modal-content"></div></form>`;
+    d.className='bertha-dialog bertha-task-dialog bertha-ritual-dialog fin-unified-dialog bertha-full-ritual-dialog fin-unified-dialog';
+    d.innerHTML=`<form class="bertha-task-modal modal-card" method="dialog"><div class="bertha-task-modal-head modal-head"><div><span>${esc(eyebrow||'RITUAIS')}</span><h2>${esc(title)}</h2></div><button type="button" data-close>×</button></div><div class="bertha-task-modal-body bertha-modal-content"></div></form>`;
     document.body.appendChild(d);
     d.querySelector('[data-close]').onclick=()=>{d.close();d.remove()};
     d.addEventListener('cancel',e=>{e.preventDefault();d.close();d.remove()});
@@ -2485,13 +2462,13 @@
 
   function customRitualDialog(id){
     const arr=read(RITUALS_KEY,[]),r=arr.find(x=>String(x.id)===String(id));if(!r)return;
-    const d=document.createElement('dialog');d.className='bertha-dialog bertha-task-dialog bertha-ritual-dialog';
-    d.innerHTML=`<form class="bertha-task-modal" method="dialog"><div class="bertha-task-modal-head"><div><span>RITUAIS</span><h2>Editar ritual</h2></div><button type="button" data-close>×</button></div><div class="bertha-task-modal-body"><label class="bertha-task-field"><span>Nome do ritual</span><input data-title value="${esc(r.title||'')}"></label><div class="bertha-task-field"><span>Ícone</span><div class="bertha-icon-picker">${RITUAL_ICON_KEYS.map(k=>`<button type="button" data-icon="${k}" class="${r.icon===k?'active':''}">${ritualIcon(k)}</button>`).join('')}</div></div><label class="bertha-task-field"><span>Descrição <small>opcional</small></span><input data-subtitle value="${esc(r.subtitle||'')}" placeholder="Se ficar vazia, usamos uma frase BERTH.A"></label><label class="bertha-task-field"><span>Como fazer <small>uma instrução por linha</small></span><textarea data-steps rows="7">${esc(ritualLines(r.steps).join('\n'))}</textarea></label><label class="bertha-task-field"><span>Produtos <small>um por linha</small></span><textarea data-products rows="7">${esc(ritualProducts(id,null,r).join('\n'))}</textarea></label><div class="bertha-task-two"><label class="bertha-task-field"><span>Duração do ciclo <small>opcional</small></span><div class="bertha-duration-input"><input data-cycle-days type="number" min="1" inputmode="numeric" value="${r.cycleDays||''}" placeholder="Ex.: 45"><select disabled><option>dias</option></select></div></label><div class="bertha-notify-box bertha-cycle-restart"><label class="bertha-toggle-row"><div><strong>Reiniciar quando acabar?</strong><span>Começa um novo ciclo automaticamente.</span></div><input data-restart-cycle type="checkbox" ${r.restartCycle?'checked':''}><i></i></label></div></div></div><div class="bertha-task-modal-actions"><span></span><div><button class="bertha-task-cancel" type="button" data-close>Cancelar</button><button class="bertha-task-save" type="button" data-save>Salvar</button></div></div></form>`;
+    const d=document.createElement('dialog');d.className='bertha-dialog bertha-task-dialog bertha-ritual-dialog fin-unified-dialog';
+    d.innerHTML=`<form class="bertha-task-modal modal-card" method="dialog"><div class="bertha-task-modal-head modal-head"><div><span>RITUAIS</span><h2>Editar ritual</h2></div><button type="button" data-close>×</button></div><div class="bertha-task-modal-body"><label class="bertha-task-field"><span>Nome do ritual</span><input data-title value="${esc(r.title||'')}"></label><div class="bertha-task-field"><span>Ícone</span><div class="bertha-icon-picker">${RITUAL_ICON_KEYS.map(k=>`<button type="button" data-icon="${k}" class="${r.icon===k?'active':''}">${ritualIcon(k)}</button>`).join('')}</div></div><label class="bertha-task-field"><span>Descrição <small>opcional</small></span><input data-subtitle value="${esc(r.subtitle||'')}" placeholder="Se ficar vazia, usamos uma frase BERTH.A"></label><label class="bertha-task-field"><span>Como fazer <small>uma instrução por linha</small></span><textarea data-steps rows="7">${esc(ritualLines(r.steps).join('\n'))}</textarea></label><label class="bertha-task-field"><span>Produtos <small>um por linha</small></span><textarea data-products rows="7">${esc(ritualProducts(id,null,r).join('\n'))}</textarea></label><div class="bertha-task-two"><label class="bertha-task-field"><span>Duração do ciclo <small>opcional</small></span><div class="bertha-duration-input"><input data-cycle-days type="number" min="1" inputmode="numeric" value="${r.cycleDays||''}" placeholder="Ex.: 45"><select disabled><option>dias</option></select></div></label><div class="bertha-notify-box bertha-cycle-restart"><label class="bertha-toggle-row"><div><strong>Reiniciar quando acabar?</strong><span>Começa um novo ciclo automaticamente.</span></div><input data-restart-cycle type="checkbox" ${r.restartCycle?'checked':''}><i></i></label></div></div></div><div class="bertha-task-modal-actions modal-actions"><span></span><div><button class="bertha-task-cancel secondary" type="button" data-close>Cancelar</button><button class="bertha-task-save primary" type="button" data-save>Salvar</button></div></div></form>`;
     document.body.appendChild(d);d.querySelectorAll('[data-close]').forEach(b=>b.onclick=()=>{d.close();d.remove()});d.querySelectorAll('[data-icon]').forEach(b=>b.onclick=()=>d.querySelectorAll('[data-icon]').forEach(z=>z.classList.toggle('active',z===b)));d.querySelector('[data-save]').onclick=()=>{const i=arr.findIndex(x=>String(x.id)===String(id));const products=ritualLines(d.querySelector('[data-products]').value);const cycleDays=Math.max(0,+d.querySelector('[data-cycle-days]')?.value||0),restartCycle=cycleDays>0&&!!d.querySelector('[data-restart-cycle]')?.checked;arr[i]={...arr[i],title:d.querySelector('[data-title]').value.trim()||r.title,subtitle:d.querySelector('[data-subtitle]').value.trim(),icon:d.querySelector('[data-icon].active')?.dataset.icon||r.icon||'sparkle',steps:ritualLines(d.querySelector('[data-steps]').value),products,cycleDays,restartCycle};const evs=ritualEvents();let evChanged=false;evs.forEach(e=>{if(String(e.ritualId)===String(id)){e.cycleDays=cycleDays;e.restartCycle=restartCycle;if(cycleDays&&!e.cycleStartedAt)e.cycleStartedAt=e.startDate||iso(new Date());evChanged=true}});if(evChanged)saveRitualEvents(evs);write(RITUALS_KEY,arr);const st=ritualProductsStore();st[ritualProductKey(id,null)]=products;saveRitualProductsStore(st);d.close();d.remove();rerender()};d.showModal();
   }
   function newRitualDialog(){
-    const d=document.createElement('dialog');d.className='bertha-dialog bertha-task-dialog bertha-ritual-dialog';
-    d.innerHTML=`<form class="bertha-task-modal" method="dialog"><div class="bertha-task-modal-head"><div><span>RITUAIS</span><h2>Novo ritual</h2></div><button type="button" data-close>×</button></div><div class="bertha-task-modal-body"><label class="bertha-task-field"><span>Nome do ritual</span><input data-title placeholder="Ex.: Sono"></label><div class="bertha-task-field"><span>Ícone</span><div class="bertha-icon-picker">${RITUAL_ICON_KEYS.map((k,i)=>`<button type="button" data-icon="${k}" class="${i===0?'active':''}">${ritualIcon(k)}</button>`).join('')}</div></div><label class="bertha-task-field"><span>Descrição <small>opcional</small></span><input data-subtitle placeholder="O que faz parte deste ritual?"></label><label class="bertha-task-field"><span>Como fazer <small>opcional · uma instrução por linha</small></span><textarea data-custom-steps rows="4" placeholder="Ex.: Preparar o ambiente, aplicar o produto, aguardar"></textarea></label><label class="bertha-task-field"><span>Produtos <small>opcional · um por linha</small></span><textarea data-custom-products rows="4" placeholder="Ex.: Nome do produto"></textarea></label><div class="bertha-task-field"><span>Quando pode acontecer?</span><div class="bertha-segment" data-period-group>${[['flex','Flexível'],['morning','Manhã'],['afternoon','Tarde'],['night','Noite']].map(([v,l])=>`<button type="button" data-period="${v}" class="${v==='flex'?'active':''}">${l}</button>`).join('')}</div></div><div class="bertha-task-two"><div class="bertha-task-field"><span>Quanto tempo leva?</span><div class="bertha-duration-input"><input data-duration-value type="number" min="1" value="20"><select data-duration-unit><option value="minutes">minutos</option><option value="hours">horas</option></select></div></div><label class="bertha-task-field"><span>Horário <small>opcional</small></span><input data-time type="time"></label></div><div class="bertha-task-field"><span>Prioridade</span><div class="bertha-segment compact" data-priority-group>${['Baixa','Normal','Importante'].map(v=>`<button type="button" data-priority="${v}" class="${v==='Normal'?'active':''}">${v==='Importante'?'Import.':v}</button>`).join('')}</div></div><label class="bertha-task-field"><span>Repetir</span><select data-repeat><option value="none">Não repetir</option><option value="daily">Todos os dias</option><option value="weekly">Toda semana</option><option value="weekdays">Dias úteis</option><option value="interval">A cada X dias</option></select></label><label class="bertha-task-field bertha-interval-field" hidden><span>A cada quantos dias?</span><input data-interval type="number" min="1" value="30"></label><div class="bertha-task-two"><label class="bertha-task-field"><span>Duração do ciclo <small>opcional</small></span><div class="bertha-duration-input"><input data-cycle-days type="number" min="1" inputmode="numeric" placeholder="Ex.: 45"><select disabled><option>dias</option></select></div></label><div class="bertha-notify-box bertha-cycle-restart"><label class="bertha-toggle-row"><div><strong>Reiniciar quando acabar?</strong><span>Começa um novo ciclo automaticamente.</span></div><input data-restart-cycle type="checkbox"><i></i></label></div></div><div class="bertha-notify-box"><label class="bertha-toggle-row"><div><strong>Me avisar?</strong><span>Guardar preferência de lembrete</span></div><input data-notify type="checkbox"><i></i></label></div></div><div class="bertha-task-modal-actions"><span></span><div><button class="bertha-task-cancel" type="button" data-close>Cancelar</button><button class="bertha-task-save" type="button" data-save>Criar</button></div></div></form>`;
+    const d=document.createElement('dialog');d.className='bertha-dialog bertha-task-dialog bertha-ritual-dialog fin-unified-dialog';
+    d.innerHTML=`<form class="bertha-task-modal modal-card" method="dialog"><div class="bertha-task-modal-head modal-head"><div><span>RITUAIS</span><h2>Novo ritual</h2></div><button type="button" data-close>×</button></div><div class="bertha-task-modal-body"><label class="bertha-task-field"><span>Nome do ritual</span><input data-title placeholder="Ex.: Sono"></label><div class="bertha-task-field"><span>Ícone</span><div class="bertha-icon-picker">${RITUAL_ICON_KEYS.map((k,i)=>`<button type="button" data-icon="${k}" class="${i===0?'active':''}">${ritualIcon(k)}</button>`).join('')}</div></div><label class="bertha-task-field"><span>Descrição <small>opcional</small></span><input data-subtitle placeholder="O que faz parte deste ritual?"></label><label class="bertha-task-field"><span>Como fazer <small>opcional · uma instrução por linha</small></span><textarea data-custom-steps rows="4" placeholder="Ex.: Preparar o ambiente, aplicar o produto, aguardar"></textarea></label><label class="bertha-task-field"><span>Produtos <small>opcional · um por linha</small></span><textarea data-custom-products rows="4" placeholder="Ex.: Nome do produto"></textarea></label><div class="bertha-task-field"><span>Quando pode acontecer?</span><div class="bertha-segment" data-period-group>${[['flex','Flexível'],['morning','Manhã'],['afternoon','Tarde'],['night','Noite']].map(([v,l])=>`<button type="button" data-period="${v}" class="${v==='flex'?'active':''}">${l}</button>`).join('')}</div></div><div class="bertha-task-two"><div class="bertha-task-field"><span>Quanto tempo leva?</span><div class="bertha-duration-input"><input data-duration-value type="number" min="1" value="20"><select data-duration-unit><option value="minutes">minutos</option><option value="hours">horas</option></select></div></div><label class="bertha-task-field"><span>Horário <small>opcional</small></span><input data-time type="time"></label></div><div class="bertha-task-field"><span>Prioridade</span><div class="bertha-segment compact" data-priority-group>${['Baixa','Normal','Importante'].map(v=>`<button type="button" data-priority="${v}" class="${v==='Normal'?'active':''}">${v==='Importante'?'Import.':v}</button>`).join('')}</div></div><label class="bertha-task-field"><span>Repetir</span><select data-repeat><option value="none">Não repetir</option><option value="daily">Todos os dias</option><option value="weekly">Toda semana</option><option value="weekdays">Dias úteis</option><option value="interval">A cada X dias</option></select></label><label class="bertha-task-field bertha-interval-field" hidden><span>A cada quantos dias?</span><input data-interval type="number" min="1" value="30"></label><div class="bertha-task-two"><label class="bertha-task-field"><span>Duração do ciclo <small>opcional</small></span><div class="bertha-duration-input"><input data-cycle-days type="number" min="1" inputmode="numeric" placeholder="Ex.: 45"><select disabled><option>dias</option></select></div></label><div class="bertha-notify-box bertha-cycle-restart"><label class="bertha-toggle-row"><div><strong>Reiniciar quando acabar?</strong><span>Começa um novo ciclo automaticamente.</span></div><input data-restart-cycle type="checkbox"><i></i></label></div></div><div class="bertha-notify-box"><label class="bertha-toggle-row"><div><strong>Me avisar?</strong><span>Guardar preferência de lembrete</span></div><input data-notify type="checkbox"><i></i></label></div></div><div class="bertha-task-modal-actions modal-actions"><span></span><div><button class="bertha-task-cancel secondary" type="button" data-close>Cancelar</button><button class="bertha-task-save primary" type="button" data-save>Criar</button></div></div></form>`;
     document.body.appendChild(d);d.querySelectorAll('[data-close]').forEach(b=>b.onclick=()=>{d.close();d.remove()});d.querySelectorAll('[data-icon]').forEach(b=>b.onclick=()=>d.querySelectorAll('[data-icon]').forEach(z=>z.classList.toggle('active',z===b)));d.querySelectorAll('[data-period]').forEach(b=>b.onclick=()=>d.querySelectorAll('[data-period]').forEach(z=>z.classList.toggle('active',z===b)));d.querySelectorAll('[data-priority]').forEach(b=>b.onclick=()=>d.querySelectorAll('[data-priority]').forEach(z=>z.classList.toggle('active',z===b)));d.querySelector('[data-repeat]').onchange=()=>d.querySelector('.bertha-interval-field').hidden=d.querySelector('[data-repeat]').value!=='interval';
     d.querySelector('[data-save]').onclick=()=>{const title=d.querySelector('[data-title]').value.trim();if(!title){d.querySelector('[data-title]').focus();return;}const arr=read(RITUALS_KEY,[]),id='ritual-'+Date.now(),products=ritualLines(d.querySelector('[data-custom-products]').value),steps=ritualLines(d.querySelector('[data-custom-steps]').value),durationValue=+d.querySelector('[data-duration-value]').value||20,durationUnit=d.querySelector('[data-duration-unit]').value,repeat=d.querySelector('[data-repeat]').value,iconKey=d.querySelector('[data-icon].active')?.dataset.icon||'sparkle',cycleDays=Math.max(0,+d.querySelector('[data-cycle-days]')?.value||0),restartCycle=cycleDays>0&&!!d.querySelector('[data-restart-cycle]')?.checked;arr.push({id,title,subtitle:d.querySelector('[data-subtitle]').value.trim(),icon:iconKey,steps,products,cycleDays,restartCycle});write(RITUALS_KEY,arr);const st=ritualProductsStore();st[ritualProductKey(id,null)]=products;saveRitualProductsStore(st);if(repeat!=='none'){const now=new Date(),evt={id:uid(),ritualId:id,ritualTitle:title,title,icon:iconKey,date:'',minutes:ritualDurationMinutes(durationValue,durationUnit),durationValue,durationUnit,period:d.querySelector('[data-period].active')?.dataset.period||'flex',time:d.querySelector('[data-time]').value,priority:d.querySelector('[data-priority].active')?.dataset.priority||'Normal',repeat,intervalDays:+d.querySelector('[data-interval]').value||30,notify:d.querySelector('[data-notify]').checked,notifyOffset:'at-time',notifyTime:'',note:'',steps:steps.join('\n'),products,primary:true,startDate:iso(now),weekday:now.getDay(),cycleDays,restartCycle,cycleStartedAt:cycleDays?iso(now):''};const events=ritualEvents();events.push(evt);saveRitualEvents(events);}d.close();d.remove();location.hash='#ritual-'+id;};d.addEventListener('cancel',e=>{e.preventDefault();d.close();d.remove()});d.showModal();
   }
@@ -4438,4 +4415,262 @@
     .bertha-ritual-dialog .bertha-task-cancel{background:rgba(255,255,255,.56)!important;color:#756b75!important;border:1px solid rgba(126,94,120,.08)!important}
     .bertha-ritual-dialog .bertha-icon-picker button.active,.bertha-ritual-dialog .bertha-segment button.active{background:linear-gradient(135deg,rgba(247,217,231,.94),rgba(228,216,246,.96))!important;color:#765c79!important;border-color:rgba(160,111,143,.16)!important}
   `;document.head.appendChild(st);
+})();
+
+
+/* BERTH.A RC36 — Rituais: mesma arquitetura visual dos modais do Financeiro; identidade do módulo preservada. */
+(function installRitualModalRC36(){
+  if(document.getElementById('bertha-ritual-modal-rc36'))return;
+  const st=document.createElement('style');st.id='bertha-ritual-modal-rc36';st.textContent=`
+    dialog.bertha-ritual-dialog[open]{
+      box-sizing:border-box!important;position:fixed!important;inset:0!important;
+      width:min(92vw,540px)!important;height:auto!important;max-width:540px!important;
+      max-height:calc(100dvh - 28px)!important;margin:auto!important;padding:0!important;
+      border:0!important;outline:0!important;background:transparent!important;
+      overflow:visible!important;box-shadow:none!important;display:block!important;
+    }
+    dialog.bertha-ritual-dialog::backdrop{background:rgba(54,44,55,.28)!important;backdrop-filter:blur(3px)!important;-webkit-backdrop-filter:blur(3px)!important}
+    dialog.bertha-ritual-dialog[open]>.bertha-task-modal{
+      box-sizing:border-box!important;width:100%!important;max-width:none!important;
+      height:auto!important;min-height:0!important;max-height:calc(100dvh - 28px)!important;
+      margin:0!important;padding:20px!important;overflow:auto!important;overscroll-behavior:contain!important;
+      border:1px solid rgba(133,103,128,.10)!important;border-radius:26px!important;
+      background:linear-gradient(145deg,rgba(253,248,250,.99) 0%,rgba(249,241,246,.98) 48%,rgba(244,239,250,.97) 100%)!important;
+      box-shadow:0 22px 64px rgba(58,44,63,.16)!important;contain:none!important;
+    }
+    dialog.bertha-ritual-dialog .bertha-task-modal-head{
+      position:static!important;display:flex!important;align-items:flex-start!important;
+      margin:0 0 14px!important;padding:0!important;background:transparent!important;
+      border:0!important;box-shadow:none!important;backdrop-filter:none!important;-webkit-backdrop-filter:none!important;
+    }
+    dialog.bertha-ritual-dialog .bertha-task-modal-head span{margin-bottom:5px!important;color:#956f87!important;font-size:11px!important;font-weight:760!important;letter-spacing:.18em!important}
+    dialog.bertha-ritual-dialog .bertha-task-modal-head h2{margin:0!important;font-size:25px!important;font-weight:540!important;letter-spacing:-.025em!important;line-height:1.12!important;color:#30313d!important}
+    dialog.bertha-ritual-dialog .bertha-task-modal-head button[data-close]{
+      flex:0 0 40px!important;width:40px!important;height:40px!important;min-width:40px!important;min-height:40px!important;
+      padding:0!important;border:1px solid rgba(133,103,128,.10)!important;border-radius:50%!important;
+      background:rgba(255,255,255,.58)!important;color:#766d77!important;font-size:25px!important;line-height:1!important;
+      box-shadow:none!important;outline:none!important;
+    }
+    dialog.bertha-ritual-dialog .bertha-task-modal-body{
+      flex:none!important;min-height:0!important;overflow:visible!important;padding:0!important;background:transparent!important;
+    }
+    dialog.bertha-ritual-dialog .bertha-task-field{margin:12px 0!important}
+    dialog.bertha-ritual-dialog .bertha-task-field>span{color:#77707c!important;font-size:14px!important;font-weight:680!important}
+    dialog.bertha-ritual-dialog .bertha-task-field input,
+    dialog.bertha-ritual-dialog .bertha-task-field select,
+    dialog.bertha-ritual-dialog .bertha-task-field textarea,
+    dialog.bertha-ritual-dialog .bertha-duration-input input,
+    dialog.bertha-ritual-dialog .bertha-duration-input select,
+    dialog.bertha-ritual-dialog .bertha-notify-custom input{
+      box-sizing:border-box!important;width:100%!important;min-height:48px!important;font-size:16px!important;line-height:1.25!important;
+      color:#393641!important;background:rgba(255,255,255,.72)!important;border:1px solid rgba(133,103,128,.14)!important;
+      border-radius:15px!important;box-shadow:none!important;outline:0!important;
+    }
+    dialog.bertha-ritual-dialog .bertha-task-field input:focus,
+    dialog.bertha-ritual-dialog .bertha-task-field select:focus,
+    dialog.bertha-ritual-dialog .bertha-task-field textarea:focus,
+    dialog.bertha-ritual-dialog .bertha-duration-input input:focus,
+    dialog.bertha-ritual-dialog .bertha-duration-input select:focus{
+      outline:2px solid rgba(213,190,232,.24)!important;outline-offset:1px!important;
+      border-color:rgba(190,142,170,.34)!important;box-shadow:none!important;
+    }
+    dialog.bertha-ritual-dialog .bertha-segment button{
+      min-height:42px!important;background:rgba(255,255,255,.48)!important;color:#746d76!important;
+      border:1px solid rgba(133,103,128,.12)!important;border-radius:13px!important;box-shadow:none!important;
+    }
+    dialog.bertha-ritual-dialog .bertha-segment button.active{
+      background:linear-gradient(135deg,rgba(240,213,226,.92),rgba(224,211,241,.94))!important;
+      color:#765c79!important;border-color:rgba(160,111,143,.16)!important;box-shadow:none!important;
+    }
+    dialog.bertha-ritual-dialog .bertha-notify-box{
+      margin:4px 0 15px!important;padding:14px!important;border:1px solid rgba(133,103,128,.10)!important;border-radius:18px!important;
+      background:linear-gradient(125deg,rgba(249,239,245,.74),rgba(242,237,249,.72))!important;
+    }
+    dialog.bertha-ritual-dialog .bertha-toggle-row strong{color:#544b58!important;font-size:13px!important}
+    dialog.bertha-ritual-dialog .bertha-toggle-row span{color:#8a808c!important;font-size:11px!important}
+    dialog.bertha-ritual-dialog .bertha-toggle-row i{background:#e7dfe8!important}
+    dialog.bertha-ritual-dialog .bertha-toggle-row input:checked+i{background:linear-gradient(135deg,#c59bb6,#b5a5d2)!important}
+    dialog.bertha-ritual-dialog .bertha-schedule-note{
+      margin-top:10px!important;padding:13px 15px!important;border:1px solid rgba(133,103,128,.08)!important;border-radius:16px!important;
+      background:rgba(255,255,255,.38)!important;color:#887f8b!important;
+    }
+    dialog.bertha-ritual-dialog .bertha-task-modal-actions{
+      position:static!important;inset:auto!important;margin:16px 0 0!important;padding:0!important;
+      background:transparent!important;border:0!important;box-shadow:none!important;backdrop-filter:none!important;-webkit-backdrop-filter:none!important;
+    }
+    dialog.bertha-ritual-dialog .bertha-task-cancel{
+      background:rgba(240,231,244,.72)!important;color:#765b82!important;border:0!important;box-shadow:none!important;
+    }
+    dialog.bertha-ritual-dialog .bertha-task-save{
+      background:linear-gradient(120deg,#d7adc5 0%,#c8afd8 52%,#b8a7d5 100%)!important;
+      color:#fff!important;border:0!important;box-shadow:none!important;
+    }
+    dialog.bertha-ritual-dialog .bertha-icon-picker button.active{
+      background:linear-gradient(135deg,rgba(240,213,226,.92),rgba(224,211,241,.94))!important;color:#765c79!important;
+      border-color:rgba(160,111,143,.16)!important;box-shadow:none!important;
+    }
+    @media(max-width:560px){
+      dialog.bertha-ritual-dialog[open]{width:calc(100vw - 24px)!important;max-height:calc(100dvh - 24px)!important}
+      dialog.bertha-ritual-dialog[open]>.bertha-task-modal{max-height:calc(100dvh - 24px)!important;padding:18px!important;border-radius:24px!important}
+      dialog.bertha-ritual-dialog .bertha-task-modal-head{margin-bottom:12px!important}
+      dialog.bertha-ritual-dialog .bertha-task-modal-actions{margin-top:14px!important}
+    }
+  `;document.head.appendChild(st);
+})();
+
+
+/* BERTH.A RC37 — Rituais: Modal System Financeiro, somente identidade cromática do módulo. */
+(function installRitualModalRC37(){
+  if(document.getElementById('bertha-ritual-modal-rc37'))return;
+  const st=document.createElement('style');st.id='bertha-ritual-modal-rc37';st.textContent=`
+    body dialog.bertha-ritual-dialog[open]{
+      position:fixed!important;inset:0!important;display:block!important;
+      width:min(92vw,540px)!important;height:auto!important;max-width:540px!important;max-height:calc(100dvh - 28px)!important;
+      margin:auto!important;padding:0!important;border:0!important;background:transparent!important;overflow:visible!important;box-shadow:none!important;
+    }
+    body dialog.bertha-ritual-dialog::backdrop{background:rgba(54,44,55,.28)!important;backdrop-filter:blur(3px)!important;-webkit-backdrop-filter:blur(3px)!important}
+    body dialog.bertha-ritual-dialog[open] .bertha-task-modal{
+      display:block!important;box-sizing:border-box!important;position:static!important;
+      width:100%!important;max-width:none!important;height:auto!important;min-height:0!important;max-height:calc(100dvh - 28px)!important;
+      margin:0!important;padding:20px!important;overflow:auto!important;contain:none!important;
+      border:1px solid rgba(151,118,145,.10)!important;border-radius:26px!important;
+      background:linear-gradient(145deg,rgba(253,248,251,.99) 0%,rgba(249,241,247,.98) 48%,rgba(244,239,250,.97) 100%)!important;
+      box-shadow:0 22px 64px rgba(58,44,63,.16)!important;
+    }
+    body dialog.bertha-ritual-dialog .bertha-task-modal-head{
+      position:static!important;display:flex!important;align-items:flex-start!important;justify-content:space-between!important;
+      margin:0 0 14px!important;padding:0!important;background:transparent!important;border:0!important;border-bottom:0!important;
+      box-shadow:none!important;backdrop-filter:none!important;-webkit-backdrop-filter:none!important;
+    }
+    body dialog.bertha-ritual-dialog .bertha-task-modal-head span{margin:0 0 5px!important;color:#9a6f89!important;font-size:11px!important;font-weight:760!important;letter-spacing:.18em!important}
+    body dialog.bertha-ritual-dialog .bertha-task-modal-head h2{margin:0!important;font-size:25px!important;font-weight:540!important;letter-spacing:-.025em!important;line-height:1.12!important;color:#30313d!important}
+    body dialog.bertha-ritual-dialog .bertha-task-modal-head button[data-close]{
+      flex:0 0 40px!important;width:40px!important;height:40px!important;min-width:40px!important;min-height:40px!important;padding:0!important;
+      border:1px solid rgba(151,118,145,.10)!important;border-radius:50%!important;background:rgba(255,255,255,.58)!important;color:#766d77!important;
+      box-shadow:none!important;outline:0!important;font-size:25px!important;line-height:1!important;
+    }
+    body dialog.bertha-ritual-dialog .bertha-task-modal-body{
+      display:block!important;flex:none!important;min-height:0!important;max-height:none!important;overflow:visible!important;
+      margin:0!important;padding:0!important;background:transparent!important;border:0!important;box-shadow:none!important;
+    }
+    body dialog.bertha-ritual-dialog .bertha-task-field{margin:12px 0!important}
+    body dialog.bertha-ritual-dialog .bertha-task-field>span{color:#77707c!important;font-size:14px!important;font-weight:680!important}
+    body dialog.bertha-ritual-dialog .bertha-task-field input,
+    body dialog.bertha-ritual-dialog .bertha-task-field select,
+    body dialog.bertha-ritual-dialog .bertha-task-field textarea,
+    body dialog.bertha-ritual-dialog .bertha-duration-input input,
+    body dialog.bertha-ritual-dialog .bertha-duration-input select,
+    body dialog.bertha-ritual-dialog .bertha-notify-custom input{
+      box-sizing:border-box!important;width:100%!important;min-height:48px!important;font-size:16px!important;line-height:1.25!important;color:#393641!important;
+      background:rgba(255,255,255,.72)!important;border:1px solid rgba(151,118,145,.14)!important;border-radius:15px!important;box-shadow:none!important;
+    }
+    body dialog.bertha-ritual-dialog .bertha-task-field input:focus,
+    body dialog.bertha-ritual-dialog .bertha-task-field select:focus,
+    body dialog.bertha-ritual-dialog .bertha-task-field textarea:focus,
+    body dialog.bertha-ritual-dialog .bertha-duration-input input:focus,
+    body dialog.bertha-ritual-dialog .bertha-duration-input select:focus{outline:2px solid rgba(220,188,212,.23)!important;outline-offset:1px!important;border-color:rgba(191,143,174,.34)!important;box-shadow:none!important}
+    body dialog.bertha-ritual-dialog .bertha-segment button{min-height:42px!important;background:rgba(255,255,255,.48)!important;color:#746d76!important;border:1px solid rgba(151,118,145,.12)!important;border-radius:13px!important;box-shadow:none!important}
+    body dialog.bertha-ritual-dialog .bertha-segment button.active{background:linear-gradient(120deg,rgba(239,205,224,.94),rgba(218,201,239,.96))!important;color:#765c79!important;border-color:rgba(169,116,150,.18)!important;box-shadow:none!important}
+    body dialog.bertha-ritual-dialog .bertha-notify-box{margin:4px 0 15px!important;padding:14px!important;border:1px solid rgba(151,118,145,.10)!important;border-radius:18px!important;background:linear-gradient(120deg,rgba(247,226,238,.72),rgba(233,224,247,.74))!important}
+    body dialog.bertha-ritual-dialog .bertha-toggle-row strong{color:#544b58!important} body dialog.bertha-ritual-dialog .bertha-toggle-row span{color:#8a808c!important}
+    body dialog.bertha-ritual-dialog .bertha-toggle-row i{background:#e7dfe8!important} body dialog.bertha-ritual-dialog .bertha-toggle-row input:checked+i{background:linear-gradient(120deg,#cf9fbb,#b9a4d3)!important}
+    body dialog.bertha-ritual-dialog .bertha-schedule-note{margin-top:10px!important;padding:13px 15px!important;border:1px solid rgba(151,118,145,.08)!important;border-radius:16px!important;background:rgba(255,255,255,.38)!important;color:#887f8b!important}
+    body dialog.bertha-ritual-dialog .bertha-task-modal-actions{
+      position:static!important;display:flex!important;align-items:center!important;justify-content:space-between!important;inset:auto!important;
+      margin:16px 0 0!important;padding:0!important;background:transparent!important;border:0!important;border-top:0!important;
+      box-shadow:none!important;backdrop-filter:none!important;-webkit-backdrop-filter:none!important;
+    }
+    body dialog.bertha-ritual-dialog .bertha-task-modal-actions>div{margin-left:auto!important}
+    body dialog.bertha-ritual-dialog .bertha-task-cancel{background:rgba(241,232,244,.72)!important;color:#765b82!important;border:0!important;box-shadow:none!important}
+    body dialog.bertha-ritual-dialog .bertha-task-save{background:linear-gradient(120deg,#d7a9c3 0%,#c8acd9 52%,#b7a3d3 100%)!important;color:#fff!important;border:0!important;box-shadow:none!important}
+    body dialog.bertha-ritual-dialog .bertha-icon-picker button.active{background:linear-gradient(120deg,rgba(239,205,224,.94),rgba(218,201,239,.96))!important;color:#765c79!important;border-color:rgba(169,116,150,.18)!important;box-shadow:none!important}
+    @media(max-width:560px){
+      body dialog.bertha-ritual-dialog[open]{width:calc(100vw - 24px)!important;max-height:calc(100dvh - 24px)!important}
+      body dialog.bertha-ritual-dialog[open] .bertha-task-modal{max-height:calc(100dvh - 24px)!important;padding:18px!important;border-radius:24px!important}
+      body dialog.bertha-ritual-dialog .bertha-task-modal-head{margin-bottom:12px!important}
+      body dialog.bertha-ritual-dialog .bertha-task-modal-actions{margin-top:14px!important}
+    }
+  `;document.head.appendChild(st);
+})();
+
+
+/* BERTH.A RC38 — Rituais usa literalmente a arquitetura de modal do Financeiro; só muda a identidade cromática. */
+(function installRitualModalRC38(){
+  if(document.getElementById('bertha-ritual-modal-rc38'))return;
+  const st=document.createElement('style');st.id='bertha-ritual-modal-rc38';st.textContent=`
+    dialog.bertha-ritual-dialog.fin-unified-dialog[open]{
+      position:fixed!important;inset:0!important;display:block!important;
+      width:min(92vw,540px)!important;height:auto!important;max-width:540px!important;max-height:calc(100dvh - 28px)!important;
+      margin:auto!important;padding:0!important;border:0!important;background:transparent!important;overflow:visible!important;box-shadow:none!important;
+    }
+    dialog.bertha-ritual-dialog.fin-unified-dialog[open]>.bertha-task-modal.modal-card{
+      display:block!important;box-sizing:border-box!important;position:static!important;
+      width:100%!important;max-width:none!important;height:auto!important;min-height:0!important;max-height:calc(100dvh - 28px)!important;
+      margin:0!important;padding:20px!important;overflow:auto!important;contain:none!important;
+      border:1px solid rgba(156,112,145,.10)!important;border-radius:26px!important;
+      background:linear-gradient(145deg,rgba(252,242,247,.99) 0%,rgba(248,232,241,.98) 48%,rgba(239,231,249,.98) 100%)!important;
+      box-shadow:0 22px 64px rgba(58,44,63,.16)!important;
+    }
+    dialog.bertha-ritual-dialog.fin-unified-dialog .bertha-task-modal-head.modal-head{
+      position:static!important;display:flex!important;align-items:flex-start!important;justify-content:space-between!important;
+      margin:0 0 14px!important;padding:0!important;background:transparent!important;
+      border:0!important;border-top:0!important;border-right:0!important;border-bottom:0!important;border-left:0!important;
+      box-shadow:none!important;backdrop-filter:none!important;-webkit-backdrop-filter:none!important;
+    }
+    dialog.bertha-ritual-dialog.fin-unified-dialog .bertha-task-modal-head.modal-head:before,
+    dialog.bertha-ritual-dialog.fin-unified-dialog .bertha-task-modal-head.modal-head:after,
+    dialog.bertha-ritual-dialog.fin-unified-dialog .bertha-task-modal-actions.modal-actions:before,
+    dialog.bertha-ritual-dialog.fin-unified-dialog .bertha-task-modal-actions.modal-actions:after{content:none!important;display:none!important}
+    dialog.bertha-ritual-dialog.fin-unified-dialog .bertha-task-modal-head span{color:#9a6f89!important}
+    dialog.bertha-ritual-dialog.fin-unified-dialog .bertha-task-modal-head button[data-close]{background:rgba(255,255,255,.58)!important;border:1px solid rgba(156,112,145,.10)!important;color:#766d77!important;box-shadow:none!important}
+    dialog.bertha-ritual-dialog.fin-unified-dialog .bertha-task-modal-body{
+      display:block!important;flex:none!important;min-height:0!important;max-height:none!important;overflow:visible!important;
+      margin:0!important;padding:0!important;background:transparent!important;border:0!important;box-shadow:none!important;
+    }
+    dialog.bertha-ritual-dialog.fin-unified-dialog .bertha-task-modal-actions.modal-actions{
+      position:static!important;inset:auto!important;margin:16px 0 0!important;padding:0!important;
+      background:transparent!important;border:0!important;border-top:0!important;box-shadow:none!important;
+      backdrop-filter:none!important;-webkit-backdrop-filter:none!important;
+    }
+    dialog.bertha-ritual-dialog.fin-unified-dialog .bertha-task-cancel.secondary{background:rgba(244,231,241,.76)!important;color:#765b82!important;border:0!important}
+    dialog.bertha-ritual-dialog.fin-unified-dialog .bertha-task-save.primary{background:linear-gradient(120deg,#d7a8c2 0%,#c8add9 50%,#b8a5d5 100%)!important;color:#fff!important;border:0!important;box-shadow:none!important}
+    dialog.bertha-ritual-dialog.fin-unified-dialog .bertha-segment button.active,
+    dialog.bertha-ritual-dialog.fin-unified-dialog .bertha-icon-picker button.active{background:linear-gradient(120deg,rgba(240,203,223,.96),rgba(219,201,240,.96))!important;color:#765c79!important;border-color:rgba(169,116,150,.18)!important}
+    dialog.bertha-ritual-dialog.fin-unified-dialog .bertha-notify-box{background:linear-gradient(120deg,rgba(247,222,236,.78),rgba(232,221,247,.80))!important;border-color:rgba(151,118,145,.10)!important}
+    @media(max-width:560px){
+      dialog.bertha-ritual-dialog.fin-unified-dialog[open]{width:calc(100vw - 24px)!important;max-height:calc(100dvh - 24px)!important}
+      dialog.bertha-ritual-dialog.fin-unified-dialog[open]>.bertha-task-modal.modal-card{max-height:calc(100dvh - 24px)!important;padding:18px!important;border-radius:24px!important}
+    }
+  `;document.head.appendChild(st);
+})();
+
+/* BERTH.A RC42 — Planos/Tarefas: modal contínuo, preservando identidade amarela */
+(function(){
+  if(document.getElementById('bertha-rc42-task-modal-style')) return;
+  const s=document.createElement('style');
+  s.id='bertha-rc42-task-modal-style';
+  s.textContent=`
+    dialog.bertha-plans-task-dialog .bertha-task-modal{
+      background:radial-gradient(circle at 14% 3%,rgba(255,244,176,.42),transparent 36%),radial-gradient(circle at 96% 2%,rgba(239,190,145,.24),transparent 38%),linear-gradient(145deg,#fffaf3 0%,#fbf7ef 56%,#fff8ee 100%)!important;
+    }
+    dialog.bertha-plans-task-dialog .bertha-task-modal-head{
+      background:transparent!important;
+      border:0!important;
+      box-shadow:none!important;
+      padding-bottom:12px!important;
+    }
+    dialog.bertha-plans-task-dialog .bertha-task-modal-body{
+      background:transparent!important;
+      border:0!important;
+    }
+    dialog.bertha-plans-task-dialog .bertha-task-modal-actions{
+      background:transparent!important;
+      border:0!important;
+      box-shadow:none!important;
+      backdrop-filter:none!important;
+      -webkit-backdrop-filter:none!important;
+      padding-top:8px!important;
+    }
+  `;
+  document.head.appendChild(s);
 })();
