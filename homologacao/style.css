@@ -814,3 +814,6 @@ h2 { margin:0; font-size:22px; letter-spacing:-.02em; }
 dialog[class*="finance" i] form,[class*="finance" i] .study-v10-modal{background:#fbf7f0!important}dialog[class*="finance" i] .modal-actions{position:static!important;margin-top:16px!important;padding:0!important}
 /* Trabalho: notas e formulários estáveis */
 .work12-note-day{display:flex!important;align-items:center!important;gap:10px!important;padding:10px 0!important}.work12-note-day input{width:20px!important;height:20px!important;flex:0 0 20px}.work12-note-day span{display:grid!important;gap:2px!important}.work12-note-day small{font-weight:500!important;color:#8d858e!important}
+
+/* RC17 — Alimentação/Receitas: programação da próxima cozinha e modal no padrão do módulo */
+.food-v115-routine{display:grid;gap:14px}.food-v115-routine .food-program-next{justify-self:stretch;min-height:44px;border-radius:16px;border:1px solid rgba(91,126,157,.18);background:linear-gradient(135deg,rgba(225,239,249,.95),rgba(255,239,213,.92));color:#547ca2;font-weight:750}.food-next-prep-dialog .study-v10-modal{background:#fffaf3}.food-next-prep-dialog .primary{background:linear-gradient(135deg,#8db7d7,#e6bf8d)!important;color:#fff!important}.food-next-prep-dialog input:focus{border-color:#8db7d7!important;box-shadow:0 0 0 3px rgba(141,183,215,.15)!important}
