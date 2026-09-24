@@ -1785,7 +1785,7 @@
             </div>
           </div>
 
-          <div class="bertha-task-two">
+          <div class="bertha-task-two bertha-task-schedule-priority">
             <label class="bertha-task-field">
               <span>Horário <small>opcional</small></span>
               <input data-time type="time" value="${esc(x.time||'')}">

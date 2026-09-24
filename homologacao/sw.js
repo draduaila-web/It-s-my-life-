@@ -1,4 +1,4 @@
-const CACHE = "hml-bertha-v221-rc58-task-commitment-clone";
+const CACHE = "hml-bertha-v221-rc59-task-commitment-clone";
 self.addEventListener("install", event => event.waitUntil(self.skipWaiting()));
 self.addEventListener("activate", event => event.waitUntil((async()=>{
   const keys=await caches.keys();
