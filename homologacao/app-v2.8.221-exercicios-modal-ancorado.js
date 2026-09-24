@@ -3736,85 +3736,80 @@ window.renderShoppingUniversal=renderShoppingUniversal;window.renderProgressOver
   const st=document.createElement('style');st.id='progress-v46-styles';st.textContent=`.progress-period46{display:grid;grid-template-columns:repeat(3,1fr);gap:7px;margin:14px 0 18px}.progress-period46 button{border:1px solid rgba(104,88,116,.08);background:rgba(255,253,249,.72);border-radius:15px;padding:10px 7px;color:#827684;font:inherit;font-size:12px;font-weight:700}.progress-period46 button.active{background:linear-gradient(135deg,rgba(232,221,244,.92),rgba(220,239,233,.9));color:#62596b}.progress-alignment46{padding:20px;border-radius:25px;background:linear-gradient(145deg,rgba(251,247,239,.98),rgba(239,231,247,.72),rgba(225,241,235,.68));border:1px solid rgba(104,88,116,.07);margin-bottom:20px}.progress-alignment46 span,.progress-alignment46 strong{display:block}.progress-alignment46 span{font-size:10px;letter-spacing:.15em;color:#8d8190;font-weight:800}.progress-alignment46 strong{font-size:22px;margin-top:6px;color:#4d4553}.progress-alignment46 p{margin:7px 0 0;color:#857a86;font-size:11.5px;line-height:1.45}.progress-life-grid46{display:grid;gap:9px}.progress-life-card46{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:5px 12px;padding:15px 16px;border-radius:20px;background:rgba(255,250,244,.86);border:1px solid rgba(106,88,116,.06)}.progress-life-card46 strong,.progress-life-card46 small{display:block}.progress-life-card46 strong{font-size:14px;color:#504752}.progress-life-card46 small{margin-top:3px;font-size:10.5px;color:#948995}.progress-life-card46>b{font-size:17px;color:#75687b}.progress-life-bar46{grid-column:1/-1;height:5px;border-radius:99px;background:rgba(120,104,127,.07);overflow:hidden}.progress-life-bar46 i{display:block;height:100%;border-radius:inherit;background:linear-gradient(90deg,#d8c8e8,#c7e1da)}.progress-evidence46{display:grid;grid-template-columns:1fr 1fr;gap:9px}.progress-evidence46>div{padding:14px;border-radius:18px;background:rgba(255,250,244,.82);border:1px solid rgba(106,88,116,.055)}.progress-evidence46 span,.progress-evidence46 b{display:block}.progress-evidence46 span{font-size:10.5px;line-height:1.3;color:#8e838f}.progress-evidence46 b{margin-top:5px;font-size:18px;color:#5f5563}.progress-method46{font-size:10.5px;line-height:1.5;color:#938894;margin:12px 3px 0}@media(max-width:420px){.progress-evidence46{grid-template-columns:1fr 1fr}.progress-alignment46 strong{font-size:20px}}`;document.head.appendChild(st);
 })();
 
-/* RC81 — authoritative Exercise modal tokens loaded last to beat legacy runtime styles. */
-(()=>{
-  const id='bertha-rc81-exercise-modal-system';
-  document.getElementById(id)?.remove();
-  const s=document.createElement('style');
-  s.id=id;
-  s.textContent=`
-html body dialog.exercise-dialog{--ex-bg:linear-gradient(145deg,#f8f0fc 0%,#f4e9f7 52%,#fae8e9 100%);--ex-primary:linear-gradient(135deg,#cdb9e3 0%,#d8bfdc 48%,#e8b9ae 100%);--ex-ink:#403947;--ex-muted:#847b86;--ex-border:rgba(126,105,139,.12);border:0!important;outline:0!important;padding:0!important;background:transparent!important;box-shadow:none!important;max-width:none!important}
-html body dialog.exercise-dialog::backdrop{background:rgba(53,48,52,.30)!important;backdrop-filter:blur(4px)!important;-webkit-backdrop-filter:blur(4px)!important}
-html body dialog.exercise-dialog[open]>:is(.bertha-modal,.study-v10-modal){box-sizing:border-box!important;width:min(92vw,520px)!important;max-width:520px!important;max-height:min(88dvh,760px)!important;margin:auto!important;overflow-y:auto!important;overflow-x:hidden!important;-webkit-overflow-scrolling:touch!important;background:var(--ex-bg)!important;border:0!important;outline:0!important;border-radius:26px!important;padding:20px!important;color:var(--ex-ink)!important;box-shadow:inset 0 0 0 1px var(--ex-border),0 20px 52px rgba(47,37,58,.14)!important;background-clip:padding-box!important}
-html body dialog.exercise-dialog .bertha-modal-head{position:relative!important;display:flex!important;justify-content:space-between!important;align-items:flex-start!important;gap:14px!important;margin-bottom:15px!important;padding-right:50px!important}
-html body dialog.exercise-dialog .bertha-modal-head .eyebrow{margin:0!important;font-size:10px!important;line-height:1.25!important;letter-spacing:.18em!important;font-weight:500!important;color:#7d678e!important;text-transform:uppercase!important}
-html body dialog.exercise-dialog .bertha-modal-head h2{margin:5px 0 0!important;font-size:22px!important;line-height:1.15!important;font-weight:450!important;letter-spacing:-.025em!important;color:var(--ex-ink)!important}
-html body dialog.exercise-dialog .bertha-modal-head p{margin:12px 0 0!important;font-size:14px!important;line-height:1.45!important;font-weight:400!important;color:#5f5664!important}
-html body dialog.exercise-dialog .bertha-modal-head>button[data-close]{position:absolute!important;top:0!important;right:0!important;width:36px!important;height:36px!important;min-width:36px!important;min-height:36px!important;margin:0!important;padding:0!important;display:grid!important;place-items:center!important;border-radius:50%!important;border:1px solid var(--ex-border)!important;outline:0!important;background:rgba(255,255,255,.48)!important;color:#817780!important;box-shadow:none!important;font-size:23px!important;font-weight:300!important;line-height:1!important;-webkit-appearance:none!important;appearance:none!important}
-html body dialog.exercise-dialog :is(.study-v10-field>span,.exercise-cycle-label,label){font-size:11.5px!important;line-height:1.3!important;font-weight:500!important;color:#655f67!important}
-html body dialog.exercise-dialog :is(input:not([type=checkbox]):not([type=radio]),select,textarea){box-sizing:border-box!important;width:100%!important;min-width:0!important;max-width:100%!important;min-height:46px!important;border:1px solid var(--ex-border)!important;border-radius:15px!important;background:#fffdfa!important;padding:11px 12px!important;color:#3e3d4b!important;box-shadow:none!important;font:inherit!important;font-size:16px!important;font-weight:400!important}
-html body dialog.exercise-dialog textarea{min-height:86px!important;resize:vertical!important}
-html body dialog.exercise-dialog .exercise-cycle-help,html body dialog.exercise-dialog .study-v10-field small,html body dialog.exercise-dialog .exercise-week-cycle small{font-size:11.5px!important;line-height:1.45!important;font-weight:400!important;color:#948a95!important}
-html body dialog.exercise-dialog .exercise-cycle-block{align-items:center!important;gap:9px!important}
-html body dialog.exercise-dialog .exercise-cycle-block select,html body dialog.exercise-dialog .exercise-unit-input{min-height:46px!important;border-radius:15px!important}
-html body dialog.exercise-dialog .exercise-block-remove{width:40px!important;height:40px!important;min-width:40px!important;min-height:40px!important;border-radius:13px!important;border:1px solid var(--ex-border)!important;background:rgba(255,255,255,.58)!important;color:#817780!important;box-shadow:none!important;font-size:22px!important;font-weight:300!important}
-html body dialog.exercise-dialog .exercise-cycle-total{border-radius:15px!important;background:rgba(255,255,255,.38)!important}
-html body dialog.exercise-dialog .exercise-cycle-total strong{font-size:18px!important;font-weight:500!important;color:var(--ex-ink)!important}
-html body dialog.exercise-dialog .study-v10-actions,html body dialog.exercise-dialog .modal-actions{position:static!important;inset:auto!important;display:flex!important;justify-content:flex-end!important;align-items:center!important;gap:9px!important;margin:18px 0 0!important;padding:0!important;background:transparent!important;border:0!important;box-shadow:none!important;backdrop-filter:none!important;-webkit-backdrop-filter:none!important}
-html body dialog.exercise-dialog .study-v10-actions button,html body dialog.exercise-dialog .modal-actions button,html body dialog.exercise-dialog button.primary,html body dialog.exercise-dialog button.secondary{box-sizing:border-box!important;min-height:44px!important;border-radius:15px!important;padding:11px 16px!important;font-size:14px!important;line-height:1.2!important;font-weight:500!important;box-shadow:none!important}
-html body dialog.exercise-dialog button.secondary{border:1px solid var(--ex-border)!important;background:rgba(255,255,255,.72)!important;color:#706972!important}
-html body dialog.exercise-dialog button.primary{border:1px solid rgba(127,99,145,.10)!important;background:var(--ex-primary)!important;color:#fff!important}
-html body dialog.exercise-dialog input[type=checkbox]{-webkit-appearance:none!important;appearance:none!important;width:20px!important;height:20px!important;min-width:20px!important;min-height:20px!important;margin:0!important;border:1px solid rgba(135,111,151,.18)!important;border-radius:6px!important;background:rgba(255,255,255,.76)!important;box-shadow:none!important;display:inline-grid!important;place-content:center!important}
-html body dialog.exercise-dialog input[type=checkbox]:checked{background:var(--ex-primary)!important;border-color:rgba(135,111,151,.18)!important}
-html body dialog.exercise-dialog input[type=checkbox]:checked::after{content:'✓'!important;color:#fff!important;font-size:13px!important;line-height:1!important;font-weight:500!important}
-html body dialog.exercise-dialog.exercise-plan-dialog[open]>:is(.bertha-modal,.study-v10-modal){overflow-y:auto!important;scroll-padding-bottom:24px!important}
-html body dialog.exercise-dialog.exercise-plan-dialog .exercise-plan-icon-section,html body dialog.exercise-dialog.exercise-plan-dialog .exercise-icon-picker{max-height:none!important;height:auto!important;overflow:visible!important}
-html body dialog.exercise-dialog.exercise-plan-dialog .study-v10-actions{position:static!important;margin-top:18px!important}
-html body dialog.exercise-dialog .exercise-icon-filter{min-height:34px!important;border:1px solid var(--ex-border)!important;border-radius:999px!important;background:rgba(255,255,255,.56)!important;color:#6f6574!important;font-weight:450!important}
-html body dialog.exercise-dialog .exercise-icon-filter.selected{background:var(--ex-primary)!important;color:#65536e!important}
-html body dialog.exercise-dialog .exercise-icon-choice{border:1px solid var(--ex-border)!important;border-radius:18px!important;background:rgba(255,255,255,.44)!important;box-shadow:none!important;font-weight:400!important}
-html body dialog.exercise-dialog .exercise-icon-choice.selected{box-shadow:inset 0 0 0 1px rgba(137,109,153,.18)!important;background:rgba(255,255,255,.50)!important}
-html body dialog.exercise-dialog .exercise-icon-choice small{font-weight:400!important;color:#817780!important}
-@media(max-width:480px){html body dialog.exercise-dialog[open]>:is(.bertha-modal,.study-v10-modal){width:calc(100vw - 24px)!important;max-width:520px!important;max-height:calc(100dvh - 24px)!important;padding:18px!important;border-radius:26px!important}}
-`;
-  document.head.appendChild(s);
-})();
 
-/* RC83 — Exercise modal master: authoritative runtime override */
+
+
+
+
+/* RC84 — EXERCÍCIOS · MODAL MASTER ÚNICO
+   Fonte única de cor, largura, altura, X, campos e ações.
+   Remove a divergência entre Novo treino, Novo ciclo, ritmo semanal e registros. */
 (()=>{
-  const id='bertha-rc83-exercise-modal-master';
+  const id='bertha-rc84-exercise-modal-master';
   document.getElementById(id)?.remove();
-  const s=document.createElement('style');
-  s.id=id;
-  s.textContent=`
-html body dialog.exercise-dialog{--ex83-bg:linear-gradient(145deg,#f7f0fa 0%,#f6edf7 54%,#f9ecec 100%);--ex83-primary:linear-gradient(135deg,#cdb9e3 0%,#d9bfdc 50%,#e8b8ae 100%);--ex83-border:rgba(118,101,129,.11);--ex83-ink:#403947;--ex83-muted:#867d88}
-html body dialog.exercise-dialog[open]>:is(.bertha-modal,.study-v10-modal){box-sizing:border-box!important;width:min(calc(100vw - 56px),430px)!important;max-width:430px!important;max-height:74dvh!important;height:auto!important;margin:auto!important;padding:16px!important;border-radius:24px!important;background:var(--ex83-bg)!important;color:var(--ex83-ink)!important;border:0!important;outline:0!important;box-shadow:inset 0 0 0 1px var(--ex83-border),0 18px 46px rgba(47,37,58,.13)!important;overflow-y:auto!important;overflow-x:hidden!important;-webkit-overflow-scrolling:touch!important}
-html body dialog.exercise-dialog.exercise-quick-dialog[open]>:is(.bertha-modal,.study-v10-modal),html body dialog.exercise-dialog.exercise-week-dialog[open]>:is(.bertha-modal,.study-v10-modal),html body dialog.exercise-dialog.exercise-edit-record-dialog[open]>:is(.bertha-modal,.study-v10-modal){max-height:70dvh!important}
-html body dialog.exercise-dialog .bertha-modal-head{position:relative!important;margin-bottom:12px!important;padding-right:44px!important;gap:10px!important}
-html body dialog.exercise-dialog .bertha-modal-head h2{font-size:21px!important;font-weight:420!important}
-html body dialog.exercise-dialog .bertha-modal-head p{margin-top:8px!important;font-size:13.5px!important}
-html body dialog.exercise-dialog .bertha-modal-head>button[data-close]{position:absolute!important;top:0!important;right:0!important;width:34px!important;height:34px!important;min-width:34px!important;min-height:34px!important;margin:0!important;padding:0!important;display:grid!important;place-items:center!important;border-radius:50%!important;border:1px solid var(--ex83-border)!important;background:rgba(255,255,255,.50)!important;color:#817780!important;font-size:21px!important;font-weight:300!important;line-height:1!important;box-shadow:none!important;outline:0!important}
-html body dialog.exercise-dialog :is(.study-v10-field>span,.exercise-cycle-label,label){font-size:11px!important;font-weight:450!important;color:#68616b!important}
-html body dialog.exercise-dialog :is(input:not([type=checkbox]):not([type=radio]),select,textarea){box-sizing:border-box!important;width:100%!important;min-height:42px!important;border-radius:14px!important;border:1px solid var(--ex83-border)!important;background:#fffdfa!important;padding:10px 11px!important;font-size:16px!important;font-weight:400!important;box-shadow:none!important}
-html body dialog.exercise-dialog textarea{min-height:76px!important}
-html body dialog.exercise-dialog .study-v10-field,html body dialog.exercise-dialog .field{margin:8px 0!important}
-html body dialog.exercise-dialog .exercise-cycle-block{gap:8px!important}
-html body dialog.exercise-dialog .exercise-cycle-block select,html body dialog.exercise-dialog .exercise-unit-input{min-height:42px!important;border-radius:14px!important}
-html body dialog.exercise-dialog .exercise-block-remove{width:36px!important;height:36px!important;min-width:36px!important;min-height:36px!important;border-radius:12px!important;border:1px solid var(--ex83-border)!important;background:rgba(255,255,255,.56)!important;color:#817780!important}
-html body dialog.exercise-dialog .exercise-cycle-total{border-radius:14px!important;background:rgba(255,255,255,.36)!important}
-html body dialog.exercise-dialog .exercise-cycle-total strong{font-size:17px!important;font-weight:500!important}
-html body dialog.exercise-dialog .study-v10-actions,html body dialog.exercise-dialog .modal-actions{position:static!important;inset:auto!important;display:flex!important;justify-content:flex-end!important;align-items:center!important;gap:8px!important;margin:14px 0 0!important;padding:0!important;background:transparent!important;border:0!important;box-shadow:none!important}
-html body dialog.exercise-dialog .study-v10-actions button,html body dialog.exercise-dialog .modal-actions button,html body dialog.exercise-dialog button.primary,html body dialog.exercise-dialog button.secondary{box-sizing:border-box!important;width:auto!important;min-width:104px!important;height:42px!important;min-height:42px!important;padding:0 15px!important;border-radius:14px!important;font-size:13.5px!important;font-weight:500!important;box-shadow:none!important}
-html body dialog.exercise-dialog button.secondary{background:rgba(255,255,255,.74)!important;border:1px solid var(--ex83-border)!important;color:#706972!important}
-html body dialog.exercise-dialog button.primary{background:var(--ex83-primary)!important;border:1px solid rgba(127,99,145,.08)!important;color:#fff!important}
-html body dialog.exercise-dialog input[type=checkbox]{-webkit-appearance:none!important;appearance:none!important;width:20px!important;height:20px!important;min-width:20px!important;min-height:20px!important;border-radius:6px!important;border:1px solid var(--ex83-border)!important;background:#fffdfa!important;box-shadow:none!important}
-html body dialog.exercise-dialog input[type=checkbox]:checked{background:var(--ex83-primary)!important}
-html body dialog.exercise-dialog .exercise-icon-filter{min-height:32px!important;background:rgba(255,255,255,.55)!important;border-color:var(--ex83-border)!important}
-html body dialog.exercise-dialog .exercise-icon-filter.selected{background:var(--ex83-primary)!important;color:#65536e!important}
-html body dialog.exercise-dialog .exercise-icon-choice{border-color:var(--ex83-border)!important;background:rgba(255,255,255,.45)!important}
+  const st=document.createElement('style');
+  st.id=id;
+  st.textContent=`
+html body dialog.exercise-dialog{
+  --ex84-bg:linear-gradient(145deg,#f7f2fa 0%,#f4edf7 54%,#faeeee 100%);
+  --ex84-primary:linear-gradient(135deg,#d7c6ea 0%,#ddc4df 50%,#edc9c9 100%);
+  --ex84-border:rgba(126,105,139,.13);
+  --ex84-ink:#403947;
+  --ex84-muted:#857d88;
+  border:0!important;outline:0!important;background:transparent!important;padding:0!important;box-shadow:none!important;
+}
+html body dialog.exercise-dialog::backdrop{background:rgba(54,49,53,.30)!important;backdrop-filter:blur(4px)!important;-webkit-backdrop-filter:blur(4px)!important}
+html body dialog.exercise-dialog[open] > :is(.bertha-modal,.study-v10-modal){
+  box-sizing:border-box!important;
+  width:min(calc(100vw - 32px),390px)!important;max-width:390px!important;
+  max-height:78dvh!important;height:auto!important;
+  margin:auto!important;padding:18px!important;
+  border:0!important;outline:0!important;border-radius:26px!important;
+  background:var(--ex84-bg)!important;background-image:var(--ex84-bg)!important;background-color:#f6eef7!important;
+  color:var(--ex84-ink)!important;
+  box-shadow:inset 0 0 0 1px var(--ex84-border),0 20px 52px rgba(47,37,58,.14)!important;
+  overflow-y:auto!important;overflow-x:hidden!important;-webkit-overflow-scrolling:touch!important;
+}
+/* Novo treino e Novo ciclo usam exatamente a mesma caixa visual. */
+html body dialog.exercise-dialog.exercise-plan-dialog[open] > :is(.bertha-modal,.study-v10-modal),
+html body dialog.exercise-dialog.exercise-cycle-dialog[open] > :is(.bertha-modal,.study-v10-modal){
+  height:min(78dvh,650px)!important;max-height:min(78dvh,650px)!important;
+}
+html body dialog.exercise-dialog .bertha-modal-head{position:relative!important;display:flex!important;align-items:flex-start!important;justify-content:space-between!important;gap:12px!important;margin:0 0 14px!important;padding:0 48px 0 0!important;background:transparent!important;border:0!important;box-shadow:none!important}
+html body dialog.exercise-dialog .bertha-modal-head .eyebrow{font-size:10px!important;line-height:1.2!important;font-weight:500!important;letter-spacing:.22em!important;color:#81748a!important;text-transform:uppercase!important}
+html body dialog.exercise-dialog .bertha-modal-head h2{margin:7px 0 0!important;font-size:22px!important;line-height:1.12!important;font-weight:420!important;color:#403947!important}
+html body dialog.exercise-dialog .bertha-modal-head p{margin:10px 0 0!important;font-size:14px!important;line-height:1.45!important;font-weight:400!important;color:#716977!important}
+html body dialog.exercise-dialog .bertha-modal-head > button[data-close]{position:absolute!important;top:0!important;right:0!important;width:38px!important;height:38px!important;min-width:38px!important;min-height:38px!important;margin:0!important;padding:0!important;display:grid!important;place-items:center!important;border-radius:50%!important;border:1px solid var(--ex84-border)!important;background:rgba(255,255,255,.54)!important;color:#827982!important;font-size:24px!important;font-weight:300!important;line-height:1!important;box-shadow:none!important;outline:0!important}
+html body dialog.exercise-dialog :is(.study-v10-field>span,.exercise-cycle-label,label){font-size:12px!important;line-height:1.25!important;font-weight:430!important;color:#635c67!important}
+html body dialog.exercise-dialog :is(input:not([type=checkbox]):not([type=radio]),select,textarea){box-sizing:border-box!important;width:100%!important;min-height:46px!important;border-radius:16px!important;border:1px solid var(--ex84-border)!important;background:#fffdfa!important;padding:11px 12px!important;font-size:16px!important;font-weight:400!important;color:#403947!important;box-shadow:none!important;outline:0!important}
+html body dialog.exercise-dialog textarea{min-height:92px!important;resize:vertical!important}
+html body dialog.exercise-dialog :is(.study-v10-field,.field){margin:10px 0!important}
+html body dialog.exercise-dialog .form-grid{gap:10px!important}
+html body dialog.exercise-dialog .exercise-cycle-section{margin-top:12px!important}
+html body dialog.exercise-dialog .exercise-cycle-help{font-size:13px!important;line-height:1.45!important;color:#918895!important;font-weight:400!important}
+html body dialog.exercise-dialog .exercise-cycle-block{gap:8px!important;align-items:center!important}
+html body dialog.exercise-dialog .exercise-cycle-block select,html body dialog.exercise-dialog .exercise-unit-input{min-height:46px!important;height:46px!important;border-radius:16px!important}
+html body dialog.exercise-dialog .exercise-block-remove{width:40px!important;height:40px!important;min-width:40px!important;min-height:40px!important;border-radius:14px!important;border:1px solid var(--ex84-border)!important;background:rgba(255,255,255,.62)!important;color:#817780!important;box-shadow:none!important}
+html body dialog.exercise-dialog .exercise-cycle-total{border-radius:16px!important;background:rgba(255,255,255,.42)!important;padding:13px 14px!important}
+html body dialog.exercise-dialog .exercise-cycle-total strong{font-size:18px!important;font-weight:500!important}
+html body dialog.exercise-dialog .study-v10-actions,html body dialog.exercise-dialog .modal-actions{position:static!important;inset:auto!important;display:flex!important;justify-content:flex-end!important;align-items:center!important;gap:9px!important;margin:16px 0 0!important;padding:0!important;background:transparent!important;border:0!important;box-shadow:none!important;backdrop-filter:none!important;-webkit-backdrop-filter:none!important}
+html body dialog.exercise-dialog .study-v10-actions button,html body dialog.exercise-dialog .modal-actions button,html body dialog.exercise-dialog button.primary,html body dialog.exercise-dialog button.secondary{box-sizing:border-box!important;width:auto!important;min-width:108px!important;height:44px!important;min-height:44px!important;padding:0 16px!important;border-radius:15px!important;font-size:14px!important;line-height:1!important;font-weight:500!important;box-shadow:none!important}
+html body dialog.exercise-dialog button.secondary{background:rgba(255,255,255,.76)!important;border:1px solid var(--ex84-border)!important;color:#6f6872!important}
+html body dialog.exercise-dialog button.primary{background:var(--ex84-primary)!important;background-image:var(--ex84-primary)!important;border:1px solid rgba(127,99,145,.08)!important;color:#fff!important}
+html body dialog.exercise-dialog input[type=checkbox]{-webkit-appearance:none!important;appearance:none!important;width:20px!important;height:20px!important;min-width:20px!important;min-height:20px!important;border-radius:6px!important;border:1px solid var(--ex84-border)!important;background:#fffdfa!important;box-shadow:none!important;display:inline-grid!important;place-content:center!important;margin:0!important}
+html body dialog.exercise-dialog input[type=checkbox]:checked{background:var(--ex84-primary)!important;border-color:rgba(127,99,145,.16)!important}
+html body dialog.exercise-dialog input[type=checkbox]:checked::after{content:'✓'!important;color:#fff!important;font-size:13px!important;line-height:1!important;font-weight:500!important}
+html body dialog.exercise-dialog .exercise-icon-filter{min-height:34px!important;border:1px solid var(--ex84-border)!important;border-radius:999px!important;background:rgba(255,255,255,.58)!important;color:#706775!important;font-weight:430!important}
+html body dialog.exercise-dialog .exercise-icon-filter.selected{background:var(--ex84-primary)!important;color:#65536e!important}
+html body dialog.exercise-dialog .exercise-icon-choice{border:1px solid var(--ex84-border)!important;border-radius:18px!important;background:rgba(255,255,255,.46)!important;box-shadow:none!important;font-weight:400!important}
+html body dialog.exercise-dialog .exercise-icon-choice.selected{box-shadow:inset 0 0 0 1px rgba(137,109,153,.18)!important;background:rgba(255,255,255,.52)!important}
+html body dialog.exercise-dialog .exercise-icon-choice small{font-weight:400!important;color:#817780!important}
 html body dialog.exercise-dialog.exercise-plan-dialog .exercise-plan-icon-section,html body dialog.exercise-dialog.exercise-plan-dialog .exercise-icon-picker{max-height:none!important;height:auto!important;overflow:visible!important}
-html body dialog.exercise-dialog.exercise-plan-dialog .study-v10-actions{position:static!important;margin-top:14px!important}
-@media(max-width:480px){html body dialog.exercise-dialog[open]>:is(.bertha-modal,.study-v10-modal){width:calc(100vw - 48px)!important;max-width:430px!important;max-height:74dvh!important;padding:16px!important;border-radius:24px!important}}
+html body dialog.exercise-dialog.exercise-plan-dialog .study-v10-actions{position:static!important;margin-top:16px!important}
+@media(max-width:480px){
+ html body dialog.exercise-dialog[open] > :is(.bertha-modal,.study-v10-modal){width:calc(100vw - 32px)!important;max-width:390px!important;padding:18px!important;border-radius:26px!important}
+ html body dialog.exercise-dialog.exercise-plan-dialog[open] > :is(.bertha-modal,.study-v10-modal),html body dialog.exercise-dialog.exercise-cycle-dialog[open] > :is(.bertha-modal,.study-v10-modal){height:min(78dvh,650px)!important;max-height:min(78dvh,650px)!important}
+}
 `;
-  document.head.appendChild(s);
+  document.head.appendChild(st);
 })();
