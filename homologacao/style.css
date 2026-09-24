@@ -2103,3 +2103,80 @@ html body .study-history-card .study-history-chevron{
   font-weight:300!important;
   color:#a89aae!important;
 }
+
+/* RC73 — CASA · acabamento visual
+   Escopo estrito: tipografia Casa, fundos dos modais e bordas.
+   Não altera estrutura nem lógica dos demais módulos. */
+html body .casa-hero-v121 .eyebrow,
+html body .casa-rule-v121 .eyebrow,
+html body #app .casa-section .eyebrow{
+  font-weight:600!important;letter-spacing:.18em!important;text-transform:uppercase!important;
+}
+html body .casa-hero-v121 h2{font-weight:400!important;letter-spacing:-.028em!important}
+html body .casa-hero-v121 p{font-weight:400!important}
+html body .casa-rule-v121 strong,
+html body .casa-rule-v121 h3{font-weight:400!important;letter-spacing:-.018em!important}
+html body .casa-rule-v121 p{font-weight:400!important}
+html body .casa-section>summary .casa-section-left strong{
+  font-weight:400!important;letter-spacing:-.014em!important;color:#403a43!important;
+}
+html body .casa-section>summary .casa-section-meta{font-weight:400!important}
+html body .casa-section-body :is(h3,strong){font-weight:500!important}
+html body .casa-section-body :is(p,small,span){font-weight:400!important}
+html body .casa-section-body :is(button,.home-how,.home-edit,.casa-buy-mini,.casa-inline-add){font-weight:500!important}
+
+/* Casa — sistema tipográfico dos modais */
+html body :is(dialog.casa-dialog,dialog.casa-maint-dialog) :is(.eyebrow,.section-title),
+html body :is(.casa-how-modal,.casa-manual-view) .eyebrow{
+  font-size:10px!important;font-weight:600!important;letter-spacing:.18em!important;text-transform:uppercase!important;
+}
+html body :is(dialog.casa-dialog,dialog.casa-maint-dialog) :is(.modal-head,.study-v10-head) h2,
+html body :is(.casa-how-modal,.casa-manual-view)>h2{
+  font-weight:400!important;letter-spacing:-.024em!important;line-height:1.12!important;
+}
+html body :is(dialog.casa-dialog,dialog.casa-maint-dialog) :is(label,.study-v10-field>span){font-weight:500!important}
+html body :is(dialog.casa-dialog,dialog.casa-maint-dialog) :is(input,select,textarea){font-weight:400!important}
+html body :is(dialog.casa-dialog,dialog.casa-maint-dialog) :is(input,textarea)::placeholder{font-weight:400!important}
+html body :is(dialog.casa-dialog,dialog.casa-maint-dialog) :is(button,.secondary,.primary){font-weight:500!important}
+html body :is(.casa-how-modal,.casa-manual-view) .casa-how-section h3{font-weight:500!important}
+html body :is(.casa-how-modal,.casa-manual-view) .casa-how-section :is(li,span){font-weight:400!important}
+
+/* Casa — superfície blush + sálvia também nos overlays Como fazer */
+html body :is(.casa-how-modal,.casa-manual-view){
+  background:linear-gradient(145deg,rgba(252,239,243,.99) 0%,rgba(250,242,239,.99) 48%,rgba(235,246,235,.99) 100%)!important;
+  border:1px solid rgba(154,119,132,.14)!important;
+  box-shadow:0 24px 60px rgba(68,52,61,.16)!important;
+}
+html body dialog.casa-dialog>.casa-modal-card,
+html body dialog.casa-maint-dialog>.casa-maint-modal{
+  background:linear-gradient(145deg,rgba(252,239,243,.99) 0%,rgba(250,242,239,.99) 48%,rgba(235,246,235,.99) 100%)!important;
+  border:1px solid rgba(154,119,132,.14)!important;
+}
+
+/* Casa — bordas uniformes, finas e discretas */
+html body :is(dialog.casa-dialog,dialog.casa-maint-dialog) :is(input:not([type=checkbox]):not([type=radio]),select,textarea){
+  border:1px solid rgba(132,106,118,.17)!important;box-shadow:none!important;
+}
+html body :is(dialog.casa-dialog,dialog.casa-maint-dialog) :is(.icon-btn,.study-v10-x,.casa-modal-x,.secondary){
+  border:1px solid rgba(132,106,118,.14)!important;box-shadow:none!important;
+}
+html body :is(.casa-how-modal,.casa-manual-view) :is(.casa-buy-mini,.secondary,.casa-edit-procedure){
+  border:1px solid rgba(132,106,118,.10)!important;box-shadow:none!important;
+}
+html body .casa-section>summary,
+html body .casa-section-body>.card,
+html body .casa-section-body>.list>.card{border-width:1px!important;border-color:rgba(127,103,115,.09)!important}
+
+/* Inventário — checkbox no padrão Casa */
+html body .casa-tool-check input[type="checkbox"]{
+  -webkit-appearance:none!important;appearance:none!important;width:22px!important;height:22px!important;min-width:22px!important;
+  border:1px solid rgba(132,106,118,.24)!important;border-radius:7px!important;background:rgba(255,255,255,.66)!important;
+  display:grid!important;place-items:center!important;margin:0!important;
+}
+html body .casa-tool-check input[type="checkbox"]:checked{
+  background:linear-gradient(135deg,#e4b7c4,#a8cfb2)!important;border-color:transparent!important;
+}
+html body .casa-tool-check input[type="checkbox"]:checked::after{
+  content:"✓";color:#fff;font-size:14px;font-weight:600;line-height:1;
+}
+html body .casa-tool-check span{font-weight:400!important}
