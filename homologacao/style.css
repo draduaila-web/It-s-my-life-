@@ -2076,3 +2076,30 @@ html body dialog.study-module-dialog .study-v10-count{font-weight:400!important}
 html body dialog.study-module-dialog .study-history-copy,
 html body dialog.study-module-dialog .study-history-help{font-weight:400!important}
 html body dialog.study-module-dialog .study-history-actions button{font-weight:500!important}
+
+/* RC72 — ESTUDOS · acabamento tipográfico exclusivo dos cards do Histórico
+   Sem alteração de estrutura, dados, cores ou comportamento. */
+html body .study-history-card > div{min-width:0!important}
+html body .study-history-card strong{
+  display:block!important;
+  font-size:15.5px!important;
+  line-height:1.28!important;
+  font-weight:400!important;
+  letter-spacing:-.012em!important;
+  color:#403b47!important;
+}
+html body .study-history-card .study-meta{
+  margin-top:5px!important;
+  font-size:13px!important;
+  line-height:1.35!important;
+  font-weight:400!important;
+  letter-spacing:0!important;
+  color:#8b848e!important;
+}
+html body .study-history-card .study-history-chevron{
+  flex:0 0 auto!important;
+  font-size:23px!important;
+  line-height:1!important;
+  font-weight:300!important;
+  color:#a89aae!important;
+}
