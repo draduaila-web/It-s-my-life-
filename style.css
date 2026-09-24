@@ -1895,3 +1895,349 @@ html body dialog.bertha-plans-task-dialog[open] :is(.bertha-task-cancel,.bertha-
 html body dialog.bertha-plans-task-dialog[open] .bertha-task-cancel{background:rgba(255,255,255,.72)!important;color:#706972!important;border:1px solid rgba(140,126,145,.12)!important}
 html body dialog.bertha-plans-task-dialog[open] .bertha-task-save{background:linear-gradient(135deg,#f7e8b8 0%,#e7bd87 45%,#cf8f67 100%)!important;color:#fff!important;border:0!important}
 @media(max-width:480px){html body dialog.bertha-plans-task-dialog[open] > form.bertha-task-modal{width:calc(100vw - 24px)!important;max-height:calc(100dvh - 24px)!important;padding:18px!important}}
+\n\n/* BERTH.A RC62 — Planos: Compromissos = referência mestre; Tarefa replica estrutura/tipografia */
+/* Corrige Data/Horário em Compromissos: nunca sobrepor; cada campo ocupa sua linha. */
+.commit-dialog .commit-two{grid-template-columns:minmax(0,1fr)!important;gap:0!important}
+.commit-dialog .commit-two>.commit-field{min-width:0!important;width:100%!important}
+.commit-dialog .commit-two input{min-width:0!important;width:100%!important;max-width:100%!important}
+
+/* Nova/Editar Tarefa usa o mesmo esqueleto visual do modal de Compromissos. */
+.bertha-plans-task-dialog.commit-dialog>.bertha-task-modal.commit-modal{
+  width:min(92vw,520px)!important;
+  max-height:min(88dvh,760px)!important;
+  overflow:auto!important;
+  padding:20px!important;
+  border-radius:26px!important;
+  background:linear-gradient(145deg,rgba(255,250,226,.98) 0%,rgba(252,239,211,.97) 54%,rgba(248,222,199,.96) 100%)!important;
+  border:1px solid rgba(177,132,88,.12)!important;
+  box-shadow:0 20px 52px rgba(47,37,58,.14)!important;
+}
+.bertha-plans-task-dialog .commit-modal-head{margin-bottom:15px!important;padding:0!important}
+.bertha-plans-task-dialog .commit-modal-head>div>span{
+  font-size:10px!important;letter-spacing:.16em!important;font-weight:800!important;color:#9c7b64!important;
+}
+.bertha-plans-task-dialog .commit-modal-head h2{
+  margin:5px 0 0!important;font-size:22px!important;line-height:1.12!important;font-weight:500!important;letter-spacing:-.02em!important;color:#373440!important;
+}
+.bertha-plans-task-dialog .commit-x{width:36px!important;height:36px!important;min-width:36px!important;border:0!important;background:rgba(247,243,237,.82)!important;color:#8e8792!important;font-size:23px!important;box-shadow:none!important}
+.bertha-plans-task-dialog .bertha-task-modal-body{padding:0!important;overflow:visible!important}
+.bertha-plans-task-dialog .commit-field{display:block!important;margin:11px 0!important;min-width:0!important}
+.bertha-plans-task-dialog .commit-field>span{display:block!important;font-size:11.5px!important;font-weight:600!important;color:#655f67!important;margin-bottom:6px!important}
+.bertha-plans-task-dialog .commit-field>span small{font-weight:500!important;color:#9b9298!important}
+.bertha-plans-task-dialog .commit-field input,
+.bertha-plans-task-dialog .commit-field select,
+.bertha-plans-task-dialog .commit-field textarea{
+ box-sizing:border-box!important;width:100%!important;min-width:0!important;max-width:100%!important;min-height:46px!important;
+ border:1px solid rgba(140,126,145,.14)!important;border-radius:15px!important;background:#fffdfa!important;padding:11px 12px!important;
+ color:#3e3d4b!important;font-size:16px!important;font-weight:400!important;box-shadow:none!important;
+}
+.bertha-plans-task-dialog .bertha-task-two{display:grid!important;grid-template-columns:minmax(0,1fr)!important;gap:0!important}
+.bertha-plans-task-dialog .bertha-task-schedule-priority{display:grid!important;grid-template-columns:minmax(0,1fr)!important;gap:0!important}
+.bertha-plans-task-dialog .bertha-duration-input{display:grid!important;grid-template-columns:1fr 1.2fr!important;gap:9px!important}
+.bertha-plans-task-dialog .bertha-segment{display:grid!important;grid-template-columns:repeat(4,minmax(0,1fr))!important;gap:8px!important}
+.bertha-plans-task-dialog .bertha-segment.compact{grid-template-columns:repeat(3,minmax(0,1fr))!important}
+.bertha-plans-task-dialog .bertha-segment button{min-width:0!important;width:100%!important;font-size:12px!important;font-weight:600!important}
+.bertha-plans-task-dialog .bertha-task-modal-actions.commit-actions{position:static!important;margin-top:18px!important;padding:0!important;background:transparent!important;border:0!important}
+.bertha-plans-task-dialog .commit-actions button{border-radius:15px!important;padding:11px 16px!important;font-size:13px!important;font-weight:700!important}
+.bertha-plans-task-dialog .commit-actions .secondary{background:rgba(255,255,255,.72)!important;color:#706972!important;border:1px solid rgba(140,126,145,.12)!important}
+.bertha-plans-task-dialog .commit-actions .primary{background:linear-gradient(135deg,#f7e8b8 0%,#e7bd87 45%,#cf8f67 100%)!important;color:#fff!important;border:0!important}
+@media(max-width:480px){
+ .bertha-plans-task-dialog.commit-dialog>.bertha-task-modal.commit-modal{width:calc(100vw - 24px)!important;max-height:calc(100dvh - 24px)!important;padding:18px!important}
+ .bertha-plans-task-dialog .bertha-segment{gap:6px!important}
+}
+
+
+/* RC63 — PLANOS MODAL MASTER: Tarefa usa o componente de Compromissos sem classes legadas de layout */
+html body dialog.bertha-plans-task-dialog[open] > form.bertha-task-modal-v2{
+ box-sizing:border-box!important;width:min(92vw,520px)!important;max-height:min(88dvh,760px)!important;overflow:auto!important;
+ background:linear-gradient(145deg,rgba(255,250,226,.98) 0%,rgba(252,239,211,.97) 54%,rgba(248,222,199,.96) 100%)!important;
+ border:1px solid rgba(177,132,88,.12)!important;border-radius:26px!important;padding:20px!important;box-shadow:0 20px 52px rgba(47,37,58,.14)!important;
+}
+.bertha-task-modal-v2 .bertha-task-modal-body-v2{display:block!important;padding:0!important;margin:0!important;overflow:visible!important}
+.bertha-task-modal-v2 .commit-modal-head>div>span{font-size:10px!important;letter-spacing:.16em!important;font-weight:800!important;color:#9c7b64!important}
+.bertha-task-modal-v2 .commit-modal-head h2{margin:5px 0 0!important;font-size:22px!important;line-height:1.12!important;color:#373440!important;font-weight:620!important}
+.bertha-task-modal-v2 .commit-field{display:block!important;margin:11px 0!important;min-width:0!important;width:100%!important}
+.bertha-task-modal-v2 .commit-field>span{display:block!important;font-size:11.5px!important;font-weight:740!important;color:#655f67!important;margin-bottom:6px!important}
+.bertha-task-modal-v2 .commit-field input,.bertha-task-modal-v2 .commit-field select,.bertha-task-modal-v2 .commit-field textarea{box-sizing:border-box!important;width:100%!important;min-width:0!important;max-width:100%!important;min-height:46px!important;border:1px solid rgba(140,126,145,.14)!important;border-radius:15px!important;background:#fffdfa!important;padding:11px 12px!important;color:#3e3d4b!important;font:inherit!important;font-size:16px!important;box-shadow:none!important}
+.bertha-task-modal-v2 .commit-field textarea{min-height:86px!important;resize:vertical!important}
+.bertha-task-modal-v2 .bertha-duration-input{display:grid!important;grid-template-columns:1fr 1.2fr!important;gap:9px!important}
+.bertha-task-modal-v2 .bertha-segment{display:grid!important;grid-template-columns:repeat(4,minmax(0,1fr))!important;gap:8px!important}
+.bertha-task-modal-v2 .bertha-segment.compact{grid-template-columns:repeat(3,minmax(0,1fr))!important}
+.bertha-task-modal-v2 .bertha-segment button{min-width:0!important;width:100%!important}
+.bertha-task-modal-v2 .commit-actions{display:flex!important;justify-content:flex-end!important;gap:9px!important;margin-top:18px!important;position:static!important;padding:0!important;background:transparent!important;border:0!important}
+.bertha-task-modal-v2 .commit-actions>div{display:flex!important;gap:9px!important;margin-left:auto!important}
+.bertha-task-modal-v2 .commit-actions button{border:0!important;border-radius:15px!important;padding:11px 16px!important;font-weight:800!important;min-height:42px!important}
+.bertha-task-modal-v2 .commit-actions .secondary{background:rgba(255,255,255,.72)!important;color:#706972!important;border:1px solid rgba(140,126,145,.12)!important}
+.bertha-task-modal-v2 .commit-actions .primary{background:linear-gradient(135deg,#f7e8b8 0%,#e7bd87 45%,#cf8f67 100%)!important;color:#fff!important}
+@media(max-width:480px){html body dialog.bertha-plans-task-dialog[open] > form.bertha-task-modal-v2{width:calc(100vw - 24px)!important;max-height:calc(100dvh - 24px)!important;padding:18px!important}}
+
+/* RC66 — MEU DIA IDEAL · SOMENTE SISTEMA TIPOGRÁFICO
+   Referência congelada: Planos. Não altera estrutura, lógica, campos ou paleta. */
+html body .bertha-ideal-hero .eyebrow{
+  font-size:10px!important;letter-spacing:.16em!important;font-weight:600!important;
+  color:#8f858f!important;text-transform:uppercase!important;
+}
+html body .bertha-ideal-hero h2{
+  font-weight:400!important;letter-spacing:-.025em!important;color:#373440!important;
+}
+html body .bertha-ideal-hero p{font-weight:400!important;color:#746f79!important}
+html body .bertha-ideal-zone-head span{
+  font-weight:600!important;letter-spacing:.16em!important;color:#817984!important;
+}
+html body .bertha-ideal-zone-head small{font-weight:400!important}
+html body .bertha-ideal-map-copy strong{font-weight:500!important}
+html body .bertha-ideal-add-zone{font-weight:500!important}
+html body .bertha-goals-head>span{
+  font-size:10px!important;letter-spacing:.16em!important;font-weight:600!important;
+  color:#8f858f!important;text-transform:uppercase!important;
+}
+html body .bertha-goals-head>strong{
+  font-weight:400!important;letter-spacing:-.018em!important;color:#373440!important;
+}
+html body .bertha-goals-note{font-weight:400!important}
+html body .bertha-goal-text>span{font-weight:500!important;color:#403a48!important}
+html body .bertha-goal-text>strong{font-weight:400!important;color:#807883!important}
+
+/* Modal Adicionar ao Meu Dia Ideal — mesma hierarquia leve de Planos. */
+html body dialog.bertha-dialog:has(.bertha-ideal-modal-form) .bertha-modal-head strong{
+  font-weight:400!important;letter-spacing:-.018em!important;color:#373440!important;
+}
+html body dialog.bertha-dialog:has(.bertha-ideal-modal-form) .bertha-ideal-modal-form .bertha-field>span,
+html body dialog.bertha-dialog:has(.bertha-ideal-modal-form) .bertha-ideal-until label>span,
+html body dialog.bertha-dialog:has(.bertha-ideal-modal-form) .bertha-notify-when>span{
+  font-size:11.5px!important;font-weight:500!important;color:#655f67!important;
+}
+html body dialog.bertha-dialog:has(.bertha-ideal-modal-form) .bertha-notify-row strong{
+  font-weight:500!important;color:#4c4650!important;
+}
+html body dialog.bertha-dialog:has(.bertha-ideal-modal-form) .bertha-notify-row small{
+  font-weight:400!important;
+}
+html body dialog.bertha-dialog:has(.bertha-ideal-modal-form) input,
+html body dialog.bertha-dialog:has(.bertha-ideal-modal-form) select,
+html body dialog.bertha-dialog:has(.bertha-ideal-modal-form) textarea{
+  font-weight:400!important;
+}
+html body dialog.bertha-dialog:has(.bertha-ideal-modal-form) .bertha-ideal-modal-actions button{
+  font-weight:500!important;
+}
+
+/* RC71 — ESTUDOS · SOMENTE TIPOGRAFIA
+   Referência: sistema tipográfico congelado de Planos.
+   Escopo estrito: tela Estudos + dialogs .study-module-dialog. */
+html body .study-hero .eyebrow,
+html body .study-section .section-heading .eyebrow{
+  font-size:10px!important;letter-spacing:.18em!important;font-weight:600!important;
+  text-transform:uppercase!important;color:#71879a!important;
+}
+html body .study-hero h2{
+  font-weight:400!important;letter-spacing:-.028em!important;line-height:1.08!important;color:#30333b!important;
+}
+html body .study-hero p{font-weight:400!important;color:#746f79!important}
+html body .study-v10-stats b{font-weight:500!important}
+html body .study-v10-stats span{font-weight:400!important}
+html body .study-section .section-heading h3{font-weight:400!important;letter-spacing:-.018em!important;color:#373440!important}
+html body .study-v10-summary strong{font-weight:500!important;color:#403a48!important}
+html body .study-v10-summary span{font-weight:400!important}
+html body .study-v10-content strong{font-weight:500!important}
+html body .study-v10-content small{font-weight:600!important;letter-spacing:.08em!important}
+html body .study-v10-content span{font-weight:400!important}
+html body .study-section button,
+html body .study-v10-summary button{font-weight:500!important}
+
+/* Modais exclusivos de Estudos */
+html body dialog.study-module-dialog .study-v10-head .eyebrow{
+  font-size:10px!important;letter-spacing:.18em!important;font-weight:600!important;
+  text-transform:uppercase!important;color:#71879a!important;
+}
+html body dialog.study-module-dialog .study-v10-head h2{
+  font-weight:400!important;letter-spacing:-.022em!important;line-height:1.12!important;color:#373440!important;
+}
+html body dialog.study-module-dialog .study-v10-head p{font-weight:400!important;color:#817b84!important}
+html body dialog.study-module-dialog .study-v10-field>span,
+html body dialog.study-module-dialog .study-notify-box>label[data-map-notify-wrap]>span,
+html body dialog.study-module-dialog .study-notify-box>label[data-content-notify-wrap]>span{
+  font-size:11.5px!important;font-weight:500!important;color:#655f67!important;
+}
+html body dialog.study-module-dialog :is(input,select,textarea){font-weight:400!important}
+html body dialog.study-module-dialog :is(input,textarea)::placeholder{font-weight:400!important}
+html body dialog.study-module-dialog .study-notify-row strong{font-weight:500!important}
+html body dialog.study-module-dialog .study-notify-row small{font-weight:400!important}
+html body dialog.study-module-dialog .study-icon-choice small{font-weight:500!important}
+html body dialog.study-module-dialog .study-v10-actions button,
+html body dialog.study-module-dialog .study-v10-filters button,
+html body dialog.study-module-dialog .study-v10-mapactions button,
+html body dialog.study-module-dialog .study-add-map-inline{font-weight:500!important}
+html body dialog.study-module-dialog .study-v10-map small{font-weight:600!important;letter-spacing:.07em!important}
+html body dialog.study-module-dialog .study-v10-map strong{font-weight:500!important}
+html body dialog.study-module-dialog .study-v10-map span,
+html body dialog.study-module-dialog .study-v10-map em{font-weight:400!important}
+html body dialog.study-module-dialog .study-v10-count{font-weight:400!important}
+html body dialog.study-module-dialog .study-history-copy,
+html body dialog.study-module-dialog .study-history-help{font-weight:400!important}
+html body dialog.study-module-dialog .study-history-actions button{font-weight:500!important}
+
+/* RC72 — ESTUDOS · acabamento tipográfico exclusivo dos cards do Histórico
+   Sem alteração de estrutura, dados, cores ou comportamento. */
+html body .study-history-card > div{min-width:0!important}
+html body .study-history-card strong{
+  display:block!important;
+  font-size:15.5px!important;
+  line-height:1.28!important;
+  font-weight:400!important;
+  letter-spacing:-.012em!important;
+  color:#403b47!important;
+}
+html body .study-history-card .study-meta{
+  margin-top:5px!important;
+  font-size:13px!important;
+  line-height:1.35!important;
+  font-weight:400!important;
+  letter-spacing:0!important;
+  color:#8b848e!important;
+}
+html body .study-history-card .study-history-chevron{
+  flex:0 0 auto!important;
+  font-size:23px!important;
+  line-height:1!important;
+  font-weight:300!important;
+  color:#a89aae!important;
+}
+
+/* RC73 — CASA · acabamento visual
+   Escopo estrito: tipografia Casa, fundos dos modais e bordas.
+   Não altera estrutura nem lógica dos demais módulos. */
+html body .casa-hero-v121 .eyebrow,
+html body .casa-rule-v121 .eyebrow,
+html body #app .casa-section .eyebrow{
+  font-weight:600!important;letter-spacing:.18em!important;text-transform:uppercase!important;
+}
+html body .casa-hero-v121 h2{font-weight:400!important;letter-spacing:-.028em!important}
+html body .casa-hero-v121 p{font-weight:400!important}
+html body .casa-rule-v121 strong,
+html body .casa-rule-v121 h3{font-weight:400!important;letter-spacing:-.018em!important}
+html body .casa-rule-v121 p{font-weight:400!important}
+html body .casa-section>summary .casa-section-left strong{
+  font-weight:400!important;letter-spacing:-.014em!important;color:#403a43!important;
+}
+html body .casa-section>summary .casa-section-meta{font-weight:400!important}
+html body .casa-section-body :is(h3,strong){font-weight:500!important}
+html body .casa-section-body :is(p,small,span){font-weight:400!important}
+html body .casa-section-body :is(button,.home-how,.home-edit,.casa-buy-mini,.casa-inline-add){font-weight:500!important}
+
+/* Casa — sistema tipográfico dos modais */
+html body :is(dialog.casa-dialog,dialog.casa-maint-dialog) :is(.eyebrow,.section-title),
+html body :is(.casa-how-modal,.casa-manual-view) .eyebrow{
+  font-size:10px!important;font-weight:600!important;letter-spacing:.18em!important;text-transform:uppercase!important;
+}
+html body :is(dialog.casa-dialog,dialog.casa-maint-dialog) :is(.modal-head,.study-v10-head) h2,
+html body :is(.casa-how-modal,.casa-manual-view)>h2{
+  font-weight:400!important;letter-spacing:-.024em!important;line-height:1.12!important;
+}
+html body :is(dialog.casa-dialog,dialog.casa-maint-dialog) :is(label,.study-v10-field>span){font-weight:500!important}
+html body :is(dialog.casa-dialog,dialog.casa-maint-dialog) :is(input,select,textarea){font-weight:400!important}
+html body :is(dialog.casa-dialog,dialog.casa-maint-dialog) :is(input,textarea)::placeholder{font-weight:400!important}
+html body :is(dialog.casa-dialog,dialog.casa-maint-dialog) :is(button,.secondary,.primary){font-weight:500!important}
+html body :is(.casa-how-modal,.casa-manual-view) .casa-how-section h3{font-weight:500!important}
+html body :is(.casa-how-modal,.casa-manual-view) .casa-how-section :is(li,span){font-weight:400!important}
+
+/* Casa — superfície blush + sálvia também nos overlays Como fazer */
+html body :is(.casa-how-modal,.casa-manual-view){
+  background:linear-gradient(145deg,rgba(252,239,243,.99) 0%,rgba(250,242,239,.99) 48%,rgba(235,246,235,.99) 100%)!important;
+  border:1px solid rgba(154,119,132,.14)!important;
+  box-shadow:0 24px 60px rgba(68,52,61,.16)!important;
+}
+html body dialog.casa-dialog>.casa-modal-card,
+html body dialog.casa-maint-dialog>.casa-maint-modal{
+  background:linear-gradient(145deg,rgba(252,239,243,.99) 0%,rgba(250,242,239,.99) 48%,rgba(235,246,235,.99) 100%)!important;
+  border:1px solid rgba(154,119,132,.14)!important;
+}
+
+/* Casa — bordas uniformes, finas e discretas */
+html body :is(dialog.casa-dialog,dialog.casa-maint-dialog) :is(input:not([type=checkbox]):not([type=radio]),select,textarea){
+  border:1px solid rgba(132,106,118,.17)!important;box-shadow:none!important;
+}
+html body :is(dialog.casa-dialog,dialog.casa-maint-dialog) :is(.icon-btn,.study-v10-x,.casa-modal-x,.secondary){
+  border:1px solid rgba(132,106,118,.14)!important;box-shadow:none!important;
+}
+html body :is(.casa-how-modal,.casa-manual-view) :is(.casa-buy-mini,.secondary,.casa-edit-procedure){
+  border:1px solid rgba(132,106,118,.10)!important;box-shadow:none!important;
+}
+html body .casa-section>summary,
+html body .casa-section-body>.card,
+html body .casa-section-body>.list>.card{border-width:1px!important;border-color:rgba(127,103,115,.09)!important}
+
+/* Inventário — checkbox no padrão Casa */
+html body .casa-tool-check input[type="checkbox"]{
+  -webkit-appearance:none!important;appearance:none!important;width:22px!important;height:22px!important;min-width:22px!important;
+  border:1px solid rgba(132,106,118,.24)!important;border-radius:7px!important;background:rgba(255,255,255,.66)!important;
+  display:grid!important;place-items:center!important;margin:0!important;
+}
+html body .casa-tool-check input[type="checkbox"]:checked{
+  background:linear-gradient(135deg,#e4b7c4,#a8cfb2)!important;border-color:transparent!important;
+}
+html body .casa-tool-check input[type="checkbox"]:checked::after{
+  content:"✓";color:#fff;font-size:14px;font-weight:600;line-height:1;
+}
+html body .casa-tool-check span{font-weight:400!important}
+
+/* RC74 — CASA · acabamento final após auditoria visual
+   Somente Casa: receitas, agenda de rotinas, inventário e modais. */
+html body .casa-recipe .panel-head h3,
+html body .casa-recipe .panel-head h3 span{font-weight:400!important;letter-spacing:-.012em!important}
+html body .casa-recipe h4{font-weight:500!important;letter-spacing:.12em!important}
+html body .casa-recipe :is(li,li span,ol li,ul li){font-weight:400!important}
+html body .casa-recipe li b{font-weight:500!important}
+html body .casa-recipe .note{font-weight:400!important}
+html body .casa-recipe .casa-how-tip strong{font-weight:500!important}
+html body .casa-recipe .casa-how-tip p{font-weight:400!important}
+
+/* Editor de receitas e demais modais Casa: mesma hierarquia leve */
+html body dialog.casa-dialog .casa-modal-card :is(label,.study-v10-field>span),
+html body dialog.casa-dialog .study-v10-modal :is(label,.study-v10-field>span){font-weight:400!important}
+html body dialog.casa-dialog :is(input,select,textarea){font-weight:400!important;line-height:1.35!important}
+html body dialog.casa-dialog .casa-substitute-info p,
+html body dialog.casa-dialog .casa-substitute-info strong{font-weight:400!important}
+html body dialog.casa-dialog .casa-substitute-info strong{font-weight:500!important}
+html body dialog.casa-dialog .danger{font-weight:400!important}
+
+/* Agenda/rotinas: nomes, horários e ações sem peso antigo */
+html body .casa-schedule-row>strong{font-weight:400!important;letter-spacing:-.01em!important}
+html body .casa-time{font-weight:500!important}
+html body .casa-schedule-edit{font-weight:500!important}
+html body .casa-routine-picker-label strong,
+html body .casa-routine-picker-menu button strong{font-weight:400!important}
+html body .casa-add-routine{font-weight:500!important}
+
+/* Inventário: cards e modal de substituição */
+html body .casa-inventory :is(.panel-head h3,.casa-product-row strong){font-weight:400!important}
+html body .casa-inventory :is(.casa-product-row small,.note){font-weight:400!important}
+html body .casa-substitute-btn,
+html body .casa-buy-mini{font-weight:400!important}
+
+/* Checkbox do inventário — força tamanho compacto no iOS e remove estilo nativo */
+html body dialog.casa-tool-dialog .casa-tool-check{
+  display:grid!important;grid-template-columns:24px minmax(0,1fr)!important;align-items:center!important;gap:12px!important;
+}
+html body dialog.casa-tool-dialog .casa-tool-check input[type="checkbox"]{
+  -webkit-appearance:none!important;appearance:none!important;
+  inline-size:24px!important;block-size:24px!important;width:24px!important;height:24px!important;
+  min-width:24px!important;max-width:24px!important;min-height:24px!important;max-height:24px!important;
+  padding:0!important;margin:0!important;border:1px solid rgba(132,106,118,.22)!important;border-radius:7px!important;
+  background:rgba(255,255,255,.70)!important;box-shadow:none!important;display:grid!important;place-items:center!important;
+}
+html body dialog.casa-tool-dialog .casa-tool-check input[type="checkbox"]:checked{
+  background:linear-gradient(135deg,#e1aebb 0%,#e6c8ba 48%,#b9d5bd 100%)!important;border-color:transparent!important;
+}
+html body dialog.casa-tool-dialog .casa-tool-check input[type="checkbox"]:checked::after{
+  content:"✓"!important;color:#fff!important;font-size:14px!important;font-weight:500!important;line-height:1!important;
+}
+html body dialog.casa-tool-dialog .casa-tool-check span{font-weight:400!important;line-height:1.35!important}
+
+/* Bordas Casa: um único traço suave, sem halo pesado */
+html body :is(dialog.casa-dialog,dialog.casa-maint-dialog) :is(input:not([type=checkbox]):not([type=radio]),select,textarea){
+  border:1px solid rgba(132,106,118,.14)!important;outline:0!important;box-shadow:none!important;
+}
+html body :is(dialog.casa-dialog,dialog.casa-maint-dialog) :is(.icon-btn,.study-v10-x,.casa-modal-x){
+  border:1px solid rgba(132,106,118,.12)!important;outline:0!important;box-shadow:none!important;
+}

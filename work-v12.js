@@ -567,3 +567,174 @@
  .work12-front .work12-icon{width:46.56px!important;height:46.56px!important;border-radius:15px!important;background:linear-gradient(125deg,rgba(238,228,250,.88),rgba(218,244,235,.86))!important;border:1px solid rgba(117,96,153,.09)!important;color:#75609a!important}
  `;document.head.appendChild(s);
 })();
+
+/* RC67 — TRABALHO · SOMENTE SISTEMA TIPOGRÁFICO
+   Referência congelada: Planos. Preserva estrutura, lógica e paleta de Trabalho. */
+(function(){
+ const s=document.createElement('style'); s.id='work-rc67-tipografia-planos'; s.textContent=`
+ /* Hero e cabeçalhos */
+ .work13-kicker,.work13-subkicker,.work13-section-label,.work13-subtag,
+ .work12-form-head .eyebrow{
+   font-size:10px!important;letter-spacing:.16em!important;font-weight:600!important;
+   color:#8f858f!important;text-transform:uppercase!important;
+ }
+ .work13-hero h2,.work12-subhero h2,.work12-form-head h2{
+   font-weight:400!important;letter-spacing:-.025em!important;color:#373440!important;
+ }
+ .work13-hero p,.work12-subhero p{font-weight:400!important;color:#746f79!important}
+
+ /* Home e submódulos */
+ .work12-front strong{font-weight:500!important;color:#403a48!important}
+ .work12-front small{font-weight:400!important;color:#807883!important}
+ .work12-front-add,.work12-front-edit,.work12-back,.work12-add{font-weight:500!important}
+ .work13-bridge strong{font-weight:500!important}.work13-bridge small,.work13-bridge a{font-weight:400!important}
+ .work12-stat b{font-weight:400!important}.work12-stat span{font-weight:400!important}
+ .work12-section-head h3,.work12-group h3,.work12-task strong,.work12-notequick strong,.work12-history-item strong{font-weight:500!important;color:#403a48!important}
+ .work12-group p,.work12-task small,.work12-notequick p,.work12-history-item small{font-weight:400!important}
+ .work12-chip,.work12-badge,.work12-mini,.work12-history summary,.work12-more summary{font-weight:500!important}
+ .work12-rule,.work12-empty{font-weight:400!important}
+
+ /* Modais de Trabalho */
+ .work12-front-form label,.work12-form label,.work14-icon-label{
+   font-weight:500!important;color:#655f67!important;
+ }
+ .work12-front-form input,.work12-front-form textarea,.work12-front-form select,
+ .work12-form input,.work12-form select,.work12-form textarea{font-weight:400!important}
+ .work12-check{font-weight:400!important}
+ .work12-check strong,.work12-toggle-copy strong{font-weight:500!important}
+ .work12-check small,.work12-toggle-copy small{font-weight:400!important}
+ .work12-secondary,.work12-primary{font-weight:500!important}
+ .work14-icon-option small{font-weight:400!important}
+ `; document.head.appendChild(s);
+})();
+
+
+/* RC68 — TRABALHO · TIPOGRAFIA AUTORITATIVA
+   Replica a leveza de Planos nos submódulos e modais de Trabalho.
+   Somente tipografia: sem alterações de estrutura, paleta ou lógica. */
+(function(){
+ const old=document.getElementById('work-rc68-tipografia-autoritativa'); if(old) old.remove();
+ const s=document.createElement('style'); s.id='work-rc68-tipografia-autoritativa'; s.textContent=`
+ /* Eyebrows / microtítulos */
+ .work13-kicker,.work13-subkicker,.work13-section-label,.work13-subtag,
+ .work12-form-head .eyebrow{
+   font-weight:600!important;letter-spacing:.16em!important;text-transform:uppercase!important;
+ }
+
+ /* Títulos principais — mesma leveza de Planos */
+ .work13-hero h2,.work12-subhero h2,.work12-form-head h2,
+ .work12-section-head h3,.work12-group h3{
+   font-weight:400!important;letter-spacing:-.025em!important;
+ }
+ .work12-form-head h2{font-size:22px!important;line-height:1.15!important}
+ .work12-section-head h3{font-size:20px!important}
+
+ /* Conteúdo dos submódulos */
+ .work12-front strong,.work12-task strong,.work12-notequick strong,
+ .work12-history-item strong,.work13-bridge strong,
+ .work12-stat b{
+   font-weight:400!important;
+ }
+ .work12-front small,.work12-task small,.work12-notequick p,
+ .work12-history-item small,.work13-bridge small,.work12-stat span,
+ .work12-group p,.work12-empty,.work12-rule{
+   font-weight:400!important;
+ }
+
+ /* Ações e chips: sem aparência pesada */
+ .work12-front-add,.work12-front-edit,.work12-back,.work12-add,
+ .work12-chip,.work12-badge,.work12-mini,.work12-history summary,
+ .work12-more summary,.work13-bridge a{
+   font-weight:500!important;
+ }
+
+ /* Modais: labels, campos, placeholders e opções */
+ .work12-front-form label,.work12-form label,.work14-icon-label,
+ .work12-toggle-row strong,.work12-check strong,.work12-toggle-copy strong{
+   font-weight:400!important;
+ }
+ .work12-front-form label>small,.work12-form label>small,
+ .work12-toggle-row span,.work12-check small,.work12-toggle-copy small,
+ .work14-icon-option small{
+   font-weight:400!important;
+ }
+ .work12-front-form input,.work12-front-form textarea,.work12-front-form select,
+ .work12-form input,.work12-form textarea,.work12-form select,
+ .work12-front-form option,.work12-form option{
+   font-weight:400!important;
+ }
+ .work12-front-form input::placeholder,.work12-front-form textarea::placeholder,
+ .work12-form input::placeholder,.work12-form textarea::placeholder{
+   font-weight:400!important;opacity:.62!important;
+ }
+ .work12-check{font-weight:400!important}
+ .work12-secondary,.work12-primary{font-weight:500!important}
+ `; document.head.appendChild(s);
+})();
+
+/* RC69 — TRABALHO · CORES DOS BOTÕES + SUPERFÍCIE NOVA FRENTE
+   Escopo visual apenas: preserva tipografia, estrutura e lógica aprovadas. */
+(function(){
+ const old=document.getElementById('work-rc69-cor-botoes-modal'); if(old) old.remove();
+ const s=document.createElement('style'); s.id='work-rc69-cor-botoes-modal'; s.textContent=`
+ /* Botões/ações dos submódulos: identidade oficial lilás + menta */
+ .work12-back,.work12-front-edit,.work12-add,.work12-front-add,
+ .work12-chip,.work12-mini,.work12-secondary,.work12-primary{
+   background:linear-gradient(125deg,rgba(238,228,250,.94) 0%,rgba(232,238,248,.92) 48%,rgba(218,244,235,.92) 100%)!important;
+   color:#6f5d88!important;
+   border:1px solid rgba(123,104,154,.10)!important;
+   box-shadow:none!important;
+ }
+ .work12-primary{
+   background:linear-gradient(125deg,#dfd0f4 0%,#dce9ed 50%,#cfeadd 100%)!important;
+   color:#625276!important;
+ }
+ .work12-mini.danger{background:#f4e9e5!important;color:#956c62!important}
+ .work12-mini.done{background:linear-gradient(125deg,rgba(231,241,236,.96),rgba(216,241,230,.94))!important;color:#587263!important}
+
+ /* Nova/Editar frente: a superfície inteira recebe o degradê de Trabalho. */
+ dialog.work12-front-dialog{
+   background:linear-gradient(145deg,rgba(247,240,253,.995) 0%,rgba(238,241,250,.99) 50%,rgba(225,247,238,.99) 100%)!important;
+   border:1px solid rgba(123,104,154,.12)!important;
+   border-radius:28px!important;
+ }
+ dialog.work12-front-dialog>.work12-front-form{
+   background:linear-gradient(145deg,rgba(247,240,253,.995) 0%,rgba(238,241,250,.99) 50%,rgba(225,247,238,.99) 100%)!important;
+   border-radius:28px!important;
+ }
+ dialog.work12-front-dialog .work12-form-head{
+   background:transparent!important;
+ }
+ dialog.work12-front-dialog .work12-form-actions{
+   background:linear-gradient(to bottom,rgba(229,244,239,0),rgba(229,244,239,.98) 14px)!important;
+ }
+ `; document.head.appendChild(s);
+})();
+
+/* RC70 — TRABALHO · NOTA RÁPIDA · CHECKBOX MEU DIA
+   Correção isolada do checkbox nativo. Nenhuma outra superfície é alterada. */
+(function(){
+ const old=document.getElementById('work-rc70-note-checkbox'); if(old) old.remove();
+ const s=document.createElement('style'); s.id='work-rc70-note-checkbox'; s.textContent=`
+ dialog.work12-dialog .work12-note-day{
+   display:flex!important;align-items:center!important;gap:14px!important;
+   margin:12px 0 8px!important;
+ }
+ dialog.work12-dialog .work12-note-day>input#w12NoteDay{
+   -webkit-appearance:none!important;appearance:none!important;
+   width:22px!important;height:22px!important;min-width:22px!important;min-height:22px!important;
+   flex:0 0 22px!important;margin:0!important;padding:0!important;
+   border:1.4px solid rgba(123,104,154,.34)!important;border-radius:7px!important;
+   background:rgba(255,253,251,.92)!important;box-shadow:none!important;
+   display:grid!important;place-items:center!important;
+ }
+ dialog.work12-dialog .work12-note-day>input#w12NoteDay:checked{
+   background:linear-gradient(135deg,#d9c9ee 0%,#cfe9df 100%)!important;
+   border-color:rgba(123,104,154,.20)!important;
+ }
+ dialog.work12-dialog .work12-note-day>input#w12NoteDay:checked::after{
+   content:'✓';font-size:14px;line-height:1;color:#655477;font-weight:600;
+ }
+ dialog.work12-dialog .work12-note-day>span{display:flex!important;flex-direction:column!important;gap:2px!important;min-width:0!important}
+ `; document.head.appendChild(s);
+})();

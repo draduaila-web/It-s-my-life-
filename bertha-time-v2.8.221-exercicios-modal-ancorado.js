@@ -1739,33 +1739,32 @@
   function taskDialog(existing=null){
     const x=existing||{};
     const d=document.createElement('dialog');
-    d.className='bertha-dialog bertha-task-dialog bertha-plans-task-dialog';
+    d.className='commit-dialog bertha-plans-task-dialog';
     d.innerHTML=`
-      <form class="bertha-task-modal" method="dialog">
-        <div class="bertha-task-modal-head">
+      <form class="commit-modal bertha-task-modal-v2" method="dialog">
+        <div class="commit-modal-head">
           <div><span>${existing?'EDITAR TAREFA':'NOVA TAREFA'}</span><h2>${existing?'Ajustar tarefa':'Adicionar tarefa'}</h2></div>
-          <button type="button" data-close aria-label="Fechar">×</button>
+          <button class="commit-x" type="button" data-close aria-label="Fechar">×</button>
         </div>
 
-        <div class="bertha-task-modal-body">
-          <label class="bertha-task-field">
+        <div class="bertha-task-modal-body-v2">
+          <label class="bertha-task-field commit-field">
             <span>O que precisa sair da sua cabeça?</span>
             <input data-title value="${esc(x.title||x.name||'')}" placeholder="Ex.: Resolver documento">
           </label>
 
-          <label class="bertha-task-field">
+          <label class="bertha-task-field commit-field">
             <span>Categoria</span>
             <select data-category>
               ${['Pessoal','Casa','Trabalho','Estudos','Saúde','Financeiro','BEC','Outro'].map(v=>`<option ${String(x.category||'Pessoal')===v?'selected':''}>${v}</option>`).join('')}
             </select>
           </label>
 
-          <div class="bertha-task-two">
-            <label class="bertha-task-field">
+          <label class="bertha-task-field commit-field">
               <span>Prazo <small>opcional</small></span>
               <input data-due type="date" value="${esc(x.dueDate||x.due||'')}">
             </label>
-            <div class="bertha-task-field">
+            <div class="bertha-task-field commit-field">
               <span>Quanto tempo leva?</span>
               <div class="bertha-duration-input">
                 <input data-duration-value type="number" min="1" step="1" inputmode="numeric" value="${taskDurationParts(x).value}">
@@ -1776,29 +1775,26 @@
                 </select>
               </div>
             </div>
-          </div>
 
-          <div class="bertha-task-field">
+          <div class="bertha-task-field commit-field">
             <span>Quando pode acontecer?</span>
             <div class="bertha-segment" data-period-group>
               ${[['flex','Flexível'],['morning','Manhã'],['afternoon','Tarde'],['night','Noite']].map(([v,l])=>`<button type="button" data-period="${v}" class="${(x.period||'flex')===v?'active':''}">${l}</button>`).join('')}
             </div>
           </div>
 
-          <div class="bertha-task-two bertha-task-schedule-priority">
-            <label class="bertha-task-field">
+          <label class="bertha-task-field commit-field">
               <span>Horário <small>opcional</small></span>
               <input data-time type="time" value="${esc(x.time||'')}">
             </label>
-            <div class="bertha-task-field">
+            <div class="bertha-task-field commit-field">
               <span>Prioridade</span>
               <div class="bertha-segment compact" data-priority-group>
                 ${[['Baixa','Baixa'],['Normal','Normal'],['Importante','Import.']].map(([v,l])=>`<button type="button" data-priority="${v}" class="${taskLabelPriority(x.priority)===v?'active':''}">${l}</button>`).join('')}
               </div>
             </div>
-          </div>
 
-          <label class="bertha-task-field">
+          <label class="bertha-task-field commit-field">
             <span>Repetir</span>
             <select data-repeat>
               <option value="none" ${(x.repeat||'none')==='none'?'selected':''}>Não repetir</option>
@@ -1832,17 +1828,17 @@
             </label>
           </div>
 
-          <label class="bertha-task-field">
+          <label class="bertha-task-field commit-field">
             <span>Observação <small>opcional</small></span>
             <textarea data-note placeholder="Algum detalhe que você não quer esquecer?">${esc(x.note||x.observation||'')}</textarea>
           </label>
         </div>
 
-        <div class="bertha-task-modal-actions">
+        <div class="commit-actions">
           ${existing?'<button class="bertha-danger-link" type="button" data-delete>Excluir</button>':'<span></span>'}
           <div>
-            <button class="bertha-task-cancel" type="button" data-close>Cancelar</button>
-            <button class="bertha-task-save" type="button" data-save>Salvar</button>
+            <button class="secondary" type="button" data-close>Cancelar</button>
+            <button class="primary" type="button" data-save>Salvar</button>
           </div>
         </div>
       </form>`;
@@ -2034,7 +2030,7 @@
   function ritualProducts(id,ev,r){const st=ritualProductsStore(),key=ritualProductKey(id,ev);if(id==='autocuidado'&&Array.isArray(ev?.products)&&ev.products.length)return ev.products;if(id==='capilar'&&Array.isArray(ev?.products)&&ev.products.length)return ev.products;if(Array.isArray(st[key]))return st[key];if(id==='capilar')return capillaryProductsFromEvent(ev);if(id!=='autocuidado'&&Array.isArray(r?.products))return r.products;return[];}
   function addRitualProductToShopping(name,source){name=String(name||'').trim();if(!name)return false;let items=[];try{items=JSON.parse(window.berthaHmlStorage.getItem(SHARED_SHOP_KEY_RITUAL)||'[]')||[]}catch{}const key=name.toLocaleLowerCase('pt-BR');if(items.some(x=>!x.done&&String(x.name||x.title||x.item||'').trim().toLocaleLowerCase('pt-BR')===key))return false;items.push({id:`ritual-shop-${Date.now()}-${Math.random().toString(36).slice(2,7)}`,name,source,category:'Autocuidado',cycle:'monthly',createdAt:Date.now(),done:false});window.berthaHmlStorage.setItem(SHARED_SHOP_KEY_RITUAL,JSON.stringify(items));return true;}
   function ritualProductsHtml(id,ev,r){const products=ritualProducts(id,ev,r),source=id==='autocuidado'?`Rituais › Autocuidado › ${ev?.title||r.title}`:`Rituais › ${r.title}`;return `<div class="bertha-section-row"><span>PRODUTOS</span><button type="button" data-edit-ritual-products="${id}">Editar</button></div><div class="bertha-extra-list">${products.length?products.map(x=>`<div class="bertha-extra-card"><span class="bertha-line-icon">${ritualIcon('sparkle')}</span><span><strong>${esc(x)}</strong><small>Produto deste cuidado</small></span><button type="button" data-ritual-buy-name="${esc(x)}" data-ritual-buy-source="${esc(source)}">Adicionar à lista</button></div>`).join(''):`<div class="bertha-empty-soft">Nenhum produto específico cadastrado. Toque em Editar para adicionar.</div>`}</div>`;}
-  function ritualProductsDialog(id,ev,r){const key=ritualProductKey(id,ev),current=ritualProducts(id,ev,r),d=document.createElement('dialog');d.className='bertha-dialog bertha-task-dialog bertha-ritual-dialog fin-unified-dialog';d.innerHTML=`<form class="bertha-task-modal modal-card" method="dialog"><div class="bertha-task-modal-head modal-head"><div><span>RITUAIS · PRODUTOS</span><h2>${esc(id==='autocuidado'?(ev?.title||'Autocuidado'):r.title)}</h2></div><button type="button" data-close>×</button></div><div class="bertha-task-modal-body"><label class="bertha-task-field"><span>Produtos usados <small>um por linha</small></span><textarea data-products rows="9" placeholder="Ex.: Nome do shampoo\nNome do condicionador">${esc(current.join('\n'))}</textarea></label><div class="bertha-schedule-note">Os nomes ficam salvos neste cuidado. Depois, use “+ lista” para mandar o produto à Lista de Compras sem criar duplicatas pendentes.</div></div><div class="bertha-task-modal-actions modal-actions"><span></span><div><button class="bertha-task-cancel secondary" type="button" data-close>Cancelar</button><button class="bertha-task-save primary" type="button" data-save>Salvar</button></div></div></form>`;document.body.appendChild(d);d.querySelectorAll('[data-close]').forEach(b=>b.onclick=()=>{d.close();d.remove()});d.querySelector('[data-save]').onclick=()=>{const vals=d.querySelector('[data-products]').value.split('\n').map(x=>x.trim()).filter(Boolean),st=ritualProductsStore();st[key]=[...new Set(vals)];saveRitualProductsStore(st);if(id!=='capilar'&&id!=='autocuidado'){const arr=read(RITUALS_KEY,[]),i=arr.findIndex(x=>x.id===id);if(i>=0){arr[i].products=st[key];write(RITUALS_KEY,arr)}}d.close();d.remove();rerender();};d.showModal();}
+  function ritualProductsDialog(id,ev,r){const key=ritualProductKey(id,ev),current=ritualProducts(id,ev,r),d=document.createElement('dialog');d.className='bertha-dialog bertha-task-dialog bertha-ritual-dialog fin-unified-dialog';d.innerHTML=`<form class="bertha-task-modal modal-card" method="dialog"><div class="bertha-task-modal-head modal-head"><div><span>RITUAIS · PRODUTOS</span><h2>${esc(id==='autocuidado'?(ev?.title||'Autocuidado'):r.title)}</h2></div><button type="button" data-close>×</button></div><div class="bertha-task-modal-body"><label class="bertha-task-field commit-field"><span>Produtos usados <small>um por linha</small></span><textarea data-products rows="9" placeholder="Ex.: Nome do shampoo\nNome do condicionador">${esc(current.join('\n'))}</textarea></label><div class="bertha-schedule-note">Os nomes ficam salvos neste cuidado. Depois, use “+ lista” para mandar o produto à Lista de Compras sem criar duplicatas pendentes.</div></div><div class="bertha-task-modal-actions modal-actions"><span></span><div><button class="bertha-task-cancel secondary" type="button" data-close>Cancelar</button><button class="bertha-task-save primary" type="button" data-save>Salvar</button></div></div></form>`;document.body.appendChild(d);d.querySelectorAll('[data-close]').forEach(b=>b.onclick=()=>{d.close();d.remove()});d.querySelector('[data-save]').onclick=()=>{const vals=d.querySelector('[data-products]').value.split('\n').map(x=>x.trim()).filter(Boolean),st=ritualProductsStore();st[key]=[...new Set(vals)];saveRitualProductsStore(st);if(id!=='capilar'&&id!=='autocuidado'){const arr=read(RITUALS_KEY,[]),i=arr.findIndex(x=>x.id===id);if(i>=0){arr[i].products=st[key];write(RITUALS_KEY,arr)}}d.close();d.remove();rerender();};d.showModal();}
 
   const RITUAL_ICONS={
     sparkle:`<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3.5c.7 4.3 2.2 5.8 6.5 6.5-4.3.7-5.8 2.2-6.5 6.5-.7-4.3-2.2-5.8-6.5-6.5 4.3-.7 5.8-2.2 6.5-6.5Z"/><path d="M18.5 15.5c.3 2 1 2.7 3 3-2 .3-2.7 1-3 3-.3-2-1-2.7-3-3 2-.3 2.7-1 3-3Z"/></svg>`,
@@ -2080,7 +2076,7 @@
     }else st.overrides[key]=iso(next);
     all[id]=st;saveRitualScheduleStore(all);
   }
-  function ritualMoveScopeHtml(){return `<div class="bertha-task-field"><span>Ao mudar a data</span><div class="bertha-segment" data-move-scope><button type="button" data-scope="one" class="active">Mover apenas esta</button><button type="button" data-scope="cycle">Mover todo o ciclo</button></div><small class="bertha-field-help">“Todo o ciclo” mantém a ordem e os intervalos, deslocando as demais datas pela mesma quantidade de dias.</small></div>`}
+  function ritualMoveScopeHtml(){return `<div class="bertha-task-field commit-field"><span>Ao mudar a data</span><div class="bertha-segment" data-move-scope><button type="button" data-scope="one" class="active">Mover apenas esta</button><button type="button" data-scope="cycle">Mover todo o ciclo</button></div><small class="bertha-field-help">“Todo o ciclo” mantém a ordem e os intervalos, deslocando as demais datas pela mesma quantidade de dias.</small></div>`}
   function bindRitualMoveScope(d){d.querySelectorAll('[data-scope]').forEach(b=>b.onclick=()=>d.querySelectorAll('[data-scope]').forEach(z=>z.classList.toggle('active',z===b)))}
   const SELFCARE_CYCLE=[
     {title:'MEZZO BIOSCULPT',minutes:20,tasks:['Limpeza facial','Mezzo — 20 min','Hidratação']},
@@ -2284,11 +2280,11 @@
     d.innerHTML=`<form class="bertha-task-modal modal-card" method="dialog">
       <div class="bertha-task-modal-head modal-head"><div><span>${esc((ritual?.title||'Ritual').toUpperCase())}</span><h2>${existing?'Editar cuidado':'Adicionar cuidado'}</h2></div><button type="button" data-close>×</button></div>
       <div class="bertha-task-modal-body">
-        <label class="bertha-task-field"><span>O que você quer incluir?</span><input data-title value="${esc(x.title)}" placeholder="Ex.: Colorir raiz"></label>
-        <div class="bertha-task-field"><span>Ícone</span><div class="bertha-icon-picker">${RITUAL_ICON_KEYS.map(k=>`<button type="button" data-icon="${k}" class="${x.icon===k?'active':''}">${ritualIcon(k)}</button>`).join('')}</div></div>
+        <label class="bertha-task-field commit-field"><span>O que você quer incluir?</span><input data-title value="${esc(x.title)}" placeholder="Ex.: Colorir raiz"></label>
+        <div class="bertha-task-field commit-field"><span>Ícone</span><div class="bertha-icon-picker">${RITUAL_ICON_KEYS.map(k=>`<button type="button" data-icon="${k}" class="${x.icon===k?'active':''}">${ritualIcon(k)}</button>`).join('')}</div></div>
         <div class="bertha-task-two bertha-ritual-date-duration">
-          <label class="bertha-task-field"><span>Data <small>opcional</small></span><input data-date type="date" value="${x.date||''}"></label>
-          <div class="bertha-task-field"><span>Quanto tempo leva?</span>
+          <label class="bertha-task-field commit-field"><span>Data <small>opcional</small></span><input data-date type="date" value="${x.date||''}"></label>
+          <div class="bertha-task-field commit-field"><span>Quanto tempo leva?</span>
             <div class="bertha-duration-input">
               <input data-duration-value type="number" min="1" step="1" inputmode="numeric" value="${ritualDurationParts(x).value}">
               <select data-duration-unit>
@@ -2300,16 +2296,16 @@
           </div>
         </div>
         ${existing?ritualMoveScopeHtml():''}
-        <div class="bertha-task-field"><span>Quando pode acontecer?</span><div class="bertha-segment" data-period-group>${[['flex','Flexível'],['morning','Manhã'],['afternoon','Tarde'],['night','Noite']].map(([v,l])=>`<button type="button" data-period="${v}" class="${x.period===v?'active':''}">${l}</button>`).join('')}</div></div>
-        <div class="bertha-task-two"><label class="bertha-task-field"><span>Horário <small>opcional</small></span><input data-time type="time" value="${x.time||''}"></label><div class="bertha-task-field"><span>Prioridade</span><div class="bertha-segment compact" data-priority-group>${[['Baixa','Baixa'],['Normal','Normal'],['Importante','Import.']].map(([v,l])=>`<button type="button" data-priority="${v}" class="${x.priority===v?'active':''}">${l}</button>`).join('')}</div></div></div>
-        <label class="bertha-task-field"><span>Repetir</span><select data-repeat><option value="none">Não repetir</option><option value="daily">Todos os dias</option><option value="weekly">Toda semana</option><option value="weekdays">Dias úteis</option><option value="interval">A cada X dias</option></select></label>
+        <div class="bertha-task-field commit-field"><span>Quando pode acontecer?</span><div class="bertha-segment" data-period-group>${[['flex','Flexível'],['morning','Manhã'],['afternoon','Tarde'],['night','Noite']].map(([v,l])=>`<button type="button" data-period="${v}" class="${x.period===v?'active':''}">${l}</button>`).join('')}</div></div>
+        <div class="bertha-task-two"><label class="bertha-task-field commit-field"><span>Horário <small>opcional</small></span><input data-time type="time" value="${x.time||''}"></label><div class="bertha-task-field commit-field"><span>Prioridade</span><div class="bertha-segment compact" data-priority-group>${[['Baixa','Baixa'],['Normal','Normal'],['Importante','Import.']].map(([v,l])=>`<button type="button" data-priority="${v}" class="${x.priority===v?'active':''}">${l}</button>`).join('')}</div></div></div>
+        <label class="bertha-task-field commit-field"><span>Repetir</span><select data-repeat><option value="none">Não repetir</option><option value="daily">Todos os dias</option><option value="weekly">Toda semana</option><option value="weekdays">Dias úteis</option><option value="interval">A cada X dias</option></select></label>
         <label class="bertha-task-field bertha-interval-field"><span>A cada quantos dias?</span><input data-interval type="number" min="1" value="${x.intervalDays||30}"></label>
-        <label class="bertha-task-field"><span>Como fazer <small>opcional · uma instrução por linha</small></span><textarea data-steps placeholder="Ex.: Aplicar na raiz, aguardar 10 minutos, enxaguar">${esc(x.steps||'')}</textarea></label>
-        <label class="bertha-task-field"><span>Produtos <small>opcional · um por linha</small></span><textarea data-products placeholder="Ex.: Nome do produto">${esc((Array.isArray(x.products)?x.products:[]).join('\n'))}</textarea></label>
+        <label class="bertha-task-field commit-field"><span>Como fazer <small>opcional · uma instrução por linha</small></span><textarea data-steps placeholder="Ex.: Aplicar na raiz, aguardar 10 minutos, enxaguar">${esc(x.steps||'')}</textarea></label>
+        <label class="bertha-task-field commit-field"><span>Produtos <small>opcional · um por linha</small></span><textarea data-products placeholder="Ex.: Nome do produto">${esc((Array.isArray(x.products)?x.products:[]).join('\n'))}</textarea></label>
         <div class="bertha-notify-box"><label class="bertha-toggle-row"><div><strong>Me avisar?</strong><span>Guardar preferência de lembrete</span></div><input data-notify type="checkbox" ${x.notify?'checked':''}><i></i></label>
           <label class="bertha-task-field bertha-notify-when"><span>Quando avisar?</span><select data-notify-offset><option value="at-time">No horário</option><option value="10">10 min antes</option><option value="30">30 min antes</option><option value="60">1 hora antes</option><option value="period-start">No início do período</option><option value="custom-time">Em um horário escolhido</option></select><label class="bertha-notify-custom"><span>Horário do aviso</span><input data-notify-time type="time" value="${x.notifyTime||''}"></label></label>
         </div>
-        <label class="bertha-task-field"><span>Observação <small>opcional</small></span><textarea data-note>${esc(x.note||'')}</textarea></label>
+        <label class="bertha-task-field commit-field"><span>Observação <small>opcional</small></span><textarea data-note>${esc(x.note||'')}</textarea></label>
       </div>
       <div class="bertha-task-modal-actions modal-actions">${existing?'<button class="bertha-delete-soft" type="button" data-delete>Excluir</button>':'<span></span>'}<div><button class="bertha-task-cancel secondary" type="button" data-close>Cancelar</button><button class="bertha-task-save primary" type="button" data-save>Salvar</button></div></div>
     </form>`;
@@ -2340,9 +2336,9 @@
     const key=id==='capilar'?CAPILLARY_SETTINGS_KEY:SELFCARE_SETTINGS_KEY, all=read(key,{}), type=ev.type, x={...ritualDefaultSettings(id,type),...(all[type]||{})};
     const d=document.createElement('dialog');d.className='bertha-dialog bertha-task-dialog bertha-ritual-dialog bertha-ritual-settings-dialog fin-unified-dialog';
     d.innerHTML=`<form class="bertha-task-modal modal-card" method="dialog"><div class="bertha-task-modal-head modal-head"><div><span>RITUAL</span><h2>Configurar ${esc(id==='capilar'?'Ritual Capilar':'Autocuidado')}</h2></div><button type="button" data-close>×</button></div><div class="bertha-task-modal-body">
-      <div class="bertha-task-field"><span>Quando pode acontecer?</span><div class="bertha-segment">${[['flex','Flexível'],['morning','Manhã'],['afternoon','Tarde'],['night','Noite']].map(([v,l])=>`<button type="button" data-period="${v}" class="${x.period===v?'active':''}">${l}</button>`).join('')}</div></div>
-      <label class="bertha-task-field"><span>Horário <small>opcional</small></span><input data-time type="time" value="${x.time||''}"></label>
-      <div class="bertha-task-field"><span>Prioridade</span><div class="bertha-segment">${['Baixa','Normal','Importante'].map(v=>`<button type="button" data-priority="${v}" class="${x.priority===v?'active':''}">${v}</button>`).join('')}</div></div>
+      <div class="bertha-task-field commit-field"><span>Quando pode acontecer?</span><div class="bertha-segment">${[['flex','Flexível'],['morning','Manhã'],['afternoon','Tarde'],['night','Noite']].map(([v,l])=>`<button type="button" data-period="${v}" class="${x.period===v?'active':''}">${l}</button>`).join('')}</div></div>
+      <label class="bertha-task-field commit-field"><span>Horário <small>opcional</small></span><input data-time type="time" value="${x.time||''}"></label>
+      <div class="bertha-task-field commit-field"><span>Prioridade</span><div class="bertha-segment">${['Baixa','Normal','Importante'].map(v=>`<button type="button" data-priority="${v}" class="${x.priority===v?'active':''}">${v}</button>`).join('')}</div></div>
       <div class="bertha-notify-box"><label class="bertha-toggle-row"><div><strong>Me avisar?</strong><span>Guardar preferência de lembrete</span></div><input data-notify type="checkbox" ${x.notify?'checked':''}><i></i></label></div>
       <div class="bertha-schedule-note">${id==='capilar'?'O cronograma-base de 45 dias permanece preservado. Corte, coloração e outros cuidados entram em “Cuidados & extras”.':'O ciclo-base de 14 dias continua automaticamente. Novos cuidados podem ser adicionados sem alterar o ciclo.'}</div>
     </div><div class="bertha-task-modal-actions modal-actions"><span></span><div><button class="bertha-task-cancel secondary" type="button" data-close>Cancelar</button><button class="bertha-task-save primary" type="button" data-save>Salvar</button></div></div></form>`;
@@ -2401,12 +2397,12 @@
     const k=Math.max(0,Number(index)||0),x=selfcareEventForIndex(k),n=x.cycleDay,products=ritualProducts('autocuidado',x,defaultRituals()[1]),oldISO=iso(x.date);
     const d=document.createElement('dialog');d.className='bertha-dialog bertha-task-dialog bertha-ritual-dialog fin-unified-dialog';
     d.innerHTML=`<form class="bertha-task-modal modal-card" method="dialog"><div class="bertha-task-modal-head modal-head"><div><span>AUTOCUIDADO · DIA ${n}/14</span><h2>Editar cuidado</h2></div><button type="button" data-close>×</button></div><div class="bertha-task-modal-body">
-      <label class="bertha-task-field"><span>Data</span><input data-date type="date" value="${oldISO}"></label>
+      <label class="bertha-task-field commit-field"><span>Data</span><input data-date type="date" value="${oldISO}"></label>
       ${ritualMoveScopeHtml()}
-      <label class="bertha-task-field"><span>Nome</span><input data-title value="${esc(x.title||'')}"></label>
-      <div class="bertha-task-two"><label class="bertha-task-field"><span>Duração</span><div class="bertha-duration-input"><input data-minutes type="number" min="0" inputmode="numeric" value="${Number(x.minutes)||0}"><select disabled><option>minutos</option></select></div></label><div class="bertha-task-field"><span>Quando pode acontecer?</span><div class="bertha-segment compact">${[['morning','Manhã'],['afternoon','Tarde'],['night','Noite']].map(([v,l])=>`<button type="button" data-period="${v}" class="${(x.period||'night')===v?'active':''}">${l}</button>`).join('')}</div></div></div>
-      <label class="bertha-task-field"><span>Como fazer <small>uma instrução por linha</small></span><textarea data-steps rows="7">${esc((x.tasks||[]).join('\n'))}</textarea></label>
-      <label class="bertha-task-field"><span>Produtos <small>um por linha</small></span><textarea data-products rows="6" placeholder="Ex.: Nome do produto">${esc(products.join('\n'))}</textarea></label>
+      <label class="bertha-task-field commit-field"><span>Nome</span><input data-title value="${esc(x.title||'')}"></label>
+      <div class="bertha-task-two"><label class="bertha-task-field commit-field"><span>Duração</span><div class="bertha-duration-input"><input data-minutes type="number" min="0" inputmode="numeric" value="${Number(x.minutes)||0}"><select disabled><option>minutos</option></select></div></label><div class="bertha-task-field commit-field"><span>Quando pode acontecer?</span><div class="bertha-segment compact">${[['morning','Manhã'],['afternoon','Tarde'],['night','Noite']].map(([v,l])=>`<button type="button" data-period="${v}" class="${(x.period||'night')===v?'active':''}">${l}</button>`).join('')}</div></div></div>
+      <label class="bertha-task-field commit-field"><span>Como fazer <small>uma instrução por linha</small></span><textarea data-steps rows="7">${esc((x.tasks||[]).join('\n'))}</textarea></label>
+      <label class="bertha-task-field commit-field"><span>Produtos <small>um por linha</small></span><textarea data-products rows="6" placeholder="Ex.: Nome do produto">${esc(products.join('\n'))}</textarea></label>
       <div class="bertha-notify-box"><label class="bertha-toggle-row"><div><strong>Disponível para o Meu Dia?</strong><span>A BERTA pode considerar este cuidado quando chegar o dia dele.</span></div><input data-myday type="checkbox" ${x.includeInMyDay!==false?'checked':''}><i></i></label></div>
       <div class="bertha-schedule-note">Você pode mover só esta ocorrência ou deslocar todo o ciclo mantendo os mesmos intervalos.</div>
     </div><div class="bertha-task-modal-actions modal-actions"><span></span><div><button class="bertha-task-cancel secondary" type="button" data-close>Cancelar</button><button class="bertha-task-save primary" type="button" data-save>Salvar</button></div></div></form>`;
@@ -2418,13 +2414,13 @@
     const k=Math.max(0,Math.min(capillaryCycleTotal()-1,Number(index)||0)),x=capillaryEventForIndex(k);if(!x)return;const n=k+1,products=ritualProducts('capilar',x,defaultRituals()[0]),oldISO=iso(x.date);
     const d=document.createElement('dialog');d.className='bertha-dialog bertha-task-dialog bertha-ritual-dialog fin-unified-dialog';
     d.innerHTML=`<form class="bertha-task-modal modal-card" method="dialog"><div class="bertha-task-modal-head modal-head"><div><span>RITUAL CAPILAR · DIA ${n}/${capillaryCycleTotal()}</span><h2>Editar cuidado</h2></div><button type="button" data-close>×</button></div><div class="bertha-task-modal-body">
-      <label class="bertha-task-field"><span>Data</span><input data-date type="date" value="${oldISO}"></label>
+      <label class="bertha-task-field commit-field"><span>Data</span><input data-date type="date" value="${oldISO}"></label>
       ${ritualMoveScopeHtml()}
-      <label class="bertha-task-field"><span>Nome</span><input data-title value="${esc(x.title||'')}"></label>
-      <label class="bertha-task-field"><span>Descrição <small>opcional</small></span><input data-subtitle value="${esc(x.subtitle||'')}"></label>
-      <div class="bertha-task-two"><label class="bertha-task-field"><span>Duração</span><div class="bertha-duration-input"><input data-minutes type="number" min="0" inputmode="numeric" value="${Number(x.minutes)||0}"><select disabled><option>minutos</option></select></div></label><div class="bertha-task-field"><span>Quando pode acontecer?</span><div class="bertha-segment compact">${[['morning','Manhã'],['afternoon','Tarde'],['night','Noite']].map(([v,l])=>`<button type="button" data-period="${v}" class="${(x.period||'morning')===v?'active':''}">${l}</button>`).join('')}</div></div></div>
-      <label class="bertha-task-field"><span>Como fazer <small>uma instrução por linha</small></span><textarea data-steps rows="8">${esc((x.tasks||[]).join('\n'))}</textarea></label>
-      <label class="bertha-task-field"><span>Produtos <small>um por linha</small></span><textarea data-products rows="6" placeholder="Ex.: Nome do produto">${esc(products.join('\n'))}</textarea></label>
+      <label class="bertha-task-field commit-field"><span>Nome</span><input data-title value="${esc(x.title||'')}"></label>
+      <label class="bertha-task-field commit-field"><span>Descrição <small>opcional</small></span><input data-subtitle value="${esc(x.subtitle||'')}"></label>
+      <div class="bertha-task-two"><label class="bertha-task-field commit-field"><span>Duração</span><div class="bertha-duration-input"><input data-minutes type="number" min="0" inputmode="numeric" value="${Number(x.minutes)||0}"><select disabled><option>minutos</option></select></div></label><div class="bertha-task-field commit-field"><span>Quando pode acontecer?</span><div class="bertha-segment compact">${[['morning','Manhã'],['afternoon','Tarde'],['night','Noite']].map(([v,l])=>`<button type="button" data-period="${v}" class="${(x.period||'morning')===v?'active':''}">${l}</button>`).join('')}</div></div></div>
+      <label class="bertha-task-field commit-field"><span>Como fazer <small>uma instrução por linha</small></span><textarea data-steps rows="8">${esc((x.tasks||[]).join('\n'))}</textarea></label>
+      <label class="bertha-task-field commit-field"><span>Produtos <small>um por linha</small></span><textarea data-products rows="6" placeholder="Ex.: Nome do produto">${esc(products.join('\n'))}</textarea></label>
       <div class="bertha-notify-box"><label class="bertha-toggle-row"><div><strong>Disponível para o Meu Dia?</strong><span>A BERTA pode considerar este cuidado quando chegar o dia dele.</span></div><input data-myday type="checkbox" ${x.includeInMyDay!==false?'checked':''}><i></i></label></div>
       <div class="bertha-schedule-note">Você pode mover só esta ocorrência ou deslocar todo o ciclo mantendo os mesmos intervalos.</div>
     </div><div class="bertha-task-modal-actions modal-actions"><span></span><div><button class="bertha-task-cancel secondary" type="button" data-close>Cancelar</button><button class="bertha-task-save primary" type="button" data-save>Salvar</button></div></div></form>`;
@@ -2463,12 +2459,12 @@
   function customRitualDialog(id){
     const arr=read(RITUALS_KEY,[]),r=arr.find(x=>String(x.id)===String(id));if(!r)return;
     const d=document.createElement('dialog');d.className='bertha-dialog bertha-task-dialog bertha-ritual-dialog fin-unified-dialog';
-    d.innerHTML=`<form class="bertha-task-modal modal-card" method="dialog"><div class="bertha-task-modal-head modal-head"><div><span>RITUAIS</span><h2>Editar ritual</h2></div><button type="button" data-close>×</button></div><div class="bertha-task-modal-body"><label class="bertha-task-field"><span>Nome do ritual</span><input data-title value="${esc(r.title||'')}"></label><div class="bertha-task-field"><span>Ícone</span><div class="bertha-icon-picker">${RITUAL_ICON_KEYS.map(k=>`<button type="button" data-icon="${k}" class="${r.icon===k?'active':''}">${ritualIcon(k)}</button>`).join('')}</div></div><label class="bertha-task-field"><span>Descrição <small>opcional</small></span><input data-subtitle value="${esc(r.subtitle||'')}" placeholder="Se ficar vazia, usamos uma frase BERTH.A"></label><label class="bertha-task-field"><span>Como fazer <small>uma instrução por linha</small></span><textarea data-steps rows="7">${esc(ritualLines(r.steps).join('\n'))}</textarea></label><label class="bertha-task-field"><span>Produtos <small>um por linha</small></span><textarea data-products rows="7">${esc(ritualProducts(id,null,r).join('\n'))}</textarea></label><div class="bertha-task-two"><label class="bertha-task-field"><span>Duração do ciclo <small>opcional</small></span><div class="bertha-duration-input"><input data-cycle-days type="number" min="1" inputmode="numeric" value="${r.cycleDays||''}" placeholder="Ex.: 45"><select disabled><option>dias</option></select></div></label><div class="bertha-notify-box bertha-cycle-restart"><label class="bertha-toggle-row"><div><strong>Reiniciar quando acabar?</strong><span>Começa um novo ciclo automaticamente.</span></div><input data-restart-cycle type="checkbox" ${r.restartCycle?'checked':''}><i></i></label></div></div></div><div class="bertha-task-modal-actions modal-actions"><span></span><div><button class="bertha-task-cancel secondary" type="button" data-close>Cancelar</button><button class="bertha-task-save primary" type="button" data-save>Salvar</button></div></div></form>`;
+    d.innerHTML=`<form class="bertha-task-modal modal-card" method="dialog"><div class="bertha-task-modal-head modal-head"><div><span>RITUAIS</span><h2>Editar ritual</h2></div><button type="button" data-close>×</button></div><div class="bertha-task-modal-body"><label class="bertha-task-field commit-field"><span>Nome do ritual</span><input data-title value="${esc(r.title||'')}"></label><div class="bertha-task-field commit-field"><span>Ícone</span><div class="bertha-icon-picker">${RITUAL_ICON_KEYS.map(k=>`<button type="button" data-icon="${k}" class="${r.icon===k?'active':''}">${ritualIcon(k)}</button>`).join('')}</div></div><label class="bertha-task-field commit-field"><span>Descrição <small>opcional</small></span><input data-subtitle value="${esc(r.subtitle||'')}" placeholder="Se ficar vazia, usamos uma frase BERTH.A"></label><label class="bertha-task-field commit-field"><span>Como fazer <small>uma instrução por linha</small></span><textarea data-steps rows="7">${esc(ritualLines(r.steps).join('\n'))}</textarea></label><label class="bertha-task-field commit-field"><span>Produtos <small>um por linha</small></span><textarea data-products rows="7">${esc(ritualProducts(id,null,r).join('\n'))}</textarea></label><div class="bertha-task-two"><label class="bertha-task-field commit-field"><span>Duração do ciclo <small>opcional</small></span><div class="bertha-duration-input"><input data-cycle-days type="number" min="1" inputmode="numeric" value="${r.cycleDays||''}" placeholder="Ex.: 45"><select disabled><option>dias</option></select></div></label><div class="bertha-notify-box bertha-cycle-restart"><label class="bertha-toggle-row"><div><strong>Reiniciar quando acabar?</strong><span>Começa um novo ciclo automaticamente.</span></div><input data-restart-cycle type="checkbox" ${r.restartCycle?'checked':''}><i></i></label></div></div></div><div class="bertha-task-modal-actions modal-actions"><span></span><div><button class="bertha-task-cancel secondary" type="button" data-close>Cancelar</button><button class="bertha-task-save primary" type="button" data-save>Salvar</button></div></div></form>`;
     document.body.appendChild(d);d.querySelectorAll('[data-close]').forEach(b=>b.onclick=()=>{d.close();d.remove()});d.querySelectorAll('[data-icon]').forEach(b=>b.onclick=()=>d.querySelectorAll('[data-icon]').forEach(z=>z.classList.toggle('active',z===b)));d.querySelector('[data-save]').onclick=()=>{const i=arr.findIndex(x=>String(x.id)===String(id));const products=ritualLines(d.querySelector('[data-products]').value);const cycleDays=Math.max(0,+d.querySelector('[data-cycle-days]')?.value||0),restartCycle=cycleDays>0&&!!d.querySelector('[data-restart-cycle]')?.checked;arr[i]={...arr[i],title:d.querySelector('[data-title]').value.trim()||r.title,subtitle:d.querySelector('[data-subtitle]').value.trim(),icon:d.querySelector('[data-icon].active')?.dataset.icon||r.icon||'sparkle',steps:ritualLines(d.querySelector('[data-steps]').value),products,cycleDays,restartCycle};const evs=ritualEvents();let evChanged=false;evs.forEach(e=>{if(String(e.ritualId)===String(id)){e.cycleDays=cycleDays;e.restartCycle=restartCycle;if(cycleDays&&!e.cycleStartedAt)e.cycleStartedAt=e.startDate||iso(new Date());evChanged=true}});if(evChanged)saveRitualEvents(evs);write(RITUALS_KEY,arr);const st=ritualProductsStore();st[ritualProductKey(id,null)]=products;saveRitualProductsStore(st);d.close();d.remove();rerender()};d.showModal();
   }
   function newRitualDialog(){
     const d=document.createElement('dialog');d.className='bertha-dialog bertha-task-dialog bertha-ritual-dialog fin-unified-dialog';
-    d.innerHTML=`<form class="bertha-task-modal modal-card" method="dialog"><div class="bertha-task-modal-head modal-head"><div><span>RITUAIS</span><h2>Novo ritual</h2></div><button type="button" data-close>×</button></div><div class="bertha-task-modal-body"><label class="bertha-task-field"><span>Nome do ritual</span><input data-title placeholder="Ex.: Sono"></label><div class="bertha-task-field"><span>Ícone</span><div class="bertha-icon-picker">${RITUAL_ICON_KEYS.map((k,i)=>`<button type="button" data-icon="${k}" class="${i===0?'active':''}">${ritualIcon(k)}</button>`).join('')}</div></div><label class="bertha-task-field"><span>Descrição <small>opcional</small></span><input data-subtitle placeholder="O que faz parte deste ritual?"></label><label class="bertha-task-field"><span>Como fazer <small>opcional · uma instrução por linha</small></span><textarea data-custom-steps rows="4" placeholder="Ex.: Preparar o ambiente, aplicar o produto, aguardar"></textarea></label><label class="bertha-task-field"><span>Produtos <small>opcional · um por linha</small></span><textarea data-custom-products rows="4" placeholder="Ex.: Nome do produto"></textarea></label><div class="bertha-task-field"><span>Quando pode acontecer?</span><div class="bertha-segment" data-period-group>${[['flex','Flexível'],['morning','Manhã'],['afternoon','Tarde'],['night','Noite']].map(([v,l])=>`<button type="button" data-period="${v}" class="${v==='flex'?'active':''}">${l}</button>`).join('')}</div></div><div class="bertha-task-two"><div class="bertha-task-field"><span>Quanto tempo leva?</span><div class="bertha-duration-input"><input data-duration-value type="number" min="1" value="20"><select data-duration-unit><option value="minutes">minutos</option><option value="hours">horas</option></select></div></div><label class="bertha-task-field"><span>Horário <small>opcional</small></span><input data-time type="time"></label></div><div class="bertha-task-field"><span>Prioridade</span><div class="bertha-segment compact" data-priority-group>${['Baixa','Normal','Importante'].map(v=>`<button type="button" data-priority="${v}" class="${v==='Normal'?'active':''}">${v==='Importante'?'Import.':v}</button>`).join('')}</div></div><label class="bertha-task-field"><span>Repetir</span><select data-repeat><option value="none">Não repetir</option><option value="daily">Todos os dias</option><option value="weekly">Toda semana</option><option value="weekdays">Dias úteis</option><option value="interval">A cada X dias</option></select></label><label class="bertha-task-field bertha-interval-field" hidden><span>A cada quantos dias?</span><input data-interval type="number" min="1" value="30"></label><div class="bertha-task-two"><label class="bertha-task-field"><span>Duração do ciclo <small>opcional</small></span><div class="bertha-duration-input"><input data-cycle-days type="number" min="1" inputmode="numeric" placeholder="Ex.: 45"><select disabled><option>dias</option></select></div></label><div class="bertha-notify-box bertha-cycle-restart"><label class="bertha-toggle-row"><div><strong>Reiniciar quando acabar?</strong><span>Começa um novo ciclo automaticamente.</span></div><input data-restart-cycle type="checkbox"><i></i></label></div></div><div class="bertha-notify-box"><label class="bertha-toggle-row"><div><strong>Me avisar?</strong><span>Guardar preferência de lembrete</span></div><input data-notify type="checkbox"><i></i></label></div></div><div class="bertha-task-modal-actions modal-actions"><span></span><div><button class="bertha-task-cancel secondary" type="button" data-close>Cancelar</button><button class="bertha-task-save primary" type="button" data-save>Criar</button></div></div></form>`;
+    d.innerHTML=`<form class="bertha-task-modal modal-card" method="dialog"><div class="bertha-task-modal-head modal-head"><div><span>RITUAIS</span><h2>Novo ritual</h2></div><button type="button" data-close>×</button></div><div class="bertha-task-modal-body"><label class="bertha-task-field commit-field"><span>Nome do ritual</span><input data-title placeholder="Ex.: Sono"></label><div class="bertha-task-field commit-field"><span>Ícone</span><div class="bertha-icon-picker">${RITUAL_ICON_KEYS.map((k,i)=>`<button type="button" data-icon="${k}" class="${i===0?'active':''}">${ritualIcon(k)}</button>`).join('')}</div></div><label class="bertha-task-field commit-field"><span>Descrição <small>opcional</small></span><input data-subtitle placeholder="O que faz parte deste ritual?"></label><label class="bertha-task-field commit-field"><span>Como fazer <small>opcional · uma instrução por linha</small></span><textarea data-custom-steps rows="4" placeholder="Ex.: Preparar o ambiente, aplicar o produto, aguardar"></textarea></label><label class="bertha-task-field commit-field"><span>Produtos <small>opcional · um por linha</small></span><textarea data-custom-products rows="4" placeholder="Ex.: Nome do produto"></textarea></label><div class="bertha-task-field commit-field"><span>Quando pode acontecer?</span><div class="bertha-segment" data-period-group>${[['flex','Flexível'],['morning','Manhã'],['afternoon','Tarde'],['night','Noite']].map(([v,l])=>`<button type="button" data-period="${v}" class="${v==='flex'?'active':''}">${l}</button>`).join('')}</div></div><div class="bertha-task-two"><div class="bertha-task-field commit-field"><span>Quanto tempo leva?</span><div class="bertha-duration-input"><input data-duration-value type="number" min="1" value="20"><select data-duration-unit><option value="minutes">minutos</option><option value="hours">horas</option></select></div></div><label class="bertha-task-field commit-field"><span>Horário <small>opcional</small></span><input data-time type="time"></label></div><div class="bertha-task-field commit-field"><span>Prioridade</span><div class="bertha-segment compact" data-priority-group>${['Baixa','Normal','Importante'].map(v=>`<button type="button" data-priority="${v}" class="${v==='Normal'?'active':''}">${v==='Importante'?'Import.':v}</button>`).join('')}</div></div><label class="bertha-task-field commit-field"><span>Repetir</span><select data-repeat><option value="none">Não repetir</option><option value="daily">Todos os dias</option><option value="weekly">Toda semana</option><option value="weekdays">Dias úteis</option><option value="interval">A cada X dias</option></select></label><label class="bertha-task-field bertha-interval-field" hidden><span>A cada quantos dias?</span><input data-interval type="number" min="1" value="30"></label><div class="bertha-task-two"><label class="bertha-task-field commit-field"><span>Duração do ciclo <small>opcional</small></span><div class="bertha-duration-input"><input data-cycle-days type="number" min="1" inputmode="numeric" placeholder="Ex.: 45"><select disabled><option>dias</option></select></div></label><div class="bertha-notify-box bertha-cycle-restart"><label class="bertha-toggle-row"><div><strong>Reiniciar quando acabar?</strong><span>Começa um novo ciclo automaticamente.</span></div><input data-restart-cycle type="checkbox"><i></i></label></div></div><div class="bertha-notify-box"><label class="bertha-toggle-row"><div><strong>Me avisar?</strong><span>Guardar preferência de lembrete</span></div><input data-notify type="checkbox"><i></i></label></div></div><div class="bertha-task-modal-actions modal-actions"><span></span><div><button class="bertha-task-cancel secondary" type="button" data-close>Cancelar</button><button class="bertha-task-save primary" type="button" data-save>Criar</button></div></div></form>`;
     document.body.appendChild(d);d.querySelectorAll('[data-close]').forEach(b=>b.onclick=()=>{d.close();d.remove()});d.querySelectorAll('[data-icon]').forEach(b=>b.onclick=()=>d.querySelectorAll('[data-icon]').forEach(z=>z.classList.toggle('active',z===b)));d.querySelectorAll('[data-period]').forEach(b=>b.onclick=()=>d.querySelectorAll('[data-period]').forEach(z=>z.classList.toggle('active',z===b)));d.querySelectorAll('[data-priority]').forEach(b=>b.onclick=()=>d.querySelectorAll('[data-priority]').forEach(z=>z.classList.toggle('active',z===b)));d.querySelector('[data-repeat]').onchange=()=>d.querySelector('.bertha-interval-field').hidden=d.querySelector('[data-repeat]').value!=='interval';
     d.querySelector('[data-save]').onclick=()=>{const title=d.querySelector('[data-title]').value.trim();if(!title){d.querySelector('[data-title]').focus();return;}const arr=read(RITUALS_KEY,[]),id='ritual-'+Date.now(),products=ritualLines(d.querySelector('[data-custom-products]').value),steps=ritualLines(d.querySelector('[data-custom-steps]').value),durationValue=+d.querySelector('[data-duration-value]').value||20,durationUnit=d.querySelector('[data-duration-unit]').value,repeat=d.querySelector('[data-repeat]').value,iconKey=d.querySelector('[data-icon].active')?.dataset.icon||'sparkle',cycleDays=Math.max(0,+d.querySelector('[data-cycle-days]')?.value||0),restartCycle=cycleDays>0&&!!d.querySelector('[data-restart-cycle]')?.checked;arr.push({id,title,subtitle:d.querySelector('[data-subtitle]').value.trim(),icon:iconKey,steps,products,cycleDays,restartCycle});write(RITUALS_KEY,arr);const st=ritualProductsStore();st[ritualProductKey(id,null)]=products;saveRitualProductsStore(st);if(repeat!=='none'){const now=new Date(),evt={id:uid(),ritualId:id,ritualTitle:title,title,icon:iconKey,date:'',minutes:ritualDurationMinutes(durationValue,durationUnit),durationValue,durationUnit,period:d.querySelector('[data-period].active')?.dataset.period||'flex',time:d.querySelector('[data-time]').value,priority:d.querySelector('[data-priority].active')?.dataset.priority||'Normal',repeat,intervalDays:+d.querySelector('[data-interval]').value||30,notify:d.querySelector('[data-notify]').checked,notifyOffset:'at-time',notifyTime:'',note:'',steps:steps.join('\n'),products,primary:true,startDate:iso(now),weekday:now.getDay(),cycleDays,restartCycle,cycleStartedAt:cycleDays?iso(now):''};const events=ritualEvents();events.push(evt);saveRitualEvents(events);}d.close();d.remove();location.hash='#ritual-'+id;};d.addEventListener('cancel',e=>{e.preventDefault();d.close();d.remove()});d.showModal();
   }
@@ -4764,7 +4760,6 @@ html body #pendingDialog[open] > #pendingForm.modal-card{
  background:linear-gradient(135deg,rgba(247,222,232,.96) 0%,rgba(241,232,249,.97) 52%,rgba(225,239,251,.97) 100%)!important;
  border:2px solid rgba(157,128,169,.28)!important;
 }
-html body dialog.bertha-plans-task-dialog[open] :is(.bertha-task-save,.primary,[type=submit]),
 html body #pendingDialog[open] :is(.primary,[type=submit]){
  background:linear-gradient(135deg,#d9a9c8 0%,#b8a5df 55%,#9ebfe4 100%)!important;color:#fff!important;border:2px solid rgba(144,115,166,.20)!important;
 }
@@ -4794,10 +4789,10 @@ html body :is(dialog.work12-dialog,dialog.work12-front-dialog) > .work12-form{
  border:2px solid rgba(125,120,127,.18)!important;
 }
 
-/* CASA + EXERCÍCIOS — borda deliberadamente perceptível, não hairline */
-html body :is(dialog.casa-dialog,dialog.casa-maint-dialog) > :is(.casa-modal-card,.casa-maint-modal,.study-v10-modal,.modal-card),
+/* RC75 — CASA: bordas finas no padrão visual aprovado. Exercícios preservado. */
+html body :is(dialog.casa-dialog,dialog.casa-maint-dialog) > :is(.casa-modal-card,.casa-maint-modal,.study-v10-modal,.modal-card){border:1px solid rgba(154,119,132,.14)!important}
+html body :is(dialog.casa-dialog,dialog.casa-maint-dialog) :is(input:not([type=checkbox]):not([type=radio]),select,textarea,.secondary,.primary,.study-v10-x,.casa-modal-x,.card,.pill,.seg-btn,.choice-btn,.casa-routine-picker-btn,.casa-web-link,.casa-tool-row){border:1px solid rgba(132,106,118,.14)!important;box-shadow:none!important}
 html body dialog.exercise-dialog > :is(.bertha-modal,.study-v10-modal){border-width:2px!important;border-style:solid!important}
-html body :is(dialog.casa-dialog,dialog.casa-maint-dialog) :is(input:not([type=checkbox]):not([type=radio]),select,textarea,.secondary,.primary,.study-v10-x,.casa-modal-x,.card,.pill,.seg-btn,.choice-btn,.casa-routine-picker-btn,.casa-web-link,.casa-tool-row){border:2px solid rgba(154,119,132,.32)!important}
 html body dialog.exercise-dialog :is(input:not([type=checkbox]):not([type=radio]),select,textarea,.secondary,.primary,.study-v10-x,.bertha-modal-head button,.card,.pill,.seg-btn,.choice-btn,.exercise-icon-choice,.exercise-icon-filter){border:2px solid rgba(148,125,169,.32)!important}
 
 /* ALIMENTAÇÃO/RECEITAS — paleta do hero Alimentação: bege + blush + menta */
@@ -4826,3 +4821,32 @@ html body #ideaDialog[open] #ideaForm.bertha-modal.study-v10-modal :is(input,tex
 document.head.appendChild(s)})();
 
 
+
+
+/* RC64 — Planos/Tarefas: Salvar herda definitivamente a paleta amarela-pessego de Compromissos. */
+(()=>{const s=document.createElement('style');s.id='bertha-rc64-task-save-master';s.textContent=`
+html body dialog.bertha-plans-task-dialog[open] .bertha-task-modal-v2 .bertha-task-save.primary,
+html body dialog.bertha-plans-task-dialog[open] .bertha-task-modal-v2 [data-save].primary{
+ background:linear-gradient(135deg,#f7e8b8 0%,#e7bd87 45%,#cf8f67 100%)!important;
+ color:#fff!important;border:0!important;box-shadow:none!important;
+}
+`;document.head.appendChild(s)})();
+
+/* RC65 — Planos/Tarefas: X ancorado no cabeçalho, idêntico a Compromissos. */
+(()=>{const s=document.createElement('style');s.id='bertha-rc65-task-close-master';s.textContent=`
+html body dialog.bertha-plans-task-dialog[open] .bertha-task-modal-v2 .commit-modal-head{
+ display:flex!important;align-items:flex-start!important;justify-content:space-between!important;gap:14px!important;position:relative!important;width:100%!important;
+}
+html body dialog.bertha-plans-task-dialog[open] .bertha-task-modal-v2 .commit-modal-head>.commit-x[data-close]{
+ position:static!important;inset:auto!important;top:auto!important;right:auto!important;bottom:auto!important;left:auto!important;
+ transform:none!important;float:none!important;margin:0 0 0 auto!important;flex:0 0 36px!important;
+ width:36px!important;height:36px!important;min-width:36px!important;max-width:36px!important;
+ display:grid!important;place-items:center!important;padding:0!important;border:0!important;border-radius:50%!important;
+ background:rgba(247,243,237,.82)!important;color:#8e8792!important;font-size:23px!important;line-height:1!important;
+ outline:none!important;box-shadow:none!important;-webkit-appearance:none!important;appearance:none!important;
+}
+html body dialog.bertha-plans-task-dialog[open] .bertha-task-modal-v2 .commit-modal-head>.commit-x[data-close]:focus,
+html body dialog.bertha-plans-task-dialog[open] .bertha-task-modal-v2 .commit-modal-head>.commit-x[data-close]:focus-visible{
+ outline:none!important;box-shadow:none!important;background:rgba(247,243,237,.82)!important;
+}
+`;document.head.appendChild(s)})();
