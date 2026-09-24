@@ -4879,3 +4879,59 @@ html body dialog.exercise-dialog :is(.study-v10-field>span,.exercise-cycle-label
 html body #app :is(.exercise-plan,.exercise-cycle,.exercise-session,.exercise-log) :is(strong,b){font-weight:500!important}
 @media(max-width:700px){html body dialog.exercise-dialog.exercise-plan-dialog[open]>.bertha-modal,html body dialog.exercise-dialog.exercise-plan-dialog[open]>.study-v10-modal{padding-bottom:32px!important;scroll-padding-bottom:32px!important}}
 `;document.head.appendChild(st)}catch(e){}})();
+
+/* RC85 — Exercícios: modal imóvel no viewport; somente o conteúdo interno rola. */
+(()=>{
+  const id='bertha-rc85-exercise-modal-static';
+  document.getElementById(id)?.remove();
+  const s=document.createElement('style');
+  s.id=id;
+  s.textContent=`
+    html:has(dialog.exercise-dialog[open]),
+    body:has(dialog.exercise-dialog[open]){
+      overflow:hidden!important;
+      overscroll-behavior:none!important;
+    }
+    html body dialog.exercise-dialog[open]{
+      position:fixed!important;
+      inset:0!important;
+      width:100vw!important;
+      height:100dvh!important;
+      max-width:none!important;
+      max-height:none!important;
+      margin:0!important;
+      padding:12px!important;
+      box-sizing:border-box!important;
+      border:0!important;
+      border-radius:0!important;
+      background:transparent!important;
+      overflow:hidden!important;
+      transform:none!important;
+      touch-action:none!important;
+      display:grid!important;
+      place-items:center!important;
+      align-content:center!important;
+      justify-content:center!important;
+    }
+    html body dialog.exercise-dialog[open] > :is(.bertha-modal,.study-v10-modal){
+      position:relative!important;
+      inset:auto!important;
+      transform:none!important;
+      margin:0!important;
+      width:min(100%,520px)!important;
+      max-width:520px!important;
+      max-height:calc(100dvh - 24px)!important;
+      overflow-y:auto!important;
+      overflow-x:hidden!important;
+      -webkit-overflow-scrolling:touch!important;
+      overscroll-behavior-y:contain!important;
+      touch-action:pan-y!important;
+      scroll-behavior:auto!important;
+      anchor-name:none!important;
+    }
+    html body dialog.exercise-dialog[open] > :is(.bertha-modal,.study-v10-modal) :is(input,select,textarea,button){
+      touch-action:manipulation!important;
+    }
+  `;
+  document.head.appendChild(s);
+})();
