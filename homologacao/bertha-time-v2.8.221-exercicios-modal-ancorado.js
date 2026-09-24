@@ -4831,3 +4831,22 @@ html body dialog.bertha-plans-task-dialog[open] .bertha-task-modal-v2 [data-save
  color:#fff!important;border:0!important;box-shadow:none!important;
 }
 `;document.head.appendChild(s)})();
+
+/* RC65 — Planos/Tarefas: X ancorado no cabeçalho, idêntico a Compromissos. */
+(()=>{const s=document.createElement('style');s.id='bertha-rc65-task-close-master';s.textContent=`
+html body dialog.bertha-plans-task-dialog[open] .bertha-task-modal-v2 .commit-modal-head{
+ display:flex!important;align-items:flex-start!important;justify-content:space-between!important;gap:14px!important;position:relative!important;width:100%!important;
+}
+html body dialog.bertha-plans-task-dialog[open] .bertha-task-modal-v2 .commit-modal-head>.commit-x[data-close]{
+ position:static!important;inset:auto!important;top:auto!important;right:auto!important;bottom:auto!important;left:auto!important;
+ transform:none!important;float:none!important;margin:0 0 0 auto!important;flex:0 0 36px!important;
+ width:36px!important;height:36px!important;min-width:36px!important;max-width:36px!important;
+ display:grid!important;place-items:center!important;padding:0!important;border:0!important;border-radius:50%!important;
+ background:rgba(247,243,237,.82)!important;color:#8e8792!important;font-size:23px!important;line-height:1!important;
+ outline:none!important;box-shadow:none!important;-webkit-appearance:none!important;appearance:none!important;
+}
+html body dialog.bertha-plans-task-dialog[open] .bertha-task-modal-v2 .commit-modal-head>.commit-x[data-close]:focus,
+html body dialog.bertha-plans-task-dialog[open] .bertha-task-modal-v2 .commit-modal-head>.commit-x[data-close]:focus-visible{
+ outline:none!important;box-shadow:none!important;background:rgba(247,243,237,.82)!important;
+}
+`;document.head.appendChild(s)})();
