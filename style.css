@@ -689,3 +689,1209 @@ h2 { margin:0; font-size:22px; letter-spacing:-.02em; }
 .casa-how-top-actions .secondary{width:100%}
 .casa-buy-mini{border:0;background:#f4e5ee;border-radius:999px;padding:6px 9px;font:inherit;font-size:12px;color:#865f79;white-space:nowrap}
 .casa-buy-mini:disabled{opacity:.7}
+
+/* =========================================================
+   BERTH.A 2.8.221 RC1 — estabilização visual do card AGORA
+   Escopo deliberadamente restrito ao Meu Dia.
+   ========================================================= */
+#app section.now-card.bertha-now{
+  display:block!important;
+  width:100%!important;
+  min-height:0!important;
+  margin:4px 0 22px!important;
+  padding:20px 22px!important;
+  border-radius:25px!important;
+  overflow:hidden!important;
+  background:rgba(255,249,240,.94)!important;
+  background-image:none!important;
+  border:1px solid rgba(255,255,255,.74)!important;
+  box-shadow:inset 0 0 0 1px rgba(115,96,113,.035),0 5px 16px rgba(74,58,77,.022)!important;
+  color:var(--ink)!important;
+}
+#app section.now-card.bertha-now .card-kicker{
+  display:block!important;
+  margin:0 0 5px!important;
+  color:#d17f74!important;
+  font-size:.68rem!important;
+  line-height:1.2!important;
+  letter-spacing:.16em!important;
+  font-weight:700!important;
+}
+#app section.now-card.bertha-now .now-title{
+  margin:0!important;
+  color:var(--ink)!important;
+  font-size:1.35rem!important;
+  line-height:1.2!important;
+  font-weight:650!important;
+}
+#app section.now-card.bertha-now .now-time{
+  margin-top:3px!important;
+  color:var(--muted)!important;
+  font-size:.82rem!important;
+  line-height:1.35!important;
+}
+#app section.now-card.bertha-now p{
+  margin:.65rem 0 0!important;
+  color:var(--muted)!important;
+  font-size:.82rem!important;
+  line-height:1.45!important;
+}
+#app section.now-card.bertha-now .bertha-actions{display:flex!important;gap:8px!important;margin-top:14px!important}
+#app section.now-card.bertha-now .bertha-primary{
+  border:0!important;border-radius:14px!important;padding:10px 14px!important;
+  background:linear-gradient(135deg,#f2a27d 0%,#eb9275 56%,#df846f 100%)!important;
+  color:#fff!important;font-weight:800!important;
+}
+
+/* BERTH.A RC2 — Próximas receitas / escolha antecipada */
+.home-recipes-shortcut-wrap{display:grid!important;gap:8px!important}
+.home-recipes-next{background:linear-gradient(135deg,rgba(235,225,246,.58),rgba(218,235,249,.52))!important}
+.recipe-upcoming{margin-top:10px!important;background:radial-gradient(circle at 92% 12%,rgba(222,207,244,.19),transparent 32%),radial-gradient(circle at 8% 90%,rgba(215,235,249,.20),transparent 35%),rgba(255,252,248,.88)!important}
+.recipe-upcoming .recipe-meal-actions button[data-future-other]{background:linear-gradient(120deg,rgba(232,219,247,.55),rgba(218,237,250,.48))!important;color:#765f88!important}
+
+
+/* BERTH.A RC3 — legibilidade das receitas */
+#chooseFoodDialog .recipe-pick,
+#chooseFutureFoodDialog .recipe-pick{
+  color:#3f3944!important;
+  text-align:left!important;
+  -webkit-text-fill-color:#3f3944!important;
+}
+#chooseFoodDialog .recipe-pick strong,
+#chooseFutureFoodDialog .recipe-pick strong{
+  display:block!important;
+  color:#3f3944!important;
+  -webkit-text-fill-color:#3f3944!important;
+  text-decoration:none!important;
+}
+#chooseFoodDialog .recipe-pick small,
+#chooseFutureFoodDialog .recipe-pick small{
+  display:block!important;
+  color:#7f7680!important;
+  -webkit-text-fill-color:#7f7680!important;
+}
+#chooseFoodDialog .recipe-pick .eyebrow,
+#chooseFutureFoodDialog .recipe-pick .eyebrow{color:#766b76!important;-webkit-text-fill-color:#766b76!important}
+.recipe-nutri-line{display:inline-block!important;margin-left:7px!important;color:#7b7079!important}
+
+/* RC4 — Exercícios: ciclos compostos + ritmo semanal */
+.exercise-week-plan{display:flex;align-items:center;justify-content:space-between;gap:14px}.exercise-week-plan>div{min-width:0}.exercise-week-plan strong{display:block;margin:4px 0 5px}.exercise-week-plan p{margin:0;color:var(--muted,#766f73);font-size:13px;line-height:1.45}.exercise-cycle-block{display:grid;grid-template-columns:minmax(0,1fr) 132px 38px;gap:8px;align-items:center;margin:8px 0}.exercise-cycle-block select,.exercise-cycle-block input{margin:0}.exercise-block-remove{width:38px;height:38px;border-radius:12px;border:1px solid rgba(90,70,80,.12);background:rgba(255,255,255,.5);font-size:22px;color:#7a6e74}.exercise-add-block{margin-top:8px}.exercise-cycle-total{display:flex;justify-content:space-between;align-items:center;margin-top:14px;padding:12px 14px;border-radius:16px;background:rgba(255,255,255,.42)}.exercise-cycle-total span{font-size:13px;color:#756d72}.exercise-cycle-total strong{font-family:Georgia,serif;font-size:18px}.exercise-week-cycle{display:grid;grid-template-columns:22px minmax(0,1fr) 118px;gap:10px;align-items:center;padding:10px 0;border-bottom:1px solid rgba(90,70,80,.08)}.exercise-week-cycle:last-child{border-bottom:0}.exercise-week-cycle>span strong,.exercise-week-cycle>span small{display:block}.exercise-week-cycle>span small{color:#847a80;margin-top:3px}.exercise-week-warning{display:none;margin:12px 0;padding:12px 14px;border-radius:16px;background:rgba(255,239,224,.7);font-size:13px;line-height:1.45;color:#705f5d}.exercise-week-warning.on{display:block}.exercise-cycle-start{margin-left:auto;flex:0 0 auto}.exercise-cycle-head{align-items:center}@media(max-width:420px){.exercise-week-plan{align-items:flex-start;flex-direction:column}.exercise-cycle-block{grid-template-columns:minmax(0,1fr) 110px 38px}.exercise-week-cycle{grid-template-columns:22px minmax(0,1fr);}.exercise-week-cycle .exercise-unit-input{grid-column:2}.exercise-cycle-start{margin-left:8px}}
+
+/* RC7 Estudos — biblioteca de ícones */
+
+.study-icon-picker{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px}.study-icon-choice{border:1px solid rgba(91,125,158,.10);background:linear-gradient(135deg,rgba(224,239,248,.92),rgba(250,220,205,.82));border-radius:15px;min-height:72px;padding:8px 5px;color:#587185}.study-icon-choice.selected{box-shadow:0 0 0 2px rgba(102,142,170,.25) inset;background:linear-gradient(135deg,rgba(194,224,242,.98),rgba(247,201,179,.94))}.study-icon-choice span{display:flex;justify-content:center}.study-icon-choice svg,.study-item-icon svg{width:27px;height:27px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}.study-icon-choice small{display:block;margin-top:5px;font-size:9px;font-weight:800;line-height:1.05}.study-content-main{display:flex;align-items:center;gap:11px;min-width:0}.study-content-main>div{min-width:0}.study-item-icon{width:42px;height:42px;flex:0 0 42px;border-radius:14px;display:flex;align-items:center;justify-content:center;color:#587185;background:linear-gradient(135deg,rgba(207,230,245,.96),rgba(248,207,186,.90))}.study-v10-content strong,.study-v10-content small,.study-v10-content span{display:block}@media(max-width:480px){.study-icon-picker{grid-template-columns:repeat(3,minmax(0,1fr))}}
+
+
+/* BERTH.A RC16 — revisão geral: Modal System v1 / estabilização iPhone */
+@media (max-width: 700px){
+  dialog.work12-dialog,dialog.study-v10-dialog,dialog.bertha-dialog,#capilarDialog,#ideaDialog,
+  dialog[id*="casa" i],dialog[class*="finance" i]{
+    position:fixed!important;left:50%!important;top:50%!important;right:auto!important;bottom:auto!important;
+    transform:translate(-50%,-50%)!important;margin:0!important;width:min(92vw,520px)!important;
+    max-width:min(92vw,520px)!important;max-height:82svh!important;overflow:hidden!important;
+    overscroll-behavior:contain!important;padding:0!important;border:0!important;background:transparent!important;
+  }
+  dialog.work12-dialog>*,dialog.study-v10-dialog>*,dialog.bertha-dialog>*,#capilarDialog>*,#ideaDialog>*,
+  dialog[id*="casa" i]>*,dialog[class*="finance" i]>*{
+    box-sizing:border-box!important;width:100%!important;max-height:82svh!important;overflow-y:auto!important;
+    -webkit-overflow-scrolling:touch!important;overscroll-behavior:contain!important;margin:0!important;
+  }
+}
+/* estrutura contínua: sem tarja/rodapé destacado */
+.study-v10-head,.bertha-modal-head,.modal-head,.work12-form-head{background:transparent!important;border-bottom:0!important}
+.study-v10-actions,.modal-actions,.work12-form-actions,[class*="finance" i] .modal-actions{background:transparent!important;border-top:0!important;box-shadow:none!important}
+.study-v10-modal,.bertha-modal,.modal-card,.work12-form{background:#fbf7f0!important;border:1px solid rgba(121,108,124,.10)!important;border-radius:26px!important;padding:20px!important}
+.study-v10-modal>label,.bertha-modal>label,.modal-card>label{margin-left:0!important;margin-right:0!important}
+/* Estudos: ícones alinhados */
+.study-content-main{display:grid!important;grid-template-columns:42px minmax(0,1fr)!important;align-items:center!important;gap:12px!important}.study-item-icon{width:42px!important;height:42px!important;display:grid!important;place-items:center!important;align-self:center!important}.study-item-icon svg{width:26px!important;height:26px!important;display:block!important}
+/* Exercícios: identidade do módulo + respiro */
+.exercise-dialog .bertha-modal,.exercise-dialog .study-v10-modal{padding:20px!important;background:#fbf7f0!important}.exercise-dialog .primary{background:linear-gradient(135deg,#d7c6ea,#edc9c9)!important;color:#5f5266!important}.exercise-dialog .bertha-modal-head{margin-bottom:14px!important}.exercise-cycle-modal{padding:20px!important}
+/* Receitas: respiro, checkbox e botões coerentes */
+.recipe-dialog .study-v10-modal{padding:20px!important}.recipe-dialog input[type=checkbox]{appearance:none!important;-webkit-appearance:none!important;width:20px!important;height:20px!important;border:1.5px solid #c5a8a4!important;border-radius:6px!important;background:#fffdfa!important}.recipe-dialog input[type=checkbox]:checked{background:linear-gradient(135deg,#efc9c5,#e6b9a9)!important;box-shadow:inset 0 0 0 4px #fffdfa!important}.recipe-modal-actions{display:flex!important;gap:8px!important;flex-wrap:wrap!important}.recipe-modal-actions button{min-height:42px!important;border-radius:14px!important;padding:10px 14px!important}.recipe-dialog .primary{background:linear-gradient(135deg,#efc9c5,#e8b9a7)!important;color:#fff!important}.recipe-dialog .secondary{border-color:rgba(177,124,118,.16)!important;color:#8d6562!important;background:#fffaf7!important}
+/* Rituais */
+#capilarDialog .modal-card{background:#fbf7f0!important;padding:20px!important}#capilarDialog .primary{background:linear-gradient(135deg,#d8c6e9,#efc9d2)!important;color:#62546a!important}
+/* Financeiro: formulário contínuo */
+dialog[class*="finance" i] form,[class*="finance" i] .study-v10-modal{background:#fbf7f0!important}dialog[class*="finance" i] .modal-actions{position:static!important;margin-top:16px!important;padding:0!important}
+/* Trabalho: notas e formulários estáveis */
+.work12-note-day{display:flex!important;align-items:center!important;gap:10px!important;padding:10px 0!important}.work12-note-day input{width:20px!important;height:20px!important;flex:0 0 20px}.work12-note-day span{display:grid!important;gap:2px!important}.work12-note-day small{font-weight:500!important;color:#8d858e!important}
+
+/* RC17 — Alimentação/Receitas: programação da próxima cozinha e modal no padrão do módulo */
+.food-v115-routine{display:grid;gap:14px}.food-v115-routine .food-program-next{justify-self:stretch;min-height:44px;border-radius:16px;border:1px solid rgba(91,126,157,.18);background:linear-gradient(135deg,rgba(225,239,249,.95),rgba(255,239,213,.92));color:#547ca2;font-weight:750}.food-next-prep-dialog .study-v10-modal{background:#fffaf3}.food-next-prep-dialog .primary{background:linear-gradient(135deg,#8db7d7,#e6bf8d)!important;color:#fff!important}.food-next-prep-dialog input:focus{border-color:#8db7d7!important;box-shadow:0 0 0 3px rgba(141,183,215,.15)!important}
+
+
+/* BERTH.A RC18 — Receitas: fechamento visual dos modais e ações */
+.recipe-shopping-dialog .study-v10-modal,
+#chooseFoodDialog .study-v10-modal,
+#chooseFutureFoodDialog .study-v10-modal,
+#foodRecipeDialog .study-v10-modal{
+  padding:22px!important;
+  background:#fbf7f0!important;
+}
+.recipe-shopping-dialog .card{margin:12px 0 16px!important;padding:16px!important;background:rgba(255,253,249,.72)!important}
+.recipe-shopping-dialog .casa-mini-shop-row label{display:grid!important;grid-template-columns:22px minmax(0,1fr)!important;gap:10px!important;align-items:start!important}
+.recipe-shopping-dialog input[type=checkbox]{appearance:none!important;-webkit-appearance:none!important;width:20px!important;height:20px!important;margin:1px 0 0!important;border:1.5px solid #c5a8a4!important;border-radius:6px!important;background:#fffdfa!important}
+.recipe-shopping-dialog input[type=checkbox]:checked{background:linear-gradient(135deg,#efc9c5,#e6b9a9)!important;box-shadow:inset 0 0 0 4px #fffdfa!important}
+.recipe-shopping-dialog .modal-actions{display:grid!important;grid-template-columns:1fr 1fr!important;gap:10px!important;margin-top:14px!important}
+.recipe-shopping-dialog .modal-actions .grow{display:none!important}
+.recipe-shopping-dialog .modal-actions button{width:100%!important;min-height:44px!important;border-radius:14px!important;padding:10px 12px!important}
+#chooseFoodDialog #chooseExistingWrap{margin-top:14px!important}
+#chooseFoodDialog #chooseFoodSearch,#chooseFutureFoodDialog #chooseFutureFoodSearch{margin-top:10px!important;margin-bottom:12px!important}
+#chooseFoodDialog .recipe-choice-stack{display:grid!important;gap:10px!important;margin-top:12px!important}
+#chooseFoodDialog .recipe-choice{padding:14px!important;border-radius:16px!important}
+#foodRecipeDialog .recipe-detail-card{margin-top:12px!important;padding:16px!important}
+#foodRecipeDialog .recipe-modal-actions{margin-top:14px!important}
+.recipe-upcoming .recipe-meal-actions button[data-future-other]{
+  background:linear-gradient(135deg,#efc9c5,#e8b9a7)!important;
+  border-color:rgba(177,124,118,.12)!important;color:#fff!important;
+}
+.recipe-upcoming .recipe-meal-actions button[data-future-keep]{
+  background:#fffaf7!important;border:1px solid rgba(177,124,118,.16)!important;color:#8d6562!important;
+}
+@media(max-width:420px){.recipe-shopping-dialog .modal-actions{grid-template-columns:1fr!important}}
+
+/* BERTH.A RC19 — Exercícios: fechamento dos modais */
+@media (max-width:700px){
+  dialog.exercise-dialog{
+    position:fixed!important;left:50%!important;top:max(12px,env(safe-area-inset-top))!important;right:auto!important;bottom:auto!important;
+    transform:translateX(-50%)!important;margin:0!important;width:min(92vw,520px)!important;max-width:min(92vw,520px)!important;
+    max-height:calc(100svh - 24px - env(safe-area-inset-top))!important;overflow:hidden!important;
+  }
+  dialog.exercise-dialog>.bertha-modal,dialog.exercise-dialog>.study-v10-modal{
+    width:100%!important;max-height:calc(100svh - 24px - env(safe-area-inset-top))!important;overflow-y:auto!important;
+    -webkit-overflow-scrolling:touch!important;overscroll-behavior:contain!important;padding:22px!important;
+  }
+}
+.exercise-dialog .bertha-modal,.exercise-dialog .study-v10-modal{border:1px solid rgba(126,105,139,.10)!important;background:#fbf7f0!important}
+.exercise-dialog .bertha-modal-head{background:transparent!important;border:0!important;margin:0 0 16px!important;padding:0!important}
+.exercise-dialog .study-v10-actions{background:transparent!important;border:0!important;box-shadow:none!important;margin-top:18px!important;padding:0!important;gap:9px!important}
+.exercise-dialog .primary{background:linear-gradient(135deg,#d7c6ea,#edc9c9)!important;color:#5f5266!important;border-color:transparent!important}
+.exercise-dialog .secondary{background:#fffaf7!important;color:#6f6375!important;border-color:rgba(126,105,139,.14)!important}
+.exercise-cycle-dialog .exercise-cycle-section,.exercise-week-dialog .exercise-cycle-section{margin-left:0!important;margin-right:0!important}
+.exercise-week-dialog .exercise-week-warning{margin-left:0!important;margin-right:0!important}
+.exercise-edit-record-dialog .bertha-modal,.exercise-plan-dialog .bertha-modal,.exercise-quick-dialog .bertha-modal{padding:22px!important}
+.exercise-other-list button:focus:not(:focus-visible){outline:none!important;box-shadow:none!important}
+
+/* RC20 — Casa: acabamento da revisão geral */
+.casa-modal-card,.casa-maint-modal{border:0!important;box-shadow:0 22px 60px rgba(76,61,69,.18)!important;background:#fffaf5!important}
+.casa-maint-dialog{align-items:flex-start!important;padding:calc(env(safe-area-inset-top,0px) + 18px) 14px calc(env(safe-area-inset-bottom,0px) + 18px)!important;overflow:hidden!important}
+.casa-maint-modal{width:min(620px,calc(100vw - 28px))!important;max-height:calc(100dvh - env(safe-area-inset-top,0px) - env(safe-area-inset-bottom,0px) - 36px)!important;overflow:auto!important;overscroll-behavior:contain!important;margin:0 auto!important;border-radius:28px!important;padding:22px 18px 20px!important}
+.casa-maint-modal .primary,.casa-tip-dialog .primary{background:linear-gradient(135deg,#e8d4df,#d9e6d9)!important;color:#655661!important;border:0!important}
+.casa-schedule-row{grid-template-columns:100px minmax(0,1fr) auto!important;align-items:center!important}
+.casa-time-stack{display:flex!important;flex-direction:column!important;align-items:center!important;justify-content:center!important;gap:5px!important;text-align:center!important}
+.casa-time-stack .casa-time{width:100%!important;text-align:center!important;justify-content:center!important}
+.casa-substitute-info label{display:block;margin-top:18px!important}.casa-substitute-info input{margin-top:7px!important}
+.casa-web-card #addCasaTip{margin:4px 0 14px!important}
+
+/* RC22 — Rituais: Modal System BERTH.A + cronogramas 45/14 dias funcionais */
+.bertha-ritual-settings-dialog,.bertha-full-ritual-dialog{padding:0!important;border:0!important;background:transparent!important;max-width:none!important;max-height:none!important}
+.bertha-ritual-settings-dialog>.bertha-task-modal,.bertha-full-ritual-dialog>.bertha-task-modal{width:min(620px,calc(100vw - 28px))!important;max-height:calc(100dvh - env(safe-area-inset-top,0px) - env(safe-area-inset-bottom,0px) - 36px)!important;margin:auto!important;background:#fbf7f0!important;border:1px solid rgba(121,108,124,.10)!important;border-radius:28px!important;overflow:hidden!important;display:flex!important;flex-direction:column!important;box-shadow:0 22px 60px rgba(76,61,69,.18)!important}
+.bertha-ritual-settings-dialog .bertha-task-modal-head,.bertha-full-ritual-dialog .bertha-task-modal-head{background:transparent!important;border:0!important;padding:22px 20px 12px!important;flex:0 0 auto!important}
+.bertha-ritual-settings-dialog .bertha-task-modal-body,.bertha-full-ritual-dialog .bertha-task-modal-body{padding:4px 20px 20px!important;overflow:auto!important;-webkit-overflow-scrolling:touch!important;overscroll-behavior:contain!important}
+.bertha-ritual-settings-dialog .bertha-task-modal-actions{position:static!important;background:transparent!important;border:0!important;box-shadow:none!important;padding:4px 20px 20px!important}
+.bertha-ritual-settings-dialog .bertha-task-save{background:linear-gradient(135deg,#d8c6e9,#efc9d2)!important;color:#62546a!important;border:0!important}
+.bertha-ritual-settings-dialog input:focus,.bertha-ritual-settings-dialog select:focus{border-color:#cdb7dc!important;box-shadow:0 0 0 3px rgba(205,183,220,.18)!important}
+.bertha-full-ritual-dialog .bertha-full-schedule{display:grid!important;gap:10px!important;padding-bottom:4px!important}
+.bertha-full-ritual-dialog .bertha-full-schedule-row{width:100%!important;text-align:left!important;border:1px solid rgba(121,108,124,.10)!important;background:#fffaf5!important;border-radius:18px!important;padding:13px 14px!important;display:grid!important;grid-template-columns:54px 1fr auto!important;gap:10px!important;align-items:center!important;color:#554b58!important}
+.bertha-full-ritual-dialog .bertha-full-schedule-row span{font-size:12px!important;font-weight:750!important;color:#8b778f!important}.bertha-full-ritual-dialog .bertha-full-schedule-row strong{display:block!important;font-size:14px!important}.bertha-full-ritual-dialog .bertha-full-schedule-row small{display:block!important;margin-top:3px!important;line-height:1.35!important;color:#8a7d87!important}.bertha-full-ritual-dialog .bertha-full-schedule-row b{font-size:20px!important;color:#b99fc6!important}
+
+
+/* BERTH.A RC23 — Trabalho + Estudos: fechamento da revisão */
+.study-notify-box{margin:12px 0 14px;padding:12px 14px;border:1px solid rgba(91,125,158,.10);border-radius:16px;background:rgba(255,253,249,.72)}
+.study-notify-row{display:flex!important;align-items:center!important;justify-content:space-between!important;gap:12px!important;margin:0!important}.study-notify-row>span{display:grid;gap:2px}.study-notify-row strong{font-size:14px;color:#5c6870}.study-notify-row small{font-size:11px;color:#87919a;font-weight:500}.study-notify-row input{width:20px!important;height:20px!important;accent-color:#7ea9c5}.study-notify-box>label[data-map-notify-wrap],.study-notify-box>label[data-content-notify-wrap]{display:grid;gap:7px;margin-top:11px;color:#65737d;font-size:12px}.study-notify-box [hidden]{display:none!important}
+.study-v10-map{align-items:center!important}.study-v10-map .study-content-main{align-items:center!important}.study-v10-mapactions{align-items:center!important;align-self:center!important}.study-v10-mapactions button{display:inline-flex!important;align-items:center!important;justify-content:center!important}
+
+/* RC24 — Meu Dia: modal de escolha de movimento herda a identidade de Exercícios */
+dialog.bertha-exercise-dialog .bertha-modal{background:#fbf7ef!important;border:1px solid rgba(151,128,170,.10)!important;}
+dialog.bertha-exercise-dialog .bertha-primary{background:linear-gradient(135deg,#c9b4dc 0%,#e7b5b1 100%)!important;color:#fff!important;border:0!important;}
+dialog.bertha-exercise-dialog .bertha-secondary{background:linear-gradient(135deg,rgba(225,214,237,.92),rgba(247,221,216,.92))!important;color:#665a70!important;border:1px solid rgba(139,113,151,.08)!important;}
+
+/* BERTH.A RC25 — fechamento de homologação: consistência final do Modal System v1 */
+/* Financeiro: corpo único, sem cabeçalho/rodapé destacados */
+dialog.fin-unified-dialog>.modal-card,
+dialog.fin-planned-dialog>.modal-card{background:#fbf7f0!important;border:1px solid rgba(121,108,124,.10)!important;border-radius:26px!important;padding:20px!important;box-shadow:0 22px 64px rgba(58,44,63,.16)!important}
+dialog.fin-unified-dialog .modal-head,
+dialog.fin-planned-dialog .modal-head{position:static!important;inset:auto!important;margin:0 0 14px!important;padding:0!important;background:transparent!important;backdrop-filter:none!important;-webkit-backdrop-filter:none!important;border:0!important;box-shadow:none!important}
+dialog.fin-unified-dialog .modal-actions,
+dialog.fin-planned-dialog .modal-actions{position:static!important;inset:auto!important;margin:16px 0 0!important;padding:0!important;background:transparent!important;border:0!important;box-shadow:none!important;backdrop-filter:none!important;-webkit-backdrop-filter:none!important}
+/* Campos nunca devem provocar autozoom no Safari/iPhone */
+dialog input,dialog select,dialog textarea{font-size:16px!important}
+/* Componentes já migrados ao Modal System: mesma estabilidade estrutural */
+@media(max-width:700px){
+ dialog.fin-unified-dialog,dialog.fin-planned-dialog,dialog.exercise-dialog,dialog.recipe-dialog,
+ .food-next-prep-dialog,#chooseFoodDialog,#chooseFutureFoodDialog,#foodRecipeDialog{
+   position:fixed!important;left:50%!important;top:50%!important;right:auto!important;bottom:auto!important;
+   transform:translate(-50%,-50%)!important;margin:0!important;width:min(92vw,540px)!important;max-width:min(92vw,540px)!important;
+   max-height:82svh!important;overflow:hidden!important;overscroll-behavior:contain!important;padding:0!important;border:0!important;background:transparent!important;
+ }
+ dialog.fin-unified-dialog>*,dialog.fin-planned-dialog>*,dialog.exercise-dialog>*,dialog.recipe-dialog>*,
+ .food-next-prep-dialog>*,#chooseFoodDialog>*,#chooseFutureFoodDialog>*,#foodRecipeDialog>*{
+   box-sizing:border-box!important;width:100%!important;max-height:82svh!important;overflow-y:auto!important;
+   -webkit-overflow-scrolling:touch!important;overscroll-behavior:contain!important;margin:0!important;
+ }
+}
+
+/* BERTH.A RC27 — Financeiro: Desejos + Metas no padrão visual de Criação & Ideias */
+.fin-unified-dialog.wish-dialog,
+.fin-unified-dialog.fg-dialog{padding:0!important;background:transparent!important;border:0!important;max-width:none!important;}
+.fin-unified-dialog.wish-dialog>.modal-card,
+.fin-unified-dialog.fg-dialog>.modal-card{
+  width:min(92vw,760px)!important;max-height:86dvh!important;overflow-y:auto!important;overscroll-behavior:contain!important;
+  margin:auto!important;padding:22px!important;border:1px solid rgba(105,92,119,.10)!important;border-radius:28px!important;
+  background:linear-gradient(145deg,rgba(255,252,247,.99),rgba(245,240,250,.96),rgba(239,247,247,.94))!important;
+  box-shadow:0 22px 60px rgba(54,43,61,.18)!important;
+}
+.fin-unified-dialog.wish-dialog .modal-head,
+.fin-unified-dialog.fg-dialog .modal-head{padding:0 0 14px!important;margin:0 0 14px!important;background:transparent!important;border:0!important;position:static!important;}
+.fin-unified-dialog.wish-dialog .modal-actions,
+.fin-unified-dialog.fg-dialog .modal-actions{position:static!important;margin:18px 0 0!important;padding:0!important;background:transparent!important;border:0!important;box-shadow:none!important;}
+.fin-unified-dialog.wish-dialog .primary,
+.fin-unified-dialog.fg-dialog .primary{background:linear-gradient(120deg,#caa7d7,#a8d3ca)!important;color:#fff!important;border:0!important;}
+.fin-unified-dialog.wish-dialog .secondary,
+.fin-unified-dialog.fg-dialog .secondary{background:rgba(238,229,247,.72)!important;color:#765b82!important;border-color:transparent!important;}
+.wish-panel{background:linear-gradient(145deg,rgba(255,252,247,.96),rgba(247,241,250,.78))!important;border:1px solid rgba(105,92,119,.08)!important;border-radius:24px!important;box-shadow:0 8px 24px rgba(65,50,72,.035)!important;}
+.wish-card{padding:16px!important;border-radius:20px!important;background:linear-gradient(140deg,rgba(248,244,252,.88),rgba(239,247,248,.82))!important;border:1px solid rgba(104,88,120,.07)!important;box-shadow:none!important;}
+.wish-card-top{align-items:flex-start!important}.wish-card .eyebrow{color:#81728a!important}.wish-card h3{font-size:18px!important;color:#48414b!important}.wish-value{font-size:18px!important;color:#48414b!important}.wish-card .fg-edit{font-size:13px!important}.wish-actions .wish-create-goal{margin-left:auto!important;}
+.wish-select input{appearance:none!important;-webkit-appearance:none!important;width:20px!important;height:20px!important;border-radius:7px!important;border:1.5px solid rgba(118,91,130,.35)!important;background:rgba(255,255,255,.78)!important;position:relative!important;}
+.wish-select input:checked{background:linear-gradient(135deg,#caa7d7,#a8d3ca)!important;border-color:transparent!important;}
+.wish-select input:checked:after{content:'✓';position:absolute;inset:0;display:grid;place-items:center;color:white;font-size:13px;font-weight:800;}
+@media(max-width:560px){.fin-unified-dialog.wish-dialog>.modal-card,.fin-unified-dialog.fg-dialog>.modal-card{width:calc(100vw - 32px)!important;max-height:84dvh!important;padding:20px!important;border-radius:27px!important}.wish-head-actions{display:grid!important;grid-template-columns:1fr 1fr!important;width:100%!important}.wish-head-actions button{width:100%!important}}
+
+/* BERTH.A RC28 — Lista de Desejos: card alinhado ao padrão dos cards do Financeiro */
+.wish-card{
+  padding:15px!important;
+  border-radius:20px!important;
+  background:linear-gradient(140deg,rgba(248,244,252,.88),rgba(239,247,248,.82))!important;
+  border:1px solid rgba(104,88,120,.07)!important;
+  box-shadow:none!important;
+  color:#48414b!important;
+}
+.wish-card-top{display:flex!important;justify-content:space-between!important;gap:12px!important;align-items:flex-start!important;}
+.wish-card .eyebrow{color:#81728a!important;letter-spacing:.14em!important;}
+.wish-card h3{margin:2px 0 0!important;font-size:18px!important;color:#48414b!important;}
+.wish-card .fg-edit{padding:0!important;font-size:13px!important;color:#7b6d83!important;background:transparent!important;}
+.wish-tags{display:flex!important;gap:6px!important;flex-wrap:wrap!important;margin:12px 0 0!important;}
+.wish-tags span,.wish-goal-chip{font-size:10px!important;padding:5px 8px!important;border-radius:999px!important;background:rgba(255,255,255,.48)!important;color:#8c818e!important;border:0!important;}
+.wish-value{display:block!important;margin:12px 0 0!important;font-size:18px!important;line-height:1.15!important;color:#48414b!important;}
+.wish-card p{margin:8px 0 0!important;font-size:11px!important;line-height:1.45!important;color:#8a808b!important;}
+.wish-actions{display:flex!important;align-items:center!important;gap:8px!important;flex-wrap:wrap!important;margin:12px 0 0!important;padding-top:10px!important;border-top:1px solid rgba(95,78,106,.07)!important;}
+.wish-actions .secondary.tiny{min-height:34px!important;padding:7px 11px!important;border-radius:13px!important;background:rgba(238,230,248,.62)!important;color:#775d8b!important;border:0!important;}
+.wish-actions .wish-create-goal{margin-left:auto!important;}
+.wish-card.is-done{opacity:.68!important;}
+
+
+/* BERTH.A RC31 — Financeiro: devolve identidade lilás + menta sem alterar a estrutura estável da RC30 */
+dialog.fin-unified-dialog>.modal-card,
+dialog.fin-planned-dialog.fin-unified-dialog>.modal-card{
+  background:linear-gradient(145deg,rgba(251,247,253,.99) 0%,rgba(245,240,250,.98) 48%,rgba(239,247,247,.97) 100%)!important;
+}
+dialog.fin-unified-dialog .modal-head,dialog.fin-unified-dialog .modal-actions{background:transparent!important;}
+
+/* BERTH.A RC32 — Lista de Desejos alinhada ao padrão visual do Financeiro */
+.wish-panel{
+  background:radial-gradient(circle at 92% 10%,rgba(122,203,193,.07),transparent 34%),linear-gradient(145deg,rgba(250,248,253,.96),rgba(247,244,252,.91))!important;
+  border:1px solid rgba(111,154,202,.14)!important;
+  border-radius:26px!important;
+  box-shadow:0 8px 24px rgba(72,56,96,.035)!important;
+}
+.wish-card{
+  background:radial-gradient(circle at 90% 8%,rgba(122,203,193,.045),transparent 30%),linear-gradient(145deg,rgba(250,248,253,.96),rgba(247,244,252,.92))!important;
+  border:1px solid rgba(111,154,202,.14)!important;
+  border-radius:20px!important;
+  box-shadow:none!important;
+}
+.wish-head-actions #wishGoal,
+.wish-actions .secondary.tiny{
+  background:rgba(238,230,248,.72)!important;
+  color:#74549a!important;
+  border:0!important;
+}
+.wish-head-actions #wishNew{
+  background:linear-gradient(135deg,#c9b4dc 0%,#a8d3ca 100%)!important;
+  color:#fff!important;
+  border:0!important;
+}
+.wish-tags span,.wish-goal-chip{
+  background:rgba(255,255,255,.62)!important;
+  color:#817789!important;
+}
+
+/* BERTH.A RC39 — Receitas: formulário longo rolável no iPhone */
+#recipeFormDialog{
+  position:fixed!important;
+  inset:0!important;
+  width:100%!important;
+  max-width:none!important;
+  height:100dvh!important;
+  max-height:100dvh!important;
+  margin:0!important;
+  padding:max(18px,env(safe-area-inset-top)) 0 max(18px,env(safe-area-inset-bottom))!important;
+  border:0!important;
+  background:transparent!important;
+  overflow:hidden!important;
+  transform:none!important;
+  box-sizing:border-box!important;
+}
+#recipeFormDialog[open]{display:flex!important;align-items:center!important;justify-content:center!important;}
+#recipeFormDialog>#recipeForm{
+  width:min(92vw,520px)!important;
+  max-width:min(92vw,520px)!important;
+  height:auto!important;
+  max-height:calc(100dvh - max(36px,env(safe-area-inset-top) + env(safe-area-inset-bottom)))!important;
+  margin:0!important;
+  overflow-x:hidden!important;
+  overflow-y:scroll!important;
+  -webkit-overflow-scrolling:touch!important;
+  overscroll-behavior:contain!important;
+  touch-action:pan-y!important;
+  padding:20px 20px calc(28px + env(safe-area-inset-bottom))!important;
+  box-sizing:border-box!important;
+}
+#recipeFormDialog>#recipeForm .study-v10-head{
+  position:sticky!important;
+  top:-20px!important;
+  z-index:4!important;
+  margin:0 -20px 16px!important;
+  padding:20px 20px 14px!important;
+  background:rgba(255,253,251,.97)!important;
+  backdrop-filter:blur(12px)!important;
+  -webkit-backdrop-filter:blur(12px)!important;
+}
+#recipeFormDialog>#recipeForm .modal-actions{
+  position:sticky!important;
+  bottom:calc(-28px - env(safe-area-inset-bottom))!important;
+  z-index:4!important;
+  margin:18px -20px calc(-28px - env(safe-area-inset-bottom))!important;
+  padding:14px 20px calc(18px + env(safe-area-inset-bottom))!important;
+  background:rgba(255,253,251,.97)!important;
+  backdrop-filter:blur(12px)!important;
+  -webkit-backdrop-filter:blur(12px)!important;
+  border-top:1px solid rgba(177,124,118,.08)!important;
+}
+
+/* BERTH.A RC41 — Alimentação: botão "Fiz esta" respeita o contexto do módulo */
+dialog.food-context-dialog #chooseThisFood{
+  background:linear-gradient(135deg,#8db7d7 0%,#e6bf8d 100%)!important;
+  color:#fff!important;
+  border:0!important;
+  box-shadow:none!important;
+}
+
+/* BERTH.A RC42 — Alimentação: primário fiel à paleta azul + butter suave */
+dialog.food-context-dialog #chooseThisFood{
+  background:linear-gradient(135deg,#9fc8e2 0%,#c8d9dc 52%,#eadfca 100%)!important;
+  color:#fff!important;
+  border:0!important;
+  box-shadow:none!important;
+}
+
+
+/* BERTH.A RC43 — Exercícios: respiro real do modal + select neutro */
+@media (max-width:700px){
+  dialog.exercise-dialog.exercise-cycle-dialog{
+    top:calc(env(safe-area-inset-top) + 16px)!important;
+    width:calc(100vw - 32px)!important;
+    max-width:520px!important;
+    max-height:calc(100svh - env(safe-area-inset-top) - env(safe-area-inset-bottom) - 32px)!important;
+  }
+  dialog.exercise-dialog.exercise-cycle-dialog>.exercise-cycle-modal{
+    width:100%!important;
+    max-height:calc(100svh - env(safe-area-inset-top) - env(safe-area-inset-bottom) - 32px)!important;
+    padding:24px 22px calc(24px + env(safe-area-inset-bottom))!important;
+    overflow-y:auto!important;
+    -webkit-overflow-scrolling:touch!important;
+    scroll-padding-bottom:28px!important;
+  }
+}
+.exercise-cycle-dialog .exercise-cycle-block select[data-block-type]{
+  appearance:auto!important;
+  -webkit-appearance:menulist!important;
+  background:#fffdfa!important;
+  color:#403943!important;
+  border:1px solid rgba(126,105,139,.14)!important;
+  box-shadow:none!important;
+  border-radius:14px!important;
+}
+.exercise-cycle-dialog .exercise-cycle-block select[data-block-type]:focus{
+  border-color:rgba(151,128,170,.34)!important;
+  box-shadow:0 0 0 3px rgba(215,198,234,.16)!important;
+  outline:none!important;
+}
+.exercise-cycle-dialog .study-v10-actions{
+  padding-bottom:2px!important;
+}
+
+/* BERTH.A RC45 — Modal System global, ESCOPO SEGURO (somente modais de conteúdo/formulário)
+   Base: RC43. NÃO alcança .bertha-more-modal, drawers, menus ou navegação. */
+
+/* 1) Superfície contínua + respiro padrão — somente famílias de modal conhecidas */
+:is(.bertha-plans-task-dialog,.commit-dialog,.bertha-ritual-dialog,.exercise-dialog,.recipe-dialog,.food-next-prep-dialog,.food-context-dialog,.fin-unified-dialog,.casa-dialog,.casa-maint-dialog,.study-module-dialog,.idea-dialog,.work12-dialog)[open]{
+  box-sizing:border-box!important;
+  max-width:none!important;
+  max-height:none!important;
+}
+
+/* Planos / Tarefas e Compromissos — amarelo + pêssego */
+.bertha-plans-task-dialog>.bertha-task-modal,
+.commit-dialog>.commit-modal{
+  background:linear-gradient(145deg,rgba(255,250,226,.98) 0%,rgba(252,239,211,.97) 54%,rgba(248,222,199,.96) 100%)!important;
+  border:1px solid rgba(177,132,88,.12)!important;
+}
+
+/* Rituais — blush + lilás */
+.bertha-ritual-dialog>.bertha-task-modal,
+.bertha-ritual-settings-dialog>.bertha-task-modal,
+.bertha-full-ritual-dialog>.bertha-task-modal{
+  background:linear-gradient(145deg,rgba(251,239,246,.98) 0%,rgba(247,231,243,.97) 48%,rgba(235,226,249,.97) 100%)!important;
+  border:1px solid rgba(170,126,157,.11)!important;
+}
+
+/* Exercícios — lilás + rosé */
+.exercise-dialog>.bertha-modal,
+.exercise-dialog>.study-v10-modal{
+  background:linear-gradient(145deg,rgba(248,241,252,.98) 0%,rgba(246,237,248,.97) 50%,rgba(250,231,232,.96) 100%)!important;
+  border:1px solid rgba(151,128,170,.11)!important;
+}
+
+/* Receitas — rosa/pêssego suave */
+.recipe-dialog>.study-v10-modal,
+#recipeFormDialog>#recipeForm{
+  background:linear-gradient(145deg,rgba(255,246,243,.99) 0%,rgba(252,239,238,.98) 52%,rgba(250,232,235,.97) 100%)!important;
+  border:1px solid rgba(181,126,137,.10)!important;
+}
+
+/* Alimentação — azul + butter, inclusive receita aberta no contexto de Alimentação */
+.food-next-prep-dialog>.study-v10-modal,
+.food-context-dialog>.study-v10-modal,
+.food-context-dialog>.modal-card,
+#chooseFoodDialog>.study-v10-modal,#chooseFutureFoodDialog>.study-v10-modal,#foodRecipeDialog>.study-v10-modal,
+dialog.food-context-dialog .recipe-detail-modal{
+  background:linear-gradient(145deg,rgba(237,247,252,.98) 0%,rgba(242,248,248,.97) 54%,rgba(253,245,220,.96) 100%)!important;
+  border:1px solid rgba(103,151,183,.11)!important;
+}
+
+/* Financeiro — lilás + menta */
+.fin-unified-dialog>.modal-card,
+.fin-planned-dialog.fin-unified-dialog>.modal-card{
+  background:linear-gradient(145deg,rgba(248,242,252,.99) 0%,rgba(243,239,249,.98) 50%,rgba(234,247,243,.97) 100%)!important;
+  border:1px solid rgba(111,154,202,.12)!important;
+}
+
+/* Casa — blush + verde suave */
+.casa-dialog>.casa-modal-card,
+.casa-maint-dialog>.casa-maint-modal,
+.casa-tip-dialog>.casa-modal-card,
+.casa-how-modal.casa-manual-view{
+  background:linear-gradient(145deg,rgba(253,241,245,.99) 0%,rgba(249,239,242,.98) 50%,rgba(236,247,238,.97) 100%)!important;
+  border:1px solid rgba(151,119,130,.11)!important;
+}
+
+/* Estudos — azul + pêssego */
+.study-module-dialog>.study-v10-modal{
+  background:linear-gradient(145deg,rgba(244,250,253,.99) 0%,rgba(237,247,252,.98) 52%,rgba(253,239,231,.96) 100%)!important;
+  border:1px solid rgba(91,125,158,.10)!important;
+}
+
+/* Criação & Ideias — lilás + menta */
+.idea-dialog>.study-v10-modal{
+  background:linear-gradient(145deg,rgba(248,242,252,.99) 0%,rgba(243,239,249,.98) 50%,rgba(235,247,243,.97) 100%)!important;
+  border:1px solid rgba(120,104,151,.10)!important;
+}
+
+/* Trabalho — lilás + menta; alta especificidade para vencer estilos injetados do work-v12 */
+html body dialog.work12-dialog,
+html body dialog.work12-dialog .work12-form,
+html body dialog.work12-front-dialog,
+html body dialog.work12-front-dialog .work12-form{
+  background:linear-gradient(145deg,rgba(247,241,252,.99) 0%,rgba(242,239,249,.98) 50%,rgba(233,247,242,.97) 100%)!important;
+}
+
+/* 2) Cabeçalhos e áreas de ação fazem parte da MESMA superfície: sem tarjas, cortes ou sombras */
+:is(.bertha-plans-task-dialog,.bertha-ritual-dialog,.exercise-dialog,.recipe-dialog,.food-next-prep-dialog,.food-context-dialog,.fin-unified-dialog,.casa-dialog,.casa-maint-dialog,.study-module-dialog,.idea-dialog)
+:is(.bertha-task-modal-head,.bertha-modal-head,.study-v10-head,.modal-head,.casa-modal-head),
+:is(.bertha-plans-task-dialog,.bertha-ritual-dialog,.exercise-dialog,.recipe-dialog,.food-next-prep-dialog,.food-context-dialog,.fin-unified-dialog,.casa-dialog,.casa-maint-dialog,.study-module-dialog,.idea-dialog)
+:is(.bertha-task-modal-actions,.study-v10-actions,.modal-actions){
+  background:transparent!important;
+  border:0!important;
+  box-shadow:none!important;
+  backdrop-filter:none!important;
+  -webkit-backdrop-filter:none!important;
+}
+.commit-dialog .commit-modal-head,.commit-dialog .commit-actions,
+html body .work12-dialog .work12-form-head,html body .work12-dialog .work12-form-actions,
+html body .work12-front-dialog .work12-form-head,html body .work12-front-dialog .work12-form-actions{
+  background:transparent!important;border:0!important;box-shadow:none!important;
+}
+
+/* 3) Campos claros/neutros sobre o fundo do módulo */
+:is(.bertha-plans-task-dialog,.commit-dialog,.bertha-ritual-dialog,.exercise-dialog,.recipe-dialog,.food-next-prep-dialog,.food-context-dialog,.fin-unified-dialog,.casa-dialog,.casa-maint-dialog,.study-module-dialog,.idea-dialog,.work12-dialog)
+:is(input:not([type="checkbox"]):not([type="radio"]),select,textarea){
+  background:rgba(255,253,250,.78)!important;
+  border-color:rgba(111,98,116,.13)!important;
+  box-shadow:none!important;
+  font-size:16px!important;
+}
+
+/* 4) Checkbox BERTH.A único — sem alterar switches customizados */
+:is(.bertha-plans-task-dialog,.commit-dialog,.bertha-ritual-dialog,.exercise-dialog,.recipe-dialog,.food-next-prep-dialog,.food-context-dialog,.fin-unified-dialog,.casa-dialog,.casa-maint-dialog,.study-module-dialog,.idea-dialog,.work12-dialog)
+input[type="checkbox"]:not(.switch-input){
+  appearance:none!important;-webkit-appearance:none!important;
+  width:24px!important;height:24px!important;min-width:24px!important;
+  border:1.5px solid rgba(111,98,116,.42)!important;border-radius:8px!important;
+  background:rgba(255,255,255,.72)!important;display:inline-grid!important;place-content:center!important;
+  box-shadow:none!important;
+}
+:is(.bertha-plans-task-dialog,.commit-dialog,.bertha-ritual-dialog,.exercise-dialog,.recipe-dialog,.food-next-prep-dialog,.food-context-dialog,.fin-unified-dialog,.casa-dialog,.casa-maint-dialog,.study-module-dialog,.idea-dialog,.work12-dialog)
+input[type="checkbox"]:not(.switch-input):checked::after{
+  content:"";width:10px;height:6px;border-left:2px solid #fff;border-bottom:2px solid #fff;transform:rotate(-45deg) translate(1px,-1px);
+}
+.bertha-plans-task-dialog input[type="checkbox"]:checked,.commit-dialog input[type="checkbox"]:checked{background:#d9a36f!important;border-color:#d9a36f!important}
+.bertha-ritual-dialog input[type="checkbox"]:checked{background:#c8a8d8!important;border-color:#c8a8d8!important}
+.exercise-dialog input[type="checkbox"]:checked{background:#c5a9d8!important;border-color:#c5a9d8!important}
+.recipe-dialog input[type="checkbox"]:checked{background:#d9a8b1!important;border-color:#d9a8b1!important}
+.food-context-dialog input[type="checkbox"]:checked,.food-next-prep-dialog input[type="checkbox"]:checked{background:#8ebbd2!important;border-color:#8ebbd2!important}
+.fin-unified-dialog input[type="checkbox"]:checked{background:#a98bc7!important;border-color:#a98bc7!important}
+.casa-dialog input[type="checkbox"]:checked,.casa-maint-dialog input[type="checkbox"]:checked{background:#b9cfb9!important;border-color:#b9cfb9!important}
+.study-module-dialog input[type="checkbox"]:checked{background:#9fc6dd!important;border-color:#9fc6dd!important}
+.idea-dialog input[type="checkbox"]:checked,.work12-dialog input[type="checkbox"]:checked{background:#a996c6!important;border-color:#a996c6!important}
+
+/* 5) Switch/toggle único: mesma geometria, cor muda pelo módulo */
+:is(.commit-toggle,.fin-reminder-switch,.study-notify-row){--bertha-switch:#c8a8d8}
+.commit-dialog .commit-toggle{--bertha-switch:#d9a36f}
+.fin-unified-dialog .fin-reminder-switch{--bertha-switch:#a98bc7}
+.commit-toggle i,.fin-reminder-switch i{width:44px!important;height:26px!important;border-radius:999px!important;background:rgba(125,116,126,.18)!important;box-shadow:none!important}
+.commit-toggle i:after,.fin-reminder-switch i:after{width:20px!important;height:20px!important;left:3px!important;top:3px!important;background:#fff!important;box-shadow:0 2px 6px rgba(63,49,67,.14)!important}
+.commit-toggle input:checked+i,.fin-reminder-switch input:checked+i{background:var(--bertha-switch)!important}
+.commit-toggle input:checked+i:after,.fin-reminder-switch input:checked+i:after{transform:translateX(18px)!important}
+
+/* 6) Respiro externo consistente e estabilidade dos modais longos.
+   O dialog é apenas o overlay; a superfície interna recebe largura/altura seguras. */
+@media(max-width:700px){
+  .bertha-plans-task-dialog>.bertha-task-modal,
+  .bertha-ritual-dialog>.bertha-task-modal,
+  .exercise-dialog>.bertha-modal,.exercise-dialog>.study-v10-modal,
+  .recipe-dialog>.study-v10-modal,
+  .food-next-prep-dialog>.study-v10-modal,.food-context-dialog>.study-v10-modal,
+  .fin-unified-dialog>.modal-card,
+  .casa-dialog>.casa-modal-card,.casa-maint-dialog>.casa-maint-modal,
+  .study-module-dialog>.study-v10-modal,.idea-dialog>.study-v10-modal{
+    box-sizing:border-box!important;
+    width:calc(100vw - 32px)!important;
+    max-width:620px!important;
+    max-height:calc(100dvh - env(safe-area-inset-top,0px) - env(safe-area-inset-bottom,0px) - 32px)!important;
+    margin:auto!important;
+    border-radius:28px!important;
+  }
+  .commit-dialog>.commit-modal{
+    width:calc(100vw - 32px)!important;max-width:520px!important;
+    max-height:calc(100dvh - env(safe-area-inset-top,0px) - env(safe-area-inset-bottom,0px) - 32px)!important;
+    margin:auto!important;border-radius:28px!important;
+  }
+}
+
+/* 7) Casa: ações não podem ficar cortadas; modal longo rola por inteiro sem barra destacada */
+.casa-maint-dialog>.casa-maint-modal,
+.casa-dialog>.casa-modal-card,
+.casa-how-modal.casa-manual-view{
+  overflow:auto!important;-webkit-overflow-scrolling:touch!important;overscroll-behavior:contain!important;
+  padding-bottom:calc(24px + env(safe-area-inset-bottom,0px))!important;
+}
+.casa-maint-dialog .study-v10-actions,.casa-dialog .modal-actions,.casa-dialog .study-v10-actions{
+  position:static!important;margin-top:18px!important;padding:0!important;background:transparent!important;border:0!important;box-shadow:none!important;
+}
+
+/* 8) Rituais: elimina o "dançar" — posição/altura estáveis; somente corpo rola quando a estrutura existe */
+.bertha-ritual-dialog[open]{overflow:hidden!important}
+.bertha-ritual-dialog>.bertha-task-modal{overflow:hidden!important;display:flex!important;flex-direction:column!important}
+.bertha-ritual-dialog .bertha-task-modal-head{flex:0 0 auto!important}
+.bertha-ritual-dialog .bertha-task-modal-body{flex:1 1 auto!important;min-height:0!important;overflow:auto!important;-webkit-overflow-scrolling:touch!important;overscroll-behavior:contain!important}
+.bertha-ritual-dialog .bertha-task-modal-actions{flex:0 0 auto!important;position:static!important}
+
+/* IMPORTANTE: .bertha-more-modal e qualquer drawer/menu ficam deliberadamente fora deste sistema. */
+
+/* BERTH.A RC47 — Meu Dia Ideal: referências multicoloridas + Receita restaurada */
+/* Referências: uma única linguagem visual, derivada do hero multicolorido do Meu Dia Ideal. */
+html body dialog.bertha-goal-dialog > .bertha-modal{
+  box-sizing:border-box!important;
+  width:min(620px,calc(100vw - 32px))!important;
+  max-height:calc(100dvh - env(safe-area-inset-top,0px) - env(safe-area-inset-bottom,0px) - 32px)!important;
+  padding:24px!important;
+  border-radius:28px!important;
+  overflow:auto!important;
+  -webkit-overflow-scrolling:touch!important;
+  background:
+    radial-gradient(circle at 12% 10%,rgba(255,236,217,.72),transparent 34%),
+    radial-gradient(circle at 88% 16%,rgba(226,218,248,.76),transparent 38%),
+    radial-gradient(circle at 82% 88%,rgba(214,239,233,.72),transparent 40%),
+    linear-gradient(145deg,rgba(253,242,244,.98) 0%,rgba(242,235,251,.98) 52%,rgba(226,243,239,.98) 100%)!important;
+  border:1px solid rgba(126,105,139,.12)!important;
+  box-shadow:0 22px 54px rgba(55,43,67,.16)!important;
+}
+html body dialog.bertha-goal-dialog .bertha-modal-head{
+  margin:0 0 18px!important;padding:0!important;background:transparent!important;
+  border:0!important;box-shadow:none!important;
+}
+html body dialog.bertha-goal-dialog .bertha-modal-head strong{color:#403747!important;font-size:20px!important;line-height:1.12!important}
+html body dialog.bertha-goal-dialog .bertha-modal-head button{
+  background:rgba(255,255,255,.36)!important;border:1px solid rgba(112,97,121,.08)!important;
+  color:#8d8390!important;box-shadow:none!important;
+}
+html body dialog.bertha-goal-dialog .note{color:#776d79!important;line-height:1.45!important;margin:0 0 16px!important}
+html body dialog.bertha-goal-dialog .bertha-goal-fields{margin:0 0 18px!important}
+html body dialog.bertha-goal-dialog .bertha-goal-fields input{
+  min-height:48px!important;border-radius:15px!important;background:rgba(255,253,249,.94)!important;
+  border:1px solid rgba(118,102,126,.12)!important;color:#403946!important;box-shadow:none!important;
+}
+html body dialog.bertha-goal-dialog .bertha-stack{gap:10px!important;margin:0!important}
+html body dialog.bertha-goal-dialog .bertha-stack .bertha-primary{
+  min-height:48px!important;border-radius:15px!important;
+  background:linear-gradient(110deg,#efcbd8 0%,#ded0f2 48%,#cde8df 100%)!important;
+  color:#665b70!important;border:1px solid rgba(121,101,134,.10)!important;box-shadow:none!important;
+}
+html body dialog.bertha-goal-dialog .bertha-stack .bertha-secondary{
+  min-height:44px!important;border-radius:15px!important;background:rgba(255,255,255,.50)!important;
+  color:#716776!important;border:1px solid rgba(121,101,134,.09)!important;box-shadow:none!important;
+}
+html body dialog.bertha-goal-dialog .bertha-goal-fields input:focus{
+  outline:none!important;border-color:rgba(130,108,145,.28)!important;
+  box-shadow:0 0 0 3px rgba(216,201,234,.42)!important;
+}
+
+/* Receita aberta: restaura a identidade rosa/pêssego do módulo Receitas.
+   Evita que a regra de contexto de Alimentação pinte o detalhe da receita de azul. */
+html body #foodRecipeDialog > .study-v10-modal,
+html body dialog.food-context-dialog .recipe-detail-modal,
+html body dialog.recipe-dialog > .study-v10-modal{
+  background:linear-gradient(145deg,rgba(255,246,243,.99) 0%,rgba(252,239,238,.98) 52%,rgba(250,232,235,.97) 100%)!important;
+  border:1px solid rgba(181,126,137,.10)!important;
+}
+
+/* BERTH.A RC48 — correção efetiva: Referências + Receitas */
+/* Referências: reforço sobre o painel real criado por dialogBase. */
+html body dialog.bertha-goal-dialog > .bertha-modal{
+  background:
+    radial-gradient(circle at 12% 10%,rgba(255,236,217,.72),transparent 34%),
+    radial-gradient(circle at 88% 16%,rgba(226,218,248,.76),transparent 38%),
+    radial-gradient(circle at 82% 88%,rgba(214,239,233,.72),transparent 40%),
+    linear-gradient(145deg,rgba(253,242,244,.98) 0%,rgba(242,235,251,.98) 52%,rgba(226,243,239,.98) 100%)!important;
+  border:1px solid rgba(126,105,139,.12)!important;
+  border-radius:28px!important;
+  padding:24px!important;
+}
+html body dialog.bertha-goal-dialog .bertha-primary{
+  background:linear-gradient(110deg,#efcbd8 0%,#ded0f2 48%,#cde8df 100%)!important;
+  color:#665b70!important;
+}
+/* Nova/editar receita: superfície contínua rosa-pêssego; sem cabeçalho/rodapé brancos. */
+html body #recipeFormDialog > #recipeForm{
+  background:
+    radial-gradient(circle at 88% 8%,rgba(246,213,219,.46),transparent 34%),
+    radial-gradient(circle at 10% 90%,rgba(247,222,205,.50),transparent 38%),
+    linear-gradient(145deg,rgba(255,247,243,.99),rgba(252,237,237,.98) 52%,rgba(250,232,224,.97))!important;
+  border:1px solid rgba(181,126,137,.10)!important;
+}
+html body #recipeFormDialog > #recipeForm .study-v10-head,
+html body #recipeFormDialog > #recipeForm .modal-actions{
+  background:transparent!important;
+  border:0!important;
+  backdrop-filter:none!important;
+  -webkit-backdrop-filter:none!important;
+  box-shadow:none!important;
+}
+html body #recipeFormDialog > #recipeForm .primary{
+  background:linear-gradient(135deg,#efc9c5 0%,#e8b9a7 100%)!important;
+  color:#fff!important;border:0!important;
+}
+
+/* BERTH.A RC49 — Modal System consolidado
+   Estudos = padrão estrutural. A identidade do hero entra na superfície e nos botões.
+   Escopo deliberadamente restrito: NÃO alcança .bertha-more-modal, #moduleMenu, drawers ou navegação. */
+
+/* 1. Overlay estável no iOS/Safari: o dialog ocupa o viewport; quem rola é a superfície interna. */
+@media (max-width:700px){
+  html body :is(
+    dialog.bertha-plans-task-dialog,dialog.commit-dialog,dialog.bertha-repeat-dialog,
+    dialog.bertha-ritual-dialog,dialog.exercise-dialog,dialog.recipe-dialog,
+    dialog.food-next-prep-dialog,dialog.food-context-dialog,dialog.shop-dialog,
+    dialog.close-purchase-dialog,dialog.fin-unified-dialog,dialog.casa-dialog,
+    dialog.casa-maint-dialog,dialog.study-module-dialog,dialog.idea-dialog,
+    dialog.work12-dialog,dialog.work12-front-dialog,dialog.bertha-goal-dialog,
+    #recipeFormDialog
+  )[open]{
+    position:fixed!important;inset:0!important;left:0!important;top:0!important;right:0!important;bottom:0!important;
+    transform:none!important;margin:0!important;width:100vw!important;max-width:none!important;
+    height:100dvh!important;max-height:100dvh!important;padding:max(16px,env(safe-area-inset-top,0px)) 16px max(16px,env(safe-area-inset-bottom,0px))!important;
+    box-sizing:border-box!important;border:0!important;border-radius:0!important;background:transparent!important;
+    overflow:hidden!important;overscroll-behavior:none!important;
+    align-items:center!important;justify-content:center!important;
+  }
+  html body :is(
+    dialog.bertha-plans-task-dialog,dialog.commit-dialog,dialog.bertha-repeat-dialog,
+    dialog.bertha-ritual-dialog,dialog.exercise-dialog,dialog.recipe-dialog,
+    dialog.food-next-prep-dialog,dialog.food-context-dialog,dialog.shop-dialog,
+    dialog.close-purchase-dialog,dialog.fin-unified-dialog,dialog.casa-dialog,
+    dialog.casa-maint-dialog,dialog.study-module-dialog,dialog.idea-dialog,
+    dialog.work12-dialog,dialog.work12-front-dialog,dialog.bertha-goal-dialog,
+    #recipeFormDialog
+  )[open] > :not(style){
+    box-sizing:border-box!important;width:min(100%,620px)!important;max-width:620px!important;
+    max-height:100%!important;margin:0!important;border-radius:28px!important;
+    overflow-y:auto!important;overflow-x:hidden!important;-webkit-overflow-scrolling:touch!important;
+    overscroll-behavior:contain!important;scrollbar-gutter:stable!important;
+  }
+  html body dialog.work12-dialog[open]>*,html body dialog.work12-front-dialog[open]>*{max-width:520px!important}
+  html body dialog.commit-dialog[open]>*,html body dialog.bertha-repeat-dialog[open]>*{max-width:520px!important}
+}
+
+/* 2. Bordas: mesma geometria e respiro do padrão Estudos. */
+html body :is(
+  .bertha-plans-task-dialog>.bertha-task-modal,.commit-dialog>.commit-modal,.bertha-repeat-dialog>.bertha-modal,
+  .bertha-ritual-dialog>.bertha-task-modal,.exercise-dialog>.bertha-modal,.exercise-dialog>.study-v10-modal,
+  .recipe-dialog>.study-v10-modal,#recipeFormDialog>#recipeForm,
+  .food-next-prep-dialog>.study-v10-modal,.food-context-dialog>.study-v10-modal,
+  .shop-dialog>.study-v10-modal,.close-purchase-dialog>.study-v10-modal,
+  .fin-unified-dialog>.modal-card,.casa-dialog>.casa-modal-card,.casa-maint-dialog>.casa-maint-modal,
+  .study-module-dialog>.study-v10-modal,.idea-dialog>.study-v10-modal,#ideaDialog>#ideaForm,
+  .work12-dialog>.work12-form,.work12-front-dialog>.work12-form,
+  .bertha-goal-dialog>.bertha-modal
+){
+  border-width:1px!important;border-style:solid!important;border-radius:28px!important;
+  box-shadow:0 22px 54px rgba(55,43,67,.14)!important;
+  padding:24px!important;
+}
+@media(max-width:420px){
+  html body :is(.study-v10-modal,.bertha-modal,.bertha-task-modal,.modal-card,.commit-modal,.work12-form,#ideaForm){padding:22px!important}
+}
+
+/* 3. Superfície contínua. Cabeçalho e ações nunca viram tarjas separadas. */
+html body :is(
+ .bertha-task-modal-head,.bertha-modal-head,.study-v10-head,.modal-head,.commit-modal-head,.casa-modal-head,.work12-form-head,
+ .bertha-task-modal-actions,.bertha-modal-actions,.study-v10-actions,.modal-actions,.commit-actions,.work12-form-actions
+){border-color:transparent!important;box-shadow:none!important;backdrop-filter:none!important;-webkit-backdrop-filter:none!important}
+html body :is(
+ .bertha-plans-task-dialog,.commit-dialog,.bertha-repeat-dialog,.bertha-ritual-dialog,.exercise-dialog,.recipe-dialog,
+ .food-next-prep-dialog,.food-context-dialog,.shop-dialog,.close-purchase-dialog,.fin-unified-dialog,.casa-dialog,
+ .casa-maint-dialog,.study-module-dialog,.idea-dialog,.work12-dialog,.work12-front-dialog,.bertha-goal-dialog
+) :is(.bertha-task-modal-head,.bertha-modal-head,.study-v10-head,.modal-head,.commit-modal-head,.casa-modal-head,.work12-form-head,
+       .bertha-task-modal-actions,.bertha-modal-actions,.study-v10-actions,.modal-actions,.commit-actions,.work12-form-actions){
+  background:transparent!important;border-top:0!important;border-bottom:0!important;
+}
+
+/* 4. Fundo + botões seguem o hero de cada módulo. */
+html body .bertha-plans-task-dialog>.bertha-task-modal,
+html body .commit-dialog>.commit-modal,
+html body .bertha-repeat-dialog>.bertha-modal{
+  background:linear-gradient(145deg,#fff9e8 0%,#f9edd8 54%,#f6ddcf 100%)!important;border-color:rgba(177,132,88,.14)!important;
+}
+html body :is(.bertha-plans-task-dialog,.commit-dialog,.bertha-repeat-dialog) :is(.primary,.bertha-primary,[type=submit]){
+  background:linear-gradient(135deg,#f1d47d,#dfa466)!important;color:#fff!important;border:0!important;
+}
+html body .bertha-ritual-dialog>.bertha-task-modal{
+  background:linear-gradient(145deg,#fcecf4 0%,#f6e6f2 48%,#eadff8 100%)!important;border-color:rgba(170,126,157,.14)!important;
+}
+html body .bertha-ritual-dialog :is(.primary,.bertha-primary,[type=submit]){background:linear-gradient(135deg,#dcaecb,#bda4df)!important;color:#fff!important;border:0!important}
+html body .exercise-dialog>:is(.bertha-modal,.study-v10-modal){background:linear-gradient(145deg,#f8f0fc,#f4e9f7 52%,#fae8e9)!important;border-color:rgba(151,128,170,.14)!important}
+html body .exercise-dialog :is(.primary,.bertha-primary,[type=submit]){background:linear-gradient(135deg,#d2bce6,#e8b8bd)!important;color:#fff!important;border:0!important}
+html body :is(.recipe-dialog>.study-v10-modal,#recipeFormDialog>#recipeForm){background:linear-gradient(145deg,#fff5f2,#fbe9e9 52%,#f8e2d8)!important;border-color:rgba(181,126,137,.13)!important}
+html body :is(.recipe-dialog,#recipeFormDialog) :is(.primary,.bertha-primary,[type=submit]){background:linear-gradient(135deg,#efc1bd,#e7a991)!important;color:#fff!important;border:0!important}
+html body :is(.food-next-prep-dialog,.food-context-dialog)>.study-v10-modal{background:linear-gradient(145deg,#edf7fc,#f0f8f7 54%,#fcf2d9)!important;border-color:rgba(103,151,183,.13)!important}
+html body :is(.food-next-prep-dialog,.food-context-dialog) :is(.primary,.bertha-primary,[type=submit]){background:linear-gradient(135deg,#9fc8e2,#c8d9dc 52%,#eadfca)!important;color:#fff!important;border:0!important}
+html body .shop-dialog>.study-v10-modal{background:linear-gradient(145deg,#fcebed 0%,#f2e8f5 48%,#e4eef8 100%)!important;border-color:rgba(155,112,140,.13)!important}
+html body .shop-dialog .shop-modal-head{background:transparent!important;padding:0 0 20px!important}
+html body .shop-dialog .shop-modal-body{padding:0!important}
+html body .shop-dialog .shop-modal-actions{background:transparent!important;border:0!important;margin:18px 0 0!important;padding:0!important}
+html body .shop-dialog .primary{background:linear-gradient(135deg,#efa98d,#df8d79)!important;color:#fff!important;border:0!important}
+html body .fin-unified-dialog>.modal-card{background:linear-gradient(145deg,#f7f0fb,#f1edf8 50%,#e8f6f1)!important;border-color:rgba(111,154,202,.14)!important}
+html body .fin-unified-dialog :is(.primary,.bertha-primary,[type=submit]){background:linear-gradient(135deg,#bba3d6,#91cbbd)!important;color:#fff!important;border:0!important}
+html body :is(.casa-dialog>.casa-modal-card,.casa-maint-dialog>.casa-maint-modal){background:linear-gradient(145deg,#fceff3,#f7eaee 50%,#eaf5eb)!important;border-color:rgba(151,119,130,.13)!important}
+html body :is(.casa-dialog,.casa-maint-dialog) :is(.primary,.bertha-primary,[type=submit]){background:linear-gradient(135deg,#e4b7c4,#a8cfb2)!important;color:#fff!important;border:0!important}
+html body .study-module-dialog>.study-v10-modal{background:linear-gradient(145deg,#f2f9fd,#eaf5fb 52%,#fcece4)!important;border-color:rgba(91,125,158,.12)!important}
+html body .study-module-dialog :is(.primary,.bertha-primary,[type=submit]){background:linear-gradient(135deg,#9fc9e1,#efbca4)!important;color:#fff!important;border:0!important}
+html body :is(.idea-dialog>.study-v10-modal,#ideaDialog>#ideaForm){background:linear-gradient(145deg,#eef4fd,#edf0fb 48%,#e8f6f2)!important;border-color:rgba(111,142,190,.13)!important}
+html body :is(.idea-dialog,#ideaDialog) :is(.primary,.bertha-primary,[type=submit]){background:linear-gradient(135deg,#83b9e6,#9d8de0)!important;color:#fff!important;border:0!important}
+html body :is(.work12-dialog,.work12-front-dialog)>.work12-form{background:linear-gradient(145deg,#f6effb,#efedf8 50%,#e8f6f1)!important;border-color:rgba(120,104,151,.13)!important}
+html body :is(.work12-dialog,.work12-front-dialog) .work12-primary{background:linear-gradient(135deg,#c7b1df,#a8d4c8)!important;color:#fff!important;border:0!important}
+html body .bertha-goal-dialog>.bertha-modal,
+html body .bertha-dialog:has(.bertha-ideal-modal-form)>.bertha-modal{
+  background:radial-gradient(circle at 10% 8%,rgba(250,211,221,.72),transparent 34%),radial-gradient(circle at 88% 12%,rgba(217,224,249,.80),transparent 38%),radial-gradient(circle at 82% 90%,rgba(217,239,233,.76),transparent 40%),linear-gradient(145deg,#fff1eb,#eee7fb 52%,#e5f4f0)!important;
+  border-color:rgba(126,105,139,.13)!important;
+}
+html body :is(.bertha-goal-dialog,.bertha-dialog:has(.bertha-ideal-modal-form)) :is(.primary,.bertha-primary,[type=submit]){background:linear-gradient(110deg,#e8a9c0,#c9b7e8 50%,#add9ce)!important;color:#fff!important;border:0!important}
+
+/* 5. Campos, selects, textareas e bordas internas: neutros, uniformes, sem autozoom. */
+html body :is(
+ .bertha-plans-task-dialog,.commit-dialog,.bertha-repeat-dialog,.bertha-ritual-dialog,.exercise-dialog,.recipe-dialog,
+ .food-next-prep-dialog,.food-context-dialog,.shop-dialog,.close-purchase-dialog,.fin-unified-dialog,.casa-dialog,
+ .casa-maint-dialog,.study-module-dialog,.idea-dialog,#ideaDialog,.work12-dialog,.work12-front-dialog,.bertha-goal-dialog,
+ .bertha-dialog:has(.bertha-ideal-modal-form)
+) :is(input:not([type=checkbox]):not([type=radio]),select,textarea){
+  box-sizing:border-box!important;background:rgba(255,253,250,.88)!important;border:1px solid rgba(111,98,116,.14)!important;
+  border-radius:16px!important;box-shadow:none!important;font-size:16px!important;outline:none!important;
+}
+
+/* 6. Checkbox único; elimina o azul nativo visto em Projetos e Trabalho. */
+html body :is(.idea-dialog,#ideaDialog,.work12-dialog,.work12-front-dialog,.recipe-dialog,.shop-dialog,.casa-dialog,.study-module-dialog,.exercise-dialog,.bertha-ritual-dialog,.fin-unified-dialog)
+ input[type="checkbox"]:not(.switch-input){
+  appearance:none!important;-webkit-appearance:none!important;width:24px!important;height:24px!important;min-width:24px!important;
+  border:1.5px solid rgba(111,98,116,.38)!important;border-radius:8px!important;background:rgba(255,255,255,.78)!important;
+  display:inline-grid!important;place-content:center!important;box-shadow:none!important;accent-color:transparent!important;
+}
+html body :is(.idea-dialog,#ideaDialog,.work12-dialog,.work12-front-dialog,.recipe-dialog,.shop-dialog,.casa-dialog,.study-module-dialog,.exercise-dialog,.bertha-ritual-dialog,.fin-unified-dialog)
+ input[type="checkbox"]:not(.switch-input):checked::after{content:"";width:10px;height:6px;border-left:2px solid #fff;border-bottom:2px solid #fff;transform:rotate(-45deg) translate(1px,-1px)}
+html body :is(.idea-dialog,#ideaDialog) input[type="checkbox"]:checked{background:#8faee2!important;border-color:#8faee2!important}
+html body :is(.work12-dialog,.work12-front-dialog) input[type="checkbox"]:checked{background:#a996c6!important;border-color:#a996c6!important}
+
+/* 7. Toggle consistente no Meu Dia Ideal e famílias já customizadas. */
+html body .bertha-dialog:has(.bertha-ideal-modal-form) :is(.bertha-switch,.bertha-toggle) i,
+html body :is(.commit-toggle,.fin-reminder-switch) i{border:0!important;box-shadow:none!important}
+
+/* 8. X neutro e foco coerente com o módulo — nunca aro azul do Safari. */
+html body :is(.work12-x,.study-v10-x,.bertha-modal-head button,.casa-modal-x,.fin-modal-x){-webkit-tap-highlight-color:transparent!important}
+html body :is(.work12-x,.study-v10-x,.bertha-modal-head button,.casa-modal-x,.fin-modal-x):focus,
+html body :is(.work12-x,.study-v10-x,.bertha-modal-head button,.casa-modal-x,.fin-modal-x):focus-visible{
+  outline:none!important;box-shadow:0 0 0 3px rgba(166,145,190,.18)!important;
+}
+
+/* 9. Ações longas: permanecem acessíveis sem criar um rodapé visual separado. */
+html body :is(.work12-dialog,.work12-front-dialog) .work12-form-actions,
+html body #recipeFormDialog>#recipeForm .modal-actions,
+html body :is(.idea-dialog,#ideaDialog) .modal-actions{
+  position:sticky!important;bottom:-24px!important;z-index:4!important;margin-top:18px!important;
+  padding:14px 0 calc(14px + env(safe-area-inset-bottom,0px))!important;border:0!important;box-shadow:none!important;
+  background:linear-gradient(to bottom,rgba(255,255,255,0),rgba(255,255,255,.16) 18%,rgba(255,255,255,.24))!important;
+}
+html body #recipeFormDialog>#recipeForm .study-v10-head{position:static!important;margin:0 0 16px!important;padding:0!important;background:transparent!important;border:0!important}
+
+/* 10. Menu Mais e bottom-nav são explicitamente protegidos deste sistema. */
+html body #moduleMenu,html body .bertha-more-modal,html body .bottom-nav{transform:none}
+
+/* =========================================================
+   RC50 — fechamento da revisão visual dos modais no iPhone
+   Escopo deliberadamente restrito aos dialogs funcionais.
+   Não toca #moduleMenu, .bottom-nav nem navegação.
+   ========================================================= */
+
+/* Planos: o hero amarelo/pêssego vira a superfície inteira, sem tarja de cabeçalho/rodapé. */
+html body dialog.bertha-plans-task-dialog > form.bertha-task-modal{
+  background:linear-gradient(145deg,#fff8dc 0%,#faedd8 52%,#f3d6c7 100%)!important;
+  border:1px solid rgba(177,132,88,.14)!important;
+  overflow:hidden!important;display:flex!important;flex-direction:column!important;
+}
+html body dialog.bertha-plans-task-dialog .bertha-task-modal-head,
+html body dialog.bertha-plans-task-dialog .bertha-task-modal-actions{
+  background:transparent!important;border:0!important;box-shadow:none!important;
+}
+html body dialog.bertha-plans-task-dialog .bertha-task-modal-body{
+  min-height:0!important;overflow-y:auto!important;-webkit-overflow-scrolling:touch!important;overscroll-behavior:contain!important;
+}
+html body dialog.bertha-plans-task-dialog .bertha-task-modal-actions{position:static!important;flex:0 0 auto!important}
+html body dialog.bertha-plans-task-dialog :is(.bertha-task-save,.primary){background:linear-gradient(135deg,#f1d47d,#dfa466)!important;color:#fff!important;border:0!important}
+
+/* Rituais: rosa/lilás do hero em toda a superfície. A classe fin-unified não pode vencer a identidade de Rituais. */
+html body dialog.bertha-ritual-dialog > form.bertha-task-modal,
+html body dialog.bertha-ritual-dialog.fin-unified-dialog > form.bertha-task-modal.modal-card{
+  background:linear-gradient(145deg,#fcecf4 0%,#f6e6f2 48%,#eadff8 100%)!important;
+  border:1px solid rgba(170,126,157,.14)!important;
+  overflow:hidden!important;display:flex!important;flex-direction:column!important;
+}
+html body dialog.bertha-ritual-dialog .bertha-task-modal-head,
+html body dialog.bertha-ritual-dialog .bertha-task-modal-actions{
+  background:transparent!important;border:0!important;box-shadow:none!important;
+}
+html body dialog.bertha-ritual-dialog .bertha-task-modal-body{
+  min-height:0!important;overflow-y:auto!important;-webkit-overflow-scrolling:touch!important;overscroll-behavior:contain!important;
+}
+html body dialog.bertha-ritual-dialog .bertha-task-modal-actions{position:static!important;flex:0 0 auto!important}
+html body dialog.bertha-ritual-dialog :is(.bertha-task-save,.primary){background:linear-gradient(135deg,#dcaecb,#bda4df)!important;color:#fff!important;border:0!important}
+
+/* Exercícios: mesma superfície lilás + rosé e sem cortes visuais. */
+html body dialog.exercise-dialog > :is(.bertha-modal,.study-v10-modal){
+  background:linear-gradient(145deg,#f8f0fc 0%,#f4e9f7 52%,#fae8e9 100%)!important;
+  border:1px solid rgba(151,128,170,.14)!important;
+}
+html body dialog.exercise-dialog :is(.bertha-modal-head,.study-v10-head,.modal-actions,.study-v10-actions){background:transparent!important;border:0!important;box-shadow:none!important}
+html body dialog.exercise-dialog :is(.primary,[type="submit"]){background:linear-gradient(135deg,#d2bce6,#e8b8bd)!important;color:#fff!important;border:0!important}
+
+/* Casa: blush + verde do hero; elimina a linha que fazia o rodapé parecer uma peça separada. */
+html body dialog.casa-dialog > :is(.casa-modal-card,.study-v10-modal,.modal-card),
+html body dialog.casa-maint-dialog > .casa-maint-modal{
+  background:linear-gradient(145deg,#fceff3 0%,#f7eaee 50%,#eaf5eb 100%)!important;
+  border:1px solid rgba(151,119,130,.13)!important;
+}
+html body dialog.casa-dialog :is(.modal-head,.study-v10-head,.modal-actions,.study-v10-actions),
+html body dialog.casa-maint-dialog :is(.modal-head,.study-v10-head,.modal-actions,.study-v10-actions){background:transparent!important;border:0!important;box-shadow:none!important}
+html body dialog.casa-dialog :is(.primary,[type="submit"]),html body dialog.casa-maint-dialog :is(.primary,[type="submit"]){background:linear-gradient(135deg,#e4b7c4,#a8cfb2)!important;color:#fff!important;border:0!important}
+
+/* Receita de verdade: formulário longo rola dentro da superfície e as ações permanecem alcançáveis. */
+html body dialog#recipeFormDialog > form#recipeForm{
+  box-sizing:border-box!important;background:linear-gradient(145deg,#fff5f2 0%,#fbe9e9 52%,#f8e2d8 100%)!important;
+  border:1px solid rgba(181,126,137,.13)!important;overflow-y:auto!important;-webkit-overflow-scrolling:touch!important;overscroll-behavior:contain!important;
+  padding-bottom:calc(24px + env(safe-area-inset-bottom,0px))!important;
+}
+html body dialog#recipeFormDialog #recipeForm > .study-v10-head{background:transparent!important;border:0!important;box-shadow:none!important}
+html body dialog#recipeFormDialog #recipeForm > .modal-actions{
+  position:sticky!important;bottom:-24px!important;z-index:5!important;margin-top:20px!important;
+  padding:14px 0 calc(14px + env(safe-area-inset-bottom,0px))!important;border:0!important;box-shadow:none!important;
+  background:linear-gradient(to bottom,rgba(251,233,233,0),rgba(251,233,233,.88) 30%,rgba(248,226,216,.98))!important;
+}
+html body dialog#recipeFormDialog :is(.primary,[type="submit"]){background:linear-gradient(135deg,#efc1bd,#e7a991)!important;color:#fff!important;border:0!important}
+
+/* Alimentação usando uma receita: continua Alimentação visualmente. */
+html body dialog.food-context-dialog > .study-v10-modal,
+html body dialog#foodRecipeDialog.food-context-dialog > .study-v10-modal,
+html body dialog#chooseFoodDialog.food-context-dialog > .study-v10-modal{
+  background:linear-gradient(145deg,#edf7fc 0%,#f0f8f7 54%,#fcf2d9 100%)!important;
+  border:1px solid rgba(103,151,183,.13)!important;
+}
+html body dialog.food-context-dialog :is(.study-v10-head,.recipe-modal-actions){background:transparent!important;border:0!important;box-shadow:none!important}
+html body dialog.food-context-dialog :is(.primary,[type="submit"]){background:linear-gradient(135deg,#9fc8e2,#c8d9dc 52%,#eadfca)!important;color:#fff!important;border:0!important}
+
+/* Meu Dia Ideal: fundo multicolor do hero em toda a superfície. */
+html body dialog.bertha-dialog:has(.bertha-ideal-modal-form) > .bertha-modal,
+html body dialog.bertha-goal-dialog > .bertha-modal{
+  background:radial-gradient(circle at 10% 8%,rgba(250,211,221,.72),transparent 34%),radial-gradient(circle at 88% 12%,rgba(217,224,249,.80),transparent 38%),radial-gradient(circle at 82% 90%,rgba(217,239,233,.76),transparent 40%),linear-gradient(145deg,#fff1eb,#eee7fb 52%,#e5f4f0)!important;
+  border:1px solid rgba(126,105,139,.13)!important;
+}
+html body dialog.bertha-dialog:has(.bertha-ideal-modal-form) :is(.bertha-modal-head,.bertha-modal-actions,.modal-actions),
+html body dialog.bertha-goal-dialog :is(.bertha-modal-head,.bertha-modal-actions,.modal-actions){background:transparent!important;border:0!important;box-shadow:none!important}
+html body dialog.bertha-dialog:has(.bertha-ideal-modal-form) :is(.primary,.bertha-primary,[type="submit"]),
+html body dialog.bertha-goal-dialog :is(.primary,.bertha-primary,[type="submit"]){background:linear-gradient(110deg,#e8a9c0,#c9b7e8 50%,#add9ce)!important;color:#fff!important;border:0!important}
+
+/* Anti-dança: somente os dialogs funcionais conhecidos. Sem regra global em dialog/body/nav. */
+@media(max-width:700px){
+  html body :is(dialog.bertha-plans-task-dialog,dialog.bertha-ritual-dialog,dialog.exercise-dialog,dialog.casa-dialog,dialog.casa-maint-dialog,dialog.recipe-dialog,dialog.food-context-dialog,dialog.food-next-prep-dialog,dialog.bertha-goal-dialog)[open]{
+    inset:0!important;margin:auto!important;padding:0!important;transform:none!important;
+    width:100vw!important;height:100dvh!important;max-width:none!important;max-height:none!important;
+    overflow:hidden!important;background:transparent!important;border:0!important;
+  }
+  html body :is(dialog.bertha-plans-task-dialog,dialog.bertha-ritual-dialog,dialog.exercise-dialog,dialog.casa-dialog,dialog.casa-maint-dialog,dialog.recipe-dialog,dialog.food-context-dialog,dialog.food-next-prep-dialog,dialog.bertha-goal-dialog)[open] > :is(.bertha-task-modal,.bertha-modal,.study-v10-modal,.casa-modal-card,.casa-maint-modal,.modal-card){
+    box-sizing:border-box!important;width:calc(100vw - 32px)!important;max-width:620px!important;
+    max-height:calc(100dvh - env(safe-area-inset-top,0px) - env(safe-area-inset-bottom,0px) - 32px)!important;
+    margin:auto!important;border-radius:28px!important;transform:none!important;
+  }
+}
+
+/* =========================================================
+   RC52 — Modal System: bordas + Tarefas sem amarelo + Casa
+   ========================================================= */
+/* Nova/Editar tarefa: identidade candy sem amarelo/ocre. */
+html body #pendingDialog[open] > #pendingForm.modal-card{
+  background:linear-gradient(145deg,#fcecf4 0%,#f1eafa 50%,#e9f1fb 100%)!important;
+  border:1.5px solid rgba(151,119,164,.24)!important;
+}
+html body #pendingDialog[open] .modal-head,html body #pendingDialog[open] .modal-actions{background:transparent!important;border:0!important;box-shadow:none!important}
+html body #pendingDialog[open] .modal-head .eyebrow{color:#98728e!important}
+html body #pendingDialog[open] :is(input,select,textarea){background:rgba(255,253,250,.9)!important;border:1.5px solid rgba(157,128,169,.25)!important;border-radius:16px!important;font-size:16px!important;box-shadow:none!important}
+html body #pendingDialog[open] :is(input,select,textarea):focus{border-color:rgba(150,117,170,.42)!important;box-shadow:0 0 0 3px rgba(185,157,204,.12)!important;outline:none!important}
+html body #pendingDialog[open] .modal-actions .primary{background:linear-gradient(135deg,#d9a9c8 0%,#b8a5df 55%,#9ebfe4 100%)!important;color:#fff!important;border:1.5px solid rgba(144,115,166,.18)!important}
+html body #pendingDialog[open] .modal-actions .secondary,html body #pendingDialog[open] .modal-head .icon-btn{background:rgba(255,253,250,.58)!important;border:1.5px solid rgba(157,128,169,.22)!important;color:#6f6671!important}
+
+/* Bordas do Modal System: visíveis e coerentes em todos os módulos revisados. */
+html body :is(.bertha-plans-task-dialog,.commit-dialog,.bertha-repeat-dialog,.bertha-ritual-dialog,.exercise-dialog,.recipe-dialog,.food-next-prep-dialog,.food-context-dialog,.shop-dialog,.close-purchase-dialog,.fin-unified-dialog,.casa-dialog,.casa-maint-dialog,.study-module-dialog,.idea-dialog,#ideaDialog,.work12-dialog,.work12-front-dialog,.bertha-goal-dialog,.bertha-dialog:has(.bertha-ideal-modal-form)) :is(input:not([type=checkbox]):not([type=radio]),select,textarea){border-width:1.5px!important;border-color:rgba(125,105,135,.22)!important}
+html body :is(.bertha-plans-task-dialog,.commit-dialog,.bertha-repeat-dialog,.bertha-ritual-dialog,.exercise-dialog,.recipe-dialog,.food-next-prep-dialog,.food-context-dialog,.shop-dialog,.close-purchase-dialog,.fin-unified-dialog,.casa-dialog,.casa-maint-dialog,.study-module-dialog,.idea-dialog,#ideaDialog,.work12-dialog,.work12-front-dialog,.bertha-goal-dialog,.bertha-dialog:has(.bertha-ideal-modal-form)) :is(.secondary,.pill,.seg-btn,.choice-btn,.icon-btn,.study-v10-x,.work12-x,.casa-modal-x){border-width:1.5px!important}
+html body :is(.casa-dialog,.casa-maint-dialog) :is(input:not([type=checkbox]),select,textarea,.secondary,.icon-btn,.casa-modal-x){border-color:rgba(154,119,132,.24)!important}
+html body .bertha-ritual-dialog :is(input:not([type=checkbox]),select,textarea,.secondary,.icon-btn){border-color:rgba(168,124,158,.24)!important}
+html body .exercise-dialog :is(input:not([type=checkbox]),select,textarea,.secondary,.icon-btn){border-color:rgba(148,125,169,.24)!important}
+html body .study-module-dialog :is(input:not([type=checkbox]),select,textarea,.secondary,.icon-btn){border-color:rgba(99,137,171,.23)!important}
+
+/* Casa — novos utensílios/equipamentos. */
+html body .casa-add-tool{width:100%;margin:10px 0 14px!important;background:linear-gradient(135deg,rgba(236,190,203,.45),rgba(188,220,196,.48))!important;border:1.5px solid rgba(154,119,132,.22)!important}
+html body .casa-custom-tools{display:grid;gap:8px;margin-top:12px}
+html body .casa-tool-row{border:1.5px solid rgba(154,119,132,.18)!important;border-radius:16px;padding:12px;background:rgba(255,253,250,.55)}
+html body .casa-tool-remove{width:36px;height:36px;border-radius:50%;border:1.5px solid rgba(154,119,132,.22);background:rgba(255,255,255,.55);color:#756b70;font-size:22px}
+html body .casa-tool-check{display:flex!important;align-items:center;gap:10px}
+html body .casa-tool-check input{width:22px!important;height:22px!important;min-width:22px!important}
+
+/* =========================================================
+   RC53 — corretiva visual/funcional consolidada
+   ========================================================= */
+
+/* Referências: cópia LITERAL da superfície cromática do hero Meu Dia Ideal. */
+html body dialog.bertha-goal-dialog > .bertha-modal{
+  background:
+    linear-gradient(135deg, rgba(246,213,223,.80) 0%, rgba(252,246,239,.96) 27%, rgba(230,241,255,.96) 100%),
+    linear-gradient(135deg, rgba(255,255,255,0) 38%, rgba(255,244,192,.12) 42%, rgba(255,245,192,.34) 45.5%, rgba(255,247,205,.60) 47.8%, rgba(255,255,255,.99) 49.4%, rgba(255,255,255,1) 50%, rgba(255,255,255,.99) 50.6%, rgba(255,247,205,.58) 52.2%, rgba(255,245,192,.32) 54.5%, rgba(255,244,192,.10) 58%, rgba(255,255,255,0) 62%),
+    radial-gradient(ellipse 23% 140% at 50% 49%, rgba(255,255,255,1) 0%, rgba(255,252,234,.98) 13%, rgba(255,247,201,.82) 24%, rgba(255,242,186,.48) 34%, rgba(255,239,181,.20) 44%, rgba(255,239,181,0) 57%)!important;
+  border-color:rgba(152,165,189,.18)!important;
+}
+html body dialog.bertha-goal-dialog :is(.primary,.bertha-primary,[type=submit]){
+  background:linear-gradient(135deg,rgba(246,213,223,.96) 0%,rgba(252,246,239,.98) 45%,rgba(230,241,255,.98) 100%)!important;
+  color:#5f5969!important;border:1.5px solid rgba(152,165,189,.20)!important;
+}
+
+/* Casa e Exercícios: bordas efetivas nos componentes reais, inclusive cards/segmentos. */
+html body :is(dialog.casa-dialog,dialog.casa-maint-dialog) :is(
+ input:not([type=checkbox]):not([type=radio]),select,textarea,.secondary,.primary,.study-v10-x,.casa-modal-x,
+ .card,.pill,.seg-btn,.choice-btn,.casa-routine-picker-btn,.casa-web-link,.casa-tool-row
+){border:1.5px solid rgba(154,119,132,.25)!important}
+html body dialog.exercise-dialog :is(
+ input:not([type=checkbox]):not([type=radio]),select,textarea,.secondary,.primary,.study-v10-x,.bertha-modal-head button,
+ .card,.pill,.seg-btn,.choice-btn,.exercise-icon-choice,.exercise-icon-filter
+){border:1.5px solid rgba(148,125,169,.25)!important}
+
+/* Criação & Ideias: restaura rolagem interna no Safari/iPhone sem mover a página de trás. */
+html body dialog#ideaDialog[open],html body dialog.idea-dialog[open]{overflow:hidden!important;overscroll-behavior:contain!important}
+html body dialog#ideaDialog[open] > #ideaForm,
+html body dialog.idea-dialog[open] > :is(.study-v10-modal,.bertha-modal){
+  box-sizing:border-box!important;display:block!important;overflow-y:auto!important;overflow-x:hidden!important;
+  -webkit-overflow-scrolling:touch!important;overscroll-behavior:contain!important;touch-action:pan-y!important;
+  max-height:calc(100dvh - env(safe-area-inset-top,0px) - env(safe-area-inset-bottom,0px) - 32px)!important;
+  padding-bottom:calc(28px + env(safe-area-inset-bottom,0px))!important;
+}
+html body dialog#ideaDialog[open] #ideaForm :is(input,textarea,select,button,label),
+html body dialog.idea-dialog[open] :is(input,textarea,select,button,label){touch-action:manipulation}
+
+/* Alimentação > detalhe da receita: restaura escala, cabeçalho e scroll do Modal System. */
+html body dialog#foodRecipeDialog[open]{overflow:hidden!important}
+html body dialog#foodRecipeDialog[open] > .study-v10-modal{
+  box-sizing:border-box!important;display:flex!important;flex-direction:column!important;
+  width:min(620px,calc(100vw - 32px))!important;max-height:calc(100dvh - env(safe-area-inset-top,0px) - env(safe-area-inset-bottom,0px) - 32px)!important;
+  padding:22px!important;overflow-y:auto!important;overflow-x:hidden!important;-webkit-overflow-scrolling:touch!important;overscroll-behavior:contain!important;
+  border-radius:28px!important;
+}
+html body dialog#foodRecipeDialog .study-v10-head{position:static!important;flex:0 0 auto!important;margin:0 0 16px!important;padding:0!important}
+html body dialog#foodRecipeDialog .study-v10-head h2{font-size:24px!important;line-height:1.08!important;margin:0 0 5px!important}
+html body dialog#foodRecipeDialog .study-v10-head p{font-size:13px!important;line-height:1.4!important;margin:0!important}
+html body dialog#foodRecipeDialog .recipe-detail-card{
+  flex:0 0 auto!important;margin:0!important;padding:18px!important;border-radius:20px!important;
+  font-size:15px!important;line-height:1.48!important;background:rgba(255,253,250,.72)!important;border:1.5px solid rgba(103,151,183,.17)!important;
+}
+html body dialog#foodRecipeDialog .recipe-detail-card h3{font-size:18px!important;line-height:1.2!important;margin:0 0 10px!important}
+html body dialog#foodRecipeDialog .recipe-detail-card h3:not(:first-child){margin-top:18px!important}
+html body dialog#foodRecipeDialog .recipe-detail-card :is(ul,ol){margin:0 0 12px!important;padding-left:24px!important}
+html body dialog#foodRecipeDialog .recipe-detail-card li{font-size:15px!important;line-height:1.48!important;margin:4px 0!important}
+html body dialog#foodRecipeDialog .recipe-detail-card p{font-size:15px!important;line-height:1.48!important;margin:12px 0 0!important}
+html body dialog#foodRecipeDialog .recipe-modal-actions{
+  position:static!important;display:grid!important;grid-template-columns:1fr 1fr!important;gap:10px!important;
+  flex:0 0 auto!important;margin:16px 0 0!important;padding:0!important;background:transparent!important;border:0!important;
+}
+html body dialog#foodRecipeDialog .recipe-modal-actions button{min-height:48px!important;border-radius:16px!important;font-size:14px!important;padding:10px 12px!important}
+html body dialog#foodRecipeDialog .recipe-modal-actions button:nth-child(3){grid-column:1/-1!important}
+
+/* Trabalho: estabiliza o primeiro paint contra regras antigas injetadas. */
+html body #app > .work12-page,html body #app > .work13-page{opacity:1!important;transform:none!important}
+html body .work13-hero{margin-top:10px!important;margin-bottom:34px!important;background:linear-gradient(125deg,rgba(238,228,250,.92) 0%,rgba(239,235,251,.88) 48%,rgba(218,244,235,.88) 100%)!important;border:1px solid rgba(123,104,154,.11)!important}
+html body .work12-fronts{gap:18px!important}
+html body .work12-front{background:linear-gradient(135deg,rgba(255,252,246,.96),rgba(252,249,243,.93))!important;grid-template-columns:47px 1fr 20px!important;padding:18px!important}
+html body .work12-front .work12-icon{width:46.56px!important;height:46.56px!important;border-radius:15px!important;background:linear-gradient(125deg,rgba(238,228,250,.88),rgba(218,244,235,.86))!important;border:1px solid rgba(117,96,153,.09)!important;color:#75609a!important}
+
+
+/* =========================================================
+   RC59 — TAREFAS: correção estrutural, sem sobreposição.
+   Referência visual literal: Novo Compromisso.
+   ========================================================= */
+html body dialog.bertha-plans-task-dialog > form.bertha-task-modal{
+  background:linear-gradient(145deg,rgba(255,250,226,.98) 0%,rgba(252,239,211,.97) 54%,rgba(248,222,199,.96) 100%)!important;
+  border:1px solid rgba(177,132,88,.12)!important;
+}
+html body dialog.bertha-plans-task-dialog .bertha-task-modal-head{
+  background:transparent!important;border:0!important;box-shadow:none!important;
+}
+html body dialog.bertha-plans-task-dialog .bertha-task-modal-head > div > span{
+  color:#96765f!important;font-weight:650!important;letter-spacing:.18em!important;
+}
+html body dialog.bertha-plans-task-dialog .bertha-task-modal-head h2{
+  font-weight:500!important;letter-spacing:-.025em!important;color:#3d3947!important;
+}
+html body dialog.bertha-plans-task-dialog .bertha-task-modal-head button[data-close]{
+  width:40px!important;height:40px!important;min-width:40px!important;border-radius:50%!important;
+  background:rgba(255,253,250,.56)!important;border:1px solid rgba(145,119,91,.13)!important;
+  color:#81797d!important;box-shadow:none!important;outline:none!important;
+}
+html body dialog.bertha-plans-task-dialog .bertha-task-field > span{
+  font-weight:600!important;color:#655f67!important;
+}
+html body dialog.bertha-plans-task-dialog .bertha-task-field > span small{font-weight:400!important;color:#9a9198!important}
+html body dialog.bertha-plans-task-dialog :is(input:not([type=checkbox]),select,textarea){
+  box-sizing:border-box!important;min-width:0!important;max-width:100%!important;width:100%!important;
+  background:rgba(255,253,250,.78)!important;border:1.5px solid rgba(145,119,91,.17)!important;
+  color:#3e3d4b!important;box-shadow:none!important;
+}
+/* Horário e Prioridade não dividem mais uma linha estreita no iPhone. */
+html body dialog.bertha-plans-task-dialog .bertha-task-schedule-priority{
+  display:grid!important;grid-template-columns:minmax(0,1fr)!important;gap:18px!important;width:100%!important;
+}
+html body dialog.bertha-plans-task-dialog .bertha-task-schedule-priority > *{min-width:0!important;width:100%!important}
+html body dialog.bertha-plans-task-dialog .bertha-task-schedule-priority .bertha-segment.compact{
+  display:grid!important;grid-template-columns:repeat(3,minmax(0,1fr))!important;gap:8px!important;width:100%!important;
+}
+html body dialog.bertha-plans-task-dialog .bertha-segment{
+  display:grid!important;grid-template-columns:repeat(4,minmax(0,1fr))!important;gap:8px!important;width:100%!important;
+}
+html body dialog.bertha-plans-task-dialog .bertha-segment button{
+  box-sizing:border-box!important;min-width:0!important;width:100%!important;white-space:nowrap!important;
+  background:rgba(255,253,250,.68)!important;border:1px solid rgba(145,119,91,.14)!important;
+  color:#6f686d!important;box-shadow:none!important;font-weight:600!important;
+}
+html body dialog.bertha-plans-task-dialog .bertha-segment button.active{
+  background:linear-gradient(135deg,#f1d47d 0%,#e7bd78 54%,#dca36d 100%)!important;
+  border-color:rgba(191,137,75,.30)!important;color:#fff!important;
+}
+html body dialog.bertha-plans-task-dialog .bertha-task-modal-actions{
+  background:transparent!important;border:0!important;box-shadow:none!important;margin-top:20px!important;
+}
+html body dialog.bertha-plans-task-dialog .bertha-task-modal-actions :is(.bertha-task-cancel,.secondary){
+  background:rgba(255,253,250,.68)!important;border:1px solid rgba(145,119,91,.14)!important;color:#6f686d!important;
+}
+html body dialog.bertha-plans-task-dialog .bertha-task-modal-actions :is(.bertha-task-save,.primary){
+  background:linear-gradient(135deg,#f1d47d 0%,#e7bd78 54%,#dca36d 100%)!important;
+  border:1px solid rgba(191,137,75,.20)!important;color:#fff!important;
+}
+@media(max-width:430px){
+  html body dialog.bertha-plans-task-dialog .bertha-segment{gap:6px!important}
+  html body dialog.bertha-plans-task-dialog .bertha-segment button{padding-left:7px!important;padding-right:7px!important;font-size:13px!important}
+  html body dialog.bertha-plans-task-dialog .bertha-task-schedule-priority .bertha-segment.compact button{font-size:13px!important}
+}
+
+
+/* RC60 — SOMENTE Nova/Editar Tarefa: superfície amarela/pêssego de Compromissos. */
+html body dialog.bertha-plans-task-dialog[open] > form.bertha-task-modal{
+  background-color:#fbedd4!important;
+  background-image:linear-gradient(145deg,#fff8dc 0%,#f9e8c9 50%,#f4d4bf 100%)!important;
+}
+
+
+/* =========================================================
+   RC61 — PLANOS > NOVA/EDITAR TAREFA
+   Fonte única: mesmo sistema visual de Novo Compromisso.
+   Sem overrides JS concorrentes. Form inteiro rolável para
+   preservar Prioridade, Repetir, Aviso e Observação no iPhone.
+   ========================================================= */
+html body dialog.bertha-plans-task-dialog[open]{
+  border:0!important;padding:0!important;background:transparent!important;max-width:none!important;max-height:none!important;
+}
+html body dialog.bertha-plans-task-dialog[open]::backdrop{background:rgba(53,48,52,.30)!important;backdrop-filter:blur(4px)!important;-webkit-backdrop-filter:blur(4px)!important}
+html body dialog.bertha-plans-task-dialog[open] > form.bertha-task-modal{
+  box-sizing:border-box!important;width:min(92vw,520px)!important;max-height:min(88dvh,760px)!important;
+  overflow-y:auto!important;overflow-x:hidden!important;-webkit-overflow-scrolling:touch!important;overscroll-behavior:contain!important;
+  display:block!important;padding:20px!important;border-radius:26px!important;
+  background:linear-gradient(145deg,rgba(255,250,226,.98) 0%,rgba(252,239,211,.97) 54%,rgba(248,222,199,.96) 100%)!important;
+  border:1px solid rgba(177,132,88,.12)!important;box-shadow:0 20px 52px rgba(47,37,58,.14)!important;
+}
+html body dialog.bertha-plans-task-dialog[open] :is(.bertha-task-modal-head,.bertha-task-modal-body,.bertha-task-modal-actions){background:transparent!important;border:0!important;box-shadow:none!important}
+html body dialog.bertha-plans-task-dialog[open] .bertha-task-modal-head{display:flex!important;justify-content:space-between!important;align-items:flex-start!important;gap:14px!important;margin:0 0 15px!important;padding:0!important}
+html body dialog.bertha-plans-task-dialog[open] .bertha-task-modal-head>div>span{font-size:10px!important;letter-spacing:.16em!important;font-weight:800!important;color:#9c7b64!important}
+html body dialog.bertha-plans-task-dialog[open] .bertha-task-modal-head h2{margin:5px 0 0!important;font-size:22px!important;line-height:1.15!important;color:#373440!important;font-weight:500!important;letter-spacing:-.02em!important}
+html body dialog.bertha-plans-task-dialog[open] .bertha-task-modal-head button[data-close]{border:0!important;outline:0!important;box-shadow:none!important;background:rgba(247,243,237,.82)!important;color:#8e8792!important;font-size:23px!important;line-height:1!important;width:36px!important;height:36px!important;min-width:36px!important;border-radius:50%!important;display:grid!important;place-items:center!important;padding:0!important}
+html body dialog.bertha-plans-task-dialog[open] .bertha-task-modal-body{display:block!important;overflow:visible!important;padding:0!important;max-height:none!important}
+html body dialog.bertha-plans-task-dialog[open] .bertha-task-field{display:block!important;margin:11px 0!important;min-width:0!important}
+html body dialog.bertha-plans-task-dialog[open] .bertha-task-field>span{display:block!important;font-size:11.5px!important;font-weight:600!important;color:#655f67!important;margin-bottom:6px!important}
+html body dialog.bertha-plans-task-dialog[open] .bertha-task-field>span small{font-weight:400!important;color:#9b9298!important}
+html body dialog.bertha-plans-task-dialog[open] :is(.bertha-task-field input,.bertha-task-field select,.bertha-task-field textarea,.bertha-duration-input input,.bertha-duration-input select,.bertha-notify-custom input){box-sizing:border-box!important;width:100%!important;min-width:0!important;max-width:100%!important;min-height:46px!important;border:1px solid rgba(140,126,145,.14)!important;border-radius:15px!important;background:#fffdfa!important;padding:11px 12px!important;color:#3e3d4b!important;font:inherit!important;font-size:16px!important;font-weight:400!important;box-shadow:none!important}
+html body dialog.bertha-plans-task-dialog[open] .bertha-task-field textarea{min-height:86px!important;resize:vertical!important}
+html body dialog.bertha-plans-task-dialog[open] .bertha-task-two{display:grid!important;grid-template-columns:minmax(0,1fr)!important;gap:0!important;width:100%!important}
+html body dialog.bertha-plans-task-dialog[open] .bertha-duration-input{display:grid!important;grid-template-columns:1fr 1.2fr!important;gap:9px!important;width:100%!important}
+html body dialog.bertha-plans-task-dialog[open] .bertha-task-schedule-priority{display:grid!important;grid-template-columns:minmax(0,1fr)!important;gap:0!important;width:100%!important}
+html body dialog.bertha-plans-task-dialog[open] .bertha-segment{display:grid!important;grid-template-columns:repeat(4,minmax(0,1fr))!important;gap:8px!important;width:100%!important}
+html body dialog.bertha-plans-task-dialog[open] .bertha-segment.compact{grid-template-columns:repeat(3,minmax(0,1fr))!important}
+html body dialog.bertha-plans-task-dialog[open] .bertha-segment button{box-sizing:border-box!important;min-width:0!important;width:100%!important;min-height:42px!important;padding:9px 6px!important;border-radius:15px!important;background:rgba(255,255,255,.72)!important;color:#706972!important;border:1px solid rgba(140,126,145,.12)!important;font-size:13px!important;font-weight:600!important;white-space:nowrap!important;box-shadow:none!important}
+html body dialog.bertha-plans-task-dialog[open] .bertha-segment button.active{background:linear-gradient(135deg,#f7e8b8 0%,#e7bd87 45%,#cf8f67 100%)!important;color:#fff!important;border:1px solid rgba(177,132,88,.12)!important}
+html body dialog.bertha-plans-task-dialog[open] .bertha-notify-box{margin:12px 0!important;padding:0!important;background:transparent!important;border:0!important}
+html body dialog.bertha-plans-task-dialog[open] .bertha-toggle-row{display:flex!important;align-items:center!important;justify-content:space-between!important;gap:16px!important;padding:13px 0!important}
+html body dialog.bertha-plans-task-dialog[open] .bertha-toggle-row strong{display:block!important;font-size:13px!important;font-weight:500!important;color:#4c4650!important}
+html body dialog.bertha-plans-task-dialog[open] .bertha-toggle-row span{display:block!important;margin-top:3px!important;font-size:11px!important;font-weight:400!important;color:#8d848c!important}
+html body dialog.bertha-plans-task-dialog[open] .bertha-task-modal-actions{display:flex!important;justify-content:flex-end!important;align-items:center!important;gap:9px!important;margin:18px 0 0!important;padding:0!important;position:static!important}
+html body dialog.bertha-plans-task-dialog[open] .bertha-task-modal-actions>div{display:flex!important;gap:9px!important;margin-left:auto!important}
+html body dialog.bertha-plans-task-dialog[open] :is(.bertha-task-cancel,.bertha-task-save){min-height:42px!important;border-radius:15px!important;padding:11px 16px!important;font-size:13px!important;font-weight:700!important;box-shadow:none!important}
+html body dialog.bertha-plans-task-dialog[open] .bertha-task-cancel{background:rgba(255,255,255,.72)!important;color:#706972!important;border:1px solid rgba(140,126,145,.12)!important}
+html body dialog.bertha-plans-task-dialog[open] .bertha-task-save{background:linear-gradient(135deg,#f7e8b8 0%,#e7bd87 45%,#cf8f67 100%)!important;color:#fff!important;border:0!important}
+@media(max-width:480px){html body dialog.bertha-plans-task-dialog[open] > form.bertha-task-modal{width:calc(100vw - 24px)!important;max-height:calc(100dvh - 24px)!important;padding:18px!important}}

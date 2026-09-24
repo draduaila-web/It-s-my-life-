@@ -22,8 +22,13 @@
     bec:'bertha.work.notes.bec.v1',
     tiktok:'bertha.work.notes.tiktok.v1'
   };
-  const notes = (kind) => read(NOTE_KEYS[kind]);
-  const persistNotes = (kind,arr) => save(NOTE_KEYS[kind],arr);
+  const CUSTOM_FRONTS_KEY='bertha.work.fronts.v1';
+  const customFronts=()=>read(CUSTOM_FRONTS_KEY);
+  const saveCustomFronts=(arr)=>save(CUSTOM_FRONTS_KEY,arr);
+  const frontKey=(id)=>`minha-vida.trabalho.custom.${id}.v1`;
+  const noteKey=(kind)=>NOTE_KEYS[kind]||`bertha.work.notes.custom.${kind}.v1`;
+  const notes = (kind) => read(noteKey(kind));
+  const persistNotes = (kind,arr) => save(noteKey(kind),arr);
 
   const WORK = {
     crefito:{
@@ -32,7 +37,7 @@
       key:KEYS.crefito,
       groups:[
         ['Demandas',['Nova demanda','Acompanhar demanda']],
-        ['Projetos',['Novo projeto','Próximo passo']],
+        ['Projetos',['Novo projeto','Acompanhar projeto']],
         ['Reuniões',['Preparar reunião','Participar de reunião','Registrar encaminhamentos']],
         ['Documentos & processos',['SEI / documento','Conferir processo','Despacho / resposta']],
         ['Acompanhamentos',['Cobrar retorno','Verificar andamento','Outro']]
@@ -65,17 +70,52 @@
     }
   };
 
+  function customCfg(kind){
+    const f=customFronts().find(x=>String(x.id)===String(kind));
+    if(!f)return null;
+    const areas=(Array.isArray(f.areas)?f.areas:[]).map(x=>String(x||'').trim()).filter(Boolean);
+    return {name:f.name||'Trabalho',icon:f.icon||'work',tag:f.tag||'TRABALHO',desc:f.desc||'Tarefas, projetos e acompanhamentos.',key:frontKey(f.id),groups:(areas.length?areas:['Geral']).map(a=>[a,['Nova tarefa']]),custom:true,id:f.id};
+  }
+  function getCfg(kind){return WORK[kind]||customCfg(kind);}
+  function allFronts(){return [...Object.keys(WORK).map(id=>({id,cfg:WORK[id],custom:false})),...customFronts().map(f=>({id:f.id,cfg:customCfg(f.id),custom:true})).filter(x=>x.cfg)];}
+
   function workSvg(kind='work'){
     const icons={
-      work:`<svg viewBox="0 0 64 48" aria-hidden="true"><path d="M9 13h18c7 0 7 9 14 9h14"/><path d="M9 24h13c7 0 7 11 15 11h18"/><path d="M9 35h18"/></svg>`,
+      work:`<svg viewBox="0 0 48 48" aria-hidden="true"><rect x="9" y="15" width="30" height="22" rx="4"/><path d="M18 15v-4h12v4M9 24h30M21 24v3h6v-3"/></svg>`,
       crefito:`<svg viewBox="0 0 48 48" aria-hidden="true"><path d="M12 13h24M12 24h24M12 35h24"/><path d="M18 9v30M30 9v30"/></svg>`,
       bec:`<svg viewBox="0 0 48 48" aria-hidden="true"><path d="M24 8c2.8 8.5 7.5 13.2 16 16-8.5 2.8-13.2 7.5-16 16-2.8-8.5-7.5-13.2-16-16 8.5-2.8 13.2-7.5 16-16Z"/><path d="M24 15v18M15 24h18"/></svg>`,
-      tiktok:`<svg viewBox="0 0 48 48" aria-hidden="true"><path d="M9 29c5-9 10-9 15 0s10 9 15 0"/><path d="M9 19c5-9 10-9 15 0s10 9 15 0"/></svg>`
+      tiktok:`<svg viewBox="0 0 48 48" aria-hidden="true"><path d="M17 11l20 13-20 13Z"/></svg>`,
+      laptop:`<svg viewBox="0 0 48 48" aria-hidden="true"><rect x="10" y="10" width="28" height="21" rx="3"/><path d="M7 36h34"/></svg>`,
+      chart:`<svg viewBox="0 0 48 48" aria-hidden="true"><path d="M10 38V25h7v13M21 38V17h7v21M32 38V10h7v28"/></svg>`,
+      people:`<svg viewBox="0 0 48 48" aria-hidden="true"><circle cx="19" cy="17" r="6"/><path d="M8 38c1-8 5-12 11-12s10 4 11 12M31 13c5 0 8 3 8 8M33 27c5 1 8 5 8 11"/></svg>`,
+      document:`<svg viewBox="0 0 48 48" aria-hidden="true"><rect x="12" y="7" width="24" height="34" rx="3"/><path d="M18 17h12M18 24h12M18 31h9"/></svg>`,
+      calendar:`<svg viewBox="0 0 48 48" aria-hidden="true"><rect x="8" y="11" width="32" height="29" rx="4"/><path d="M8 19h32M16 7v8M32 7v8M16 26h5M27 26h5M16 33h5"/></svg>`,
+      check:`<svg viewBox="0 0 48 48" aria-hidden="true"><rect x="9" y="9" width="30" height="30" rx="6"/><path d="m16 24 6 6 11-13"/></svg>`,
+      target:`<svg viewBox="0 0 48 48" aria-hidden="true"><circle cx="24" cy="24" r="15"/><circle cx="24" cy="24" r="8"/><circle cx="24" cy="24" r="2"/><path d="M35 13 42 6M35 13h7V6"/></svg>`,
+      idea:`<svg viewBox="0 0 48 48" aria-hidden="true"><path d="M16 29c-3-3-5-6-5-11a13 13 0 0 1 26 0c0 5-2 8-5 11-2 2-3 4-3 7H19c0-3-1-5-3-7Z"/><path d="M19 40h10M21 44h6"/></svg>`,
+      settings:`<svg viewBox="0 0 48 48" aria-hidden="true"><circle cx="24" cy="24" r="6"/><path d="M24 7v5M24 36v5M7 24h5M36 24h5M12 12l4 4M32 32l4 4M36 12l-4 4M16 32l-4 4"/></svg>`,
+      mail:`<svg viewBox="0 0 48 48" aria-hidden="true"><rect x="7" y="11" width="34" height="26" rx="4"/><path d="m9 14 15 12 15-12"/></svg>`,
+      phone:`<svg viewBox="0 0 48 48" aria-hidden="true"><path d="M15 8c-3 1-6 5-5 9 2 11 10 19 21 21 4 1 8-2 9-5l-8-6-5 5c-6-3-9-6-12-12l5-5Z"/></svg>`,
+      chat:`<svg viewBox="0 0 48 48" aria-hidden="true"><path d="M8 10h32v24H21l-9 7v-7H8Z"/><path d="M16 22h1M24 22h1M32 22h1"/></svg>`,
+      globe:`<svg viewBox="0 0 48 48" aria-hidden="true"><circle cx="24" cy="24" r="17"/><path d="M7 24h34M24 7c6 6 8 11 8 17s-2 11-8 17c-6-6-8-11-8-17s2-11 8-17Z"/></svg>`,
+      building:`<svg viewBox="0 0 48 48" aria-hidden="true"><path d="M10 41V10h21v31M31 20h8v21M7 41h35"/><path d="M16 17h4M24 17h2M16 24h4M24 24h2M16 31h4M24 31h2"/></svg>`,
+      folder:`<svg viewBox="0 0 48 48" aria-hidden="true"><path d="M6 14h15l4 5h17v20H6Z"/></svg>`,
+      link:`<svg viewBox="0 0 48 48" aria-hidden="true"><path d="M20 29l-3 3a8 8 0 0 1-11-11l7-7a8 8 0 0 1 11 0M28 19l3-3a8 8 0 0 1 11 11l-7 7a8 8 0 0 1-11 0M17 24h14"/></svg>`,
+      star:`<svg viewBox="0 0 48 48" aria-hidden="true"><path d="m24 7 5 11 12 1-9 8 3 12-11-6-11 6 3-12-9-8 12-1Z"/></svg>`
     };
     return icons[kind]||icons.work;
   }
-  function workKindForCfg(cfg){return Object.keys(WORK).find(k=>WORK[k]===cfg)||'crefito';}
-  function workEngineId(kind,id){return kind==='crefito'?`crefito:${id}`:`minha-vida.trabalho.${kind}.v1:${id}`;}
+  const WORK_ICON_OPTIONS=[
+    ['work','Maleta'],['laptop','Computador'],['chart','Resultados'],['people','Equipe'],['document','Documento'],
+    ['calendar','Agenda'],['check','Checklist'],['target','Meta'],['idea','Ideias'],['settings','Operações'],
+    ['mail','E-mail'],['phone','Telefone'],['chat','Atendimento'],['globe','Digital'],['building','Empresa'],
+    ['folder','Projetos'],['link','Parcerias'],['star','Destaque']
+  ];
+  function workIconPicker(selected='work'){
+    return `<div class="work14-icon-picker" data-work-icon-picker>${WORK_ICON_OPTIONS.map(([id,label])=>`<button type="button" class="work14-icon-option ${selected===id?'selected':''}" data-work-icon="${id}" aria-label="${label}"><span>${workSvg(id)}</span><small>${label}</small></button>`).join('')}</div>`;
+  }
+  function workKindForCfg(cfg){if(cfg?.custom&&cfg.id)return cfg.id;return Object.keys(WORK).find(k=>WORK[k]===cfg)||'crefito';}
+  function workEngineId(kind,id,cfg){if(cfg?.custom)return `${cfg.key}:${id}`;return kind==='crefito'?`crefito:${id}`:`minha-vida.trabalho.${kind}.v1:${id}`;}
   function taskMinutes(x){
     if(+x.minutes>0)return +x.minutes;
     const v=String(x.duration||'30 min').toLowerCase();
@@ -84,9 +124,9 @@
   }
   function startWorkTask(kind,cfg,id){
     const arr=tasks(cfg),i=arr.findIndex(x=>String(x.id)===String(id));if(i<0)return;
-    const x=arr[i],minutes=taskMinutes(x),engineId=workEngineId(kind,x.id);
+    const x=arr[i],minutes=taskMinutes(x),engineId=workEngineId(kind,x.id,cfg);
     if(window.BerthaTimeEngine?.start){
-      window.BerthaTimeEngine.start({id:engineId,learningKey:engineId,source:`Trabalho · ${cfg.name}`,title:x.title||'Trabalho',minutes,configuredMinutes:minutes,date:x.date||'',time:x.time||'',period:String(x.period||'Flexível').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace('manha','morning').replace('tarde','afternoon').replace('noite','night').replace('flexivel','flex'),priority:x.priority||'Normal',kind:'work',workKind:kind,workTaskId:x.id});
+      window.BerthaTimeEngine.start({id:engineId,learningKey:engineId,source:`Trabalho · ${cfg.name}`,title:x.title||'Trabalho',minutes,configuredMinutes:minutes,date:x.date||'',time:x.time||'',period:String(x.period||'Flexível').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace('manha','morning').replace('tarde','afternoon').replace('noite','night').replace('flexivel','flex'),priority:x.priority||'Normal',kind:'work',workKind:kind,workTaskId:x.id,workStorageKey:cfg.key});
       setTimeout(()=>{const active=window.BerthaTimeEngine?.active?.();if(active&&String(active.id)===engineId){const a=tasks(cfg),j=a.findIndex(t=>String(t.id)===String(id));if(j>=0){a[j]={...a[j],status:'Em andamento',startedAt:active.startedAt||Date.now(),updatedAt:Date.now()};persist(cfg,a);renderWorkspace(kind)}}},120);
     }else{
       arr[i]={...x,status:'Em andamento',startedAt:Date.now(),updatedAt:Date.now()};persist(cfg,arr);renderWorkspace(kind);
@@ -96,7 +136,7 @@
     try{const key='bertha.time-engine.v1',e=JSON.parse(window.berthaHmlStorage.getItem(key)||'{"active":null,"history":[],"snoozed":{}}');e.history=Array.isArray(e.history)?e.history:[];if(!e.history.some(h=>String(h.itemId)===String(engineId)&&h.status==='done'&&Math.abs((+h.endedAt||0)-end)<2000)){e.history.unshift({itemId:engineId,learningKey:engineId,title:x.title||'Trabalho',source:`Trabalho · ${cfg.name}`,day:TODAY(),startedAt:end-real*60000,endedAt:end,configuredMinutes:taskMinutes(x),plannedMinutes:taskMinutes(x),realMinutes:real,status:'done',category:x.area||cfg.name});window.berthaHmlStorage.setItem(key,JSON.stringify(e));}}catch{}
   }
   function completeWorkTask(kind,cfg,id){
-    const arr=tasks(cfg),i=arr.findIndex(x=>String(x.id)===String(id));if(i<0)return;const x=arr[i],engineId=workEngineId(kind,x.id),active=window.BerthaTimeEngine?.active?.();
+    const arr=tasks(cfg),i=arr.findIndex(x=>String(x.id)===String(id));if(i<0)return;const x=arr[i],engineId=workEngineId(kind,x.id,cfg),active=window.BerthaTimeEngine?.active?.();
     if(active&&String(active.id)===engineId){window.BerthaTimeEngine.finish();setTimeout(()=>renderWorkspace(kind),120);return;}
     const end=Date.now(),st=x.startedAt||end,real=Math.max(1,Math.round((end-st)/60000));arr[i]={...x,status:'Concluído',completedAt:end,actualMinutes:real,updatedAt:end};persist(cfg,arr);recordWorkCompletion(engineId,x,cfg,end,real);renderWorkspace(kind);
   }
@@ -119,6 +159,12 @@
       .work12-arrow{font-size:24px;color:#b3a7b4}
       .work12-note{margin-top:18px;padding:18px 20px!important}
       .work12-note p{margin:7px 0 0;color:#817783}
+      .work12-front-add{margin-top:12px;width:100%;border:1px dashed rgba(112,104,122,.22);background:rgba(255,252,246,.58);border-radius:24px;padding:15px 18px;color:#786d7b;font:inherit;font-weight:800;text-align:center}
+      .work12-front-edit{border:0;background:rgba(238,229,244,.82);color:#755d84;border-radius:999px;padding:8px 11px;font-weight:800;margin-left:auto}
+      .work12-front-dialog{position:fixed;left:50%;top:50%;transform:translate(-50%,-50%);width:min(92vw,500px);max-height:78svh;margin:0;border:0;border-radius:28px;padding:0;background:#fbf7ef;box-shadow:0 28px 80px rgba(55,43,62,.20);overflow:hidden}
+      .work12-front-dialog::backdrop{background:rgba(48,39,49,.32);backdrop-filter:blur(3px)}
+      .work12-front-form{padding:20px;display:grid;gap:14px;max-height:78svh;overflow:auto;-webkit-overflow-scrolling:touch}
+      .work12-front-form label{display:grid;gap:7px;font-size:12px;font-weight:800;color:#746c75}.work12-front-form input,.work12-front-form textarea,.work12-front-form select{font:inherit;font-size:16px;border:1px solid rgba(103,91,108,.13);border-radius:16px;background:#fffdfa;padding:12px 13px;color:#40384a}.work12-front-form textarea{resize:vertical}
       .work12-back{border:0;background:#f0e6f6;color:#715486;border-radius:999px;padding:10px 14px;font-weight:800}
       .work12-subhead{display:flex;align-items:center;gap:12px;margin:0 0 18px}
       .work12-subhero{display:flex;gap:14px;align-items:center;margin:0 0 20px}
@@ -180,6 +226,23 @@
       .work12-check{display:flex!important;gap:9px;align-items:center;font-weight:700}.work12-check input{width:auto!important;min-height:auto!important;margin:0!important}
       .work12-duration{display:grid;grid-template-columns:88px minmax(0,1fr);gap:8px}.work12-duration input,.work12-duration select{margin-top:3px}
       @media(max-width:520px){.work12-dialog{width:92vw;max-height:68vh}.work12-form{max-height:68vh}.work12-form input,.work12-form select,.work12-form textarea{font-size:16px}}
+    `;
+
+    s.textContent += `
+      /* RC9 · Trabalho alinhado à linguagem BERTH.A: lilás + menta */
+      .work12-front{background:linear-gradient(135deg,rgba(244,238,252,.86),rgba(231,248,241,.82))!important;border:1px solid rgba(123,104,154,.10)!important;box-shadow:0 7px 22px rgba(84,68,105,.035)!important}
+      .work12-front .work12-icon{width:48px!important;height:48px!important;border-radius:15px!important;background:linear-gradient(135deg,rgba(226,211,248,.94),rgba(211,242,229,.92))!important;color:#75609a!important;border:1px solid rgba(117,96,153,.08)!important}
+      .work12-front .work12-icon svg{width:28px!important;height:28px!important;fill:none!important;stroke:currentColor!important;stroke-width:1.8!important;stroke-linecap:round!important;stroke-linejoin:round!important}
+      .work12-front{grid-template-columns:48px 1fr 22px!important}.work12-front:nth-child(n) .work12-icon{color:#75609a!important}
+      .work12-front-add{background:linear-gradient(120deg,rgba(239,230,250,.62),rgba(221,245,234,.58))!important;border-color:rgba(123,104,154,.22)!important;color:#715d8f!important}
+      .work13-bridge{background:linear-gradient(135deg,rgba(239,230,250,.68),rgba(220,245,234,.62))!important;border-color:rgba(123,104,154,.09)!important}
+      .work12-front-dialog,.work12-dialog{background:#fbf8f2!important}
+      .work14-icon-field{display:grid;gap:8px}.work14-icon-label{font-size:12px;font-weight:800;color:#746c75}
+      .work14-icon-picker{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:8px;max-height:210px;overflow:auto;padding:2px;-webkit-overflow-scrolling:touch}
+      .work14-icon-option{border:1px solid rgba(119,100,149,.10);background:linear-gradient(135deg,rgba(239,230,250,.68),rgba(220,245,234,.62));border-radius:15px;min-height:76px;padding:8px 4px 6px;display:grid;place-items:center;gap:4px;color:#75609a;font:inherit}
+      .work14-icon-option span{width:31px;height:31px;display:grid;place-items:center}.work14-icon-option svg{width:27px;height:27px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+      .work14-icon-option small{font-size:9px;line-height:1.05;color:#756f7c;font-weight:650;text-align:center}.work14-icon-option.selected{outline:2px solid rgba(119,92,161,.42);background:linear-gradient(135deg,#e5d7f8,#d8f1e5);box-shadow:0 4px 12px rgba(94,74,120,.07)}
+      @media(max-width:520px){.work14-icon-picker{grid-template-columns:repeat(4,minmax(0,1fr))}.work14-icon-option{min-height:72px}}
     `;
     document.head.appendChild(s);
     if(!document.getElementById('work-v13-visual')){
@@ -243,27 +306,42 @@
   function renderHome(){
     injectStyles();
     const a=APP(); if(!a) return;
+    const fronts=allFronts();
+    const cards=fronts.map(({id,cfg,custom},idx)=>`<button type="button" class="work12-front" data-work12-go="${esc(id)}">
+      <span class="work12-icon">${workSvg(custom?(cfg.icon||'work'):id)}</span><span><strong>${esc(cfg.name)}</strong><small>${esc(cfg.tag||cfg.desc||'Trabalho')}</small></span><span class="work12-arrow">›</span>
+    </button>`).join('');
     a.innerHTML=`
       <section class="work13-hero">
         <div><div class="work13-kicker">TRABALHO</div><h2>Know what’s next.<br>Live what’s now.</h2><p>A BERTH.A organiza. Você age.</p></div>
         <span class="work13-hero-mark">${workSvg('work')}</span>
       </section>
       <div class="work13-section-label">MINHAS FRENTES</div>
-      <section class="work12-fronts">
-        <button type="button" class="work12-front" data-work12-go="crefito">
-          <span class="work12-icon">${workSvg('crefito')}</span><span><strong>CREFITO-11</strong><small>Trabalho oficial · 08:00–14:00</small></span><span class="work12-arrow">›</span>
-        </button>
-        <button type="button" class="work12-front" data-work12-go="bec">
-          <span class="work12-icon">${workSvg('bec')}</span><span><strong>BEC</strong><small>Empresa, projetos e operações</small></span><span class="work12-arrow">›</span>
-        </button>
-        <button type="button" class="work12-front" data-work12-go="tiktok">
-          <span class="work12-icon">${workSvg('tiktok')}</span><span><strong>TikTok</strong><small>Conteúdo, produção e presença digital</small></span><span class="work12-arrow">›</span>
-        </button>
-      </section>
+      <section class="work12-fronts">${cards||'<div class="work12-empty">Cadastre sua primeira frente de trabalho.</div>'}</section>
+      <button type="button" class="work12-front-add" id="work12AddFront">＋ Nova frente de trabalho</button>
       <section class="work13-bridge"><div><strong>Menos decisões · mais foco</strong><small>Cada frente tem seu próprio espaço. Depois, as tarefas importantes podem entrar no Meu Dia.</small></div><a href="#meu-dia">Meu Dia →</a></section>`;
-    a.querySelectorAll('[data-work12-go]').forEach(b=>{
-      b.onclick=()=>{ location.hash = '#trabalho-'+b.dataset.work12Go; };
-    });
+    a.querySelectorAll('[data-work12-go]').forEach(b=>{b.onclick=()=>{ location.hash = '#trabalho-'+b.dataset.work12Go; };});
+    document.getElementById('work12AddFront').onclick=()=>openFrontModal();
+  }
+
+  function openFrontModal(frontId=null){
+    injectStyles();
+    const all=customFronts(),x=frontId?all.find(f=>String(f.id)===String(frontId)):null;
+    const dlg=document.createElement('dialog');dlg.className='work12-front-dialog';
+    const areas=Array.isArray(x?.areas)?x.areas.join('\n'):'';
+    dlg.innerHTML=`<form class="work12-front-form">
+      <div class="work12-form-head"><div><div class="eyebrow">TRABALHO</div><h2>${x?'Editar frente':'Nova frente de trabalho'}</h2></div><button type="button" class="work12-x" data-close>×</button></div>
+      <label>Nome<input data-name maxlength="60" value="${esc(x?.name||'')}" placeholder="Ex.: Clínica, Empresa, Consultório"></label>
+      <label>Tipo<select data-tag><option ${x?.tag==='TRABALHO'?'selected':''}>TRABALHO</option><option ${x?.tag==='EMPRESA'?'selected':''}>EMPRESA</option><option ${x?.tag==='AUTÔNOMO'?'selected':''}>AUTÔNOMO</option><option ${x?.tag==='CONTEÚDO'?'selected':''}>CONTEÚDO</option><option ${x?.tag==='PROJETO'?'selected':''}>PROJETO</option></select></label>
+      <div class="work14-icon-field"><span class="work14-icon-label">Ícone</span>${workIconPicker(x?.icon||'work')}<input type="hidden" data-icon value="${esc(x?.icon||'work')}"></div>
+      <label>Descrição <small style="font-weight:500">opcional</small><input data-desc maxlength="140" value="${esc(x?.desc||'')}" placeholder="O que acontece nesta frente?"></label>
+      <label>Áreas <small style="font-weight:500">opcional · uma por linha</small><textarea data-areas rows="4" placeholder="Ex.: Clientes\nAdministrativo\nConteúdo">${esc(areas)}</textarea></label>
+      <div class="work12-form-actions">${x?'<button type="button" class="work12-secondary" data-delete>Excluir</button>':''}<button type="button" class="work12-secondary" data-close>Cancelar</button><button type="submit" class="work12-primary">Salvar</button></div>
+    </form>`;
+    document.body.appendChild(dlg);dlg.showModal();
+    const close=()=>{try{dlg.close()}catch{}dlg.remove()};dlg.querySelectorAll('[data-close]').forEach(b=>b.onclick=close);dlg.addEventListener('cancel',e=>{e.preventDefault();close()});
+    dlg.querySelectorAll('[data-work-icon]').forEach(b=>b.onclick=()=>{dlg.querySelector('[data-icon]').value=b.dataset.workIcon;dlg.querySelectorAll('[data-work-icon]').forEach(x=>x.classList.toggle('selected',x===b));});
+    dlg.querySelector('form').onsubmit=e=>{e.preventDefault();const name=dlg.querySelector('[data-name]').value.trim();if(!name){dlg.querySelector('[data-name]').focus();return}const id=x?.id||`front-${Date.now()}`;const data={id,name,tag:dlg.querySelector('[data-tag]').value,icon:dlg.querySelector('[data-icon]').value||'work',desc:dlg.querySelector('[data-desc]').value.trim(),areas:dlg.querySelector('[data-areas]').value.split(/\n|,/).map(v=>v.trim()).filter(Boolean),createdAt:x?.createdAt||Date.now(),updatedAt:Date.now()};const i=all.findIndex(f=>String(f.id)===String(id));if(i>=0)all[i]=data;else all.push(data);saveCustomFronts(all);close();location.hash='#trabalho-'+id;renderWorkspace(id)};
+    if(x)dlg.querySelector('[data-delete]').onclick=()=>{if(!confirm('Excluir esta frente de trabalho e suas tarefas?'))return;saveCustomFronts(all.filter(f=>String(f.id)!==String(x.id)));window.berthaHmlStorage.removeItem(frontKey(x.id));window.berthaHmlStorage.removeItem(noteKey(x.id));close();location.hash='#trabalho';renderHome()};
   }
 
   function groupDesc(name){
@@ -299,13 +377,13 @@
 
   function renderWorkspace(kind){
     injectStyles();
-    const cfg=WORK[kind], a=APP(); if(!cfg||!a) return;
+    const cfg=getCfg(kind), a=APP(); if(!cfg||!a) return;
     const all=tasks(cfg), open=all.filter(x=>x.status!=='Concluído'), done=all.filter(x=>x.status==='Concluído');
     const ns=notes(kind);
     const mins=x=>{ const v=String(x.duration||'30 min'); if(v.includes('h')){const m=v.match(/(\d+)h(?:(\d+))?/);return m?Number(m[1])*60+Number(m[2]||0):60;} return parseInt(v)||30; };
     const totalMin=open.reduce((sum,x)=>sum+mins(x),0);
     a.innerHTML=`
-      <div class="work12-subhead"><button class="work12-back" id="work12Back">← Trabalho</button><span class="work13-subtag">${esc(cfg.tag)}</span></div>
+      <div class="work12-subhead"><button class="work12-back" id="work12Back">← Trabalho</button><span class="work13-subtag">${esc(cfg.tag)}</span>${cfg.custom?'<button class="work12-front-edit" id="work12EditFront">Editar frente</button>':''}</div>
       <section class="work12-subhero"><span class="work12-icon">${workSvg(kind)}</span><div><span class="work13-subkicker">TRABALHO · ${esc(cfg.name.toUpperCase())}</span><h2>${esc(cfg.name)}</h2><p>${esc(cfg.desc)}</p></div></section>
       <section class="work12-summary"><div class="work12-stat"><b>${open.length}</b><span>tarefas em aberto</span></div><div class="work12-stat"><b>${totalMin<60?totalMin+' min':(totalMin/60).toFixed(totalMin%60?1:0).replace('.',',')+' h'}</b><span>tempo conhecido</span></div></section>
       <section class="work12-section"><div class="work12-section-head"><h3>Notas rápidas</h3><button class="work12-add" id="work12AddNote">+ nota</button></div>
@@ -320,13 +398,14 @@
       </div></section>
       <div class="work12-rule">Nota é para não esquecer. Tarefa é o que precisa ser executado. Ao concluir, a tarefa sai da lista ativa e permanece no histórico.</div>`;
     document.getElementById('work12Back').onclick=()=>location.hash='#trabalho';
+    if(cfg.custom)document.getElementById('work12EditFront').onclick=()=>openFrontModal(kind);
     document.getElementById('work12Add').onclick=()=>openModal(cfg,null);
     document.getElementById('work12AddNote').onclick=()=>openNoteModal(kind,cfg);
-    a.querySelectorAll('[data-work12-action]').forEach(b=>b.onclick=()=>{ const g=b.dataset.work12Group,act=b.dataset.work12Action; const title=(act==='Nova tarefa'||act==='Outra tarefa'||act==='Outro')?`${g} · `:`${g} · ${act}`; openModal(cfg,{title,area:g,date:TODAY(),duration:'30 min',frequency:'Única',priority:'Normal',status:'A fazer'}); });
+    a.querySelectorAll('[data-work12-action]').forEach(b=>b.onclick=()=>{ const g=b.dataset.work12Group,act=b.dataset.work12Action; const title=(act==='Nova tarefa'||act==='Outra tarefa'||act==='Outro')?`${g} · `:`${g} · ${act}`; openModal(cfg,{title,area:g,date:TODAY(),duration:'30 min',frequency:'Única',priority:'Normal',status:'A fazer',_modalTitle:act}); });
     a.querySelectorAll('[data-work12-edit]').forEach(b=>b.onclick=()=>{const item=all.find(x=>String(x.id)===String(b.dataset.work12Edit));if(item)openModal(cfg,item)});
     a.querySelectorAll('[data-work12-start]').forEach(b=>b.onclick=()=>startWorkTask(kind,cfg,b.dataset.work12Start));
     a.querySelectorAll('[data-work12-complete]').forEach(b=>b.onclick=()=>completeWorkTask(kind,cfg,b.dataset.work12Complete));
-    a.querySelectorAll('[data-work12-repeat]').forEach(b=>b.onclick=()=>{const arr=tasks(cfg),x=arr.find(x=>String(x.id)===String(b.dataset.work12Repeat));if(!x)return;arr.push({...x,id:uid(),status:'A fazer',date:TODAY(),startedAt:null,completedAt:null,actualMinutes:null,createdAt:Date.now(),updatedAt:Date.now()});persist(cfg,arr);renderWorkspace(kind)});
+    a.querySelectorAll('[data-work12-repeat]').forEach(b=>b.onclick=()=>{const arr=tasks(cfg),x=arr.find(x=>String(x.id)===String(b.dataset.work12Repeat));if(!x)return;const now=Date.now();arr.push({...x,id:uid(),status:'A fazer',date:TODAY(),time:'',period:'Flexível',startedAt:null,completedAt:null,actualMinutes:null,repeated:true,repeatRequestedAt:now,repeatedFromTime:x.time||'',repeatedFromPeriod:x.period||'',createdAt:now,updatedAt:now});persist(cfg,arr);renderWorkspace(kind)});
     a.querySelectorAll('[data-work12-delete]').forEach(b=>b.onclick=()=>{if(!confirm('Excluir este registro concluído?'))return;persist(cfg,tasks(cfg).filter(x=>String(x.id)!==String(b.dataset.work12Delete)));renderWorkspace(kind)});
     a.querySelectorAll('[data-note-del]').forEach(b=>b.onclick=()=>{persistNotes(kind,notes(kind).filter(n=>String(n.id)!==String(b.dataset.noteDel)));renderWorkspace(kind)});
     a.querySelectorAll('[data-note-task]').forEach(b=>b.onclick=()=>{const n=notes(kind).find(n=>String(n.id)===String(b.dataset.noteTask));if(n)openModal(cfg,{title:n.title||n.text||'',note:n.text||'',date:TODAY(),duration:'30 min',frequency:'Única',priority:'Normal',status:'A fazer',_noteId:n.id,_noteKind:kind})});
@@ -334,8 +413,8 @@
 
   function openNoteModal(kind,cfg){
     const dlg=document.createElement('dialog');dlg.className='work12-dialog';
-    dlg.innerHTML=`<form class="work12-form"><div class="work12-form-head"><div><div class="eyebrow">TRABALHO · ${esc(cfg.name.toUpperCase())}</div><h2>Nota rápida</h2></div><button type="button" class="work12-x">×</button></div><label>Título<input id="w12NoteTitle" maxlength="100" placeholder="Ex.: perguntar ao jurídico"></label><label>Anotação<textarea id="w12NoteText" rows="4" maxlength="800" placeholder="Escreva sem precisar transformar isso em tarefa agora."></textarea></label><div class="work12-form-actions"><button type="button" class="work12-secondary" data-cancel>Cancelar</button><button class="work12-primary" type="submit">Salvar nota</button></div></form>`;
-    document.body.appendChild(dlg);dlg.showModal();const close=()=>{try{dlg.close()}catch{}dlg.remove()};dlg.querySelector('.work12-x').onclick=close;dlg.querySelector('[data-cancel]').onclick=close;dlg.addEventListener('cancel',e=>{e.preventDefault();close()});dlg.querySelector('form').onsubmit=e=>{e.preventDefault();const title=dlg.querySelector('#w12NoteTitle').value.trim(),text=dlg.querySelector('#w12NoteText').value.trim();if(!title&&!text)return;const arr=notes(kind);arr.unshift({id:uid(),title,text,createdAt:Date.now()});persistNotes(kind,arr);close();renderWorkspace(kind)};
+    dlg.innerHTML=`<form class="work12-form"><div class="work12-form-head"><div><div class="eyebrow">TRABALHO · ${esc(cfg.name.toUpperCase())}</div><h2>Nota rápida</h2></div><button type="button" class="work12-x">×</button></div><label>Título<input id="w12NoteTitle" maxlength="100" placeholder="Ex.: perguntar ao jurídico"></label><label>Anotação<textarea id="w12NoteText" rows="4" maxlength="800" placeholder="Escreva sem precisar transformar isso em tarefa agora."></textarea></label><label class="work12-note-day"><input id="w12NoteDay" type="checkbox"> <span><strong>Aparecer em Meu Dia</strong><small>Cria também uma tarefa de hoje, sem apagar a nota.</small></span></label><div class="work12-form-actions"><button type="button" class="work12-secondary" data-cancel>Cancelar</button><button class="work12-primary" type="submit">Salvar nota</button></div></form>`;
+    document.body.appendChild(dlg);dlg.showModal();requestAnimationFrame(()=>{const f=dlg.querySelector('.work12-form');if(f)f.scrollTop=0;});const close=()=>{try{dlg.close()}catch{}dlg.remove()};dlg.querySelector('.work12-x').onclick=close;dlg.querySelector('[data-cancel]').onclick=close;dlg.addEventListener('cancel',e=>{e.preventDefault();close()});dlg.querySelector('form').onsubmit=e=>{e.preventDefault();const title=dlg.querySelector('#w12NoteTitle').value.trim(),text=dlg.querySelector('#w12NoteText').value.trim();if(!title&&!text)return;const arr=notes(kind);arr.unshift({id:uid(),title,text,createdAt:Date.now()});persistNotes(kind,arr);if(dlg.querySelector('#w12NoteDay')?.checked){const ta=tasks(cfg);ta.push(normalizeTask({id:uid(),title:title||text||'Nota',note:text,date:TODAY(),duration:'15 min',frequency:'Única',priority:'Normal',status:'A fazer',showInDay:true},cfg));persist(cfg,ta)}close();renderWorkspace(kind)};
   }
 
   function openModal(cfg,preset){
@@ -347,7 +426,7 @@
     const opts=(arr,sel)=>arr.map(v=>`<option ${v===sel?'selected':''}>${esc(v)}</option>`).join('');
     const areaOptions=cfg.groups.map(([g])=>g); if(p.area&&!areaOptions.includes(p.area))areaOptions.unshift(p.area);
     dlg.innerHTML=`<form class="work12-form" id="work12Form">
-      <div class="work12-form-head"><div><div class="eyebrow">TRABALHO · ${esc(cfg.name.toUpperCase())}</div><h2>${preset?'Editar tarefa':'Nova tarefa'}</h2></div><button type="button" class="work12-x" id="work12Close">×</button></div>
+      <div class="work12-form-head"><div><div class="eyebrow">TRABALHO · ${esc(cfg.name.toUpperCase())}</div><h2>${p._modalTitle?esc(p._modalTitle):(preset?'Editar tarefa':'Nova tarefa')}</h2></div><button type="button" class="work12-x" id="work12Close">×</button></div>
       <label>O que precisa ser feito?<input id="w12Title" required maxlength="150" value="${esc(p.title)}" placeholder="Ex.: revisar campanha"></label>
       <div class="work12-grid2"><label>Área<select id="w12Area"><option value="">Selecionar</option>${opts(areaOptions,p.area)}</select></label><label>Data / prazo<input id="w12Date" type="date" value="${esc(p.date)}"></label></div>
       <div class="work12-grid2"><label>Duração<div class="work12-duration"><input id="w12DurationValue" type="number" min="1" step="1" value="${durationValue}"><select id="w12DurationUnit">${opts(['minutos','horas'],durationUnit)}</select></div></label><label>Prioridade<select id="w12Priority">${opts(['Baixa','Normal','Alta','Urgente'],p.priority)}</select></label></div>
@@ -355,7 +434,12 @@
         <div class="work12-grid2"><label>Quando pode acontecer?<select id="w12Period">${opts(['Flexível','Manhã','Tarde','Noite'],p.period)}</select></label><label>Horário opcional<input id="w12Time" type="time" value="${esc(p.time)}"></label></div>
         <label>Frequência<select id="w12Frequency">${opts(['Única','Diária','Semanal','Quinzenal','Mensal','Conforme necessário'],p.frequency)}</select></label>
         <label>Status<select id="w12Status">${opts(['A fazer','Em andamento','Aguardando','Concluído','Pausado'],p.status)}</select></label>
-        <label class="work12-check"><input id="w12Notify" type="checkbox" ${p.notify?'checked':''}> Me avisar?</label>
+        <div class="work12-notify-box">
+          <label class="work12-toggle-row">
+            <div><strong>Me avisar?</strong><span>Guardar preferência de lembrete</span></div>
+            <input id="w12Notify" type="checkbox" ${p.notify?'checked':''}><i></i>
+          </label>
+        </div>
         <label id="w12NotifyWrap" ${p.notify?'':'hidden'}>Quando avisar?<select id="w12NotifyWhen">${opts(['No horário da tarefa','10 min antes','30 min antes','1 hora antes','No início do período','Em um horário escolhido'],p.notifyWhen)}</select></label>
         <label>Observação<textarea id="w12Note" rows="2" maxlength="600" placeholder="Contexto ou próximo passo">${esc(p.note)}</textarea></label>
       </div></details>
@@ -368,20 +452,118 @@
       const data={...p,id:p.id||uid(),title:dlg.querySelector('#w12Title').value.trim(),area:dlg.querySelector('#w12Area').value.trim(),date:dlg.querySelector('#w12Date').value,time:dlg.querySelector('#w12Time').value,period:dlg.querySelector('#w12Period').value,duration,minutes,frequency:dlg.querySelector('#w12Frequency').value,priority:dlg.querySelector('#w12Priority').value,status:dlg.querySelector('#w12Status').value,notify:notify.checked,notifyWhen:dlg.querySelector('#w12NotifyWhen').value,note:dlg.querySelector('#w12Note').value.trim(),source:cfg.name,updatedAt:Date.now(),createdAt:p.createdAt||Date.now()};
       if(data.status==='Concluído'&&!data.completedAt)data.completedAt=Date.now();const i=arr.findIndex(x=>String(x.id)===String(data.id));if(i>=0)arr[i]=data;else arr.push(data);persist(cfg,arr);
       if(p._noteId&&p._noteKind)persistNotes(p._noteKind,notes(p._noteKind).filter(n=>String(n.id)!==String(p._noteId)));
-      close();renderWorkspace(Object.keys(WORK).find(k=>WORK[k]===cfg));};
+      close();renderWorkspace(workKindForCfg(cfg));};
   }
 
   function route(){
     const h=(location.hash||'').replace('#','');
     if(h==='trabalho') renderHome();
-    else if(h==='trabalho-crefito') renderWorkspace('crefito');
-    else if(h==='trabalho-bec') renderWorkspace('bec');
-    else if(h==='trabalho-tiktok') renderWorkspace('tiktok');
+    else if(h.startsWith('trabalho-')) renderWorkspace(h.slice('trabalho-'.length));
   }
+  // RC43: expõe a renderização real para o roteador principal chamar depois de concluir a troca de rota.
+  // Evita depender da ordem dos listeners de hashchange no Safari/iPhone.
+  window.__BERTHA_WORK_ROUTE__=route;
 
   // Trabalho é o único responsável pelas rotas #trabalho*.
   // Render imediato evita a tela-placeholder antiga durante a navegação.
-  window.addEventListener('hashchange',route);
-  window.addEventListener('DOMContentLoaded',route);
-  route();
+  window.addEventListener('hashchange',()=>{route();setTimeout(route,0);setTimeout(route,80)});
+  window.addEventListener('DOMContentLoaded',()=>{route();setTimeout(route,0);setTimeout(route,80)});
+  route();setTimeout(route,0);
+})();
+
+/* BERTH.A v2.8.208 — Trabalho: acabamento visual homologação */
+(function(){
+  const s=document.createElement('style'); s.id='work-v208-polish'; s.textContent=`
+    .work13-hero-mark{width:52px!important;height:48px!important;color:#a29ca3!important;opacity:.58!important}
+    .work13-hero-mark svg{width:48px!important;height:38px!important;stroke-width:1.25!important}
+    @media(max-width:520px){.work13-hero{grid-template-columns:minmax(0,1fr) 52px!important}.work13-hero-mark{width:48px!important;height:44px!important}.work13-hero-mark svg{width:44px!important;height:35px!important}}
+    .work12-check{gap:10px!important;color:#6f696f!important}
+    .work12-check input[type=checkbox]{appearance:none!important;-webkit-appearance:none!important;width:20px!important;height:20px!important;min-width:20px!important;min-height:20px!important;border:1.5px solid #b9b0bb!important;border-radius:7px!important;background:#fffdfa!important;display:grid!important;place-items:center!important;box-shadow:none!important;accent-color:transparent!important}
+    .work12-check input[type=checkbox]:checked{background:linear-gradient(135deg,#d9c9ea 0%,#efd9c8 100%)!important;border-color:#b9a6c4!important}
+    .work12-check input[type=checkbox]:checked:after{content:'✓';font-size:12px;line-height:1;color:#675a72;font-weight:800}
+    .work12-dialog{position:fixed!important;left:50%!important;top:50%!important;right:auto!important;bottom:auto!important;transform:translate(-50%,-50%)!important;margin:0!important;width:min(92vw,520px)!important;height:min(72svh,720px)!important;max-height:min(72svh,720px)!important;overflow:hidden!important;overscroll-behavior:contain!important}
+    .work12-form{height:100%!important;max-height:none!important;overflow-y:auto!important;overscroll-behavior:contain!important;-webkit-overflow-scrolling:touch!important}
+    .work12-form-head{top:-17px!important}.work12-form-actions{bottom:-17px!important}
+    .work12-notify-box{margin:4px 0 10px;padding:12px 13px;border:1px solid rgba(126,117,140,.10);border-radius:16px;background:rgba(255,253,249,.72)}
+    .work12-toggle-row{display:grid!important;grid-template-columns:1fr auto!important;gap:12px!important;align-items:center!important;position:relative!important;margin:0!important}
+    .work12-toggle-row>div{display:grid;gap:2px}.work12-toggle-row strong{font-size:14px;color:#68626a}.work12-toggle-row span{font-size:11px;font-weight:500;color:#918991}
+    .work12-toggle-row input{position:absolute!important;opacity:0!important;pointer-events:none!important;width:1px!important;height:1px!important}
+    .work12-toggle-row i{width:42px;height:24px;border-radius:999px;background:#d9d2da;position:relative;display:block;transition:.18s ease;box-shadow:inset 0 0 0 1px rgba(109,94,116,.06)}
+    .work12-toggle-row i:after{content:'';position:absolute;width:20px;height:20px;left:2px;top:2px;border-radius:50%;background:#fff;box-shadow:0 1px 4px rgba(70,57,77,.18);transition:.18s ease}
+    .work12-toggle-row input:checked+i{background:linear-gradient(135deg,#b9a6d8 0%,#d9c5df 58%,#ead7c5 100%)}.work12-toggle-row input:checked+i:after{transform:translateX(18px)}
+    @media(max-width:520px){.work12-dialog{height:min(74svh,720px)!important;max-height:min(74svh,720px)!important}}
+  `; document.head.appendChild(s);
+})();
+
+/* BERTH.A v2.8.221 RC10 — Trabalho: respiro + degradê oficial lilás/menta */
+(function(){
+  const s=document.createElement('style');
+  s.id='work-rc10-lilas-menta-respiro';
+  s.textContent=`
+    /* Hero: mesma família do print, apenas um tom acima; sem amarelo */
+    .work13-hero{
+      margin-bottom:34px!important;
+      background:linear-gradient(125deg,rgba(238,228,250,.92) 0%,rgba(239,235,251,.88) 48%,rgba(218,244,235,.88) 100%)!important;
+      border-color:rgba(123,104,154,.11)!important;
+    }
+    .work13-hero:after{background:rgba(255,255,255,.24)!important}
+    .work13-section-label{margin:0 2px 17px!important}
+    .work12-fronts{gap:18px!important}
+
+    /* Cards continuam creme; somente o campo do ícone recebe o degradê oficial */
+    .work12-front{
+      background:linear-gradient(135deg,rgba(255,252,246,.96),rgba(252,249,243,.93))!important;
+      grid-template-columns:47px 1fr 20px!important;
+      padding:18px 18px!important;
+    }
+    .work12-front:nth-child(n){background:linear-gradient(135deg,rgba(255,252,246,.96),rgba(252,249,243,.93))!important}
+    .work12-front .work12-icon{
+      width:46.56px!important;height:46.56px!important;border-radius:15px!important;
+      background:linear-gradient(125deg,rgba(238,228,250,.88),rgba(218,244,235,.86))!important;
+      color:#75609a!important;border:1px solid rgba(117,96,153,.07)!important;
+    }
+    .work12-front:nth-child(n) .work12-icon{color:#75609a!important}
+    .work12-front .work12-icon svg{width:27.16px!important;height:27.16px!important;stroke-width:1.55!important}
+
+    /* CTA e modais usam exatamente a mesma linguagem cromática */
+    .work12-front-add{
+      margin-top:20px!important;
+      background:linear-gradient(125deg,rgba(238,228,250,.72),rgba(218,244,235,.70))!important;
+      border-color:rgba(123,104,154,.22)!important;color:#715d8f!important;
+    }
+    .work12-front-dialog,.work12-dialog,.work12-form,.work12-form-head{
+      background:linear-gradient(125deg,rgba(249,245,253,.985),rgba(239,248,244,.985))!important;
+    }
+    .work12-form-actions{background:linear-gradient(to bottom,rgba(244,247,247,0),rgba(241,247,244,.98) 13px)!important}
+    .work12-primary,.work12-secondary,.work12-more,.work12-notify-box{
+      background:linear-gradient(125deg,rgba(238,228,250,.82),rgba(218,244,235,.80))!important;
+      color:#67577f!important;border-color:rgba(123,104,154,.10)!important;
+    }
+    .work14-icon-option,.work14-icon-option.selected{
+      background:linear-gradient(125deg,rgba(238,228,250,.78),rgba(218,244,235,.76))!important;
+      color:#75609a!important;
+    }
+    .work14-icon-option span{width:30.07px!important;height:30.07px!important}
+    .work14-icon-option svg{width:26.19px!important;height:26.19px!important}
+
+    /* Respiro final para a barra fixa não disputar com o conteúdo */
+    .work13-bridge{margin-top:28px!important;margin-bottom:128px!important}
+    @media(max-width:520px){
+      .work13-hero{margin-top:10px!important;margin-bottom:34px!important}
+      .work12-fronts{gap:18px!important}
+      .work12-front-add{margin-top:20px!important}
+    }
+  `;
+  document.head.appendChild(s);
+})();
+
+/* RC53 — estabilização visual de Trabalho após todas as regras injetadas */
+(function(){
+ const s=document.createElement('style');s.id='work-rc53-stable-first-paint';s.textContent=`
+ .work13-hero{margin-top:10px!important;margin-bottom:34px!important;background:linear-gradient(125deg,rgba(238,228,250,.92) 0%,rgba(239,235,251,.88) 48%,rgba(218,244,235,.88) 100%)!important;border:1px solid rgba(123,104,154,.11)!important}
+ .work12-fronts{gap:18px!important}
+ .work12-front{background:linear-gradient(135deg,rgba(255,252,246,.96),rgba(252,249,243,.93))!important;grid-template-columns:47px 1fr 20px!important;padding:18px!important}
+ .work12-front:nth-child(n){background:linear-gradient(135deg,rgba(255,252,246,.96),rgba(252,249,243,.93))!important}
+ .work12-front .work12-icon{width:46.56px!important;height:46.56px!important;border-radius:15px!important;background:linear-gradient(125deg,rgba(238,228,250,.88),rgba(218,244,235,.86))!important;border:1px solid rgba(117,96,153,.09)!important;color:#75609a!important}
+ `;document.head.appendChild(s);
 })();
