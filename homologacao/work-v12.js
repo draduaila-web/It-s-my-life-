@@ -710,3 +710,31 @@
  }
  `; document.head.appendChild(s);
 })();
+
+/* RC70 — TRABALHO · NOTA RÁPIDA · CHECKBOX MEU DIA
+   Correção isolada do checkbox nativo. Nenhuma outra superfície é alterada. */
+(function(){
+ const old=document.getElementById('work-rc70-note-checkbox'); if(old) old.remove();
+ const s=document.createElement('style'); s.id='work-rc70-note-checkbox'; s.textContent=`
+ dialog.work12-dialog .work12-note-day{
+   display:flex!important;align-items:center!important;gap:14px!important;
+   margin:12px 0 8px!important;
+ }
+ dialog.work12-dialog .work12-note-day>input#w12NoteDay{
+   -webkit-appearance:none!important;appearance:none!important;
+   width:22px!important;height:22px!important;min-width:22px!important;min-height:22px!important;
+   flex:0 0 22px!important;margin:0!important;padding:0!important;
+   border:1.4px solid rgba(123,104,154,.34)!important;border-radius:7px!important;
+   background:rgba(255,253,251,.92)!important;box-shadow:none!important;
+   display:grid!important;place-items:center!important;
+ }
+ dialog.work12-dialog .work12-note-day>input#w12NoteDay:checked{
+   background:linear-gradient(135deg,#d9c9ee 0%,#cfe9df 100%)!important;
+   border-color:rgba(123,104,154,.20)!important;
+ }
+ dialog.work12-dialog .work12-note-day>input#w12NoteDay:checked::after{
+   content:'✓';font-size:14px;line-height:1;color:#655477;font-weight:600;
+ }
+ dialog.work12-dialog .work12-note-day>span{display:flex!important;flex-direction:column!important;gap:2px!important;min-width:0!important}
+ `; document.head.appendChild(s);
+})();
