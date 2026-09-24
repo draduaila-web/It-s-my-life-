@@ -2366,3 +2366,217 @@ html body :is(dialog.casa-dialog,dialog.casa-maint-dialog) .secondary{
     border-radius:28px!important;
   }
 }
+
+/* RC78 — EXERCÍCIOS: tipografia leve + Modal System BERTH.A
+   Escopo exclusivo do módulo Exercícios. Preserva lógica e integrações. */
+html body #app .exercise-hero .eyebrow,
+html body #app .exercise-focus .eyebrow,
+html body #app .exercise-week-plan .eyebrow,
+html body #app .exercise-note .eyebrow,
+html body #app .section-title{
+  font-weight:500!important;
+  letter-spacing:.20em!important;
+  color:#8b7f8d!important;
+}
+html body #app .exercise-hero h2{
+  font-weight:400!important;
+  letter-spacing:-.035em!important;
+}
+html body #app .exercise-hero p,
+html body #app .exercise-focus p,
+html body #app .exercise-week-plan p,
+html body #app .exercise-note p,
+html body #app .exercise-plan span,
+html body #app .exercise-plan small,
+html body #app .exercise-cycle-copy span,
+html body #app .exercise-cycle-copy small,
+html body #app .exercise-session span,
+html body #app .empty span{
+  font-weight:400!important;
+}
+html body #app :is(.exercise-focus,.exercise-week-plan,.exercise-cycle,.exercise-plan,.exercise-session,.exercise-note) strong,
+html body #app :is(.exercise-focus,.exercise-week-plan,.exercise-cycle,.exercise-plan,.exercise-session,.exercise-note) b{
+  font-weight:500!important;
+}
+html body #app :is(.exercise-focus-actions,.exercise-plan-actions,.exercise-cycle-head) button,
+html body #app .exercise-add,
+html body #app .exercise-edit,
+html body #app .pill{
+  font-weight:500!important;
+}
+
+/* Exercícios — títulos/labels dos modais sem peso visual excessivo. */
+html body dialog.exercise-dialog .eyebrow{
+  font-weight:500!important;
+  letter-spacing:.20em!important;
+  color:#8b7f8d!important;
+}
+html body dialog.exercise-dialog :is(h1,h2,h3){font-weight:400!important;letter-spacing:-.025em!important;}
+html body dialog.exercise-dialog :is(label,.field-label,.exercise-cycle-label,strong,b){font-weight:500!important;}
+html body dialog.exercise-dialog :is(p,small,.exercise-cycle-help){font-weight:400!important;}
+html body dialog.exercise-dialog :is(input,select,textarea,button){font-weight:400!important;}
+html body dialog.exercise-dialog :is(.primary,.secondary){font-weight:500!important;}
+
+/* X: mesma geometria e posição do Modal System aprovado. */
+html body dialog.exercise-dialog .bertha-modal-head{
+  position:relative!important;
+  display:flex!important;
+  align-items:flex-start!important;
+  justify-content:space-between!important;
+  gap:16px!important;
+  padding-right:58px!important;
+}
+html body dialog.exercise-dialog .bertha-modal-head > div{min-width:0!important;}
+html body dialog.exercise-dialog .bertha-modal-head > button[data-close]{
+  position:absolute!important;
+  top:0!important;
+  right:0!important;
+  width:48px!important;
+  height:48px!important;
+  min-width:48px!important;
+  min-height:48px!important;
+  margin:0!important;
+  padding:0!important;
+  display:grid!important;
+  place-items:center!important;
+  border-radius:50%!important;
+  border:1px solid rgba(126,105,139,.12)!important;
+  background:rgba(255,255,255,.24)!important;
+  color:#817780!important;
+  box-shadow:none!important;
+  font-size:31px!important;
+  font-weight:300!important;
+  line-height:1!important;
+  z-index:3!important;
+  -webkit-appearance:none!important;
+  appearance:none!important;
+}
+html body dialog.exercise-dialog .bertha-modal-head > button[data-close]:focus:not(:focus-visible){outline:none!important;box-shadow:none!important;}
+
+/* Contorno contínuo: evita borda curta/torta no Safari durante scroll. */
+html body dialog.exercise-dialog[open] > :is(.bertha-modal,.study-v10-modal){
+  border:0!important;
+  outline:0!important;
+  border-radius:28px!important;
+  background-clip:padding-box!important;
+  box-shadow:inset 0 0 0 1px rgba(145,120,158,.12),0 22px 54px rgba(55,43,67,.13)!important;
+  overflow-x:hidden!important;
+}
+html body dialog.exercise-dialog[open] :is(input:not([type="checkbox"]):not([type="radio"]),select,textarea){
+  border:1px solid rgba(126,105,139,.12)!important;
+  box-shadow:none!important;
+}
+html body dialog.exercise-dialog[open] :is(.study-v10-actions,.modal-actions){
+  background:transparent!important;
+  border:0!important;
+  box-shadow:none!important;
+}
+@media(max-width:700px){
+  html body dialog.exercise-dialog[open] > :is(.bertha-modal,.study-v10-modal){
+    border-radius:28px!important;
+    padding:22px!important;
+    padding-bottom:22px!important;
+  }
+}
+
+/* RC78 hotfix — Exercícios / Novo treino: rolagem dos ícones no Safari.
+   Evita scroll aninhado: o modal inteiro é a única superfície vertical rolável. */
+html body dialog.exercise-dialog.exercise-plan-dialog[open] > :is(.bertha-modal,.study-v10-modal){
+  overflow-y:auto!important;
+  overflow-x:hidden!important;
+  -webkit-overflow-scrolling:touch!important;
+  overscroll-behavior-y:contain!important;
+  touch-action:pan-y!important;
+}
+html body dialog.exercise-dialog.exercise-plan-dialog .exercise-plan-icon-section{
+  overflow:visible!important;
+  max-height:none!important;
+  touch-action:pan-y!important;
+}
+html body dialog.exercise-dialog.exercise-plan-dialog .exercise-plan-icon-section .exercise-icon-picker{
+  max-height:none!important;
+  height:auto!important;
+  overflow:visible!important;
+  overscroll-behavior:auto!important;
+  -webkit-overflow-scrolling:auto!important;
+  touch-action:pan-y!important;
+}
+html body dialog.exercise-dialog.exercise-plan-dialog .exercise-icon-choice{
+  touch-action:manipulation!important;
+}
+@media(max-width:700px){
+  html body dialog.exercise-dialog.exercise-plan-dialog[open] > :is(.bertha-modal,.study-v10-modal){
+    max-height:calc(100dvh - env(safe-area-inset-top,0px) - env(safe-area-inset-bottom,0px) - 32px)!important;
+    padding-bottom:34px!important;
+  }
+}
+
+/* RC79 — EXERCÍCIOS · acabamento final visual e correção do modal de ícones
+   Escopo estrito: Exercícios. Sem alteração de lógica, dados ou integração com Progresso. */
+html body #app :is(.exercise-plan,.exercise-cycle,.exercise-session) strong,
+html body #app :is(.exercise-plan,.exercise-cycle,.exercise-session) b{
+  font-weight:500!important;
+  letter-spacing:-.015em!important;
+}
+html body #app :is(.exercise-plan-actions,.exercise-cycle-head) button,
+html body #app .exercise-add,
+html body #app .exercise-edit{
+  font-weight:500!important;
+}
+html body #app .exercise-plan :is(span,small),
+html body #app .exercise-cycle-copy :is(span,small),
+html body #app .exercise-session span{
+  font-weight:400!important;
+}
+
+/* X circular único + contorno fino/contínuo dos modais de Exercícios. */
+html body dialog.exercise-dialog[open] > :is(.bertha-modal,.study-v10-modal){
+  border:0!important;
+  outline:0!important;
+  border-radius:28px!important;
+  background-clip:padding-box!important;
+  box-shadow:inset 0 0 0 1px rgba(145,120,158,.12),0 22px 54px rgba(55,43,67,.13)!important;
+}
+html body dialog.exercise-dialog .bertha-modal-head > button[data-close]{
+  position:absolute!important;top:0!important;right:0!important;
+  width:48px!important;height:48px!important;min-width:48px!important;min-height:48px!important;
+  padding:0!important;margin:0!important;display:grid!important;place-items:center!important;
+  border-radius:50%!important;border:1px solid rgba(126,105,139,.12)!important;
+  outline:0!important;background:rgba(255,255,255,.24)!important;color:#817780!important;
+  box-shadow:none!important;font-size:31px!important;font-weight:300!important;line-height:1!important;
+  -webkit-appearance:none!important;appearance:none!important;
+}
+html body dialog.exercise-dialog :is(input:not([type="checkbox"]):not([type="radio"]),select,textarea,.secondary,.primary,.exercise-icon-choice,.exercise-icon-filter,.exercise-block-remove){
+  border-width:1px!important;
+}
+html body dialog.exercise-dialog .exercise-cycle-total strong{font-family:inherit!important;font-weight:500!important;}
+
+/* Novo treino: UMA superfície rolável. Ações deixam de ser sticky e nunca cobrem os ícones. */
+html body dialog.exercise-dialog.exercise-plan-dialog[open]{
+  overflow:hidden!important;
+  touch-action:pan-y!important;
+}
+html body dialog.exercise-dialog.exercise-plan-dialog[open] > :is(.bertha-modal,.study-v10-modal){
+  overflow-y:auto!important;overflow-x:hidden!important;
+  -webkit-overflow-scrolling:touch!important;overscroll-behavior-y:contain!important;touch-action:pan-y!important;
+  scroll-padding-bottom:28px!important;
+}
+html body dialog.exercise-dialog.exercise-plan-dialog .exercise-plan-icon-section,
+html body dialog.exercise-dialog.exercise-plan-dialog .exercise-icon-picker{
+  max-height:none!important;height:auto!important;overflow:visible!important;touch-action:pan-y!important;
+}
+html body dialog.exercise-dialog.exercise-plan-dialog .study-v10-actions{
+  position:static!important;inset:auto!important;
+  margin:22px 0 0!important;padding:0!important;
+  background:transparent!important;border:0!important;box-shadow:none!important;
+  backdrop-filter:none!important;-webkit-backdrop-filter:none!important;
+}
+@media(max-width:700px){
+  html body dialog.exercise-dialog[open]{padding:16px!important;box-sizing:border-box!important;}
+  html body dialog.exercise-dialog[open] > :is(.bertha-modal,.study-v10-modal){
+    width:100%!important;max-width:620px!important;
+    max-height:calc(100dvh - 32px)!important;margin:auto!important;
+    border-radius:28px!important;padding:22px!important;
+  }
+  html body dialog.exercise-dialog.exercise-plan-dialog[open] > :is(.bertha-modal,.study-v10-modal){padding-bottom:30px!important;}
+}

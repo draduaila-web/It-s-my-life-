@@ -4716,7 +4716,7 @@
   html body :is(dialog.food-context-dialog,dialog.food-next-prep-dialog) :is(.primary,[type=submit]){color:#fff!important;background:linear-gradient(135deg,#9fc8e2 0%,#a9d4ca 55%,#dfc78f 100%)!important}
 
   /* EXERCÍCIOS — tipografia do total volta à família do app + respiro lateral constante */
-  html body dialog.exercise-dialog .exercise-cycle-total strong{font-family:inherit!important;font-size:20px!important;font-weight:760!important;letter-spacing:-.01em!important}
+  html body dialog.exercise-dialog .exercise-cycle-total strong{font-family:inherit!important;font-size:20px!important;font-weight:500!important;letter-spacing:-.01em!important}
   @media(max-width:700px){
     html body dialog.exercise-dialog[open]{padding:16px!important;box-sizing:border-box!important}
     html body dialog.exercise-dialog[open]>.study-v10-modal{width:100%!important;max-width:620px!important;max-height:calc(100dvh - 32px)!important;margin:auto!important}
@@ -4792,8 +4792,8 @@ html body :is(dialog.work12-dialog,dialog.work12-front-dialog) > .work12-form{
 /* RC75 — CASA: bordas finas no padrão visual aprovado. Exercícios preservado. */
 html body :is(dialog.casa-dialog,dialog.casa-maint-dialog) > :is(.casa-modal-card,.casa-maint-modal,.study-v10-modal,.modal-card){border:1px solid rgba(154,119,132,.14)!important}
 html body :is(dialog.casa-dialog,dialog.casa-maint-dialog) :is(input:not([type=checkbox]):not([type=radio]),select,textarea,.secondary,.primary,.study-v10-x,.casa-modal-x,.card,.pill,.seg-btn,.choice-btn,.casa-routine-picker-btn,.casa-web-link,.casa-tool-row){border:1px solid rgba(132,106,118,.14)!important;box-shadow:none!important}
-html body dialog.exercise-dialog > :is(.bertha-modal,.study-v10-modal){border-width:2px!important;border-style:solid!important}
-html body dialog.exercise-dialog :is(input:not([type=checkbox]):not([type=radio]),select,textarea,.secondary,.primary,.study-v10-x,.bertha-modal-head button,.card,.pill,.seg-btn,.choice-btn,.exercise-icon-choice,.exercise-icon-filter){border:2px solid rgba(148,125,169,.32)!important}
+html body dialog.exercise-dialog > :is(.bertha-modal,.study-v10-modal){border-width:1px!important;border-style:solid!important}
+html body dialog.exercise-dialog :is(input:not([type=checkbox]):not([type=radio]),select,textarea,.secondary,.primary,.study-v10-x,.bertha-modal-head button,.card,.pill,.seg-btn,.choice-btn,.exercise-icon-choice,.exercise-icon-filter){border:1px solid rgba(148,125,169,.18)!important}
 
 /* ALIMENTAÇÃO/RECEITAS — paleta do hero Alimentação: bege + blush + menta */
 html body dialog#foodRecipeDialog[open] > .study-v10-modal,
@@ -4850,3 +4850,18 @@ html body dialog.bertha-plans-task-dialog[open] .bertha-task-modal-v2 .commit-mo
  outline:none!important;box-shadow:none!important;background:rgba(247,243,237,.82)!important;
 }
 `;document.head.appendChild(s)})();
+
+;(()=>{try{const id='bertha-rc79-exercise-finish';document.getElementById(id)?.remove();const st=document.createElement('style');st.id=id;st.textContent=`
+html body #app :is(.exercise-plan,.exercise-cycle,.exercise-session) strong,html body #app :is(.exercise-plan,.exercise-cycle,.exercise-session) b{font-weight:500!important;letter-spacing:-.015em!important}
+html body #app :is(.exercise-plan-actions,.exercise-cycle-head) button,html body #app .exercise-add,html body #app .exercise-edit{font-weight:500!important}
+html body dialog.exercise-dialog[open]>.bertha-modal,html body dialog.exercise-dialog[open]>.study-v10-modal{border:0!important;outline:0!important;border-radius:28px!important;background-clip:padding-box!important;box-shadow:inset 0 0 0 1px rgba(145,120,158,.12),0 22px 54px rgba(55,43,67,.13)!important}
+html body dialog.exercise-dialog .bertha-modal-head{position:relative!important;padding-right:58px!important}
+html body dialog.exercise-dialog .bertha-modal-head>button[data-close]{position:absolute!important;top:0!important;right:0!important;width:48px!important;height:48px!important;min-width:48px!important;min-height:48px!important;padding:0!important;margin:0!important;display:grid!important;place-items:center!important;border-radius:50%!important;border:1px solid rgba(126,105,139,.12)!important;outline:0!important;background:rgba(255,255,255,.24)!important;color:#817780!important;box-shadow:none!important;font-size:31px!important;font-weight:300!important;line-height:1!important;-webkit-appearance:none!important;appearance:none!important}
+html body dialog.exercise-dialog :is(input:not([type=checkbox]):not([type=radio]),select,textarea,.secondary,.primary,.exercise-icon-choice,.exercise-icon-filter,.exercise-block-remove){border-width:1px!important}
+html body dialog.exercise-dialog .exercise-cycle-total strong{font-family:inherit!important;font-weight:500!important}
+html body dialog.exercise-dialog.exercise-plan-dialog[open]{overflow:hidden!important;touch-action:pan-y!important}
+html body dialog.exercise-dialog.exercise-plan-dialog[open]>.bertha-modal,html body dialog.exercise-dialog.exercise-plan-dialog[open]>.study-v10-modal{overflow-y:auto!important;overflow-x:hidden!important;-webkit-overflow-scrolling:touch!important;overscroll-behavior-y:contain!important;touch-action:pan-y!important;scroll-padding-bottom:28px!important}
+html body dialog.exercise-dialog.exercise-plan-dialog .exercise-plan-icon-section,html body dialog.exercise-dialog.exercise-plan-dialog .exercise-icon-picker{max-height:none!important;height:auto!important;overflow:visible!important;touch-action:pan-y!important}
+html body dialog.exercise-dialog.exercise-plan-dialog .study-v10-actions{position:static!important;inset:auto!important;margin:22px 0 0!important;padding:0!important;background:transparent!important;border:0!important;box-shadow:none!important;backdrop-filter:none!important;-webkit-backdrop-filter:none!important}
+@media(max-width:700px){html body dialog.exercise-dialog[open]{padding:16px!important;box-sizing:border-box!important}html body dialog.exercise-dialog[open]>.bertha-modal,html body dialog.exercise-dialog[open]>.study-v10-modal{width:100%!important;max-width:620px!important;max-height:calc(100dvh - 32px)!important;margin:auto!important;border-radius:28px!important;padding:22px!important}html body dialog.exercise-dialog.exercise-plan-dialog[open]>.bertha-modal,html body dialog.exercise-dialog.exercise-plan-dialog[open]>.study-v10-modal{padding-bottom:30px!important}}
+`;document.head.appendChild(st)}catch(e){}})();
