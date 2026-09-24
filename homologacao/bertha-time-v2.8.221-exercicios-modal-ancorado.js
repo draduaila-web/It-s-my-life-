@@ -1739,15 +1739,15 @@
   function taskDialog(existing=null){
     const x=existing||{};
     const d=document.createElement('dialog');
-    d.className='bertha-dialog bertha-task-dialog bertha-plans-task-dialog commit-dialog';
+    d.className='commit-dialog bertha-plans-task-dialog';
     d.innerHTML=`
-      <form class="bertha-task-modal commit-modal" method="dialog">
-        <div class="bertha-task-modal-head commit-modal-head">
+      <form class="commit-modal bertha-task-modal-v2" method="dialog">
+        <div class="commit-modal-head">
           <div><span>${existing?'EDITAR TAREFA':'NOVA TAREFA'}</span><h2>${existing?'Ajustar tarefa':'Adicionar tarefa'}</h2></div>
           <button class="commit-x" type="button" data-close aria-label="Fechar">×</button>
         </div>
 
-        <div class="bertha-task-modal-body">
+        <div class="bertha-task-modal-body-v2">
           <label class="bertha-task-field commit-field">
             <span>O que precisa sair da sua cabeça?</span>
             <input data-title value="${esc(x.title||x.name||'')}" placeholder="Ex.: Resolver documento">
@@ -1760,8 +1760,7 @@
             </select>
           </label>
 
-          <div class="bertha-task-two commit-two">
-            <label class="bertha-task-field commit-field">
+          <label class="bertha-task-field commit-field">
               <span>Prazo <small>opcional</small></span>
               <input data-due type="date" value="${esc(x.dueDate||x.due||'')}">
             </label>
@@ -1776,7 +1775,6 @@
                 </select>
               </div>
             </div>
-          </div>
 
           <div class="bertha-task-field commit-field">
             <span>Quando pode acontecer?</span>
@@ -1785,8 +1783,7 @@
             </div>
           </div>
 
-          <div class="bertha-task-two bertha-task-schedule-priority">
-            <label class="bertha-task-field commit-field">
+          <label class="bertha-task-field commit-field">
               <span>Horário <small>opcional</small></span>
               <input data-time type="time" value="${esc(x.time||'')}">
             </label>
@@ -1796,7 +1793,6 @@
                 ${[['Baixa','Baixa'],['Normal','Normal'],['Importante','Import.']].map(([v,l])=>`<button type="button" data-priority="${v}" class="${taskLabelPriority(x.priority)===v?'active':''}">${l}</button>`).join('')}
               </div>
             </div>
-          </div>
 
           <label class="bertha-task-field commit-field">
             <span>Repetir</span>
@@ -1838,11 +1834,11 @@
           </label>
         </div>
 
-        <div class="bertha-task-modal-actions commit-actions">
+        <div class="commit-actions">
           ${existing?'<button class="bertha-danger-link" type="button" data-delete>Excluir</button>':'<span></span>'}
           <div>
-            <button class="bertha-task-cancel secondary" type="button" data-close>Cancelar</button>
-            <button class="bertha-task-save primary" type="button" data-save>Salvar</button>
+            <button class="secondary" type="button" data-close>Cancelar</button>
+            <button class="primary" type="button" data-save>Salvar</button>
           </div>
         </div>
       </form>`;
