@@ -2899,3 +2899,90 @@ html body dialog.exercise-dialog .exercise-icon-choice small{font-weight:400!imp
     border-radius:26px!important;
   }
 }
+
+/* RC82 — EXERCÍCIOS · proporção dos modais + ações do Registro
+   Escopo estrito: Exercícios. Sem alteração de lógica/dados. */
+html body dialog.exercise-dialog[open] > :is(.bertha-modal,.study-v10-modal){
+  width:min(calc(100vw - 40px),460px)!important;
+  max-width:460px!important;
+  max-height:78dvh!important;
+  padding:18px!important;
+  border-radius:24px!important;
+}
+/* Modais curtos ficam compactos; os longos rolam dentro da mesma casca. */
+html body dialog.exercise-dialog.exercise-quick-dialog[open] > :is(.bertha-modal,.study-v10-modal),
+html body dialog.exercise-dialog.exercise-week-dialog[open] > :is(.bertha-modal,.study-v10-modal){
+  height:auto!important;
+  max-height:76dvh!important;
+}
+html body dialog.exercise-dialog.exercise-cycle-dialog[open] > :is(.bertha-modal,.study-v10-modal),
+html body dialog.exercise-dialog.exercise-plan-dialog[open] > :is(.bertha-modal,.study-v10-modal){
+  height:auto!important;
+  max-height:78dvh!important;
+  overflow-y:auto!important;
+  overflow-x:hidden!important;
+}
+/* Reduz a altura percebida de Novo ciclo/Novo treino sem apertar leitura. */
+html body dialog.exercise-dialog .bertha-modal-head{margin-bottom:12px!important;}
+html body dialog.exercise-dialog .bertha-modal-head p{margin-top:9px!important;}
+html body dialog.exercise-dialog .study-v10-field,
+html body dialog.exercise-dialog .field{margin:9px 0!important;}
+html body dialog.exercise-dialog .exercise-cycle-section{margin-top:12px!important;}
+html body dialog.exercise-dialog :is(input:not([type="checkbox"]):not([type="radio"]),select){min-height:44px!important;}
+html body dialog.exercise-dialog textarea{min-height:78px!important;}
+html body dialog.exercise-dialog .study-v10-actions,
+html body dialog.exercise-dialog .modal-actions{margin-top:14px!important;}
+
+/* Registro: Editar + X formam um único grupo estável à direita do card. */
+html body #app .exercise-session{
+  display:grid!important;
+  grid-template-columns:minmax(0,1fr) auto!important;
+  align-items:center!important;
+  column-gap:12px!important;
+}
+html body #app .exercise-session>div:first-child{min-width:0!important;}
+html body #app .exercise-session-actions{
+  display:flex!important;
+  align-items:center!important;
+  justify-content:flex-end!important;
+  gap:6px!important;
+  flex:0 0 auto!important;
+  white-space:nowrap!important;
+}
+html body #app .exercise-session-actions .exercise-edit{
+  min-width:0!important;
+  height:34px!important;
+  min-height:34px!important;
+  padding:0 12px!important;
+  border-radius:999px!important;
+  font-size:12px!important;
+  font-weight:450!important;
+  line-height:1!important;
+}
+html body #app .exercise-session-actions .more{
+  width:32px!important;
+  height:32px!important;
+  min-width:32px!important;
+  min-height:32px!important;
+  padding:0!important;
+  margin:0!important;
+  display:grid!important;
+  place-items:center!important;
+  border:1px solid rgba(126,105,139,.10)!important;
+  border-radius:50%!important;
+  background:rgba(255,255,255,.45)!important;
+  color:#817780!important;
+  box-shadow:none!important;
+  font-size:18px!important;
+  font-weight:300!important;
+  line-height:1!important;
+}
+@media(max-width:480px){
+  html body dialog.exercise-dialog[open] > :is(.bertha-modal,.study-v10-modal){
+    width:calc(100vw - 40px)!important;
+    max-width:460px!important;
+    max-height:78dvh!important;
+    padding:18px!important;
+    border-radius:24px!important;
+  }
+}

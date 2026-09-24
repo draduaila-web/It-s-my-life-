@@ -1,4 +1,4 @@
-const CACHE = "hml-bertha-v221-rc70-note-checkbox";
+const CACHE = "hml-bertha-v221-rc82-exercise-modal-proportion";
 self.addEventListener("install", event => event.waitUntil(self.skipWaiting()));
 self.addEventListener("activate", event => event.waitUntil((async()=>{
   const keys=await caches.keys();
