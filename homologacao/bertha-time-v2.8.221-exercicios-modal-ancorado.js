@@ -4789,10 +4789,10 @@ html body :is(dialog.work12-dialog,dialog.work12-front-dialog) > .work12-form{
  border:2px solid rgba(125,120,127,.18)!important;
 }
 
-/* CASA + EXERCÍCIOS — borda deliberadamente perceptível, não hairline */
-html body :is(dialog.casa-dialog,dialog.casa-maint-dialog) > :is(.casa-modal-card,.casa-maint-modal,.study-v10-modal,.modal-card),
+/* RC75 — CASA: bordas finas no padrão visual aprovado. Exercícios preservado. */
+html body :is(dialog.casa-dialog,dialog.casa-maint-dialog) > :is(.casa-modal-card,.casa-maint-modal,.study-v10-modal,.modal-card){border:1px solid rgba(154,119,132,.14)!important}
+html body :is(dialog.casa-dialog,dialog.casa-maint-dialog) :is(input:not([type=checkbox]):not([type=radio]),select,textarea,.secondary,.primary,.study-v10-x,.casa-modal-x,.card,.pill,.seg-btn,.choice-btn,.casa-routine-picker-btn,.casa-web-link,.casa-tool-row){border:1px solid rgba(132,106,118,.14)!important;box-shadow:none!important}
 html body dialog.exercise-dialog > :is(.bertha-modal,.study-v10-modal){border-width:2px!important;border-style:solid!important}
-html body :is(dialog.casa-dialog,dialog.casa-maint-dialog) :is(input:not([type=checkbox]):not([type=radio]),select,textarea,.secondary,.primary,.study-v10-x,.casa-modal-x,.card,.pill,.seg-btn,.choice-btn,.casa-routine-picker-btn,.casa-web-link,.casa-tool-row){border:2px solid rgba(154,119,132,.32)!important}
 html body dialog.exercise-dialog :is(input:not([type=checkbox]):not([type=radio]),select,textarea,.secondary,.primary,.study-v10-x,.bertha-modal-head button,.card,.pill,.seg-btn,.choice-btn,.exercise-icon-choice,.exercise-icon-filter){border:2px solid rgba(148,125,169,.32)!important}
 
 /* ALIMENTAÇÃO/RECEITAS — paleta do hero Alimentação: bege + blush + menta */
