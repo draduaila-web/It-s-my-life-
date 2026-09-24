@@ -1,6 +1,6 @@
 
 (function(){if(document.getElementById('close-purchase-v2873-style'))return;const st=document.createElement('style');st.id='close-purchase-v2873-style';st.textContent=`.close-purchase-modal{display:flex!important;flex-direction:column!important;max-height:min(88dvh,760px)!important;overflow:hidden!important}.close-purchase-list{display:grid;gap:9px;overflow:auto;padding:2px 2px 10px;min-height:0}.close-purchase-item{display:grid!important;grid-template-columns:24px minmax(0,1fr) auto;align-items:center;gap:10px;margin:0!important;padding:12px 13px;border:1px solid #eadfec;border-radius:16px;background:#fff;cursor:pointer}.close-purchase-item input{position:absolute;opacity:0;pointer-events:none}.close-purchase-check{width:21px;height:21px;border:1.5px solid #cbbbd1;border-radius:7px;background:#fff;display:grid;place-items:center}.close-purchase-item input:checked+.close-purchase-check{background:#8f73a1;border-color:#8f73a1}.close-purchase-item input:checked+.close-purchase-check:after{content:'✓';color:#fff;font-size:14px;font-weight:900}.close-purchase-copy{min-width:0}.close-purchase-copy strong,.close-purchase-copy small{display:block}.close-purchase-copy strong{font-size:14px;color:#514854}.close-purchase-copy small{margin-top:3px;font-size:11px;color:#8c818e}.close-purchase-base{font-size:10px;font-weight:850;color:#80668f;background:#f3eafb;border-radius:999px;padding:6px 8px;white-space:nowrap}.close-purchase-hint{font-size:11px;line-height:1.4;color:#8a808b;padding:5px 2px 0}.close-purchase-actions{position:sticky!important;bottom:-20px!important;margin:12px -20px -20px!important;padding:13px 20px calc(13px + env(safe-area-inset-bottom))!important;background:rgba(255,253,251,.97)!important;border-top:1px solid rgba(92,72,104,.08);z-index:2}@media(max-width:560px){.close-purchase-modal{width:calc(100vw - 24px)!important;max-height:calc(100dvh - 24px)!important;border-radius:24px!important;padding:18px!important}.close-purchase-actions{bottom:-18px!important;margin:12px -18px -18px!important;padding:12px 18px calc(12px + env(safe-area-inset-bottom))!important}.close-purchase-base{display:none}}`;document.head.appendChild(st)})();
-// BERTH.A v2.8.221 RC88 — Alimentação: cardápio semanal + consumo real + Receitas como fonte única
+// BERTH.A v2.8.221 RC90 — Alimentação: estados coerentes + hoje em foco + nutrição explícita
 // BERTH.A Homologação v2.8.180 — modal Encerrar compra refinado
 // BERTH.A app-v2.8.127 · Casa modais blush/sálvia + menu de áreas alinhado
 window.BERTHA_BUILD="2.8.139-trabalho-estetica-integracao";
@@ -2322,11 +2322,11 @@ function foodRecipeMacros(recipe){
  return {...kcalInfo,protein:proteinValue,proteinSource};
 }
 function foodRecipeNutritionLabel(recipe){
- if(!recipe?.nutrition)return '';
- const n=recipe.nutrition,k=foodNumeric(n.kcal),p=foodNumeric(n.protein),ref=n.reference||'100g';
+ const n=recipe?.nutrition||{},k=foodNumeric(n.kcal),p=foodNumeric(n.protein),ref=n.reference||'100g';
  const refLabel=ref==='portion'?'por porção':ref==='whole'?'prato completo':ref==='100g'?'por 100 g':'referência cadastrada';
- const bits=[];if(k!=null)bits.push(`${Math.round(k)} kcal`);if(p!=null)bits.push(`${String(Math.round(p*10)/10).replace('.',',')} g proteína`);
- return bits.length?`${bits.join(' · ')} · ${refLabel}`:'';
+ const bits=[k!=null?`${Math.round(k)} kcal`:'Calorias: não cadastrado',p!=null?`${String(Math.round(p*10)/10).replace('.',',')} g proteína`:'Proteína: não cadastrada'];
+ const hasAny=k!=null||p!=null;
+ return `${bits.join(' · ')}${hasAny?` · ${refLabel}`:''}`;
 }
 function recordRecipeConsumption(mealId,title,source){
  try{
@@ -2398,11 +2398,12 @@ function ensureFoodModuleStyles(){
 function foodMealLineIcon(id){const icons={breakfast:'<path d="M4 8h12v5a5 5 0 0 1-5 5H9a5 5 0 0 1-5-5V8z"/><path d="M16 10h2a2 2 0 0 1 0 4h-2"/><path d="M7 5c0-1 1-1 1-2M11 5c0-1 1-1 1-2"/>',lunch:'<path d="M7 3v8M4 3v5c0 2 6 2 6 0V3M7 11v10M16 3v18M16 3c4 3 4 8 0 10"/>',dinner:'<path d="M20 14.5A8 8 0 0 1 9.5 4a7 7 0 1 0 10.5 10.5z"/>'};return `<svg viewBox="0 0 24 24" aria-hidden="true">${icons[id]||icons.dinner}</svg>`}
 function renderTodayFoodCard(){
  const meals=getTodayMeals();
- return `<section class="food-v115-today"><div class="food-v115-today-head"><div><span class="eyebrow">HOJE · ${escapeHtml(foodDayName().toUpperCase())}</span><h3>O que estava previsto para hoje.</h3><p>Marque o que realmente aconteceu. Só “Comi” entra no Meu Progresso.</p></div></div><div class="food-v115-today-grid">${meals.map(m=>{const selected=getRecipeById(m.log.selectedRecipeId)||m.recipe,name=m.log.otherText||selected?.name||m.name,status=m.log.consumption||'',nutrition=foodRecipeNutritionLabel(selected);return `<article class="food-v115-meal ${status?'has-status '+status:''}"><div class="food-v115-meal-label"><span class="food-v115-meal-icon">${foodMealLineIcon(m.id)}</span>${escapeHtml(m.label)}</div><strong>${escapeHtml(name)}</strong>${nutrition?`<small class="food-v115-nutrition">${escapeHtml(nutrition)}</small>`:'<small class="food-v115-nutrition muted">Informação nutricional disponível quando cadastrada em Receitas.</small>'}<div class="food-v115-actions food-v115-consumption"><button type="button" class="food-status-btn food-eaten ${status==='consumed'?'selected':''}" data-food-status="consumed" data-food-meal="${m.id}">Comi</button><button type="button" class="food-status-btn food-skipped ${status==='skipped'?'selected':''}" data-food-status="skipped" data-food-meal="${m.id}">Não comi</button>${selected?`<button type="button" class="food-recipe-link" data-food-open-recipe="${selected.id}">Ver receita</button>`:''}</div></article>`}).join('')}</div></section>`;
+ return `<section class="food-v115-today"><div class="food-v115-today-head"><div><span class="eyebrow">HOJE · ${escapeHtml(foodDayName().toUpperCase())}</span><h3>O que estava previsto para hoje.</h3><p>Marque o que realmente aconteceu. Só “Comi” entra no Meu Progresso.</p></div></div><div class="food-v115-today-grid">${meals.map(m=>{const selected=getRecipeById(m.log.selectedRecipeId)||m.recipe,name=m.log.otherText||selected?.name||m.name,status=m.log.consumption||'',nutrition=foodRecipeNutritionLabel(selected);return `<article class="food-v115-meal ${status?'has-status '+status:''}"><div class="food-v115-meal-label"><span class="food-v115-meal-icon">${foodMealLineIcon(m.id)}</span>${escapeHtml(m.label)}</div><strong>${escapeHtml(name)}</strong><small class="food-v115-nutrition">${escapeHtml(nutrition)}</small><div class="food-v115-actions food-v115-consumption"><button type="button" class="food-status-btn food-eaten ${status==='consumed'?'selected':''}" data-food-status="consumed" data-food-meal="${m.id}">Comi</button><button type="button" class="food-status-btn food-skipped ${status==='skipped'?'selected':''}" data-food-status="skipped" data-food-meal="${m.id}">Não comi</button>${selected?`<button type="button" class="food-recipe-link" data-food-open-recipe="${selected.id}">Ver receita</button>`:''}</div></article>`}).join('')}</div></section>`;
 }
 function bindTodayFoodActions(){
  document.querySelectorAll('[data-food-status]').forEach(b=>b.onclick=()=>{const mealId=b.dataset.foodMeal,status=b.dataset.foodStatus,s=getTodayMealState(mealId),title=s.log.otherText||s.selected?.name||s.meal.name;setTodayMealConsumption(mealId,status,title,s.log.source||'planned')});
  document.querySelectorAll('[data-food-open-recipe]').forEach(b=>b.onclick=()=>openRecipeInRecipes(b.dataset.foodOpenRecipe));
+ requestAnimationFrame(()=>{document.querySelectorAll('.food-week-track').forEach(track=>{const card=track.querySelector('.food-week-day.today');if(!card)return;const left=Math.max(0,card.offsetLeft-track.clientWidth*0.08);track.scrollLeft=left;});});
 }
 function renderFoodMeuDiaMini(){
  return `<div class="home-recipes-shortcut-wrap"><a class="home-recipes-shortcut" href="#receitas" onclick="setTimeout(()=>document.querySelector('.recipe-today')?.scrollIntoView({behavior:'smooth',block:'start'}),90)"><span class="home-recipes-shortcut-icon">${recipeMealIcon()}</span><span>Receitas do dia</span><b>→</b></a><a class="home-recipes-shortcut home-recipes-next" href="#receitas" onclick="setTimeout(()=>document.querySelector('.recipe-upcoming')?.scrollIntoView({behavior:'smooth',block:'start'}),90)"><span class="home-recipes-shortcut-icon">${recipeMealIcon()}</span><span>Receitas de amanhã</span><b>→</b></a></div>`;
@@ -2517,7 +2518,7 @@ function ensureFoodPolishStylesRC87(){
  html body dialog.food-next-prep-dialog[open]>.study-v10-modal{
    box-sizing:border-box!important;width:min(100%,480px)!important;max-width:480px!important;height:auto!important;max-height:calc(100dvh - 28px)!important;
    margin:auto!important;padding:22px!important;overflow:auto!important;border-radius:28px!important;border:1px solid rgba(143,119,129,.12)!important;
-   background:linear-gradient(145deg,#fbf8f1 0%,#f7eff1 52%,#eef5ef 100%)!important;
+   background:linear-gradient(145deg,#f7fbfb 0%,#f3f8f5 56%,#fbf8ea 100%)!important;
    box-shadow:0 18px 46px rgba(58,49,60,.10)!important;color:#484148!important
  }
  html body dialog.food-next-prep-dialog .study-v10-head{display:flex!important;align-items:flex-start!important;justify-content:space-between!important;gap:16px!important;margin:0 0 18px!important;padding:0!important}
@@ -2538,7 +2539,7 @@ function ensureFoodPolishStylesRC87(){
  html body dialog.food-next-prep-dialog .study-v10-actions{position:static!important;display:flex!important;justify-content:flex-end!important;gap:10px!important;margin:18px 0 0!important;padding:0!important;background:transparent!important;border:0!important;box-shadow:none!important}
  html body dialog.food-next-prep-dialog .study-v10-actions button{min-height:46px!important;min-width:112px!important;border-radius:16px!important;padding:10px 16px!important;font-size:14px!important;font-weight:500!important;box-shadow:none!important}
  html body dialog.food-next-prep-dialog .secondary{background:rgba(255,253,249,.84)!important;color:#6e666c!important;border:1px solid rgba(139,112,124,.12)!important}
- html body dialog.food-next-prep-dialog .primary{background:linear-gradient(135deg,#e7bcc3 0%,#e7c7b9 56%,#cadbcd 100%)!important;color:#fff!important;border:0!important}
+ html body dialog.food-next-prep-dialog .primary{background:linear-gradient(135deg,#cfe6eb 0%,#d8eadf 58%,#eee2b8 100%)!important;color:#5f6666!important;border:0!important}
 
  @media(max-width:480px){
    html body dialog.food-context-dialog[open]{padding:12px!important}
@@ -2563,14 +2564,14 @@ function ensureFoodArchitectureRC88(){
  .food-v115-consumption{display:grid!important;grid-template-columns:auto auto 1fr!important;gap:7px!important;margin-top:12px!important}
  .food-v115-consumption button{min-height:34px!important;font-weight:500!important}
  .food-v115-consumption .food-status-btn{background:rgba(255,251,247,.78)!important;color:#716873!important;border-color:rgba(113,101,116,.10)!important}
- .food-v115-consumption .food-eaten.selected{background:linear-gradient(135deg,rgba(218,239,232,.88),rgba(237,246,222,.84))!important;color:#627a70!important;border-color:rgba(98,130,115,.15)!important}
- .food-v115-consumption .food-skipped.selected{background:linear-gradient(135deg,rgba(249,226,229,.88),rgba(249,238,226,.84))!important;color:#986f77!important;border-color:rgba(151,105,117,.13)!important}
+ .food-v115-consumption .food-eaten.selected{background:linear-gradient(135deg,rgba(207,230,235,.92),rgba(216,234,223,.92),rgba(238,226,184,.78))!important;color:#5f6f6b!important;border-color:rgba(102,137,133,.14)!important}
+ .food-v115-consumption .food-skipped.selected{background:linear-gradient(135deg,rgba(250,248,239,.96),rgba(239,242,226,.92),rgba(233,240,237,.92))!important;color:#77756e!important;border-color:rgba(124,130,119,.12)!important}
  .food-v115-consumption .food-recipe-link{justify-self:end;background:transparent!important;border:0!important;color:#7d7580!important;text-decoration:underline;text-underline-offset:3px;padding-inline:6px!important}
  .food-week-carousel{padding:17px 18px!important;margin-top:10px!important}
  .food-week-carousel-head{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:12px}.food-week-carousel-head h3{margin:0;font-size:18px;font-weight:500;color:#4a454d}
  .food-week-track{display:flex;gap:9px;overflow-x:auto;padding:2px 1px 6px;scroll-snap-type:x proximity;scrollbar-width:none}.food-week-track::-webkit-scrollbar{display:none}
  .food-week-day{flex:0 0 150px;min-height:142px;padding:13px;border:1px solid rgba(111,106,117,.07);border-radius:17px;background:linear-gradient(145deg,rgba(255,252,247,.86),rgba(250,247,245,.72));scroll-snap-align:start;display:flex;flex-direction:column}
- .food-week-day.today{background:linear-gradient(145deg,rgba(232,242,249,.82),rgba(248,235,233,.72),rgba(235,245,236,.72));border-color:rgba(111,132,146,.11)}
+ .food-week-day.today{background:linear-gradient(145deg,rgba(225,241,245,.92),rgba(231,242,234,.90),rgba(250,245,221,.88));border-color:rgba(105,137,139,.13);box-shadow:0 7px 18px rgba(84,111,110,.05)}
  .food-week-day>b{font-size:10px;letter-spacing:.16em;color:#8c7f89;font-weight:600}.food-week-day>strong{margin-top:7px;font-size:13px;line-height:1.28;color:#4f4951;font-weight:500}.food-week-day>small{margin-top:6px;color:#958b94;font-size:10.5px;line-height:1.3;font-weight:400}
  .food-week-day>button{margin-top:auto;align-self:flex-start;border:0!important;background:transparent!important;color:#7e7680!important;padding:8px 0 0!important;min-height:auto!important;font-size:11px!important;font-weight:500!important;text-decoration:underline;text-underline-offset:3px;box-shadow:none!important}
  @media(max-width:520px){.food-v115-consumption{grid-template-columns:1fr 1fr!important}.food-v115-consumption .food-recipe-link{grid-column:1/-1;justify-self:start}.food-week-day{flex-basis:142px}}
