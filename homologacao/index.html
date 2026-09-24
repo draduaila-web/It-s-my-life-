@@ -9,7 +9,7 @@
 <meta name="apple-mobile-web-app-title" content="BERTH.A HML">
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="apple-touch-icon" sizes="512x512" href="../bertha-icon-512.png">
-<link rel="stylesheet" href="./style.css?v=221-rc53-corretiva-consolidada">
+<link rel="stylesheet" href="./style.css?v=221-rc54-corretiva-direta">
 <script id="bertha-rollback-221-bootstrap">
 (function(){
   const KEY='bertha.hml.rc13.modalcolors.refresh';
@@ -41,7 +41,9 @@
    Este seletor específico + !important vence essa regra sem alterar outros modais. */
 #ideaDialog #ideaForm.bertha-modal.study-v10-modal {
   border-radius: 40px !important;
-  overflow: hidden !important;
+  overflow-y: auto !important;
+  overflow-x: hidden !important;
+  -webkit-overflow-scrolling: touch !important;
 }
 
 /* RC6 · Biblioteca de ícones segmentada por tipo */
@@ -564,7 +566,7 @@ body.bertha-hml::before{content:"HOMOLOGAÇÃO";position:fixed;z-index:99999;top
   });
 })();
 </script>
-<script src="app-v2.8.221-exercicios-modal-ancorado.js?v=221-rc53-corretiva-consolidada"></script>
+<script src="app-v2.8.221-exercicios-modal-ancorado.js?v=221-rc54-corretiva-direta"></script>
 
 <dialog id="moduleMenu">
 <div class="module-sheet">
@@ -590,7 +592,7 @@ body.bertha-hml::before{content:"HOMOLOGAÇÃO";position:fixed;z-index:99999;top
 </div>
 </dialog>
 
-<script src="work-v12.js?v=221-rc53-corretiva-consolidada"></script>
-<script src="bertha-time-v2.8.221-exercicios-modal-ancorado.js?v=221-rc53-corretiva-consolidada"></script>
+<script src="work-v12.js?v=221-rc54-corretiva-direta"></script>
+<script src="bertha-time-v2.8.221-exercicios-modal-ancorado.js?v=221-rc54-corretiva-direta"></script>
 </body>
 </html>

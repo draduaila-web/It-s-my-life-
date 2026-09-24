@@ -4755,3 +4755,72 @@
   `;
   document.head.appendChild(s);
 })();
+
+/* RC54 — corrective layer: verified against iPhone screenshots 23/09/2026 */
+(()=>{const s=document.createElement('style');s.id='bertha-rc54-final-corrective';s.textContent=`
+/* TAREFAS — remove definitivamente o amarelo/ocre legado */
+html body dialog.bertha-plans-task-dialog[open] > form.bertha-task-modal,
+html body #pendingDialog[open] > #pendingForm.modal-card{
+ background:linear-gradient(135deg,rgba(247,222,232,.96) 0%,rgba(241,232,249,.97) 52%,rgba(225,239,251,.97) 100%)!important;
+ border:2px solid rgba(157,128,169,.28)!important;
+}
+html body dialog.bertha-plans-task-dialog[open] :is(.bertha-task-save,.primary,[type=submit]),
+html body #pendingDialog[open] :is(.primary,[type=submit]){
+ background:linear-gradient(135deg,#d9a9c8 0%,#b8a5df 55%,#9ebfe4 100%)!important;color:#fff!important;border:2px solid rgba(144,115,166,.20)!important;
+}
+html body dialog.bertha-plans-task-dialog[open] :is(.pill,.seg-btn,.choice-btn,.secondary,.icon-btn,input:not([type=checkbox]):not([type=radio]),select,textarea),
+html body #pendingDialog[open] :is(.pill,.seg-btn,.choice-btn,.secondary,.icon-btn,input:not([type=checkbox]):not([type=radio]),select,textarea){border:2px solid rgba(157,128,169,.27)!important}
+
+/* MEU DIA IDEAL — a própria superfície do hero, sem menta/lilás adicional */
+html body dialog.bertha-goal-dialog[open] > .bertha-modal,
+html body dialog.bertha-dialog[open]:has(.bertha-ideal-modal-form) > .bertha-modal{
+ background:linear-gradient(135deg,rgba(246,213,223,.80) 0%,rgba(252,246,239,.96) 27%,rgba(230,241,255,.96) 100%)!important;
+ border:2px solid rgba(152,165,189,.22)!important;
+}
+html body :is(dialog.bertha-goal-dialog[open],dialog.bertha-dialog[open]:has(.bertha-ideal-modal-form)) :is(.primary,.bertha-primary,[type=submit]){
+ background:linear-gradient(135deg,rgba(223,160,183,.99) 0%,rgba(245,224,200,.98) 44%,rgba(210,227,244,.99) 100%)!important;color:#fff!important;border:2px solid rgba(193,149,171,.24)!important;
+}
+
+/* TRABALHO — interior usa a MESMA família do hero */
+html body .work12-front,
+html body .work13-card,
+html body .work12-card{
+ background:radial-gradient(circle at 86% 78%,rgba(248,231,182,.18),transparent 33%),linear-gradient(135deg,rgba(251,247,236,.98) 0%,rgba(244,239,251,.92) 50%,rgba(239,247,240,.92) 100%)!important;
+ border:1.5px solid rgba(125,120,127,.13)!important;
+}
+html body .work12-front .work12-icon{background:linear-gradient(135deg,rgba(244,239,251,.96),rgba(239,247,240,.96))!important;border:1.5px solid rgba(123,104,154,.14)!important}
+html body :is(dialog.work12-dialog,dialog.work12-front-dialog) > .work12-form{
+ background:radial-gradient(circle at 86% 78%,rgba(248,231,182,.18),transparent 33%),linear-gradient(135deg,rgba(251,247,236,.98) 0%,rgba(244,239,251,.94) 50%,rgba(239,247,240,.94) 100%)!important;
+ border:2px solid rgba(125,120,127,.18)!important;
+}
+
+/* CASA + EXERCÍCIOS — borda deliberadamente perceptível, não hairline */
+html body :is(dialog.casa-dialog,dialog.casa-maint-dialog) > :is(.casa-modal-card,.casa-maint-modal,.study-v10-modal,.modal-card),
+html body dialog.exercise-dialog > :is(.bertha-modal,.study-v10-modal){border-width:2px!important;border-style:solid!important}
+html body :is(dialog.casa-dialog,dialog.casa-maint-dialog) :is(input:not([type=checkbox]):not([type=radio]),select,textarea,.secondary,.primary,.study-v10-x,.casa-modal-x,.card,.pill,.seg-btn,.choice-btn,.casa-routine-picker-btn,.casa-web-link,.casa-tool-row){border:2px solid rgba(154,119,132,.32)!important}
+html body dialog.exercise-dialog :is(input:not([type=checkbox]):not([type=radio]),select,textarea,.secondary,.primary,.study-v10-x,.bertha-modal-head button,.card,.pill,.seg-btn,.choice-btn,.exercise-icon-choice,.exercise-icon-filter){border:2px solid rgba(148,125,169,.32)!important}
+
+/* ALIMENTAÇÃO/RECEITAS — paleta do hero Alimentação: bege + blush + menta */
+html body dialog#foodRecipeDialog[open] > .study-v10-modal,
+html body dialog#recipeFormDialog[open] > #recipeForm,
+html body dialog.recipe-dialog[open] > .study-v10-modal{
+ background:linear-gradient(135deg,var(--beige-soft,#fbf5e9) 0%,#fff5f7 52%,var(--mint-soft,#e8f4ec) 100%)!important;
+ border:2px solid rgba(220,190,205,.42)!important;
+}
+html body dialog#foodRecipeDialog[open] .recipe-detail-card{background:rgba(255,253,250,.72)!important;border:2px solid rgba(220,190,205,.30)!important}
+html body dialog#foodRecipeDialog[open] .recipe-modal-actions button{border:2px solid rgba(205,171,187,.28)!important}
+html body dialog#foodRecipeDialog[open] .recipe-modal-actions button:nth-child(1){background:linear-gradient(135deg,#efc4c9,#edb49f)!important;color:#fff!important}
+html body dialog#foodRecipeDialog[open] .recipe-modal-actions button:nth-child(2),
+html body dialog#foodRecipeDialog[open] .recipe-modal-actions button:nth-child(3){background:linear-gradient(135deg,#d8edf5,#e8f2df)!important;color:#657083!important}
+
+/* CRIAÇÃO & IDEIAS — o form é o scroller; neutraliza overflow:hidden inline legado */
+html body #ideaDialog[open]{overflow:hidden!important;touch-action:none!important}
+html body #ideaDialog[open] #ideaForm.bertha-modal.study-v10-modal{
+ overflow-y:scroll!important;overflow-x:hidden!important;-webkit-overflow-scrolling:touch!important;overscroll-behavior-y:contain!important;touch-action:pan-y!important;
+ height:auto!important;max-height:calc(100dvh - env(safe-area-inset-top,0px) - env(safe-area-inset-bottom,0px) - 28px)!important;
+ padding-bottom:calc(40px + env(safe-area-inset-bottom,0px))!important;
+}
+html body #ideaDialog[open] #ideaForm.bertha-modal.study-v10-modal *{touch-action:auto}
+html body #ideaDialog[open] #ideaForm.bertha-modal.study-v10-modal :is(input,textarea,select){touch-action:manipulation}
+`;
+document.head.appendChild(s)})();
