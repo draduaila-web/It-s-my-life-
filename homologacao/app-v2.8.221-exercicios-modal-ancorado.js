@@ -2482,9 +2482,68 @@ function ensureFoodPolishStylesRC86(){
  `;document.head.appendChild(st)
 }
 
+
+function ensureFoodPolishStylesRC87(){
+ if(document.getElementById('bertha-food-polish-rc87'))return;
+ const st=document.createElement('style');st.id='bertha-food-polish-rc87';st.textContent=`
+ /* RC87 — ALIMENTAÇÃO: harmonização pastel dos modais.
+    Mesma estrutura aprovada; reduz saturação, neutraliza X e unifica ações. */
+ html body :is(dialog.food-context-dialog,dialog.food-next-prep-dialog)>.study-v10-modal,
+ html body dialog#recipeFormDialog.food-context-dialog>#recipeForm{
+   background:linear-gradient(145deg,#fcf8f1 0%,#faeff1 48%,#eef6ef 100%)!important;
+   border:1px solid rgba(151,130,139,.11)!important;
+   box-shadow:0 18px 44px rgba(63,48,66,.09)!important;
+ }
+ html body :is(dialog.food-context-dialog,dialog.food-next-prep-dialog) .study-v10-head .eyebrow{
+   color:#8a7e84!important;font-weight:500!important;letter-spacing:.22em!important;
+ }
+ html body :is(dialog.food-context-dialog,dialog.food-next-prep-dialog) .study-v10-head h2{
+   color:#433e44!important;font-weight:500!important;letter-spacing:-.025em!important;
+ }
+ html body :is(dialog.food-context-dialog,dialog.food-next-prep-dialog) .study-v10-head p{
+   color:#877e84!important;font-weight:400!important;
+ }
+ html body :is(dialog.food-context-dialog,dialog.food-next-prep-dialog) .study-v10-x{
+   color:#7c757b!important;background:rgba(255,253,250,.62)!important;
+   border:1px solid rgba(126,113,120,.12)!important;box-shadow:none!important;
+   font-weight:300!important;
+ }
+ html body :is(dialog.food-context-dialog,dialog.food-next-prep-dialog) :is(input:not([type=checkbox]):not([type=radio]),select,textarea){
+   background:rgba(255,254,251,.82)!important;border:1px solid rgba(137,119,128,.12)!important;
+   color:#4c474d!important;box-shadow:none!important;
+ }
+ html body :is(dialog.food-context-dialog,dialog.food-next-prep-dialog) :is(.secondary){
+   background:linear-gradient(135deg,#f3eaeb 0%,#edf3ed 100%)!important;
+   color:#675f65!important;border:1px solid rgba(137,119,128,.09)!important;box-shadow:none!important;
+ }
+ html body :is(dialog.food-context-dialog,dialog.food-next-prep-dialog) :is(.primary,[type=submit]){
+   background:linear-gradient(135deg,#e8c0c8 0%,#edd6ca 52%,#cfe2d2 100%)!important;
+   color:#fff!important;border:0!important;box-shadow:none!important;
+ }
+ html body dialog#foodRecipeDialog.food-context-dialog .recipe-detail-card{
+   background:rgba(255,254,251,.67)!important;border:1px solid rgba(137,119,128,.09)!important;
+ }
+ html body dialog#foodRecipeDialog.food-context-dialog .recipe-detail-card h3{font-weight:500!important;color:#4b464b!important}
+ html body dialog#foodRecipeDialog.food-context-dialog .recipe-detail-card strong{font-weight:500!important}
+ html body dialog#foodRecipeDialog.food-context-dialog .recipe-modal-actions button{
+   min-height:46px!important;border-radius:16px!important;font-size:14px!important;font-weight:500!important;
+ }
+ html body dialog#foodRecipeDialog.food-context-dialog .recipe-modal-actions button:nth-child(1){
+   background:linear-gradient(135deg,#edc7cd 0%,#efd9ce 100%)!important;color:#665d62!important;border:0!important;
+ }
+ html body dialog#foodRecipeDialog.food-context-dialog .recipe-modal-actions button:nth-child(2){
+   background:linear-gradient(135deg,#eef3ef 0%,#dcebdc 100%)!important;color:#626b63!important;border:0!important;
+ }
+ html body dialog#foodRecipeDialog.food-context-dialog .recipe-modal-actions button:nth-child(3){
+   background:linear-gradient(135deg,#f4e9eb 0%,#edf4ee 100%)!important;color:#665f64!important;border:1px solid rgba(137,119,128,.08)!important;
+ }
+ `;document.head.appendChild(st)
+}
+
 function renderAlimentacao(){
  ensureFoodModuleStyles();
  ensureFoodPolishStylesRC86();
+ ensureFoodPolishStylesRC87();
  const d=loadFood(),today=foodDayName();
  const dayAbbr={Segunda:'SEG',Terça:'TER',Quarta:'QUA',Quinta:'QUI',Sexta:'SEX',Sábado:'SÁB',Domingo:'DOM'};
  app.innerHTML=`<div class="food-v115"><section class="food-v115-hero"><span class="eyebrow">ALIMENTAÇÃO</span><h2>Know what’s next.</h2><p>Você escolhe. A BERTH.A organiza seu dia.</p><span class="food-v115-abstract" aria-hidden="true"></span></section>${renderTodayFoodCard()}<section class="food-v115-week"><div class="food-v115-section-kicker"><span class="eyebrow">SEMANA ${escapeHtml(String(d.week||1))} · CARDÁPIO</span></div><div class="card food-v115-card food-v115-breakfast"><div class="food-v115-breakfast-head"><h3>Café da manhã</h3><span class="food-v115-pill">7 dias</span></div><div class="food-v115-days">${d.breakfasts.map(x=>`<div class="food-v115-day ${x[0]===today?'today':''}"><b>${dayAbbr[x[0]]||escapeHtml(x[0].slice(0,3))}</b><span>${escapeHtml(x[1])}</span></div>`).join('')}</div></div><div class="card food-v115-card food-v115-dinner"><div class="food-v115-dinner-head"><h3>Jantar + marmita</h3><span class="food-v115-pill">3 pessoas</span></div>${d.dinners.map(x=>{const r=recipeForMealName(x[1]);return `<div class="food-v115-dinner-row"><span class="food-v115-daytag">${dayAbbr[x[0]]||escapeHtml(x[0].slice(0,3))}</span><div><strong>${escapeHtml(x[1])}</strong>${x[2]?`<small>marmita → ${escapeHtml(x[2])}</small>`:''}</div>${r?`<button type="button" class="food-v115-recipe-btn" aria-label="Ver receita" data-food-recipe="${r.id}">›</button>`:'<span></span>'}</div>`}).join('')}</div></section><div class="section-title food-v115-routine-title">ROTINA DE PREPARO</div><div class="card food-v115-card food-v115-routine"><label><input type="checkbox" id="foodCook" ${d.cookingDone?'checked':''}><span><strong>Cozinha quinzenal</strong><small>Produzir bases, porcionar, etiquetar e congelar.</small>${d.cookingDoneAt?`<small class="food-v115-cookdate">Concluída em ${foodPrepDateLabel(d.cookingDoneAt)}</small>`:''}${d.nextCookingDate?`<small class="food-v115-cookdate">Próxima programada: ${new Date(d.nextCookingDate+'T12:00:00').toLocaleDateString('pt-BR')}</small>`:''}</span></label><button type="button" class="secondary food-program-next" id="foodProgramNext">Programar próxima</button></div></div>`;
