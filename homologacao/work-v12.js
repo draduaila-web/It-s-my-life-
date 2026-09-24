@@ -671,3 +671,42 @@
  .work12-secondary,.work12-primary{font-weight:500!important}
  `; document.head.appendChild(s);
 })();
+
+/* RC69 — TRABALHO · CORES DOS BOTÕES + SUPERFÍCIE NOVA FRENTE
+   Escopo visual apenas: preserva tipografia, estrutura e lógica aprovadas. */
+(function(){
+ const old=document.getElementById('work-rc69-cor-botoes-modal'); if(old) old.remove();
+ const s=document.createElement('style'); s.id='work-rc69-cor-botoes-modal'; s.textContent=`
+ /* Botões/ações dos submódulos: identidade oficial lilás + menta */
+ .work12-back,.work12-front-edit,.work12-add,.work12-front-add,
+ .work12-chip,.work12-mini,.work12-secondary,.work12-primary{
+   background:linear-gradient(125deg,rgba(238,228,250,.94) 0%,rgba(232,238,248,.92) 48%,rgba(218,244,235,.92) 100%)!important;
+   color:#6f5d88!important;
+   border:1px solid rgba(123,104,154,.10)!important;
+   box-shadow:none!important;
+ }
+ .work12-primary{
+   background:linear-gradient(125deg,#dfd0f4 0%,#dce9ed 50%,#cfeadd 100%)!important;
+   color:#625276!important;
+ }
+ .work12-mini.danger{background:#f4e9e5!important;color:#956c62!important}
+ .work12-mini.done{background:linear-gradient(125deg,rgba(231,241,236,.96),rgba(216,241,230,.94))!important;color:#587263!important}
+
+ /* Nova/Editar frente: a superfície inteira recebe o degradê de Trabalho. */
+ dialog.work12-front-dialog{
+   background:linear-gradient(145deg,rgba(247,240,253,.995) 0%,rgba(238,241,250,.99) 50%,rgba(225,247,238,.99) 100%)!important;
+   border:1px solid rgba(123,104,154,.12)!important;
+   border-radius:28px!important;
+ }
+ dialog.work12-front-dialog>.work12-front-form{
+   background:linear-gradient(145deg,rgba(247,240,253,.995) 0%,rgba(238,241,250,.99) 50%,rgba(225,247,238,.99) 100%)!important;
+   border-radius:28px!important;
+ }
+ dialog.work12-front-dialog .work12-form-head{
+   background:transparent!important;
+ }
+ dialog.work12-front-dialog .work12-form-actions{
+   background:linear-gradient(to bottom,rgba(229,244,239,0),rgba(229,244,239,.98) 14px)!important;
+ }
+ `; document.head.appendChild(s);
+})();
