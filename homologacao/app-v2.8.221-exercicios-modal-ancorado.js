@@ -2396,8 +2396,95 @@ function foodPrepDateLabel(ts){if(!ts)return'';try{return new Date(ts).toLocaleD
 function openFoodNextPrepDialog(){
  const d=loadFood(),dlg=document.createElement('dialog');dlg.className='study-v10-dialog food-next-prep-dialog';const base=new Date();base.setDate(base.getDate()+14);const suggested=d.nextCookingDate||base.toISOString().slice(0,10);dlg.innerHTML=`<form class="study-v10-modal" id="foodNextPrepForm"><div class="study-v10-head"><div><div class="eyebrow">ALIMENTAÇÃO · ROTINA DE PREPARO</div><h2>Programar próxima</h2><p>Defina quando pretende fazer a próxima cozinha quinzenal.</p></div><button type="button" class="study-v10-x" data-close>×</button></div><label>Data<input type="date" id="foodNextPrepDate" value="${escapeHtml(suggested)}" required></label><div class="study-v10-actions"><button type="button" class="secondary" data-close>Cancelar</button><button type="submit" class="primary">Salvar</button></div></form>`;document.body.appendChild(dlg);const close=()=>dlg.close();dlg.querySelectorAll('[data-close]').forEach(b=>b.onclick=close);dlg.onclose=()=>dlg.remove();dlg.querySelector('#foodNextPrepForm').onsubmit=e=>{e.preventDefault();d.nextCookingDate=dlg.querySelector('#foodNextPrepDate').value;saveFood(d);close();renderAlimentacao()};dlg.showModal();
 }
+
+function ensureFoodPolishStylesRC86(){
+ if(document.getElementById('bertha-food-polish-rc86'))return;
+ const st=document.createElement('style');st.id='bertha-food-polish-rc86';st.textContent=`
+ /* RC86 — ALIMENTAÇÃO: tipografia leve + modal system próprio.
+    Exceção deliberada: .food-next-prep-dialog permanece intocado. */
+ .food-v115{font-family:"Avenir Next","Montserrat",Inter,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}
+ .food-v115 .eyebrow,.food-v115-section-kicker .eyebrow{
+   font-size:10px!important;font-weight:500!important;letter-spacing:.22em!important;color:#8b7f88!important
+ }
+ .food-v115-hero h2{font-weight:500!important;letter-spacing:-.03em!important}
+ .food-v115-hero p{font-weight:400!important}
+ .food-v115 :is(h3,.food-v115-today-head h3,.food-v115-breakfast-head h3,.food-v115-dinner-head h3){font-weight:500!important;letter-spacing:-.015em!important}
+ .food-v115 :is(strong,.food-v115-meal strong,.food-v115-dinner-row strong,.food-v115-routine strong){font-weight:500!important}
+ .food-v115 :is(.food-v115-pill,.food-v115-day b,.food-v115-daytag,.food-v115-actions button,.food-program-next){font-weight:500!important}
+ .food-v115 :is(small,.food-v115-day span,.food-v115-routine small){font-weight:400!important}
+ .food-v115-routine-title{font-weight:500!important;letter-spacing:.20em!important}
+ .food-v115-actions button{font-size:11.5px!important}
+
+ /* Modal master Alimentação — TODOS, exceto Programar próxima cozinha quinzenal */
+ html body dialog.food-context-dialog[open]{
+   position:fixed!important;inset:0!important;width:100vw!important;height:100dvh!important;max-width:none!important;max-height:none!important;
+   margin:0!important;padding:14px!important;border:0!important;border-radius:0!important;background:transparent!important;transform:none!important;
+   overflow:hidden!important;display:grid!important;place-items:center!important;
+ }
+ html body dialog.food-context-dialog[open]>.study-v10-modal,
+ html body dialog#recipeFormDialog.food-context-dialog[open]>#recipeForm{
+   box-sizing:border-box!important;width:min(100%,520px)!important;max-width:520px!important;max-height:calc(100dvh - 28px)!important;
+   margin:auto!important;padding:22px!important;overflow-y:auto!important;overflow-x:hidden!important;-webkit-overflow-scrolling:touch!important;overscroll-behavior:contain!important;
+   border-radius:28px!important;border:1px solid rgba(174,136,151,.14)!important;
+   background:linear-gradient(145deg,#fbf5e9 0%,#faeef0 52%,#e8f3ea 100%)!important;
+   box-shadow:0 18px 48px rgba(63,48,66,.10)!important;
+ }
+ html body dialog.food-context-dialog .study-v10-head{display:flex!important;align-items:flex-start!important;justify-content:space-between!important;gap:16px!important;margin:0 0 18px!important;padding:0!important}
+ html body dialog.food-context-dialog .study-v10-head>div{min-width:0!important}
+ html body dialog.food-context-dialog .study-v10-head .eyebrow{font-size:10px!important;font-weight:500!important;letter-spacing:.22em!important;color:#8b7a85!important;margin:0 0 6px!important}
+ html body dialog.food-context-dialog .study-v10-head h2{margin:0!important;font-size:27px!important;line-height:1.08!important;font-weight:500!important;letter-spacing:-.025em!important;color:#433d45!important}
+ html body dialog.food-context-dialog .study-v10-head p{margin:8px 0 0!important;font-size:13.5px!important;line-height:1.45!important;font-weight:400!important;color:#857b83!important}
+ html body dialog.food-context-dialog .study-v10-x{
+   position:static!important;inset:auto!important;transform:none!important;flex:0 0 40px!important;width:40px!important;height:40px!important;min-width:40px!important;
+   margin:0 0 0 auto!important;padding:0!important;display:grid!important;place-items:center!important;border-radius:50%!important;
+   border:1px solid rgba(132,111,121,.13)!important;background:rgba(255,252,248,.56)!important;color:#81777f!important;box-shadow:none!important;
+   font-size:25px!important;font-weight:300!important;line-height:1!important;
+ }
+ html body dialog.food-context-dialog :is(label,.recipe-nutrition-head strong){font-size:13.5px!important;font-weight:500!important;color:#5c535b!important}
+ html body dialog.food-context-dialog :is(input:not([type=checkbox]):not([type=radio]),select,textarea){
+   box-sizing:border-box!important;width:100%!important;min-height:50px!important;border:1px solid rgba(136,113,124,.14)!important;border-radius:17px!important;
+   background:rgba(255,253,250,.78)!important;color:#4b454c!important;font:400 16px/1.35 inherit!important;padding:12px 15px!important;box-shadow:none!important
+ }
+ html body dialog.food-context-dialog textarea{min-height:112px!important;resize:vertical!important}
+ html body dialog.food-context-dialog :is(input,textarea)::placeholder{color:#aca3a8!important;font-weight:400!important;opacity:1!important}
+ html body dialog.food-context-dialog .form-grid{gap:12px!important}
+ html body dialog.food-context-dialog :is(.recipe-detail-card,.recipe-choice,.recipe-pick,.recipe-nutrition-box,.card){
+   border:1px solid rgba(143,117,129,.10)!important;border-radius:20px!important;background:rgba(255,253,250,.62)!important;box-shadow:none!important
+ }
+ html body dialog#foodRecipeDialog.food-context-dialog .recipe-detail-card{margin-top:10px!important;padding:18px!important}
+ html body dialog#foodRecipeDialog.food-context-dialog .recipe-detail-card h3{margin:4px 0 10px!important;font-size:18px!important;line-height:1.2!important;font-weight:500!important;color:#474047!important}
+ html body dialog#foodRecipeDialog.food-context-dialog .recipe-detail-card :is(li,p){font-size:15.5px!important;line-height:1.5!important;font-weight:400!important;color:#4f494f!important}
+ html body dialog#foodRecipeDialog.food-context-dialog .recipe-detail-card :is(ul,ol){margin:0 0 18px!important;padding-left:22px!important}
+ html body dialog#foodRecipeDialog.food-context-dialog .recipe-detail-card strong{font-weight:500!important}
+ html body dialog.food-context-dialog .recipe-choice strong,
+ html body dialog.food-context-dialog .recipe-pick strong{font-weight:500!important;color:#4c454c!important}
+ html body dialog.food-context-dialog .recipe-choice small,
+ html body dialog.food-context-dialog .recipe-pick small{font-weight:400!important;color:#8d838a!important}
+
+ html body dialog.food-context-dialog :is(.modal-actions,.recipe-modal-actions,.study-v10-actions){position:static!important;inset:auto!important;margin:18px 0 0!important;padding:0!important;background:transparent!important;border:0!important;box-shadow:none!important}
+ html body dialog#foodRecipeDialog.food-context-dialog .recipe-modal-actions{display:grid!important;grid-template-columns:1fr 1fr!important;gap:10px!important}
+ html body dialog#foodRecipeDialog.food-context-dialog #recipeToShopping{grid-column:1/-1!important}
+ html body dialog.food-context-dialog :is(.primary,.secondary,[type=submit]){
+   min-height:46px!important;border-radius:16px!important;padding:10px 16px!important;font-size:14px!important;font-weight:500!important;box-shadow:none!important
+ }
+ html body dialog.food-context-dialog :is(.secondary){background:linear-gradient(135deg,#f3e5e8 0%,#e7f1e8 100%)!important;color:#675e66!important;border:1px solid rgba(139,112,124,.10)!important}
+ html body dialog.food-context-dialog :is(.primary,[type=submit]){background:linear-gradient(135deg,#e6b3bd 0%,#e6c6b5 52%,#bcd5c2 100%)!important;color:#fff!important;border:0!important}
+ html body dialog.food-context-dialog input[type=checkbox]{appearance:none!important;-webkit-appearance:none!important;width:21px!important;height:21px!important;min-width:21px!important;margin:1px 0 0!important;border-radius:7px!important;border:1px solid rgba(139,112,124,.22)!important;background:rgba(255,253,250,.84)!important;display:grid!important;place-items:center!important}
+ html body dialog.food-context-dialog input[type=checkbox]:checked{background:linear-gradient(135deg,#e6b3bd,#bcd5c2)!important;border-color:transparent!important;box-shadow:none!important}
+ html body dialog.food-context-dialog input[type=checkbox]:checked:after{content:'✓';font-size:13px;line-height:1;color:#fff;font-weight:600}
+ @media(max-width:480px){
+   html body dialog.food-context-dialog[open]{padding:12px!important}
+   html body dialog.food-context-dialog[open]>.study-v10-modal,
+   html body dialog#recipeFormDialog.food-context-dialog[open]>#recipeForm{width:calc(100vw - 24px)!important;max-height:calc(100dvh - 24px)!important;padding:19px!important}
+   html body dialog.food-context-dialog .study-v10-head h2{font-size:24px!important}
+   html body dialog#foodRecipeDialog.food-context-dialog .recipe-detail-card :is(li,p){font-size:15px!important}
+ }
+ `;document.head.appendChild(st)
+}
+
 function renderAlimentacao(){
  ensureFoodModuleStyles();
+ ensureFoodPolishStylesRC86();
  const d=loadFood(),today=foodDayName();
  const dayAbbr={Segunda:'SEG',Terça:'TER',Quarta:'QUA',Quinta:'QUI',Sexta:'SEX',Sábado:'SÁB',Domingo:'DOM'};
  app.innerHTML=`<div class="food-v115"><section class="food-v115-hero"><span class="eyebrow">ALIMENTAÇÃO</span><h2>Know what’s next.</h2><p>Você escolhe. A BERTH.A organiza seu dia.</p><span class="food-v115-abstract" aria-hidden="true"></span></section>${renderTodayFoodCard()}<section class="food-v115-week"><div class="food-v115-section-kicker"><span class="eyebrow">SEMANA ${escapeHtml(String(d.week||1))} · CARDÁPIO</span></div><div class="card food-v115-card food-v115-breakfast"><div class="food-v115-breakfast-head"><h3>Café da manhã</h3><span class="food-v115-pill">7 dias</span></div><div class="food-v115-days">${d.breakfasts.map(x=>`<div class="food-v115-day ${x[0]===today?'today':''}"><b>${dayAbbr[x[0]]||escapeHtml(x[0].slice(0,3))}</b><span>${escapeHtml(x[1])}</span></div>`).join('')}</div></div><div class="card food-v115-card food-v115-dinner"><div class="food-v115-dinner-head"><h3>Jantar + marmita</h3><span class="food-v115-pill">3 pessoas</span></div>${d.dinners.map(x=>{const r=recipeForMealName(x[1]);return `<div class="food-v115-dinner-row"><span class="food-v115-daytag">${dayAbbr[x[0]]||escapeHtml(x[0].slice(0,3))}</span><div><strong>${escapeHtml(x[1])}</strong>${x[2]?`<small>marmita → ${escapeHtml(x[2])}</small>`:''}</div>${r?`<button type="button" class="food-v115-recipe-btn" aria-label="Ver receita" data-food-recipe="${r.id}">›</button>`:'<span></span>'}</div>`}).join('')}</div></section><div class="section-title food-v115-routine-title">ROTINA DE PREPARO</div><div class="card food-v115-card food-v115-routine"><label><input type="checkbox" id="foodCook" ${d.cookingDone?'checked':''}><span><strong>Cozinha quinzenal</strong><small>Produzir bases, porcionar, etiquetar e congelar.</small>${d.cookingDoneAt?`<small class="food-v115-cookdate">Concluída em ${foodPrepDateLabel(d.cookingDoneAt)}</small>`:''}${d.nextCookingDate?`<small class="food-v115-cookdate">Próxima programada: ${new Date(d.nextCookingDate+'T12:00:00').toLocaleDateString('pt-BR')}</small>`:''}</span></label><button type="button" class="secondary food-program-next" id="foodProgramNext">Programar próxima</button></div></div>`;
