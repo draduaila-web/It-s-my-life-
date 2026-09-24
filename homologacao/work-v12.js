@@ -607,3 +607,67 @@
  .work14-icon-option small{font-weight:400!important}
  `; document.head.appendChild(s);
 })();
+
+
+/* RC68 — TRABALHO · TIPOGRAFIA AUTORITATIVA
+   Replica a leveza de Planos nos submódulos e modais de Trabalho.
+   Somente tipografia: sem alterações de estrutura, paleta ou lógica. */
+(function(){
+ const old=document.getElementById('work-rc68-tipografia-autoritativa'); if(old) old.remove();
+ const s=document.createElement('style'); s.id='work-rc68-tipografia-autoritativa'; s.textContent=`
+ /* Eyebrows / microtítulos */
+ .work13-kicker,.work13-subkicker,.work13-section-label,.work13-subtag,
+ .work12-form-head .eyebrow{
+   font-weight:600!important;letter-spacing:.16em!important;text-transform:uppercase!important;
+ }
+
+ /* Títulos principais — mesma leveza de Planos */
+ .work13-hero h2,.work12-subhero h2,.work12-form-head h2,
+ .work12-section-head h3,.work12-group h3{
+   font-weight:400!important;letter-spacing:-.025em!important;
+ }
+ .work12-form-head h2{font-size:22px!important;line-height:1.15!important}
+ .work12-section-head h3{font-size:20px!important}
+
+ /* Conteúdo dos submódulos */
+ .work12-front strong,.work12-task strong,.work12-notequick strong,
+ .work12-history-item strong,.work13-bridge strong,
+ .work12-stat b{
+   font-weight:400!important;
+ }
+ .work12-front small,.work12-task small,.work12-notequick p,
+ .work12-history-item small,.work13-bridge small,.work12-stat span,
+ .work12-group p,.work12-empty,.work12-rule{
+   font-weight:400!important;
+ }
+
+ /* Ações e chips: sem aparência pesada */
+ .work12-front-add,.work12-front-edit,.work12-back,.work12-add,
+ .work12-chip,.work12-badge,.work12-mini,.work12-history summary,
+ .work12-more summary,.work13-bridge a{
+   font-weight:500!important;
+ }
+
+ /* Modais: labels, campos, placeholders e opções */
+ .work12-front-form label,.work12-form label,.work14-icon-label,
+ .work12-toggle-row strong,.work12-check strong,.work12-toggle-copy strong{
+   font-weight:400!important;
+ }
+ .work12-front-form label>small,.work12-form label>small,
+ .work12-toggle-row span,.work12-check small,.work12-toggle-copy small,
+ .work14-icon-option small{
+   font-weight:400!important;
+ }
+ .work12-front-form input,.work12-front-form textarea,.work12-front-form select,
+ .work12-form input,.work12-form textarea,.work12-form select,
+ .work12-front-form option,.work12-form option{
+   font-weight:400!important;
+ }
+ .work12-front-form input::placeholder,.work12-front-form textarea::placeholder,
+ .work12-form input::placeholder,.work12-form textarea::placeholder{
+   font-weight:400!important;opacity:.62!important;
+ }
+ .work12-check{font-weight:400!important}
+ .work12-secondary,.work12-primary{font-weight:500!important}
+ `; document.head.appendChild(s);
+})();
