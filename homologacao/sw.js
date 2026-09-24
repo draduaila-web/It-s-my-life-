@@ -1,4 +1,4 @@
-const CACHE = "hml-bertha-v221-rc60-task-surface-gradient";
+const CACHE = "hml-bertha-v221-rc62-task-surface-gradient";
 self.addEventListener("install", event => event.waitUntil(self.skipWaiting()));
 self.addEventListener("activate", event => event.waitUntil((async()=>{
   const keys=await caches.keys();
