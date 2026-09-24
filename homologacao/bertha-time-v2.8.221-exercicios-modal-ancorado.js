@@ -4849,3 +4849,40 @@ html body dialog.bertha-plans-task-dialog[open] .bertha-task-cancel{background:r
 html body dialog.bertha-plans-task-dialog[open] .bertha-task-save{background:linear-gradient(135deg,#d9a9c8 0%,#b8a5df 55%,#9ebfe4 100%)!important;color:#fff!important;border:2px solid rgba(144,115,166,.18)!important;box-shadow:none!important}
 `;
 document.head.appendChild(s)})();
+
+/* BERTH.A RC57 — ajuste isolado: Nova/Editar Tarefa = linguagem visual de Compromissos; Meu Dia Ideal = tipografia leve */
+(()=>{if(document.getElementById('bertha-rc57-task-ideal'))return;const s=document.createElement('style');s.id='bertha-rc57-task-ideal';s.textContent=`
+/* PLANOS > TAREFA: usa Compromissos como referência visual mestre. */
+html body dialog.bertha-plans-task-dialog[open] > form.bertha-task-modal{
+  background:linear-gradient(145deg,rgba(255,250,226,.98) 0%,rgba(252,239,211,.97) 54%,rgba(248,222,199,.96) 100%)!important;
+  border:1px solid rgba(177,132,88,.12)!important;
+  box-shadow:0 20px 52px rgba(47,37,58,.14)!important;
+}
+html body dialog.bertha-plans-task-dialog[open] :is(.bertha-task-modal-head,.bertha-task-modal-body,.bertha-task-modal-actions){background:transparent!important;border-color:transparent!important;box-shadow:none!important}
+html body dialog.bertha-plans-task-dialog[open] .bertha-task-modal-head span{color:#9c7b64!important;font-weight:800!important}
+html body dialog.bertha-plans-task-dialog[open] .bertha-task-modal-head h2{color:#373440!important;font-weight:620!important}
+html body dialog.bertha-plans-task-dialog[open] .bertha-task-modal-head button[data-close]{background:rgba(247,243,237,.82)!important;color:#8e8792!important;border:0!important;box-shadow:none!important}
+html body dialog.bertha-plans-task-dialog[open] .bertha-task-field>span{color:#655f67!important;font-weight:740!important}
+html body dialog.bertha-plans-task-dialog[open] :is(.bertha-task-field input,.bertha-task-field select,.bertha-task-field textarea,.bertha-duration-input input,.bertha-duration-input select,.bertha-notify-custom input){background:#fffdfa!important;border:1px solid rgba(140,126,145,.14)!important;color:#3e3d4b!important;box-shadow:none!important}
+html body dialog.bertha-plans-task-dialog[open] :is(.bertha-task-field input,.bertha-task-field select,.bertha-task-field textarea,.bertha-duration-input input,.bertha-duration-input select,.bertha-notify-custom input):focus{border-color:rgba(202,144,99,.42)!important;box-shadow:0 0 0 3px rgba(238,194,150,.12)!important;outline:none!important}
+html body dialog.bertha-plans-task-dialog[open] .bertha-segment button{background:rgba(255,255,255,.58)!important;border:1px solid rgba(140,126,145,.12)!important;color:#706972!important;box-shadow:none!important}
+html body dialog.bertha-plans-task-dialog[open] .bertha-segment button.active{background:linear-gradient(135deg,#f7e8b8 0%,#e7bd87 45%,#cf8f67 100%)!important;color:#755a49!important;border:1px solid rgba(177,132,88,.22)!important;box-shadow:none!important}
+html body dialog.bertha-plans-task-dialog[open] .bertha-notify-box{background:rgba(255,253,250,.48)!important;border:1px solid rgba(140,126,145,.10)!important}
+html body dialog.bertha-plans-task-dialog[open] .bertha-toggle-row strong{color:#4c4650!important;font-weight:650!important}
+html body dialog.bertha-plans-task-dialog[open] .bertha-toggle-row span,html body dialog.bertha-plans-task-dialog[open] .bertha-notify-note{color:#8d848c!important}
+html body dialog.bertha-plans-task-dialog[open] .bertha-toggle-row i{background:#ded8d3!important}
+html body dialog.bertha-plans-task-dialog[open] .bertha-toggle-row input:checked+i{background:#dfaa85!important}
+html body dialog.bertha-plans-task-dialog[open] .bertha-task-cancel{background:rgba(255,255,255,.72)!important;color:#706972!important;border:1px solid rgba(140,126,145,.12)!important}
+html body dialog.bertha-plans-task-dialog[open] .bertha-task-save{background:linear-gradient(135deg,#f7e8b8 0%,#e7bd87 45%,#cf8f67 100%)!important;color:#fff!important;border:0!important;box-shadow:none!important}
+
+/* MEU DIA IDEAL: mantém a paleta validada e alivia a tipografia conforme Compromissos. */
+html body dialog.bertha-dialog[open]:has(.bertha-ideal-modal-form) .bertha-modal-head strong{font-weight:620!important;letter-spacing:-.02em!important}
+html body dialog.bertha-dialog[open]:has(.bertha-ideal-modal-form) .bertha-ideal-modal-form .bertha-field>span,
+html body dialog.bertha-dialog[open]:has(.bertha-ideal-modal-form) .bertha-ideal-until span,
+html body dialog.bertha-dialog[open]:has(.bertha-ideal-modal-form) .bertha-notify-when>span{font-weight:600!important}
+html body dialog.bertha-dialog[open]:has(.bertha-ideal-modal-form) :is(input,select,textarea){font-weight:500!important}
+html body dialog.bertha-dialog[open]:has(.bertha-ideal-modal-form) .bertha-notify-row strong{font-weight:600!important}
+html body dialog.bertha-dialog[open]:has(.bertha-ideal-modal-form) .bertha-notify-row small{font-weight:400!important}
+html body dialog.bertha-dialog[open]:has(.bertha-ideal-modal-form) .bertha-ideal-modal-actions button{font-weight:700!important}
+`;
+document.head.appendChild(s)})();
