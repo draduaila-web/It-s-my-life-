@@ -2180,3 +2180,64 @@ html body .casa-tool-check input[type="checkbox"]:checked::after{
   content:"✓";color:#fff;font-size:14px;font-weight:600;line-height:1;
 }
 html body .casa-tool-check span{font-weight:400!important}
+
+/* RC74 — CASA · acabamento final após auditoria visual
+   Somente Casa: receitas, agenda de rotinas, inventário e modais. */
+html body .casa-recipe .panel-head h3,
+html body .casa-recipe .panel-head h3 span{font-weight:400!important;letter-spacing:-.012em!important}
+html body .casa-recipe h4{font-weight:500!important;letter-spacing:.12em!important}
+html body .casa-recipe :is(li,li span,ol li,ul li){font-weight:400!important}
+html body .casa-recipe li b{font-weight:500!important}
+html body .casa-recipe .note{font-weight:400!important}
+html body .casa-recipe .casa-how-tip strong{font-weight:500!important}
+html body .casa-recipe .casa-how-tip p{font-weight:400!important}
+
+/* Editor de receitas e demais modais Casa: mesma hierarquia leve */
+html body dialog.casa-dialog .casa-modal-card :is(label,.study-v10-field>span),
+html body dialog.casa-dialog .study-v10-modal :is(label,.study-v10-field>span){font-weight:400!important}
+html body dialog.casa-dialog :is(input,select,textarea){font-weight:400!important;line-height:1.35!important}
+html body dialog.casa-dialog .casa-substitute-info p,
+html body dialog.casa-dialog .casa-substitute-info strong{font-weight:400!important}
+html body dialog.casa-dialog .casa-substitute-info strong{font-weight:500!important}
+html body dialog.casa-dialog .danger{font-weight:400!important}
+
+/* Agenda/rotinas: nomes, horários e ações sem peso antigo */
+html body .casa-schedule-row>strong{font-weight:400!important;letter-spacing:-.01em!important}
+html body .casa-time{font-weight:500!important}
+html body .casa-schedule-edit{font-weight:500!important}
+html body .casa-routine-picker-label strong,
+html body .casa-routine-picker-menu button strong{font-weight:400!important}
+html body .casa-add-routine{font-weight:500!important}
+
+/* Inventário: cards e modal de substituição */
+html body .casa-inventory :is(.panel-head h3,.casa-product-row strong){font-weight:400!important}
+html body .casa-inventory :is(.casa-product-row small,.note){font-weight:400!important}
+html body .casa-substitute-btn,
+html body .casa-buy-mini{font-weight:400!important}
+
+/* Checkbox do inventário — força tamanho compacto no iOS e remove estilo nativo */
+html body dialog.casa-tool-dialog .casa-tool-check{
+  display:grid!important;grid-template-columns:24px minmax(0,1fr)!important;align-items:center!important;gap:12px!important;
+}
+html body dialog.casa-tool-dialog .casa-tool-check input[type="checkbox"]{
+  -webkit-appearance:none!important;appearance:none!important;
+  inline-size:24px!important;block-size:24px!important;width:24px!important;height:24px!important;
+  min-width:24px!important;max-width:24px!important;min-height:24px!important;max-height:24px!important;
+  padding:0!important;margin:0!important;border:1px solid rgba(132,106,118,.22)!important;border-radius:7px!important;
+  background:rgba(255,255,255,.70)!important;box-shadow:none!important;display:grid!important;place-items:center!important;
+}
+html body dialog.casa-tool-dialog .casa-tool-check input[type="checkbox"]:checked{
+  background:linear-gradient(135deg,#e1aebb 0%,#e6c8ba 48%,#b9d5bd 100%)!important;border-color:transparent!important;
+}
+html body dialog.casa-tool-dialog .casa-tool-check input[type="checkbox"]:checked::after{
+  content:"✓"!important;color:#fff!important;font-size:14px!important;font-weight:500!important;line-height:1!important;
+}
+html body dialog.casa-tool-dialog .casa-tool-check span{font-weight:400!important;line-height:1.35!important}
+
+/* Bordas Casa: um único traço suave, sem halo pesado */
+html body :is(dialog.casa-dialog,dialog.casa-maint-dialog) :is(input:not([type=checkbox]):not([type=radio]),select,textarea){
+  border:1px solid rgba(132,106,118,.14)!important;outline:0!important;box-shadow:none!important;
+}
+html body :is(dialog.casa-dialog,dialog.casa-maint-dialog) :is(.icon-btn,.study-v10-x,.casa-modal-x){
+  border:1px solid rgba(132,106,118,.12)!important;outline:0!important;box-shadow:none!important;
+}
