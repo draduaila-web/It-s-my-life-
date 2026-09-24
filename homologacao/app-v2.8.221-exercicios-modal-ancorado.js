@@ -3779,3 +3779,42 @@ html body dialog.exercise-dialog .exercise-icon-choice small{font-weight:400!imp
 `;
   document.head.appendChild(s);
 })();
+
+/* RC83 — Exercise modal master: authoritative runtime override */
+(()=>{
+  const id='bertha-rc83-exercise-modal-master';
+  document.getElementById(id)?.remove();
+  const s=document.createElement('style');
+  s.id=id;
+  s.textContent=`
+html body dialog.exercise-dialog{--ex83-bg:linear-gradient(145deg,#f7f0fa 0%,#f6edf7 54%,#f9ecec 100%);--ex83-primary:linear-gradient(135deg,#cdb9e3 0%,#d9bfdc 50%,#e8b8ae 100%);--ex83-border:rgba(118,101,129,.11);--ex83-ink:#403947;--ex83-muted:#867d88}
+html body dialog.exercise-dialog[open]>:is(.bertha-modal,.study-v10-modal){box-sizing:border-box!important;width:min(calc(100vw - 56px),430px)!important;max-width:430px!important;max-height:74dvh!important;height:auto!important;margin:auto!important;padding:16px!important;border-radius:24px!important;background:var(--ex83-bg)!important;color:var(--ex83-ink)!important;border:0!important;outline:0!important;box-shadow:inset 0 0 0 1px var(--ex83-border),0 18px 46px rgba(47,37,58,.13)!important;overflow-y:auto!important;overflow-x:hidden!important;-webkit-overflow-scrolling:touch!important}
+html body dialog.exercise-dialog.exercise-quick-dialog[open]>:is(.bertha-modal,.study-v10-modal),html body dialog.exercise-dialog.exercise-week-dialog[open]>:is(.bertha-modal,.study-v10-modal),html body dialog.exercise-dialog.exercise-edit-record-dialog[open]>:is(.bertha-modal,.study-v10-modal){max-height:70dvh!important}
+html body dialog.exercise-dialog .bertha-modal-head{position:relative!important;margin-bottom:12px!important;padding-right:44px!important;gap:10px!important}
+html body dialog.exercise-dialog .bertha-modal-head h2{font-size:21px!important;font-weight:420!important}
+html body dialog.exercise-dialog .bertha-modal-head p{margin-top:8px!important;font-size:13.5px!important}
+html body dialog.exercise-dialog .bertha-modal-head>button[data-close]{position:absolute!important;top:0!important;right:0!important;width:34px!important;height:34px!important;min-width:34px!important;min-height:34px!important;margin:0!important;padding:0!important;display:grid!important;place-items:center!important;border-radius:50%!important;border:1px solid var(--ex83-border)!important;background:rgba(255,255,255,.50)!important;color:#817780!important;font-size:21px!important;font-weight:300!important;line-height:1!important;box-shadow:none!important;outline:0!important}
+html body dialog.exercise-dialog :is(.study-v10-field>span,.exercise-cycle-label,label){font-size:11px!important;font-weight:450!important;color:#68616b!important}
+html body dialog.exercise-dialog :is(input:not([type=checkbox]):not([type=radio]),select,textarea){box-sizing:border-box!important;width:100%!important;min-height:42px!important;border-radius:14px!important;border:1px solid var(--ex83-border)!important;background:#fffdfa!important;padding:10px 11px!important;font-size:16px!important;font-weight:400!important;box-shadow:none!important}
+html body dialog.exercise-dialog textarea{min-height:76px!important}
+html body dialog.exercise-dialog .study-v10-field,html body dialog.exercise-dialog .field{margin:8px 0!important}
+html body dialog.exercise-dialog .exercise-cycle-block{gap:8px!important}
+html body dialog.exercise-dialog .exercise-cycle-block select,html body dialog.exercise-dialog .exercise-unit-input{min-height:42px!important;border-radius:14px!important}
+html body dialog.exercise-dialog .exercise-block-remove{width:36px!important;height:36px!important;min-width:36px!important;min-height:36px!important;border-radius:12px!important;border:1px solid var(--ex83-border)!important;background:rgba(255,255,255,.56)!important;color:#817780!important}
+html body dialog.exercise-dialog .exercise-cycle-total{border-radius:14px!important;background:rgba(255,255,255,.36)!important}
+html body dialog.exercise-dialog .exercise-cycle-total strong{font-size:17px!important;font-weight:500!important}
+html body dialog.exercise-dialog .study-v10-actions,html body dialog.exercise-dialog .modal-actions{position:static!important;inset:auto!important;display:flex!important;justify-content:flex-end!important;align-items:center!important;gap:8px!important;margin:14px 0 0!important;padding:0!important;background:transparent!important;border:0!important;box-shadow:none!important}
+html body dialog.exercise-dialog .study-v10-actions button,html body dialog.exercise-dialog .modal-actions button,html body dialog.exercise-dialog button.primary,html body dialog.exercise-dialog button.secondary{box-sizing:border-box!important;width:auto!important;min-width:104px!important;height:42px!important;min-height:42px!important;padding:0 15px!important;border-radius:14px!important;font-size:13.5px!important;font-weight:500!important;box-shadow:none!important}
+html body dialog.exercise-dialog button.secondary{background:rgba(255,255,255,.74)!important;border:1px solid var(--ex83-border)!important;color:#706972!important}
+html body dialog.exercise-dialog button.primary{background:var(--ex83-primary)!important;border:1px solid rgba(127,99,145,.08)!important;color:#fff!important}
+html body dialog.exercise-dialog input[type=checkbox]{-webkit-appearance:none!important;appearance:none!important;width:20px!important;height:20px!important;min-width:20px!important;min-height:20px!important;border-radius:6px!important;border:1px solid var(--ex83-border)!important;background:#fffdfa!important;box-shadow:none!important}
+html body dialog.exercise-dialog input[type=checkbox]:checked{background:var(--ex83-primary)!important}
+html body dialog.exercise-dialog .exercise-icon-filter{min-height:32px!important;background:rgba(255,255,255,.55)!important;border-color:var(--ex83-border)!important}
+html body dialog.exercise-dialog .exercise-icon-filter.selected{background:var(--ex83-primary)!important;color:#65536e!important}
+html body dialog.exercise-dialog .exercise-icon-choice{border-color:var(--ex83-border)!important;background:rgba(255,255,255,.45)!important}
+html body dialog.exercise-dialog.exercise-plan-dialog .exercise-plan-icon-section,html body dialog.exercise-dialog.exercise-plan-dialog .exercise-icon-picker{max-height:none!important;height:auto!important;overflow:visible!important}
+html body dialog.exercise-dialog.exercise-plan-dialog .study-v10-actions{position:static!important;margin-top:14px!important}
+@media(max-width:480px){html body dialog.exercise-dialog[open]>:is(.bertha-modal,.study-v10-modal){width:calc(100vw - 48px)!important;max-width:430px!important;max-height:74dvh!important;padding:16px!important;border-radius:24px!important}}
+`;
+  document.head.appendChild(s);
+})();
