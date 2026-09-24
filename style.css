@@ -2241,3 +2241,51 @@ html body :is(dialog.casa-dialog,dialog.casa-maint-dialog) :is(input:not([type=c
 html body :is(dialog.casa-dialog,dialog.casa-maint-dialog) :is(.icon-btn,.study-v10-x,.casa-modal-x){
   border:1px solid rgba(132,106,118,.12)!important;outline:0!important;box-shadow:none!important;
 }
+
+/* RC76 — CASA · paleta oficial blush + menta e bordas Modal System
+   Escopo estrito: somente Casa. Remove lavanda residual. */
+:root{--casa-blush:#e6bdc8;--casa-mint:#c9dfcd;--casa-ink:#5f545b;}
+html body #app :is(.casa-inline-add,#addMaintenance,.casa-add-routine,.casa-schedule-edit,.casa-recipe-edit,.home-edit,.casa-buy-mini){
+  background:linear-gradient(115deg,rgba(236,198,210,.88) 0%,rgba(248,235,232,.92) 48%,rgba(201,223,205,.94) 100%)!important;
+  background-image:linear-gradient(115deg,rgba(236,198,210,.88) 0%,rgba(248,235,232,.92) 48%,rgba(201,223,205,.94) 100%)!important;
+  color:var(--casa-ink)!important;border-color:rgba(151,119,130,.10)!important;box-shadow:none!important;
+}
+html body #app .casa-substitute-btn{
+  background:linear-gradient(115deg,rgba(244,224,229,.92),rgba(225,239,227,.94))!important;
+  color:#71636a!important;border-color:rgba(151,119,130,.10)!important;
+}
+html body #app :is(.casa-task-start,.casa-maint-actions .start,.casa-task-finish,.casa-maint-actions .finish,.casa-task-reopen){
+  background:linear-gradient(115deg,rgba(244,220,228,.88),rgba(220,237,222,.92))!important;color:#675960!important;
+}
+html body #app .casa-section>summary,
+html body #app :is(.casa-manual-area,.casa-recipe,.casa-inventory,.casa-schedule-card,.casa-web-card){
+  background:linear-gradient(135deg,rgba(255,252,249,.98),rgba(250,239,243,.60) 54%,rgba(236,246,237,.72))!important;
+}
+html body #app .casa-web-link{
+  background:linear-gradient(115deg,rgba(250,232,238,.72),rgba(232,244,234,.86))!important;
+}
+
+/* Modal Casa: uma única borda fina; neutraliza RC53/overrides antigos de 1.5–2px. */
+html body dialog.casa-dialog[open] > :is(.casa-modal-card,.study-v10-modal,.modal-card),
+html body dialog.casa-maint-dialog[open] > .casa-maint-modal,
+html body :is(.casa-how-modal,.casa-manual-view){
+  border:1px solid rgba(151,119,130,.11)!important;
+  outline:0!important;
+  box-shadow:0 20px 52px rgba(68,52,61,.12)!important;
+  background:linear-gradient(145deg,rgba(252,239,243,.99) 0%,rgba(251,245,239,.99) 49%,rgba(235,246,235,.99) 100%)!important;
+}
+html body :is(dialog.casa-dialog,dialog.casa-maint-dialog) :is(input:not([type=checkbox]):not([type=radio]),select,textarea){
+  border:1px solid rgba(132,106,118,.12)!important;outline:0!important;box-shadow:none!important;
+}
+html body :is(dialog.casa-dialog,dialog.casa-maint-dialog) :is(.secondary,.primary,.icon-btn,.study-v10-x,.casa-modal-x,.pill,.seg-btn,.choice-btn,.casa-routine-picker-btn,.casa-web-link,.casa-tool-row){
+  border:1px solid rgba(132,106,118,.10)!important;outline:0!important;box-shadow:none!important;
+}
+html body :is(dialog.casa-dialog,dialog.casa-maint-dialog) :is(.primary,[type=submit]),
+html body :is(.casa-how-modal,.casa-manual-view) :is(.casa-edit-procedure,#editCasaHow,#editManualCasa){
+  background:linear-gradient(115deg,#e2aebb 0%,#e8c9bf 48%,#bfd8c3 100%)!important;
+  color:#5d5057!important;border:1px solid rgba(151,119,130,.10)!important;box-shadow:none!important;
+}
+html body :is(dialog.casa-dialog,dialog.casa-maint-dialog) .secondary{
+  background:linear-gradient(115deg,rgba(247,229,235,.82),rgba(226,241,229,.92))!important;
+  color:#62585d!important;
+}
