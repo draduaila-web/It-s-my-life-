@@ -1,6 +1,6 @@
 
 (function(){if(document.getElementById('close-purchase-v2873-style'))return;const st=document.createElement('style');st.id='close-purchase-v2873-style';st.textContent=`.close-purchase-modal{display:flex!important;flex-direction:column!important;max-height:min(88dvh,760px)!important;overflow:hidden!important}.close-purchase-list{display:grid;gap:9px;overflow:auto;padding:2px 2px 10px;min-height:0}.close-purchase-item{display:grid!important;grid-template-columns:24px minmax(0,1fr) auto;align-items:center;gap:10px;margin:0!important;padding:12px 13px;border:1px solid #eadfec;border-radius:16px;background:#fff;cursor:pointer}.close-purchase-item input{position:absolute;opacity:0;pointer-events:none}.close-purchase-check{width:21px;height:21px;border:1.5px solid #cbbbd1;border-radius:7px;background:#fff;display:grid;place-items:center}.close-purchase-item input:checked+.close-purchase-check{background:#8f73a1;border-color:#8f73a1}.close-purchase-item input:checked+.close-purchase-check:after{content:'✓';color:#fff;font-size:14px;font-weight:900}.close-purchase-copy{min-width:0}.close-purchase-copy strong,.close-purchase-copy small{display:block}.close-purchase-copy strong{font-size:14px;color:#514854}.close-purchase-copy small{margin-top:3px;font-size:11px;color:#8c818e}.close-purchase-base{font-size:10px;font-weight:850;color:#80668f;background:#f3eafb;border-radius:999px;padding:6px 8px;white-space:nowrap}.close-purchase-hint{font-size:11px;line-height:1.4;color:#8a808b;padding:5px 2px 0}.close-purchase-actions{position:sticky!important;bottom:-20px!important;margin:12px -20px -20px!important;padding:13px 20px calc(13px + env(safe-area-inset-bottom))!important;background:rgba(255,253,251,.97)!important;border-top:1px solid rgba(92,72,104,.08);z-index:2}@media(max-width:560px){.close-purchase-modal{width:calc(100vw - 24px)!important;max-height:calc(100dvh - 24px)!important;border-radius:24px!important;padding:18px!important}.close-purchase-actions{bottom:-18px!important;margin:12px -18px -18px!important;padding:12px 18px calc(12px + env(safe-area-inset-bottom))!important}.close-purchase-base{display:none}}`;document.head.appendChild(st)})();
-// BERTH.A v2.8.118 — Alimentação congelamento visual: ícone próprio + calor suave nos cards; integrações v117 preservadas
+// BERTH.A v2.8.221 RC88 — Alimentação: cardápio semanal + consumo real + Receitas como fonte única
 // BERTH.A Homologação v2.8.180 — modal Encerrar compra refinado
 // BERTH.A app-v2.8.127 · Casa modais blush/sálvia + menu de áreas alinhado
 window.BERTHA_BUILD="2.8.139-trabalho-estetica-integracao";
@@ -2278,7 +2278,7 @@ function foodYesterdayName(){return ["Domingo","Segunda","Terça","Quarta","Quin
 function foodLunchToday(d=loadFood()){const y=foodYesterdayName(),prev=d.dinners.find(x=>x[0]===y);return prev?`Marmita: ${String(prev[1]||'').split(' + ')[0]}`:'Marmita / almoço de hoje';}
 function getTodayMeals(){const d=loadFood(),key=foodTodayISO(),breakfast=foodBreakfastToday(d),dinner=plannedDinnerToday(d);return [
  {id:'breakfast',label:'Café da manhã',name:breakfast?.[1]||'Café da manhã',recipe:recipeForMealName(breakfast?.[1]||'')},
- {id:'lunch',label:'Almoço',name:foodLunchToday(d),recipe:null},
+ {id:'lunch',label:'Marmita',name:foodLunchToday(d),recipe:recipeForMealName(foodLunchToday(d))},
  {id:'dinner',label:'Jantar',name:dinner?.[1]||'Jantar de hoje',recipe:recipeForMealName(dinner?.[1]||'')}
 ].map(m=>({...m,log:(d.mealLog[key]?.meals||{})[m.id]||{}}));}
 function getTodayMealState(mealId='dinner'){const d=loadFood(),key=foodTodayISO(),meal=getTodayMeals().find(x=>x.id===mealId)||getTodayMeals()[2],log=meal.log||{},selected=getRecipeById(log.selectedRecipeId)||meal.recipe;return {d,key,meal,plannedRecipe:meal.recipe,log,selected};}
@@ -2309,28 +2309,47 @@ function foodRecipeCalories(recipe){
  if(ref==='100g')return {kcal:null,source:'Receita cadastrada · kcal/100 g, quantidade consumida não informada',complete:false};
  return {kcal:null,source:'Informação nutricional de ingrediente; total da refeição não calculado',complete:false};
 }
+function foodRecipeMacros(recipe){
+ const kcalInfo=foodRecipeCalories(recipe),n=recipe?.nutrition||{},protein=foodNumeric(n.protein),ref=n.reference||'100g';
+ let proteinValue=null,proteinSource='Sem proteína calculável para a porção';
+ if(protein!=null){
+  if(ref==='portion'){proteinValue=Math.round(protein*10)/10;proteinSource='Receita cadastrada · por porção'}
+  else if(ref==='whole'){
+   const m=String(recipe?.yield||'').match(/([0-9]+(?:[.,][0-9]+)?)\s*(?:porç|unid)/i),portions=m?foodNumeric(m[1]):null;
+   if(portions&&portions>0){proteinValue=Math.round((protein/portions)*10)/10;proteinSource=`Receita cadastrada · prato completo ÷ ${String(portions).replace('.',',')} porções`}
+  }
+ }
+ return {...kcalInfo,protein:proteinValue,proteinSource};
+}
+function foodRecipeNutritionLabel(recipe){
+ if(!recipe?.nutrition)return '';
+ const n=recipe.nutrition,k=foodNumeric(n.kcal),p=foodNumeric(n.protein),ref=n.reference||'100g';
+ const refLabel=ref==='portion'?'por porção':ref==='whole'?'prato completo':ref==='100g'?'por 100 g':'referência cadastrada';
+ const bits=[];if(k!=null)bits.push(`${Math.round(k)} kcal`);if(p!=null)bits.push(`${String(Math.round(p*10)/10).replace('.',',')} g proteína`);
+ return bits.length?`${bits.join(' · ')} · ${refLabel}`:'';
+}
 function recordRecipeConsumption(mealId,title,source){
  try{
-  const st=getTodayMealState(mealId),recipe=st.selected||null,nut=foodRecipeCalories(recipe),d=loadRec(),date=foodTodayISO(),key=`${date}:${mealId}`;
+  const st=getTodayMealState(mealId),recipe=st.selected||null,nut=foodRecipeMacros(recipe),d=loadRec(),date=foodTodayISO(),key=`${date}:${mealId}`;
   d.consumptionLog=(d.consumptionLog||[]).filter(x=>x.key!==key);
-  d.consumptionLog.push({key,date,mealId,mealLabel:st.meal?.label||mealId,plannedRecipeId:st.plannedRecipe?.id||null,recipeId:recipe?.id||null,title:title||recipe?.name||st.meal?.name||'Refeição',source:source||'planned',kcal:nut.kcal,kcalSource:nut.source,kcalComplete:!!nut.complete,recordedAt:new Date().toISOString()});
+  d.consumptionLog.push({key,date,mealId,mealLabel:st.meal?.label||mealId,plannedRecipeId:st.plannedRecipe?.id||null,recipeId:recipe?.id||null,title:title||recipe?.name||st.meal?.name||'Refeição',source:source||'planned',kcal:nut.kcal,kcalSource:nut.source,kcalComplete:!!nut.complete,protein:nut.protein,proteinSource:nut.proteinSource,recordedAt:new Date().toISOString()});
   saveRec(d);
  }catch(e){console.warn('BERTH.A receitas/consumo',e)}
 }
 function removeRecipeConsumption(mealId,date=foodTodayISO()){try{const d=loadRec(),key=`${date}:${mealId}`;d.consumptionLog=(d.consumptionLog||[]).filter(x=>x.key!==key);saveRec(d)}catch(e){console.warn('BERTH.A receitas/desfazer consumo',e)}}
 function recordFoodProgress(mealId,title,source){
  try{
-  const st=getTodayMealState(mealId),recipe=st.selected||null,nut=foodRecipeCalories(recipe),data=JSON.parse(window.berthaHmlStorage.getItem('bertha.time-engine.v1')||'{}');data.history=Array.isArray(data.history)?data.history:[];const key=`food:${foodTodayISO()}:${mealId}`;data.history=data.history.filter(h=>h.itemId!==key);data.history.push({id:`${key}:${Date.now()}`,itemId:key,source:'Alimentação',category:'Alimentação',title:title||'Refeição',status:'done',startedAt:Date.now(),endedAt:Date.now(),realMinutes:0,learningKey:`meal:${mealId}`,mealId,recipeId:recipe?.id||null,plannedRecipeId:st.plannedRecipe?.id||null,mealSource:source||'planned',kcal:nut.kcal,kcalSource:nut.source,kcalComplete:!!nut.complete});window.berthaHmlStorage.setItem('bertha.time-engine.v1',JSON.stringify(data));
+  const st=getTodayMealState(mealId),recipe=st.selected||null,nut=foodRecipeMacros(recipe),data=JSON.parse(window.berthaHmlStorage.getItem('bertha.time-engine.v1')||'{}');data.history=Array.isArray(data.history)?data.history:[];const key=`food:${foodTodayISO()}:${mealId}`;data.history=data.history.filter(h=>h.itemId!==key);data.history.push({id:`${key}:${Date.now()}`,itemId:key,source:'Alimentação',category:'Alimentação',title:title||'Refeição',status:'done',startedAt:Date.now(),endedAt:Date.now(),realMinutes:0,learningKey:`meal:${mealId}`,mealId,recipeId:recipe?.id||null,plannedRecipeId:st.plannedRecipe?.id||null,mealSource:source||'planned',kcal:nut.kcal,kcalSource:nut.source,kcalComplete:!!nut.complete,protein:nut.protein,proteinSource:nut.proteinSource});window.berthaHmlStorage.setItem('bertha.time-engine.v1',JSON.stringify(data));
  }catch(e){console.warn('BERTH.A alimentação/progresso',e)}
 }
 function refreshFoodRoute(){if(state.route==='receitas')renderReceitas();else if(state.route==='alimentacao')renderAlimentacao();else if(state.route==='meu-dia')renderMeuDia();else if(state.route==='progresso')renderProgressOverview();}
-function setTodayMealConsumption(mealId,status,title,source){const {d,key}=getTodayMealState(mealId);d.mealLog[key]=d.mealLog[key]||{};d.mealLog[key].meals=d.mealLog[key].meals||{};d.mealLog[key].meals[mealId]={...(d.mealLog[key].meals[mealId]||{}),consumption:status,consumedAt:new Date().toISOString()};saveFood(d);if(status==='consumed'){recordRecipeConsumption(mealId,title,source);recordFoodProgress(mealId,title,source)}refreshFoodRoute();}
+function setTodayMealConsumption(mealId,status,title,source){const {d,key}=getTodayMealState(mealId);d.mealLog[key]=d.mealLog[key]||{};d.mealLog[key].meals=d.mealLog[key].meals||{};d.mealLog[key].meals[mealId]={...(d.mealLog[key].meals[mealId]||{}),consumption:status,consumedAt:status==='consumed'?new Date().toISOString():null,skippedAt:status==='skipped'?new Date().toISOString():null};saveFood(d);if(status==='consumed'){recordRecipeConsumption(mealId,title,source);recordFoodProgress(mealId,title,source)}else{removeRecipeConsumption(mealId,key);try{const data=JSON.parse(window.berthaHmlStorage.getItem('bertha.time-engine.v1')||'{}');data.history=Array.isArray(data.history)?data.history:[];const progressKey=`food:${key}:${mealId}`;data.history=data.history.filter(h=>h.itemId!==progressKey);window.berthaHmlStorage.setItem('bertha.time-engine.v1',JSON.stringify(data));}catch(e){console.warn('BERTH.A alimentação/não comi',e)}}refreshFoodRoute();}
 function undoTodayMeal(mealId){const d=loadFood(),key=foodTodayISO();if(d.mealLog?.[key]?.meals?.[mealId]){delete d.mealLog[key].meals[mealId];if(!Object.keys(d.mealLog[key].meals).length)delete d.mealLog[key];saveFood(d)}removeRecipeConsumption(mealId,key);try{const data=JSON.parse(window.berthaHmlStorage.getItem('bertha.time-engine.v1')||'{}');data.history=Array.isArray(data.history)?data.history:[];const progressKey=`food:${key}:${mealId}`;data.history=data.history.filter(h=>h.itemId!==progressKey);window.berthaHmlStorage.setItem('bertha.time-engine.v1',JSON.stringify(data));}catch(e){console.warn('BERTH.A alimentação/desfazer',e)}refreshFoodRoute();}
-function openRecipesFromFood(action,mealId,recipeId){
- // Alimentação consome a biblioteca de receitas sem sair do módulo.
- // O contexto visual/navegacional permanece Alimentação do início ao fim.
- if(action==='other')openChooseRecipe(mealId,'alimentacao');
- else if(action==='view'&&recipeId)openFoodRecipe(recipeId,false,mealId,'alimentacao');
+function openRecipeInRecipes(recipeId){
+ if(!recipeId)return;
+ try{sessionStorage.setItem('bertha.recipe.origin','alimentacao')}catch{}
+ window.location.hash='#receitas';
+ setTimeout(()=>{try{state.route='receitas';renderReceitas();openFoodRecipe(recipeId,false,'dinner','receitas')}catch(e){console.warn('BERTH.A abrir receita',e)}},120);
 }
 function ensureFoodModuleStyles(){
  if(document.getElementById('bertha-food-v115-styles'))return;
@@ -2377,8 +2396,14 @@ function ensureFoodModuleStyles(){
  `;document.head.appendChild(st)
 }
 function foodMealLineIcon(id){const icons={breakfast:'<path d="M4 8h12v5a5 5 0 0 1-5 5H9a5 5 0 0 1-5-5V8z"/><path d="M16 10h2a2 2 0 0 1 0 4h-2"/><path d="M7 5c0-1 1-1 1-2M11 5c0-1 1-1 1-2"/>',lunch:'<path d="M7 3v8M4 3v5c0 2 6 2 6 0V3M7 11v10M16 3v18M16 3c4 3 4 8 0 10"/>',dinner:'<path d="M20 14.5A8 8 0 0 1 9.5 4a7 7 0 1 0 10.5 10.5z"/>'};return `<svg viewBox="0 0 24 24" aria-hidden="true">${icons[id]||icons.dinner}</svg>`}
-function renderTodayFoodCard(){const meals=getTodayMeals();return `<section class="food-v115-today"><div class="food-v115-today-head"><div><span class="eyebrow">COMIDA DE HOJE · ${escapeHtml(foodDayName().toUpperCase())}</span><h3>Seu dia já começa decidido.</h3></div></div><div class="food-v115-today-grid">${meals.map(m=>{const selected=getRecipeById(m.log.selectedRecipeId)||m.recipe,name=m.log.otherText||selected?.name||m.name,done=m.log.consumption==='consumed';return `<div class="food-v115-meal"><div class="food-v115-meal-label"><span class="food-v115-meal-icon">${foodMealLineIcon(m.id)}</span>${escapeHtml(m.label)}</div><strong>${escapeHtml(name)}</strong><div class="food-v115-actions">${done?`<button type="button" class="food-done-state" data-food-undo="${m.id}">Desfazer</button><button type="button" data-food-other="${m.id}">Alterar</button>`:`<button type="button" data-food-done="${m.id}">Fiz esta</button><button type="button" data-food-other="${m.id}">Fiz outra</button>`}${selected?`<button type="button" class="food-view-btn" aria-label="Ver receita" data-food-view="${m.id}">›</button>`:''}</div></div>`}).join('')}</div></section>`;}
-function bindTodayFoodActions(){document.querySelectorAll('[data-food-done]').forEach(b=>b.onclick=()=>{const s=getTodayMealState(b.dataset.foodDone),title=s.log.otherText||s.selected?.name||s.meal.name;setTodayMealConsumption(b.dataset.foodDone,'consumed',title,s.log.source||'planned')});document.querySelectorAll('[data-food-undo]').forEach(b=>b.onclick=()=>undoTodayMeal(b.dataset.foodUndo));document.querySelectorAll('[data-food-other]').forEach(b=>b.onclick=()=>state.route==='alimentacao'?openRecipesFromFood('other',b.dataset.foodOther):openChooseRecipe(b.dataset.foodOther));document.querySelectorAll('[data-food-view]').forEach(b=>b.onclick=()=>{const st=getTodayMealState(b.dataset.foodView);if(st.selected){if(state.route==='alimentacao')openRecipesFromFood('view',b.dataset.foodView,st.selected.id);else openFoodRecipe(st.selected.id,false,b.dataset.foodView)}});}
+function renderTodayFoodCard(){
+ const meals=getTodayMeals();
+ return `<section class="food-v115-today"><div class="food-v115-today-head"><div><span class="eyebrow">HOJE · ${escapeHtml(foodDayName().toUpperCase())}</span><h3>O que estava previsto para hoje.</h3><p>Marque o que realmente aconteceu. Só “Comi” entra no Meu Progresso.</p></div></div><div class="food-v115-today-grid">${meals.map(m=>{const selected=getRecipeById(m.log.selectedRecipeId)||m.recipe,name=m.log.otherText||selected?.name||m.name,status=m.log.consumption||'',nutrition=foodRecipeNutritionLabel(selected);return `<article class="food-v115-meal ${status?'has-status '+status:''}"><div class="food-v115-meal-label"><span class="food-v115-meal-icon">${foodMealLineIcon(m.id)}</span>${escapeHtml(m.label)}</div><strong>${escapeHtml(name)}</strong>${nutrition?`<small class="food-v115-nutrition">${escapeHtml(nutrition)}</small>`:'<small class="food-v115-nutrition muted">Informação nutricional disponível quando cadastrada em Receitas.</small>'}<div class="food-v115-actions food-v115-consumption"><button type="button" class="food-status-btn food-eaten ${status==='consumed'?'selected':''}" data-food-status="consumed" data-food-meal="${m.id}">Comi</button><button type="button" class="food-status-btn food-skipped ${status==='skipped'?'selected':''}" data-food-status="skipped" data-food-meal="${m.id}">Não comi</button>${selected?`<button type="button" class="food-recipe-link" data-food-open-recipe="${selected.id}">Ver receita</button>`:''}</div></article>`}).join('')}</div></section>`;
+}
+function bindTodayFoodActions(){
+ document.querySelectorAll('[data-food-status]').forEach(b=>b.onclick=()=>{const mealId=b.dataset.foodMeal,status=b.dataset.foodStatus,s=getTodayMealState(mealId),title=s.log.otherText||s.selected?.name||s.meal.name;setTodayMealConsumption(mealId,status,title,s.log.source||'planned')});
+ document.querySelectorAll('[data-food-open-recipe]').forEach(b=>b.onclick=()=>openRecipeInRecipes(b.dataset.foodOpenRecipe));
+}
 function renderFoodMeuDiaMini(){
  return `<div class="home-recipes-shortcut-wrap"><a class="home-recipes-shortcut" href="#receitas" onclick="setTimeout(()=>document.querySelector('.recipe-today')?.scrollIntoView({behavior:'smooth',block:'start'}),90)"><span class="home-recipes-shortcut-icon">${recipeMealIcon()}</span><span>Receitas do dia</span><b>→</b></a><a class="home-recipes-shortcut home-recipes-next" href="#receitas" onclick="setTimeout(()=>document.querySelector('.recipe-upcoming')?.scrollIntoView({behavior:'smooth',block:'start'}),90)"><span class="home-recipes-shortcut-icon">${recipeMealIcon()}</span><span>Receitas de amanhã</span><b>→</b></a></div>`;
 }
@@ -2397,11 +2422,10 @@ function openFoodNextPrepDialog(){
  const d=loadFood(),dlg=document.createElement('dialog');dlg.className='study-v10-dialog food-next-prep-dialog';const base=new Date();base.setDate(base.getDate()+14);const suggested=d.nextCookingDate||base.toISOString().slice(0,10);dlg.innerHTML=`<form class="study-v10-modal" id="foodNextPrepForm"><div class="study-v10-head"><div><div class="eyebrow">ALIMENTAÇÃO · ROTINA DE PREPARO</div><h2>Programar próxima</h2><p>Defina quando pretende fazer a próxima cozinha quinzenal.</p></div><button type="button" class="study-v10-x" data-close>×</button></div><label>Data<input type="date" id="foodNextPrepDate" value="${escapeHtml(suggested)}" required></label><div class="study-v10-actions"><button type="button" class="secondary" data-close>Cancelar</button><button type="submit" class="primary">Salvar</button></div></form>`;document.body.appendChild(dlg);const close=()=>dlg.close();dlg.querySelectorAll('[data-close]').forEach(b=>b.onclick=close);dlg.onclose=()=>dlg.remove();dlg.querySelector('#foodNextPrepForm').onsubmit=e=>{e.preventDefault();d.nextCookingDate=dlg.querySelector('#foodNextPrepDate').value;saveFood(d);close();renderAlimentacao()};dlg.showModal();
 }
 
-function ensureFoodPolishStylesRC86(){
- if(document.getElementById('bertha-food-polish-rc86'))return;
- const st=document.createElement('style');st.id='bertha-food-polish-rc86';st.textContent=`
- /* RC86 — ALIMENTAÇÃO: tipografia leve + modal system próprio.
-    Exceção deliberada: .food-next-prep-dialog permanece intocado. */
+function ensureFoodPolishStylesRC87(){
+ if(document.getElementById('bertha-food-polish-rc87'))return;
+ const st=document.createElement('style');st.id='bertha-food-polish-rc87';st.textContent=`
+ /* RC87 — ALIMENTAÇÃO: tipografia leve + modal system único, suave e coerente. */
  .food-v115{font-family:"Avenir Next","Montserrat",Inter,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}
  .food-v115 .eyebrow,.food-v115-section-kicker .eyebrow{
    font-size:10px!important;font-weight:500!important;letter-spacing:.22em!important;color:#8b7f88!important
@@ -2415,7 +2439,7 @@ function ensureFoodPolishStylesRC86(){
  .food-v115-routine-title{font-weight:500!important;letter-spacing:.20em!important}
  .food-v115-actions button{font-size:11.5px!important}
 
- /* Modal master Alimentação — TODOS, exceto Programar próxima cozinha quinzenal */
+ /* Modal master Alimentação — contexto de receitas */
  html body dialog.food-context-dialog[open]{
    position:fixed!important;inset:0!important;width:100vw!important;height:100dvh!important;max-width:none!important;max-height:none!important;
    margin:0!important;padding:14px!important;border:0!important;border-radius:0!important;background:transparent!important;transform:none!important;
@@ -2426,7 +2450,7 @@ function ensureFoodPolishStylesRC86(){
    box-sizing:border-box!important;width:min(100%,520px)!important;max-width:520px!important;max-height:calc(100dvh - 28px)!important;
    margin:auto!important;padding:22px!important;overflow-y:auto!important;overflow-x:hidden!important;-webkit-overflow-scrolling:touch!important;overscroll-behavior:contain!important;
    border-radius:28px!important;border:1px solid rgba(174,136,151,.14)!important;
-   background:linear-gradient(145deg,#fbf5e9 0%,#faeef0 52%,#e8f3ea 100%)!important;
+   background:linear-gradient(145deg,#fbf7ef 0%,#f9eff1 52%,#eef5ef 100%)!important;
    box-shadow:0 18px 48px rgba(63,48,66,.10)!important;
  }
  html body dialog.food-context-dialog .study-v10-head{display:flex!important;align-items:flex-start!important;justify-content:space-between!important;gap:16px!important;margin:0 0 18px!important;padding:0!important}
@@ -2467,11 +2491,55 @@ function ensureFoodPolishStylesRC86(){
  html body dialog.food-context-dialog :is(.primary,.secondary,[type=submit]){
    min-height:46px!important;border-radius:16px!important;padding:10px 16px!important;font-size:14px!important;font-weight:500!important;box-shadow:none!important
  }
- html body dialog.food-context-dialog :is(.secondary){background:linear-gradient(135deg,#f3e5e8 0%,#e7f1e8 100%)!important;color:#675e66!important;border:1px solid rgba(139,112,124,.10)!important}
- html body dialog.food-context-dialog :is(.primary,[type=submit]){background:linear-gradient(135deg,#e6b3bd 0%,#e6c6b5 52%,#bcd5c2 100%)!important;color:#fff!important;border:0!important}
+ html body dialog.food-context-dialog :is(.secondary){background:rgba(255,253,249,.82)!important;color:#6f666d!important;border:1px solid rgba(139,112,124,.12)!important}
+ html body dialog.food-context-dialog :is(.primary,[type=submit]){background:linear-gradient(135deg,#e7bcc3 0%,#e8c9bd 56%,#c8dccd 100%)!important;color:#fff!important;border:0!important}
  html body dialog.food-context-dialog input[type=checkbox]{appearance:none!important;-webkit-appearance:none!important;width:21px!important;height:21px!important;min-width:21px!important;margin:1px 0 0!important;border-radius:7px!important;border:1px solid rgba(139,112,124,.22)!important;background:rgba(255,253,250,.84)!important;display:grid!important;place-items:center!important}
  html body dialog.food-context-dialog input[type=checkbox]:checked{background:linear-gradient(135deg,#e6b3bd,#bcd5c2)!important;border-color:transparent!important;box-shadow:none!important}
  html body dialog.food-context-dialog input[type=checkbox]:checked:after{content:'✓';font-size:13px;line-height:1;color:#fff;font-weight:600}
+
+ /* Receita aberta: uma hierarquia cromática sóbria — blush primário, neutro secundário e menta terciária. */
+ html body dialog#foodRecipeDialog.food-context-dialog #chooseThisFood{
+   background:linear-gradient(135deg,#e7bcc3 0%,#e9c1b5 100%)!important;color:#fff!important;border:0!important
+ }
+ html body dialog#foodRecipeDialog.food-context-dialog #chooseOtherFromRecipe{
+   background:rgba(255,253,249,.86)!important;color:#6c636a!important;border:1px solid rgba(139,112,124,.12)!important
+ }
+ html body dialog#foodRecipeDialog.food-context-dialog #recipeToShopping{
+   background:linear-gradient(135deg,rgba(244,236,237,.94),rgba(226,239,229,.94))!important;color:#676066!important;border:1px solid rgba(127,145,130,.10)!important
+ }
+
+ /* Programar próxima — mesma estrutura aprovada, só com cor suavizada e X neutro. */
+ html body dialog.food-next-prep-dialog[open]{
+   position:fixed!important;inset:0!important;width:100vw!important;height:100dvh!important;max-width:none!important;max-height:none!important;
+   margin:0!important;padding:14px!important;border:0!important;border-radius:0!important;background:transparent!important;transform:none!important;
+   overflow:hidden!important;display:grid!important;place-items:center!important
+ }
+ html body dialog.food-next-prep-dialog[open]>.study-v10-modal{
+   box-sizing:border-box!important;width:min(100%,480px)!important;max-width:480px!important;height:auto!important;max-height:calc(100dvh - 28px)!important;
+   margin:auto!important;padding:22px!important;overflow:auto!important;border-radius:28px!important;border:1px solid rgba(143,119,129,.12)!important;
+   background:linear-gradient(145deg,#fbf8f1 0%,#f7eff1 52%,#eef5ef 100%)!important;
+   box-shadow:0 18px 46px rgba(58,49,60,.10)!important;color:#484148!important
+ }
+ html body dialog.food-next-prep-dialog .study-v10-head{display:flex!important;align-items:flex-start!important;justify-content:space-between!important;gap:16px!important;margin:0 0 18px!important;padding:0!important}
+ html body dialog.food-next-prep-dialog .study-v10-head .eyebrow{font-size:10px!important;font-weight:500!important;letter-spacing:.22em!important;color:#8b7f87!important}
+ html body dialog.food-next-prep-dialog .study-v10-head h2{margin:0!important;font-size:26px!important;line-height:1.08!important;font-weight:500!important;letter-spacing:-.025em!important;color:#433d44!important}
+ html body dialog.food-next-prep-dialog .study-v10-head p{margin:8px 0 0!important;font-size:13.5px!important;line-height:1.45!important;font-weight:400!important;color:#857d83!important}
+ html body dialog.food-next-prep-dialog .study-v10-x{
+   position:static!important;inset:auto!important;transform:none!important;flex:0 0 40px!important;width:40px!important;height:40px!important;min-width:40px!important;
+   margin:0 0 0 auto!important;padding:0!important;display:grid!important;place-items:center!important;border-radius:50%!important;
+   border:1px solid rgba(132,111,121,.12)!important;background:rgba(255,253,250,.58)!important;color:#817a80!important;box-shadow:none!important;
+   font-size:24px!important;font-weight:300!important;line-height:1!important
+ }
+ html body dialog.food-next-prep-dialog label{font-size:13.5px!important;font-weight:400!important;color:#5f575e!important}
+ html body dialog.food-next-prep-dialog input[type=date]{
+   min-height:48px!important;border:1px solid rgba(136,113,124,.13)!important;border-radius:17px!important;background:rgba(255,253,250,.82)!important;
+   color:#4d474c!important;font-size:16px!important;font-weight:400!important;padding:10px 14px!important;box-shadow:none!important
+ }
+ html body dialog.food-next-prep-dialog .study-v10-actions{position:static!important;display:flex!important;justify-content:flex-end!important;gap:10px!important;margin:18px 0 0!important;padding:0!important;background:transparent!important;border:0!important;box-shadow:none!important}
+ html body dialog.food-next-prep-dialog .study-v10-actions button{min-height:46px!important;min-width:112px!important;border-radius:16px!important;padding:10px 16px!important;font-size:14px!important;font-weight:500!important;box-shadow:none!important}
+ html body dialog.food-next-prep-dialog .secondary{background:rgba(255,253,249,.84)!important;color:#6e666c!important;border:1px solid rgba(139,112,124,.12)!important}
+ html body dialog.food-next-prep-dialog .primary{background:linear-gradient(135deg,#e7bcc3 0%,#e7c7b9 56%,#cadbcd 100%)!important;color:#fff!important;border:0!important}
+
  @media(max-width:480px){
    html body dialog.food-context-dialog[open]{padding:12px!important}
    html body dialog.food-context-dialog[open]>.study-v10-modal,
@@ -2482,72 +2550,57 @@ function ensureFoodPolishStylesRC86(){
  `;document.head.appendChild(st)
 }
 
-
-function ensureFoodPolishStylesRC87(){
- if(document.getElementById('bertha-food-polish-rc87'))return;
- const st=document.createElement('style');st.id='bertha-food-polish-rc87';st.textContent=`
- /* RC87 — ALIMENTAÇÃO: harmonização pastel dos modais.
-    Mesma estrutura aprovada; reduz saturação, neutraliza X e unifica ações. */
- html body :is(dialog.food-context-dialog,dialog.food-next-prep-dialog)>.study-v10-modal,
- html body dialog#recipeFormDialog.food-context-dialog>#recipeForm{
-   background:linear-gradient(145deg,#fcf8f1 0%,#faeff1 48%,#eef6ef 100%)!important;
-   border:1px solid rgba(151,130,139,.11)!important;
-   box-shadow:0 18px 44px rgba(63,48,66,.09)!important;
- }
- html body :is(dialog.food-context-dialog,dialog.food-next-prep-dialog) .study-v10-head .eyebrow{
-   color:#8a7e84!important;font-weight:500!important;letter-spacing:.22em!important;
- }
- html body :is(dialog.food-context-dialog,dialog.food-next-prep-dialog) .study-v10-head h2{
-   color:#433e44!important;font-weight:500!important;letter-spacing:-.025em!important;
- }
- html body :is(dialog.food-context-dialog,dialog.food-next-prep-dialog) .study-v10-head p{
-   color:#877e84!important;font-weight:400!important;
- }
- html body :is(dialog.food-context-dialog,dialog.food-next-prep-dialog) .study-v10-x{
-   color:#7c757b!important;background:rgba(255,253,250,.62)!important;
-   border:1px solid rgba(126,113,120,.12)!important;box-shadow:none!important;
-   font-weight:300!important;
- }
- html body :is(dialog.food-context-dialog,dialog.food-next-prep-dialog) :is(input:not([type=checkbox]):not([type=radio]),select,textarea){
-   background:rgba(255,254,251,.82)!important;border:1px solid rgba(137,119,128,.12)!important;
-   color:#4c474d!important;box-shadow:none!important;
- }
- html body :is(dialog.food-context-dialog,dialog.food-next-prep-dialog) :is(.secondary){
-   background:linear-gradient(135deg,#f3eaeb 0%,#edf3ed 100%)!important;
-   color:#675f65!important;border:1px solid rgba(137,119,128,.09)!important;box-shadow:none!important;
- }
- html body :is(dialog.food-context-dialog,dialog.food-next-prep-dialog) :is(.primary,[type=submit]){
-   background:linear-gradient(135deg,#e8c0c8 0%,#edd6ca 52%,#cfe2d2 100%)!important;
-   color:#fff!important;border:0!important;box-shadow:none!important;
- }
- html body dialog#foodRecipeDialog.food-context-dialog .recipe-detail-card{
-   background:rgba(255,254,251,.67)!important;border:1px solid rgba(137,119,128,.09)!important;
- }
- html body dialog#foodRecipeDialog.food-context-dialog .recipe-detail-card h3{font-weight:500!important;color:#4b464b!important}
- html body dialog#foodRecipeDialog.food-context-dialog .recipe-detail-card strong{font-weight:500!important}
- html body dialog#foodRecipeDialog.food-context-dialog .recipe-modal-actions button{
-   min-height:46px!important;border-radius:16px!important;font-size:14px!important;font-weight:500!important;
- }
- html body dialog#foodRecipeDialog.food-context-dialog .recipe-modal-actions button:nth-child(1){
-   background:linear-gradient(135deg,#edc7cd 0%,#efd9ce 100%)!important;color:#665d62!important;border:0!important;
- }
- html body dialog#foodRecipeDialog.food-context-dialog .recipe-modal-actions button:nth-child(2){
-   background:linear-gradient(135deg,#eef3ef 0%,#dcebdc 100%)!important;color:#626b63!important;border:0!important;
- }
- html body dialog#foodRecipeDialog.food-context-dialog .recipe-modal-actions button:nth-child(3){
-   background:linear-gradient(135deg,#f4e9eb 0%,#edf4ee 100%)!important;color:#665f64!important;border:1px solid rgba(137,119,128,.08)!important;
- }
+function ensureFoodArchitectureRC88(){
+ if(document.getElementById('bertha-food-architecture-rc88'))return;
+ const st=document.createElement('style');st.id='bertha-food-architecture-rc88';st.textContent=`
+ .food-v115-today-head p{margin:7px 0 0;color:#978e96;font-size:12.5px;line-height:1.4;font-weight:400}
+ .food-v115-today-grid{grid-template-columns:1fr!important;gap:10px!important;margin-top:12px}
+ .food-v115-meal{padding:14px 15px!important;border:1px solid rgba(111,106,117,.07)!important;border-radius:18px!important;background:rgba(255,253,249,.72)!important}
+ .food-v115-meal+.food-v115-meal{border-left:1px solid rgba(111,106,117,.07)!important;border-top:1px solid rgba(111,106,117,.07)!important}
+ .food-v115-meal strong{min-height:0!important;margin-top:7px!important;font-size:15px!important;font-weight:500!important;color:#4b454e!important}
+ .food-v115-meal-label{font-weight:500!important;letter-spacing:.13em!important;color:#8d808a!important}
+ .food-v115-nutrition{display:block;margin-top:5px;color:#918890;font-size:11.5px;line-height:1.35;font-weight:400}.food-v115-nutrition.muted{opacity:.72}
+ .food-v115-consumption{display:grid!important;grid-template-columns:auto auto 1fr!important;gap:7px!important;margin-top:12px!important}
+ .food-v115-consumption button{min-height:34px!important;font-weight:500!important}
+ .food-v115-consumption .food-status-btn{background:rgba(255,251,247,.78)!important;color:#716873!important;border-color:rgba(113,101,116,.10)!important}
+ .food-v115-consumption .food-eaten.selected{background:linear-gradient(135deg,rgba(218,239,232,.88),rgba(237,246,222,.84))!important;color:#627a70!important;border-color:rgba(98,130,115,.15)!important}
+ .food-v115-consumption .food-skipped.selected{background:linear-gradient(135deg,rgba(249,226,229,.88),rgba(249,238,226,.84))!important;color:#986f77!important;border-color:rgba(151,105,117,.13)!important}
+ .food-v115-consumption .food-recipe-link{justify-self:end;background:transparent!important;border:0!important;color:#7d7580!important;text-decoration:underline;text-underline-offset:3px;padding-inline:6px!important}
+ .food-week-carousel{padding:17px 18px!important;margin-top:10px!important}
+ .food-week-carousel-head{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:12px}.food-week-carousel-head h3{margin:0;font-size:18px;font-weight:500;color:#4a454d}
+ .food-week-track{display:flex;gap:9px;overflow-x:auto;padding:2px 1px 6px;scroll-snap-type:x proximity;scrollbar-width:none}.food-week-track::-webkit-scrollbar{display:none}
+ .food-week-day{flex:0 0 150px;min-height:142px;padding:13px;border:1px solid rgba(111,106,117,.07);border-radius:17px;background:linear-gradient(145deg,rgba(255,252,247,.86),rgba(250,247,245,.72));scroll-snap-align:start;display:flex;flex-direction:column}
+ .food-week-day.today{background:linear-gradient(145deg,rgba(232,242,249,.82),rgba(248,235,233,.72),rgba(235,245,236,.72));border-color:rgba(111,132,146,.11)}
+ .food-week-day>b{font-size:10px;letter-spacing:.16em;color:#8c7f89;font-weight:600}.food-week-day>strong{margin-top:7px;font-size:13px;line-height:1.28;color:#4f4951;font-weight:500}.food-week-day>small{margin-top:6px;color:#958b94;font-size:10.5px;line-height:1.3;font-weight:400}
+ .food-week-day>button{margin-top:auto;align-self:flex-start;border:0!important;background:transparent!important;color:#7e7680!important;padding:8px 0 0!important;min-height:auto!important;font-size:11px!important;font-weight:500!important;text-decoration:underline;text-underline-offset:3px;box-shadow:none!important}
+ @media(max-width:520px){.food-v115-consumption{grid-template-columns:1fr 1fr!important}.food-v115-consumption .food-recipe-link{grid-column:1/-1;justify-self:start}.food-week-day{flex-basis:142px}}
  `;document.head.appendChild(st)
+}
+function foodWeekDays(){return ['Segunda','Terça','Quarta','Quinta','Sexta','Sábado','Domingo']}
+function foodDinnerForDay(day,d=loadFood()){return d.dinners.find(x=>x[0]===day)||null}
+function foodMarmitaForDay(day,d=loadFood()){
+ const days=foodWeekDays(),i=days.indexOf(day),prev=days[(i+6)%7],row=foodDinnerForDay(prev,d);if(!row)return null;const base=String(row[1]||'').split(' + ')[0];return {name:`Marmita: ${base}`,recipe:recipeForMealName(base)};
+}
+function foodPlanItem(day,type,d=loadFood()){
+ if(type==='breakfast'){const x=d.breakfasts.find(v=>v[0]===day);return {name:x?.[1]||'—',recipe:recipeForMealName(x?.[1]||'')}}
+ if(type==='lunch')return foodMarmitaForDay(day,d)||{name:'Sem marmita prevista',recipe:null};
+ const x=foodDinnerForDay(day,d);return {name:x?.[1]||'—',recipe:recipeForMealName(x?.[1]||'')};
+}
+function renderFoodWeekCarousel(title,type,d,today){
+ const days=foodWeekDays(),dayAbbr={Segunda:'SEG',Terça:'TER',Quarta:'QUA',Quinta:'QUI',Sexta:'SEX',Sábado:'SÁB',Domingo:'DOM'};
+ return `<div class="card food-v115-card food-week-carousel"><div class="food-week-carousel-head"><h3>${escapeHtml(title)}</h3><span class="food-v115-pill">7 dias</span></div><div class="food-week-track">${days.map(day=>{const item=foodPlanItem(day,type,d),nut=foodRecipeNutritionLabel(item.recipe);return `<article class="food-week-day ${day===today?'today':''}"><b>${dayAbbr[day]}</b><strong>${escapeHtml(item.name)}</strong>${nut?`<small>${escapeHtml(nut)}</small>`:''}${item.recipe?`<button type="button" data-food-open-recipe="${item.recipe.id}">Ver receita</button>`:''}</article>`}).join('')}</div></div>`;
 }
 
 function renderAlimentacao(){
  ensureFoodModuleStyles();
- ensureFoodPolishStylesRC86();
  ensureFoodPolishStylesRC87();
+ ensureFoodArchitectureRC88();
  const d=loadFood(),today=foodDayName();
- const dayAbbr={Segunda:'SEG',Terça:'TER',Quarta:'QUA',Quinta:'QUI',Sexta:'SEX',Sábado:'SÁB',Domingo:'DOM'};
- app.innerHTML=`<div class="food-v115"><section class="food-v115-hero"><span class="eyebrow">ALIMENTAÇÃO</span><h2>Know what’s next.</h2><p>Você escolhe. A BERTH.A organiza seu dia.</p><span class="food-v115-abstract" aria-hidden="true"></span></section>${renderTodayFoodCard()}<section class="food-v115-week"><div class="food-v115-section-kicker"><span class="eyebrow">SEMANA ${escapeHtml(String(d.week||1))} · CARDÁPIO</span></div><div class="card food-v115-card food-v115-breakfast"><div class="food-v115-breakfast-head"><h3>Café da manhã</h3><span class="food-v115-pill">7 dias</span></div><div class="food-v115-days">${d.breakfasts.map(x=>`<div class="food-v115-day ${x[0]===today?'today':''}"><b>${dayAbbr[x[0]]||escapeHtml(x[0].slice(0,3))}</b><span>${escapeHtml(x[1])}</span></div>`).join('')}</div></div><div class="card food-v115-card food-v115-dinner"><div class="food-v115-dinner-head"><h3>Jantar + marmita</h3><span class="food-v115-pill">3 pessoas</span></div>${d.dinners.map(x=>{const r=recipeForMealName(x[1]);return `<div class="food-v115-dinner-row"><span class="food-v115-daytag">${dayAbbr[x[0]]||escapeHtml(x[0].slice(0,3))}</span><div><strong>${escapeHtml(x[1])}</strong>${x[2]?`<small>marmita → ${escapeHtml(x[2])}</small>`:''}</div>${r?`<button type="button" class="food-v115-recipe-btn" aria-label="Ver receita" data-food-recipe="${r.id}">›</button>`:'<span></span>'}</div>`}).join('')}</div></section><div class="section-title food-v115-routine-title">ROTINA DE PREPARO</div><div class="card food-v115-card food-v115-routine"><label><input type="checkbox" id="foodCook" ${d.cookingDone?'checked':''}><span><strong>Cozinha quinzenal</strong><small>Produzir bases, porcionar, etiquetar e congelar.</small>${d.cookingDoneAt?`<small class="food-v115-cookdate">Concluída em ${foodPrepDateLabel(d.cookingDoneAt)}</small>`:''}${d.nextCookingDate?`<small class="food-v115-cookdate">Próxima programada: ${new Date(d.nextCookingDate+'T12:00:00').toLocaleDateString('pt-BR')}</small>`:''}</span></label><button type="button" class="secondary food-program-next" id="foodProgramNext">Programar próxima</button></div></div>`;
- document.querySelector('#foodCook').onchange=e=>{if(e.target.checked)recordFoodPrepProgress();else undoFoodPrepProgress();renderAlimentacao()};document.querySelector('#foodProgramNext')?.addEventListener('click',openFoodNextPrepDialog);bindTodayFoodActions();document.querySelectorAll('[data-food-recipe]').forEach(b=>b.onclick=()=>{try{sessionStorage.setItem('bertha.recipe.origin','alimentacao')}catch{};openFoodRecipe(b.dataset.foodRecipe,false)});
+ app.innerHTML=`<div class="food-v115"><section class="food-v115-hero"><span class="eyebrow">ALIMENTAÇÃO</span><h2>Know what’s next.</h2><p>Cardápio claro. Consumo real. O detalhe da receita mora em Receitas.</p><span class="food-v115-abstract" aria-hidden="true"></span></section>${renderTodayFoodCard()}<section class="food-v115-week"><div class="food-v115-section-kicker"><span class="eyebrow">SEMANA ${escapeHtml(String(d.week||1))} · CARDÁPIO</span></div>${renderFoodWeekCarousel('Café da manhã','breakfast',d,today)}${renderFoodWeekCarousel('Marmita','lunch',d,today)}${renderFoodWeekCarousel('Jantar','dinner',d,today)}</section><div class="section-title food-v115-routine-title">ROTINA DE PREPARO</div><div class="card food-v115-card food-v115-routine"><label><input type="checkbox" id="foodCook" ${d.cookingDone?'checked':''}><span><strong>Cozinha quinzenal</strong><small>Produzir bases, porcionar, etiquetar e congelar.</small>${d.cookingDoneAt?`<small class="food-v115-cookdate">Concluída em ${foodPrepDateLabel(d.cookingDoneAt)}</small>`:''}${d.nextCookingDate?`<small class="food-v115-cookdate">Próxima programada: ${new Date(d.nextCookingDate+'T12:00:00').toLocaleDateString('pt-BR')}</small>`:''}</span></label><button type="button" class="secondary food-program-next" id="foodProgramNext">Programar próxima</button></div></div>`;
+ document.querySelector('#foodCook').onchange=e=>{if(e.target.checked)recordFoodPrepProgress();else undoFoodPrepProgress();renderAlimentacao()};
+ document.querySelector('#foodProgramNext')?.addEventListener('click',openFoodNextPrepDialog);
+ bindTodayFoodActions();
+ document.querySelectorAll('[data-food-open-recipe]').forEach(b=>b.onclick=()=>openRecipeInRecipes(b.dataset.foodOpenRecipe));
 }
 // ===== BERTH.A v2.8.60 · Lista de Compras Universal + Saúde + Meu Progresso =====
 const HEALTH_KEY="minha-vida.saude.v1";
@@ -2838,14 +2891,14 @@ function progressEngineHistory(){try{return (JSON.parse(window.berthaHmlStorage.
 function progressWeekStart(){const d=new Date();const day=(d.getDay()+6)%7;d.setHours(0,0,0,0);d.setDate(d.getDate()-day);return d.getTime()}
 function progressAreaFromHistory(h){const t=`${h.source||''} ${h.category||''} ${h.title||''} ${h.itemId||''} ${h.plannedItemId||''} ${h.learningKey||''}`.toLowerCase();if(/exerc|exercise|moviment|treino|esteira/.test(t))return'movimento';if(/ritual capilar|ritual/.test(t))return'rituais';if(/autocuidado/.test(t))return'autocuidado';if(/estud/.test(t))return'estudos';if(/casa/.test(t))return'casa';if(/crefito|trabalho|bec|tiktok/.test(t))return'trabalho';if(/projeto|criaç|ideia/.test(t))return'projetos';if(/alimenta|refei|comida/.test(t))return'alimentacao';return'outros'}
 function progressGoalSummary(area,g){if(!g)return'';const nf=v=>String(v).replace('.',',');if(area==='movimento'){const a=[];if(g.sessionsPerWeek)a.push(`${nf(g.sessionsPerWeek)} sessões/sem`);if(g.minutesPerWeek)a.push(`${nf(g.minutesPerWeek)} min/sem`);return a.join(' · ')}if(area==='alimentacao'&&g.adherencePercent)return`${nf(g.adherencePercent)}% do planejamento`;if(area==='autocuidado'&&g.sessionsPerWeek)return`${nf(g.sessionsPerWeek)} momentos/sem`;if(area==='estudos'&&g.hoursPerWeek)return`${nf(g.hoursPerWeek)} h/sem`;if(area==='projetos'&&g.onTimePercent)return`${nf(g.onTimePercent)}% no prazo`;if(area==='trabalho'&&g.prioritiesPerWeek)return`${nf(g.prioritiesPerWeek)} prioridades/sem`;if(area==='casa'&&g.routinesPerWeek)return`${nf(g.routinesPerWeek)} rotinas/sem`;if(area==='rituais'&&g.sessionsPerWeek)return`${nf(g.sessionsPerWeek)} rituais/sem`;return''}
-function progressActualSummary(area,g,arr){const mins=arr.reduce((s,x)=>s+(+x.realMinutes||0),0),n=arr.length;if(area==='movimento')return g?`${n}${g.sessionsPerWeek?`/${g.sessionsPerWeek}`:''} ${n===1?'sessão':'sessões'}${g.minutesPerWeek?` · ${mins}/${g.minutesPerWeek} min`:mins?` · ${mins} min`:''}`:`${n} sessão${n===1?'':'ões'} · ${mins} min`;if(area==='estudos')return`${(mins/60).toFixed(1).replace('.',',')}${g?.hoursPerWeek?`/${String(g.hoursPerWeek).replace('.',',')}`:''} h`;if(['autocuidado','rituais'].includes(area))return`${n}${g?.sessionsPerWeek?`/${g.sessionsPerWeek}`:''} realizado${n===1?'':'s'}`;if(area==='trabalho')return`${n}${g?.prioritiesPerWeek?`/${g.prioritiesPerWeek}`:''} conclusão${n===1?'':'ões'}`;if(area==='casa')return`${n}${g?.routinesPerWeek?`/${g.routinesPerWeek}`:''} rotina${n===1?'':'s'}`;if(area==='projetos')return n?`${n} atividade${n===1?'':'s'} de projeto`:'Ainda sem conclusão';if(area==='alimentacao'){const meals=arr.filter(x=>x.activityType!=='foodPrep'),preps=arr.filter(x=>x.activityType==='foodPrep');if(!meals.length&&!preps.length)return'Nenhum registro';const bits=[];if(meals.length){const planned=meals.filter(x=>x.mealSource==='planned').length,pct=Math.round(planned/meals.length*100),known=meals.filter(x=>Number.isFinite(+x.kcal)),kcal=known.reduce((s,x)=>s+(+x.kcal||0),0);bits.push(`${pct}% conforme planejado · ${meals.length} ${meals.length===1?'refeição':'refeições'}`);if(known.length)bits.push(`${Math.round(kcal)} kcal${known.length<meals.length?' parciais':''}`)}if(preps.length)bits.push(`${preps.length} preparo${preps.length===1?'':'s'}`);return bits.join(' · ');}return`${n} realizado${n===1?'':'s'}`}
+function progressActualSummary(area,g,arr){const mins=arr.reduce((s,x)=>s+(+x.realMinutes||0),0),n=arr.length;if(area==='movimento')return g?`${n}${g.sessionsPerWeek?`/${g.sessionsPerWeek}`:''} ${n===1?'sessão':'sessões'}${g.minutesPerWeek?` · ${mins}/${g.minutesPerWeek} min`:mins?` · ${mins} min`:''}`:`${n} sessão${n===1?'':'ões'} · ${mins} min`;if(area==='estudos')return`${(mins/60).toFixed(1).replace('.',',')}${g?.hoursPerWeek?`/${String(g.hoursPerWeek).replace('.',',')}`:''} h`;if(['autocuidado','rituais'].includes(area))return`${n}${g?.sessionsPerWeek?`/${g.sessionsPerWeek}`:''} realizado${n===1?'':'s'}`;if(area==='trabalho')return`${n}${g?.prioritiesPerWeek?`/${g.prioritiesPerWeek}`:''} conclusão${n===1?'':'ões'}`;if(area==='casa')return`${n}${g?.routinesPerWeek?`/${g.routinesPerWeek}`:''} rotina${n===1?'':'s'}`;if(area==='projetos')return n?`${n} atividade${n===1?'':'s'} de projeto`:'Ainda sem conclusão';if(area==='alimentacao'){const meals=arr.filter(x=>x.activityType!=='foodPrep'),preps=arr.filter(x=>x.activityType==='foodPrep');if(!meals.length&&!preps.length)return'Nenhum registro';const bits=[];if(meals.length){const planned=meals.filter(x=>x.mealSource==='planned').length,pct=Math.round(planned/meals.length*100),known=meals.filter(x=>Number.isFinite(+x.kcal)),kcal=known.reduce((s,x)=>s+(+x.kcal||0),0);bits.push(`${pct}% conforme planejado · ${meals.length} ${meals.length===1?'refeição':'refeições'}`);if(known.length)bits.push(`${Math.round(kcal)} kcal${known.length<meals.length?' parciais':''}`);const pKnown=meals.filter(x=>Number.isFinite(+x.protein)),protein=pKnown.reduce((sum,x)=>sum+(+x.protein||0),0);if(pKnown.length)bits.push(`${String(Math.round(protein*10)/10).replace('.',',')} g proteína${pKnown.length<meals.length?' parcial':''}`)}if(preps.length)bits.push(`${preps.length} preparo${preps.length===1?'':'s'}`);return bits.join(' · ');}return`${n} realizado${n===1?'':'s'}`}
 function progressFinanceRow(){const d=loadFin(),month=finCurrentMonth(),fixed=finFixedTotal(d),variable=finMonthTotal(d,month),bills=finPlannedMonth(d,month),paid=bills.filter(x=>x.paid),open=bills.filter(x=>!x.paid),covered=finPersonal(d.excluded).reduce((sum,x)=>sum+Number(x.value||0),0),remaining=Number(d.income||0)-fixed-variable;return `<details class="progress-category"><summary class="progress-category-head"><strong>Financeiro</strong><b>R$ ${money(remaining)} disponíveis</b></summary><small>${paid.length}/${bills.length} contas previstas pagas · realizado R$ ${money(variable)}</small><div class="progress-detail"><div><span>Orçamento base</span><span>R$ ${money(fixed)}</span></div><div><span>Gastos registrados no mês</span><span>R$ ${money(variable)}</span></div><div><span>Contas previstas pendentes</span><span>${open.length} · R$ ${money(open.reduce((sum,x)=>sum+x.expected,0))}</span></div><div><span>Despesas cobertas hoje</span><span>R$ ${money(covered)}</span></div></div></details>`}
 function progressFoodCaloriesByDay(arr){
  const meals=arr.filter(x=>x.activityType!=='foodPrep'),map=new Map();
  meals.forEach(h=>{const ts=+h.endedAt||+h.startedAt||0,day=new Date(ts);if(!ts||Number.isNaN(day.getTime()))return;const key=`${day.getFullYear()}-${String(day.getMonth()+1).padStart(2,'0')}-${String(day.getDate()).padStart(2,'0')}`;if(!map.has(key))map.set(key,{date:day,items:[]});map.get(key).items.push(h)});
- return [...map.values()].sort((a,b)=>b.date-a.date).map(g=>{const known=g.items.filter(x=>Number.isFinite(+x.kcal)),total=Math.round(known.reduce((s,x)=>s+(+x.kcal||0),0)),partial=known.length<g.items.length;const sources=[...new Set(g.items.map(x=>x.kcalSource).filter(Boolean))];return {date:g.date,total,known:known.length,count:g.items.length,partial,sources};});
+ return [...map.values()].sort((a,b)=>b.date-a.date).map(g=>{const known=g.items.filter(x=>Number.isFinite(+x.kcal)),total=Math.round(known.reduce((s,x)=>s+(+x.kcal||0),0)),partial=known.length<g.items.length,pKnown=g.items.filter(x=>Number.isFinite(+x.protein)),protein=Math.round(pKnown.reduce((s,x)=>s+(+x.protein||0),0)*10)/10,proteinPartial=pKnown.length<g.items.length;const sources=[...new Set(g.items.map(x=>x.kcalSource).filter(Boolean))];return {date:g.date,total,known:known.length,count:g.items.length,partial,sources,protein,proteinKnown:pKnown.length,proteinPartial};});
 }
-function progressFoodExtraDetail(arr){const days=progressFoodCaloriesByDay(arr);if(!days.length)return'';return `<div class="progress-food-calories"><strong>Calorias consumidas por dia</strong>${days.map(d=>`<div class="progress-food-kcal-row"><span>${d.date.toLocaleDateString('pt-BR',{weekday:'short',day:'2-digit',month:'2-digit'})}</span><span>${d.known?`${d.total} kcal${d.partial?' · parcial':''}`:'Sem kcal calculáveis'}</span><small>Fonte: ${escapeHtml(d.sources.length?d.sources.join(' · '):'sem informação nutricional suficiente')}</small></div>`).join('')}</div>`}
+function progressFoodExtraDetail(arr){const days=progressFoodCaloriesByDay(arr);if(!days.length)return'';return `<div class="progress-food-calories"><strong>Consumo registrado por dia</strong>${days.map(d=>`<div class="progress-food-kcal-row"><span>${d.date.toLocaleDateString('pt-BR',{weekday:'short',day:'2-digit',month:'2-digit'})}</span><span>${d.known?`${d.total} kcal${d.partial?' · parcial':''}`:'Sem kcal calculáveis'}${d.proteinKnown?` · ${String(d.protein).replace('.',',')} g proteína${d.proteinPartial?' parcial':''}`:''}</span><small>Fonte: ${escapeHtml(d.sources.length?d.sources.join(' · '):'sem informação nutricional suficiente')}</small></div>`).join('')}</div>`}
 function ensureProgressStyles(){if(document.getElementById('bertha-progress-styles-v181'))return;const st=document.createElement('style');st.id='bertha-progress-styles-v181';st.textContent=`
 /* v2.8.181 — Meu Progresso · refinamento visual homologação */
 .progress-page{padding-bottom:24px}
