@@ -1,4 +1,4 @@
-const CACHE = "hml-bertha-v221-rc54-corretivo-cirurgico";
+const CACHE = "hml-bertha-v221-rc55-corretivo-cirurgico";
 self.addEventListener("install", event => event.waitUntil(self.skipWaiting()));
 self.addEventListener("activate", event => event.waitUntil((async()=>{
   const keys=await caches.keys();

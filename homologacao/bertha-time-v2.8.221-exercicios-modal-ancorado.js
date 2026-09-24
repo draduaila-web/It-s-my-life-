@@ -1542,8 +1542,8 @@
        A RC47 ainda aplicava uma paleta por área via style inline !important, que tinha
        precedência sobre o CSS compartilhado e por isso a mudança não aparecia. */
     const modal=d.querySelector('.bertha-modal');
-    const idealSurface='radial-gradient(circle at 12% 10%,rgba(255,236,217,.72),transparent 34%),radial-gradient(circle at 88% 16%,rgba(226,218,248,.76),transparent 38%),radial-gradient(circle at 82% 88%,rgba(214,239,233,.72),transparent 40%),linear-gradient(145deg,rgba(253,242,244,.98) 0%,rgba(242,235,251,.98) 52%,rgba(226,243,239,.98) 100%)';
-    const idealAction='linear-gradient(110deg,#efcbd8 0%,#ded0f2 48%,#cde8df 100%)';
+    const idealSurface='linear-gradient(135deg, rgba(246,213,223,.80) 0%, rgba(252,246,239,.96) 27%, rgba(230,241,255,.96) 100%),linear-gradient(135deg, rgba(255,255,255,0) 38%, rgba(255,244,192,.12) 42%, rgba(255,245,192,.34) 45.5%, rgba(255,247,205,.60) 47.8%, rgba(255,255,255,.99) 49.4%, rgba(255,255,255,1) 50%, rgba(255,255,255,.99) 50.6%, rgba(255,247,205,.58) 52.2%, rgba(255,245,192,.32) 54.5%, rgba(255,244,192,.10) 58%, rgba(255,255,255,0) 62%),radial-gradient(ellipse 23% 140% at 50% 49%, rgba(255,255,255,1) 0%, rgba(255,252,234,.98) 13%, rgba(255,247,201,.82) 24%, rgba(255,242,186,.48) 34%, rgba(255,239,181,.20) 44%, rgba(255,239,181,0) 57%)';
+    const idealAction='linear-gradient(135deg, rgba(223,160,183,.99) 0%, rgba(245,224,200,.98) 44%, rgba(210,227,244,.99) 100%)';
     if(modal){modal.style.setProperty('background',idealSurface,'important');modal.style.setProperty('border','1px solid rgba(126,105,139,.12)','important');}
     const saveGoal=d.querySelector('[data-goal-save]');if(saveGoal){saveGoal.style.setProperty('background',idealAction,'important');saveGoal.style.setProperty('color','#665b70','important');saveGoal.style.setProperty('border','1px solid rgba(121,101,134,.10)','important');saveGoal.style.setProperty('box-shadow','none','important');}
     d.querySelector('[data-goal-save]').onclick=()=>{const obj={area,label,updatedAt:Date.now(),version:2};d.querySelectorAll('[data-goal-field]').forEach(i=>{const v=Math.min(100,Number(String(i.value||'').replace(',','.')));if(v>0)obj[i.dataset.goalField]=v});if(Object.keys(obj).length<=4)return;all[area]=obj;write(PROGRESS_GOALS_KEY,all);d.close();d.remove();rerender();setTimeout(enhanceIdealScreen,0)};
@@ -4756,8 +4756,8 @@
   document.head.appendChild(s);
 })();
 
-/* RC54 — corrective layer: verified against iPhone screenshots 23/09/2026 */
-(()=>{const s=document.createElement('style');s.id='bertha-rc54-final-corrective';s.textContent=`
+/* RC55 — corrective layer: verified against iPhone screenshots 23/09/2026 */
+(()=>{const s=document.createElement('style');s.id='bertha-rc55-final-corrective';s.textContent=`
 /* TAREFAS — remove definitivamente o amarelo/ocre legado */
 html body dialog.bertha-plans-task-dialog[open] > form.bertha-task-modal,
 html body #pendingDialog[open] > #pendingForm.modal-card{
