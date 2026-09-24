@@ -4760,7 +4760,6 @@ html body #pendingDialog[open] > #pendingForm.modal-card{
  background:linear-gradient(135deg,rgba(247,222,232,.96) 0%,rgba(241,232,249,.97) 52%,rgba(225,239,251,.97) 100%)!important;
  border:2px solid rgba(157,128,169,.28)!important;
 }
-html body dialog.bertha-plans-task-dialog[open] :is(.bertha-task-save,.primary,[type=submit]),
 html body #pendingDialog[open] :is(.primary,[type=submit]){
  background:linear-gradient(135deg,#d9a9c8 0%,#b8a5df 55%,#9ebfe4 100%)!important;color:#fff!important;border:2px solid rgba(144,115,166,.20)!important;
 }
@@ -4822,3 +4821,13 @@ html body #ideaDialog[open] #ideaForm.bertha-modal.study-v10-modal :is(input,tex
 document.head.appendChild(s)})();
 
 
+
+
+/* RC64 — Planos/Tarefas: Salvar herda definitivamente a paleta amarela-pessego de Compromissos. */
+(()=>{const s=document.createElement('style');s.id='bertha-rc64-task-save-master';s.textContent=`
+html body dialog.bertha-plans-task-dialog[open] .bertha-task-modal-v2 .bertha-task-save.primary,
+html body dialog.bertha-plans-task-dialog[open] .bertha-task-modal-v2 [data-save].primary{
+ background:linear-gradient(135deg,#f7e8b8 0%,#e7bd87 45%,#cf8f67 100%)!important;
+ color:#fff!important;border:0!important;box-shadow:none!important;
+}
+`;document.head.appendChild(s)})();
