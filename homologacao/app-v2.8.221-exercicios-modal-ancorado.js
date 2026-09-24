@@ -2096,6 +2096,35 @@ function unlockExerciseModalPage(){
   requestAnimationFrame(()=>window.scrollTo(0,y));
 }
 function openExerciseDialogStable(dlg){
+  /* RC80 — acabamento estável dos modais de Exercícios no Safari/iPhone. */
+  try{
+    dlg.style.setProperty('border','0','important');
+    dlg.style.setProperty('outline','0','important');
+    dlg.style.setProperty('background','transparent','important');
+    dlg.style.setProperty('padding','0','important');
+    const panel=dlg.querySelector('.bertha-modal,.study-v10-modal');
+    if(panel){
+      panel.style.setProperty('border','0','important');
+      panel.style.setProperty('outline','0','important');
+      panel.style.setProperty('box-shadow','inset 0 0 0 1px rgba(145,120,158,.10), 0 22px 54px rgba(55,43,67,.13)','important');
+    }
+    const actions=dlg.querySelector('.study-v10-actions,.modal-actions');
+    if(actions){
+      actions.style.setProperty('position','static','important');
+      actions.style.setProperty('inset','auto','important');
+      actions.style.setProperty('bottom','auto','important');
+      actions.style.setProperty('left','auto','important');
+      actions.style.setProperty('right','auto','important');
+      actions.style.setProperty('transform','none','important');
+      actions.style.setProperty('margin','22px 0 0','important');
+      actions.style.setProperty('padding','0','important');
+      actions.style.setProperty('background','transparent','important');
+      actions.style.setProperty('box-shadow','none','important');
+      actions.style.setProperty('backdrop-filter','none','important');
+      actions.style.setProperty('-webkit-backdrop-filter','none','important');
+      actions.style.setProperty('z-index','auto','important');
+    }
+  }catch{}
   lockExerciseModalPage();
   let released=false;
   const release=()=>{if(released)return;released=true;unlockExerciseModalPage();if(window.visualViewport){window.visualViewport.removeEventListener('scroll',sync);window.visualViewport.removeEventListener('resize',sync)}};

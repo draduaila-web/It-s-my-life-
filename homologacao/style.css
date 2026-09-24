@@ -2580,3 +2580,47 @@ html body dialog.exercise-dialog.exercise-plan-dialog .study-v10-actions{
   }
   html body dialog.exercise-dialog.exercise-plan-dialog[open] > :is(.bertha-modal,.study-v10-modal){padding-bottom:30px!important;}
 }
+
+/* RC80 — EXERCÍCIOS · hotfix final observado em homologação
+   1) remove contorno escuro do elemento dialog; 2) ações de Novo treino ficam no fluxo;
+   3) checkboxes no padrão BERTH.A; 4) pesos residuais mais leves. */
+html body dialog.exercise-dialog[open]{
+  border:0!important;outline:0!important;background:transparent!important;box-shadow:none!important;
+}
+html body dialog.exercise-dialog[open] > :is(.bertha-modal,.study-v10-modal){
+  border:0!important;outline:0!important;
+  box-shadow:inset 0 0 0 1px rgba(145,120,158,.10),0 22px 54px rgba(55,43,67,.13)!important;
+}
+html body dialog.exercise-dialog .study-v10-actions,
+html body dialog.exercise-dialog .modal-actions{
+  position:static!important;top:auto!important;right:auto!important;bottom:auto!important;left:auto!important;inset:auto!important;
+  transform:none!important;z-index:auto!important;margin:22px 0 0!important;padding:0!important;
+  background:transparent!important;border:0!important;box-shadow:none!important;
+  backdrop-filter:none!important;-webkit-backdrop-filter:none!important;
+}
+html body dialog.exercise-dialog.exercise-plan-dialog .exercise-plan-icon-section,
+html body dialog.exercise-dialog.exercise-plan-dialog .exercise-icon-picker{
+  overflow:visible!important;max-height:none!important;height:auto!important;
+}
+html body dialog.exercise-dialog input[type="checkbox"]{
+  -webkit-appearance:none!important;appearance:none!important;
+  width:20px!important;height:20px!important;min-width:20px!important;min-height:20px!important;
+  margin:0!important;border:1px solid rgba(135,111,151,.18)!important;border-radius:6px!important;
+  background:rgba(255,255,255,.72)!important;box-shadow:none!important;display:inline-grid!important;place-content:center!important;
+}
+html body dialog.exercise-dialog input[type="checkbox"]:checked{
+  background:linear-gradient(135deg,#d9c4ea 0%,#efc9cb 100%)!important;
+  border-color:rgba(135,111,151,.20)!important;
+}
+html body dialog.exercise-dialog input[type="checkbox"]:checked::after{
+  content:"✓";font-size:13px;line-height:1;color:#fff;font-weight:500;
+}
+html body dialog.exercise-dialog :is(.study-v10-field>span,.exercise-cycle-label,label,strong,b){font-weight:500!important;}
+html body dialog.exercise-dialog .exercise-week-cycle>span strong{font-weight:500!important;}
+html body #app :is(.exercise-plan,.exercise-cycle,.exercise-session,.exercise-log) :is(strong,b){font-weight:500!important;}
+html body #app :is(.exercise-plan-actions,.exercise-cycle-head,.exercise-session) button{font-weight:500!important;}
+@media(max-width:700px){
+  html body dialog.exercise-dialog.exercise-plan-dialog[open] > :is(.bertha-modal,.study-v10-modal){
+    padding-bottom:32px!important;scroll-padding-bottom:32px!important;
+  }
+}
