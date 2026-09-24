@@ -4886,3 +4886,33 @@ html body dialog.bertha-dialog[open]:has(.bertha-ideal-modal-form) .bertha-notif
 html body dialog.bertha-dialog[open]:has(.bertha-ideal-modal-form) .bertha-ideal-modal-actions button{font-weight:700!important}
 `;
 document.head.appendChild(s)})();
+
+
+/* BERTH.A RC58 — TAREFA: réplica direta da linguagem de Compromissos */
+(()=>{if(document.getElementById('bertha-rc58-task-commitment-clone'))return;const s=document.createElement('style');s.id='bertha-rc58-task-commitment-clone';s.textContent=`
+html body dialog.bertha-plans-task-dialog[open] > form.bertha-task-modal{
+ background:linear-gradient(145deg,#fff8dc 0%,#fff1cf 48%,#f8dfc9 100%)!important;
+ border:1px solid rgba(177,132,88,.12)!important;
+ box-shadow:0 20px 52px rgba(47,37,58,.14)!important;
+}
+html body dialog.bertha-plans-task-dialog[open] :is(.bertha-task-modal-head,.bertha-task-modal-body,.bertha-task-modal-actions){background:transparent!important;border:0!important;box-shadow:none!important}
+html body dialog.bertha-plans-task-dialog[open] .bertha-task-modal-head h2{font-size:22px!important;font-weight:500!important;letter-spacing:-.02em!important;color:#373440!important}
+html body dialog.bertha-plans-task-dialog[open] .bertha-task-modal-head span{font-size:10px!important;font-weight:700!important;letter-spacing:.16em!important;color:#9c7b64!important}
+html body dialog.bertha-plans-task-dialog[open] .bertha-task-field>span{font-size:11.5px!important;font-weight:600!important;color:#655f67!important}
+html body dialog.bertha-plans-task-dialog[open] .bertha-task-field small{font-weight:400!important}
+html body dialog.bertha-plans-task-dialog[open] :is(.bertha-task-field input,.bertha-task-field select,.bertha-task-field textarea,.bertha-duration-input input,.bertha-duration-input select,.bertha-notify-custom input){background:#fffdfa!important;border:1px solid rgba(140,126,145,.14)!important;font-weight:400!important}
+html body dialog.bertha-plans-task-dialog[open] .bertha-task-modal-head button[data-close]{width:36px!important;height:36px!important;background:rgba(247,243,237,.82)!important;color:#8e8792!important;border:0!important;font-size:23px!important}
+html body dialog.bertha-plans-task-dialog[open] .bertha-segment button,
+html body dialog.bertha-plans-task-dialog[open] .bertha-task-cancel,
+html body dialog.bertha-plans-task-dialog[open] .bertha-task-save{
+ min-height:42px!important;border-radius:15px!important;font-size:13px!important;font-weight:600!important;box-shadow:none!important;
+}
+html body dialog.bertha-plans-task-dialog[open] .bertha-segment button,
+html body dialog.bertha-plans-task-dialog[open] .bertha-task-cancel{background:rgba(255,255,255,.72)!important;color:#706972!important;border:1px solid rgba(140,126,145,.12)!important}
+html body dialog.bertha-plans-task-dialog[open] .bertha-segment button.active,
+html body dialog.bertha-plans-task-dialog[open] .bertha-task-save{background:linear-gradient(135deg,#f7e8b8 0%,#e7bd87 45%,#cf8f67 100%)!important;color:#fff!important;border:1px solid rgba(177,132,88,.12)!important}
+html body dialog.bertha-plans-task-dialog[open] .bertha-notify-box{background:rgba(255,253,250,.42)!important;border:1px solid rgba(140,126,145,.10)!important}
+html body dialog.bertha-plans-task-dialog[open] .bertha-toggle-row strong{font-weight:500!important;color:#4c4650!important}
+html body dialog.bertha-plans-task-dialog[open] .bertha-toggle-row span{font-weight:400!important;color:#8d848c!important}
+`;
+document.head.appendChild(s)})();
