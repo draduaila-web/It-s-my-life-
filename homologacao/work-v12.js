@@ -567,3 +567,43 @@
  .work12-front .work12-icon{width:46.56px!important;height:46.56px!important;border-radius:15px!important;background:linear-gradient(125deg,rgba(238,228,250,.88),rgba(218,244,235,.86))!important;border:1px solid rgba(117,96,153,.09)!important;color:#75609a!important}
  `;document.head.appendChild(s);
 })();
+
+/* RC67 — TRABALHO · SOMENTE SISTEMA TIPOGRÁFICO
+   Referência congelada: Planos. Preserva estrutura, lógica e paleta de Trabalho. */
+(function(){
+ const s=document.createElement('style'); s.id='work-rc67-tipografia-planos'; s.textContent=`
+ /* Hero e cabeçalhos */
+ .work13-kicker,.work13-subkicker,.work13-section-label,.work13-subtag,
+ .work12-form-head .eyebrow{
+   font-size:10px!important;letter-spacing:.16em!important;font-weight:600!important;
+   color:#8f858f!important;text-transform:uppercase!important;
+ }
+ .work13-hero h2,.work12-subhero h2,.work12-form-head h2{
+   font-weight:400!important;letter-spacing:-.025em!important;color:#373440!important;
+ }
+ .work13-hero p,.work12-subhero p{font-weight:400!important;color:#746f79!important}
+
+ /* Home e submódulos */
+ .work12-front strong{font-weight:500!important;color:#403a48!important}
+ .work12-front small{font-weight:400!important;color:#807883!important}
+ .work12-front-add,.work12-front-edit,.work12-back,.work12-add{font-weight:500!important}
+ .work13-bridge strong{font-weight:500!important}.work13-bridge small,.work13-bridge a{font-weight:400!important}
+ .work12-stat b{font-weight:400!important}.work12-stat span{font-weight:400!important}
+ .work12-section-head h3,.work12-group h3,.work12-task strong,.work12-notequick strong,.work12-history-item strong{font-weight:500!important;color:#403a48!important}
+ .work12-group p,.work12-task small,.work12-notequick p,.work12-history-item small{font-weight:400!important}
+ .work12-chip,.work12-badge,.work12-mini,.work12-history summary,.work12-more summary{font-weight:500!important}
+ .work12-rule,.work12-empty{font-weight:400!important}
+
+ /* Modais de Trabalho */
+ .work12-front-form label,.work12-form label,.work14-icon-label{
+   font-weight:500!important;color:#655f67!important;
+ }
+ .work12-front-form input,.work12-front-form textarea,.work12-front-form select,
+ .work12-form input,.work12-form select,.work12-form textarea{font-weight:400!important}
+ .work12-check{font-weight:400!important}
+ .work12-check strong,.work12-toggle-copy strong{font-weight:500!important}
+ .work12-check small,.work12-toggle-copy small{font-weight:400!important}
+ .work12-secondary,.work12-primary{font-weight:500!important}
+ .work14-icon-option small{font-weight:400!important}
+ `; document.head.appendChild(s);
+})();
