@@ -1700,3 +1700,76 @@ html body .casa-tool-row{border:1.5px solid rgba(154,119,132,.18)!important;bord
 html body .casa-tool-remove{width:36px;height:36px;border-radius:50%;border:1.5px solid rgba(154,119,132,.22);background:rgba(255,255,255,.55);color:#756b70;font-size:22px}
 html body .casa-tool-check{display:flex!important;align-items:center;gap:10px}
 html body .casa-tool-check input{width:22px!important;height:22px!important;min-width:22px!important}
+
+/* =========================================================
+   RC53 — corretiva visual/funcional consolidada
+   ========================================================= */
+
+/* Referências: cópia LITERAL da superfície cromática do hero Meu Dia Ideal. */
+html body dialog.bertha-goal-dialog > .bertha-modal{
+  background:
+    linear-gradient(135deg, rgba(246,213,223,.80) 0%, rgba(252,246,239,.96) 27%, rgba(230,241,255,.96) 100%),
+    linear-gradient(135deg, rgba(255,255,255,0) 38%, rgba(255,244,192,.12) 42%, rgba(255,245,192,.34) 45.5%, rgba(255,247,205,.60) 47.8%, rgba(255,255,255,.99) 49.4%, rgba(255,255,255,1) 50%, rgba(255,255,255,.99) 50.6%, rgba(255,247,205,.58) 52.2%, rgba(255,245,192,.32) 54.5%, rgba(255,244,192,.10) 58%, rgba(255,255,255,0) 62%),
+    radial-gradient(ellipse 23% 140% at 50% 49%, rgba(255,255,255,1) 0%, rgba(255,252,234,.98) 13%, rgba(255,247,201,.82) 24%, rgba(255,242,186,.48) 34%, rgba(255,239,181,.20) 44%, rgba(255,239,181,0) 57%)!important;
+  border-color:rgba(152,165,189,.18)!important;
+}
+html body dialog.bertha-goal-dialog :is(.primary,.bertha-primary,[type=submit]){
+  background:linear-gradient(135deg,rgba(246,213,223,.96) 0%,rgba(252,246,239,.98) 45%,rgba(230,241,255,.98) 100%)!important;
+  color:#5f5969!important;border:1.5px solid rgba(152,165,189,.20)!important;
+}
+
+/* Casa e Exercícios: bordas efetivas nos componentes reais, inclusive cards/segmentos. */
+html body :is(dialog.casa-dialog,dialog.casa-maint-dialog) :is(
+ input:not([type=checkbox]):not([type=radio]),select,textarea,.secondary,.primary,.study-v10-x,.casa-modal-x,
+ .card,.pill,.seg-btn,.choice-btn,.casa-routine-picker-btn,.casa-web-link,.casa-tool-row
+){border:1.5px solid rgba(154,119,132,.25)!important}
+html body dialog.exercise-dialog :is(
+ input:not([type=checkbox]):not([type=radio]),select,textarea,.secondary,.primary,.study-v10-x,.bertha-modal-head button,
+ .card,.pill,.seg-btn,.choice-btn,.exercise-icon-choice,.exercise-icon-filter
+){border:1.5px solid rgba(148,125,169,.25)!important}
+
+/* Criação & Ideias: restaura rolagem interna no Safari/iPhone sem mover a página de trás. */
+html body dialog#ideaDialog[open],html body dialog.idea-dialog[open]{overflow:hidden!important;overscroll-behavior:contain!important}
+html body dialog#ideaDialog[open] > #ideaForm,
+html body dialog.idea-dialog[open] > :is(.study-v10-modal,.bertha-modal){
+  box-sizing:border-box!important;display:block!important;overflow-y:auto!important;overflow-x:hidden!important;
+  -webkit-overflow-scrolling:touch!important;overscroll-behavior:contain!important;touch-action:pan-y!important;
+  max-height:calc(100dvh - env(safe-area-inset-top,0px) - env(safe-area-inset-bottom,0px) - 32px)!important;
+  padding-bottom:calc(28px + env(safe-area-inset-bottom,0px))!important;
+}
+html body dialog#ideaDialog[open] #ideaForm :is(input,textarea,select,button,label),
+html body dialog.idea-dialog[open] :is(input,textarea,select,button,label){touch-action:manipulation}
+
+/* Alimentação > detalhe da receita: restaura escala, cabeçalho e scroll do Modal System. */
+html body dialog#foodRecipeDialog[open]{overflow:hidden!important}
+html body dialog#foodRecipeDialog[open] > .study-v10-modal{
+  box-sizing:border-box!important;display:flex!important;flex-direction:column!important;
+  width:min(620px,calc(100vw - 32px))!important;max-height:calc(100dvh - env(safe-area-inset-top,0px) - env(safe-area-inset-bottom,0px) - 32px)!important;
+  padding:22px!important;overflow-y:auto!important;overflow-x:hidden!important;-webkit-overflow-scrolling:touch!important;overscroll-behavior:contain!important;
+  border-radius:28px!important;
+}
+html body dialog#foodRecipeDialog .study-v10-head{position:static!important;flex:0 0 auto!important;margin:0 0 16px!important;padding:0!important}
+html body dialog#foodRecipeDialog .study-v10-head h2{font-size:24px!important;line-height:1.08!important;margin:0 0 5px!important}
+html body dialog#foodRecipeDialog .study-v10-head p{font-size:13px!important;line-height:1.4!important;margin:0!important}
+html body dialog#foodRecipeDialog .recipe-detail-card{
+  flex:0 0 auto!important;margin:0!important;padding:18px!important;border-radius:20px!important;
+  font-size:15px!important;line-height:1.48!important;background:rgba(255,253,250,.72)!important;border:1.5px solid rgba(103,151,183,.17)!important;
+}
+html body dialog#foodRecipeDialog .recipe-detail-card h3{font-size:18px!important;line-height:1.2!important;margin:0 0 10px!important}
+html body dialog#foodRecipeDialog .recipe-detail-card h3:not(:first-child){margin-top:18px!important}
+html body dialog#foodRecipeDialog .recipe-detail-card :is(ul,ol){margin:0 0 12px!important;padding-left:24px!important}
+html body dialog#foodRecipeDialog .recipe-detail-card li{font-size:15px!important;line-height:1.48!important;margin:4px 0!important}
+html body dialog#foodRecipeDialog .recipe-detail-card p{font-size:15px!important;line-height:1.48!important;margin:12px 0 0!important}
+html body dialog#foodRecipeDialog .recipe-modal-actions{
+  position:static!important;display:grid!important;grid-template-columns:1fr 1fr!important;gap:10px!important;
+  flex:0 0 auto!important;margin:16px 0 0!important;padding:0!important;background:transparent!important;border:0!important;
+}
+html body dialog#foodRecipeDialog .recipe-modal-actions button{min-height:48px!important;border-radius:16px!important;font-size:14px!important;padding:10px 12px!important}
+html body dialog#foodRecipeDialog .recipe-modal-actions button:nth-child(3){grid-column:1/-1!important}
+
+/* Trabalho: estabiliza o primeiro paint contra regras antigas injetadas. */
+html body #app > .work12-page,html body #app > .work13-page{opacity:1!important;transform:none!important}
+html body .work13-hero{margin-top:10px!important;margin-bottom:34px!important;background:linear-gradient(125deg,rgba(238,228,250,.92) 0%,rgba(239,235,251,.88) 48%,rgba(218,244,235,.88) 100%)!important;border:1px solid rgba(123,104,154,.11)!important}
+html body .work12-fronts{gap:18px!important}
+html body .work12-front{background:linear-gradient(135deg,rgba(255,252,246,.96),rgba(252,249,243,.93))!important;grid-template-columns:47px 1fr 20px!important;padding:18px!important}
+html body .work12-front .work12-icon{width:46.56px!important;height:46.56px!important;border-radius:15px!important;background:linear-gradient(125deg,rgba(238,228,250,.88),rgba(218,244,235,.86))!important;border:1px solid rgba(117,96,153,.09)!important;color:#75609a!important}

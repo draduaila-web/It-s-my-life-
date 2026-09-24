@@ -556,3 +556,14 @@
   `;
   document.head.appendChild(s);
 })();
+
+/* RC53 — estabilização visual de Trabalho após todas as regras injetadas */
+(function(){
+ const s=document.createElement('style');s.id='work-rc53-stable-first-paint';s.textContent=`
+ .work13-hero{margin-top:10px!important;margin-bottom:34px!important;background:linear-gradient(125deg,rgba(238,228,250,.92) 0%,rgba(239,235,251,.88) 48%,rgba(218,244,235,.88) 100%)!important;border:1px solid rgba(123,104,154,.11)!important}
+ .work12-fronts{gap:18px!important}
+ .work12-front{background:linear-gradient(135deg,rgba(255,252,246,.96),rgba(252,249,243,.93))!important;grid-template-columns:47px 1fr 20px!important;padding:18px!important}
+ .work12-front:nth-child(n){background:linear-gradient(135deg,rgba(255,252,246,.96),rgba(252,249,243,.93))!important}
+ .work12-front .work12-icon{width:46.56px!important;height:46.56px!important;border-radius:15px!important;background:linear-gradient(125deg,rgba(238,228,250,.88),rgba(218,244,235,.86))!important;border:1px solid rgba(117,96,153,.09)!important;color:#75609a!important}
+ `;document.head.appendChild(s);
+})();
