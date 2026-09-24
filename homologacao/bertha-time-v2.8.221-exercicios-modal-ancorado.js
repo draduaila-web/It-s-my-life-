@@ -4824,3 +4824,28 @@ html body #ideaDialog[open] #ideaForm.bertha-modal.study-v10-modal *{touch-actio
 html body #ideaDialog[open] #ideaForm.bertha-modal.study-v10-modal :is(input,textarea,select){touch-action:manipulation}
 `;
 document.head.appendChild(s)})();
+
+/* BERTH.A RC56 — NOVA/EDITAR TAREFA: correção isolada, sem amarelo */
+(()=>{if(document.getElementById('bertha-rc56-task-only'))return;const s=document.createElement('style');s.id='bertha-rc56-task-only';s.textContent=`
+html body dialog.bertha-plans-task-dialog[open]{background:transparent!important;border:0!important}
+html body dialog.bertha-plans-task-dialog[open]>form.bertha-task-modal{
+ background:linear-gradient(135deg,#f8e5ed 0%,#f2e9f7 52%,#e4eff9 100%)!important;
+ border:2px solid rgba(151,126,168,.28)!important;
+ box-shadow:0 24px 70px rgba(72,58,84,.22)!important;
+}
+html body dialog.bertha-plans-task-dialog[open] :is(.bertha-task-modal-head,.bertha-task-modal-body,.bertha-task-modal-actions){background:transparent!important;border-color:rgba(143,124,160,.12)!important}
+html body dialog.bertha-plans-task-dialog[open] .bertha-task-modal-head span{color:#8c6d91!important}
+html body dialog.bertha-plans-task-dialog[open] .bertha-task-modal-head button[data-close]{background:rgba(255,255,255,.58)!important;color:#756c78!important;border:2px solid rgba(151,126,168,.22)!important;box-shadow:none!important}
+html body dialog.bertha-plans-task-dialog[open] :is(.bertha-task-field input,.bertha-task-field select,.bertha-task-field textarea,.bertha-duration-input input,.bertha-duration-input select,.bertha-notify-custom input){background:rgba(255,253,252,.78)!important;border:2px solid rgba(151,126,168,.25)!important;color:#433a47!important}
+html body dialog.bertha-plans-task-dialog[open] :is(.bertha-task-field input,.bertha-task-field select,.bertha-task-field textarea,.bertha-duration-input input,.bertha-duration-input select,.bertha-notify-custom input):focus{border-color:rgba(133,151,191,.52)!important;box-shadow:0 0 0 3px rgba(178,199,227,.18)!important}
+html body dialog.bertha-plans-task-dialog[open] .bertha-segment button{background:rgba(255,253,252,.52)!important;border:2px solid rgba(151,126,168,.18)!important;color:#716a74!important;box-shadow:none!important}
+html body dialog.bertha-plans-task-dialog[open] .bertha-segment button.active{background:linear-gradient(135deg,#e6bfd2 0%,#d5bee8 52%,#b8d2eb 100%)!important;color:#67546f!important;border:2px solid rgba(151,126,168,.26)!important;box-shadow:inset 0 0 0 1px rgba(255,255,255,.38)!important}
+html body dialog.bertha-plans-task-dialog[open] .bertha-notify-box{background:linear-gradient(135deg,rgba(247,220,232,.66),rgba(231,220,246,.68),rgba(221,237,249,.68))!important;border:2px solid rgba(151,126,168,.20)!important}
+html body dialog.bertha-plans-task-dialog[open] .bertha-toggle-row strong{color:#67586c!important}
+html body dialog.bertha-plans-task-dialog[open] .bertha-toggle-row span,html body dialog.bertha-plans-task-dialog[open] .bertha-notify-note{color:#897d8c!important}
+html body dialog.bertha-plans-task-dialog[open] .bertha-toggle-row i{background:#ddd7e2!important}
+html body dialog.bertha-plans-task-dialog[open] .bertha-toggle-row input:checked+i{background:linear-gradient(135deg,#d7a9c8,#b8a5df,#9ebfe4)!important}
+html body dialog.bertha-plans-task-dialog[open] .bertha-task-cancel{background:rgba(255,253,252,.54)!important;color:#716875!important;border:2px solid rgba(151,126,168,.18)!important}
+html body dialog.bertha-plans-task-dialog[open] .bertha-task-save{background:linear-gradient(135deg,#d9a9c8 0%,#b8a5df 55%,#9ebfe4 100%)!important;color:#fff!important;border:2px solid rgba(144,115,166,.18)!important;box-shadow:none!important}
+`;
+document.head.appendChild(s)})();
