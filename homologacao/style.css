@@ -1970,3 +1970,54 @@ html body dialog.bertha-plans-task-dialog[open] > form.bertha-task-modal-v2{
 .bertha-task-modal-v2 .commit-actions .secondary{background:rgba(255,255,255,.72)!important;color:#706972!important;border:1px solid rgba(140,126,145,.12)!important}
 .bertha-task-modal-v2 .commit-actions .primary{background:linear-gradient(135deg,#f7e8b8 0%,#e7bd87 45%,#cf8f67 100%)!important;color:#fff!important}
 @media(max-width:480px){html body dialog.bertha-plans-task-dialog[open] > form.bertha-task-modal-v2{width:calc(100vw - 24px)!important;max-height:calc(100dvh - 24px)!important;padding:18px!important}}
+
+/* RC66 — MEU DIA IDEAL · SOMENTE SISTEMA TIPOGRÁFICO
+   Referência congelada: Planos. Não altera estrutura, lógica, campos ou paleta. */
+html body .bertha-ideal-hero .eyebrow{
+  font-size:10px!important;letter-spacing:.16em!important;font-weight:600!important;
+  color:#8f858f!important;text-transform:uppercase!important;
+}
+html body .bertha-ideal-hero h2{
+  font-weight:400!important;letter-spacing:-.025em!important;color:#373440!important;
+}
+html body .bertha-ideal-hero p{font-weight:400!important;color:#746f79!important}
+html body .bertha-ideal-zone-head span{
+  font-weight:600!important;letter-spacing:.16em!important;color:#817984!important;
+}
+html body .bertha-ideal-zone-head small{font-weight:400!important}
+html body .bertha-ideal-map-copy strong{font-weight:500!important}
+html body .bertha-ideal-add-zone{font-weight:500!important}
+html body .bertha-goals-head>span{
+  font-size:10px!important;letter-spacing:.16em!important;font-weight:600!important;
+  color:#8f858f!important;text-transform:uppercase!important;
+}
+html body .bertha-goals-head>strong{
+  font-weight:400!important;letter-spacing:-.018em!important;color:#373440!important;
+}
+html body .bertha-goals-note{font-weight:400!important}
+html body .bertha-goal-text>span{font-weight:500!important;color:#403a48!important}
+html body .bertha-goal-text>strong{font-weight:400!important;color:#807883!important}
+
+/* Modal Adicionar ao Meu Dia Ideal — mesma hierarquia leve de Planos. */
+html body dialog.bertha-dialog:has(.bertha-ideal-modal-form) .bertha-modal-head strong{
+  font-weight:400!important;letter-spacing:-.018em!important;color:#373440!important;
+}
+html body dialog.bertha-dialog:has(.bertha-ideal-modal-form) .bertha-ideal-modal-form .bertha-field>span,
+html body dialog.bertha-dialog:has(.bertha-ideal-modal-form) .bertha-ideal-until label>span,
+html body dialog.bertha-dialog:has(.bertha-ideal-modal-form) .bertha-notify-when>span{
+  font-size:11.5px!important;font-weight:500!important;color:#655f67!important;
+}
+html body dialog.bertha-dialog:has(.bertha-ideal-modal-form) .bertha-notify-row strong{
+  font-weight:500!important;color:#4c4650!important;
+}
+html body dialog.bertha-dialog:has(.bertha-ideal-modal-form) .bertha-notify-row small{
+  font-weight:400!important;
+}
+html body dialog.bertha-dialog:has(.bertha-ideal-modal-form) input,
+html body dialog.bertha-dialog:has(.bertha-ideal-modal-form) select,
+html body dialog.bertha-dialog:has(.bertha-ideal-modal-form) textarea{
+  font-weight:400!important;
+}
+html body dialog.bertha-dialog:has(.bertha-ideal-modal-form) .bertha-ideal-modal-actions button{
+  font-weight:500!important;
+}
