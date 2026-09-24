@@ -1841,3 +1841,10 @@ html body dialog.bertha-plans-task-dialog .bertha-task-modal-actions :is(.bertha
   html body dialog.bertha-plans-task-dialog .bertha-segment button{padding-left:7px!important;padding-right:7px!important;font-size:13px!important}
   html body dialog.bertha-plans-task-dialog .bertha-task-schedule-priority .bertha-segment.compact button{font-size:13px!important}
 }
+
+
+/* RC60 — SOMENTE Nova/Editar Tarefa: superfície amarela/pêssego de Compromissos. */
+html body dialog.bertha-plans-task-dialog[open] > form.bertha-task-modal{
+  background-color:#fbedd4!important;
+  background-image:linear-gradient(145deg,#fff8dc 0%,#f9e8c9 50%,#f4d4bf 100%)!important;
+}

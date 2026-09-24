@@ -1848,6 +1848,13 @@
       </form>`;
 
     document.body.appendChild(d);
+    /* RC60 — Planos > Tarefa: a superfície usa literalmente a mesma família cromática de Compromissos.
+       Aplicado no elemento real do modal para não ser sobrescrito pelo legado creme. */
+    const taskSurface=d.querySelector('.bertha-task-modal');
+    if(taskSurface){
+      taskSurface.style.setProperty('background','linear-gradient(145deg, #fff8dc 0%, #f9e8c9 50%, #f4d4bf 100%)','important');
+      taskSurface.style.setProperty('background-color','#fbedd4','important');
+    }
     const close=()=>{try{d.close()}catch{} d.remove()};
     d.querySelectorAll('[data-close]').forEach(b=>b.onclick=close);
     d.addEventListener('cancel',e=>{e.preventDefault();close()});
