@@ -729,7 +729,7 @@
     const e=engine(),list=Array.isArray(e.actives)?e.actives:[];
     const idx=activeId?list.findIndex(a=>String(a.id)===String(activeId)):0;if(idx<0)return;
     const active=list[idx],measured=Math.max(1,Math.round((Date.now()-active.startedAt)/60000));
-    const d=dialogBase('Concluir atividade',`<p class="bertha-muted">Confira o tempo real antes de concluir <strong>${esc(active.title||'Atividade')}</strong>.</p><label class="bertha-field">Tempo real (min)<input type="number" min="1" inputmode="numeric" data-finish-real value="${measured}"></label><div class="bertha-actions"><button class="bertha-secondary" data-keep-going>Continuar atividade</button><button class="bertha-primary" data-confirm-finish>Concluir</button></div>`);
+    const d=dialogBase('Concluir atividade',`<p class="bertha-muted">Confira o tempo real antes de concluir <strong>${esc(active.title||'Atividade')}</strong>.</p><label class="bertha-field">Tempo real (min)<input type="number" min="1" inputmode="numeric" data-finish-real value="${measured}"></label><div class="bertha-actions"><button class="bertha-secondary" data-keep-going>Continuar atividade</button><button class="bertha-primary" data-confirm-finish>Concluir</button></div>`); d.classList.add('bertha-finish-dialog');
     d.classList.add('bertha-meudia-dialog','bertha-finish-dialog');
     d.querySelector('[data-keep-going]').onclick=()=>{d.close();d.remove();};
     d.querySelector('[data-confirm-finish]').onclick=()=>{const real=Math.max(1,+d.querySelector('[data-finish-real]').value||measured);d.close();d.remove();finishActive(active.id,real);if(typeof afterFinish==='function')setTimeout(afterFinish,60);};
@@ -757,7 +757,7 @@
   document.addEventListener('visibilitychange',()=>{if(!document.hidden)setTimeout(checkTimeOverruns,250)});
 
   function editCompletedTimeDialog(item,realMinutes){
-    const d=dialogBase('Ajustar tempo real',`<p class="bertha-muted">A BERTH.A registrou <strong>${durationText(realMinutes)}</strong> para <strong>${esc(item.title||'Atividade')}</strong>.</p><label class="bertha-field">Tempo real (min)<input type="number" min="1" inputmode="numeric" data-real value="${Math.max(1,+realMinutes||1)}"></label><div class="bertha-actions"><button class="bertha-secondary" data-cancel>Cancelar</button><button class="bertha-primary" data-save-real>Salvar tempo</button></div>`);
+    const d=dialogBase('Ajustar tempo real',`<p class="bertha-muted">A BERTH.A registrou <strong>${durationText(realMinutes)}</strong> para <strong>${esc(item.title||'Atividade')}</strong>.</p><label class="bertha-field">Tempo real (min)<input type="number" min="1" inputmode="numeric" data-real value="${Math.max(1,+realMinutes||1)}"></label><div class="bertha-actions"><button class="bertha-secondary" data-cancel>Cancelar</button><button class="bertha-primary" data-save-real>Salvar tempo</button></div>`); d.classList.add('bertha-finish-dialog');
     d.querySelector('[data-cancel]').onclick=()=>{d.close();d.remove()};
     d.querySelector('[data-save-real]').onclick=()=>{const real=Math.max(1,+d.querySelector('[data-real]').value||realMinutes);const e=engine();const h=(e.history||[]).find(x=>x.status==='done'&&String(x.itemId)===String(item.id));if(h){h.realMinutes=real;h.editedRealMinutes=true;saveEngine(e)}const key=durationLearningKey(item),store=durationLearningStore(),rec=store.items?.[key];if(rec&&Array.isArray(rec.samples)&&rec.samples.length){rec.samples[rec.samples.length-1].realMinutes=real;const calc=computeDurationLearning(rec.samples,rec.configuredMinutes||item.configuredMinutes||item.plannedMinutes||30);Object.assign(rec,{count:calc.count,learned:calc.learned,learnedMinutes:calc.learnedMinutes,suggestedMinutes:calc.suggestedMinutes,confidence:calc.confidence,lastMinutes:calc.lastMinutes,updatedAt:new Date().toISOString()});store.items[key]=rec;saveDurationLearningStore(store)}d.close();d.remove();rerender();};
   }
@@ -2785,6 +2785,19 @@
     .bertha-dialog .bertha-stack .bertha-primary,.bertha-dialog .bertha-stack .bertha-secondary{min-height:48px;border-radius:16px!important;font-size:15px!important}
     .bertha-dialog .bertha-stack .bertha-primary{background:linear-gradient(135deg,#9c79e9,#6bbce4)!important;color:#fff!important}
     .bertha-dialog .bertha-stack .bertha-secondary{background:#eee7f4!important;color:#6c5b76!important}
+    /* RC113 — Meu Dia: modais de concluir/ajustar tempo com fundo neutro, tipografia leve e ações alinhadas à direita. */
+    .bertha-dialog.bertha-finish-dialog .bertha-modal{background:#fbf7ef!important;border-radius:28px!important;padding:22px!important}
+    .bertha-dialog.bertha-finish-dialog .bertha-modal-head{align-items:flex-start!important;gap:14px!important;margin-bottom:12px!important}
+    .bertha-dialog.bertha-finish-dialog .bertha-modal-head strong{font-size:19px!important;line-height:1.2!important;font-weight:600!important;color:#3f3545!important;letter-spacing:-.01em!important}
+    .bertha-dialog.bertha-finish-dialog .bertha-modal-head button{color:#8c858e!important}
+    .bertha-dialog.bertha-finish-dialog p{margin:0 0 10px!important;font-size:15px!important;line-height:1.48!important;color:#6e6672!important;font-weight:400!important}
+    .bertha-dialog.bertha-finish-dialog p strong{color:#4c4450!important;font-weight:560!important}
+    .bertha-dialog.bertha-finish-dialog .bertha-field{display:grid!important;gap:7px!important;margin:14px 0 0!important;font-weight:560!important;color:#5f5662!important}
+    .bertha-dialog.bertha-finish-dialog .bertha-field input{width:100%!important;box-sizing:border-box!important;padding:14px 16px!important;border:1px solid rgba(140,126,145,.16)!important;border-radius:16px!important;background:rgba(255,255,255,.84)!important;font-size:16px!important;font-weight:500!important;color:#433b47!important;box-shadow:none!important}
+    .bertha-dialog.bertha-finish-dialog .bertha-actions{display:flex!important;justify-content:flex-end!important;gap:10px!important;flex-wrap:wrap!important;margin-top:18px!important}
+    .bertha-dialog.bertha-finish-dialog .bertha-actions .bertha-secondary,.bertha-dialog.bertha-finish-dialog .bertha-actions .bertha-primary{min-height:46px!important;border-radius:16px!important;padding:0 18px!important;font-size:15px!important;font-weight:560!important;box-shadow:none!important;min-width:0!important;width:auto!important;flex:0 0 auto!important}
+    .bertha-dialog.bertha-finish-dialog .bertha-actions .bertha-secondary{background:rgba(255,255,255,.82)!important;color:#6d6673!important;border:1px solid rgba(140,126,145,.14)!important}
+    .bertha-dialog.bertha-finish-dialog .bertha-actions .bertha-primary{background:linear-gradient(135deg, rgba(223,160,183,.98) 0%, rgba(245,224,200,.97) 44%, rgba(210,227,244,.98) 100%)!important;color:#fff!important;border:1px solid rgba(193,149,171,.22)!important}
     /* RC112 — Meu Dia: modal de tempo excedido com peso e cores no padrão do módulo. */
     .bertha-dialog.bertha-overrun-dialog .bertha-modal{background:#fbf7ef!important;border-radius:28px!important;padding:22px!important}
     .bertha-dialog.bertha-overrun-dialog .bertha-modal-head{margin-bottom:14px!important;align-items:flex-start!important}
