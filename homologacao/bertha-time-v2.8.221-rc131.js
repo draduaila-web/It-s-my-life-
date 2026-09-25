@@ -4167,6 +4167,7 @@
       more:'<path d="M5 7h14M5 12h14M5 17h14"/>',
       network:'<circle cx="8" cy="9" r="2.4"/><circle cx="16" cy="9" r="2.4"/><path d="M3.8 19c.6-3.4 2.1-5 4.2-5s3.6 1.6 4.2 5M11.8 19c.6-3.4 2.1-5 4.2-5s3.6 1.6 4.2 5"/>',
       invite:'<path d="M4 8.5h16v10H4z"/><path d="m4 9 8 5 8-5"/><path d="M8 5.5h8"/>',
+      award:'<path d="M8 4h8v3a4 4 0 0 1-8 0V4z"/><path d="M8 6H5v1a4 4 0 0 0 4 4M16 6h3v1a4 4 0 0 1-4 4M12 11v5M8 21h8M9 16h6v5H9z"/>',
       heart:'<path d="M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.6l-1-1a5.5 5.5 0 0 0-7.8 7.8l1 1L12 21l7.8-7.6 1-1a5.5 5.5 0 0 0 0-7.8z"/>',
       briefcase:'<rect x="3" y="7" width="18" height="12" rx="2"/><path d="M8 7V5a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2M3 12h18"/>',
       study:'<path d="M3 5.5A3.5 3.5 0 0 1 6.5 2H11v17H6.5A3.5 3.5 0 0 0 3 22V5.5zM21 5.5A3.5 3.5 0 0 0 17.5 2H13v17h4.5A3.5 3.5 0 0 1 21 22V5.5z"/>',
@@ -4203,7 +4204,8 @@
       ['financeiro','wallet','Financeiro','Entradas, saídas e atenção'],
       ['ideias','idea','Criação & Ideias','Projetos e inspirações'],
       ['satelites','network','Satélites','Família, ajuda e Kids'],
-      ['convites','invite','Convites','Almoço, academia e momentos juntos']
+      ['convites','invite','Convites','Almoço, academia e momentos juntos'],
+      ['premiacoes','award','Premiações','Conquistas, Kids e reconhecimentos']
     ];
     d=document.createElement('dialog');d.id='berthaMore';d.className='bertha-dialog';
     d.innerHTML=`<div class="bertha-modal bertha-more-modal bertha-more-v216"><div class="bertha-modal-head bertha-more-head"><div class="bertha-more-brand"><div class="bertha-more-title">Mais</div><div class="bertha-more-tagline">OUT OF YOUR HEAD. INTO YOUR LIFE.</div><div class="bertha-more-promise">Uma vida previsível na palma das suas mãos.</div></div><button data-close aria-label="Fechar">×</button></div><div class="module-links bertha-module-cards bertha-module-cards-v216">${modules.map(([r,i,l,dsc])=>`<a href="#${r}"><span class="bertha-menu-icon bertha-menu-icon-v216">${icon(i)}</span><span class="bertha-menu-copy"><strong>${l}</strong><small>${dsc}</small></span></a>`).join('')}</div><section class="bertha-more-data bertha-more-data-v216" aria-label="Ferramentas de homologação"><div class="bertha-more-data-copy"><span>HOMOLOGAÇÃO · DADOS</span><small>Backup e restauração ficam disponíveis durante os testes.</small></div><div class="bertha-more-data-actions"><button type="button" data-backup-export>Exportar backup</button><button type="button" data-backup-import>Restaurar backup</button><button type="button" data-hml-reset>Limpar homologação</button><input type="file" data-backup-file accept="application/json,.json" hidden></div></section></div>`;
