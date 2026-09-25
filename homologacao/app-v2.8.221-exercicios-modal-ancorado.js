@@ -4900,3 +4900,23 @@ html body .sat-permission.is-on .sat-perm-check{
 }
 `;
 document.head.appendChild(st)})();
+
+
+/* RC127 — Satélites: fundo do modal exatamente na mesma família do hero */
+;(function(){if(document.getElementById('rc127-sat-modal-bg'))return;const st=document.createElement('style');st.id='rc127-sat-modal-bg';st.textContent=`
+html body dialog.sat-modal{background:transparent!important}
+html body dialog.sat-modal>.modal-card,
+html body dialog.sat-modal .modal-card{
+  background:linear-gradient(135deg,#fbf4ec 0%,#edf3f4 52%,#f3edf7 100%)!important;
+  border:1px solid rgba(113,96,130,.09)!important;
+  box-shadow:0 18px 44px rgba(74,57,69,.10)!important;
+}
+html body dialog.sat-modal .modal-head{
+  background:transparent!important;
+  border-bottom:0!important;
+}
+html body dialog.sat-modal .modal-actions{
+  background:linear-gradient(to top,rgba(243,237,247,.96) 58%,rgba(243,237,247,0))!important;
+  border-top:0!important;
+}
+`;document.head.appendChild(st)})();
