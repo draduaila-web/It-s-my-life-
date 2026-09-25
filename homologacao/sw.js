@@ -1,4 +1,4 @@
-const CACHE = "hml-bertha-v221-rc139-casa-rotina-x-manutencao-satelites";
+const CACHE = "hml-bertha-v221-rc140-premiacoes-personalizaveis";
 self.addEventListener("install", event => event.waitUntil(self.skipWaiting()));
 self.addEventListener("activate", event => event.waitUntil((async()=>{
   const keys=await caches.keys();
