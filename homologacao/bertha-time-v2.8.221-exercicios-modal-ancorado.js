@@ -745,6 +745,11 @@
   setInterval(checkTimeOverruns,15000);
   document.addEventListener('visibilitychange',()=>{if(!document.hidden)setTimeout(checkTimeOverruns,250)});
 
+  function editCompletedTimeDialog(item,realMinutes){
+    const d=dialogBase('Ajustar tempo real',`<p class="bertha-muted">A BERTH.A registrou <strong>${durationText(realMinutes)}</strong> para <strong>${esc(item.title||'Atividade')}</strong>.</p><label class="bertha-field">Tempo real (min)<input type="number" min="1" inputmode="numeric" data-real value="${Math.max(1,+realMinutes||1)}"></label><div class="bertha-actions"><button class="bertha-secondary" data-cancel>Cancelar</button><button class="bertha-primary" data-save-real>Salvar tempo</button></div>`);
+    d.querySelector('[data-cancel]').onclick=()=>{d.close();d.remove()};
+    d.querySelector('[data-save-real]').onclick=()=>{const real=Math.max(1,+d.querySelector('[data-real]').value||realMinutes);const e=engine();const h=(e.history||[]).find(x=>x.status==='done'&&String(x.itemId)===String(item.id));if(h){h.realMinutes=real;h.editedRealMinutes=true;saveEngine(e)}const key=durationLearningKey(item),store=durationLearningStore(),rec=store.items?.[key];if(rec&&Array.isArray(rec.samples)&&rec.samples.length){rec.samples[rec.samples.length-1].realMinutes=real;const calc=computeDurationLearning(rec.samples,rec.configuredMinutes||item.configuredMinutes||item.plannedMinutes||30);Object.assign(rec,{count:calc.count,learned:calc.learned,learnedMinutes:calc.learnedMinutes,suggestedMinutes:calc.suggestedMinutes,confidence:calc.confidence,lastMinutes:calc.lastMinutes,updatedAt:new Date().toISOString()});store.items[key]=rec;saveDurationLearningStore(store)}d.close();d.remove();rerender();};
+  }
   function repeatAfterFinishDialog(item,realMinutes){
     const route=(location.hash||'#meu-dia').toLowerCase();
     let contextClass='bertha-repeat-context-generic';
@@ -763,6 +768,7 @@
       <p>Tempo real: <strong>${durationText(realMinutes)}</strong>.</p>
       <div class="bertha-repeat-actions">
         <button type="button" class="secondary" data-done>Encerrar</button>
+        <button type="button" class="secondary" data-edit-real>Ajustar tempo</button>
         <button type="button" class="primary" data-again>Repetir</button>
       </div>
       <small>Repetir não começa agora. A atividade volta para as sugestões quando couber no seu dia.</small>
@@ -771,6 +777,7 @@
     const close=()=>dlg.close();
     dlg.querySelector('.bertha-repeat-x').onclick=close;
     dlg.querySelector('[data-done]').onclick=close;
+    dlg.querySelector('[data-edit-real]').onclick=()=>{close();setTimeout(()=>editCompletedTimeDialog(item,realMinutes),70)};
     dlg.querySelector('[data-again]').onclick=()=>{enqueueRepeat(item);close();rerender();};
     dlg.addEventListener('close',()=>dlg.remove(),{once:true});dlg.showModal();
   }
@@ -901,6 +908,49 @@
     if(!timed.length)return '';
     return `<section class="day-section home-scheduled"><div class="section-head"><h2>Próximos horários</h2></div>${timed.map(x=>`<div class="home-scheduled-row"><span class="home-scheduled-time">${esc(x.time)}</span><div><strong>${esc(x.title)}</strong><small>${esc(x.source)} · ${durationText(+x.minutes||30)}</small></div><span class="home-scheduled-arrow">›</span></div>`).join('')}</section>`;
   }
+  const DAY_BLOCKS_KEY='bertha.meu-dia.fixed-blocks.v1';
+  const DAY_CONFLICT_KEY='bertha.meu-dia.fixed-conflicts.v1';
+  function defaultDayBlocks(day=new Date().getDay()){
+    if(day<1||day>5) return [];
+    const blocks=[
+      {id:'morning',title:'Manhã protegida',start:'05:16',end:'07:35',protected:true},
+      {id:'work',title:'Trabalho oficial',start:'08:00',end:'14:00'},
+    ];
+    if(day===1||day===3) blocks.push({id:'strategy',title:'Janela estratégica',start:'14:40',end:'16:10'});
+    const ho={1:['16:40','18:40'],2:['15:40','17:40'],3:['16:40','18:40'],4:['15:40','17:40'],5:['15:40','17:40']}[day];
+    if(ho) blocks.push({id:'homeoffice',title:'Home office · duração planejada 2h',start:ho[0],end:ho[1]});
+    blocks.push({id:'night',title:'Noite protegida · descanso primeiro',start:'19:00',end:'23:59',protected:true});
+    return blocks;
+  }
+  function dayBlocks(day=new Date().getDay()){
+    const store=read(DAY_BLOCKS_KEY,{}),saved=store?.[String(day)];
+    return Array.isArray(saved)?saved:defaultDayBlocks(day);
+  }
+  function saveDayBlocks(day,blocks){const store=read(DAY_BLOCKS_KEY,{});store[String(day)]=blocks;write(DAY_BLOCKS_KEY,store);}
+  function blockToMinutes(b){return {a:timeToM(b.start)||0,b:timeToM(b.end)||1440};}
+  function editDayBlocksDialog(){
+    const names=['Domingo','Segunda','Terça','Quarta','Quinta','Sexta','Sábado'];
+    const current=new Date().getDay();
+    const d=dialogBase('Horários-base do Meu Dia',`<p class="bertha-muted">Edite os blocos que a BERTH.A usa para proteger horários e encontrar janelas livres.</p><label class="bertha-field">Dia da semana<select data-day>${names.map((n,i)=>`<option value="${i}" ${i===current?'selected':''}>${n}</option>`).join('')}</select></label><div data-block-list></div><div class="bertha-actions"><button class="bertha-secondary" data-reset>Restaurar padrão</button><button class="bertha-primary" data-save>Salvar horários</button></div>`);
+    const list=d.querySelector('[data-block-list]'),sel=d.querySelector('[data-day]');
+    const render=()=>{const day=+sel.value,blocks=dayBlocks(day);list.innerHTML=blocks.length?blocks.map((b,i)=>`<div class="bertha-fixed-edit" data-i="${i}"><label><input type="checkbox" data-enabled ${b.enabled===false?'':'checked'}><span>${esc(b.title)}</span></label><div><input type="time" data-start value="${esc(b.start)}"><span>–</span><input type="time" data-end value="${esc(b.end)}"></div></div>`).join(''):`<div class="bertha-empty">Sem blocos fixos neste dia.</div>`;};
+    sel.onchange=render;render();
+    d.querySelector('[data-reset]').onclick=()=>{saveDayBlocks(+sel.value,defaultDayBlocks(+sel.value));render();};
+    d.querySelector('[data-save]').onclick=()=>{const day=+sel.value,base=dayBlocks(day),rows=[...list.querySelectorAll('.bertha-fixed-edit')];const next=rows.map((r,i)=>({...base[i],enabled:r.querySelector('[data-enabled]').checked,start:r.querySelector('[data-start]').value||base[i].start,end:r.querySelector('[data-end]').value||base[i].end}));saveDayBlocks(day,next);d.close();d.remove();rerender();};
+  }
+  function fixedCommitmentConflicts(){
+    const today=iso(),blocks=dayBlocks().filter(b=>b.enabled!==false),comm=sourcesToday().filter(x=>x.kind==='commitment'&&x.time),out=[];
+    for(const c of comm){const ca=timeToM(c.time),cb=ca+Math.max(1,+c.minutes||30);for(const b of blocks){const bm=blockToMinutes(b);if(ca<bm.b&&cb>bm.a)out.push({commitment:c,block:b,key:`${today}|${c.commitmentId||c.id}|${b.id}`});}}
+    return out;
+  }
+  function maybePromptFixedCommitmentConflict(){
+    if(document.querySelector('dialog[open]'))return;
+    const handled=read(DAY_CONFLICT_KEY,{}),c=fixedCommitmentConflicts().find(x=>!handled[x.key]);if(!c)return;
+    const d=dialogBase('Há um conflito de horário',`<p><strong>${esc(c.commitment.title)}</strong> coincide com <strong>${esc(c.block.title)}</strong>.</p><p class="bertha-muted">O que você prefere fazer?</p><div class="bertha-stack"><button class="bertha-primary" data-keep-commit>Priorizar o compromisso</button><button class="bertha-secondary" data-edit-block>Editar horários-base</button><button class="bertha-secondary" data-edit-commit>Ajustar compromisso</button></div>`);
+    d.querySelector('[data-keep-commit]').onclick=()=>{handled[c.key]='commitment';write(DAY_CONFLICT_KEY,handled);d.close();d.remove();rerender();};
+    d.querySelector('[data-edit-block]').onclick=()=>{handled[c.key]='editing-block';write(DAY_CONFLICT_KEY,handled);d.close();d.remove();setTimeout(editDayBlocksDialog,60)};
+    d.querySelector('[data-edit-commit]').onclick=()=>{handled[c.key]='editing-commitment';write(DAY_CONFLICT_KEY,handled);d.close();d.remove();location.hash='#compromissos'};
+  }
   function renderHomeTimeline(){
     const m=minsNow(), w=new Date().getDay(), weekday=w>=1&&w<=5;
     const state=(a,b,prot=false,commit=false)=>{
@@ -910,15 +960,10 @@
     };
     const rows=[];
 
-    // Estrutura-base do dia. Compromissos entram na mesma linha do tempo.
-    if(weekday){
-      rows.push({a:316,b:455,label:'05:16–07:35',title:'Manhã protegida',protected:true});
-      rows.push({a:480,b:840,label:'08:00–14:00',title:'Trabalho oficial'});
-      if(w===1||w===3) rows.push({a:880,b:970,label:'14:40–16:10',title:'Janela estratégica'});
-      const ho={1:[1000,1120,'16:40–18:40'],2:[940,1060,'15:40–17:40'],3:[1000,1120,'16:40–18:40'],4:[940,1060,'15:40–17:40'],5:[940,1060,'15:40–17:40']}[w];
-      if(ho) rows.push({a:ho[0],b:ho[1],label:ho[2],title:'Home office · duração planejada 2h'});
-      rows.push({a:1140,b:1440,label:'19:00+',title:'Noite protegida · descanso primeiro',protected:true});
-    }
+    // Estrutura-base editável do dia. Compromissos entram na mesma linha do tempo.
+    dayBlocks(w).filter(b=>b.enabled!==false).forEach(b=>{
+      const bm=blockToMinutes(b);rows.push({a:bm.a,b:bm.b,label:`${b.start}–${b.end==='23:59'?'23:59':b.end}`,title:b.title,protected:!!b.protected,fixedBlockId:b.id});
+    });
 
     const timed=sourcesToday().filter(x=>x.kind==='commitment'&&x.time).sort((a,b)=>a.time.localeCompare(b.time));
     timed.forEach(x=>{
@@ -1457,7 +1502,7 @@
     const financeReminders = renderFinanceRemindersHome();
     const shopCount=window.BerthaShopping?.pendingCount?.()||0; const healthRaw=window.BerthaShopping?.renderHealthMini?.()||''; const health=/Nenhum item cadastrado/i.test(healthRaw)?'':healthRaw;
     const utility=`<section class="home-utility-grid"><a class="home-utility-card" href="#compras"><span class="home-utility-icon">${homeUtilityIcon('bag')}</span><span class="home-utility-copy"><strong>Lista de Compras</strong><small>O que preciso adquirir?</small></span><span class="home-utility-count">${shopCount}</span></a><a class="home-utility-card" href="#progresso"><span class="home-utility-icon">${homeUtilityIcon('trend')}</span><span class="home-utility-copy"><strong>Meu Progresso</strong><small>Como estou caminhando?</small></span><span aria-hidden="true">›</span></a></section>`;
-    return `<section class="day-hero"><div class="eyebrow">MEU DIA</div><h1>${greet}, Duaila.</h1><p class="day-date">${today}</p></section>${nowCard()}<section class="day-section home-day-structure"><div class="section-head"><h2>Seu dia</h2><small class="home-day-helper">Compromissos e sugestões nas janelas livres.</small></div><div class="timeline bertha-timeline">${renderHomeTimeline()}</div></section><section class="day-section"><div class="section-head"><h2>O que importa hoje</h2><span class="soft-count">${tasks.length}</span></div>${tasks.length?tasks.map(x=>`<div class="focus-row bertha-focus"><div><strong>${esc(x.title)}</strong><small>${esc(x.source)} · ${durationText(+x.minutes||30)}</small></div><button data-start="${esc(x.id)}">Começar</button></div>`).join(''):`<div class="bertha-empty">Seu essencial está em dia.</div>`}</section>${renderFoodHomeMini()}${financeReminders}${health}${free?`<section class="free-space"><strong>Espaço livre também faz parte do dia.</strong><p>Se nada precisa ser resolvido agora, não resolva.</p></section>`:''}${utility}`;
+    return `<section class="day-hero"><div class="eyebrow">MEU DIA</div><h1>${greet}, Duaila.</h1><p class="day-date">${today}</p></section>${nowCard()}<section class="day-section home-day-structure"><div class="section-head"><div><h2>Seu dia</h2><small class="home-day-helper">Compromissos e sugestões nas janelas livres.</small></div><button type="button" class="home-edit-hours" data-edit-day-hours>Editar horários</button></div><div class="timeline bertha-timeline">${renderHomeTimeline()}</div></section><section class="day-section"><div class="section-head"><h2>O que importa hoje</h2><span class="soft-count">${tasks.length}</span></div>${tasks.length?tasks.map(x=>`<div class="focus-row bertha-focus"><div><strong>${esc(x.title)}</strong><small>${esc(x.source)} · ${durationText(+x.minutes||30)}</small></div><button data-start="${esc(x.id)}">Começar</button></div>`).join(''):`<div class="bertha-empty">Seu essencial está em dia.</div>`}</section>${renderFoodHomeMini()}${financeReminders}${health}${free?`<section class="free-space"><strong>Espaço livre também faz parte do dia.</strong><p>Se nada precisa ser resolvido agora, não resolva.</p></section>`:''}${utility}`;
   }
 
   function idealZoneIcon(zone){
@@ -2602,7 +2647,7 @@
   }
   function startFromHome(item){ if(isMovementReserve(item)) openMovementSelector(item); else startItem(item); }
 
-  function bindHome(){ document.querySelectorAll('[data-start]').forEach(b=>b.onclick=()=>{const x=sourcesToday().find(i=>i.id===b.dataset.start);if(x)startFromHome(x)}); document.querySelectorAll('[data-postpone]').forEach(b=>b.onclick=()=>{const x=sourcesToday().find(i=>i.id===b.dataset.postpone);if(x)postponeDialog(x)}); document.querySelectorAll('[data-finish-active]').forEach(f=>f.onclick=()=>finishActive(f.dataset.finishActive)); window.BerthaShopping?.bindHealthMini?.(); }
+  function bindHome(){ document.querySelectorAll('[data-start]').forEach(b=>b.onclick=()=>{const x=sourcesToday().find(i=>i.id===b.dataset.start);if(x)startFromHome(x)}); document.querySelectorAll('[data-postpone]').forEach(b=>b.onclick=()=>{const x=sourcesToday().find(i=>i.id===b.dataset.postpone);if(x)postponeDialog(x)}); document.querySelectorAll('[data-finish-active]').forEach(f=>f.onclick=()=>finishActive(f.dataset.finishActive)); document.querySelectorAll('[data-edit-day-hours]').forEach(b=>b.onclick=editDayBlocksDialog); window.BerthaShopping?.bindHealthMini?.(); setTimeout(maybePromptFixedCommitmentConflict,180); }
 
   function enhanceIdealScreen(){
     const route=String(location.hash||'').toLowerCase();
@@ -5078,3 +5123,22 @@ html body dialog#recipeFormDialog.recipe-dialog:not(.food-context-dialog) .modal
   }
 }
 `;document.head.appendChild(s)})();
+
+;(function(){if(document.getElementById('rc108-meu-dia-style'))return;const st=document.createElement('style');st.id='rc108-meu-dia-style';st.textContent=`
+
+  /* RC108 — MEU DIA: hierarquia leve + horários-base editáveis */
+  #app .home-day-structure .section-head{align-items:flex-start!important;gap:12px!important}
+  #app .home-day-structure .section-head>div{min-width:0!important}
+  #app .home-edit-hours{appearance:none!important;border:1px solid rgba(112,91,117,.10)!important;background:rgba(255,250,246,.70)!important;color:#817481!important;border-radius:999px!important;padding:7px 10px!important;font:500 11px/1.1 Inter,-apple-system,BlinkMacSystemFont,"SF Pro Text",sans-serif!important;white-space:nowrap!important}
+  #app .day-section .section-head h2{font-weight:430!important;letter-spacing:-.015em!important}
+  #app .bertha-focus strong{font-weight:520!important;font-size:15px!important;line-height:1.22!important}
+  #app .bertha-focus small{font-weight:400!important}
+  #app .bertha-focus button{font-weight:500!important}
+  #app .bertha-time-row b{font-weight:520!important}
+  #app .bertha-time-row span{font-weight:400!important}
+  .bertha-fixed-edit{display:grid;gap:8px;padding:11px 0;border-bottom:1px solid rgba(94,75,101,.08)}
+  .bertha-fixed-edit>label{display:flex;align-items:center;gap:9px;font-weight:500;color:#504750}
+  .bertha-fixed-edit>label input{width:19px;height:19px;accent-color:#9b86af}
+  .bertha-fixed-edit>div{display:grid;grid-template-columns:minmax(0,1fr) auto minmax(0,1fr);align-items:center;gap:8px}
+  .bertha-fixed-edit input[type="time"]{width:100%;min-height:42px;border:1px solid rgba(105,86,112,.13);border-radius:14px;background:#fffdfa;padding:7px 10px;font:400 16px/1.2 Inter,-apple-system,BlinkMacSystemFont,"SF Pro Text",sans-serif;color:#504750}
+`;document.head.appendChild(st)})();
