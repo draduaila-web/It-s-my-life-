@@ -1858,9 +1858,9 @@ function openCasaTaskEditor(id){
  const d=loadCasa(),hit=casaTaskById(id,d),task=hit?.task;if(!task)return;const ds=loadCasaDurations(),dlg=document.createElement('dialog');dlg.className='bertha-dialog casa-dialog casa-responsibility-dialog';
  const sat=loadSatellites(),members=(sat.members||[]).filter(m=>m.status!=='removed'&&m.permissions?.casa!==false),responsibility=task.responsibility||'owner';
  const legacy=task.assigneeId?[String(task.assigneeId)]:[],selected=new Set((Array.isArray(task.assigneeIds)?task.assigneeIds:legacy).map(String));
- const targetHtml=members.map(m=>`<label class="sat-target-option"><input type="checkbox" data-sat-target value="${escapeHtml(m.id)}" ${selected.has(String(m.id))?'checked':''}><span><strong>${escapeHtml(m.name)}</strong><small>${m.role==='kids'?'Kids':'Adulto'}</small></span></label>`).join('');
+ const targetHtml=members.map(m=>`<button type="button" class="sat-target-option ${selected.has(String(m.id))?'is-checked':''}" data-target-toggle data-member-id="${escapeHtml(m.id)}" aria-pressed="${selected.has(String(m.id))?'true':'false'}"><input type="checkbox" data-sat-target value="${escapeHtml(m.id)}" ${selected.has(String(m.id))?'checked':''} tabindex="-1" aria-hidden="true"><span class="sat-target-check" aria-hidden="true"></span><span class="sat-target-copy"><strong>${escapeHtml(m.name)}</strong><small>${m.role==='kids'?'Kids':'Adulto'}</small></span></button>`).join('');
  const emptyTargets=`<div class="sat-empty-mini"><span>Nenhum satélite com acesso à Casa.</span><button type="button" class="sat-inline-add" id="ctAddSatellite">＋ Adicionar satélite</button></div>`;
- dlg.innerHTML=`<form method="dialog" class="modal-card casa-modal-card" id="casaTaskEdit"><div class="modal-head"><div><div class="eyebrow">CASA · RESPONSABILIDADE</div><h2>Editar rotina</h2></div><button type="button" class="icon-btn casa-modal-x" data-close aria-label="Fechar">×</button></div><label>Atividade<input id="ctName" value="${escapeHtml(task.name)}"></label><label>Duração real estimada (min)<input id="ctMin" type="number" min="5" max="480" step="5" value="${ds[id]||15}"></label><label>Horário / janela preferencial<input id="ctTime" value="${escapeHtml(casaTime(id))}"></label><label>Frequência<input id="ctFreq" value="${escapeHtml(task.freq)}"></label><div class="sat-resp-block"><span class="sat-label">Responsabilidade</span><div class="sat-resp-options" data-resp><button type="button" data-v="owner" class="${responsibility==='owner'?'active':''}">Eu faço</button><button type="button" data-v="help" class="${responsibility==='help'?'active':''}">Aceito ajuda</button><button type="button" data-v="delegated" class="${responsibility==='delegated'?'active':''}">Delegar</button></div><input type="hidden" id="ctResp" value="${escapeHtml(responsibility)}"></div><div class="sat-assignee-field" ${responsibility==='delegated'?'':'hidden'}><div class="sat-target-head"><span>Delegar para</span><button type="button" class="sat-target-all" id="ctAllTargets">Todos</button></div><div class="sat-target-grid">${targetHtml||emptyTargets}</div><small class="sat-target-note">A tarefa aparece para todos os selecionados. Quando alguém assumir ou concluir, os demais verão quem foi.</small></div><div class="sat-kids-points" hidden><label class="sat-check"><input type="checkbox" id="ctPoints" ${task.pointsEnabled?'checked':''}><span>Esta missão vale pontos se for concluída por um Kids</span></label><label>Pontos<input id="ctPointsValue" type="number" min="1" max="100" value="${Math.max(1,+task.pointsValue||2)}"></label></div><div class="modal-actions"><div class="grow"></div><button type="button" class="secondary" id="cancelCt">Cancelar</button><button class="primary" value="default">Salvar</button></div></form>`;
+ dlg.innerHTML=`<form method="dialog" class="modal-card casa-modal-card" id="casaTaskEdit"><div class="modal-head"><div><div class="eyebrow">CASA · RESPONSABILIDADE</div><h2>Editar rotina</h2></div><button type="button" class="icon-btn casa-modal-x" data-close aria-label="Fechar">×</button></div><label>Atividade<input id="ctName" value="${escapeHtml(task.name)}"></label><label>Duração real estimada (min)<input id="ctMin" type="number" min="5" max="480" step="5" value="${ds[id]||15}"></label><label>Horário / janela preferencial<input id="ctTime" value="${escapeHtml(casaTime(id))}"></label><label>Frequência<input id="ctFreq" value="${escapeHtml(task.freq)}"></label><div class="sat-resp-block"><span class="sat-label">Responsabilidade</span><div class="sat-resp-options" data-resp><button type="button" data-v="owner" class="${responsibility==='owner'?'active':''}">Eu faço</button><button type="button" data-v="help" class="${responsibility==='help'?'active':''}">Aceito ajuda</button><button type="button" data-v="delegated" class="${responsibility==='delegated'?'active':''}">Delegar</button></div><input type="hidden" id="ctResp" value="${escapeHtml(responsibility)}"></div><div class="sat-assignee-field" ${responsibility==='delegated'?'':'hidden'}><div class="sat-target-head"><span>Delegar para</span><button type="button" class="sat-target-all" id="ctAllTargets">Todos</button></div><div class="sat-target-grid">${targetHtml||emptyTargets}</div><small class="sat-target-note">A tarefa aparece para todos os selecionados. Quando alguém assumir ou concluir, os demais verão quem foi.</small></div><div class="sat-kids-points" hidden><button type="button" class="sat-check casa-points-toggle ${task.pointsEnabled?'is-checked':''}" data-points-toggle aria-pressed="${task.pointsEnabled?'true':'false'}"><input type="checkbox" id="ctPoints" ${task.pointsEnabled?'checked':''} tabindex="-1" aria-hidden="true"><span class="sat-target-check" aria-hidden="true"></span><span>Esta missão vale pontos se for concluída por um Kids</span></button><label>Pontos<input id="ctPointsValue" type="number" min="1" max="100" value="${Math.max(1,+task.pointsValue||2)}"></label></div><div class="modal-actions"><div class="grow"></div><button type="button" class="secondary" id="cancelCt">Cancelar</button><button class="primary" value="default">Salvar</button></div></form>`;
  document.body.appendChild(dlg);dlg.showModal();const close=()=>{dlg.close();dlg.remove()};dlg.querySelectorAll('[data-close],#cancelCt').forEach(b=>b.onclick=close);
  const respInput=dlg.querySelector('#ctResp'),assField=dlg.querySelector('.sat-assignee-field'),points=dlg.querySelector('.sat-kids-points'),targetChecks=[...dlg.querySelectorAll('[data-sat-target]')];
  const selectedMembers=()=>targetChecks.filter(c=>c.checked).map(c=>members.find(m=>String(m.id)===String(c.value))).filter(Boolean);
@@ -1868,31 +1868,27 @@ function openCasaTaskEditor(id){
  dlg.querySelectorAll('[data-resp] button').forEach(b=>b.onclick=()=>{dlg.querySelectorAll('[data-resp] button').forEach(x=>x.classList.toggle('active',x===b));respInput.value=b.dataset.v;sync()});
  targetChecks.forEach(c=>c.onchange=sync);
 
- // RC133 — torna toda a linha realmente clicável no iPhone/Safari.
- dlg.querySelectorAll('.sat-target-option').forEach(row=>{
-   const input=row.querySelector('input[type="checkbox"]');
-   if(!input)return;
-   row.style.cursor='pointer';
-   row.addEventListener('click',e=>{
-     if(e.target===input)return;
-     e.preventDefault();
+ // RC134 — controles customizados: sem checkbox nativo/label do Safari.
+ dlg.querySelectorAll('[data-target-toggle]').forEach(row=>{
+   const input=row.querySelector('[data-sat-target]');
+   row.addEventListener('click',()=>{
      input.checked=!input.checked;
+     row.classList.toggle('is-checked',input.checked);
+     row.setAttribute('aria-pressed',String(input.checked));
      input.dispatchEvent(new Event('change',{bubbles:true}));
    });
  });
- dlg.querySelectorAll('.sat-kids-points .sat-check').forEach(row=>{
-   const input=row.querySelector('input[type="checkbox"]');
-   if(!input)return;
-   row.style.cursor='pointer';
-   row.addEventListener('click',e=>{
-     if(e.target===input)return;
-     e.preventDefault();
+ const pointsToggle=dlg.querySelector('[data-points-toggle]');
+ if(pointsToggle){
+   const input=pointsToggle.querySelector('#ctPoints');
+   pointsToggle.addEventListener('click',()=>{
      input.checked=!input.checked;
-     input.dispatchEvent(new Event('change',{bubbles:true}));
+     pointsToggle.classList.toggle('is-checked',input.checked);
+     pointsToggle.setAttribute('aria-pressed',String(input.checked));
    });
- });
+ }
 
- dlg.querySelector('#ctAllTargets')?.addEventListener('click',()=>{const allSelected=targetChecks.length&&targetChecks.every(c=>c.checked);targetChecks.forEach(c=>c.checked=!allSelected);sync()});
+ dlg.querySelector('#ctAllTargets')?.addEventListener('click',()=>{const allSelected=targetChecks.length&&targetChecks.every(c=>c.checked);targetChecks.forEach(c=>{c.checked=!allSelected;const row=c.closest('[data-target-toggle]');row?.classList.toggle('is-checked',c.checked);row?.setAttribute('aria-pressed',String(c.checked));});sync()});
  dlg.querySelector('#ctAddSatellite')?.addEventListener('click',()=>{close();location.hash='#satelites';setTimeout(()=>openSatelliteEditor(),80)});
  sync();
  dlg.querySelector('#casaTaskEdit').addEventListener('submit',e=>{
@@ -5439,3 +5435,39 @@ html body dialog.sat-modal .modal-actions{
   `;
   document.head.appendChild(st);
 })();
+
+
+;(function(){if(document.getElementById('rc134-casa-custom-check'))return;const st=document.createElement('style');st.id='rc134-casa-custom-check';st.textContent=`
+html body dialog.casa-dialog.casa-responsibility-dialog .sat-target-option,
+html body dialog.casa-dialog.casa-responsibility-dialog .casa-points-toggle{
+  -webkit-appearance:none!important;appearance:none!important;width:100%!important;
+  display:grid!important;grid-template-columns:24px minmax(0,1fr)!important;align-items:center!important;
+  gap:12px!important;text-align:left!important;padding:14px!important;margin:0!important;border-radius:18px!important;
+  border:1px solid rgba(126,115,132,.09)!important;background:#FFFDFC!important;color:#4B4550!important;
+  box-shadow:none!important;cursor:pointer!important;touch-action:manipulation!important;-webkit-tap-highlight-color:transparent!important;
+}
+html body dialog.casa-dialog.casa-responsibility-dialog .sat-target-option.is-checked,
+html body dialog.casa-dialog.casa-responsibility-dialog .casa-points-toggle.is-checked{
+  border-color:rgba(216,157,183,.26)!important;background:#FFFDFC!important;
+}
+html body dialog.casa-dialog.casa-responsibility-dialog .sat-target-option input[type=checkbox],
+html body dialog.casa-dialog.casa-responsibility-dialog .casa-points-toggle input[type=checkbox]{
+  position:absolute!important;opacity:0!important;pointer-events:none!important;width:1px!important;height:1px!important;
+}
+html body dialog.casa-dialog.casa-responsibility-dialog .sat-target-check{
+  width:24px!important;height:24px!important;border-radius:8px!important;border:1.5px solid rgba(126,115,132,.26)!important;
+  background:#FFFDFC!important;display:grid!important;place-items:center!important;box-sizing:border-box!important;
+}
+html body dialog.casa-dialog.casa-responsibility-dialog .sat-target-option.is-checked .sat-target-check,
+html body dialog.casa-dialog.casa-responsibility-dialog .casa-points-toggle.is-checked .sat-target-check{
+  background:linear-gradient(135deg,#DE9FB8 0%,#F0C9B4 54%,#BFD5ED 100%)!important;border-color:transparent!important;
+}
+html body dialog.casa-dialog.casa-responsibility-dialog .sat-target-option.is-checked .sat-target-check:after,
+html body dialog.casa-dialog.casa-responsibility-dialog .casa-points-toggle.is-checked .sat-target-check:after{
+  content:'✓'!important;color:#fff!important;font-size:14px!important;font-weight:700!important;line-height:1!important;
+}
+html body dialog.casa-dialog.casa-responsibility-dialog .sat-target-copy{display:block!important;min-width:0!important}
+html body dialog.casa-dialog.casa-responsibility-dialog .sat-target-copy strong{display:block!important;font-weight:400!important;font-size:13.5px!important}
+html body dialog.casa-dialog.casa-responsibility-dialog .sat-target-copy small{display:block!important;margin-top:3px!important;font-weight:400!important}
+html body dialog.casa-dialog.casa-responsibility-dialog .casa-points-toggle>span:last-child{font-weight:400!important;line-height:1.35!important}
+`;document.head.appendChild(st)})();
