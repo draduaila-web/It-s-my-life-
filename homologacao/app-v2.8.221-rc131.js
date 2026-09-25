@@ -5471,3 +5471,52 @@ html body dialog.casa-dialog.casa-responsibility-dialog .sat-target-copy strong{
 html body dialog.casa-dialog.casa-responsibility-dialog .sat-target-copy small{display:block!important;margin-top:3px!important;font-weight:400!important}
 html body dialog.casa-dialog.casa-responsibility-dialog .casa-points-toggle>span:last-child{font-weight:400!important;line-height:1.35!important}
 `;document.head.appendChild(st)})();
+
+/* RC135 — Casa: restaura SOMENTE a identidade cromática original do módulo.
+   Mantém os controles customizados/clicáveis da RC134. */
+;(function(){
+  if(document.getElementById('rc135-casa-color-restore'))return;
+  const st=document.createElement('style');
+  st.id='rc135-casa-color-restore';
+  st.textContent=`
+  html body dialog.casa-dialog.casa-responsibility-dialog .modal-card.casa-modal-card{
+    background:linear-gradient(145deg,rgba(255,251,248,.99),rgba(253,247,247,.985) 56%,rgba(247,251,245,.98))!important;
+    background-color:#fbf7f0!important;
+    border:1px solid rgba(132,106,118,.12)!important;
+    box-shadow:0 28px 68px rgba(58,45,54,.18)!important;
+    color:#3e3842!important;
+  }
+  html body dialog.casa-dialog.casa-responsibility-dialog .modal-head,
+  html body dialog.casa-dialog.casa-responsibility-dialog .modal-actions{
+    background:transparent!important;
+    background-image:none!important;
+  }
+  html body dialog.casa-dialog.casa-responsibility-dialog .sat-resp-options{
+    background:rgba(255,255,255,.58)!important;
+    border:1px solid rgba(113,96,130,.08)!important;
+  }
+  html body dialog.casa-dialog.casa-responsibility-dialog .sat-resp-options button.active{
+    background:linear-gradient(135deg,rgba(239,222,231,.96),rgba(223,235,226,.96))!important;
+    color:#5e4e59!important;
+    box-shadow:0 1px 0 rgba(80,65,78,.04)!important;
+  }
+  html body dialog.casa-dialog.casa-responsibility-dialog .sat-target-grid{
+    background:rgba(255,255,255,.52)!important;
+    border:1px solid rgba(113,96,130,.08)!important;
+  }
+  html body dialog.casa-dialog.casa-responsibility-dialog .modal-actions .secondary{
+    background:linear-gradient(135deg,rgba(238,246,237,.96),rgba(232,242,232,.96))!important;
+    color:#647566!important;
+    border:1px solid rgba(118,151,125,.10)!important;
+    box-shadow:none!important;
+  }
+  html body dialog.casa-dialog.casa-responsibility-dialog .modal-actions .primary{
+    background:linear-gradient(115deg,#d8a5b3 0%,#d9b5b5 46%,#b9cfb9 100%)!important;
+    background-image:linear-gradient(115deg,#d8a5b3 0%,#d9b5b5 46%,#b9cfb9 100%)!important;
+    color:#5e5057!important;
+    border:0!important;
+    box-shadow:none!important;
+  }
+  `;
+  document.head.appendChild(st);
+})();

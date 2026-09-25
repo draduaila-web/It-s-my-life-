@@ -1,4 +1,4 @@
-const CACHE = "hml-bertha-v221-rc134-casa-custom-check";
+const CACHE = "hml-bertha-v221-rc135-casa-color-restore";
 self.addEventListener("install", event => event.waitUntil(self.skipWaiting()));
 self.addEventListener("activate", event => event.waitUntil((async()=>{
   const keys=await caches.keys();
