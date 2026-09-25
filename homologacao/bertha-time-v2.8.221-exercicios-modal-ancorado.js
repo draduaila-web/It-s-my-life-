@@ -4199,7 +4199,8 @@
       ['alimentacao','food','Alimentação','Refeições e escolhas'],
       ['receitas','recipe','Receitas','Seu repertório'],
       ['financeiro','wallet','Financeiro','Entradas, saídas e atenção'],
-      ['ideias','idea','Criação & Ideias','Projetos e inspirações']
+      ['ideias','idea','Criação & Ideias','Projetos e inspirações'],
+      ['satelites','more','Satélites','Família, ajuda e Kids']
     ];
     d=document.createElement('dialog');d.id='berthaMore';d.className='bertha-dialog';
     d.innerHTML=`<div class="bertha-modal bertha-more-modal bertha-more-v216"><div class="bertha-modal-head bertha-more-head"><div class="bertha-more-brand"><div class="bertha-more-title">Mais</div><div class="bertha-more-tagline">OUT OF YOUR HEAD. INTO YOUR LIFE.</div><div class="bertha-more-promise">Uma vida previsível na palma das suas mãos.</div></div><button data-close aria-label="Fechar">×</button></div><div class="module-links bertha-module-cards bertha-module-cards-v216">${modules.map(([r,i,l,dsc])=>`<a href="#${r}"><span class="bertha-menu-icon bertha-menu-icon-v216">${icon(i)}</span><span class="bertha-menu-copy"><strong>${l}</strong><small>${dsc}</small></span></a>`).join('')}</div><section class="bertha-more-data bertha-more-data-v216" aria-label="Ferramentas de homologação"><div class="bertha-more-data-copy"><span>HOMOLOGAÇÃO · DADOS</span><small>Backup e restauração ficam disponíveis durante os testes.</small></div><div class="bertha-more-data-actions"><button type="button" data-backup-export>Exportar backup</button><button type="button" data-backup-import>Restaurar backup</button><button type="button" data-hml-reset>Limpar homologação</button><input type="file" data-backup-file accept="application/json,.json" hidden></div></section></div>`;

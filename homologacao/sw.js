@@ -1,4 +1,4 @@
-const CACHE = "hml-bertha-v221-rc110-exercise-modal-master";
+const CACHE = "hml-bertha-v221-rc118-satellites-v2";
 self.addEventListener("install", event => event.waitUntil(self.skipWaiting()));
 self.addEventListener("activate", event => event.waitUntil((async()=>{
   const keys=await caches.keys();
@@ -23,5 +23,14 @@ self.addEventListener("fetch", event=>{
   event.respondWith((async()=>{
     const c=await caches.match(event.request);if(c)return c;
     try{const r=await fetch(event.request,{cache:"no-cache"});if(r&&r.ok){const cache=await caches.open(CACHE);await cache.put(event.request,r.clone());}return r;}catch(_){return Response.error();}
+  })());
+});
+self.addEventListener("notificationclick",event=>{
+  event.notification.close();
+  const route=event.notification?.data?.route||"#satelites";
+  event.waitUntil((async()=>{
+    const cs=await self.clients.matchAll({type:"window",includeUncontrolled:true});
+    for(const c of cs){try{if(c.navigate)await c.navigate(`./${route}`);await c.focus();return;}catch(_){}}
+    try{await self.clients.openWindow(`./${route}`)}catch(_){ }
   })());
 });

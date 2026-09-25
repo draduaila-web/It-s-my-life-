@@ -232,7 +232,8 @@ function ensureMainNavigation() {
       ['casa','🏠 Casa'],
       ['exercicios','🏃 Exercícios'],
       ['alimentacao','🍽️ Alimentação'],
-      ['receitas','📖 Receitas']
+      ['receitas','📖 Receitas'],
+      ['satelites','◇ Satélites']
     ];
     links.innerHTML = desired.map(([r,label]) => `<a href="#${r}" data-module-route="${r}">${label}</a>`).join('');
     links.querySelectorAll('[data-module-route]').forEach(a=>a.addEventListener('click',()=>{const route=a.dataset.moduleRoute;const dlg=document.getElementById('moduleMenu');if(dlg?.open)dlg.close();if(route==='financeiro'){setTimeout(()=>{if((location.hash||'').replace('#','')==='financeiro') render();},0);}}));
@@ -261,6 +262,8 @@ function render() {
       route === "exercicios" ? "🏃 Exercícios" :
       route === "alimentacao" ? "🍽️ Alimentação" :
       route === "receitas" ? "📖 Receitas" :
+      route === "satelites" ? "Satélites" :
+      route === "satelite" ? "Meu Dia" :
       route === "compras" ? "Lista de Compras" :
       route === "progresso" ? "Meu Progresso" :
       "Minha Vida";
@@ -301,6 +304,8 @@ function render() {
   else if (route === "exercicios") renderExercicios();
   else if (route === "alimentacao") renderAlimentacao();
   else if (route === "receitas") renderReceitas();
+  else if (route === "satelites") renderSatellites();
+  else if (route === "satelite") renderSatelliteDay();
   else if (route === "compras") renderShoppingUniversal();
   else if (route === "progresso") renderProgressOverview();
   else renderPlaceholder();
@@ -1834,7 +1839,7 @@ function casaRefreshRoutineCycles(d){
      const fixed=t.nextDue||casaNextRoutineDate(t.freq,t.completedAt||t.lastCompletedAt||Date.now());
      if(fixed&&!t.nextDue){t.nextDue=fixed;changed=true;}
      const due=fixed?today>=fixed:(t.completedAt?casaLocalDay(t.completedAt)!==today:true);
-     if(due){t.done=false;delete t.completedAt;changed=true;}
+     if(due){t.done=false;delete t.completedAt;delete t.completedById;delete t.claimedById;delete t.assigneeId;delete t.pointsAwardedAt;t.declinedByIds=[];t.satelliteStatus=t.responsibility==='help'?'available':t.responsibility==='delegated'?'assigned':'open';changed=true;}
    }
  }));
  return changed;
@@ -1846,10 +1851,32 @@ function casaRemoveLatestProgress(id){
  try{const key='bertha.time-engine.v1',e=JSON.parse(window.berthaHmlStorage.getItem(key)||'{"active":null,"history":[],"snoozed":{}}'),itemId=`casa:routine:${id}`;const i=(e.history||[]).findIndex(h=>h.itemId===itemId&&h.status==='done');if(i>=0){e.history.splice(i,1);window.berthaHmlStorage.setItem(key,JSON.stringify(e));}}catch{}
 }
 function openCasaTaskEditor(id){
- const d=loadCasa(),task=d.areas.flatMap(a=>a.tasks).find(t=>t.id===id);if(!task)return;const ds=loadCasaDurations(),dlg=document.createElement('dialog');dlg.className='bertha-dialog casa-dialog';
- dlg.innerHTML=`<form method="dialog" class="modal-card casa-modal-card" id="casaTaskEdit"><div class="modal-head"><div><div class="eyebrow">CASA</div><h2>Editar rotina</h2></div><button class="icon-btn casa-modal-x" value="cancel" aria-label="Fechar">×</button></div><label>Atividade<input id="ctName" value="${escapeHtml(task.name)}"></label><label>Duração real estimada (min)<input id="ctMin" type="number" min="5" max="480" step="5" value="${ds[id]||15}"></label><label>Horário / janela preferencial<input id="ctTime" value="${escapeHtml(casaTime(id))}"></label><label>Frequência<input id="ctFreq" value="${escapeHtml(task.freq)}"></label><div class="modal-actions"><div class="grow"></div><button type="button" class="secondary" id="cancelCt">Cancelar</button><button class="primary" value="default">Salvar</button></div></form>`;document.body.appendChild(dlg);dlg.showModal();dlg.querySelector('#cancelCt').onclick=()=>{dlg.close();dlg.remove()};dlg.querySelector('#casaTaskEdit').addEventListener('submit',e=>{e.preventDefault();task.name=dlg.querySelector('#ctName').value.trim()||task.name;task.freq=dlg.querySelector('#ctFreq').value.trim()||task.freq;ds[id]=Math.max(5,+dlg.querySelector('#ctMin').value||ds[id]||15);const times=loadCasaTimes();times[id]=dlg.querySelector('#ctTime').value.trim()||times[id];saveCasa(d);saveCasaDurations(ds);saveCasaTimes(times);dlg.close();dlg.remove();renderCasa()});
+ const d=loadCasa(),hit=casaTaskById(id,d),task=hit?.task;if(!task)return;const ds=loadCasaDurations(),dlg=document.createElement('dialog');dlg.className='bertha-dialog casa-dialog casa-responsibility-dialog';
+ const sat=loadSatellites(),members=(sat.members||[]).filter(m=>m.status!=='removed'&&m.permissions?.casa!==false),responsibility=task.responsibility||'owner';
+ const legacy=task.assigneeId?[String(task.assigneeId)]:[],selected=new Set((Array.isArray(task.assigneeIds)?task.assigneeIds:legacy).map(String));
+ const targetHtml=members.map(m=>`<label class="sat-target-option"><input type="checkbox" data-sat-target value="${escapeHtml(m.id)}" ${selected.has(String(m.id))?'checked':''}><span><strong>${escapeHtml(m.name)}</strong><small>${m.role==='kids'?'Kids':'Adulto'}</small></span></label>`).join('');
+ dlg.innerHTML=`<form method="dialog" class="modal-card casa-modal-card" id="casaTaskEdit"><div class="modal-head"><div><div class="eyebrow">CASA · RESPONSABILIDADE</div><h2>Editar rotina</h2></div><button type="button" class="icon-btn casa-modal-x" data-close aria-label="Fechar">×</button></div><label>Atividade<input id="ctName" value="${escapeHtml(task.name)}"></label><label>Duração real estimada (min)<input id="ctMin" type="number" min="5" max="480" step="5" value="${ds[id]||15}"></label><label>Horário / janela preferencial<input id="ctTime" value="${escapeHtml(casaTime(id))}"></label><label>Frequência<input id="ctFreq" value="${escapeHtml(task.freq)}"></label><div class="sat-resp-block"><span class="sat-label">Responsabilidade</span><div class="sat-resp-options" data-resp><button type="button" data-v="owner" class="${responsibility==='owner'?'active':''}">Eu faço</button><button type="button" data-v="help" class="${responsibility==='help'?'active':''}">Aceito ajuda</button><button type="button" data-v="delegated" class="${responsibility==='delegated'?'active':''}">Delegar</button></div><input type="hidden" id="ctResp" value="${escapeHtml(responsibility)}"></div><div class="sat-assignee-field" ${responsibility==='delegated'?'':'hidden'}><div class="sat-target-head"><span>Delegar para</span><button type="button" class="sat-target-all" id="ctAllTargets">Todos</button></div><div class="sat-target-grid">${targetHtml||'<div class="sat-empty-mini">Nenhum satélite com acesso à Casa.</div>'}</div><small class="sat-target-note">A tarefa aparece para todos os selecionados. Quando alguém assumir ou concluir, os demais verão quem foi.</small></div><div class="sat-kids-points" hidden><label class="sat-check"><input type="checkbox" id="ctPoints" ${task.pointsEnabled?'checked':''}><span>Esta missão vale pontos se for concluída por um Kids</span></label><label>Pontos<input id="ctPointsValue" type="number" min="1" max="100" value="${Math.max(1,+task.pointsValue||2)}"></label></div><div class="modal-actions"><div class="grow"></div><button type="button" class="secondary" id="cancelCt">Cancelar</button><button class="primary" value="default">Salvar</button></div></form>`;
+ document.body.appendChild(dlg);dlg.showModal();const close=()=>{dlg.close();dlg.remove()};dlg.querySelectorAll('[data-close],#cancelCt').forEach(b=>b.onclick=close);
+ const respInput=dlg.querySelector('#ctResp'),assField=dlg.querySelector('.sat-assignee-field'),points=dlg.querySelector('.sat-kids-points'),targetChecks=[...dlg.querySelectorAll('[data-sat-target]')];
+ const selectedMembers=()=>targetChecks.filter(c=>c.checked).map(c=>members.find(m=>String(m.id)===String(c.value))).filter(Boolean);
+ const sync=()=>{const r=respInput.value;assField.hidden=r!=='delegated';points.hidden=!(r==='delegated'&&selectedMembers().some(m=>m.role==='kids'))};
+ dlg.querySelectorAll('[data-resp] button').forEach(b=>b.onclick=()=>{dlg.querySelectorAll('[data-resp] button').forEach(x=>x.classList.toggle('active',x===b));respInput.value=b.dataset.v;sync()});
+ targetChecks.forEach(c=>c.onchange=sync);
+ dlg.querySelector('#ctAllTargets')?.addEventListener('click',()=>{const allSelected=targetChecks.length&&targetChecks.every(c=>c.checked);targetChecks.forEach(c=>c.checked=!allSelected);sync()});
+ sync();
+ dlg.querySelector('#casaTaskEdit').addEventListener('submit',e=>{
+   e.preventDefault();task.name=dlg.querySelector('#ctName').value.trim()||task.name;task.freq=dlg.querySelector('#ctFreq').value.trim()||task.freq;ds[id]=Math.max(5,+dlg.querySelector('#ctMin').value||ds[id]||15);const times=loadCasaTimes();times[id]=dlg.querySelector('#ctTime').value.trim()||times[id];
+   task.responsibility=respInput.value;
+   const ids=task.responsibility==='delegated'?targetChecks.filter(c=>c.checked).map(c=>c.value):[];
+   if(task.responsibility==='delegated'&&!ids.length){assField.classList.add('sat-target-error');return}
+   task.assigneeIds=ids;task.assigneeId=null;task.claimedById=null;task.completedById=null;delete task.pointsAwardedAt;task.declinedByIds=[];
+   task.requiresValidation=false;
+   task.pointsEnabled=!!(ids.length&&selectedMembers().some(m=>m.role==='kids')&&dlg.querySelector('#ctPoints')?.checked);
+   task.pointsValue=task.pointsEnabled?Math.max(1,+dlg.querySelector('#ctPointsValue')?.value||2):0;
+   task.satelliteStatus=task.responsibility==='help'?'available':task.responsibility==='delegated'?'assigned':'open';
+   saveCasa(d);saveCasaDurations(ds);saveCasaTimes(times);close();renderCasa()
+ });
 }
-
 function loadCasa(){
  try{
   const raw=JSON.parse(window.berthaHmlStorage.getItem(CASA_KEY)||"null");
@@ -2016,7 +2043,7 @@ function renderCasaCore(){
  const d=loadCasa();
  d.maintenance=(Array.isArray(d.maintenance)?d.maintenance:[]).filter(Boolean).map(m=>({status:"a_fazer",area:"Casa geral",type:"Reparo / conserto",durationValue:30,durationUnit:"minutes",priority:"normal",frequency:"Única",responsible:"Eu",notify:false,period:"flex",...m}));
  const all=d.areas.flatMap(a=>a.tasks),done=all.filter(x=>x.done).length;
- const routineTaskHtml=(a,t)=>{const search=[a.title,t.name,casaDuration(t.id),casaTime(t.id),t.freq||"cíclica",t.when].join(" ").toLowerCase();return `<div class="home-task-wrap casa-routine-row" data-routine-search="${escapeHtml(search)}"><label class="home-task ${t.done?"done":""}"><input type="checkbox" data-casa-task="${a.id}|${t.id}" ${t.done?"checked":""}><span><strong>${escapeHtml(t.name)}</strong><small>${escapeHtml(casaDuration(t.id))} · ${escapeHtml(casaTime(t.id))} · ${escapeHtml(t.freq||"cíclica")} · ${escapeHtml(t.when)}</small>${t.done&&t.nextDue?`<small>Próxima: ${new Date(t.nextDue+"T12:00:00").toLocaleDateString("pt-BR")}</small>`:""}</span></label><div class="home-task-actions">${CASA_HOW[t.id]?`<button type="button" class="home-how" data-casa-how="${t.id}">Como fazer →</button>`:""}<button type="button" class="home-edit" data-casa-edit="${t.id}">Editar</button></div><div class="casa-task-exec">${t.done?`<button type="button" class="casa-task-reopen" data-casa-reopen="${t.id}">↻ Fazer novamente</button>`:`<button type="button" class="casa-task-start" data-casa-start="${t.id}">▶ Começar</button><button type="button" class="casa-task-finish" data-casa-finish="${t.id}">✓ Concluir</button>`}</div></div>`};
+ const routineTaskHtml=(a,t)=>{const search=[a.title,t.name,casaDuration(t.id),casaTime(t.id),t.freq||"cíclica",t.when].join(" ").toLowerCase(),sat=loadSatellites(),members=sat.members||[],resp=t.responsibility||'owner',status=t.satelliteStatus||'open',targets=satelliteTargets(t).map(id=>members.find(m=>String(m.id)===String(id))).filter(Boolean),claimer=members.find(m=>String(m.id)===String(t.claimedById||t.assigneeId)),completer=members.find(m=>String(m.id)===String(t.completedById||t.assigneeId)),targetNames=targets.map(m=>m.name).join(' + ');const respChip=resp==='help'?`<span class="sat-task-chip help">${t.done&&completer?`Concluída por ${escapeHtml(completer.name)}`:claimer?`Assumida · ${escapeHtml(claimer.name)}`:'Aceito ajuda'}</span>`:resp==='delegated'?`<span class="sat-task-chip delegated">${t.done&&completer?`Concluída por ${escapeHtml(completer.name)}${status==='completed'?' · validar':''}`:claimer?`Assumida · ${escapeHtml(claimer.name)}`:`Delegada · ${escapeHtml(targetNames||'Satélites')}`}</span>`:'';const validate=status==='completed'?`<button type="button" class="sat-validate" data-sat-validate="${t.id}">Validar conclusão</button>`:'';return `<div class="home-task-wrap casa-routine-row" data-routine-search="${escapeHtml(search)}"><label class="home-task ${t.done?"done":""}"><input type="checkbox" data-casa-task="${a.id}|${t.id}" ${t.done?"checked":""}><span><strong>${escapeHtml(t.name)}</strong><small>${escapeHtml(casaDuration(t.id))} · ${escapeHtml(casaTime(t.id))} · ${escapeHtml(t.freq||"cíclica")} · ${escapeHtml(t.when)}</small>${respChip}${t.pointsEnabled?`<span class="sat-task-chip points">+${+t.pointsValue||0} pts</span>`:''}${t.done&&t.nextDue?`<small>Período concluído${completer?` por ${escapeHtml(completer.name)}`:''} · Próxima: ${new Date(t.nextDue+"T12:00:00").toLocaleDateString("pt-BR")}</small>`:""}</span></label><div class="home-task-actions">${CASA_HOW[t.id]?`<button type="button" class="home-how" data-casa-how="${t.id}">Como fazer →</button>`:""}<button type="button" class="home-edit" data-casa-edit="${t.id}">Editar</button></div><div class="casa-task-exec">${validate}${t.done?`<button type="button" class="casa-task-reopen" data-casa-reopen="${t.id}">↻ Fazer novamente</button>`:`<button type="button" class="casa-task-start" data-casa-start="${t.id}">▶ Começar</button><button type="button" class="casa-task-finish" data-casa-finish="${t.id}">✓ Concluir</button>`}</div></div>`};
  const areaPickerLabel=a=>{const t=String(a.title||'');if(/roup|lavander/i.test(t))return 'Lavanderia';if(/jardim|piscina|extern/i.test(t))return 'Áreas externas';return t};
  const routinesHtml=`<div class="casa-routine-browser"><div class="casa-routine-picker"><button type="button" class="casa-routine-picker-btn" id="casaRoutineAreaPicker" aria-expanded="false"><span class="casa-routine-picker-label">${casaAreaIcon('rotinas')}<strong>Escolher uma área…</strong></span><span class="casa-routine-picker-chevron">⌄</span></button><div class="casa-routine-picker-menu" id="casaRoutineAreaMenu" hidden>${d.areas.map(a=>`<button type="button" data-area-pick="${escapeHtml(String(a.id))}"><span>${casaAreaIcon(a.title)}<strong>${escapeHtml(areaPickerLabel(a))}</strong></span><small>${a.tasks.length}</small></button>`).join("")}</div></div><div class="casa-routine-groups">${d.areas.map(a=>`<details class="casa-routine-group" data-routine-id="${escapeHtml(String(a.id))}"><summary><span>${casaAreaIcon(a.title)}<strong>${escapeHtml(a.title)}</strong></span><span class="casa-routine-count">${a.tasks.length}</span></summary><div class="casa-routine-group-body">${a.tasks.length?a.tasks.map(t=>routineTaskHtml(a,t)).join(""):`<p class="note">Sem rotina cadastrada. Mantemos espaço para incluir apenas o que realmente for necessário.</p>`}<button type="button" class="secondary casa-add-routine" data-add-casa-routine="${escapeHtml(String(a.id))}">＋ Adicionar rotina nesta área</button></div></details>`).join("")}</div></div>`
  const scheduled=all.filter(t=>casaTime(t.id)&&casaTime(t.id)!="ao fim do ciclo").slice().sort((a,b)=>String(casaTime(a.id)).localeCompare(String(casaTime(b.id))));
@@ -2043,6 +2070,7 @@ function renderCasaCore(){
  document.querySelectorAll("[data-casa-start]").forEach(b=>b.onclick=()=>casaStartRoutine(b.dataset.casaStart));
  document.querySelectorAll("[data-casa-finish]").forEach(b=>b.onclick=()=>casaFinishRoutine(b.dataset.casaFinish));
  document.querySelectorAll("[data-casa-reopen]").forEach(b=>b.onclick=()=>casaReopenRoutine(b.dataset.casaReopen));
+ document.querySelectorAll("[data-sat-validate]").forEach(b=>b.onclick=()=>validateSatelliteCasaTask(b.dataset.satValidate));
  bindCasaShoppingMini();
  document.querySelectorAll("[data-casa-manual]").forEach(b=>b.onclick=()=>openCasaManual(b.dataset.casaManual));
  document.querySelectorAll("[data-recipe-buy]").forEach(b=>bindCasaBuyButton(b,b.dataset.recipeBuy,"Receita da Casa"));
@@ -2058,6 +2086,104 @@ function renderCasaCore(){
  document.querySelectorAll("[data-maint-finish]").forEach(b=>b.onclick=()=>casaFinishMaintenance(b.dataset.maintFinish));
  document.querySelectorAll("[data-maint-edit]").forEach(b=>b.onclick=()=>openCasaMaintenance(b.dataset.maintEdit));
 }
+
+/* BERTH.A Satélites v1 — Owner ↔ Adulto ↔ Kids. Homologação local-first; schema cloud preparado. */
+const SATELLITES_KEY='bertha.satellites.v1',SATELLITE_PREVIEW_KEY='bertha.satellite.preview.v1',SAT_KIDS_KEY='bertha.kids.progress.v1';
+function satId(){return `sat-${Date.now()}-${Math.random().toString(36).slice(2,7)}`}
+function loadSatellites(){try{const x=JSON.parse(window.berthaHmlStorage.getItem(SATELLITES_KEY)||'null');if(x&&typeof x==='object')return {...x,members:Array.isArray(x.members)?x.members:[],invites:Array.isArray(x.invites)?x.invites:[]}}catch{}return {owner:{id:'owner',name:'Owner'},members:[],invites:[]}}
+function saveSatellites(x){window.berthaHmlStorage.setItem(SATELLITES_KEY,JSON.stringify(x))}
+function satelliteName(id){return loadSatellites().members.find(m=>String(m.id)===String(id))?.name||'Satélite'}
+function loadKidsProgress(){try{return JSON.parse(window.berthaHmlStorage.getItem(SAT_KIDS_KEY)||'{}')||{}}catch{return{}}}
+function saveKidsProgress(x){window.berthaHmlStorage.setItem(SAT_KIDS_KEY,JSON.stringify(x||{}))}
+function awardKidsPoints(memberId,points,title){const all=loadKidsProgress(),month=new Date().toISOString().slice(0,7),k=all[memberId]||{lifetime:0,season:0,seasonKey:month,awards:[]};if(k.seasonKey!==month){k.season=0;k.seasonKey=month}k.lifetime=(+k.lifetime||0)+points;k.season=(+k.season||0)+points;k.log=Array.isArray(k.log)?k.log:[];k.log.unshift({id:satId(),title,points,at:Date.now()});const unlocks=[[20,'Primeiros passos','medal'],[50,'Ovo surpresa','egg'],[100,'Guardião da Casa','trophy'],[150,'Skin da temporada','skin']];k.awards=Array.isArray(k.awards)?k.awards:[];unlocks.forEach(([n,name,type])=>{const key=`${month}:${n}`;if(k.season>=n&&!k.awards.some(a=>a.key===key))k.awards.push({key,name,type,at:Date.now()})});all[memberId]=k;saveKidsProgress(all)}
+const SAT_OWNER_EVENTS_KEY='bertha.satellites.owner-events.v1';
+function loadSatelliteOwnerEvents(){try{const x=JSON.parse(window.berthaHmlStorage.getItem(SAT_OWNER_EVENTS_KEY)||'[]');return Array.isArray(x)?x:[]}catch{return[]}}
+function saveSatelliteOwnerEvents(x){window.berthaHmlStorage.setItem(SAT_OWNER_EVENTS_KEY,JSON.stringify((x||[]).slice(0,100)))}
+function satelliteMember(id){return loadSatellites().members.find(m=>String(m.id)===String(id))}
+function satelliteTargets(task){const legacy=task?.assigneeId?[task.assigneeId]:[];return (Array.isArray(task?.assigneeIds)&&task.assigneeIds.length?task.assigneeIds:legacy).map(String)}
+function satelliteNotifyOwner(member,task,type='completed'){
+ const event={id:satId(),type,memberId:member?.id||null,memberName:member?.name||'Satélite',taskId:task.id,taskName:task.name,at:Date.now(),read:false};
+ const events=loadSatelliteOwnerEvents();events.unshift(event);saveSatelliteOwnerEvents(events);
+ const title='BERTH.A · Casa',body=`${event.memberName} concluiu “${event.taskName}”.`;
+ try{
+   if(typeof Notification!=='undefined'&&Notification.permission==='granted'){
+     if(navigator.serviceWorker?.ready)navigator.serviceWorker.ready.then(reg=>reg.showNotification(title,{body,tag:`sat-${task.id}-${task.completedAt||Date.now()}`,data:{route:'#casa',taskId:task.id}})).catch(()=>{try{new Notification(title,{body})}catch{}});
+     else new Notification(title,{body});
+   }
+ }catch{}
+}
+async function requestSatelliteOwnerNotifications(){
+ try{if(typeof Notification==='undefined')return false;const p=await Notification.requestPermission();renderSatellites();return p==='granted'}catch{return false}
+}
+function satelliteTaskList(memberId){
+ const d=loadCasa(),out=[],mid=String(memberId);
+ (d.areas||[]).forEach(a=>(a.tasks||[]).forEach(t=>{
+   const r=t.responsibility||'owner',targets=satelliteTargets(t),declined=(t.declinedByIds||[]).map(String),eligible=(r==='help')||(r==='delegated'&&targets.includes(mid));
+   if(!eligible||declined.includes(mid))return;
+   const status=t.satelliteStatus||'open';
+   if(['available','assigned','accepted','in_progress','completed','validated'].includes(status)||t.done)out.push({task:t,area:a});
+ }));
+ return out
+}
+function setSatelliteTaskState(taskId,memberId,state){
+ const d=loadCasa(),hit=casaTaskById(taskId,d);if(!hit)return;const task=hit.task,mid=String(memberId),member=satelliteMember(mid),claimed=task.claimedById?String(task.claimedById):'';
+ if(state==='accepted'){
+   if(claimed&&claimed!==mid)return;
+   task.claimedById=mid;task.assigneeId=mid;task.satelliteStatus='accepted';
+ }else if(state==='declined'){
+   task.declinedByIds=Array.from(new Set([...(task.declinedByIds||[]).map(String),mid]));
+   if(claimed===mid){task.claimedById=null;task.assigneeId=null;task.satelliteStatus=task.responsibility==='help'?'available':'assigned'}
+ }else if(state==='in_progress'){
+   if(claimed&&claimed!==mid)return;
+   task.claimedById=mid;task.assigneeId=mid;task.satelliteStatus='in_progress';
+ }else if(state==='completed'){
+   if(claimed&&claimed!==mid)return;
+   const end=Date.now();task.claimedById=mid;task.assigneeId=mid;task.completedById=mid;task.completedAt=end;task.lastCompletedAt=end;task.done=true;task.nextDue=casaNextRoutineDate(task.freq,end);
+   const needsValidation=member?.role==='kids'||!!member?.requiresValidation;
+   task.requiresValidation=needsValidation;task.satelliteStatus=needsValidation?'completed':'validated';
+   casaRecordProgress(hit,end,Math.max(5,+loadCasaDurations()[task.id]||15));
+   if(member?.role==='kids'&&task.pointsEnabled&&!needsValidation)awardKidsPoints(member.id,Math.max(1,+task.pointsValue||1),task.name);
+   satelliteNotifyOwner(member,task,'completed');
+ }
+ saveCasa(d);renderSatelliteDay()
+}
+function validateSatelliteCasaTask(taskId){
+ const d=loadCasa(),hit=casaTaskById(taskId,d);if(!hit)return;const task=hit.task,member=satelliteMember(task.completedById||task.claimedById||task.assigneeId);
+ task.satelliteStatus='validated';task.done=true;
+ if(member?.role==='kids'&&task.pointsEnabled&&!task.pointsAwardedAt){awardKidsPoints(member.id,Math.max(1,+task.pointsValue||1),task.name);task.pointsAwardedAt=Date.now()}
+ saveCasa(d);renderCasa()
+}
+function ensureSatelliteStyles(){if(document.getElementById('bertha-sat-v1'))return;const s=document.createElement('style');s.id='bertha-sat-v1';s.textContent=`
+.sat-page{display:grid;gap:14px}.sat-hero{padding:22px;border-radius:28px;background:linear-gradient(135deg,#fbf5ee,#eef4f3 54%,#f2edf7);border:1px solid rgba(113,96,130,.09)}.sat-hero .eyebrow,.sat-card .eyebrow{font-size:10px;letter-spacing:.18em;font-weight:500;color:#84778b}.sat-hero h2{margin:6px 0 8px;font-size:28px;font-weight:400;color:#3f3944}.sat-hero p{margin:0;color:#766f7a;font-size:13px;line-height:1.45}.sat-actions{display:flex;gap:8px;flex-wrap:wrap}.sat-actions button,.sat-card button,.sat-page .primary,.sat-page .secondary{border-radius:999px;min-height:40px;padding:9px 14px;font-size:12px;font-weight:500}.sat-member{display:grid;grid-template-columns:42px 1fr auto;gap:12px;align-items:center;padding:15px;border-radius:20px;background:rgba(255,255,255,.78);border:1px solid rgba(113,96,130,.08)}.sat-avatar{width:42px;height:42px;border-radius:15px;display:grid;place-items:center;background:linear-gradient(135deg,#e9dfea,#dcebe5);font-size:20px}.sat-member strong{display:block;font-weight:520}.sat-member small{display:block;margin-top:3px;color:#8a818c}.sat-role{font-size:10px;padding:5px 8px;border-radius:999px;background:#f4ece7;color:#786b70}.sat-empty{padding:22px;text-align:center;color:#8a818c}.sat-resp-block{display:grid;gap:7px;margin:12px 0}.sat-label{font-size:13px;font-weight:500;color:#5f5662}.sat-resp-options{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;background:rgba(255,255,255,.45);padding:4px;border-radius:16px}.sat-resp-options button{border:0;background:transparent;border-radius:13px;min-height:38px;color:#756d78;font-weight:500}.sat-resp-options button.active{background:linear-gradient(135deg,#ecdce5,#dce9df);color:#654f5d}.sat-check{display:flex!important;align-items:center;gap:9px!important}.sat-task-chip{display:inline-flex!important;width:max-content;margin:6px 5px 0 0;padding:4px 8px;border-radius:999px;font-size:9.5px!important;font-weight:500!important}.sat-task-chip.help{background:#eef1e4;color:#687057}.sat-task-chip.delegated{background:#f1e7ec;color:#775d6c}.sat-task-chip.points{background:#fff0c9;color:#80681d}.sat-validate{background:linear-gradient(135deg,#ead5df,#dce8dc)!important;color:#685566!important}.sat-day-head{display:flex;align-items:center;justify-content:space-between;gap:10px}.sat-day-back{border:0;background:rgba(255,255,255,.7);border-radius:999px;padding:8px 11px;color:#706672}.sat-mission{padding:15px;border-radius:20px;background:rgba(255,255,255,.78);border:1px solid rgba(113,96,130,.08);display:grid;gap:9px}.sat-mission strong{font-weight:520}.sat-mission small{color:#837a85}.sat-mission-actions{display:flex;gap:7px;flex-wrap:wrap}.sat-mission-actions button{border:0;border-radius:999px;padding:8px 12px;background:#f2e9ee;color:#6d5966;font-weight:500}.sat-mission-actions .go{background:linear-gradient(135deg,#e8d8e1,#dbe8df)}.kids-hero{background:linear-gradient(135deg,#fff2cf,#e4eefc 52%,#efdef3)}.kids-progress{height:10px;border-radius:999px;background:rgba(255,255,255,.75);overflow:hidden;margin-top:9px}.kids-progress span{display:block;height:100%;background:linear-gradient(90deg,#84b6e7,#d7a8d1);border-radius:inherit}.kids-awards{display:flex;gap:7px;flex-wrap:wrap}.kids-awards span{padding:7px 10px;border-radius:999px;background:#fff7e1;font-size:11px}.sat-cloud-note{padding:11px 13px;border-radius:16px;background:rgba(238,244,242,.75);font-size:11px;color:#6f7773}.sat-modal .modal-card{background:linear-gradient(145deg,#fbf7ef,#f4f5f0)!important}`;document.head.appendChild(s)}
+function openSatelliteEditor(id){ensureSatelliteStyles();const data=loadSatellites(),old=data.members.find(m=>String(m.id)===String(id)),dlg=document.createElement('dialog');dlg.className='bertha-dialog casa-dialog sat-modal';dlg.innerHTML=`<form class="modal-card casa-modal-card" id="satForm"><div class="modal-head"><div><div class="eyebrow">SATÉLITES</div><h2>${old?'Editar satélite':'Novo satélite'}</h2></div><button type="button" class="icon-btn casa-modal-x" data-close>×</button></div><label>Nome<input id="satName" required value="${escapeHtml(old?.name||'')}"></label><label>Tipo<select id="satRole"><option value="adult" ${old?.role==='adult'?'selected':''}>Adulto</option><option value="kids" ${old?.role==='kids'?'selected':''}>Kids</option></select></label><div class="sat-permissions"><div class="eyebrow">PERMISSÕES</div><label class="sat-check"><input type="checkbox" id="satCasa" ${old?.permissions?.casa!==false?'checked':''}><span>Casa e tarefas compartilhadas</span></label><label class="sat-check"><input type="checkbox" id="satCompras" ${old?.permissions?.compras?'checked':''}><span>Lista de Compras</span></label><label class="sat-check"><input type="checkbox" id="satPlanos" ${old?.permissions?.planos?'checked':''}><span>Planos compartilhados</span></label></div><label class="sat-check"><input type="checkbox" id="satValidation" ${old?.requiresValidation?'checked':''}><span>Conclusões precisam de validação do Owner</span></label><div class="modal-actions"><div class="grow"></div><button type="button" class="secondary" data-close>Cancelar</button><button class="primary" type="submit">Salvar</button></div></form>`;document.body.appendChild(dlg);const close=()=>dlg.close();dlg.querySelectorAll('[data-close]').forEach(b=>b.onclick=close);dlg.onclose=()=>dlg.remove();dlg.querySelector('#satRole').onchange=()=>{if(dlg.querySelector('#satRole').value==='kids')dlg.querySelector('#satValidation').checked=true};dlg.querySelector('#satForm').onsubmit=e=>{e.preventDefault();const m=old||{id:satId(),status:'active',createdAt:Date.now()};m.name=dlg.querySelector('#satName').value.trim();m.role=dlg.querySelector('#satRole').value;m.permissions={casa:dlg.querySelector('#satCasa').checked,compras:dlg.querySelector('#satCompras').checked,planos:dlg.querySelector('#satPlanos').checked};m.requiresValidation=m.role==='kids'||dlg.querySelector('#satValidation').checked;if(!old)data.members.push(m);saveSatellites(data);close();renderSatellites()};dlg.showModal()}
+function renderSatellites(){
+ ensureSatelliteStyles();const data=loadSatellites(),members=data.members.filter(m=>m.status!=='removed'),events=loadSatelliteOwnerEvents(),unread=events.filter(e=>!e.read).length,permission=(typeof Notification!=='undefined'?Notification.permission:'unsupported');
+ app.innerHTML=`<div class="sat-page"><section class="sat-hero"><div class="eyebrow">REDE BERTH.A</div><h2>Seu mundo, compartilhado só onde faz sentido.</h2><p>Satélites recebem apenas os recortes que você autorizar. Casa é a primeira integração funcional.</p></section><div class="sat-actions"><button class="primary" id="addSatellite">＋ Adicionar satélite</button>${permission!=='granted'&&permission!=='unsupported'?'<button class="secondary" id="satEnableNotifications">Ativar notificações do Owner</button>':''}</div><div class="sat-cloud-note">Uma tarefa pode ser oferecida a vários satélites. Quem assumir bloqueia a execução duplicada; quando concluir, todos veem quem fez e o período da rotina é encerrado.</div>${events.length?`<section class="sat-card card"><div class="panel-head"><div><h3>Atividade da rede</h3><p class="note">${unread?`${unread} nova${unread===1?'':'s'} para o Owner.`:'Tudo visto.'}</p></div><button type="button" class="secondary" id="satMarkRead">Marcar como visto</button></div><div class="sat-event-list">${events.slice(0,6).map(e=>`<div class="sat-event ${e.read?'':'unread'}"><span>✓</span><div><strong>${escapeHtml(e.memberName)} concluiu ${escapeHtml(e.taskName)}</strong><small>${new Date(e.at).toLocaleString('pt-BR',{day:'2-digit',month:'2-digit',hour:'2-digit',minute:'2-digit'})}</small></div></div>`).join('')}</div></section>`:''}<section class="sat-card card"><div class="panel-head"><div><h3>Minha rede</h3><p class="note">Adultos colaboram. Kids recebem uma experiência gamificada.</p></div><span class="pill">${members.length}</span></div>${members.length?members.map(m=>`<div class="sat-member"><span class="sat-avatar">${m.role==='kids'?'★':'◇'}</span><span><strong>${escapeHtml(m.name)}</strong><small>${m.permissions?.casa!==false?'Casa':''}${m.permissions?.compras?' · Compras':''}${m.permissions?.planos?' · Planos':''}</small></span><span><span class="sat-role">${m.role==='kids'?'KIDS':'ADULTO'}</span><div class="sat-actions"><button type="button" class="secondary" data-sat-preview="${m.id}">Ver perfil</button><button type="button" class="secondary" data-sat-edit="${m.id}">Editar</button></div></span></div>`).join(''):`<div class="sat-empty">Adicione o primeiro satélite para testar delegação, aceite de ajuda e Meu Dia próprio.</div>`}</section></div>`;
+ document.querySelector('#addSatellite').onclick=()=>openSatelliteEditor();
+ document.querySelector('#satEnableNotifications')?.addEventListener('click',requestSatelliteOwnerNotifications);
+ document.querySelector('#satMarkRead')?.addEventListener('click',()=>{const x=loadSatelliteOwnerEvents();x.forEach(e=>e.read=true);saveSatelliteOwnerEvents(x);renderSatellites()});
+ document.querySelectorAll('[data-sat-edit]').forEach(b=>b.onclick=()=>openSatelliteEditor(b.dataset.satEdit));
+ document.querySelectorAll('[data-sat-preview]').forEach(b=>b.onclick=()=>{window.berthaHmlStorage.setItem(SATELLITE_PREVIEW_KEY,b.dataset.satPreview);location.hash='#satelite'})
+}
+function renderSatelliteDay(){
+ ensureSatelliteStyles();const data=loadSatellites(),id=window.berthaHmlStorage.getItem(SATELLITE_PREVIEW_KEY),m=data.members.find(x=>String(x.id)===String(id));if(!m){location.hash='#satelites';return}
+ const tasks=m.permissions?.casa===false?[]:satelliteTaskList(m.id),kids=loadKidsProgress()[m.id]||{lifetime:0,season:0,awards:[]},next=50-(kids.season%50||0),pct=Math.min(100,(kids.season%50)/50*100);
+ const missionHtml=({task,area})=>{const claimed=satelliteMember(task.claimedById||task.assigneeId),completed=satelliteMember(task.completedById),mine=String(task.claimedById||task.assigneeId||'')===String(m.id),done=!!task.done;let actions='';
+   if(done){actions=`<span class="sat-task-chip ${task.satelliteStatus==='completed'?'delegated':'help'}">${completed?`Concluída por ${escapeHtml(completed.name)}`:'Concluída'}${task.satelliteStatus==='completed'?' · aguardando validação':''}</span>`}
+   else if(claimed&&!mine){actions=`<span class="sat-task-chip delegated">Assumida por ${escapeHtml(claimed.name)}</span>`}
+   else if(task.satelliteStatus==='available'||task.satelliteStatus==='assigned'){actions=`<button data-sat-accept="${task.id}" class="go">${task.satelliteStatus==='available'?'Assumir':'Aceitar'}</button><button data-sat-decline="${task.id}">Agora não</button>`}
+   else if(task.satelliteStatus==='accepted'&&mine){actions=`<button data-sat-start="${task.id}" class="go">Começar</button>`}
+   else if(task.satelliteStatus==='in_progress'&&mine){actions=`<button data-sat-complete="${task.id}" class="go">Concluir</button>`}
+   return `<div class="sat-mission ${done?'done':''}"><div><strong>${escapeHtml(task.name)}</strong><small>${escapeHtml(area.title)} · ${escapeHtml(casaDuration(task.id))} · ${escapeHtml(casaTime(task.id))}</small>${task.pointsEnabled&&m.role==='kids'?`<span class="sat-task-chip points">+${+task.pointsValue||0} pts</span>`:''}</div><div class="sat-mission-actions">${actions}</div></div>`};
+ app.innerHTML=`<div class="sat-page"><div class="sat-day-head"><button class="sat-day-back" id="satBack">← Owner</button><span class="sat-role">${m.role==='kids'?'KIDS':'SATÉLITE'}</span></div><section class="sat-hero ${m.role==='kids'?'kids-hero':''}"><div class="eyebrow">${m.role==='kids'?'MINHA TEMPORADA':'MEU DIA'}</div><h2>${m.role==='kids'?`Oi, ${escapeHtml(m.name)}!`:`${escapeHtml(m.name)}, o que precisa da sua atenção?`}</h2><p>${m.role==='kids'?`${kids.season||0} pontos nesta temporada · ${next||50} até o próximo desbloqueio.`:'Aqui aparecem apenas tarefas delegadas e oportunidades de ajudar.'}</p>${m.role==='kids'?`<div class="kids-progress"><span style="width:${pct}%"></span></div>`:''}</section>${m.role==='kids'&&kids.awards?.length?`<section class="card"><div class="eyebrow">CONQUISTAS</div><div class="kids-awards">${kids.awards.slice(-8).map(a=>`<span>${a.type==='egg'?'🥚':a.type==='trophy'?'🏆':a.type==='skin'?'✦':'●'} ${escapeHtml(a.name)}</span>`).join('')}</div></section>`:''}<section class="card"><div class="panel-head"><div><h3>${m.role==='kids'?'Missões':'Tarefas'}</h3><p class="note">${m.role==='kids'?'Conclua missões para ganhar pontos e desbloquear conquistas.':'Assuma ajuda ou execute o que foi delegado a você.'}</p></div><span class="pill">${tasks.filter(x=>!x.task.done).length}</span></div>${tasks.length?tasks.map(missionHtml).join(''):`<div class="sat-empty">Nada pendente por aqui.</div>`}</section></div>`;
+ document.querySelector('#satBack').onclick=()=>{location.hash='#satelites'};
+ document.querySelectorAll('[data-sat-accept]').forEach(b=>b.onclick=()=>setSatelliteTaskState(b.dataset.satAccept,m.id,'accepted'));
+ document.querySelectorAll('[data-sat-decline]').forEach(b=>b.onclick=()=>setSatelliteTaskState(b.dataset.satDecline,m.id,'declined'));
+ document.querySelectorAll('[data-sat-start]').forEach(b=>b.onclick=()=>setSatelliteTaskState(b.dataset.satStart,m.id,'in_progress'));
+ document.querySelectorAll('[data-sat-complete]').forEach(b=>b.onclick=()=>setSatelliteTaskState(b.dataset.satComplete,m.id,'completed'))
+}
+window.renderSatellites=renderSatellites;window.renderSatelliteDay=renderSatelliteDay;window.validateSatelliteCasaTask=validateSatelliteCasaTask;
+
 function renderCasa(){
  try{return renderCasaCore();}
  catch(e){
@@ -4501,3 +4627,16 @@ html body #recipeFormDialog:not(.food-context-dialog) .modal-actions .secondary{
   `;
   document.head.appendChild(s);
 })();
+;(function(){if(document.getElementById('bertha-sat-v2'))return;const st=document.createElement('style');st.id='bertha-sat-v2';st.textContent=`
+.sat-assignee-field{display:grid;gap:8px;margin:12px 0}.sat-assignee-field[hidden]{display:none!important}
+.sat-target-head{display:flex;align-items:center;justify-content:space-between;gap:10px;color:#5f5662;font-size:13px;font-weight:500}
+.sat-target-all{border:1px solid rgba(113,96,130,.10)!important;background:rgba(255,255,255,.72)!important;color:#706672!important;border-radius:999px!important;min-height:32px!important;padding:6px 11px!important;font-size:11px!important;font-weight:500!important}
+.sat-target-grid{display:grid;gap:7px;padding:8px;border-radius:17px;background:rgba(255,255,255,.52);border:1px solid rgba(113,96,130,.08)}
+.sat-target-option{display:flex!important;align-items:center!important;gap:10px!important;padding:9px 10px!important;margin:0!important;border-radius:13px!important;background:rgba(255,255,255,.76)!important;font-weight:400!important}
+.sat-target-option input{width:18px!important;height:18px!important;accent-color:#b890a7!important}.sat-target-option span{display:block}
+.sat-target-option strong{display:block;font-size:13px;font-weight:500;color:#514954}.sat-target-option small{display:block;margin-top:2px;font-size:10.5px;color:#948a95}
+.sat-target-note{font-size:10.5px!important;line-height:1.4!important;color:#8d838e!important}.sat-target-error{outline:2px solid rgba(190,108,126,.22);border-radius:18px;padding:6px}
+.sat-event-list{display:grid;gap:7px}.sat-event{display:grid;grid-template-columns:24px 1fr;gap:9px;align-items:start;padding:10px 11px;border-radius:15px;background:rgba(255,255,255,.58)}.sat-event.unread{background:linear-gradient(110deg,rgba(248,232,238,.82),rgba(235,245,236,.82))}
+.sat-event>span{width:24px;height:24px;border-radius:50%;display:grid;place-items:center;background:#eef3eb;color:#657260;font-size:11px}.sat-event strong{display:block;font-size:12px;font-weight:500;color:#554d57}.sat-event small{display:block;margin-top:3px;font-size:10px;color:#918892}
+.sat-mission.done{opacity:.72}.sat-mission.done strong{text-decoration:line-through;text-decoration-thickness:1px}
+`;document.head.appendChild(st)})();
