@@ -725,6 +725,26 @@
   }
 
 
+  const OVERRUN_PROMPT_KEY='bertha.time-overrun-prompt.v1';
+  function timeOverrunPrompt(active){
+    if(!active||active.overrunOpenEnded)return;
+    const planned=Math.max(1,+active.plannedMinutes||30),elapsed=Math.floor((Date.now()-(+active.startedAt||Date.now()))/60000);
+    if(elapsed<planned)return;
+    const prompted=read(OVERRUN_PROMPT_KEY,{}),stamp=String(active.startedAt||'');
+    if(prompted[active.id]===stamp)return;
+    prompted[active.id]=stamp;write(OVERRUN_PROMPT_KEY,prompted);
+    const d=dialogBase('O tempo planejado terminou',`<p class="bertha-muted"><strong>${esc(active.title||'Atividade')}</strong> estava prevista para ${durationText(planned)}.</p><p>Quer concluir ou continuar?</p><div class="bertha-stack bertha-overrun-actions"><button class="bertha-primary" data-overrun-finish>Concluir agora</button><button class="bertha-secondary" data-overrun-ten>Continuar +10 min</button><button class="bertha-secondary" data-overrun-open>Continuar sem limite</button></div>`);
+    d.querySelector('[data-overrun-finish]').onclick=()=>{d.close();d.remove();finishActive(active.id)};
+    d.querySelector('[data-overrun-ten]').onclick=()=>{const e=engine(),a=e.actives.find(x=>String(x.id)===String(active.id));if(a){a.plannedMinutes=Math.max(planned,elapsed)+10;a.overrunOpenEnded=false;saveEngine(e)};delete prompted[active.id];write(OVERRUN_PROMPT_KEY,prompted);d.close();d.remove();rerender()};
+    d.querySelector('[data-overrun-open]').onclick=()=>{const e=engine(),a=e.actives.find(x=>String(x.id)===String(active.id));if(a){a.overrunOpenEnded=true;saveEngine(e)};d.close();d.remove();rerender()};
+  }
+  function checkTimeOverruns(){
+    if(document.visibilityState!=='visible')return;
+    const e=engine();(e.actives||[]).forEach(a=>timeOverrunPrompt(a));
+  }
+  setInterval(checkTimeOverruns,15000);
+  document.addEventListener('visibilitychange',()=>{if(!document.hidden)setTimeout(checkTimeOverruns,250)});
+
   function repeatAfterFinishDialog(item,realMinutes){
     const route=(location.hash||'#meu-dia').toLowerCase();
     let contextClass='bertha-repeat-context-generic';
@@ -890,48 +910,56 @@
     };
     const rows=[];
 
-    // A rotina-base de trabalho só existe de segunda a sexta.
+    // Estrutura-base do dia. Compromissos entram na mesma linha do tempo.
     if(weekday){
-      rows.push([316,455,'05:16–07:35','Manhã protegida',true]);
-      rows.push([480,840,'08:00–14:00','Trabalho oficial',false]);
-
-      if(w===1||w===3) rows.push([880,970,'14:40–16:10','Janela estratégica',false]);
-
-      const ho={
-        1:[1000,1120,'16:40–18:40'],
-        2:[940,1060,'15:40–17:40'],
-        3:[1000,1120,'16:40–18:40'],
-        4:[940,1060,'15:40–17:40'],
-        5:[940,1060,'15:40–17:40']
-      }[w];
-      if(ho) rows.push([ho[0],ho[1],ho[2],'Home office · duração planejada 2h',false]);
-
-      rows.push([1140,1440,'19:00+','Noite protegida · descanso primeiro',true]);
+      rows.push({a:316,b:455,label:'05:16–07:35',title:'Manhã protegida',protected:true});
+      rows.push({a:480,b:840,label:'08:00–14:00',title:'Trabalho oficial'});
+      if(w===1||w===3) rows.push({a:880,b:970,label:'14:40–16:10',title:'Janela estratégica'});
+      const ho={1:[1000,1120,'16:40–18:40'],2:[940,1060,'15:40–17:40'],3:[1000,1120,'16:40–18:40'],4:[940,1060,'15:40–17:40'],5:[940,1060,'15:40–17:40']}[w];
+      if(ho) rows.push({a:ho[0],b:ho[1],label:ho[2],title:'Home office · duração planejada 2h'});
+      rows.push({a:1140,b:1440,label:'19:00+',title:'Noite protegida · descanso primeiro',protected:true});
     }
 
-    // Compromissos cadastrados aparecem em qualquer dia, inclusive sábado e domingo.
-    const timed=sourcesToday()
-      .filter(x=>x.kind==='commitment'&&x.time)
-      .sort((a,b)=>a.time.localeCompare(b.time));
-
+    const timed=sourcesToday().filter(x=>x.kind==='commitment'&&x.time).sort((a,b)=>a.time.localeCompare(b.time));
     timed.forEach(x=>{
-      const [h,mi]=(x.time||'00:00').split(':').map(Number),
-            a=h*60+mi,
-            b=a+Math.max(1,+x.minutes||30);
-      rows.push([
-        a,b,
-        `${x.time}–${hhmm(new Date(new Date().setHours(h,mi+(+x.minutes||30),0,0)))}`,
-        x.title,false,true
-      ]);
+      const [h,mi]=(x.time||'00:00').split(':').map(Number),a=h*60+mi,b=a+Math.max(1,+x.minutes||30);
+      const endH=Math.floor(b/60)%24,endM=b%60;
+      rows.push({a,b,label:`${x.time}–${String(endH).padStart(2,'0')}:${String(endM).padStart(2,'0')}`,title:x.title,commitment:true});
     });
+    rows.sort((x,y)=>x.a-y.a||x.b-y.b);
 
-    rows.sort((a,b)=>a[0]-b[0]);
+    // A BERTH.A preenche apenas janelas futuras/atuais que realmente comportem uma ação.
+    const activeIds=new Set((engine().actives||[]).map(a=>String(a.id)));
+    const flexible=candidates().filter(x=>!x.time&&x.kind!=='commitment'&&!activeIds.has(String(x.id))).sort((a,b)=>suggestionScore(b,null)-suggestionScore(a,null));
+    const used=new Set();
+    const pickForGap=(gap)=>{
+      const item=flexible.find(x=>!used.has(String(x.id))&&Math.max(1,+x.minutes||30)<=gap);
+      if(item) used.add(String(item.id));
+      return item;
+    };
 
-    if(!rows.length){
-      return `<div class="bertha-time-row bertha-day-open"><i>LIVRE</i><b>Hoje</b><span>Seu dia está aberto. A BERTH.A encaixa o que fizer sentido.</span></div>`;
+    const out=[];
+    let cursor=weekday?316:Math.max(480,m), i=0;
+    for(const r of rows){
+      const gapStart=Math.max(cursor,m),gapEnd=r.a,gap=gapEnd-gapStart;
+      if(gap>=15){
+        const item=pickForGap(gap);
+        if(item){
+          const mins=Math.max(1,+item.minutes||30),start=gapStart,end=Math.min(gapEnd,start+mins);
+          out.push({a:start,b:end,label:`${String(Math.floor(start/60)).padStart(2,'0')}:${String(start%60).padStart(2,'0')}–${String(Math.floor(end/60)).padStart(2,'0')}:${String(end%60).padStart(2,'0')}`,title:item.title,suggestion:true,item});
+        }
+      }
+      out.push(r);cursor=Math.max(cursor,r.b);i++;
     }
+    const tailStart=Math.max(cursor,m),tailEnd=1320,tailGap=tailEnd-tailStart;
+    if(tailGap>=15){const item=pickForGap(tailGap);if(item){const mins=Math.max(1,+item.minutes||30),end=Math.min(tailEnd,tailStart+mins);out.push({a:tailStart,b:end,label:`${String(Math.floor(tailStart/60)).padStart(2,'0')}:${String(tailStart%60).padStart(2,'0')}–${String(Math.floor(end/60)).padStart(2,'0')}:${String(end%60).padStart(2,'0')}`,title:item.title,suggestion:true,item});}}
+    out.sort((x,y)=>x.a-y.a||Number(!!y.commitment)-Number(!!x.commitment));
 
-    return rows.map(r=>`<div class="bertha-time-row ${r[5]?'is-commitment':''}"><i>${state(r[0],r[1],r[4],r[5])}</i><b>${r[2]}</b><span>${esc(r[3])}</span></div>`).join('');
+    if(!out.length)return `<div class="bertha-time-row bertha-day-open"><i>LIVRE</i><b>Hoje</b><span>Seu dia está aberto. A BERTH.A encaixa o que fizer sentido.</span></div>`;
+    return out.map(r=>{
+      if(r.suggestion)return `<div class="bertha-time-row is-suggestion"><i>BERTH.A</i><b>${r.label}</b><span>${esc(r.title)} <small>· sugestão para esta janela</small></span><button type="button" data-start="${esc(r.item.id)}">Começar</button></div>`;
+      return `<div class="bertha-time-row ${r.commitment?'is-commitment':''}"><i>${state(r.a,r.b,r.protected,r.commitment)}</i><b>${r.label}</b><span>${esc(r.title)}</span></div>`;
+    }).join('');
   }
   function ensureMeuDiaV168Styles(){
     if(document.getElementById('bertha-meu-dia-v168'))return;
@@ -1429,7 +1457,7 @@
     const financeReminders = renderFinanceRemindersHome();
     const shopCount=window.BerthaShopping?.pendingCount?.()||0; const healthRaw=window.BerthaShopping?.renderHealthMini?.()||''; const health=/Nenhum item cadastrado/i.test(healthRaw)?'':healthRaw;
     const utility=`<section class="home-utility-grid"><a class="home-utility-card" href="#compras"><span class="home-utility-icon">${homeUtilityIcon('bag')}</span><span class="home-utility-copy"><strong>Lista de Compras</strong><small>O que preciso adquirir?</small></span><span class="home-utility-count">${shopCount}</span></a><a class="home-utility-card" href="#progresso"><span class="home-utility-icon">${homeUtilityIcon('trend')}</span><span class="home-utility-copy"><strong>Meu Progresso</strong><small>Como estou caminhando?</small></span><span aria-hidden="true">›</span></a></section>`;
-    return `<section class="day-hero"><div class="eyebrow">MEU DIA</div><h1>${greet}, Duaila.</h1><p class="day-date">${today}</p></section>${utility}<section class="day-section home-day-structure"><div class="section-head"><h2>Seu dia, sem excesso</h2></div><div class="timeline bertha-timeline">${renderHomeTimeline()}</div></section>${nowCard()}${renderFoodHomeMini()}${financeReminders}<section class="day-section"><div class="section-head"><h2>O que importa hoje</h2><span class="soft-count">${tasks.length}</span></div>${tasks.length?tasks.map(x=>`<div class="focus-row bertha-focus"><div><strong>${esc(x.title)}</strong><small>${esc(x.source)} · ${durationText(+x.minutes||30)}</small></div><button data-start="${esc(x.id)}">Começar</button></div>`).join(''):`<div class="bertha-empty">Seu essencial está em dia.</div>`}</section>${health}${free?`<section class="free-space"><strong>Espaço livre também faz parte do dia.</strong><p>Se nada precisa ser resolvido agora, não resolva.</p></section>`:''}`;
+    return `<section class="day-hero"><div class="eyebrow">MEU DIA</div><h1>${greet}, Duaila.</h1><p class="day-date">${today}</p></section>${nowCard()}<section class="day-section home-day-structure"><div class="section-head"><h2>Seu dia</h2><small class="home-day-helper">Compromissos e sugestões nas janelas livres.</small></div><div class="timeline bertha-timeline">${renderHomeTimeline()}</div></section><section class="day-section"><div class="section-head"><h2>O que importa hoje</h2><span class="soft-count">${tasks.length}</span></div>${tasks.length?tasks.map(x=>`<div class="focus-row bertha-focus"><div><strong>${esc(x.title)}</strong><small>${esc(x.source)} · ${durationText(+x.minutes||30)}</small></div><button data-start="${esc(x.id)}">Começar</button></div>`).join(''):`<div class="bertha-empty">Seu essencial está em dia.</div>`}</section>${renderFoodHomeMini()}${financeReminders}${health}${free?`<section class="free-space"><strong>Espaço livre também faz parte do dia.</strong><p>Se nada precisa ser resolvido agora, não resolva.</p></section>`:''}${utility}`;
   }
 
   function idealZoneIcon(zone){

@@ -3457,3 +3457,40 @@ html body #app:has(.finance-hero) :is(.fg-edit,.mini-delete){
     font-size:14px!important;
   }
 }
+
+/* RC107 — MEU DIA · ORQUESTRAÇÃO TEMPORAL + TIPOGRAFIA LEVE */
+html body #app .day-hero .eyebrow,
+html body #app .day-hero h1,
+html body #app .day-hero .day-date,
+html body #app .day-section h2,
+html body #app .now-card,
+html body #app .bertha-time-row,
+html body #app .bertha-focus,
+html body #app .home-utility-card{font-weight:400!important}
+html body #app .day-hero .eyebrow{font-weight:500!important;letter-spacing:.22em!important}
+html body #app .day-section .section-head h2{font-weight:450!important;letter-spacing:-.02em!important}
+html body #app .home-day-helper{display:block;margin-top:2px;color:#8f8490;font-size:11.5px;font-weight:400}
+html body #app .bertha-now.active{padding:13px 15px!important;border-radius:20px!important;margin:10px 0 12px!important;min-height:0!important}
+html body #app .bertha-now.active .card-kicker{font-size:10px!important;letter-spacing:.18em!important;font-weight:550!important}
+html body #app .bertha-now.active .now-title{font-size:19px!important;line-height:1.12!important;font-weight:500!important;margin-top:4px!important}
+html body #app .bertha-now.active .now-time{font-size:11.5px!important;font-weight:400!important;margin-top:3px!important}
+html body #app .bertha-now.active p{font-size:11.5px!important;line-height:1.35!important;margin:5px 0 8px!important}
+html body #app .bertha-now.active .bertha-actions{margin-top:5px!important}
+html body #app .bertha-now.active .bertha-actions button{min-height:36px!important;padding:7px 13px!important;font-size:12px!important}
+html body #app .bertha-primary{background:linear-gradient(135deg,#f5b39d 0%,#efaa92 58%,#e7a18c 100%)!important;box-shadow:none!important}
+html body #app .bertha-focus button{background:linear-gradient(135deg,rgba(248,222,207,.72),rgba(244,207,190,.70))!important;color:#725d65!important;font-weight:500!important;border:1px solid rgba(170,121,105,.10)!important}
+html body #app .bertha-time-row{position:relative!important;grid-template-columns:70px 86px minmax(0,1fr)!important;gap:8px!important;padding:10px 11px!important;min-height:44px!important}
+html body #app .bertha-time-row i{font-size:8.5px!important;font-weight:550!important;letter-spacing:.08em!important}
+html body #app .bertha-time-row b{font-size:11.5px!important;font-weight:500!important}
+html body #app .bertha-time-row span{font-size:12px!important;font-weight:400!important;line-height:1.3!important}
+html body #app .bertha-time-row span small{font-size:10px!important;color:#8d818f!important;font-weight:400!important}
+html body #app .bertha-time-row.is-commitment{background:linear-gradient(135deg,rgba(250,229,216,.72),rgba(245,218,210,.66))!important;border-color:rgba(201,142,122,.10)!important}
+html body #app .bertha-time-row.is-suggestion{grid-template-columns:70px 86px minmax(0,1fr) auto!important;background:linear-gradient(135deg,rgba(224,235,249,.72),rgba(230,242,235,.70))!important;border-color:rgba(109,145,163,.10)!important}
+html body #app .bertha-time-row.is-suggestion::before{background:#81a9c1!important}
+html body #app .bertha-time-row.is-suggestion button{border:1px solid rgba(105,137,157,.12)!important;border-radius:999px!important;background:rgba(255,255,255,.58)!important;color:#627c8c!important;min-height:30px!important;padding:5px 9px!important;font-size:10.5px!important;font-weight:500!important}
+html body #app .home-utility-grid{order:99!important;margin-top:18px!important;margin-bottom:8px!important}
+html body #app .home-utility-card strong{font-weight:500!important}
+html body #app .home-utility-card small{font-weight:400!important}
+html body .bertha-overrun-actions{display:grid!important;grid-template-columns:1fr!important;gap:8px!important;margin-top:14px!important}
+html body .bertha-overrun-actions button{width:100%!important;min-height:42px!important}
+@media(max-width:390px){html body #app .bertha-time-row{grid-template-columns:62px 78px minmax(0,1fr)!important}html body #app .bertha-time-row.is-suggestion{grid-template-columns:62px 78px minmax(0,1fr)!important}html body #app .bertha-time-row.is-suggestion button{grid-column:3;justify-self:start;margin-top:4px}}
