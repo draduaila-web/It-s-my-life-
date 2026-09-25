@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 120">
+<defs>
+  <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+    <stop offset="0" stop-color="#f0effa"/><stop offset="1" stop-color="#e9e1f4"/>
+  </linearGradient>
+  <filter id="s" x="-30%" y="-30%" width="160%" height="160%">
+    <feDropShadow dx="0" dy="4" stdDeviation="4" flood-opacity=".12"/>
+  </filter>
+</defs>
+<rect width="120" height="120" rx="28" fill="url(#bg)"/>
+<g filter="url(#s)"><path d="M43 43C31 23 35 8 44 10c11 3 9 20 16 31 7-11 5-28 16-31 9-2 13 13 1 33" fill="#c8c5e8"/><ellipse cx="60" cy="70" rx="35" ry="31" fill="#d7d4ef"/><circle cx="47" cy="67" r="4" fill="#4d4e65"/><circle cx="73" cy="67" r="4" fill="#4d4e65"/><path d="M60 74l5 5-5 4-5-4z" fill="#d58ca9"/></g>
+</svg>
