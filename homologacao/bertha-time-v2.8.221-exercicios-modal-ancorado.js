@@ -5232,3 +5232,13 @@ html body dialog.bertha-meudia-dialog :is(input,select,textarea){font-weight:400
 #app .free-space{min-height:0!important;height:auto!important;padding:14px 16px!important;border-radius:20px!important;background:linear-gradient(120deg,rgba(255,248,242,.84),rgba(241,247,241,.74))!important;border:1px solid rgba(112,94,117,.08)!important;box-shadow:none!important;text-align:left!important;margin-top:12px!important}#app .free-space strong{font-size:14px!important;font-weight:430!important}#app .free-space p{font-size:12.5px!important;line-height:1.4!important;margin:4px 0 0!important;color:#817782!important}
 @media(max-width:390px){.bertha-dayhours-grid{grid-template-columns:1fr}}
 `;document.head.appendChild(st)})();
+
+
+;(function(){if(document.getElementById('rc114-meudia-modal-bg'))return;const st=document.createElement('style');st.id='rc114-meudia-modal-bg';st.textContent=`
+/* RC114 — Meu Dia: reduzir lilás dos modais de tempo, preservando botões já aprovados. */
+html body dialog.bertha-meudia-dialog.bertha-finish-dialog[open]>.bertha-modal,
+html body dialog.bertha-overrun-dialog[open]>.bertha-modal{
+  background:linear-gradient(145deg,#fffaf4 0%,#fbf7f0 58%,#f3f8f4 100%)!important;
+  border-color:rgba(148,123,128,.10)!important;
+}
+`;document.head.appendChild(st)})();
