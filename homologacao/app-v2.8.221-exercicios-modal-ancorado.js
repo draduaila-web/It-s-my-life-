@@ -610,6 +610,11 @@ function ensureIdeasV297Styles(){
   #ideaDialog :is(small,.note,.hint,.muted){font-weight:400!important}
   #ideaDialog .modal-actions button,#ideaDialog :is(.primary,.secondary,[type=submit]){font-weight:500!important}
   #ideaDialog [data-close]{font-weight:300!important}
+
+  /* RC111 — Criação & Ideias: remover o círculo/fundo ao redor dos ícones dos cards. */
+  .idea-symbol{width:28px!important;height:28px!important;flex:0 0 28px!important;border-radius:0!important;background:transparent!important;border:0!important;box-shadow:none!important;padding:0!important}
+  .idea-card .idea-symbol{color:#8ba9c8!important}
+  .idea-symbol .idea-icon-svg{width:24px!important;height:24px!important}
   `; document.head.appendChild(st);
 }
 
