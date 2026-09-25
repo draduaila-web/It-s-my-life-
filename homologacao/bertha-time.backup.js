@@ -5259,3 +5259,10 @@ html body dialog.bertha-postpone-dialog[open] .bertha-choice-grid button{min-hei
 html body dialog.bertha-postpone-dialog[open] .bertha-field{font-size:13px!important;font-weight:500!important;color:#625b64!important;margin:13px 0 0!important;gap:7px!important}
 html body dialog.bertha-postpone-dialog[open] .bertha-field input[type=time]{min-height:46px!important;height:46px!important;border-radius:15px!important;padding:0 14px!important;font-size:16px!important;font-weight:400!important;background:rgba(255,255,255,.72)!important;border:1px solid rgba(120,103,125,.10)!important;color:#514a53!important}
 `;document.head.appendChild(st)})();
+
+;(function(){if(document.getElementById('rc122-ideal-modal-type'))return;const st=document.createElement('style');st.id='rc122-ideal-modal-type';st.textContent=`
+html body dialog.bertha-dialog[open]:has(.bertha-ideal-modal-form) .bertha-modal-head strong{font-size:19px!important;font-weight:430!important;letter-spacing:-.015em!important;color:#403946!important}
+html body dialog.bertha-dialog[open]:has(.bertha-ideal-modal-form) .bertha-field>span,html body dialog.bertha-dialog[open]:has(.bertha-ideal-modal-form) .bertha-ideal-until span,html body dialog.bertha-dialog[open]:has(.bertha-ideal-modal-form) .bertha-notify-when>span{font-weight:500!important;color:#5e5663!important}
+html body dialog.bertha-dialog[open]:has(.bertha-ideal-modal-form) input,html body dialog.bertha-dialog[open]:has(.bertha-ideal-modal-form) select{font-weight:400!important}
+html body dialog.bertha-dialog[open]:has(.bertha-ideal-modal-form) button{font-weight:500!important}
+`;document.head.appendChild(st)})();
