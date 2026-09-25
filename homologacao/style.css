@@ -3114,3 +3114,105 @@ html body dialog.exercise-dialog.exercise-plan-dialog .study-v10-actions{positio
     border-radius:24px!important;
   }
 }
+
+/* RC100 — FINANCEIRO · tipografia leve
+   Escopo estritamente tipográfico. Preserva estrutura, cores e lógica. */
+#app:has(.finance-hero) .finance-hero-kicker,
+#app:has(.finance-hero) .eyebrow,
+#app:has(.finance-hero) .section-title{
+  font-weight:520!important;
+}
+#app:has(.finance-hero) .finance-hero h2{
+  font-weight:400!important;
+  letter-spacing:-.02em!important;
+}
+#app:has(.finance-hero) .finance-hero p{
+  font-weight:400!important;
+}
+#app:has(.finance-hero) .finance-main>strong{
+  font-weight:430!important;
+  letter-spacing:-.015em!important;
+}
+#app:has(.finance-hero) .text-btn,
+#app:has(.finance-hero) button{
+  font-weight:520!important;
+}
+#app:has(.finance-hero) .panel-head h3,
+#app:has(.finance-hero) .finance-row strong,
+#app:has(.finance-hero) .planned-bill-top strong,
+#app:has(.finance-hero) .finance-cat strong,
+#app:has(.finance-hero) .goal-card strong,
+#app:has(.finance-hero) .covered-edit strong,
+#app:has(.finance-hero) .excluded-card strong,
+#app:has(.finance-hero) .empty strong,
+#app:has(.finance-hero) .fin-due-alert strong,
+#app:has(.finance-hero) .fin-source-name196 strong,
+#app:has(.finance-hero) .fin-source-numbers196 b,
+#app:has(.finance-hero) .fin-flow-group summary b,
+#app:has(.finance-hero) .fin-flow-total,
+#app:has(.finance-hero) .progress-fin-flow-total strong{
+  font-weight:500!important;
+}
+#app:has(.finance-hero) .finance-row>b,
+#app:has(.finance-hero) .planned-bill-side>b,
+#app:has(.finance-hero) .finance-metrics b,
+#app:has(.finance-hero) .planned-mini-metrics b,
+#app:has(.finance-hero) .goal-row strong{
+  font-weight:500!important;
+}
+#app:has(.finance-hero) .fin-status{
+  font-weight:560!important;
+  letter-spacing:.01em!important;
+}
+#app:has(.finance-hero) .finance-covered-intro,
+#app:has(.finance-hero) .planned-bill-copy>span,
+#app:has(.finance-hero) .planned-bill-copy>small,
+#app:has(.finance-hero) .covered-edit span:not(.pill),
+#app:has(.finance-hero) .note,
+#app:has(.finance-hero) small{
+  font-weight:400!important;
+}
+
+/* Financeiro · todos os modais */
+dialog.fin-unified-dialog .modal-head .eyebrow,
+dialog.fin-planned-dialog .modal-head .eyebrow{
+  font-weight:520!important;
+  letter-spacing:.18em!important;
+}
+dialog.fin-unified-dialog .modal-head h2,
+dialog.fin-planned-dialog .modal-head h2{
+  font-weight:420!important;
+  letter-spacing:-.02em!important;
+}
+dialog.fin-unified-dialog label,
+dialog.fin-planned-dialog label{
+  font-weight:480!important;
+}
+dialog.fin-unified-dialog label strong,
+dialog.fin-planned-dialog label strong,
+dialog.fin-unified-dialog .fin-reminder-head strong,
+dialog.fin-unified-dialog .fin-reminder-repeat strong,
+dialog.fin-planned-dialog .fin-reminder-head strong,
+dialog.fin-planned-dialog .fin-reminder-repeat strong{
+  font-weight:500!important;
+}
+dialog.fin-unified-dialog input,
+dialog.fin-unified-dialog select,
+dialog.fin-unified-dialog textarea,
+dialog.fin-planned-dialog input,
+dialog.fin-planned-dialog select,
+dialog.fin-planned-dialog textarea{
+  font-weight:400!important;
+}
+dialog.fin-unified-dialog .modal-actions button,
+dialog.fin-planned-dialog .modal-actions button,
+dialog.fin-unified-dialog .fin-delete-bill,
+dialog.fin-planned-dialog .fin-delete-bill{
+  font-weight:520!important;
+}
+dialog.fin-unified-dialog .note,
+dialog.fin-unified-dialog small,
+dialog.fin-planned-dialog .note,
+dialog.fin-planned-dialog small{
+  font-weight:400!important;
+}
