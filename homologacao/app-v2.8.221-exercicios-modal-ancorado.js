@@ -5042,3 +5042,67 @@ html body dialog.sat-modal .modal-actions{
   `;
   document.head.appendChild(st);
 })();
+
+
+/* RC130 — Satélites/Convites · redução VISÍVEL do peso tipográfico dos modais */
+;(function(){
+  if(document.getElementById('rc130-sat-modal-type-visible')) return;
+  const st=document.createElement('style');
+  st.id='rc130-sat-modal-type-visible';
+  st.textContent=`
+  html body dialog.sat-modal,
+  html body dialog.sat-modal *{
+    font-synthesis:none!important;
+  }
+
+  html body dialog.sat-modal .modal-head .eyebrow,
+  html body dialog.sat-modal .sat-permissions>.eyebrow,
+  html body dialog.sat-modal .sat-kids-settings>.eyebrow{
+    font-weight:450!important;
+  }
+
+  html body dialog.sat-modal .modal-head h2{
+    font-size:20px!important;
+    line-height:1.2!important;
+    font-weight:300!important;
+    letter-spacing:-.012em!important;
+  }
+
+  html body dialog.sat-modal .sat-editor-fields>label,
+  html body dialog.sat-modal .sat-avatar-field>span{
+    font-weight:350!important;
+  }
+
+  html body dialog.sat-modal :is(input:not([type=checkbox]),select,textarea){
+    font-weight:300!important;
+  }
+
+  html body dialog.sat-modal .sat-avatar-choice,
+  html body dialog.sat-modal .sat-avatar-choice *,
+  html body dialog.sat-modal .sat-avatar-choice small{
+    font-weight:350!important;
+  }
+
+  html body dialog.sat-modal .sat-permission-copy strong,
+  html body dialog.sat-modal .sat-permission strong{
+    font-weight:350!important;
+  }
+
+  html body dialog.sat-modal .sat-permission-copy small,
+  html body dialog.sat-modal .sat-permission small,
+  html body dialog.sat-modal .sat-section-note,
+  html body dialog.sat-modal .sat-kids-settings p{
+    font-weight:300!important;
+  }
+
+  html body dialog.sat-modal .modal-actions .primary,
+  html body dialog.sat-modal .modal-actions .secondary{
+    font-weight:400!important;
+  }
+
+  html body dialog.sat-modal strong{
+    font-weight:350!important;
+  }
+  `;
+  document.head.appendChild(st);
+})();
