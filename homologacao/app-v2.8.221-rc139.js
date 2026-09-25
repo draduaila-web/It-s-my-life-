@@ -2065,8 +2065,8 @@ function maintenanceCard(m){const meta=[m.area,m.type,m.date?formatDate(m.date):
 function openCasaNewRoutine(areaId){
  const d=loadCasa();const area=(d.areas||[]).find(a=>String(a.id)===String(areaId));if(!area)return;
  const dlg=document.createElement('dialog');dlg.className='bertha-dialog casa-dialog';
- dlg.innerHTML=`<form method="dialog" class="modal-card casa-modal-card" id="casaNewRoutineForm"><div class="modal-head"><div><div class="eyebrow">CASA · ROTINAS</div><h2>Nova rotina</h2><p class="note">${escapeHtml(area.title)}</p></div><button class="icon-btn casa-modal-x" value="cancel" aria-label="Fechar">×</button></div><label>Atividade<input id="cnrName" required placeholder="Ex.: Limpar a varanda"></label><label>Duração estimada (min)<input id="cnrMin" type="number" min="1" max="480" step="5" value="10"></label><label>Horário / janela preferencial<input id="cnrTime" placeholder="Ex.: manhã, 18:30, janela doméstica"></label><label>Frequência<input id="cnrFreq" placeholder="Ex.: semanal, a cada 2 dias" value="conforme necessário"></label><div class="modal-actions"><div class="grow"></div><button type="button" class="secondary" id="cancelCnr">Cancelar</button><button class="primary" value="default">Salvar</button></div></form>`;
- document.body.appendChild(dlg);dlg.showModal();dlg.querySelector('#cancelCnr').onclick=()=>dlg.close();dlg.addEventListener('close',()=>dlg.remove());
+ dlg.innerHTML=`<form method="dialog" class="modal-card casa-modal-card" id="casaNewRoutineForm"><div class="modal-head"><div><div class="eyebrow">CASA · ROTINAS</div><h2>Nova rotina</h2><p class="note">${escapeHtml(area.title)}</p></div><button type="button" class="icon-btn casa-modal-x" data-close-cnr aria-label="Fechar">×</button></div><label>Atividade<input id="cnrName" required placeholder="Ex.: Limpar a varanda"></label><label>Duração estimada (min)<input id="cnrMin" type="number" min="1" max="480" step="5" value="10"></label><label>Horário / janela preferencial<input id="cnrTime" placeholder="Ex.: manhã, 18:30, janela doméstica"></label><label>Frequência<input id="cnrFreq" placeholder="Ex.: semanal, a cada 2 dias" value="conforme necessário"></label><div class="modal-actions"><div class="grow"></div><button type="button" class="secondary" id="cancelCnr">Cancelar</button><button class="primary" value="default">Salvar</button></div></form>`;
+ document.body.appendChild(dlg);dlg.showModal();const closeCnr=()=>dlg.close();dlg.querySelector('#cancelCnr').onclick=closeCnr;dlg.querySelector('[data-close-cnr]')?.addEventListener('click',closeCnr);dlg.addEventListener('close',()=>dlg.remove());
  dlg.querySelector('#casaNewRoutineForm').addEventListener('submit',e=>{e.preventDefault();const name=dlg.querySelector('#cnrName').value.trim();if(!name)return;const id=`casa-${String(area.id).replace(/[^a-z0-9]+/gi,'-').toLowerCase()}-${Date.now()}`;area.tasks=Array.isArray(area.tasks)?area.tasks:[];area.tasks.push({id,name,freq:dlg.querySelector('#cnrFreq').value.trim()||'conforme necessário',when:dlg.querySelector('#cnrTime').value.trim()||'horário a definir',done:false});const ds=loadCasaDurations();ds[id]=Math.max(1,+dlg.querySelector('#cnrMin').value||10);saveCasaDurations(ds);const ts=loadCasaTimes();ts[id]=dlg.querySelector('#cnrTime').value.trim()||'flexível';saveCasaTimes(ts);saveCasa(d);dlg.close();renderCasa();requestAnimationFrame(()=>{const target=document.querySelector(`.casa-routine-group[data-routine-id="${CSS.escape(String(areaId))}"]`);if(target){target.open=true;target.scrollIntoView({behavior:'smooth',block:'start'})}})});
 }
 function renderCasaCore(){
@@ -2365,8 +2365,11 @@ const casaV132=document.createElement('style');casaV132.id='casa-v132-horarios-f
 
 function openCasaMaintenance(id){
  const d=loadCasa();d.maintenance=d.maintenance||[];const current=id?d.maintenance.find(x=>String(x.id)===String(id)):null;
- const m={id:current?.id||uid(),name:"",area:"Casa geral",type:"Reparo / conserto",date:"",durationValue:30,durationUnit:"minutes",priority:"normal",frequency:"Única",responsible:"Eu",notify:false,notifyWhen:"No horário da tarefa",period:"flex",time:"",note:"",status:"a_fazer",...current};
+ const m={id:current?.id||uid(),name:"",area:"Casa geral",type:"Reparo / conserto",date:"",durationValue:30,durationUnit:"minutes",priority:"normal",frequency:"Única",responsible:"Eu",notify:false,notifyWhen:"No horário da tarefa",period:"flex",time:"",note:"",status:"a_fazer",responsibility:"owner",assigneeIds:[],...current};
  const areas=["Casa geral",...(Array.isArray(d.areas)?d.areas:[]).map(a=>a.title),"Piscina","Jardim","Garagem","Edícula","Área externa"];
+ const sat=loadSatellites(),members=(sat.members||[]).filter(x=>x.status!=="removed"&&x.permissions?.casa!==false);
+ const selected=new Set((Array.isArray(m.assigneeIds)?m.assigneeIds:[]).map(String));
+ const targetHtml=members.map(x=>`<button type="button" class="maint-sat-option ${selected.has(String(x.id))?'is-selected':''}" data-maint-sat="${escapeHtml(x.id)}" aria-pressed="${selected.has(String(x.id))?'true':'false'}"><span class="maint-sat-check">${selected.has(String(x.id))?'✓':''}</span><span><strong>${escapeHtml(x.name)}</strong><small>${x.role==='kids'?'Kids':'Adulto'}</small></span></button>`).join('');
  const dlg=document.createElement("dialog");dlg.className="study-v10-dialog casa-maint-dialog";
  dlg.innerHTML=`<form class="study-v10-modal casa-maint-modal" id="casaMaintForm"><div class="study-v10-head"><div><div class="eyebrow">CASA · MANUTENÇÃO</div><h2>${current?"Editar manutenção":"Nova manutenção"}</h2><p>Ligada à área da casa, ao Meu Dia e ao tempo real.</p></div><button type="button" class="study-v10-x" data-close>×</button></div>
  ${field("O que precisa ser feito?",`<input id="mName" required maxlength="100" value="${escapeHtml(m.name)}">`)}
@@ -2375,14 +2378,69 @@ function openCasaMaintenance(id){
  ${field("Horário opcional",`<input id="mTime" type="time" value="${escapeHtml(m.time||'')}">`)}
  ${field("Duração estimada",`<div class="study-v10-duration"><input id="mDur" type="number" min="1" value="${+m.durationValue||30}"><select id="mDurUnit"><option value="minutes" ${m.durationUnit==='minutes'?'selected':''}>minutos</option><option value="hours" ${m.durationUnit==='hours'?'selected':''}>horas</option></select></div>`)}
  <div class="form-grid">${field("Prioridade",`<select id="mPriority"><option value="baixa" ${m.priority==='baixa'?'selected':''}>Baixa</option><option value="normal" ${m.priority==='normal'?'selected':''}>Normal</option><option value="alta" ${m.priority==='alta'?'selected':''}>Alta</option><option value="urgente" ${m.priority==='urgente'?'selected':''}>Urgente</option></select>`)}${field("Frequência",`<select id="mFreq">${["Única","Diária","Semanal","Quinzenal","Mensal","Conforme necessário"].map(x=>`<option ${x===m.frequency?'selected':''}>${x}</option>`).join('')}</select>`)}</div>
- ${field("Responsável",`<select id="mResp">${["Eu","Henrique","Thiago","Prestador / profissional"].map(x=>`<option ${x===m.responsible?'selected':''}>${x}</option>`).join('')}</select>`)}
+
+ <div class="maint-share-block">
+   <span class="maint-share-label">Compartilhamento</span>
+   <div class="sat-resp-options maint-resp-options" data-maint-resp>
+     <button type="button" data-v="owner" class="${m.responsibility==='owner'?'active':''}">Eu faço</button>
+     <button type="button" data-v="help" class="${m.responsibility==='help'?'active':''}">Aceito ajuda</button>
+     <button type="button" data-v="delegated" class="${m.responsibility==='delegated'?'active':''}">Delegar</button>
+   </div>
+   <input type="hidden" id="mResponsibility" value="${escapeHtml(m.responsibility||'owner')}">
+   <div class="maint-sat-targets" ${m.responsibility==='delegated'?'':'hidden'}>
+     <div class="sat-target-head"><span>Delegar para</span><button type="button" class="sat-target-all" id="mAllTargets">Todos</button></div>
+     <div class="maint-sat-grid">${targetHtml||'<div class="sat-empty-mini">Nenhum satélite com acesso à Casa.</div>'}</div>
+     <small class="sat-target-note">A manutenção será compartilhada apenas com os satélites selecionados.</small>
+   </div>
+ </div>
+
+ ${field("Responsável externo / referência",`<select id="mResp">${["Eu","Henrique","Thiago","Prestador / profissional"].map(x=>`<option ${x===m.responsible?'selected':''}>${x}</option>`).join('')}</select>`)}
  <label class="study-v10-field" style="display:flex;align-items:center;gap:10px"><input id="mNotify" type="checkbox" ${m.notify?'checked':''} style="width:auto"><span style="margin:0">Me avisar?</span></label>
  <div id="mNotifyWrap" style="${m.notify?'':'display:none'}">${field("Quando avisar?",`<select id="mNotifyWhen">${["No horário da tarefa","10 min antes","30 min antes","1 hora antes","No início do período","Em um horário escolhido"].map(x=>`<option ${x===m.notifyWhen?'selected':''}>${x}</option>`).join('')}</select>`)}</div>
  ${field("Observação",`<textarea id="mNote" rows="3">${escapeHtml(m.note||'')}</textarea>`)}
  <div class="study-v10-actions">${current?'<button type="button" class="danger" id="deleteMaint">Excluir</button>':''}<button type="button" class="secondary" data-close>Cancelar</button><button class="primary" type="submit">Salvar</button></div></form>`;
- document.body.appendChild(dlg);const close=()=>dlg.close();dlg.querySelectorAll('[data-close]').forEach(b=>b.onclick=close);dlg.addEventListener('click',e=>{if(e.target===dlg)close()});dlg.onclose=()=>dlg.remove();dlg.querySelector('#mNotify').onchange=e=>dlg.querySelector('#mNotifyWrap').style.display=e.target.checked?'':'none';
+ document.body.appendChild(dlg);
+ const close=()=>dlg.close();
+ dlg.querySelectorAll('[data-close]').forEach(b=>b.onclick=close);
+ dlg.addEventListener('click',e=>{if(e.target===dlg)close()});
+ dlg.onclose=()=>dlg.remove();
+ dlg.querySelector('#mNotify').onchange=e=>dlg.querySelector('#mNotifyWrap').style.display=e.target.checked?'':'none';
+
+ const respInput=dlg.querySelector('#mResponsibility');
+ const targetsWrap=dlg.querySelector('.maint-sat-targets');
+ const satButtons=[...dlg.querySelectorAll('[data-maint-sat]')];
+ const syncTargets=()=>{targetsWrap.hidden=respInput.value!=='delegated'};
+ dlg.querySelectorAll('[data-maint-resp] button').forEach(b=>b.onclick=()=>{
+   dlg.querySelectorAll('[data-maint-resp] button').forEach(x=>x.classList.toggle('active',x===b));
+   respInput.value=b.dataset.v;
+   syncTargets();
+ });
+ satButtons.forEach(b=>b.onclick=()=>{
+   const on=b.getAttribute('aria-pressed')!=='true';
+   b.setAttribute('aria-pressed',String(on));
+   b.classList.toggle('is-selected',on);
+   b.querySelector('.maint-sat-check').textContent=on?'✓':'';
+ });
+ dlg.querySelector('#mAllTargets')?.addEventListener('click',()=>{
+   const allOn=satButtons.length&&satButtons.every(b=>b.getAttribute('aria-pressed')==='true');
+   satButtons.forEach(b=>{
+     b.setAttribute('aria-pressed',String(!allOn));
+     b.classList.toggle('is-selected',!allOn);
+     b.querySelector('.maint-sat-check').textContent=!allOn?'✓':'';
+   });
+ });
+ syncTargets();
+
  dlg.querySelector('#deleteMaint')?.addEventListener('click',()=>{if(!confirm(`Excluir “${m.name}”?`))return;d.maintenance=d.maintenance.filter(x=>String(x.id)!==String(m.id));saveCasa(d);close();renderCasa()});
- dlg.querySelector('#casaMaintForm').addEventListener('submit',e=>{e.preventDefault();const obj={...m,name:dlg.querySelector('#mName').value.trim(),area:dlg.querySelector('#mArea').value,type:dlg.querySelector('#mType').value,date:dlg.querySelector('#mDate').value,period:dlg.querySelector('#mPeriod').value,time:dlg.querySelector('#mTime').value,durationValue:Math.max(1,+dlg.querySelector('#mDur').value||30),durationUnit:dlg.querySelector('#mDurUnit').value,priority:dlg.querySelector('#mPriority').value,frequency:dlg.querySelector('#mFreq').value,responsible:dlg.querySelector('#mResp').value,notify:dlg.querySelector('#mNotify').checked,notifyWhen:dlg.querySelector('#mNotifyWhen').value,note:dlg.querySelector('#mNote').value.trim(),status:m.status||'a_fazer',updatedAt:Date.now()};d.maintenance=current?d.maintenance.map(x=>String(x.id)===String(m.id)?obj:x):[...d.maintenance,{...obj,createdAt:Date.now()}];saveCasa(d);close();renderCasa()});
+ dlg.querySelector('#casaMaintForm').addEventListener('submit',e=>{
+   e.preventDefault();
+   const responsibility=respInput.value||'owner';
+   const assigneeIds=responsibility==='delegated'?satButtons.filter(b=>b.getAttribute('aria-pressed')==='true').map(b=>b.dataset.maintSat):[];
+   if(responsibility==='delegated'&&!assigneeIds.length){targetsWrap.classList.add('sat-target-error');return}
+   const obj={...m,name:dlg.querySelector('#mName').value.trim(),area:dlg.querySelector('#mArea').value,type:dlg.querySelector('#mType').value,date:dlg.querySelector('#mDate').value,period:dlg.querySelector('#mPeriod').value,time:dlg.querySelector('#mTime').value,durationValue:Math.max(1,+dlg.querySelector('#mDur').value||30),durationUnit:dlg.querySelector('#mDurUnit').value,priority:dlg.querySelector('#mPriority').value,frequency:dlg.querySelector('#mFreq').value,responsible:dlg.querySelector('#mResp').value,notify:dlg.querySelector('#mNotify').checked,notifyWhen:dlg.querySelector('#mNotifyWhen').value,note:dlg.querySelector('#mNote').value.trim(),responsibility,assigneeIds,status:m.status||'a_fazer',updatedAt:Date.now()};
+   d.maintenance=current?d.maintenance.map(x=>String(x.id)===String(m.id)?obj:x):[...d.maintenance,{...obj,createdAt:Date.now()}];
+   saveCasa(d);close();renderCasa()
+ });
  dlg.showModal();
 }
 
@@ -5639,3 +5697,27 @@ renderKidsRewards=renderUniversalRewards;
 const _renderSatellitesRC137=renderSatellites;
 renderSatellites=function(){_renderSatellitesRC137();const data=loadSatellites();document.querySelectorAll('[data-sat-preview]').forEach(btn=>{const m=data.members.find(x=>String(x.id)===String(btn.dataset.satPreview));if(!m||m.role==='kids')return;const actions=btn.closest('.sat-actions');if(!actions||actions.querySelector('[data-sat-recognize]'))return;const b=document.createElement('button');b.type='button';b.className='secondary sat-recognize';b.dataset.satRecognize=m.id;b.textContent='Reconhecer';b.onclick=()=>openRecognitionModal(m.id);actions.appendChild(b)})};
 window.renderSatellites=renderSatellites;
+
+;(function(){
+  if(document.getElementById('rc139-casa-maint-share'))return;
+  const st=document.createElement('style');
+  st.id='rc139-casa-maint-share';
+  st.textContent=`
+    html body .casa-maint-modal .maint-share-block{display:grid;gap:10px;margin:12px 0 16px}
+    html body .casa-maint-modal .maint-share-label{font-size:13px;font-weight:400;color:#5f5662}
+    html body .casa-maint-modal .maint-sat-targets[hidden]{display:none!important}
+    html body .casa-maint-modal .maint-sat-targets{display:grid;gap:8px}
+    html body .casa-maint-modal .maint-sat-grid{display:grid;gap:8px;padding:8px;border-radius:18px;background:rgba(255,255,255,.52);border:1px solid rgba(113,96,130,.08)}
+    html body .casa-maint-modal .maint-sat-option{-webkit-appearance:none;appearance:none;width:100%;display:grid;grid-template-columns:24px minmax(0,1fr);align-items:center;gap:12px;text-align:left;padding:13px 14px;border-radius:17px;border:1px solid rgba(126,115,132,.10);background:#fffdfa;color:#4b4550}
+    html body .casa-maint-modal .maint-sat-option strong{display:block;font-size:13.5px;font-weight:400}
+    html body .casa-maint-modal .maint-sat-option small{display:block;margin-top:2px;font-size:11px;font-weight:400;color:#817a84}
+    html body .casa-maint-modal .maint-sat-check{width:24px;height:24px;border-radius:8px;border:1.5px solid rgba(126,115,132,.26);background:#fff;display:grid;place-items:center;color:#fff;font-size:14px;font-weight:700}
+    html body .casa-maint-modal .maint-sat-option.is-selected{border-color:rgba(216,157,183,.25)}
+    html body .casa-maint-modal .maint-sat-option.is-selected .maint-sat-check{background:linear-gradient(135deg,#DE9FB8 0%,#F0C9B4 54%,#BFD5ED 100%);border-color:transparent}
+    html body .casa-maint-modal .maint-resp-options button,
+    html body .casa-maint-modal .sat-target-head,
+    html body .casa-maint-modal .sat-target-note,
+    html body .casa-maint-modal .sat-target-all{font-weight:400!important}
+  `;
+  document.head.appendChild(st);
+})();
