@@ -1,4 +1,4 @@
-const CACHE = "hml-bertha-v221-rc137-rewards-universal";
+const CACHE = "hml-bertha-v221-rc138-rewards-refine";
 self.addEventListener("install", event => event.waitUntil(self.skipWaiting()));
 self.addEventListener("activate", event => event.waitUntil((async()=>{
   const keys=await caches.keys();
