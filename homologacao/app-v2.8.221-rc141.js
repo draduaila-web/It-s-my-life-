@@ -1,0 +1,5978 @@
+
+(function(){if(document.getElementById('close-purchase-v2873-style'))return;const st=document.createElement('style');st.id='close-purchase-v2873-style';st.textContent=`.close-purchase-modal{display:flex!important;flex-direction:column!important;max-height:min(88dvh,760px)!important;overflow:hidden!important}.close-purchase-list{display:grid;gap:9px;overflow:auto;padding:2px 2px 10px;min-height:0}.close-purchase-item{display:grid!important;grid-template-columns:24px minmax(0,1fr) auto;align-items:center;gap:10px;margin:0!important;padding:12px 13px;border:1px solid #eadfec;border-radius:16px;background:#fff;cursor:pointer}.close-purchase-item input{position:absolute;opacity:0;pointer-events:none}.close-purchase-check{width:21px;height:21px;border:1.5px solid #cbbbd1;border-radius:7px;background:#fff;display:grid;place-items:center}.close-purchase-item input:checked+.close-purchase-check{background:#8f73a1;border-color:#8f73a1}.close-purchase-item input:checked+.close-purchase-check:after{content:'✓';color:#fff;font-size:14px;font-weight:900}.close-purchase-copy{min-width:0}.close-purchase-copy strong,.close-purchase-copy small{display:block}.close-purchase-copy strong{font-size:14px;color:#514854}.close-purchase-copy small{margin-top:3px;font-size:11px;color:#8c818e}.close-purchase-base{font-size:10px;font-weight:850;color:#80668f;background:#f3eafb;border-radius:999px;padding:6px 8px;white-space:nowrap}.close-purchase-hint{font-size:11px;line-height:1.4;color:#8a808b;padding:5px 2px 0}.close-purchase-actions{position:sticky!important;bottom:-20px!important;margin:12px -20px -20px!important;padding:13px 20px calc(13px + env(safe-area-inset-bottom))!important;background:rgba(255,253,251,.97)!important;border-top:1px solid rgba(92,72,104,.08);z-index:2}@media(max-width:560px){.close-purchase-modal{width:calc(100vw - 24px)!important;max-height:calc(100dvh - 24px)!important;border-radius:24px!important;padding:18px!important}.close-purchase-actions{bottom:-18px!important;margin:12px -18px -18px!important;padding:12px 18px calc(12px + env(safe-area-inset-bottom))!important}.close-purchase-base{display:none}}`;document.head.appendChild(st)})();
+// BERTH.A v2.8.221 RC96 — Alimentação: cardápios configuráveis pelo owner
+// BERTH.A Homologação v2.8.180 — modal Encerrar compra refinado
+// BERTH.A app-v2.8.127 · Casa modais blush/sálvia + menu de áreas alinhado
+window.BERTHA_BUILD="2.8.139-trabalho-estetica-integracao";
+// BERTH.A v2.8.10 — Casa: dados reais, modal padrão e horários abaixo das rotinas.
+const STORAGE_KEY = "minha-vida.pendencias.v1";
+const state = {
+  route: "meu-dia",
+  filter: "abertas",
+  editingId: null,
+  search: ""
+};
+
+const app = document.querySelector("#app");
+const dialog = document.querySelector("#pendingDialog");
+const form = document.querySelector("#pendingForm");
+
+function loadPendencias() {
+  try { return JSON.parse(window.berthaHmlStorage.getItem(STORAGE_KEY)) || []; }
+  catch { return []; }
+}
+function savePendencias(items) {
+  window.berthaHmlStorage.setItem(STORAGE_KEY, JSON.stringify(items));
+}
+function uid() {
+  return `${Date.now()}-${Math.random().toString(16).slice(2)}`;
+}
+function todayISO() {
+  const d = new Date();
+  const local = new Date(d.getTime() - d.getTimezoneOffset()*60000);
+  return local.toISOString().slice(0,10);
+}
+function formatDate(value) {
+  if (!value) return "";
+  return new Intl.DateTimeFormat("pt-BR", {day:"2-digit", month:"2-digit"}).format(new Date(value+"T12:00:00"));
+}
+function dueClass(value) {
+  if (!value) return "";
+  if (value < todayISO()) return "overdue";
+  if (value === todayISO()) return "today";
+  return "";
+}
+function escapeHtml(value="") {
+  // Dados persistidos por versões antigas podem conter números, null ou outros
+  // tipos. A camada de apresentação nunca deve cair por isso.
+  return String(value ?? "").replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[c]));
+}
+
+
+function mvNow(){return new Date();}
+function mvMinutes(d=mvNow()){return d.getHours()*60+d.getMinutes();}
+function mvDow(d=mvNow()){return d.getDay();}
+function mvDate(){return new Intl.DateTimeFormat('pt-BR',{weekday:'long',day:'numeric',month:'long'}).format(mvNow());}
+function mvRead(k){try{return JSON.parse(window.berthaHmlStorage.getItem(k)||'[]')}catch(e){return[]}}
+function mvPending(){
+ const a=mvRead('minha-vida.pendencias.v1'), t=new Date(); t.setHours(0,0,0,0);
+ return a.filter(x=>!x.completed&&!x.done&&(!x.dueDate||new Date(x.dueDate+'T00:00:00')<=t)).slice(0,5);
+}
+function mvCurrentBlock(){
+ const d=mvNow(), m=mvMinutes(d), w=mvDow(d);
+ if(m>=320&&m<455)return ['Manhã protegida','05:20–07:35','Seu ritual de manhã. Sem tarefas domésticas.','protected'];
+ if(m>=480&&m<840)return ['Trabalho CREFITO-11','08:00–14:00','Bloco oficial de trabalho.','work'];
+ if((w===1||w===3)&&m>=880&&m<970)return ['Janela estratégica','14:40–16:10','Espaço para decisões e prioridades estratégicas.','strategy'];
+ const ho={1:['16:40','18:40'],2:['15:40','17:40'],3:['16:40','18:40'],4:['15:40','17:40'],5:['15:40','17:40']}[w];
+ if(ho){const s=+ho[0].slice(0,2)*60+ +ho[0].slice(3),e=+ho[1].slice(0,2)*60+ +ho[1].slice(3);if(m>=s&&m<e)return ['Home office',ho.join('–'),'Bloco obrigatório de trabalho em casa.','office'];}
+ if(m>=1140)return ['Noite protegida','após 19:00','Agora é espaço para desacelerar. O sistema não vai encher sua noite.','rest'];
+ return ['Espaço livre','agora','Você não precisa preencher cada minuto.','free'];
+}
+function studyWindowNow(){
+ const d=mvNow(),m=mvMinutes(d),w=mvDow(d);
+ if((w===1||w===3) && m>=880 && m<970) return {minutes:970-m,start:880,end:970,label:'Janela estratégica'};
+ if((w===2||w===4||w===5) && m>=870 && m<910) return {minutes:910-m,start:870,end:910,label:'Janela curta'};
+ return null;
+}
+function renderStudySuggestionMeuDia(){
+ const win=studyWindowNow();
+ if(!win) return '';
+ const sug=estudoSugestao(win.minutes);
+ if(!sug || !sug.maps?.length) return `<section class="study-now-card"><div class="eyebrow">ESTUDOS</div><strong>Nenhum conteúdo precisa entrar agora.</strong><p>Sua janela está disponível. Se quiser estudar, escolha livremente; caso contrário, preserve o espaço.</p></section>`;
+ const first=sug.maps[0];
+ const label=win.minutes>=75?'até 1h30':win.minutes>=45?'até 1h':'até 40 min';
+ return `<section class="study-now-card"><div class="eyebrow">ESTUDOS · ${escapeHtml(win.label)} · ${label}</div><h3>${escapeHtml(sug.title)}</h3><p>${escapeHtml(sug.text)}</p><button class="study-now-action" onclick="location.hash='#estudos';setTimeout(()=>document.getElementById('mapa-${first.id}')?.scrollIntoView({behavior:'smooth',block:'center'}),80)">Mapa ${String(first.id).padStart(3,'0')} · ${escapeHtml(first.materia)}<small>${escapeHtml(first.topico)}</small></button></section>`;
+}
+function ensureStudyMeuDiaStyles(){
+ if(document.getElementById('study-meu-dia-styles')) return;
+ const style=document.createElement('style'); style.id='study-meu-dia-styles';
+ style.textContent=`
+ .study-now-card{margin:16px 0;padding:18px;border:1px solid rgba(92,72,104,.10);border-radius:24px;background:linear-gradient(135deg,#f3eef8,#eef5f8);box-shadow:0 8px 24px rgba(76,58,82,.05)}
+ .study-now-card h3{margin:6px 0 4px;font-size:21px}.study-now-card p{margin:0 0 12px;color:#756d78}.study-now-action{width:100%;text-align:left;border:1px solid #ddd2e8;border-radius:16px;padding:12px;background:#fffdfb;color:#654b75;font-weight:800}.study-now-action small{display:block;margin-top:4px;color:#8a808e;font-weight:500}
+ .bottom-nav{position:fixed!important;left:0!important;right:0!important;bottom:0!important;width:100%!important;max-width:none!important;margin:0!important;transform:none!important;display:grid!important;grid-template-columns:repeat(4,minmax(0,1fr))!important;align-items:stretch!important;z-index:9999!important;border-radius:24px 24px 0 0!important;padding:8px 10px calc(8px + env(safe-area-inset-bottom))!important;box-sizing:border-box!important;background:rgba(255,250,246,.96)!important;backdrop-filter:blur(12px)!important}
+ .bottom-nav .nav-item{min-width:0!important;width:100%!important;display:flex!important;align-items:center!important;justify-content:center!important;gap:3px!important;flex-direction:column!important;white-space:nowrap!important}
+ `;
+ document.head.appendChild(style);
+}
+function finHomeMonthOffset(offset=0){
+ const d=new Date();d.setDate(1);d.setMonth(d.getMonth()+offset);
+ return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,"0")}`;
+}
+function finHomeReminders(){
+ try{
+  const d=loadFin(),months=[finHomeMonthOffset(-1),finHomeMonthOffset(0),finHomeMonthOffset(1)],seen=new Set(),items=[];
+  months.forEach(month=>finPlannedMonth(d,month).forEach(o=>{
+   if(o.paid||o.bill.reminderEnabled===false)return;
+   const days=finDaysTo(o.due),lead=Number(o.bill.reminderDays??0);if(days>lead)return;
+   const key=`${o.bill.id}|${o.month}`;if(seen.has(key))return;seen.add(key);items.push({...o,days,status:finPlannedStatus(o)});
+  }));
+  return items.sort((a,b)=>a.due.localeCompare(b.due)).slice(0,4);
+ }catch(e){return[];}
+}
+function finReminderMomentLabel(o){
+ const b=o.bill||{},now=new Date(),first=b.reminderTime||'09:00',again=b.repeatReminderTime||'21:30',repeat=b.repeatIfPending!==false,hhmm=`${String(now.getHours()).padStart(2,'0')}:${String(now.getMinutes()).padStart(2,'0')}`;
+ const base=o.days<0?`Atrasada · ${Math.abs(o.days)}d`:o.days===0?'Vence hoje':o.days===1?'Vence amanhã':o.status.label;
+ if(hhmm<first)return `${base} · aviso ${first}`;
+ if(repeat&&hhmm<again)return `${base} · próximo aviso ${again}`;
+ return `${base} · ${formatDate(o.due)}`;
+}
+function renderFinanceRemindersMeuDia(){
+ const items=finHomeReminders();if(!items.length)return '';
+ const icon=o=>o.days<0?`<svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="8"></circle><path d="M12 7.5v5.4"></path><path d="M12 16.6h.01"></path></svg>`:`<svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="8"></circle><path d="M12 7.5v4.9l3.2 1.9"></path></svg>`;
+ const rows=items.map(o=>`<a class="home-fin-reminder-row" href="#financeiro"><span class="home-fin-reminder-icon ${o.days<0?'is-late':'is-clock'}" aria-hidden="true">${icon(o)}</span><span><strong>${escapeHtml(o.bill.name||'Conta prevista')}</strong><small>${escapeHtml(finReminderMomentLabel(o))}</small></span><b>›</b></a>`).join('');
+ return `<section class="day-section home-fin-reminders"><div class="section-head"><h2>Contas para lembrar</h2><a href="#financeiro">ver financeiro</a></div>${rows}</section>`;
+}
+function renderMeuDia(){
+ ensureStudyMeuDiaStyles();
+ const d=mvNow(), h=d.getHours(), greet=h<12?'Bom dia':h<18?'Boa tarde':'Boa noite', b=mvCurrentBlock(), p=mvPending();
+ const focus=b[3]==='rest'?[['Desacelerar','Nada urgente precisa entrar aqui.']]:p.slice(0,3).map(x=>[x.title||x.name||'Pendência',x.note||'Pendência para hoje']);
+ if(!focus.length)focus.push(['Seu essencial está em dia','Use este espaço para viver, descansar ou escolher o que importa.']);
+ const w=mvDow(d), ho={1:'16:40–18:40',2:'15:40–17:40',3:'16:40–18:40',4:'15:40–17:40',5:'15:40–17:40'}[w]||'—';
+ return `<section class="day-hero"><div class="eyebrow">💜 MEU DIA</div><h1>${greet}, Duaila.</h1><p class="day-date">${mvDate()}</p></section>
+ <section class="now-card ${b[3]}"><div class="card-kicker">AGORA</div><div class="now-title">${b[0]}</div><div class="now-time">${b[1]}</div><p>${b[2]}</p></section>
+ ${renderFinanceRemindersMeuDia()}
+ ${renderFoodMeuDiaMini()}
+ <section class="day-section"><div class="section-head"><h2>O que importa hoje</h2><span class="soft-count">${focus.length}</span></div>
+ ${focus.map((x,i)=>`<div class="focus-row"><span class="focus-dot">${i+1}</span><div><strong>${x[0]}</strong><small>${x[1]}</small></div></div>`).join('')}</section>
+ <section class="day-section"><div class="section-head"><h2>Seu dia, sem excesso</h2></div><div class="timeline">
+ <div><b>05:20–07:35</b><span>Manhã protegida · movimento + café + se arrumar</span></div>
+ <div><b>08:00–14:00</b><span>Trabalho oficial</span></div>
+ ${(w===1||w===3)?'<div><b>14:40–16:10</b><span>Janela estratégica</span></div>':''}
+ <div><b>${ho}</b><span>Home office</span></div><div><b>19:00+</b><span>Noite protegida · descanso primeiro</span></div></div></section>
+ ${p.length?`<section class="day-section"><div class="section-head"><h2>Pendências que merecem aparecer</h2><a href="#pendencias">ver todas</a></div>${p.map(x=>`<div class="compact-item"><strong>${x.title||x.name||'Pendência'}</strong>${x.dueDate?`<small>${x.dueDate}</small>`:''}</div>`).join('')}</section>`:''}
+ ${renderStudySuggestionMeuDia()}
+ <section class="quick-grid"><a href="#pendencias">📝<span>Pendências</span></a><a href="#rituais">✨<span>Rituais</span></a><a href="#exercicios">🏃<span>Exercícios</span></a><a href="#alimentacao">🍽️<span>Alimentação</span></a><a href="#receitas">📖<span>Receitas</span></a><a href="#casa">🏠<span>Casa</span></a><a href="#financeiro">💰<span>Financeiro</span></a><a href="#ideias">💡<span>Criação &amp; Ideias</span></a><a href="#estudos">📚<span>Estudos</span></a></section>
+ <section class="free-space"><div>☁️</div><strong>Espaço livre também faz parte do dia.</strong><p>Se nada precisa ser resolvido agora, não resolva.</p></section>`;
+}
+
+function ensureSoftMeuDiaStyles(){
+  if(document.getElementById('soft-meu-dia-styles')) return;
+  const style=document.createElement('style');
+  style.id='soft-meu-dia-styles';
+  style.textContent=`
+    .quick-grid{gap:14px!important;}
+    .quick-grid a{min-height:104px!important;border:1px solid rgba(92,72,104,.10)!important;box-shadow:0 8px 24px rgba(76,58,82,.06)!important;transition:transform .18s ease,box-shadow .18s ease!important;}
+    .quick-grid a:active{transform:scale(.985);}
+    .quick-grid a:nth-child(1){background:#f6e5ea!important;}
+    .quick-grid a:nth-child(2){background:#eee7f7!important;}
+    .quick-grid a:nth-child(3){background:#e5f2ed!important;}
+    .quick-grid a:nth-child(4){background:#f8e9df!important;}
+    .quick-grid a:nth-child(5){background:#e8f0f7!important;}
+    .quick-grid a:nth-child(6){background:#f7f0d9!important;}
+    .quick-grid a:nth-child(7){background:#e5f2ed!important;}
+    .quick-grid a:nth-child(8){background:#f1e9f5!important;}
+    .quick-grid a:nth-child(9){background:#e8eff7!important;}
+    .quick-grid a span{font-weight:500!important;}
+    .home-fin-reminders{background:radial-gradient(circle at 92% 12%,rgba(135,177,218,.06),transparent 32%),linear-gradient(135deg,rgba(255,251,244,.98),rgba(248,246,252,.94))!important;border:1px solid rgba(112,92,156,.08)!important;border-radius:20px!important;padding:9px 12px!important;box-shadow:0 5px 16px rgba(76,58,82,.025)!important;}
+    .home-fin-reminders .section-head{margin-bottom:2px!important}.home-fin-reminders .section-head h2{font-size:17px!important}.home-fin-reminders .section-head a{font-size:11px!important}
+    .home-fin-reminder-row{display:grid!important;grid-template-columns:22px minmax(0,1fr) auto!important;align-items:center!important;gap:9px!important;padding:8px 1px!important;text-decoration:none!important;color:inherit!important;border-top:1px solid rgba(92,72,104,.07)!important;}
+    .home-fin-reminder-row:first-of-type{border-top:0!important;}
+    .home-fin-reminder-icon{display:grid!important;place-items:center!important;width:20px!important;height:20px!important;color:#765f99!important;background:transparent!important;border-radius:0!important}.home-fin-reminder-icon:before,.home-fin-reminder-icon:after{content:none!important;display:none!important}.home-fin-reminder-icon svg{width:19px!important;height:19px!important;fill:none!important;stroke:currentColor!important;stroke-width:1.45!important;stroke-linecap:round!important;stroke-linejoin:round!important}.home-fin-reminder-icon.is-late{color:#956875!important}
+    .home-fin-reminder-row strong,.home-fin-reminder-row small{display:block!important;}
+    .home-fin-reminder-row strong{font-size:14px!important}.home-fin-reminder-row small{margin-top:1px!important;color:#827681!important;font-size:10.5px!important;}
+    .home-fin-reminder-row>b{font-size:20px!important;color:#8e718f!important;font-weight:400!important;}
+    .home-recipes-shortcut-wrap{display:flex!important;justify-content:flex-end!important;margin:8px 2px 12px!important;}
+    .home-recipes-shortcut{display:inline-flex!important;align-items:center!important;gap:7px!important;min-height:38px!important;padding:7px 12px!important;border:1px solid rgba(173,104,128,.16)!important;border-radius:999px!important;background:linear-gradient(120deg,rgba(255,244,239,.78),rgba(248,226,231,.62))!important;box-shadow:0 5px 16px rgba(93,68,77,.035)!important;text-decoration:none!important;color:#9a5e73!important;font-size:12px!important;font-weight:700!important;letter-spacing:.01em!important;}
+    .home-recipes-shortcut-icon{width:17px!important;height:17px!important;display:grid!important;place-items:center!important;color:#a8667d!important;}
+    .home-recipes-shortcut-icon svg{width:17px!important;height:17px!important;fill:none!important;stroke:currentColor!important;stroke-width:1.65!important;stroke-linecap:round!important;stroke-linejoin:round!important;}
+    .home-recipes-shortcut b{font-size:16px!important;line-height:1!important;font-weight:400!important;color:#a8667d!important;}
+  `;
+  document.head.appendChild(style);
+}
+
+/* NAVEGAÇÃO PRINCIPAL — MINHA VIDA
+   A abertura padrão é Meu Dia. A barra inferior mantém quatro acessos:
+   B•A · Planos · Rituais · Mais. Planos reúne Tarefas e Compromissos.
+*/
+function ensureMainNavigation() {
+  ensureSoftMeuDiaStyles();
+  ensureStudyMeuDiaStyles();
+  // Reconstrói uma única barra inferior, mesmo que o index antigo tenha
+  // deixado uma barra duplicada/antiga. Isso evita o problema do iPhone
+  // mostrar apenas “Rituais | Mais”.
+  const navs = Array.from(document.querySelectorAll('.bottom-nav'));
+  let nav = navs[0] || null;
+  navs.slice(1).forEach(n => n.remove());
+  if (!nav) {
+    nav = document.createElement('nav');
+    nav.className = 'bottom-nav';
+    nav.setAttribute('aria-label', 'Navegação principal');
+    document.body.appendChild(nav);
+  }
+  nav.innerHTML = `
+    <a class="nav-item" data-route="meu-dia" href="#meu-dia" aria-label="B•A"><strong class="nav-ba">B•A</strong><span>Início</span></a>
+    <a class="nav-item" data-route="planos" href="#planos" aria-label="Planos"><span class="nav-line-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M6 5.5h12M6 12h12M6 18.5h8"/><path d="M3.5 5.5h.01M3.5 12h.01M3.5 18.5h.01"/></svg></span><span>Planos</span></a>
+    <a class="nav-item" data-route="rituais" href="#rituais" aria-label="Rituais">✨<span>Rituais</span></a>
+    <button class="nav-item" type="button" data-more="1" aria-label="Mais">☰<span>Mais</span></button>`;
+  Object.assign(nav.style, {
+    position:'fixed', left:'0', right:'0', bottom:'0', width:'100%', maxWidth:'none',
+    margin:'0', transform:'none', display:'grid', gridTemplateColumns:'repeat(4,minmax(0,1fr))',
+    boxSizing:'border-box', zIndex:'99999', padding:'8px 10px calc(8px + env(safe-area-inset-bottom))',
+    borderRadius:'24px 24px 0 0', background:'rgba(255,250,246,.97)',
+    backdropFilter:'blur(12px)', WebkitBackdropFilter:'blur(12px)'
+  });
+  nav.querySelectorAll('.nav-item').forEach(item => Object.assign(item.style, {
+    minWidth:'0', width:'100%', display:'flex', alignItems:'center', justifyContent:'center',
+    gap:'3px', flexDirection:'column', whiteSpace:'nowrap', boxSizing:'border-box', padding:'6px 2px',
+    background:'transparent', border:'0', textDecoration:'none'
+  }));
+  const more = nav.querySelector('[data-more]');
+  if (more) more.onclick = () => document.getElementById('moduleMenu')?.showModal();
+
+  const links = document.querySelector('.module-links');
+  if (links) {
+    const desired = [
+      ['meu-dia','💜 Meu Dia'],
+      ['planos','Planos'],
+      ['pendencias','Tarefas'],
+      ['compromissos','Compromissos'],
+      ['ideias','💡 Criação & Ideias'],
+      ['estudos','📚 Estudos / CEBRASPE'],
+      ['financeiro','💰 Financeiro'],
+      ['casa','🏠 Casa'],
+      ['exercicios','🏃 Exercícios'],
+      ['alimentacao','🍽️ Alimentação'],
+      ['receitas','📖 Receitas'],
+      ['satelites','◇ Satélites'],
+      ['convites','Convites'],
+      ['premiacoes','Premiações']
+    ];
+    links.innerHTML = desired.map(([r,label]) => `<a href="#${r}" data-module-route="${r}">${label}</a>`).join('');
+    links.querySelectorAll('[data-module-route]').forEach(a=>a.addEventListener('click',()=>{const route=a.dataset.moduleRoute;const dlg=document.getElementById('moduleMenu');if(dlg?.open)dlg.close();if(route==='financeiro'){setTimeout(()=>{if((location.hash||'').replace('#','')==='financeiro') render();},0);}}));
+  }
+}
+
+function render() {
+  ensureMainNavigation();
+  const hash = (location.hash || "").replace("#", "").trim();
+  const route = hash || state.route || "meu-dia";
+  state.route = route;
+  document.body.dataset.berthaRoute = route;
+
+  const pageTitle = document.querySelector("#pageTitle");
+  if (pageTitle) {
+    pageTitle.textContent =
+      route === "planos" ? "Planos" :
+      route === "pendencias" ? "Tarefas" :
+      route === "compromissos" ? "Compromissos" :
+      route === "meu-dia" ? "💜 Meu Dia" :
+      route === "ideias" ? "💡 Criação & Ideias" :
+      route === "rituais" ? "✨ Rituais" :
+      route === "estudos" ? "📚 Estudos" :
+      route === "financeiro" ? "💰 Financeiro" :
+      route === "casa" ? "🏠 Casa" :
+      route === "exercicios" ? "🏃 Exercícios" :
+      route === "alimentacao" ? "🍽️ Alimentação" :
+      route === "receitas" ? "📖 Receitas" :
+      route === "satelites" ? "Satélites" :
+      route === "convites" ? "Convites" :
+      route === "premiacoes" ? "Premiações" :
+      route === "satelite" ? "Meu Dia" :
+      route === "compras" ? "Lista de Compras" :
+      route === "progresso" ? "Meu Progresso" :
+      "Minha Vida";
+  }
+
+  document.querySelectorAll(".bottom-nav .nav-item").forEach(b =>
+    b.classList.toggle("active", b.dataset.route === route)
+  );
+
+  // v2.8.203 — Rituais é renderizado exclusivamente pelo runtime final.
+  // Evita a dupla renderização legado + atual que fazia a tela "sambar" no iPhone.
+  if ((route === "rituais" || route.startsWith("ritual-")) && window.__BERTHA_FINAL_RITUAL_ROUTER__) {
+    return;
+  }
+
+  if (route === "meu-dia") {
+    app.innerHTML = renderMeuDia();
+    return;
+  }
+
+  // Trabalho é renderizado exclusivamente por work-v12.js.
+  // Evita o placeholder antigo aparecer antes da tela correta.
+  if (route === "trabalho" || route.startsWith("trabalho-")) {
+    // RC43: o módulo Trabalho renderiza depois que o roteador principal terminou sua atualização.
+    // Isso elimina a tela parcial que só se corrigia após recarregar a página no Safari.
+    requestAnimationFrame(()=>window.__BERTHA_WORK_ROUTE__?.());
+    return;
+  }
+
+  if (route === "planos") renderPlanos();
+  else if (route === "pendencias") renderPendencias();
+  else if (route === "compromissos") renderCompromissos();
+  else if (route === "ideias") renderIdeias();
+  else if (route === "rituais") renderRituais();
+  else if (route === "estudos") renderEstudos();
+  else if (route === "financeiro") renderFinanceiro();
+  else if (route === "casa") renderCasa();
+  else if (route === "exercicios") renderExercicios();
+  else if (route === "alimentacao") renderAlimentacao();
+  else if (route === "receitas") renderReceitas();
+  else if (route === "satelites") renderSatellites();
+  else if (route === "convites") renderConvites();
+  else if (route === "premiacoes") renderKidsRewards();
+  else if (route === "satelite") renderSatelliteDay();
+  else if (route === "compras") renderShoppingUniversal();
+  else if (route === "progresso") renderProgressOverview();
+  else renderPlaceholder();
+}
+
+// Stable reference for BERTH.A runtime layers; prevents later scripts from replacing the core router.
+window.__berthaCoreRender = render;
+window.__berthaCoreRenderFinanceiro = renderFinanceiro;
+window.addEventListener("hashchange", render);
+
+
+/* ---------------------------------------------------------
+   PLANOS — guarda-chuva de Tarefas + Compromissos
+   v2.8.152
+   --------------------------------------------------------- */
+const BERTHA_COMMITMENTS_KEY='bertha.commitments.v1';
+function berthaRead(key,fallback=[]){try{return JSON.parse(window.berthaHmlStorage.getItem(key))??fallback}catch{return fallback}}
+function berthaWrite(key,value){window.berthaHmlStorage.setItem(key,JSON.stringify(value))}
+function plansEsc(v=''){return String(v).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[c]))}
+function plansDatePt(v){if(!v)return'';const d=new Date(v+'T12:00:00');return Number.isNaN(d.getTime())?v:d.toLocaleDateString('pt-BR',{day:'2-digit',month:'short'})}
+function plansDuration(x){const n=Math.max(1,+x.durationValue||30),u=x.durationUnit||'minutes';return u==='days'?`${n} dia${n===1?'':'s'}`:u==='hours'?`${n}h`:`${n} min`}
+function ensurePlansStyles(){if(document.getElementById('bertha-plans-v152'))return;const st=document.createElement('style');st.id='bertha-plans-v152';st.textContent=`
+.nav-line-icon{width:22px;height:22px;display:grid;place-items:center}.nav-line-icon svg{width:21px;height:21px;fill:none;stroke:currentColor;stroke-width:1.6;stroke-linecap:round;stroke-linejoin:round}.nav-ba{font-size:16px;letter-spacing:.01em;font-weight:700;line-height:22px}
+.plans-page{display:grid;gap:14px}.plans-hero{position:relative;overflow:hidden;padding:23px 22px 22px;border-radius:29px;border:1px solid rgba(177,132,88,.12);background:radial-gradient(circle at 56% 40%,rgba(255,249,223,.88),transparent 28%),linear-gradient(135deg,rgba(255,250,225,.99) 0%,rgba(250,229,204,.72) 54%,rgba(232,185,148,.52) 100%);box-shadow:0 12px 34px rgba(91,69,47,.04)}.plans-hero:before{content:"";position:absolute;left:34%;top:-24%;width:210px;height:180px;border-radius:50%;background:radial-gradient(circle,rgba(255,255,242,.72),rgba(255,255,242,0) 67%);pointer-events:none}.plans-hero:after{content:"";position:absolute;right:-30px;bottom:-58px;width:210px;height:210px;border-radius:50%;background:radial-gradient(circle,rgba(218,153,111,.24),rgba(218,153,111,0) 66%);pointer-events:none}.plans-hero>*{position:relative;z-index:1}.plans-hero .eyebrow{font-size:10.5px;letter-spacing:.19em;font-weight:800;color:#9b7458}.plans-hero h2{margin:7px 0 8px;font-size:25px;line-height:1.07;letter-spacing:-.03em;color:#3d3947;font-weight:510;max-width:290px}.plans-hero p{margin:0;max-width:305px;color:#756d6a;font-size:12.5px;line-height:1.44}.plans-hero-mark{position:absolute;right:20px;top:20px!important;width:46px;height:46px;display:grid;place-items:center;color:#b58a68;opacity:.75}.plans-hero-mark svg{width:40px;height:40px;fill:none;stroke:currentColor;stroke-width:1.35;stroke-linecap:round;stroke-linejoin:round}.plans-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}.plans-entry{appearance:none;text-align:left;border:1px solid rgba(151,112,80,.08);border-radius:22px;padding:17px;background:linear-gradient(140deg,rgba(255,251,232,.99),rgba(246,222,198,.62));color:#403a40;min-height:128px;box-shadow:0 8px 22px rgba(95,68,42,.025)}.plans-entry.commit{background:linear-gradient(140deg,rgba(255,250,225,.99),rgba(235,194,160,.58))}.plans-entry svg{width:25px;height:25px;fill:none;stroke:#b78365;stroke-width:1.55;stroke-linecap:round;stroke-linejoin:round}.plans-entry strong{display:block;margin-top:18px;font-size:17px}.plans-entry span{display:block;margin-top:5px;font-size:11.5px;line-height:1.35;color:#847875}.plans-summary{display:grid;gap:10px}.plans-summary-card{border:1px solid rgba(105,88,75,.07);border-radius:20px;background:#fdf9f3;padding:15px}.plans-summary-card .k{font-size:10px;letter-spacing:.14em;font-weight:800;color:#9c8170}.plans-summary-card strong{display:block;margin-top:6px;color:#413b43;font-size:15px}.plans-summary-card small{display:block;margin-top:4px;color:#8d8280}.commit-head{display:flex;align-items:flex-start;justify-content:space-between;gap:12px}.commit-add{border:0;border-radius:16px;padding:12px 15px;background:linear-gradient(135deg,#f7e8b8 0%,#e7bd87 45%,#cf8f67 100%);color:#fff;font-weight:800;box-shadow:0 8px 20px rgba(172,116,74,.12)}.commit-section{margin-top:18px}.commit-section h3{margin:0 0 9px;font-size:12px;letter-spacing:.12em;text-transform:uppercase;color:#887871}.commit-card{display:grid;grid-template-columns:64px minmax(0,1fr) 34px;gap:10px;align-items:center;padding:13px 11px;border:1px solid rgba(110,91,75,.07);border-radius:18px;background:#fdf9f3;margin-bottom:8px}.commit-time{font-size:13px;font-weight:800;color:#b47c5a}.commit-copy strong{display:block;font-size:14px;color:#413b43}.commit-copy small{display:block;margin-top:4px;color:#8a7f7b;font-size:11px}.commit-more{border:0;background:transparent;color:#9a8d89;font-size:22px}.commit-empty{padding:18px;border:1px dashed rgba(126,104,86,.14);border-radius:18px;color:#918580;font-size:12px;background:rgba(255,250,243,.5)}
+.commit-dialog{border:0;padding:0;background:transparent;max-width:none}.commit-dialog::backdrop{background:rgba(53,48,52,.30);backdrop-filter:blur(4px)}.commit-modal{box-sizing:border-box;width:min(92vw,520px);max-height:min(88dvh,760px);overflow:auto;background:#fbf7f0;border:1px solid rgba(140,126,145,.10);border-radius:26px;padding:20px;box-shadow:0 20px 52px rgba(47,37,58,.14)}.commit-modal-head{display:flex;justify-content:space-between;align-items:flex-start;gap:14px;margin-bottom:15px}.commit-modal-head .eyebrow{font-size:10px;letter-spacing:.16em;font-weight:800;color:#9c7b64}.commit-modal-head h2{margin:5px 0 0;font-size:22px;color:#373440;font-weight:620}.commit-x{border:0!important;outline:0!important;box-shadow:none!important;background:rgba(247,243,237,.82)!important;color:#8e8792!important;font-size:23px;line-height:1;width:36px;height:36px;border-radius:50%;display:grid;place-items:center;padding:0}.commit-field{display:block;margin:11px 0;min-width:0}.commit-field>span{display:block;font-size:11.5px;font-weight:740;color:#655f67;margin-bottom:6px}.commit-field input,.commit-field select,.commit-field textarea{box-sizing:border-box;width:100%;min-width:0;max-width:100%;min-height:46px;border:1px solid rgba(140,126,145,.14);border-radius:15px;background:#fffdfa;padding:11px 12px;color:#3e3d4b;font:inherit;font-size:16px}.commit-field textarea{min-height:86px;resize:vertical}.commit-two{display:grid;grid-template-columns:minmax(0,1fr);gap:0}.commit-duration{display:grid;grid-template-columns:1fr 1.2fr;gap:9px}.commit-toggle-row{display:flex;align-items:center;justify-content:space-between;gap:16px;padding:13px 0}.commit-toggle-row>div strong{display:block;font-size:13px;color:#4c4650}.commit-toggle-row>div small{display:block;margin-top:3px;font-size:11px;color:#8d848c}.commit-toggle{position:relative;width:48px;height:28px;flex:0 0 auto}.commit-toggle input{position:absolute;opacity:0}.commit-toggle i{display:block;width:48px;height:28px;border-radius:999px;background:#ded8d3;transition:.18s}.commit-toggle i:after{content:"";display:block;width:22px;height:22px;border-radius:50%;background:white;box-shadow:0 2px 6px rgba(0,0,0,.13);transform:translate(3px,3px);transition:.18s}.commit-toggle input:checked+i{background:#dfaa85}.commit-toggle input:checked+i:after{transform:translate(23px,3px)}.commit-expand{display:none}.commit-expand.on{display:block}.commit-actions{display:flex;justify-content:flex-end;gap:9px;margin-top:18px}.commit-actions button{border:0;border-radius:15px;padding:11px 16px;font-weight:800}.commit-actions .secondary{background:rgba(255,255,255,.72);color:#706972;border:1px solid rgba(140,126,145,.12)}.commit-actions .primary{background:linear-gradient(135deg,#f7e8b8 0%,#e7bd87 45%,#cf8f67 100%);color:white}.commit-delete{margin-right:auto!important;background:#fff1ee!important;color:#ad695e!important}.commit-reminder{display:grid;grid-template-columns:1fr 1.35fr;gap:9px}
+@media(max-width:480px){.plans-grid{grid-template-columns:1fr 1fr}.plans-entry{padding:15px;min-height:118px}.commit-two,.commit-duration,.commit-reminder{grid-template-columns:1fr 1fr}.commit-modal{width:calc(100vw - 24px);max-height:calc(100dvh - 24px);padding:18px}}
+/* v2.8.153 — Tarefas: linguagem enxuta + modal Planos forçado após estilos dinâmicos */
+#pendingDialog[open] #pendingForm.modal-card{background:#fbf7f0!important;border-color:rgba(177,132,88,.10)!important}
+#pendingDialog[open] .modal-head{background:linear-gradient(135deg,rgba(255,252,232,.98) 0%,rgba(247,226,198,.90) 56%,rgba(224,170,128,.62) 100%)!important;border-bottom:1px solid rgba(177,132,88,.10)!important}
+#pendingDialog[open] .modal-head .eyebrow{color:#9b7458!important}
+#pendingDialog[open] .modal-head h2{color:#3d3947!important}
+#pendingDialog[open] input,#pendingDialog[open] select,#pendingDialog[open] textarea{background:#fffdfa!important;border-color:rgba(177,132,88,.14)!important}
+#pendingDialog[open] input:focus,#pendingDialog[open] select:focus,#pendingDialog[open] textarea:focus{border-color:rgba(191,127,78,.38)!important;box-shadow:0 0 0 3px rgba(231,186,140,.12)!important}
+#pendingDialog[open] .modal-actions{background:rgba(251,247,240,.97)!important;border-top-color:rgba(177,132,88,.09)!important}
+#pendingDialog[open] .modal-actions .primary{background:linear-gradient(135deg,#fff1bd 0%,#e8bd88 52%,#cb855f 100%)!important;color:#fff!important}
+#pendingDialog[open] .modal-head .icon-btn{background:rgba(255,252,245,.82)!important;border-color:rgba(132,105,86,.10)!important;color:#7e777a!important}
+/* Tarefas dentro de Planos — mesma família amarelo-creme + pêssego */
+.plans-task-hero{position:relative;overflow:hidden!important;border:1px solid rgba(177,132,88,.12)!important;background:radial-gradient(circle at 52% 32%,rgba(255,254,235,.82),transparent 30%),linear-gradient(135deg,rgba(255,251,229,.99) 0%,rgba(248,225,198,.72) 58%,rgba(221,167,126,.50) 100%)!important;box-shadow:0 12px 34px rgba(91,69,47,.04)!important}
+.plans-task-hero .eyebrow{font-size:10.5px!important;letter-spacing:.19em!important;font-weight:800!important;color:#9b7458!important;margin-bottom:7px!important}
+.plans-task-hero h2{font-size:25px!important;line-height:1.07!important;font-weight:510!important;letter-spacing:-.03em!important;color:#3d3947!important;margin:0 0 8px!important}
+.plans-task-hero p{font-size:12.5px!important;line-height:1.44!important;color:#756d6a!important;margin:0!important}
+#addBtn.primary{background:linear-gradient(135deg,#fbefc5 0%,#e8bd88 52%,#cf8f67 100%)!important;color:#fff!important;border:0!important;box-shadow:0 8px 20px rgba(172,116,74,.12)!important}
+.tabs .tab.active{background:linear-gradient(135deg,rgba(249,235,196,.94),rgba(226,177,136,.88))!important;color:#785b46!important;border-color:rgba(177,132,88,.12)!important}
+.pending-card .check.done{background:#d29a68!important;border-color:#d29a68!important}
+`;document.head.appendChild(st)}
+function renderPlanos(){ensurePlansStyles();const tasks=loadPendencias().filter(x=>!x.done&&!x.completed);const commits=berthaRead(BERTHA_COMMITMENTS_KEY,[]).filter(x=>x.active!==false);const today=new Date().toISOString().slice(0,10);const next=commits.filter(x=>x.date>=today).sort((a,b)=>`${a.date} ${a.time}`.localeCompare(`${b.date} ${b.time}`))[0];app.innerHTML=`<div class="plans-page"><section class="plans-hero"><div class="eyebrow">PLANOS</div><h2>Everything in its place. Life in motion.</h2><p>Você planeja. A BERTH.A organiza.</p><div class="plans-hero-mark" aria-hidden="true"><svg viewBox="0 0 48 48"><path d="M12 30c5-8 11-12 18-12 3 0 6 .7 9 2.2"/><path d="M12 35c8-3 15-4 24-2"/><path d="M31 13l4 4-4 4"/></svg></div></section><div class="plans-grid"><button class="plans-entry" data-open-tasks><svg viewBox="0 0 24 24"><path d="M6 5.5h12M6 12h12M6 18.5h8"/><path d="M3.5 5.5h.01M3.5 12h.01M3.5 18.5h.01"/></svg><strong>Tarefas</strong><span>O que precisa ser feito.</span></button><button class="plans-entry commit" data-open-commitments><svg viewBox="0 0 24 24"><rect x="4" y="5.5" width="16" height="14" rx="2.5"/><path d="M8 3.5v4M16 3.5v4M4 9.5h16"/></svg><strong>Compromissos</strong><span>O que já ocupa data e horário.</span></button></div><div class="plans-summary"><div class="plans-summary-card"><div class="k">TAREFAS ABERTAS</div><strong>${tasks.length} ${tasks.length===1?'tarefa':'tarefas'}</strong><small>${tasks[0]?plansEsc(tasks[0].title||tasks[0].name||'Próxima tarefa'):'Nada pendente agora.'}</small></div><div class="plans-summary-card"><div class="k">PRÓXIMO COMPROMISSO</div><strong>${next?`${plansDatePt(next.date)} · ${plansEsc(next.time||'sem horário')}`:'Nenhum compromisso próximo'}</strong><small>${next?plansEsc(next.title):'Seu tempo ainda está aberto.'}</small></div></div></div>`;document.querySelector('[data-open-tasks]').onclick=()=>location.hash='#pendencias';document.querySelector('[data-open-commitments]').onclick=()=>location.hash='#compromissos'}
+function commitmentOccursOn(x,date){if(x.active===false)return false;if(x.repeat==='none'||!x.repeat)return x.date===date;if(x.date>date)return false;if(x.repeatUntil&&date>x.repeatUntil)return false;const start=new Date(x.date+'T12:00:00'),d=new Date(date+'T12:00:00');const days=Math.floor((d-start)/86400000);if(days<0)return false;if(x.repeat==='daily')return true;if(x.repeat==='weekly')return days%7===0;if(x.repeat==='weekdays')return (x.weekdays||[]).includes(d.getDay());if(x.repeat==='monthly')return d.getDate()===start.getDate();return false}
+function renderCompromissos(){ensurePlansStyles();const all=berthaRead(BERTHA_COMMITMENTS_KEY,[]).filter(x=>x.active!==false);const today=new Date().toISOString().slice(0,10),tom=new Date(Date.now()+86400000).toISOString().slice(0,10);const todayItems=all.filter(x=>commitmentOccursOn(x,today)).sort((a,b)=>(a.time||'99:99').localeCompare(b.time||'99:99'));const upcoming=all.filter(x=>x.repeat==='none'&&x.date>today).sort((a,b)=>`${a.date} ${a.time}`.localeCompare(`${b.date} ${b.time}`)).slice(0,12);const recurring=all.filter(x=>x.repeat&&x.repeat!=='none');const card=x=>`<div class="commit-card"><div class="commit-time">${plansEsc(x.time||'—')}</div><div class="commit-copy"><strong>${plansEsc(x.title)}</strong><small>${plansEsc(plansDuration(x))}${x.location?` · ${plansEsc(x.location)}`:''}</small></div><button class="commit-more" data-edit-commit="${plansEsc(x.id)}">›</button></div>`;app.innerHTML=`<div class="plans-page"><section class="plans-hero"><div class="commit-head"><div><div class="eyebrow">PLANOS · COMPROMISSOS</div><h2>Everything in its place. Life in motion.</h2><p>Você marca. A BERTH.A lembra você.</p></div></div><div class="plans-hero-mark" aria-hidden="true"><svg viewBox="0 0 48 48"><rect x="11" y="13" width="26" height="24" rx="7"/><path d="M17 10v7M31 10v7M11 21h26"/></svg></div></section><button class="commit-add" data-new-commit>＋ Novo compromisso</button><section class="commit-section"><h3>Hoje</h3>${todayItems.length?todayItems.map(card).join(''):'<div class="commit-empty">Nenhum compromisso marcado para hoje.</div>'}</section><section class="commit-section"><h3>Próximos</h3>${upcoming.length?upcoming.map(x=>`<div class="commit-card"><div class="commit-time">${plansDatePt(x.date)}</div><div class="commit-copy"><strong>${plansEsc(x.title)}</strong><small>${plansEsc(x.time||'sem horário')} · ${plansEsc(plansDuration(x))}</small></div><button class="commit-more" data-edit-commit="${plansEsc(x.id)}">›</button></div>`).join(''):'<div class="commit-empty">Nenhum próximo compromisso.</div>'}</section><section class="commit-section"><h3>Recorrentes</h3>${recurring.length?recurring.map(card).join(''):'<div class="commit-empty">Nenhum compromisso recorrente.</div>'}</section></div>`;document.querySelector('[data-new-commit]').onclick=()=>openCommitmentModal();document.querySelectorAll('[data-edit-commit]').forEach(b=>b.onclick=()=>openCommitmentModal(b.dataset.editCommit))}
+function openCommitmentModal(id=null){ensurePlansStyles();const all=berthaRead(BERTHA_COMMITMENTS_KEY,[]),x=id?all.find(a=>String(a.id)===String(id)):null;const dlg=document.createElement('dialog');dlg.className='commit-dialog';const today=new Date().toISOString().slice(0,10);dlg.innerHTML=`<form class="commit-modal" method="dialog"><div class="commit-modal-head"><div><div class="eyebrow">PLANOS · COMPROMISSOS</div><h2>${x?'Editar compromisso':'Novo compromisso'}</h2></div><button class="commit-x" type="button" data-close>×</button></div><label class="commit-field"><span>Título</span><input data-title value="${plansEsc(x?.title||'')}" placeholder="Ex.: Dentista"></label><label class="commit-field"><span>Data</span><input type="date" data-date value="${plansEsc(x?.date||today)}"></label><label class="commit-field"><span>Horário</span><input type="time" data-time value="${plansEsc(x?.time||'')}"></label><label class="commit-field"><span>Duração</span><div class="commit-duration"><input type="number" min="1" inputmode="numeric" data-duration value="${x?.durationValue||60}"><select data-duration-unit><option value="minutes" ${x?.durationUnit!=='hours'&&x?.durationUnit!=='days'?'selected':''}>minutos</option><option value="hours" ${x?.durationUnit==='hours'?'selected':''}>horas</option><option value="days" ${x?.durationUnit==='days'?'selected':''}>dias</option></select></div></label><div class="commit-toggle-row"><div><strong>Repetir?</strong><small>Para compromissos que voltam ao calendário.</small></div><label class="commit-toggle"><input type="checkbox" data-repeat-toggle ${x?.repeat&&x.repeat!=='none'?'checked':''}><i></i></label></div><div class="commit-expand ${x?.repeat&&x.repeat!=='none'?'on':''}" data-repeat-box><label class="commit-field"><span>Frequência</span><select data-repeat><option value="daily" ${x?.repeat==='daily'?'selected':''}>Todos os dias</option><option value="weekdays" ${x?.repeat==='weekdays'?'selected':''}>Dias específicos</option><option value="weekly" ${x?.repeat==='weekly'?'selected':''}>Semanal</option><option value="monthly" ${x?.repeat==='monthly'?'selected':''}>Mensal</option></select></label><div data-weekdays style="display:${x?.repeat==='weekdays'?'block':'none'}"><label class="commit-field"><span>Dias da semana</span><select multiple data-weekdays-select size="4"><option value="1">Segunda</option><option value="2">Terça</option><option value="3">Quarta</option><option value="4">Quinta</option><option value="5">Sexta</option><option value="6">Sábado</option><option value="0">Domingo</option></select></label></div><label class="commit-field"><span>Até quando?</span><select data-repeat-mode><option value="forever" ${!x?.repeatUntil?'selected':''}>Sem data final</option><option value="date" ${x?.repeatUntil?'selected':''}>Até uma data</option></select></label><label class="commit-field ${x?.repeatUntil?'':'commit-expand'}" data-repeat-until-wrap><span>Data final</span><input type="date" data-repeat-until value="${plansEsc(x?.repeatUntil||'')}"></label></div><div class="commit-toggle-row"><div><strong>Me avisar?</strong><small>A BERTH.A pode lembrar antes.</small></div><label class="commit-toggle"><input type="checkbox" data-notify ${x?.notify?'checked':''}><i></i></label></div><div class="commit-expand ${x?.notify?'on':''}" data-notify-box><label class="commit-field"><span>Quando avisar?</span><div class="commit-reminder"><input type="number" min="0" inputmode="numeric" data-notify-value value="${x?.notifyValue??15}"><select data-notify-unit><option value="minutes" ${x?.notifyUnit!=='hours'&&x?.notifyUnit!=='days'?'selected':''}>minutos antes</option><option value="hours" ${x?.notifyUnit==='hours'?'selected':''}>horas antes</option><option value="days" ${x?.notifyUnit==='days'?'selected':''}>dias antes</option></select></div></label></div><label class="commit-field"><span>Local ou link <small style="font-weight:500;color:#9b9298">(opcional)</small></span><input data-location value="${plansEsc(x?.location||'')}"></label><label class="commit-field"><span>Observação <small style="font-weight:500;color:#9b9298">(opcional)</small></span><textarea data-note>${plansEsc(x?.note||'')}</textarea></label><div class="commit-actions">${x?'<button type="button" class="commit-delete" data-delete>Excluir</button>':''}<button type="button" class="secondary" data-close>Cancelar</button><button type="button" class="primary" data-save>Salvar</button></div></form>`;document.body.appendChild(dlg);const close=()=>{dlg.close();dlg.remove()};dlg.querySelectorAll('[data-close]').forEach(b=>b.onclick=close);const rt=dlg.querySelector('[data-repeat-toggle]'),rb=dlg.querySelector('[data-repeat-box]'),rs=dlg.querySelector('[data-repeat]'),wd=dlg.querySelector('[data-weekdays]'),rm=dlg.querySelector('[data-repeat-mode]'),ruw=dlg.querySelector('[data-repeat-until-wrap]'),nt=dlg.querySelector('[data-notify]'),nb=dlg.querySelector('[data-notify-box]');rt.onchange=()=>rb.classList.toggle('on',rt.checked);rs.onchange=()=>wd.style.display=rs.value==='weekdays'?'block':'none';rm.onchange=()=>ruw.classList.toggle('commit-expand',rm.value!=='date');nt.onchange=()=>nb.classList.toggle('on',nt.checked);if(x?.weekdays?.length){[...dlg.querySelector('[data-weekdays-select]').options].forEach(o=>o.selected=x.weekdays.includes(+o.value))}dlg.querySelector('[data-save]').onclick=()=>{const title=dlg.querySelector('[data-title]').value.trim();if(!title){dlg.querySelector('[data-title]').focus();return}const repeat=rt.checked?rs.value:'none',repeatUntil=rt.checked&&rm.value==='date'?dlg.querySelector('[data-repeat-until]').value:'';const data={id:x?.id||`commit-${Date.now()}`,title,date:dlg.querySelector('[data-date]').value||today,time:dlg.querySelector('[data-time]').value,durationValue:Math.max(1,+dlg.querySelector('[data-duration]').value||60),durationUnit:dlg.querySelector('[data-duration-unit]').value,repeat,weekdays:repeat==='weekdays'?[...dlg.querySelector('[data-weekdays-select]').selectedOptions].map(o=>+o.value):[],repeatUntil,notify:nt.checked,notifyValue:Math.max(0,+dlg.querySelector('[data-notify-value]').value||0),notifyUnit:dlg.querySelector('[data-notify-unit]').value,location:dlg.querySelector('[data-location]').value.trim(),note:dlg.querySelector('[data-note]').value.trim(),active:true,updatedAt:Date.now(),createdAt:x?.createdAt||Date.now()};const i=all.findIndex(a=>String(a.id)===String(data.id));if(i>=0)all[i]=data;else all.push(data);berthaWrite(BERTHA_COMMITMENTS_KEY,all);close();renderCompromissos()};if(x)dlg.querySelector('[data-delete]').onclick=()=>{berthaWrite(BERTHA_COMMITMENTS_KEY,all.filter(a=>String(a.id)!==String(x.id)));close();renderCompromissos()};dlg.addEventListener('cancel',e=>{e.preventDefault();close()});dlg.showModal()}
+
+function renderPendencias() {
+  const all = loadPendencias();
+  const filtered = all
+    .filter(p => state.filter === "abertas" ? !p.done : p.done)
+    .filter(p => !state.search || `${p.title} ${p.category} ${p.note}`.toLowerCase().includes(state.search.toLowerCase()))
+    .sort((a,b) => {
+      if (a.done !== b.done) return Number(a.done)-Number(b.done);
+      if (!a.due && !b.due) return b.createdAt-a.createdAt;
+      if (!a.due) return 1;
+      if (!b.due) return -1;
+      return a.due.localeCompare(b.due);
+    });
+
+  const openCount = all.filter(p => !p.done).length;
+  app.innerHTML = `
+    <section class="hero plans-task-hero">
+      <div class="eyebrow">PLANOS · TAREFAS</div><h2>Everything handled. Nothing carried.</h2>
+      <p>Você registra. A BERTH.A encaixa no seu tempo.</p>
+    </section>
+
+    <div class="add-row">
+      <input class="search" id="searchInput" placeholder="Buscar tarefa..." value="${escapeHtml(state.search)}">
+      <button class="primary" id="addBtn">＋ Adicionar</button>
+    </div>
+
+    <div class="tabs">
+      <button class="tab ${state.filter==="abertas"?"active":""}" data-filter="abertas">Abertas ${openCount ? `· ${openCount}` : ""}</button>
+      <button class="tab ${state.filter==="concluidas"?"active":""}" data-filter="concluidas">Concluídas</button>
+    </div>
+
+    <div class="list">
+      ${filtered.length ? filtered.map(cardHtml).join("") : emptyHtml()}
+    </div>
+  `;
+
+  document.querySelector("#addBtn").onclick = () => openModal();
+  document.querySelector("#searchInput").oninput = e => { state.search=e.target.value; renderPendencias(); };
+  document.querySelectorAll("[data-filter]").forEach(b => b.onclick = () => { state.filter=b.dataset.filter; renderPendencias(); });
+  document.querySelectorAll("[data-id]").forEach(card => {
+    const id = card.dataset.id;
+    card.querySelector(".check").onclick = e => { e.stopPropagation(); toggleDone(id); };
+    card.querySelector(".more").onclick = e => { e.stopPropagation(); openModal(id); };
+    card.onclick = e => {
+      if (e.target.closest(".check,.more")) return;
+      openModal(id);
+    };
+  });
+}
+
+function cardHtml(p) {
+  const due = p.due ? `<span class="pill ${dueClass(p.due)}">${p.due < todayISO() ? "Vencida · " : ""}${formatDate(p.due)}</span>` : "";
+  return `
+    <article class="card pending-card" data-id="${p.id}">
+      <div class="pending">
+        <button class="check ${p.done ? "done":""}" aria-label="${p.done?"Reabrir":"Concluir"}"></button>
+        <div class="pending-main">
+          <div class="pending-title ${p.done?"done-text":""}">${escapeHtml(p.title)}</div>
+          <div class="meta">
+            <span class="pill">${escapeHtml(p.category)}</span>${due}
+          </div>
+          ${p.note ? `<p class="note">${escapeHtml(p.note)}</p>` : ""}
+        </div>
+        <button class="more" aria-label="Editar">•••</button>
+      </div>
+    </article>`;
+}
+function emptyHtml() {
+  return state.filter === "abertas" ? `
+    <div class="empty">
+      <strong>Nada precisa de você agora.</strong>
+      <span>Se algo surgir, coloque aqui. Você não precisa lembrar.</span>
+    </div>` : `
+    <div class="empty">
+      <div class="symbol">✓</div>
+      <strong>Ainda não há concluídas.</strong>
+      <span>Quando você resolver algo, ele ficará aqui.</span>
+    </div>`;
+}
+
+function openModal(id=null) {
+  state.editingId = id;
+  const p = id ? loadPendencias().find(x => x.id===id) : null;
+  document.querySelector("#dialogEyebrow").textContent = p ? "EDITAR TAREFA" : "NOVA TAREFA";
+  document.querySelector("#dialogTitle").textContent = p ? "Editar tarefa" : "Adicionar tarefa";
+  document.querySelector("#pendingTitle").value = p?.title || "";
+  document.querySelector("#pendingCategory").value = p?.category || "Pessoal";
+  document.querySelector("#pendingDue").value = p?.due || "";
+  document.querySelector("#pendingNote").value = p?.note || "";
+  document.querySelector("#deletePendingBtn").hidden = !p;
+  dialog.showModal();
+}
+
+function closeModal() {
+  dialog.close();
+  state.editingId = null;
+}
+document.querySelector("#cancelPendingBtn").onclick = closeModal;
+document.querySelector("#deletePendingBtn").onclick = () => {
+  if (!state.editingId) return;
+  if (confirm("Excluir esta tarefa?")) {
+    savePendencias(loadPendencias().filter(p => p.id !== state.editingId));
+    closeModal(); renderPendencias();
+  }
+};
+
+form.addEventListener("submit", e => {
+  e.preventDefault();
+  const items = loadPendencias();
+  const data = {
+    title: document.querySelector("#pendingTitle").value.trim(),
+    category: document.querySelector("#pendingCategory").value,
+    due: document.querySelector("#pendingDue").value,
+    note: document.querySelector("#pendingNote").value.trim()
+  };
+  if (!data.title) return;
+  if (state.editingId) {
+    const i = items.findIndex(p => p.id===state.editingId);
+    items[i] = {...items[i], ...data, updatedAt:Date.now()};
+  } else {
+    items.push({id:uid(), ...data, done:false, createdAt:Date.now(), updatedAt:Date.now()});
+  }
+  savePendencias(items);
+  closeModal();
+  renderPendencias();
+});
+
+function toggleDone(id) {
+  const items = loadPendencias();
+  const i = items.findIndex(p => p.id===id);
+  if (i < 0) return;
+  items[i].done = !items[i].done;
+  items[i].updatedAt = Date.now();
+  items[i].completedAt = items[i].done ? Date.now() : null;
+  savePendencias(items);
+  renderPendencias();
+}
+
+
+/* =========================================================
+   CRIAÇÃO & IDEIAS — v2.8.140 · cards com fundo creme e véus azul/lilás
+   Ideia = captura leve | Plano = horizonte | Projeto = execução em blocos
+========================================================= */
+
+const IDEAS_KEY = "minha-vida.ideias.v1";
+let ideaFilter = "todas";
+
+function loadIdeias(){ try{return JSON.parse(window.berthaHmlStorage.getItem(IDEAS_KEY))||[]}catch{return[]} }
+function saveIdeias(items){ window.berthaHmlStorage.setItem(IDEAS_KEY,JSON.stringify(items)); }
+function minsLabel(n){n=Math.max(0,+n||0);if(n>=60){const h=Math.floor(n/60),m=n%60;return `${h}h${m?` ${m}min`:''}`}return `${n} min`}
+function projectBlocks(x){return (Array.isArray(x.sessionMinutes)?x.sessionMinutes:[]).map(Number).filter(n=>n>0).sort((a,b)=>a-b)}
+function projectRemaining(x){const total=Math.max(0,+x.totalMinutes||0),done=Math.max(0,+x.progressMinutes||0);return total?Math.max(0,total-done):0}
+function ideaSafeLink(url){try{const u=new URL(String(url||'').trim());return /^https?:$/.test(u.protocol)?u.href:''}catch(e){return ''}}
+
+const IDEA_ICONS=[
+  ['spark','Ideia','<path d="M12 3l1.5 4.2L18 9l-4.5 1.8L12 15l-1.5-4.2L6 9l4.5-1.8L12 3z"/><path d="M18.5 14.5l.8 2.2 2.2.8-2.2.8-.8 2.2-.8-2.2-2.2-.8 2.2-.8.8-2.2z"/>'],
+  ['bulb','Lâmpada','<path d="M9 18h6M10 21h4"/><path d="M8.2 14.5A6 6 0 1 1 15.8 14.5c-.9.7-1.4 1.5-1.6 2.5H9.8c-.2-1-.7-1.8-1.6-2.5z"/>'],
+  ['note','Nota','<path d="M6 4h12v16H6z"/><path d="M9 8h6M9 12h6M9 16h4"/>'],
+  ['pen','Escrita','<path d="M5 19l3.5-.8L18 8.7 15.3 6 5.8 15.5 5 19z"/><path d="M13.8 7.5l2.7 2.7"/>'],
+  ['palette','Criação','<path d="M12 4a8 8 0 1 0 0 16h1.2a1.8 1.8 0 0 0 0-3.6h-.7a1.5 1.5 0 0 1 0-3H16A4 4 0 0 0 20 9.4C20 6.4 16.4 4 12 4z"/><path d="M8 9h.01M11 7h.01M15 8h.01"/>'],
+  ['folder','Projeto','<path d="M3.5 7h6l2 2h9v10h-17z"/><path d="M3.5 7V5h6l2 2"/>'],
+  ['target','Meta','<circle cx="12" cy="12" r="8"/><circle cx="12" cy="12" r="4"/><path d="M12 12l6-6"/>'],
+  ['map','Plano','<path d="M4 6l5-2 6 2 5-2v14l-5 2-6-2-5 2z"/><path d="M9 4v14M15 6v14"/>'],
+  ['check','Checklist','<path d="M9 6h11M9 12h11M9 18h11"/><path d="M4 6l1 1 2-2M4 12l1 1 2-2M4 18l1 1 2-2"/>'],
+  ['calendar','Agenda','<rect x="4" y="5" width="16" height="15" rx="2"/><path d="M8 3v4M16 3v4M4 9h16"/>'],
+  ['home','Casa','<path d="M4 11l8-7 8 7v9h-6v-6h-4v6H4z"/>'],
+  ['briefcase','Trabalho','<rect x="3" y="7" width="18" height="12" rx="2"/><path d="M9 7V4h6v3M3 12h18"/>']
+];
+function ideaIconSvg(key){const it=IDEA_ICONS.find(x=>x[0]===key)||IDEA_ICONS[0];return `<svg class="idea-icon-svg" viewBox="0 0 24 24" aria-hidden="true">${it[2]}</svg>`}
+function ideaIconPicker(selected='spark'){return `<div class="idea-icon-picker" role="group" aria-label="Ícone">${IDEA_ICONS.map(([k,l])=>`<button type="button" class="idea-icon-choice ${k===selected?'active':''}" data-idea-icon="${k}" aria-label="${l}" title="${l}">${ideaIconSvg(k)}<span>${l}</span></button>`).join('')}</div><input type="hidden" id="ideaIcon" value="${selected}">`}
+function bindIdeaIconPicker(root){root.querySelectorAll('[data-idea-icon]').forEach(b=>b.onclick=()=>{root.querySelector('#ideaIcon').value=b.dataset.ideaIcon;root.querySelectorAll('[data-idea-icon]').forEach(x=>x.classList.toggle('active',x===b))})}
+
+function ensureIdeasV297Styles(){
+  if(document.querySelector('#ideasV297Styles')) return;
+  const st=document.createElement('style'); st.id='ideasV297Styles'; st.textContent=`
+  :root{--idea-blue:#6ea9dc;--idea-periwinkle:#8fa7ea;--idea-lav:#b6a6ea;--idea-ink:#30354d;--idea-cream:#fffaf4}
+  .idea-hero{position:relative;overflow:hidden;padding:22px 24px!important;border:1px solid rgba(111,154,202,.20)!important;border-radius:28px!important;background:linear-gradient(118deg,rgba(223,239,252,.88),rgba(255,250,244,.96) 48%,rgba(236,231,252,.72))!important;box-shadow:0 14px 34px rgba(73,89,119,.06)!important}
+  .idea-hero:before{content:"";position:absolute;inset:-70% -25% auto 25%;height:220px;background:radial-gradient(ellipse,rgba(139,190,231,.22),transparent 67%);filter:blur(18px);pointer-events:none}
+  .idea-hero-kicker{position:relative;font-size:12px;letter-spacing:.18em;font-weight:750;color:#5689b8;margin-bottom:12px}
+  .idea-hero h2{position:relative;margin:0 0 8px!important;font-size:30px!important;line-height:1.06!important;font-weight:520!important;color:var(--idea-ink)!important;letter-spacing:-.025em}
+  .idea-hero p{position:relative;margin:0!important;max-width:88%;font-size:15px!important;line-height:1.45!important;color:#6f7587!important}
+  .idea-hero + .add-row{margin-top:15px!important}
+  .idea-card{position:relative;overflow:hidden;background:linear-gradient(130deg,rgba(251,249,244,.96),rgba(239,246,253,.80) 52%,rgba(238,233,250,.64))!important;border:1px solid rgba(122,157,196,.12)!important;box-shadow:0 10px 28px rgba(73,89,119,.045)!important}
+  .idea-card:before{content:"";position:absolute;inset:-30% auto auto -18%;width:210px;height:210px;border-radius:50%;background:radial-gradient(circle,rgba(171,208,236,.16),transparent 62%);pointer-events:none}
+  .idea-card:after{content:"";position:absolute;right:-52px;bottom:-68px;width:210px;height:210px;border-radius:50%;background:radial-gradient(circle,rgba(204,196,241,.16),transparent 60%);pointer-events:none}
+  .idea-card .pending{position:relative;z-index:1}
+  .idea-card .idea-symbol{color:#8ba9c8!important}
+  .idea-card .pending-title{color:#30354d!important}
+  .idea-card .note{color:#7c8190!important}
+  .idea-card .pill{background:rgba(236,226,212,.80)!important;color:#806f63!important;border:1px solid rgba(186,167,145,.10)!important}
+  .idea-card .idea-link{background:rgba(224,235,246,.72)!important;color:#5b87b0!important;border-color:rgba(112,157,205,.12)!important}
+  .idea-card .idea-more{color:#8b90a0!important}
+  .idea-hero-mark{position:absolute;right:22px;top:22px;font-size:24px;color:rgba(88,144,194,.48);font-weight:300}
+  #addIdeaBtn.primary,#ideaDialog .primary{border:0!important;background:linear-gradient(105deg,#74afe0 0%,#7fa6e6 55%,#aa96e7 100%)!important;color:white!important;box-shadow:0 9px 22px rgba(99,143,207,.16)!important}
+  .idea-tabs .idea-tab.active{background:linear-gradient(110deg,rgba(211,232,248,.94),rgba(229,230,249,.78))!important;color:#3976aa!important;box-shadow:none!important}
+  .idea-empty .symbol{display:none!important}.idea-empty{padding-top:70px!important}.idea-spark{font-size:27px;color:#80add1;margin-bottom:15px;font-weight:300}.idea-empty strong{color:#30354d!important}.idea-empty span{color:#7c8190!important;line-height:1.45!important}
+  #ideaDialog{background:transparent!important;border:0!important;box-shadow:none!important}
+  #ideaDialog::backdrop{background:rgba(48,46,54,.32)!important;backdrop-filter:blur(7px);-webkit-backdrop-filter:blur(7px)}
+  #ideaDialog #ideaForm.bertha-modal{background:linear-gradient(145deg,rgba(255,251,245,.985) 0%,rgba(245,250,255,.985) 48%,rgba(244,241,253,.965) 100%)!important;border:1px solid rgba(123,158,194,.18)!important;box-shadow:0 26px 70px rgba(44,55,78,.18)!important;color:var(--idea-ink)!important}
+  #ideaDialog #ideaForm.bertha-modal{position:relative!important;isolation:isolate!important}
+  #ideaDialog #ideaForm.bertha-modal:before{content:"";position:absolute;z-index:-1;pointer-events:none;inset:0;border-radius:inherit;background:radial-gradient(ellipse at 12% 8%,rgba(166,211,242,.16),transparent 34%),radial-gradient(ellipse at 92% 76%,rgba(184,166,235,.12),transparent 38%)}
+  #ideaDialog .bertha-modal-head{align-items:flex-start!important;margin-bottom:12px!important}
+  #ideaDialog .eyebrow{font-size:11px!important;letter-spacing:.18em!important;color:#5d91bd!important;font-weight:760!important}
+  #ideaDialog .bertha-modal-head h2{font-size:25px!important;font-weight:540!important;letter-spacing:-.025em!important;color:#30354d!important;margin:4px 0 2px!important}
+  #ideaDialog .idea-modal-sub{margin:0!important;color:#858a99!important;font-size:13px!important}
+  #ideaDialog [data-close]{color:#4e88bc!important;background:rgba(235,244,252,.72)!important;border:0!important;border-radius:999px!important;width:36px!important;height:36px!important;font-size:25px!important;line-height:1!important}
+  #ideaDialog .idea-native-type{position:absolute!important;width:1px!important;height:1px!important;overflow:hidden!important;clip:rect(0 0 0 0)!important;clip-path:inset(50%)!important;white-space:nowrap!important}
+  #ideaDialog .idea-type-segments{display:grid;grid-template-columns:repeat(3,1fr);gap:4px;padding:4px;margin:4px 0 16px;background:rgba(244,243,244,.72);border-radius:999px}
+  #ideaDialog .idea-type-segments button{min-height:36px;border:0;border-radius:999px;background:transparent;color:#7b7e8c;font-size:14px;font-weight:600}
+  #ideaDialog .idea-type-segments button.active{background:linear-gradient(110deg,rgba(200,227,247,.96),rgba(215,220,249,.92));color:#326fa4;box-shadow:0 2px 8px rgba(84,121,166,.08)}
+  #ideaDialog label{color:#34394d!important;font-size:14px!important;font-weight:620!important}
+  #ideaDialog input,#ideaDialog select,#ideaDialog textarea{min-height:46px!important;border:1px solid rgba(112,135,164,.18)!important;border-radius:13px!important;background:rgba(255,255,255,.74)!important;color:#30354d!important;padding:11px 13px!important;outline:none!important;box-shadow:none!important}
+  #ideaDialog textarea{min-height:92px!important;resize:none!important}
+  #ideaDialog input:focus,#ideaDialog select:focus,#ideaDialog textarea:focus{border-color:rgba(103,160,211,.55)!important;box-shadow:0 0 0 3px rgba(119,172,218,.10)!important}
+  #ideaDialog #ideaConditional>.card,#ideaDialog #projectTrackOptions{background:linear-gradient(120deg,rgba(229,242,252,.72),rgba(241,238,253,.58))!important;border:1px solid rgba(119,157,197,.12)!important;border-radius:17px!important;box-shadow:none!important}
+  #ideaDialog #projectTrackOptions label{font-size:13px!important;font-weight:520!important}
+  #ideaDialog input[type=checkbox]{appearance:none!important;-webkit-appearance:none!important;width:20px!important;min-width:20px!important;height:20px!important;min-height:20px!important;padding:0!important;border-radius:6px!important;border:1.5px solid rgba(92,126,161,.45)!important;background:rgba(255,255,255,.75)!important;display:grid!important;place-content:center!important}
+  #ideaDialog input[type=checkbox]:checked{background:linear-gradient(135deg,#69a8dc,#8c9fe2)!important;border-color:transparent!important}
+  #ideaDialog input[type=checkbox]:checked:after{content:"✓";color:white;font-size:13px;font-weight:800;line-height:1}
+  #ideaDialog .idea-inline-spark{color:#6f9fc7;font-size:17px}
+  #ideaDialog .modal-actions{border-top:0!important;margin-top:8px!important}
+  #ideaDialog .modal-actions .secondary{background:rgba(239,241,246,.72)!important;color:#71778a!important;border:0!important}
+
+  .idea-icon-svg{width:22px;height:22px;display:block;fill:none;stroke:currentColor;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round}
+  .idea-symbol{width:38px;height:38px;border-radius:12px;display:grid;place-items:center;background:rgba(225,237,248,.72);flex:0 0 38px}
+  #ideaDialog .idea-icon-label{display:block;margin:2px 0 7px;color:#34394d;font-size:14px;font-weight:620}
+  #ideaDialog .idea-icon-picker{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px;margin:0 0 16px}
+  #ideaDialog .idea-icon-choice{min-width:0;min-height:62px;border:1px solid rgba(112,135,164,.14);border-radius:14px;background:rgba(255,255,255,.62);color:#708ba9;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:5px;padding:7px 4px}
+  #ideaDialog .idea-icon-choice span{font-size:10px;line-height:1.1;color:#72798b;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%}
+  #ideaDialog .idea-icon-choice.active{background:linear-gradient(120deg,rgba(213,235,249,.94),rgba(231,228,250,.86));border-color:rgba(102,153,204,.34);color:#4f86b7;box-shadow:0 0 0 2px rgba(119,172,218,.08)}
+  @media(max-width:480px){.idea-hero{padding:20px!important}.idea-hero h2{font-size:28px!important}.idea-hero p{max-width:100%}#ideaDialog #ideaForm{padding:18px 18px max(28px,env(safe-area-inset-bottom))!important}}
+
+  /* RC104 — Criação & Ideias: tipografia leve no módulo e em todos os modais.
+     Somente peso/hierarquia tipográfica; cores, estrutura e lógica preservadas. */
+  .idea-hero-kicker{font-weight:500!important}
+  .idea-hero h2{font-weight:400!important}
+  .idea-hero p{font-weight:400!important}
+  #addIdeaBtn.primary{font-weight:500!important}
+  .idea-tabs .idea-tab{font-weight:450!important}
+  .idea-card .pending-title{font-weight:450!important}
+  .idea-card .note{font-weight:400!important}
+  .idea-card .pill,.idea-card .idea-link{font-weight:450!important}
+  .idea-empty strong{font-weight:450!important}
+  .idea-empty span{font-weight:400!important}
+
+  #ideaDialog .eyebrow{font-weight:500!important}
+  #ideaDialog .bertha-modal-head h2{font-weight:400!important}
+  #ideaDialog .idea-modal-sub{font-weight:400!important}
+  #ideaDialog label,#ideaDialog .idea-icon-label{font-weight:450!important}
+  #ideaDialog input,#ideaDialog select,#ideaDialog textarea{font-weight:400!important}
+  #ideaDialog input::placeholder,#ideaDialog textarea::placeholder{font-weight:400!important}
+  #ideaDialog .idea-type-segments button{font-weight:450!important}
+  #ideaDialog .idea-type-segments button.active{font-weight:500!important}
+  #ideaDialog .idea-icon-choice span{font-weight:400!important}
+  #ideaDialog #projectTrackOptions label{font-weight:400!important}
+  #ideaDialog .project-shopping-row label{font-weight:400!important}
+  #ideaDialog :is(.card,strong,b){font-weight:500!important}
+  #ideaDialog :is(small,.note,.hint,.muted){font-weight:400!important}
+  #ideaDialog .modal-actions button,#ideaDialog :is(.primary,.secondary,[type=submit]){font-weight:500!important}
+  #ideaDialog [data-close]{font-weight:300!important}
+
+  /* RC111 — Criação & Ideias: remover o círculo/fundo ao redor dos ícones dos cards. */
+  .idea-symbol{width:28px!important;height:28px!important;flex:0 0 28px!important;border-radius:0!important;background:transparent!important;border:0!important;box-shadow:none!important;padding:0!important}
+  .idea-card .idea-symbol{color:#8ba9c8!important}
+  .idea-symbol .idea-icon-svg{width:24px!important;height:24px!important}
+  `; document.head.appendChild(st);
+}
+
+function renderIdeias(){
+  ensureIdeasV297Styles();
+  const all=loadIdeias();
+  const counts={todas:all.length,ideias:all.filter(x=>x.type==='ideia').length,projetos:all.filter(x=>x.type==='projeto').length,planos:all.filter(x=>x.type==='plano').length};
+  const filtered=all.filter(x=>ideaFilter==='todas'||x.type===ideaFilter).sort((a,b)=>(b.updatedAt||0)-(a.updatedAt||0));
+  app.innerHTML=`
+    <section class="hero idea-hero"><div class="idea-hero-kicker">CRIAÇÃO &amp; IDEIAS</div><h2>Create headroom for life.</h2><p>Você guarda. A BERTH.A ajuda a dar forma quando for a hora.</p><span class="idea-hero-mark" aria-hidden="true">◇</span></section>
+    <div class="add-row"><input class="search" id="ideaSearch" placeholder="Buscar ideia..." autocomplete="off"><button class="primary" id="addIdeaBtn">＋ Adicionar</button></div>
+    <div class="tabs idea-tabs">${ideaTab('todas','Tudo')}${ideaTab('ideia','Ideias')}${ideaTab('projeto','Projetos')}${ideaTab('plano','Planos')}</div>
+    <div class="list" id="ideaList">${filtered.length?filtered.map(ideaCardHtml).join(''):ideaEmptyHtml()}</div>`;
+  document.querySelector('#addIdeaBtn').onclick=()=>openIdeaModal();
+  document.querySelector('#ideaSearch').oninput=e=>{const q=e.target.value.toLowerCase();document.querySelector('#ideaList').innerHTML=filtered.filter(x=>`${x.title} ${x.note||''} ${x.nextAction||''}`.toLowerCase().includes(q)).map(ideaCardHtml).join('')||ideaEmptyHtml();bindIdeaCards()};
+  document.querySelectorAll('.idea-tab').forEach(b=>b.onclick=()=>{ideaFilter=b.dataset.filter;renderIdeias()});
+  bindIdeaCards();
+}
+function ideaTab(filter,label){return `<button class="tab idea-tab ${ideaFilter===filter?'active':''}" data-filter="${filter}">${label}</button>`}
+function ideaCardHtml(x){
+  const typeLabel=x.type==='projeto'?'Projeto':x.type==='plano'?'Plano':'Ideia';
+  let extra='';
+  if(x.type==='projeto'){
+    const rem=projectRemaining(x), total=+x.totalMinutes||0, done=+x.progressMinutes||0;
+    const pct=total?Math.min(100,Math.round(done/total*100)):0;
+    const estimate=x.totalDurationUnit==='days'?`<span class="pill">Estimativa: ${+x.totalDurationValue||+x.totalDays||0} ${(+x.totalDurationValue||+x.totalDays||0)===1?'dia':'dias'}${done?` · ${minsLabel(done)} realizados`:''}</span>`:(total?`<span class="pill">${pct}% · faltam ${minsLabel(rem)}</span>`:'');
+    extra=`<div class="meta" style="margin-top:7px;gap:6px;flex-wrap:wrap">${estimate}${x.projectSuggestWindow?'<span class="pill">BERTA pode sugerir</span>':''}${x.nextAction?`<span class="pill">Próximo: ${escapeHtml(x.nextAction)}</span>`:''}</div>`;
+  } else if(x.type==='plano' && x.planHorizon){ extra=`<div class="meta" style="margin-top:7px"><span class="pill">${escapeHtml(x.planHorizonLabel||x.planHorizon)}</span></div>`; }
+  const link=ideaSafeLink(x.link);
+  return `<article class="card pending-card idea-card" data-idea-id="${x.id}"><div class="pending"><div class="idea-symbol">${ideaIconSvg(x.icon||(x.type==='projeto'?'folder':x.type==='plano'?'map':'spark'))}</div><div class="pending-main"><div class="pending-title">${escapeHtml(x.title)}</div><div class="meta"><span class="pill">${typeLabel}</span>${link?`<a class="pill idea-link" href="${escapeHtml(link)}" target="_blank" rel="noopener">↗ Abrir link</a>`:''}</div>${x.note?`<p class="note">${escapeHtml(x.note)}</p>`:''}${extra}</div><button class="more idea-more" aria-label="Editar">•••</button></div></article>`;
+}
+function ideaEmptyHtml(){return `<div class="empty idea-empty"><div class="idea-spark" aria-hidden="true">◇</div><strong>Esse espaço está leve.</strong><span>Registre quando aparecer.<br>Nem toda ideia precisa virar tarefa.</span></div>`}
+function bindIdeaCards(){document.querySelectorAll('[data-idea-id]').forEach(card=>card.onclick=e=>{if(e.target.closest('.idea-link'))return;if(e.target.closest('.idea-more'))e.stopPropagation();openIdeaModal(card.dataset.ideaId)})}
+
+function openIdeaModal(id=null){
+  ensureFinanceStyles();
+  ensureIdeasV297Styles();
+  const p=id?loadIdeias().find(x=>x.id===id):null, type=p?.type||'ideia';
+  let projectShoppingNeeds=Array.isArray(p?.shoppingNeeds)?p.shoppingNeeds.map(x=>typeof x==='string'?{id:uid(),name:x,sendToShopping:false}:{id:x.id||uid(),name:String(x.name||'').trim(),sendToShopping:!!x.sendToShopping}).filter(x=>x.name):[];
+  const d=document.createElement('dialog');d.id='ideaDialog';d.className='study-v10-dialog idea-dialog';
+  d.innerHTML=`<form method="dialog" id="ideaForm" class="bertha-modal study-v10-modal">
+    <div class="bertha-modal-head"><div><div class="eyebrow">CRIAÇÃO &amp; IDEIAS</div><h2 id="ideaModalTitle">${p?'Editar registro':'Nova entrada'}</h2><p class="idea-modal-sub">Guarde hoje. Dê forma quando for a hora.</p></div><button type="button" data-close aria-label="Fechar">×</button></div>
+    <div class="idea-type-segments" role="group" aria-label="Tipo"><button type="button" data-idea-type="ideia">Ideia</button><button type="button" data-idea-type="plano">Plano</button><button type="button" data-idea-type="projeto">Projeto</button></div>
+    <label class="idea-native-type">Tipo<select id="ideaType"><option value="ideia" ${type==='ideia'?'selected':''}>Ideia</option><option value="projeto" ${type==='projeto'?'selected':''}>Projeto</option><option value="plano" ${type==='plano'?'selected':''}>Plano</option></select></label>
+    <span class="idea-icon-label">Ícone</span>${ideaIconPicker(p?.icon||(type==='projeto'?'folder':type==='plano'?'map':'spark'))}
+    <label>Nome<input id="ideaTitle" required maxlength="120" value="${escapeHtml(p?.title||'')}" placeholder="Ex.: Organizar projeto da casa"></label>
+    <div id="ideaConditional"></div>
+    <label>Link <span class="muted">(opcional)</span><input id="ideaLink" type="url" inputmode="url" autocapitalize="none" autocomplete="url" value="${escapeHtml(p?.link||'')}" placeholder="https://..."></label>
+    <label>Observação <span class="muted">(opcional)</span><textarea id="ideaNote" rows="3" maxlength="700" placeholder="Contexto, inspiração, algo que você não quer esquecer...">${escapeHtml(p?.note||'')}</textarea></label>
+    <div class="modal-actions">${p?'<button type="button" class="secondary" id="deleteIdeaBtn">Excluir</button>':''}<div class="grow"></div><button type="button" class="secondary" id="cancelIdeaBtn">Cancelar</button><button class="primary" value="default">Salvar</button></div>
+  </form>`;
+  
+  if(!document.querySelector('#ideaModalUXFix')){const s=document.createElement('style');s.id='ideaModalUXFix';s.textContent=`#ideaDialog input,#ideaDialog select,#ideaDialog textarea{font-size:16px!important;box-sizing:border-box}#ideaDialog #ideaForm>label{display:block!important;width:100%!important;box-sizing:border-box;margin:0 0 12px!important}#ideaDialog #ideaForm>label>input,#ideaDialog #ideaForm>label>select,#ideaDialog #ideaForm>label>textarea{display:block!important;width:100%!important;max-width:100%!important;margin-top:6px!important}#ideaDialog .form-grid{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:10px}
+#ideaDialog #ideaConditional>label{display:block;width:100%;box-sizing:border-box;margin:0 0 12px}
+#ideaDialog #ideaConditional>label>input,#ideaDialog #ideaConditional>label>select{display:block;width:100%;max-width:100%;margin-top:6px}
+@media(max-width:480px){
+ #ideaDialog{width:min(92vw,520px)!important;max-height:calc(100dvh - 110px)!important;overflow-y:auto!important;overflow-x:hidden!important;-webkit-overflow-scrolling:touch!important;overscroll-behavior:contain!important;padding:0!important;border-radius:24px!important}
+ #ideaDialog #ideaForm{width:100%!important;max-height:none!important;overflow:visible!important;padding:17px 17px max(30px,env(safe-area-inset-bottom))!important;margin:0!important;border-radius:24px!important}
+ #ideaDialog .form-grid{grid-template-columns:minmax(0,1fr)!important;gap:0!important}
+ #ideaDialog .form-grid>label,#ideaDialog #ideaConditional>label{display:block!important;width:100%!important;min-width:0!important;margin:0 0 12px!important}
+ #ideaDialog .form-grid input:not([type=checkbox]),#ideaDialog .form-grid select,#ideaDialog #ideaConditional input:not([type=checkbox]),#ideaDialog #ideaConditional select{display:block!important;width:100%!important;max-width:100%!important;min-width:0!important;margin-top:6px!important}
+ #ideaDialog #ideaForm>label{margin-bottom:12px!important}
+ #ideaDialog #projectBlocksHelp{display:block;line-height:1.4;margin:-2px 0 12px}
+ #ideaDialog #projectTrackOptions{margin-bottom:14px!important}
+ #ideaDialog #ideaConditional input[type=checkbox]{display:grid!important;width:20px!important;max-width:20px!important;min-width:20px!important;height:20px!important;min-height:20px!important;margin:2px 0 0!important;flex:0 0 20px!important}
+ #ideaDialog #projectTrackOptions label{display:flex!important;align-items:flex-start!important;gap:10px!important;width:100%!important;margin:0 0 10px!important}
+ #ideaDialog #projectTrackOptions label:last-of-type{margin-bottom:0!important}
+ #ideaDialog #ideaConditional .project-track-master{display:flex!important;align-items:flex-start!important;gap:10px!important;width:100%!important;margin:0 0 10px!important}
+ #ideaDialog #ideaConditional .project-track-master>input[type=checkbox]{display:block!important;width:20px!important;min-width:20px!important;max-width:20px!important;height:20px!important;min-height:20px!important;flex:0 0 20px!important;margin:2px 0 0!important}
+ #ideaDialog #ideaConditional .project-track-copy{display:block!important;flex:1 1 auto!important;min-width:0!important;line-height:1.25!important}
+ #ideaDialog #ideaConditional .project-track-copy strong{display:block!important;margin:0!important}
+ #ideaDialog #ideaConditional .project-track-copy small{display:block!important;margin:2px 0 0!important;line-height:1.3!important}
+ #ideaDialog #ideaConditional #projectInactiveDaysWrap{display:grid!important;grid-template-columns:130px minmax(0,1fr)!important;gap:10px!important;align-items:center!important;width:100%!important;margin:4px 0 0!important;padding:0!important}
+ #ideaDialog #ideaConditional #projectInactiveDaysWrap>span{display:block!important;margin:0!important;line-height:1.2!important}
+ #ideaDialog #ideaConditional #projectInactiveDaysWrap>input{display:block!important;width:100%!important;min-width:0!important;margin:0!important}
+ #ideaDialog .modal-actions{position:relative!important;display:flex!important;flex-wrap:wrap!important;gap:10px!important;padding-top:8px!important;padding-bottom:4px!important}
+ #ideaDialog .project-shopping-box{background:linear-gradient(120deg,rgba(229,242,252,.72),rgba(241,238,253,.58))!important;border:1px solid rgba(119,157,197,.12)!important;border-radius:17px!important}
+ #ideaDialog .project-shopping-box>strong{display:block;margin-bottom:2px}#ideaDialog .project-shopping-box>small{display:block;color:#777f91;margin-bottom:10px;line-height:1.35}
+ #ideaDialog .project-shopping-add{display:grid;grid-template-columns:minmax(0,1fr) 42px;gap:8px;align-items:center;margin-bottom:8px}#ideaDialog .project-shopping-add input{margin:0!important}#ideaDialog .project-shopping-add button{height:42px;border:0;border-radius:12px;background:linear-gradient(105deg,#74afe0,#aa96e7);color:white;font-size:20px}
+ #ideaDialog .project-shopping-row{display:flex;align-items:center;gap:8px;padding:7px 0;border-top:1px solid rgba(112,135,164,.10)}#ideaDialog .project-shopping-row label{display:flex!important;align-items:center!important;gap:10px!important;flex:1;margin:0!important;font-weight:520!important}#ideaDialog .project-shopping-row button{border:0;background:transparent;color:#8b91a0;font-size:20px;padding:4px 6px}.project-shopping-empty{opacity:.75}
+
+}`;document.head.appendChild(s)}
+  document.body.appendChild(d);d.showModal();bindIdeaIconPicker(d);
+  d.querySelectorAll('[data-close]').forEach(b=>b.onclick=()=>{clearInterval(ideaTypeWatcher);d.close();d.remove()});
+  d.addEventListener('click',e=>{if(e.target===d){clearInterval(ideaTypeWatcher);d.close();d.remove()}});
+  const conditional=d.querySelector('#ideaConditional');
+  function drawConditional(){
+    const t=d.querySelector('#ideaType').value;
+    if(t==='ideia'){conditional.innerHTML=`<div class="card" style="padding:12px;margin:0 0 12px"><small><span class="idea-inline-spark">◇</span> Ideias não ocupam tempo no Meu Dia. Guarde primeiro; decida depois.</small></div>`;return}
+    if(t==='plano'){
+      const h=p?.planHorizon||'algum-dia';
+      conditional.innerHTML=`<label>Horizonte<select id="planHorizon"><option value="esta-semana" ${h==='esta-semana'?'selected':''}>Esta semana</option><option value="este-mes" ${h==='este-mes'?'selected':''}>Este mês</option><option value="data" ${h==='data'?'selected':''}>Até uma data</option><option value="algum-dia" ${h==='algum-dia'?'selected':''}>Algum dia</option></select></label><label id="planDateWrap">Data-alvo <span class="muted">(opcional)</span><input id="planDate" type="date" value="${escapeHtml(p?.planDate||'')}"></label>`;
+      const hs=conditional.querySelector('#planHorizon'),dw=conditional.querySelector('#planDateWrap');
+      const syncPlanDate=()=>{dw.style.display=hs.value==='data'?'block':'none'}; hs.onchange=syncPlanDate; syncPlanDate(); return}
+    const blocks=projectBlocks(p||{}); const blockUnit=p?.sessionUnit||((blocks.length&&blocks.every(n=>n%60===0))?'hours':'minutes');
+    const raw=blocks.length?blocks.map(n=>blockUnit==='hours'?Number((n/60).toFixed(2)):n).join(', '):(blockUnit==='hours'?'2, 4, 6':'30, 40, 60');
+    conditional.innerHTML=`
+      <label>Resultado que você quer alcançar<input id="projectOutcome" maxlength="220" value="${escapeHtml(p?.outcome||'')}" placeholder="Ex.: Aparador terminado e instalado"></label>
+      <div class="form-grid"><label>Tempo total estimado<input id="projectTotal" type="number" min="1" value="${p?.totalDurationValue||4}"></label><label>Unidade<select id="projectTotalUnit"><option value="days" ${p?.totalDurationUnit==='days'?'selected':''}>dias</option><option value="hours" ${(!p?.totalDurationUnit||p?.totalDurationUnit==='hours')?'selected':''}>horas</option><option value="minutes" ${p?.totalDurationUnit==='minutes'?'selected':''}>minutos</option></select></label></div>
+      <div class="form-grid"><label>Blocos de trabalho<input id="projectBlocks" inputmode="text" autocomplete="off" autocapitalize="off" spellcheck="false" value="${raw}" placeholder="Ex.: ${blockUnit==='hours'?'2, 4, 8':'30, 40, 60'}"></label><label>Unidade dos blocos<select id="projectBlockUnit"><option value="hours" ${blockUnit==='hours'?'selected':''}>horas</option><option value="minutes" ${blockUnit==='minutes'?'selected':''}>minutos</option></select></label></div>
+      <small id="projectBlocksHelp">Digite livremente os blocos que funcionam para você. A BERTA sugere o que couber na janela disponível.</small>
+      <label>Bloco preferido<select id="projectPreferred"></select></label>
+      <label>Próximo passo <span class="muted">(opcional)</span><input id="projectNext" maxlength="180" value="${escapeHtml(p?.nextAction||'')}" placeholder="Ex.: Lixar o primeiro módulo"></label>
+      <div class="form-grid"><label>Prioridade<select id="projectPriority"><option value="Baixa" ${p?.priority==='Baixa'?'selected':''}>Baixa</option><option value="Normal" ${!p?.priority||p?.priority==='Normal'?'selected':''}>Normal</option><option value="Alta" ${p?.priority==='Alta'?'selected':''}>Alta</option></select></label><label>Prazo <span class="muted">(opcional)</span><input id="projectDue" type="date" value="${escapeHtml(p?.dueDate||'')}"></label></div>
+      <div class="project-track-master"><input id="projectTrack" type="checkbox" ${p?.trackProject!==false?'checked':''}><div class="project-track-copy"><strong>Quero que a BERTA acompanhe este projeto</strong><small>Ela pode lembrar de continuidade e mostrar em que etapa você está.</small></div></div>
+      <div id="projectTrackOptions" class="card" style="padding:12px;margin:0 0 12px">
+        <label style="display:flex;gap:10px;align-items:center"><input id="projectWindow" type="checkbox" ${p?.projectSuggestWindow!==false?'checked':''} style="width:auto"><span>Sugerir quando houver uma janela compatível</span></label>
+        <label style="display:flex;gap:10px;align-items:center"><input id="projectContinue" type="checkbox" ${p?.projectContinuePrompt!==false?'checked':''} style="width:auto"><span>Dar peso à continuidade quando eu já tiver começado</span></label>
+        <label style="display:flex;gap:10px;align-items:center"><input id="projectInactive" type="checkbox" ${p?.projectInactiveReminder?'checked':''} style="width:auto"><span>Lembrar se ficar parado</span></label>
+        <div id="projectInactiveDaysWrap"><span>Dias sem avanço</span><input id="projectInactiveDays" type="number" min="1" max="60" value="${+p?.inactiveDays||7}"></div>
+      </div>
+      <div class="card project-shopping-box" style="padding:12px;margin:0 0 12px">
+        <strong>Preciso para este projeto</strong><small>Marque o que também deve entrar na Lista de Compras.</small>
+        <div class="project-shopping-add"><input id="projectShoppingNew" maxlength="100" placeholder="Ex.: Tinta para madeira"><button type="button" id="projectShoppingAdd">＋</button></div>
+        <div id="projectShoppingRows"></div>
+      </div>`;
+    const shopRows=conditional.querySelector('#projectShoppingRows'),shopNew=conditional.querySelector('#projectShoppingNew'),shopAdd=conditional.querySelector('#projectShoppingAdd');
+    const renderProjectShopping=()=>{if(!shopRows)return;shopRows.innerHTML=projectShoppingNeeds.length?projectShoppingNeeds.map(n=>`<div class="project-shopping-row"><label><input type="checkbox" data-project-shop="${n.id}" ${n.sendToShopping?'checked':''}><span>${escapeHtml(n.name)}</span></label><button type="button" data-project-shop-del="${n.id}" aria-label="Remover">×</button></div>`).join(''):`<small class="project-shopping-empty">Nenhum item adicionado.</small>`;shopRows.querySelectorAll('[data-project-shop]').forEach(cb=>cb.onchange=()=>{const n=projectShoppingNeeds.find(x=>String(x.id)===String(cb.dataset.projectShop));if(n)n.sendToShopping=cb.checked});shopRows.querySelectorAll('[data-project-shop-del]').forEach(b=>b.onclick=()=>{projectShoppingNeeds=projectShoppingNeeds.filter(x=>String(x.id)!==String(b.dataset.projectShopDel));renderProjectShopping()})};
+    const addProjectShopping=()=>{const name=String(shopNew?.value||'').trim();if(!name)return;if(!projectShoppingNeeds.some(x=>x.name.toLocaleLowerCase('pt-BR')===name.toLocaleLowerCase('pt-BR')))projectShoppingNeeds.push({id:uid(),name,sendToShopping:true});shopNew.value='';renderProjectShopping()};
+    shopAdd?.addEventListener('click',addProjectShopping);shopNew?.addEventListener('keydown',e=>{if(e.key==='Enter'){e.preventDefault();addProjectShopping()}});renderProjectShopping();
+    const blocksInput=conditional.querySelector('#projectBlocks'),blockUnitSelect=conditional.querySelector('#projectBlockUnit'),preferredSelect=conditional.querySelector('#projectPreferred');
+    const parseBlockValues=()=>[...new Set(String(blocksInput?.value||'').split(/[,;\s]+/).map(s=>Number(String(s).replace(',','.'))).filter(n=>n>0))].sort((a,b)=>a-b);
+    const refreshPreferred=()=>{if(!preferredSelect)return;const unit=blockUnitSelect?.value||'hours',vals=parseBlockValues(),saved=+p?.preferredSession||0;preferredSelect.innerHTML=vals.map(v=>{const mins=Math.round(unit==='hours'?v*60:v);const label=unit==='hours'?`${v} ${v===1?'hora':'horas'}`:`${v} min`;return `<option value="${mins}" ${mins===saved?'selected':''}>${label}</option>`}).join('');if(!preferredSelect.value&&preferredSelect.options.length)preferredSelect.selectedIndex=0;};
+    blocksInput?.addEventListener('input',refreshPreferred);blockUnitSelect?.addEventListener('change',refreshPreferred);refreshPreferred();
+    const tr=conditional.querySelector('#projectTrack'),opts=conditional.querySelector('#projectTrackOptions');
+    if(tr){
+      const syncTrack=()=>{opts.style.display=tr.checked?'block':'none'}; tr.onchange=syncTrack; syncTrack();
+      const inactive=conditional.querySelector('#projectInactive'),inactiveWrap=conditional.querySelector('#projectInactiveDaysWrap');
+      if(inactive&&inactiveWrap){const syncInactive=()=>inactiveWrap.style.display=inactive.checked?'block':'none';inactive.onchange=syncInactive;syncInactive();}
+    }
+  }
+  const ideaTypeSelect=d.querySelector('#ideaType'),ideaModalTitle=d.querySelector('#ideaModalTitle');
+  function syncIdeaModalTitle(){if(p){ideaModalTitle.textContent='Editar registro';}else{ideaModalTitle.textContent='Nova entrada';} d.querySelectorAll('[data-idea-type]').forEach(b=>b.classList.toggle('active',b.dataset.ideaType===ideaTypeSelect.value));}
+  let lastIdeaType='';
+  function syncIdeaTypeUI(force=false){
+    const current=ideaTypeSelect?.value||'ideia';
+    if(!force && current===lastIdeaType)return;
+    lastIdeaType=current;
+    drawConditional();
+    syncIdeaModalTitle();
+  }
+  // iPhone/Safari: alguns selects nativos podem atualizar visualmente antes de disparar
+  // o evento change de forma confiável dentro de <dialog>. Escutamos ambos e mantemos
+  // uma verificação leve enquanto o modal estiver aberto.
+  d.querySelectorAll('[data-idea-type]').forEach(b=>b.addEventListener('click',()=>{ideaTypeSelect.value=b.dataset.ideaType;syncIdeaTypeUI(true);}));
+  ideaTypeSelect.addEventListener('input',()=>syncIdeaTypeUI(true));
+  ideaTypeSelect.addEventListener('change',()=>syncIdeaTypeUI(true));
+  ideaTypeSelect.addEventListener('blur',()=>syncIdeaTypeUI());
+  syncIdeaTypeUI(true);
+  const ideaTypeWatcher=setInterval(()=>{
+    if(!d.isConnected || !d.open){clearInterval(ideaTypeWatcher);return;}
+    syncIdeaTypeUI();
+  },120);
+  d.querySelector('#cancelIdeaBtn').onclick=()=>{clearInterval(ideaTypeWatcher);d.close();d.remove()};
+  if(p)d.querySelector('#deleteIdeaBtn').onclick=()=>{if(confirm('Excluir este registro?')){saveIdeias(loadIdeias().filter(x=>x.id!==p.id));d.close();d.remove();renderIdeias()}};
+  d.querySelector('#ideaForm').addEventListener('submit',e=>{
+    e.preventDefault();const items=loadIdeias(),t=d.querySelector('#ideaType').value;
+    let data={title:d.querySelector('#ideaTitle').value.trim(),type:t,icon:d.querySelector('#ideaIcon')?.value||'spark',link:d.querySelector('#ideaLink').value.trim(),note:d.querySelector('#ideaNote').value.trim()}; if(!data.title)return;
+    if(data.link&&!ideaSafeLink(data.link)){const linkInput=d.querySelector('#ideaLink');linkInput.setCustomValidity('Use um link começando com http:// ou https://');linkInput.reportValidity();return}else d.querySelector('#ideaLink').setCustomValidity('');
+    if(t==='plano'){
+      const h=d.querySelector('#planHorizon')?.value||'algum-dia';const labels={'esta-semana':'Esta semana','este-mes':'Este mês','data':'Até uma data','algum-dia':'Algum dia'};
+      Object.assign(data,{planHorizon:h,planHorizonLabel:labels[h],planDate:d.querySelector('#planDate')?.value||''});
+    }
+    if(t==='projeto'){
+      const val=Math.max(1,+d.querySelector('#projectTotal').value||1),unit=d.querySelector('#projectTotalUnit').value,total=unit==='hours'?val*60:unit==='minutes'?val:0;
+      const sessionUnit=d.querySelector('#projectBlockUnit')?.value||'hours';
+      const blockValues=[...new Set(String(d.querySelector('#projectBlocks').value||'').split(/[,;\s]+/).map(s=>Number(String(s).replace(',','.'))).filter(n=>n>0))].sort((a,b)=>a-b);
+      const blocks=blockValues.map(n=>Math.round(sessionUnit==='hours'?n*60:n)).filter(n=>n>0);
+      const track=d.querySelector('#projectTrack').checked;
+      Object.assign(data,{outcome:d.querySelector('#projectOutcome').value.trim(),totalDurationValue:val,totalDurationUnit:unit,totalMinutes:total,totalDays:unit==='days'?val:null,progressMinutes:+p?.progressMinutes||0,sessionUnit,sessionMinutes:blocks.length?blocks:[30],preferredSession:+d.querySelector('#projectPreferred').value||(blocks[0]||30),nextAction:d.querySelector('#projectNext').value.trim(),priority:d.querySelector('#projectPriority').value,dueDate:d.querySelector('#projectDue').value,trackProject:track,projectSuggestWindow:track&&d.querySelector('#projectWindow').checked,projectContinuePrompt:track&&d.querySelector('#projectContinue').checked,projectInactiveReminder:track&&d.querySelector('#projectInactive').checked,inactiveDays:Math.max(1,+d.querySelector('#projectInactiveDays').value||7),shoppingNeeds:projectShoppingNeeds.map(x=>({...x})),status:p?.status||'ativo',lastWorkedAt:p?.lastWorkedAt||null});
+      const shopping=loadSharedShopping();const source=`Projeto · ${data.title}`;projectShoppingNeeds.filter(n=>n.sendToShopping).forEach(n=>{const exists=shopping.some(i=>!i.done&&String(i.name||'').trim().toLocaleLowerCase('pt-BR')===n.name.toLocaleLowerCase('pt-BR')&&String(i.source||'')===source);if(!exists)shopping.push({id:uid(),name:n.name,qty:'',unit:'',category:'Outros',expectedValue:'',source,projectId:p?.id||null,createdAt:Date.now(),done:false,cycle:'monthly'});});saveSharedShopping(shopping);
+    }
+    const now=Date.now(); if(p){const i=items.findIndex(x=>x.id===p.id);items[i]={...items[i],...data,updatedAt:now}}else items.push({id:uid(),...data,createdAt:now,updatedAt:now});
+    saveIdeias(items);clearInterval(ideaTypeWatcher);d.close();d.remove();renderIdeias();
+  });
+}
+
+/* =========================================================
+   RITUAIS
+========================================================= */
+
+const RITUAIS_KEY = "minha-vida.rituais.v1";
+const RITUAL_CAPILAR_KEY = "minha-vida.ritual-capilar.v1";
+
+function loadRituais() {
+  try { return JSON.parse(window.berthaHmlStorage.getItem(RITUAIS_KEY)) || []; }
+  catch { return []; }
+}
+function saveRituais(items) {
+  window.berthaHmlStorage.setItem(RITUAIS_KEY, JSON.stringify(items));
+}
+function loadCapilar() {
+  try { return JSON.parse(window.berthaHmlStorage.getItem(RITUAL_CAPILAR_KEY)) || defaultCapilar(); }
+  catch { return defaultCapilar(); }
+}
+function saveCapilar(data) {
+  window.berthaHmlStorage.setItem(RITUAL_CAPILAR_KEY, JSON.stringify(data));
+}
+function defaultCapilar() {
+  return {
+    washDays: [],
+    notes: "",
+    steps: [
+      {id:"lavagem", name:"Lavagem", detail:"Definir quando lavar e seguir a rotina de produtos."},
+      {id:"tratamento", name:"Tratamento", detail:"Escolher o tratamento previsto para a lavagem."},
+      {id:"finalizacao", name:"Finalização", detail:"Finalizar o cabelo após a lavagem."},
+      {id:"dayafter", name:"Day after", detail:"Manutenção do dia seguinte à lavagem."}
+    ]
+  };
+}
+
+function renderRituais() {
+  app.innerHTML = `
+    <section class="hero">
+      <h2>✨ Rituais</h2>
+      <p>Space to think. Space to live.</p>
+    </section>
+
+    <div class="ritual-grid">
+      <button class="ritual-card featured" id="capilarBtn">
+        <span class="ritual-icon">✦</span>
+        <div><strong>Ritual Capilar</strong><span>Lavagem · tratamento · finalização · day after</span></div>
+        <b>›</b>
+      </button>
+      <button class="ritual-card" id="newRitualBtn">
+        <span class="ritual-icon">＋</span>
+        <div><strong>Novo ritual</strong><span>Crie outro ritual quando fizer sentido.</span></div>
+        <b>›</b>
+      </button>
+    </div>
+
+    <div class="section-title">MEUS RITUAIS</div>
+    <div class="list" id="ritualList">
+      ${loadRituais().map(ritualCardHtml).join("") || `<div class="empty"><div class="symbol">☾</div><strong>Nenhum outro ritual ainda.</strong><span>Não precisamos preencher esse espaço.</span></div>`}
+    </div>
+  `;
+
+  document.querySelector("#capilarBtn").onclick = renderCapilar;
+  document.querySelector("#newRitualBtn").onclick = () => openRitualModal();
+  document.querySelectorAll("[data-ritual-id]").forEach(x => x.onclick = () => openRitualModal(x.dataset.ritualId));
+}
+function ritualCardHtml(x) {
+  return `<article class="card ritual-small" data-ritual-id="${x.id}">
+    <div class="pending">
+      <span class="ritual-icon small">✦</span>
+      <div class="pending-main"><div class="pending-title">${escapeHtml(x.name)}</div><p class="note">${escapeHtml(x.description || "")}</p></div>
+      <button class="more">›</button>
+    </div>
+  </article>`;
+}
+
+function renderCapilar() {
+  const c = loadCapilar();
+  app.innerHTML = `
+    <section class="hero">
+      <div class="backline"><button class="back-inline" id="ritualBack">‹ Rituais</button></div>
+      <h2>✦ Ritual Capilar</h2>
+      <p>Um espaço próprio para a rotina do cabelo — sem misturar com as outras tarefas do dia.</p>
+    </section>
+
+    <div class="card capilar-panel">
+      <div class="panel-head"><div><div class="eyebrow">ROTINA</div><h3>Lavagem & cuidado</h3></div><button class="secondary" id="editCapilar">Editar</button></div>
+      <div class="capilar-steps">
+        ${c.steps.map((s,i) => `<div class="capilar-step"><span>${i+1}</span><div><strong>${escapeHtml(s.name)}</strong><small>${escapeHtml(s.detail)}</small></div></div>`).join("")}
+      </div>
+    </div>
+
+    <div class="section-title">OBSERVAÇÕES</div>
+    <div class="card">
+      <p class="note big-note">${escapeHtml(c.notes || "Nenhuma observação registrada.")}</p>
+    </div>
+
+    <div class="section-title">LAVAGENS PROGRAMADAS</div>
+    <div class="card">
+      <div class="wash-list">${c.washDays.length ? c.washDays.map(d => `<span class="pill today">${formatDate(d)}</span>`).join("") : `<span class="muted">Nenhuma data definida ainda.</span>`}</div>
+    </div>
+  `;
+  document.querySelector("#ritualBack").onclick = renderRituais;
+  document.querySelector("#editCapilar").onclick = () => openCapilarModal();
+}
+
+function openCapilarModal() {
+  const c = loadCapilar();
+  const d = document.createElement("dialog");
+  d.id = "capilarDialog";
+  d.innerHTML = `
+    <form method="dialog" id="capilarForm" class="modal-card">
+      <div class="modal-head"><div><div class="eyebrow">RITUAL CAPILAR</div><h2>Configurar rotina</h2></div><button class="icon-btn" value="cancel">×</button></div>
+      <label>Datas de lavagem <span class="muted">(separe por vírgulas)</span>
+        <input id="washDays" value="${c.washDays.join(", ")}" placeholder="2026-09-09, 2026-09-12">
+      </label>
+      <label>Observações
+        <textarea id="capilarNotes" rows="4" maxlength="700" placeholder="Produtos, cuidados ou observações importantes...">${escapeHtml(c.notes)}</textarea>
+      </label>
+      <div class="section-title inner">ETAPAS</div>
+      ${c.steps.map((s,i) => `<label class="step-edit">${i+1}. ${escapeHtml(s.name)}<textarea data-step="${s.id}" rows="2" maxlength="250">${escapeHtml(s.detail)}</textarea></label>`).join("")}
+      <div class="modal-actions"><div class="grow"></div><button type="button" class="secondary" id="closeCapilar">Cancelar</button><button class="primary" value="default">Salvar</button></div>
+    </form>`;
+  document.body.appendChild(d);
+  d.showModal();
+  d.querySelector("#closeCapilar").onclick = () => { d.close(); d.remove(); };
+  d.querySelector("#capilarForm").addEventListener("submit", e => {
+    e.preventDefault();
+    const dates = d.querySelector("#washDays").value.split(",").map(x=>x.trim()).filter(Boolean);
+    const steps = c.steps.map(s => ({...s, detail:d.querySelector(`[data-step="${s.id}"]`).value.trim()}));
+    saveCapilar({washDays:dates, notes:d.querySelector("#capilarNotes").value.trim(), steps});
+    d.close(); d.remove(); renderCapilar();
+  });
+}
+
+function openRitualModal(id=null) {
+  const p = id ? loadRituais().find(x=>x.id===id) : null;
+  const d = document.createElement("dialog");
+  d.innerHTML = `<form method="dialog" class="modal-card" id="ritualForm">
+    <div class="modal-head"><div><div class="eyebrow">RITUAL</div><h2>${p?"Editar":"Novo"} ritual</h2></div><button class="icon-btn" value="cancel">×</button></div>
+    <label>Nome<input id="ritualName" required maxlength="80" value="${escapeHtml(p?.name||"")}"></label>
+    <label>Descrição<textarea id="ritualDescription" rows="4" maxlength="300">${escapeHtml(p?.description||"")}</textarea></label>
+    <div class="modal-actions">${p?'<button type="button" class="secondary" id="deleteRitual">Excluir</button>':""}<div class="grow"></div><button type="button" class="secondary" id="cancelRitual">Cancelar</button><button class="primary" value="default">Salvar</button></div>
+  </form>`;
+  document.body.appendChild(d); d.showModal();
+  d.querySelector("#cancelRitual").onclick=()=>{d.close();d.remove();};
+  if(p) d.querySelector("#deleteRitual").onclick=()=>{ if(confirm("Excluir este ritual?")){saveRituais(loadRituais().filter(x=>x.id!==p.id));d.close();d.remove();renderRituais();}};
+  d.querySelector("#ritualForm").addEventListener("submit",e=>{
+    e.preventDefault();
+    const items=loadRituais(), data={name:d.querySelector("#ritualName").value.trim(),description:d.querySelector("#ritualDescription").value.trim()};
+    if(p){const i=items.findIndex(x=>x.id===p.id);items[i]={...items[i],...data,updatedAt:Date.now()};}
+    else items.push({id:uid(),...data,createdAt:Date.now(),updatedAt:Date.now()});
+    saveRituais(items);d.close();d.remove();renderRituais();
+  });
+}
+
+
+/* =========================================================
+   ESTUDOS
+========================================================= */
+
+
+const ESTUDOS_KEY="minha-vida.estudos.v1";
+const ESTUDOS_MAPAS_KEY="minha-vida.estudos.mapas.v1";
+const ESTUDOS_CONTENT_KEY="bertha.estudos.conteudos.v1";
+function loadEstudos(){try{return JSON.parse(window.berthaHmlStorage.getItem(ESTUDOS_KEY))||{subjects:[],sessions:[],reviews:[],questions:[]}}catch{return{subjects:[],sessions:[],reviews:[],questions:[]}}}
+function saveEstudos(x){window.berthaHmlStorage.setItem(ESTUDOS_KEY,JSON.stringify(x))}
+function loadMapasStatus(){try{return JSON.parse(window.berthaHmlStorage.getItem(ESTUDOS_MAPAS_KEY))||{}}catch{return{}}}
+function saveMapasStatus(x){window.berthaHmlStorage.setItem(ESTUDOS_MAPAS_KEY,JSON.stringify(x))}
+function loadStudyContents(){try{return JSON.parse(window.berthaHmlStorage.getItem(ESTUDOS_CONTENT_KEY))||[]}catch{return[]}}
+function saveStudyContents(x){window.berthaHmlStorage.setItem(ESTUDOS_CONTENT_KEY,JSON.stringify(x))}
+const TCDF_MAPAS=[{"id": 1, "bloco": "Orientação", "materia": "Orientação e Estratégia", "topico": "Como funciona a prova do TCDF 2026", "semana": "S1"}, {"id": 2, "bloco": "Orientação", "materia": "Orientação e Estratégia", "topico": "Como funciona a pontuação Cebraspe", "semana": "S1"}, {"id": 3, "bloco": "Orientação", "materia": "Orientação e Estratégia", "topico": "Como usar os Mapas da Aprovação", "semana": "S1"}, {"id": 4, "bloco": "Orientação", "materia": "Orientação e Estratégia", "topico": "Rota visual até a prova", "semana": "S1"}, {"id": 5, "bloco": "P1", "materia": "Língua Portuguesa", "topico": "Mapa Mestre de Língua Portuguesa", "semana": "S1"}, {"id": 6, "bloco": "P1", "materia": "Língua Portuguesa", "topico": "Compreensão e interpretação de textos", "semana": "S1"}, {"id": 7, "bloco": "P1", "materia": "Língua Portuguesa", "topico": "Tipos e gêneros textuais", "semana": "S1"}, {"id": 8, "bloco": "P1", "materia": "Língua Portuguesa", "topico": "Ortografia oficial", "semana": "S1"}, {"id": 9, "bloco": "P1", "materia": "Língua Portuguesa", "topico": "Coesão: referenciação, substituição e repetição", "semana": "S1"}, {"id": 10, "bloco": "P1", "materia": "Língua Portuguesa", "topico": "Conectores e sequenciação textual", "semana": "S1"}, {"id": 11, "bloco": "P1", "materia": "Língua Portuguesa", "topico": "Tempos e modos verbais", "semana": "S1"}, {"id": 12, "bloco": "P1", "materia": "Língua Portuguesa", "topico": "Classes de palavras", "semana": "S1"}, {"id": 13, "bloco": "P1", "materia": "Língua Portuguesa", "topico": "Coordenação", "semana": "S1"}, {"id": 14, "bloco": "P1", "materia": "Língua Portuguesa", "topico": "Subordinação", "semana": "S1"}, {"id": 15, "bloco": "P1", "materia": "Língua Portuguesa", "topico": "Pontuação", "semana": "S1"}, {"id": 16, "bloco": "P1", "materia": "Língua Portuguesa", "topico": "Concordância verbal e nominal", "semana": "S1"}, {"id": 17, "bloco": "P1", "materia": "Língua Portuguesa", "topico": "Regência verbal e nominal", "semana": "S1"}, {"id": 18, "bloco": "P1", "materia": "Língua Portuguesa", "topico": "Crase", "semana": "S1"}, {"id": 19, "bloco": "P1", "materia": "Língua Portuguesa", "topico": "Colocação dos pronomes átonos", "semana": "S1"}, {"id": 20, "bloco": "P1", "materia": "Língua Portuguesa", "topico": "Significação e substituição de palavras/trechos", "semana": "S1"}, {"id": 21, "bloco": "P1", "materia": "Língua Portuguesa", "topico": "Reorganização e reescrita de frases, períodos, gêneros e níveis de formalidade", "semana": "S1"}, {"id": 22, "bloco": "P1", "materia": "Lei Orgânica do DF", "topico": "Mapa Mestre da LODF", "semana": "S2"}, {"id": 23, "bloco": "P1", "materia": "Lei Orgânica do DF", "topico": "Fundamentos da organização dos poderes e do Distrito Federal", "semana": "S2"}, {"id": 24, "bloco": "P1", "materia": "Lei Orgânica do DF", "topico": "Organização do Distrito Federal", "semana": "S2"}, {"id": 25, "bloco": "P1", "materia": "Lei Orgânica do DF", "topico": "Organização dos Poderes", "semana": "S2"}, {"id": 26, "bloco": "P1", "materia": "Lei Orgânica do DF", "topico": "Tributação do Distrito Federal", "semana": "S2"}, {"id": 27, "bloco": "P1", "materia": "Lei Orgânica do DF", "topico": "Orçamento do Distrito Federal", "semana": "S2"}, {"id": 28, "bloco": "P1", "materia": "Lei Orgânica do DF", "topico": "Ordem econômica do Distrito Federal", "semana": "S2"}, {"id": 29, "bloco": "P1", "materia": "DF, RIDE e Política para Mulheres", "topico": "Mapa Mestre: DF, RIDE e Política para Mulheres", "semana": "S2"}, {"id": 30, "bloco": "P1", "materia": "DF, RIDE e Política para Mulheres", "topico": "Realidade étnica e social do Distrito Federal", "semana": "S2"}, {"id": 31, "bloco": "P1", "materia": "DF, RIDE e Política para Mulheres", "topico": "Realidade histórica e geográfica", "semana": "S2"}, {"id": 32, "bloco": "P1", "materia": "DF, RIDE e Política para Mulheres", "topico": "Realidade cultural, política e econômica", "semana": "S2"}, {"id": 33, "bloco": "P1", "materia": "DF, RIDE e Política para Mulheres", "topico": "RIDE — Lei Complementar Federal nº 94/1998", "semana": "S2"}, {"id": 34, "bloco": "P1", "materia": "DF, RIDE e Política para Mulheres", "topico": "RIDE — Decreto Federal nº 7.469/2011", "semana": "S2"}, {"id": 35, "bloco": "P1", "materia": "DF, RIDE e Política para Mulheres", "topico": "Plano Distrital de Política para Mulheres 2020–2023", "semana": "S2"}, {"id": 36, "bloco": "P1", "materia": "DF, RIDE e Política para Mulheres", "topico": "Lei Maria da Penha — Lei nº 11.340/2006", "semana": "S2"}, {"id": 37, "bloco": "P1", "materia": "Primeiros Socorros", "topico": "Cuidados iniciais, urgência, emergência e acionamento do socorro", "semana": "S2"}, {"id": 38, "bloco": "P1", "materia": "Primeiros Socorros", "topico": "Engasgo", "semana": "S2"}, {"id": 39, "bloco": "P1", "materia": "Primeiros Socorros", "topico": "Sangramento", "semana": "S2"}, {"id": 40, "bloco": "P1", "materia": "Primeiros Socorros", "topico": "Fratura", "semana": "S2"}, {"id": 41, "bloco": "P1", "materia": "Primeiros Socorros", "topico": "Queimadura", "semana": "S2"}, {"id": 42, "bloco": "P1", "materia": "Primeiros Socorros", "topico": "Desmaio e convulsão", "semana": "S2"}, {"id": 43, "bloco": "P1", "materia": "Primeiros Socorros", "topico": "Intoxicação", "semana": "S2"}, {"id": 44, "bloco": "P1", "materia": "Raciocínio Lógico e Matemática Financeira", "topico": "Mapa Mestre de RLM", "semana": "S3"}, {"id": 45, "bloco": "P1", "materia": "Raciocínio Lógico e Matemática Financeira", "topico": "Estruturas lógicas", "semana": "S3"}, {"id": 46, "bloco": "P1", "materia": "Raciocínio Lógico e Matemática Financeira", "topico": "Lógica de argumentação", "semana": "S3"}, {"id": 47, "bloco": "P1", "materia": "Raciocínio Lógico e Matemática Financeira", "topico": "Analogias e inferências", "semana": "S3"}, {"id": 48, "bloco": "P1", "materia": "Raciocínio Lógico e Matemática Financeira", "topico": "Deduções e conclusões", "semana": "S3"}, {"id": 49, "bloco": "P1", "materia": "Raciocínio Lógico e Matemática Financeira", "topico": "Proposições simples e compostas", "semana": "S3"}, {"id": 50, "bloco": "P1", "materia": "Raciocínio Lógico e Matemática Financeira", "topico": "Tabelas-verdade", "semana": "S3"}, {"id": 51, "bloco": "P1", "materia": "Raciocínio Lógico e Matemática Financeira", "topico": "Equivalências", "semana": "S3"}, {"id": 52, "bloco": "P1", "materia": "Raciocínio Lógico e Matemática Financeira", "topico": "Leis de De Morgan", "semana": "S3"}, {"id": 53, "bloco": "P1", "materia": "Raciocínio Lógico e Matemática Financeira", "topico": "Diagramas lógicos", "semana": "S3"}, {"id": 54, "bloco": "P1", "materia": "Raciocínio Lógico e Matemática Financeira", "topico": "Lógica de primeira ordem", "semana": "S3"}, {"id": 55, "bloco": "P1", "materia": "Raciocínio Lógico e Matemática Financeira", "topico": "Princípios de contagem", "semana": "S3"}, {"id": 56, "bloco": "P1", "materia": "Raciocínio Lógico e Matemática Financeira", "topico": "Probabilidade", "semana": "S3"}, {"id": 57, "bloco": "P1", "materia": "Raciocínio Lógico e Matemática Financeira", "topico": "Operações com conjuntos", "semana": "S3"}, {"id": 58, "bloco": "P1", "materia": "Raciocínio Lógico e Matemática Financeira", "topico": "Razão, proporção e porcentagem", "semana": "S3"}, {"id": 59, "bloco": "P1", "materia": "Raciocínio Lógico e Matemática Financeira", "topico": "Juros simples", "semana": "S3"}, {"id": 60, "bloco": "P1", "materia": "Raciocínio Lógico e Matemática Financeira", "topico": "Juros compostos", "semana": "S3"}, {"id": 61, "bloco": "P1", "materia": "Raciocínio Lógico e Matemática Financeira", "topico": "Taxas nominal, efetiva e equivalente", "semana": "S3"}, {"id": 62, "bloco": "P1", "materia": "Raciocínio Lógico e Matemática Financeira", "topico": "Sistemas de amortização", "semana": "S3"}, {"id": 63, "bloco": "P1", "materia": "Raciocínio Lógico e Matemática Financeira", "topico": "Fluxo de caixa", "semana": "S3"}, {"id": 64, "bloco": "P2", "materia": "Lei Orgânica e Regimento Interno do TCDF", "topico": "Mapa Mestre do TCDF", "semana": "S4"}, {"id": 65, "bloco": "P2", "materia": "Lei Orgânica e Regimento Interno do TCDF", "topico": "Natureza, competência e jurisdição", "semana": "S4"}, {"id": 66, "bloco": "P2", "materia": "Lei Orgânica e Regimento Interno do TCDF", "topico": "Composição do TCDF", "semana": "S4"}, {"id": 67, "bloco": "P2", "materia": "Lei Orgânica e Regimento Interno do TCDF", "topico": "Plenário e Câmaras", "semana": "S4"}, {"id": 68, "bloco": "P2", "materia": "Lei Orgânica e Regimento Interno do TCDF", "topico": "Presidente e Vice-Presidente", "semana": "S4"}, {"id": 69, "bloco": "P2", "materia": "Lei Orgânica e Regimento Interno do TCDF", "topico": "Conselheiros, Auditores e Ministério Público", "semana": "S4"}, {"id": 70, "bloco": "P2", "materia": "Lei Orgânica e Regimento Interno do TCDF", "topico": "Serviços auxiliares", "semana": "S4"}, {"id": 71, "bloco": "P2", "materia": "Lei Orgânica e Regimento Interno do TCDF", "topico": "Regimento Interno — Título I", "semana": "S4"}, {"id": 72, "bloco": "P2", "materia": "Lei Orgânica e Regimento Interno do TCDF", "topico": "Regimento Interno — Título II", "semana": "S4"}, {"id": 73, "bloco": "P2", "materia": "Lei Orgânica e Regimento Interno do TCDF", "topico": "Regimento Interno — Título III", "semana": "S4"}, {"id": 74, "bloco": "P2", "materia": "Lei Orgânica e Regimento Interno do TCDF", "topico": "Lei Orgânica × Regimento: visão integrada", "semana": "S4"}, {"id": 75, "bloco": "P2", "materia": "Direito Constitucional", "topico": "Mapa Mestre de Constitucional", "semana": "S4"}, {"id": 76, "bloco": "P2", "materia": "Direito Constitucional", "topico": "Princípios fundamentais", "semana": "S4"}, {"id": 77, "bloco": "P2", "materia": "Direito Constitucional", "topico": "Aplicabilidade das normas constitucionais: plena, contida, limitada e programáticas", "semana": "S4"}, {"id": 78, "bloco": "P2", "materia": "Direito Constitucional", "topico": "Emenda, reforma e revisão constitucional", "semana": "S4"}, {"id": 79, "bloco": "P2", "materia": "Direito Constitucional", "topico": "Direitos e deveres individuais e coletivos", "semana": "S4"}, {"id": 80, "bloco": "P2", "materia": "Direito Constitucional", "topico": "Direitos sociais", "semana": "S4"}, {"id": 81, "bloco": "P2", "materia": "Direito Constitucional", "topico": "Nacionalidade", "semana": "S4"}, {"id": 82, "bloco": "P2", "materia": "Direito Constitucional", "topico": "Direitos políticos e partidos políticos", "semana": "S4"}, {"id": 83, "bloco": "P2", "materia": "Direito Constitucional", "topico": "Organização político-administrativa", "semana": "S4"}, {"id": 84, "bloco": "P2", "materia": "Direito Constitucional", "topico": "União, estados, Distrito Federal e municípios", "semana": "S4"}, {"id": 85, "bloco": "P2", "materia": "Direito Constitucional", "topico": "Administração Pública: disposições gerais", "semana": "S5"}, {"id": 86, "bloco": "P2", "materia": "Direito Constitucional", "topico": "Servidores públicos", "semana": "S5"}, {"id": 87, "bloco": "P2", "materia": "Direito Constitucional", "topico": "Poder Executivo", "semana": "S5"}, {"id": 88, "bloco": "P2", "materia": "Direito Constitucional", "topico": "Presidente da República: atribuições e responsabilidades", "semana": "S5"}, {"id": 89, "bloco": "P2", "materia": "Direito Constitucional", "topico": "Poder Legislativo: estrutura, funcionamento e atribuições", "semana": "S5"}, {"id": 90, "bloco": "P2", "materia": "Direito Constitucional", "topico": "Processo legislativo", "semana": "S5"}, {"id": 91, "bloco": "P2", "materia": "Direito Constitucional", "topico": "Fiscalização contábil, financeira e orçamentária + CPI", "semana": "S5"}, {"id": 92, "bloco": "P2", "materia": "Direito Constitucional", "topico": "Poder Judiciário + Ministério Público + Advocacia Pública + Defensoria", "semana": "S5"}, {"id": 93, "bloco": "P2", "materia": "Direito Previdenciário", "topico": "Mapa Mestre de Previdenciário", "semana": "S5"}, {"id": 94, "bloco": "P2", "materia": "Direito Previdenciário", "topico": "Seguridade Social: origem e evolução", "semana": "S5"}, {"id": 95, "bloco": "P2", "materia": "Direito Previdenciário", "topico": "Seguridade: conceito, organização e princípios constitucionais", "semana": "S5"}, {"id": 96, "bloco": "P2", "materia": "Direito Previdenciário", "topico": "RGPS — Lei nº 8.212/1991 I", "semana": "S5"}, {"id": 97, "bloco": "P2", "materia": "Direito Previdenciário", "topico": "RGPS — Lei nº 8.212/1991 II", "semana": "S5"}, {"id": 98, "bloco": "P2", "materia": "Direito Previdenciário", "topico": "RGPS — Lei nº 8.213/1991 I", "semana": "S5"}, {"id": 99, "bloco": "P2", "materia": "Direito Previdenciário", "topico": "RGPS — Lei nº 8.213/1991 II", "semana": "S5"}, {"id": 100, "bloco": "P2", "materia": "Direito Previdenciário", "topico": "Regime Próprio de Previdência Social", "semana": "S5"}, {"id": 101, "bloco": "P2", "materia": "Direito Previdenciário", "topico": "RPPS/DF — LC Distrital nº 769/2008", "semana": "S5"}, {"id": 102, "bloco": "P2", "materia": "Direito Previdenciário", "topico": "Previdência complementar — LC nº 108/2001 e LC nº 109/2001", "semana": "S5"}, {"id": 103, "bloco": "P2", "materia": "Direito Previdenciário", "topico": "Previdência complementar do DF — LC Distrital nº 932/2017", "semana": "S5"}, {"id": 104, "bloco": "P2", "materia": "Direito Civil", "topico": "Mapa Mestre de Direito Civil", "semana": "S6"}, {"id": 105, "bloco": "P2", "materia": "Direito Civil", "topico": "LINDB", "semana": "S6"}, {"id": 106, "bloco": "P2", "materia": "Direito Civil", "topico": "Pessoas naturais e pessoas jurídicas", "semana": "S6"}, {"id": 107, "bloco": "P2", "materia": "Direito Civil", "topico": "Domicílio", "semana": "S6"}, {"id": 108, "bloco": "P2", "materia": "Direito Civil", "topico": "Bens", "semana": "S6"}, {"id": 109, "bloco": "P2", "materia": "Direito Civil", "topico": "Fatos jurídicos", "semana": "S6"}, {"id": 110, "bloco": "P2", "materia": "Direito Civil", "topico": "Negócio jurídico", "semana": "S6"}, {"id": 111, "bloco": "P2", "materia": "Direito Civil", "topico": "Atos lícitos e ilícitos + prescrição e decadência", "semana": "S6"}, {"id": 112, "bloco": "P2", "materia": "Direito Tributário", "topico": "Mapa Mestre de Tributário", "semana": "S6"}, {"id": 113, "bloco": "P2", "materia": "Direito Tributário", "topico": "Direito Tributário: conceito e fontes", "semana": "S6"}, {"id": 114, "bloco": "P2", "materia": "Direito Tributário", "topico": "Sistema Tributário Nacional", "semana": "S6"}, {"id": 115, "bloco": "P2", "materia": "Direito Tributário", "topico": "Princípios tributários", "semana": "S6"}, {"id": 116, "bloco": "P2", "materia": "Direito Tributário", "topico": "Limitações constitucionais ao poder de tributar", "semana": "S6"}, {"id": 117, "bloco": "P2", "materia": "Direito Tributário", "topico": "Repartição das receitas tributárias", "semana": "S6"}, {"id": 118, "bloco": "P2", "materia": "Direito Tributário", "topico": "Tributo: conceito e natureza jurídica", "semana": "S6"}, {"id": 119, "bloco": "P2", "materia": "Direito Tributário", "topico": "Imposto × taxa × contribuição de melhoria", "semana": "S6"}, {"id": 120, "bloco": "P2", "materia": "Direito Tributário", "topico": "Empréstimos compulsórios × contribuições", "semana": "S6"}, {"id": 121, "bloco": "P2", "materia": "Dados, Estatística, IA e Excel", "topico": "Mapa Mestre de Dados, Estatística, IA e Excel", "semana": "S6"}, {"id": 122, "bloco": "P2", "materia": "Dados, Estatística, IA e Excel", "topico": "Tipos de dados: estruturados/não estruturados e quantitativos/qualitativos", "semana": "S6"}, {"id": 123, "bloco": "P2", "materia": "Dados, Estatística, IA e Excel", "topico": "Produtos da análise: bases, relatórios, planilhas e dashboards", "semana": "S6"}, {"id": 124, "bloco": "P2", "materia": "Dados, Estatística, IA e Excel", "topico": "Distribuição de frequências", "semana": "S6"}, {"id": 125, "bloco": "P2", "materia": "Dados, Estatística, IA e Excel", "topico": "Média, mediana e moda", "semana": "S6"}, {"id": 126, "bloco": "P2", "materia": "Dados, Estatística, IA e Excel", "topico": "Variância e desvio-padrão", "semana": "S6"}, {"id": 127, "bloco": "P2", "materia": "Dados, Estatística, IA e Excel", "topico": "Anomalias e outliers", "semana": "S7"}, {"id": 128, "bloco": "P2", "materia": "Dados, Estatística, IA e Excel", "topico": "Séries históricas", "semana": "S7"}, {"id": 129, "bloco": "P2", "materia": "Dados, Estatística, IA e Excel", "topico": "Gráficos e boas práticas de visualização", "semana": "S7"}, {"id": 130, "bloco": "P2", "materia": "Dados, Estatística, IA e Excel", "topico": "Storytelling e narrativa com dados", "semana": "S7"}, {"id": 131, "bloco": "P2", "materia": "Dados, Estatística, IA e Excel", "topico": "Inteligência artificial generativa", "semana": "S7"}, {"id": 132, "bloco": "P2", "materia": "Dados, Estatística, IA e Excel", "topico": "Engenharia de prompt: contexto, persona, exemplos, saída e encadeamento", "semana": "S7"}, {"id": 133, "bloco": "P2", "materia": "Dados, Estatística, IA e Excel", "topico": "Vieses cognitivos e ética no uso de dados/IA", "semana": "S7"}, {"id": 134, "bloco": "P2", "materia": "Dados, Estatística, IA e Excel", "topico": "Excel: Power Query", "semana": "S7"}, {"id": 135, "bloco": "P2", "materia": "Dados, Estatística, IA e Excel", "topico": "Excel: fórmulas lógicas, financeiras e de busca", "semana": "S7"}, {"id": 136, "bloco": "P2", "materia": "Dados, Estatística, IA e Excel", "topico": "Excel: tabelas dinâmicas e grandes bases relacionais", "semana": "S7"}, {"id": 137, "bloco": "P3", "materia": "Direito Administrativo", "topico": "Mapa Mestre de Direito Administrativo", "semana": "S7"}, {"id": 138, "bloco": "P3", "materia": "Direito Administrativo", "topico": "Estado × Governo × Administração Pública", "semana": "S7"}, {"id": 139, "bloco": "P3", "materia": "Direito Administrativo", "topico": "Direito Administrativo: conceito, objeto e fontes", "semana": "S7"}, {"id": 140, "bloco": "P3", "materia": "Direito Administrativo", "topico": "Conceito e requisitos", "semana": "S7"}, {"id": 141, "bloco": "P3", "materia": "Direito Administrativo", "topico": "Atributos", "semana": "S7"}, {"id": 142, "bloco": "P3", "materia": "Direito Administrativo", "topico": "Classificação e espécies", "semana": "S7"}, {"id": 143, "bloco": "P3", "materia": "Direito Administrativo", "topico": "Cassação × anulação × revogação × convalidação", "semana": "S7"}, {"id": 144, "bloco": "P3", "materia": "Direito Administrativo", "topico": "Decadência administrativa", "semana": "S7"}, {"id": 145, "bloco": "P3", "materia": "Direito Administrativo", "topico": "Conceito, espécies e disposições constitucionais", "semana": "S7"}, {"id": 146, "bloco": "P3", "materia": "Direito Administrativo", "topico": "Cargo × emprego × função", "semana": "S7"}, {"id": 147, "bloco": "P3", "materia": "Direito Administrativo", "topico": "Provimento × vacância", "semana": "S7"}, {"id": 148, "bloco": "P3", "materia": "Direito Administrativo", "topico": "Efetividade × estabilidade × vitaliciedade", "semana": "S7"}, {"id": 149, "bloco": "P3", "materia": "Direito Administrativo", "topico": "Remuneração, direitos, deveres e responsabilidades", "semana": "S7"}, {"id": 150, "bloco": "P3", "materia": "Direito Administrativo", "topico": "Sindicância e PAD", "semana": "S8"}, {"id": 151, "bloco": "P3", "materia": "Direito Administrativo", "topico": "Poder hierárquico × disciplinar", "semana": "S8"}, {"id": 152, "bloco": "P3", "materia": "Direito Administrativo", "topico": "Poder regulamentar × poder de polícia", "semana": "S8"}, {"id": 153, "bloco": "P3", "materia": "Direito Administrativo", "topico": "Uso × abuso de poder", "semana": "S8"}, {"id": 154, "bloco": "P3", "materia": "Direito Administrativo", "topico": "Regime jurídico-administrativo e princípios", "semana": "S8"}, {"id": 155, "bloco": "P3", "materia": "Direito Administrativo", "topico": "Evolução e responsabilidade por ação estatal", "semana": "S8"}, {"id": 156, "bloco": "P3", "materia": "Direito Administrativo", "topico": "Omissão e requisitos", "semana": "S8"}, {"id": 157, "bloco": "P3", "materia": "Direito Administrativo", "topico": "Excludentes, atenuantes, reparação e direito de regresso", "semana": "S8"}, {"id": 158, "bloco": "P3", "materia": "Direito Administrativo", "topico": "Conceito, elementos e classificação", "semana": "S8"}, {"id": 159, "bloco": "P3", "materia": "Direito Administrativo", "topico": "Princípios, formas de prestação e meios de execução", "semana": "S8"}, {"id": 160, "bloco": "P3", "materia": "Direito Administrativo", "topico": "Autarquias × fundações", "semana": "S8"}, {"id": 161, "bloco": "P3", "materia": "Direito Administrativo", "topico": "Empresas públicas × sociedades de economia mista", "semana": "S8"}, {"id": 162, "bloco": "P3", "materia": "Direito Administrativo", "topico": "Paraestatais e terceiro setor", "semana": "S8"}, {"id": 163, "bloco": "P3", "materia": "Direito Administrativo", "topico": "Controle administrativo", "semana": "S8"}, {"id": 164, "bloco": "P3", "materia": "Direito Administrativo", "topico": "Controle judicial × legislativo", "semana": "S8"}, {"id": 165, "bloco": "P3", "materia": "Direito Administrativo", "topico": "Improbidade — Lei nº 8.429/1992", "semana": "S8"}, {"id": 166, "bloco": "P3", "materia": "Direito Administrativo", "topico": "Processo Administrativo — Lei nº 9.784/1999", "semana": "S8"}, {"id": 167, "bloco": "P3", "materia": "Direito Administrativo", "topico": "Lei de Acesso à Informação", "semana": "S8"}, {"id": 168, "bloco": "P3", "materia": "Direito Administrativo", "topico": "LGPD", "semana": "S8"}, {"id": 169, "bloco": "P3", "materia": "Administração Financeira e Orçamentária", "topico": "Mapa Mestre de AFO", "semana": "S9"}, {"id": 170, "bloco": "P3", "materia": "Administração Financeira e Orçamentária", "topico": "Orçamento público: conceito e técnicas", "semana": "S9"}, {"id": 171, "bloco": "P3", "materia": "Administração Financeira e Orçamentária", "topico": "Princípios orçamentários", "semana": "S9"}, {"id": 172, "bloco": "P3", "materia": "Administração Financeira e Orçamentária", "topico": "Ciclo e processo orçamentário", "semana": "S9"}, {"id": 173, "bloco": "P3", "materia": "Administração Financeira e Orçamentária", "topico": "Sistema de planejamento e orçamento", "semana": "S9"}, {"id": 174, "bloco": "P3", "materia": "Administração Financeira e Orçamentária", "topico": "PPA", "semana": "S9"}, {"id": 175, "bloco": "P3", "materia": "Administração Financeira e Orçamentária", "topico": "LDO", "semana": "S9"}, {"id": 176, "bloco": "P3", "materia": "Administração Financeira e Orçamentária", "topico": "LOA", "semana": "S9"}, {"id": 177, "bloco": "P3", "materia": "Administração Financeira e Orçamentária", "topico": "Classificações orçamentárias", "semana": "S9"}, {"id": 178, "bloco": "P3", "materia": "Administração Financeira e Orçamentária", "topico": "Estrutura programática", "semana": "S9"}, {"id": 179, "bloco": "P3", "materia": "Administração Financeira e Orçamentária", "topico": "Créditos ordinários e adicionais", "semana": "S9"}, {"id": 180, "bloco": "P3", "materia": "Administração Financeira e Orçamentária", "topico": "Programação e execução orçamentária e financeira", "semana": "S9"}, {"id": 181, "bloco": "P3", "materia": "Administração Financeira e Orçamentária", "topico": "Descentralização orçamentária e financeira", "semana": "S9"}, {"id": 182, "bloco": "P3", "materia": "Administração Financeira e Orçamentária", "topico": "Acompanhamento, sistemas e alterações orçamentárias", "semana": "S9"}, {"id": 183, "bloco": "P3", "materia": "Administração Financeira e Orçamentária", "topico": "Receita pública: conceito e classificações", "semana": "S9"}, {"id": 184, "bloco": "P3", "materia": "Administração Financeira e Orçamentária", "topico": "Estágios, fontes e dívida ativa", "semana": "S9"}, {"id": 185, "bloco": "P3", "materia": "Administração Financeira e Orçamentária", "topico": "Despesa pública: conceito e classificações", "semana": "S9"}, {"id": 186, "bloco": "P3", "materia": "Administração Financeira e Orçamentária", "topico": "Estágios da despesa", "semana": "S9"}, {"id": 187, "bloco": "P3", "materia": "Administração Financeira e Orçamentária", "topico": "Restos a pagar × despesas de exercícios anteriores", "semana": "S9"}, {"id": 188, "bloco": "P3", "materia": "Administração Financeira e Orçamentária", "topico": "Dívida flutuante × fundada + suprimento de fundos", "semana": "S9"}, {"id": 189, "bloco": "P3", "materia": "Administração Financeira e Orçamentária", "topico": "Lei de Responsabilidade Fiscal", "semana": "S9"}, {"id": 190, "bloco": "P3", "materia": "Administração Financeira e Orçamentária", "topico": "Lei nº 4.320/1964", "semana": "S9"}, {"id": 191, "bloco": "P3", "materia": "Administração Financeira e Orçamentária", "topico": "Transferências voluntárias", "semana": "S9"}, {"id": 192, "bloco": "P3", "materia": "Administração Financeira e Orçamentária", "topico": "Decreto Distrital nº 32.598/2010", "semana": "S9"}, {"id": 193, "bloco": "P3", "materia": "Administração Geral e Pública", "topico": "Mapa Mestre de Administração", "semana": "S10"}, {"id": 194, "bloco": "P3", "materia": "Administração Geral e Pública", "topico": "Perspectiva clássica: científica e burocrática", "semana": "S10"}, {"id": 195, "bloco": "P3", "materia": "Administração Geral e Pública", "topico": "Relações humanas, recursos humanos e ciências comportamentais", "semana": "S10"}, {"id": 196, "bloco": "P3", "materia": "Administração Geral e Pública", "topico": "Pensamento sistêmico × contingência", "semana": "S10"}, {"id": 197, "bloco": "P3", "materia": "Administração Geral e Pública", "topico": "Evolução da Administração do setor público brasileiro", "semana": "S10"}, {"id": 198, "bloco": "P3", "materia": "Administração Geral e Pública", "topico": "Patrimonialista × burocrática × gerencial", "semana": "S10"}, {"id": 199, "bloco": "P3", "materia": "Administração Geral e Pública", "topico": "Princípios da governança pública", "semana": "S10"}, {"id": 200, "bloco": "P3", "materia": "Administração Geral e Pública", "topico": "Liderança × estratégia × controle", "semana": "S10"}, {"id": 201, "bloco": "P3", "materia": "Administração Geral e Pública", "topico": "Planejamento × organização × direção × controle", "semana": "S10"}, {"id": 202, "bloco": "P3", "materia": "Administração Geral e Pública", "topico": "SWOT × GUT × 5W2H", "semana": "S10"}, {"id": 203, "bloco": "P3", "materia": "Administração Geral e Pública", "topico": "PDCA × mapas estratégicos × benchmarking × fatores críticos de sucesso", "semana": "S10"}, {"id": 204, "bloco": "P3", "materia": "Administração Geral e Pública", "topico": "Modelagem de processos", "semana": "S10"}, {"id": 205, "bloco": "P3", "materia": "Administração Geral e Pública", "topico": "BPMN", "semana": "S10"}, {"id": 206, "bloco": "P3", "materia": "Administração Geral e Pública", "topico": "EPC × IDF0 × cadeia de valor", "semana": "S10"}, {"id": 207, "bloco": "P3", "materia": "Administração Geral e Pública", "topico": "CHA × matriz de competências × APPO", "semana": "S10"}, {"id": 208, "bloco": "P3", "materia": "Administração Geral e Pública", "topico": "Liderança × motivação", "semana": "S10"}, {"id": 209, "bloco": "P3", "materia": "Administração Geral e Pública", "topico": "PMBOK × Prince × Scrum × métodos ágeis", "semana": "S10"}, {"id": 210, "bloco": "P3", "materia": "Administração Geral e Pública", "topico": "Cronogramas, escopo, sequenciamento, esforço, duração, pessoas e Kanban", "semana": "S10"}, {"id": 211, "bloco": "P3", "materia": "LC Distrital 840/2011", "topico": "Mapa Mestre LC 840", "semana": "S10"}, {"id": 212, "bloco": "P3", "materia": "LC Distrital 840/2011", "topico": "Disposições preliminares, cargos e funções de confiança", "semana": "S10"}, {"id": 213, "bloco": "P3", "materia": "LC Distrital 840/2011", "topico": "Concurso público, nomeação e requisitos de investidura", "semana": "S10"}, {"id": 214, "bloco": "P3", "materia": "LC Distrital 840/2011", "topico": "Posse, exercício e estágio probatório", "semana": "S10"}, {"id": 215, "bloco": "P3", "materia": "LC Distrital 840/2011", "topico": "Estabilidade e formas de provimento derivado", "semana": "S10"}, {"id": 216, "bloco": "P3", "materia": "LC Distrital 840/2011", "topico": "Remoção, redistribuição e substituição", "semana": "S10"}, {"id": 217, "bloco": "P3", "materia": "LC Distrital 840/2011", "topico": "Vacância do cargo público", "semana": "S11"}, {"id": 218, "bloco": "P3", "materia": "LC Distrital 840/2011", "topico": "Carreiras, promoção, regime e jornada de trabalho", "semana": "S11"}, {"id": 219, "bloco": "P3", "materia": "LC Distrital 840/2011", "topico": "Sistema remuneratório: subsídio, remuneração, teto e descontos", "semana": "S11"}, {"id": 220, "bloco": "P3", "materia": "LC Distrital 840/2011", "topico": "Vantagens: indenizações, gratificações e adicionais", "semana": "S11"}, {"id": 221, "bloco": "P3", "materia": "LC Distrital 840/2011", "topico": "Férias", "semana": "S11"}, {"id": 222, "bloco": "P3", "materia": "LC Distrital 840/2011", "topico": "Licenças", "semana": "S11"}, {"id": 223, "bloco": "P3", "materia": "LC Distrital 840/2011", "topico": "Abono de ponto e afastamentos", "semana": "S11"}, {"id": 224, "bloco": "P3", "materia": "LC Distrital 840/2011", "topico": "Tempo de serviço e direito de petição", "semana": "S11"}, {"id": 225, "bloco": "P3", "materia": "LC Distrital 840/2011", "topico": "Deveres e responsabilidades do servidor", "semana": "S11"}, {"id": 226, "bloco": "P3", "materia": "LC Distrital 840/2011", "topico": "Infrações disciplinares", "semana": "S11"}, {"id": 227, "bloco": "P3", "materia": "LC Distrital 840/2011", "topico": "Sanções disciplinares, prescrição e extinção da punibilidade", "semana": "S11"}, {"id": 228, "bloco": "P3", "materia": "LC Distrital 840/2011", "topico": "Sindicância, processo disciplinar e revisão", "semana": "S11"}, {"id": 229, "bloco": "P3", "materia": "LC Distrital 840/2011", "topico": "Seguridade social, saúde e disposições finais e transitórias", "semana": "S11"}, {"id": 230, "bloco": "P3", "materia": "LC Distrital 840/2011", "topico": "Revisão integrada da LC 840", "semana": "S11"}, {"id": 231, "bloco": "P3", "materia": "Gestão de Contratos", "topico": "Mapa Mestre de Gestão de Contratos", "semana": "S11"}, {"id": 232, "bloco": "P3", "materia": "Gestão de Contratos", "topico": "Lei nº 14.133/2021 — visão integrada", "semana": "S11"}, {"id": 233, "bloco": "P3", "materia": "Gestão de Contratos", "topico": "Decreto Distrital nº 44.330/2023", "semana": "S11"}, {"id": 234, "bloco": "P3", "materia": "Gestão de Contratos", "topico": "IN nº 5/2017", "semana": "S11"}, {"id": 235, "bloco": "P3", "materia": "Gestão de Contratos", "topico": "Elaboração de contratos", "semana": "S11"}, {"id": 236, "bloco": "P3", "materia": "Gestão de Contratos", "topico": "Cláusulas contratuais", "semana": "S11"}, {"id": 237, "bloco": "P3", "materia": "Gestão de Contratos", "topico": "Indicadores de nível de serviço", "semana": "S11"}, {"id": 238, "bloco": "P3", "materia": "Gestão de Contratos", "topico": "Papel do fiscal", "semana": "S11"}, {"id": 239, "bloco": "P3", "materia": "Gestão de Contratos", "topico": "Papel do preposto", "semana": "S11"}, {"id": 240, "bloco": "P3", "materia": "Gestão de Contratos", "topico": "Acompanhamento da execução", "semana": "S11"}, {"id": 241, "bloco": "P3", "materia": "Gestão de Contratos", "topico": "Registro de irregularidades", "semana": "S12"}, {"id": 242, "bloco": "P3", "materia": "Gestão de Contratos", "topico": "Notificação de irregularidades", "semana": "S12"}, {"id": 243, "bloco": "P3", "materia": "Gestão de Contratos", "topico": "Penalidades", "semana": "S12"}, {"id": 244, "bloco": "P3", "materia": "Gestão de Contratos", "topico": "Sanções administrativas", "semana": "S12"}, {"id": 245, "bloco": "P3", "materia": "Gestão de Contratos", "topico": "Equação econômico-financeira", "semana": "S12"}, {"id": 246, "bloco": "P3", "materia": "Gestão de Contratos", "topico": "Reajuste", "semana": "S12"}, {"id": 247, "bloco": "P3", "materia": "Gestão de Contratos", "topico": "Repactuação", "semana": "S12"}, {"id": 248, "bloco": "P3", "materia": "Gestão de Contratos", "topico": "Quadro comparativo integrado: contratação e fiscalização", "semana": "S12"}, {"id": 249, "bloco": "P4", "materia": "Discursiva", "topico": "Como funciona a prova discursiva do TCDF", "semana": "S12"}, {"id": 250, "bloco": "P4", "materia": "Discursiva", "topico": "Critérios de correção e nota mínima", "semana": "S12"}, {"id": 251, "bloco": "P4", "materia": "Discursiva", "topico": "Como estruturar a questão de até 20 linhas", "semana": "S12"}, {"id": 252, "bloco": "P4", "materia": "Discursiva", "topico": "Como interpretar o comando da discursiva", "semana": "S12"}, {"id": 253, "bloco": "P4", "materia": "Discursiva", "topico": "Como planejar a resposta antes de escrever", "semana": "S12"}, {"id": 254, "bloco": "P4", "materia": "Discursiva", "topico": "Introdução, desenvolvimento e conclusão sem desperdiçar linhas", "semana": "S12"}, {"id": 255, "bloco": "P4", "materia": "Discursiva", "topico": "Coerência, coesão e linguagem formal", "semana": "S12"}, {"id": 256, "bloco": "P4", "materia": "Discursiva", "topico": "Erros gramaticais e impacto na pontuação", "semana": "S12"}, {"id": 257, "bloco": "P4", "materia": "Discursiva", "topico": "Gestão do limite de linhas", "semana": "S12"}, {"id": 258, "bloco": "P4", "materia": "Discursiva", "topico": "Peça técnica “Informação”: estrutura", "semana": "S12"}, {"id": 259, "bloco": "P4", "materia": "Discursiva", "topico": "Como transformar conhecimento de P3 em peça técnica", "semana": "S12"}, {"id": 260, "bloco": "P4", "materia": "Discursiva", "topico": "Checklist visual de revisão antes de entregar", "semana": "S12"}];
+const ESTUDOS_MAPAS_CRUD_KEY="bertha.estudos.mapas.crud.v1";
+function loadStudyMapsCrud(){
+ try{const v=JSON.parse(window.berthaHmlStorage.getItem(ESTUDOS_MAPAS_CRUD_KEY)||'{}');return{custom:Array.isArray(v.custom)?v.custom:[],overrides:v.overrides&&typeof v.overrides==='object'?v.overrides:{},deleted:Array.isArray(v.deleted)?v.deleted.map(Number):[]};}catch{return{custom:[],overrides:{},deleted:[]}}
+}
+function saveStudyMapsCrud(v){window.berthaHmlStorage.setItem(ESTUDOS_MAPAS_CRUD_KEY,JSON.stringify(v))}
+function studyMapsAll(){
+ const c=loadStudyMapsCrud(),deleted=new Set(c.deleted.map(Number));
+ const base=TCDF_MAPAS.filter(x=>!deleted.has(+x.id)).map(x=>({...x,...(c.overrides[String(x.id)]||{}),id:+x.id,custom:false}));
+ const custom=c.custom.filter(x=>!deleted.has(+x.id)).map(x=>({...x,id:+x.id,custom:true}));
+ return [...base,...custom].sort((a,b)=>(+a.id)-(+b.id));
+}
+function studyMapById(id){return studyMapsAll().find(x=>+x.id===+id)}
+function nextStudyMapId(){const all=[...TCDF_MAPAS,...loadStudyMapsCrud().custom],max=all.reduce((m,x)=>Math.max(m,+x.id||0),260);return Math.max(261,max+1)}
+function saveStudyMapRecord(obj){
+ const c=loadStudyMapsCrud(),base=TCDF_MAPAS.some(x=>+x.id===+obj.id);
+ if(base)c.overrides[String(obj.id)]={bloco:obj.bloco,materia:obj.materia,topico:obj.topico,semana:obj.semana,minutes:obj.minutes||30,icon:obj.icon||'auto'};
+ else{const i=c.custom.findIndex(x=>+x.id===+obj.id);if(i>=0)c.custom[i]={...c.custom[i],...obj,custom:true};else c.custom.push({...obj,custom:true});}
+ c.deleted=c.deleted.filter(x=>+x!==+obj.id);saveStudyMapsCrud(c);
+}
+function deleteStudyMapRecord(id){
+ const c=loadStudyMapsCrud(),base=TCDF_MAPAS.some(x=>+x.id===+id);
+ if(base){if(!c.deleted.some(x=>+x===+id))c.deleted.push(+id);delete c.overrides[String(id)];}
+ else c.custom=c.custom.filter(x=>+x.id!==+id);
+ saveStudyMapsCrud(c);
+}
+const STUDY_ICONS=[
+ ['auto','Automático'],['book','Leitura'],['doc','Documento'],['law','Legislação'],['video','Aula / vídeo'],['audio','Áudio'],['questions','Questões'],['test','Simulado'],['notes','Resumo'],['map','Mapa mental'],['cards','Flashcards'],['review','Revisão'],['calc','Cálculo'],['computer','Informática'],['language','Idiomas']
+];
+function studyIconSvg(key='auto'){
+ const d={auto:'M8 20h32M12 12h24M16 28h16',book:'M8 9c7-2 12 0 16 4v24c-4-4-9-6-16-4V9Zm32 0c-7-2-12 0-16 4v24c4-4 9-6 16-4V9Z',doc:'M13 7h15l8 8v26H13V7Zm15 0v9h8M18 24h13M18 30h13',law:'M24 7v34M13 13h22M15 13l-6 13h12L15 13Zm18 0-6 13h12L33 13ZM14 41h20',video:'M9 12h24v24H9V12Zm24 8 8-5v18l-8-5',audio:'M13 18h8l8-7v26l-8-7h-8V18Zm21 1c4 4 4 10 0 14',questions:'M10 10h28v28H10V10Zm8 8c1-5 11-5 12 0 1 4-5 5-6 8v2M24 33h.1',test:'M14 8h20v34H14V8Zm5 9 3 3 6-7M19 29h10M19 35h10',notes:'M11 9h26v30H11V9Zm6 8h14M17 24h14M17 31h10',map:'M8 24h10M18 24l6-10 6 10M30 24h10M24 14V8M24 24v14M16 38h16',cards:'M14 12h24v28H14V12Zm-4-4h24M10 8v28',review:'M12 16a15 15 0 1 1-2 17M12 16V8M12 16h8',calc:'M12 8h24v32H12V8Zm5 6h14v7H17v-7Zm0 13h3M24 27h3M31 27h1M17 33h3M24 33h3M31 33h1',computer:'M8 10h32v23H8V10Zm10 30h12M24 33v7',language:'M9 11h18v24H9V11Zm18 7h12v21H24M14 18h8M18 15v12M13 29c5-2 8-6 9-11M32 24l5 11M29 31h7'};
+ return `<svg viewBox="0 0 48 48" aria-hidden="true"><path d="${d[key]||d.auto}"/></svg>`;
+}
+function studyIconPicker(selected='auto'){
+ return `<div class="study-icon-picker" data-study-icons>${STUDY_ICONS.map(([k,l])=>`<button type="button" class="study-icon-choice ${k===selected?'selected':''}" data-study-icon="${k}" title="${l}"><span>${studyIconSvg(k)}</span><small>${l}</small></button>`).join('')}</div>`;
+}
+function bindStudyIconPicker(dlg,initial='auto'){dlg.dataset.studyIcon=initial||'auto';dlg.querySelectorAll('[data-study-icon]').forEach(b=>b.onclick=()=>{dlg.dataset.studyIcon=b.dataset.studyIcon;dlg.querySelectorAll('[data-study-icon]').forEach(x=>x.classList.toggle('selected',x===b));});}
+function studyMapDialog(id,onDone){
+ const current=id!=null?studyMapById(id):null,dlg=document.createElement('dialog');dlg.className='study-v10-dialog study-module-dialog';
+ const map=current||{id:nextStudyMapId(),bloco:'P1',materia:'',topico:'',semana:'S1',minutes:30,icon:'auto',notify:false,notifyWhen:'No início do período'};
+ dlg.innerHTML=`<div class="study-v10-modal"><div class="study-v10-head"><div><div class="eyebrow">TCDF 2026</div><h2>${current?'Editar mapa':'Novo mapa'}</h2><p>${current?`Mapa ${String(map.id).padStart(3,'0')}`:'Ele entra na mesma biblioteca e na inteligência da BERTH.A.'}</p></div><button class="study-v10-x" type="button">×</button></div>
+ ${field('Tema / título',`<input data-map-topic maxlength="180" value="${escapeHtml(map.topico||'')}" placeholder="Ex.: Controle da administração pública">`)}
+ ${field('Matéria',`<input data-map-subject maxlength="120" value="${escapeHtml(map.materia||'')}" placeholder="Ex.: Direito Administrativo">`)}
+ <div class="study-map-form-grid">${field('Bloco',`<input data-map-block maxlength="30" value="${escapeHtml(map.bloco||'')}" placeholder="Ex.: P2">`)}${field('Semana',`<input data-map-week maxlength="30" value="${escapeHtml(map.semana||'')}" placeholder="Ex.: S4">`)}</div>
+ ${field('Ícone do estudo',studyIconPicker(map.icon||'auto'))}${field('Duração planejada',`<div class="study-v10-duration"><input data-map-minutes type="number" min="5" step="5" value="${Math.max(5,+map.minutes||30)}"><span class="study-map-unit">minutos</span></div>`)}
+ <div class="study-notify-box"><label class="study-notify-row"><span><strong>Avisar</strong><small>Guardar lembrete para este mapa.</small></span><input type="checkbox" data-map-notify ${map.notify?'checked':''}></label><label data-map-notify-wrap ${map.notify?'':'hidden'}><span>Quando avisar?</span><select data-map-notify-when><option ${map.notifyWhen==='No início do período'?'selected':''}>No início do período</option><option ${map.notifyWhen==='10 min antes'?'selected':''}>10 min antes</option><option ${map.notifyWhen==='30 min antes'?'selected':''}>30 min antes</option><option ${map.notifyWhen==='1 hora antes'?'selected':''}>1 hora antes</option></select></label></div>
+ <div class="study-v10-actions">${current?'<button class="danger" type="button" data-map-delete>Excluir</button>':''}<button class="secondary" type="button" data-map-cancel>Cancelar</button><button class="primary" type="button" data-map-save>Salvar</button></div></div>`;
+ document.body.appendChild(dlg);bindStudyIconPicker(dlg,map.icon||'auto');const mn=dlg.querySelector('[data-map-notify]'),mnw=dlg.querySelector('[data-map-notify-wrap]');if(mn)mn.onchange=()=>mnw.hidden=!mn.checked;const close=()=>dlg.close();dlg.querySelector('.study-v10-x').onclick=close;dlg.querySelector('[data-map-cancel]').onclick=close;
+ dlg.querySelector('[data-map-delete]')?.addEventListener('click',()=>{if(!confirm(`Excluir o Mapa ${String(map.id).padStart(3,'0')} da biblioteca? O histórico de estudos já realizado será preservado.`))return;deleteStudyMapRecord(map.id);close();setTimeout(()=>{renderEstudos();onDone?.();},0)});
+ dlg.querySelector('[data-map-save]').onclick=()=>{const topico=dlg.querySelector('[data-map-topic]').value.trim(),materia=dlg.querySelector('[data-map-subject]').value.trim();if(!topico||!materia){alert('Preencha o tema e a matéria.');return;}saveStudyMapRecord({id:+map.id,topico,materia,bloco:dlg.querySelector('[data-map-block]').value.trim()||'—',semana:dlg.querySelector('[data-map-week]').value.trim()||'—',minutes:Math.max(5,+dlg.querySelector('[data-map-minutes]').value||30),icon:dlg.dataset.studyIcon||'auto',notify:!!dlg.querySelector('[data-map-notify]')?.checked,notifyWhen:dlg.querySelector('[data-map-notify-when]')?.value||'No início do período'});close();setTimeout(()=>{renderEstudos();onDone?.();},0)};
+ dlg.onclose=()=>dlg.remove();dlg.showModal();
+}
+
+function addDaysISO(ms,n){const d=new Date(ms);d.setDate(d.getDate()+n);return d.toISOString().slice(0,10)}
+function nextStepFor(a={}){if(!a.primeira)return{field:"primeira",label:"1ª volta"};if(!a.questoes)return{field:"questoes",label:"Questões"};if(!a.domino)return{field:"domino",label:"Domínio"};return{field:"done",label:"Dominado"}}
+function nextReviewFor(a={}){if(!a.primeiraAt)return null;for(const k of["r1","r3","r7","r15"])if(!a[k]&&a[k+"Due"])return{key:k,label:k.toUpperCase(),due:a[k+"Due"]};return null}
+function toggleMapa(id,f){const d=loadMapasStatus(),k=String(id),a={...(d[k]||{})};if(f==="primeira"&&!a.primeira){a.primeira=true;a.primeiraAt=Date.now();a.r1Due=addDaysISO(a.primeiraAt,1);a.r3Due=addDaysISO(a.primeiraAt,3);a.r7Due=addDaysISO(a.primeiraAt,7);a.r15Due=addDaysISO(a.primeiraAt,15)}else if(f==="primeira"){a.primeira=false;a.primeiraAt=null;["r1","r3","r7","r15"].forEach(x=>{delete a[x];delete a[x+"Due"]})}else if(f==="questoes")a.questoes=!a.questoes;else if(f==="domino"){if(!a.primeira||!a.questoes){alert("Complete primeiro a 1ª volta e as questões.");return}a.domino=!a.domino}saveMapasStatus({...d,[k]:a});renderEstudos()}
+function estudoSugestao(min=30){const d=loadMapasStatus(),maps=studyMapsAll(),limit=Math.max(1,+min||30),fits=x=>Math.max(5,+x.minutes||30)<=limit,rev=maps.filter(x=>nextReviewFor(d[x.id])&&fits(x)),due=maps.filter(x=>!d[x.id]?.domino&&fits(x));if(rev.length)return{title:"Revisão primeiro",text:"Há revisão prevista que cabe nesta janela.",maps:rev.slice(0,1)};if(due.length)return{title:limit<=30?`Janela de ${limit} min`:"Próximo conteúdo",text:"Este mapa cabe no tempo disponível.",maps:due.slice(0,1)};return{title:`Janela de ${limit} min`,text:"Nenhum mapa planejado cabe nesta janela sem apertar seu dia.",maps:[]}}
+function studyNorm(v=""){return String(v).toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g,"")}
+function studyStatus(a={}){return a.domino?"dominio":a.questoes?"questoes":a.primeira?"primeira":"nao-iniciado"}
+
+function studyHeroIcon(){return `<svg viewBox="0 0 48 42" aria-hidden="true"><path d="M8 10h24"/><path d="M14 21h26"/><path d="M8 32h24"/><path d="M32 10l8 11-8 11"/></svg>`}
+function renderEstudos(){
+ const d=loadEstudos(),st=loadMapasStatus(),c=loadStudyContents(),maps=studyMapsAll(),mapCount=maps.length,first=maps.filter(x=>st[x.id]?.primeira).length,q=maps.filter(x=>st[x.id]?.questoes).length,dom=maps.filter(x=>st[x.id]?.domino).length,sug=estudoSugestao(30);
+ const activeRaw=window.BerthaTimeEngine?.active?.(),activeStudy=activeRaw&&String(activeRaw.source||'').toLowerCase()==='estudos'?activeRaw:null;
+ const activeElapsed=activeStudy?Math.max(0,Math.floor((Date.now()-(+activeStudy.startedAt||Date.now()))/60000)):0;
+ app.innerHTML=`<section class="study-hero"><div><div class="eyebrow">ESTUDOS</div><h2>Space to think. Space to live.</h2><p>Você estuda. A BERTH.A acompanha.</p></div><span class="study-hero-icon">${studyHeroIcon()}</span></section>
+ <div class="study-v10-stats"><div><b>${d.sessions.length}</b><span>sessões</span></div><div><b>${dom}</b><span>dominados</span></div><div><b>${mapCount}</b><span>mapas</span></div></div>
+ <div class="study-section"><div class="section-heading"><div><div class="eyebrow">TCDF 2026</div><h3>Biblioteca de mapas</h3></div><div class="study-map-head-actions"><button class="secondary" id="addMap">＋ Mapa</button><button class="secondary" id="viewMaps">Ver mapas</button></div></div><div class="card study-v10-summary"><div><strong>${mapCount} mapas cadastrados</strong><span>${first} em 1ª volta · ${q} com questões · ${dom} dominados</span></div><button class="secondary" id="searchMaps">⌕ Buscar</button></div></div>
+ <div class="study-section"><div class="section-heading"><div><div class="eyebrow">${activeStudy?'SESSÃO EM ANDAMENTO':'SUGESTÃO INTELIGENTE'}</div><h3>${activeStudy?'Estudo em andamento':escapeHtml(sug.title)}</h3></div></div><div class="card">${activeStudy?`<p><strong>${escapeHtml(activeStudy.title||'Estudo')}</strong><br><span>${activeElapsed} min decorridos · previsto ${Math.max(1,+activeStudy.plannedMinutes||+activeStudy.minutes||30)} min</span></p><button class="primary" data-finish-study>Concluir estudo</button>`:`<p>${escapeHtml(sug.text)}</p>${sug.maps[0]?`<button class="primary" data-start-map="${sug.maps[0].id}">Começar · Mapa ${String(sug.maps[0].id).padStart(3,"0")}</button>`:""}`}</div></div>
+ <div class="study-section"><div class="section-heading"><div><div class="eyebrow">OUTROS ESTUDOS</div><h3>Outros conteúdos</h3></div><button class="secondary" id="addContent">＋ Conteúdo</button></div><div class="list">${c.length?c.map(contentCard).join(""):`<div class="empty compact"><strong>Nenhum conteúdo adicionado.</strong><span>Cadastre MBA, Tarot, aulas, áudios ou outros estudos online.</span></div>`}</div></div>
+ <div class="study-section"><div class="section-heading"><div><div class="eyebrow">HISTÓRICO</div><h3>Estudos realizados</h3></div><button class="secondary" id="pastStudy">＋ Registrar passado</button></div><div class="list">${d.sessions.length?d.sessions.slice().reverse().slice(0,8).map(sessionHtml).join(""):`<div class="empty compact"><strong>Nenhum estudo registrado.</strong><span>Começar → Concluir mede o tempo automaticamente.</span></div>`}</div></div>`;
+ document.querySelector("#addMap")?.addEventListener("click",()=>studyMapDialog(null));document.querySelector("#viewMaps")?.addEventListener("click",()=>openMaps(false));document.querySelector("#searchMaps")?.addEventListener("click",()=>openMaps(true));document.querySelector("[data-start-map]")?.addEventListener("click",e=>startMap(+e.currentTarget.dataset.startMap));document.querySelector("[data-finish-study]")?.addEventListener("click",()=>window.BerthaTimeEngine?.finish?.());document.querySelector("#addContent")?.addEventListener("click",()=>contentDialog());document.querySelector("#pastStudy")?.addEventListener("click",pastDialog);document.querySelectorAll("[data-study-session]").forEach(card=>card.onclick=()=>openPastStudyActions(card.dataset.studySession));document.querySelectorAll("[data-content-start]").forEach(b=>b.onclick=()=>startContent(b.dataset.contentStart));document.querySelectorAll("[data-content-open]").forEach(b=>b.onclick=()=>openContent(b.dataset.contentOpen));document.querySelectorAll("[data-content-edit]").forEach(b=>b.onclick=()=>contentDialog(b.dataset.contentEdit));document.querySelectorAll("[data-content-delete]").forEach(b=>b.onclick=()=>deleteStudyContent(b.dataset.contentDelete));
+}
+function contentCard(x){return `<article class="card study-v10-content"><div class="study-content-main"><span class="study-item-icon">${studyIconSvg(x.icon||'auto')}</span><div><small>${escapeHtml(x.group||"ESTUDO")}</small><strong>${escapeHtml(x.title)}</strong><span>${x.minutes||60} min${x.note?" · "+escapeHtml(x.note):""}</span></div></div><div>${x.url?`<button class="secondary" data-content-open="${x.id}">Abrir conteúdo</button>`:""}<button class="primary" data-content-start="${x.id}">Começar</button><button class="secondary" data-content-edit="${x.id}">⋯</button><button class="study-v10-trash" data-content-delete="${x.id}" aria-label="Excluir conteúdo">×</button></div></article>`}
+function openMaps(focus){
+ const maps=studyMapsAll(),dlg=document.createElement("dialog");dlg.className="study-v10-dialog study-module-dialog";dlg.innerHTML=`<div class="study-v10-modal maplib"><div class="study-v10-head"><div><div class="eyebrow">TCDF 2026</div><h2>${maps.length} mapas</h2><p>Busque, acompanhe, edite ou acrescente mapas.</p></div><button class="study-v10-x">×</button></div><div class="study-map-library-tools"><div class="study-v10-search">⌕<input type="search" placeholder="Buscar nos ${maps.length} mapas…"></div><button type="button" class="primary study-add-map-inline" data-new-map>＋ Mapa</button></div><div class="study-v10-filters">${[["todos","Todos"],["nao-iniciado","Não iniciados"],["primeira","1ª volta"],["questoes","Questões"],["dominio","Domínio"]].map(([v,l])=>`<button data-filter="${v}" class="${v==="todos"?"active":""}">${l}</button>`).join("")}</div><div class="study-v10-results"></div></div>`;document.body.appendChild(dlg);let filter="todos";const input=dlg.querySelector("input"),res=dlg.querySelector(".study-v10-results");
+ const draw=()=>{const st=loadMapasStatus(),term=studyNorm(input.value.trim()),all=studyMapsAll(),rows=all.filter(x=>(filter==="todos"||studyStatus(st[x.id])===filter)&&(!term||studyNorm(`${x.id} ${String(x.id).padStart(3,"0")} ${x.bloco} ${x.materia} ${x.topico} ${x.semana}`).includes(term)));res.innerHTML=`<div class="study-v10-count">${rows.length} mapa${rows.length===1?"":"s"}</div>`+(rows.length?rows.map(x=>mapRow(x,st[x.id]||{})).join(""):`<div class="empty compact"><strong>Nenhum mapa encontrado.</strong><span>Tente outra palavra-chave.</span></div>`);res.querySelectorAll("[data-go]").forEach(b=>b.onclick=()=>{const id=+b.dataset.go;dlg.close();startMap(id)});res.querySelectorAll("[data-toggle]").forEach(b=>b.onclick=()=>{toggleMapa(+b.dataset.id,b.dataset.toggle);setTimeout(draw,0)});res.querySelectorAll("[data-edit-map]").forEach(b=>b.onclick=()=>studyMapDialog(+b.dataset.editMap,draw))};
+ dlg.querySelector(".study-v10-x").onclick=()=>dlg.close();dlg.querySelector('[data-new-map]').onclick=()=>studyMapDialog(null,draw);input.oninput=draw;dlg.querySelectorAll("[data-filter]").forEach(b=>b.onclick=()=>{filter=b.dataset.filter;dlg.querySelectorAll("[data-filter]").forEach(x=>x.classList.toggle("active",x===b));draw()});dlg.onclose=()=>dlg.remove();draw();dlg.showModal();if(focus)setTimeout(()=>input.focus(),120)
+}
+function mapRow(x,a){return `<article class="study-v10-map"><div class="study-content-main"><span class="study-item-icon">${studyIconSvg(x.icon||'auto')}</span><div><small>MAPA ${String(x.id).padStart(3,"0")} · ${escapeHtml(x.bloco)} · ${escapeHtml(x.semana)}</small><strong>${escapeHtml(x.topico)}</strong><span>${escapeHtml(x.materia)} · ${Math.max(5,+x.minutes||30)} min</span><em>Próximo: ${nextStepFor(a).label}</em></div></div><div class="study-v10-mapactions">${[["primeira","1ª"],["questoes","Q"],["domino","D"]].map(([f,l])=>`<button data-id="${x.id}" data-toggle="${f}" class="${a[f]?"done":""}">${l}</button>`).join("")}<button data-go="${x.id}" class="go">Começar</button><button data-edit-map="${x.id}" class="edit-map" aria-label="Editar mapa">Editar</button></div></article>`}
+function startViaBertha(item){if(window.BerthaDurationLearning)item.minutes=window.BerthaDurationLearning.effectiveMinutes(item);if(window.BerthaTimeEngine?.start){window.BerthaTimeEngine.start(item);setTimeout(()=>{try{renderEstudos()}catch{}},0)}else alert("Atualize também bertha-time-v1.js para usar o timer global.")}
+function startMap(id){const x=studyMapById(id);if(x){const mins=Math.max(5,+x.minutes||30);startViaBertha({id:`study:tcdf:${id}`,learningKey:`study:tcdf:${id}`,source:"Estudos",title:`Mapa ${String(id).padStart(3,"0")} · ${x.topico}`,minutes:mins,configuredMinutes:mins,period:"flex",kind:"study"})}}
+function startContent(id){const x=loadStudyContents().find(v=>v.id===id);if(!x)return;if(x.url&&confirm("Abrir o conteúdo e começar a medir?"))openContent(id);startViaBertha({id:`study:content:${id}`,learningKey:`study:content:${id}`,source:"Estudos",title:x.title,minutes:+x.minutes||60,configuredMinutes:+x.minutes||60,period:"flex",kind:"study"})}
+function openContent(id){const x=loadStudyContents().find(v=>v.id===id);if(!x?.url)return;let u=x.url.trim();if(!/^https?:\/\//i.test(u))u="https://"+u;window.open(u,"_blank","noopener")}
+function deleteStudyContent(id){
+ const items=loadStudyContents(),item=items.find(x=>x.id===id);if(!item)return;
+ if(!confirm(`Excluir “${item.title}”?`))return;
+ saveStudyContents(items.filter(x=>x.id!==id));
+ renderEstudos();
+}
+function contentDialog(id){
+ const items=loadStudyContents(),e=items.find(x=>x.id===id),dlg=document.createElement("dialog");dlg.className="study-v10-dialog study-module-dialog";dlg.innerHTML=`<div class="study-v10-modal"><div class="study-v10-head"><div><div class="eyebrow">ESTUDOS</div><h2>${e?"Editar conteúdo":"Adicionar conteúdo"}</h2><p>MBA, Tarot, áudio, aula ou outro material.</p></div><button class="study-v10-x">×</button></div>${field("Nome",`<input data-title value="${escapeHtml(e?.title||"")}" placeholder="Ex.: MBA · Aula 04">`)}${field("Frente de estudo",`<input data-group value="${escapeHtml(e?.group||"")}" placeholder="Ex.: MBA, Tarot, TCDF">`)}${field("Link para abrir o conteúdo",`<input data-url value="${escapeHtml(e?.url||"")}" placeholder="https://…">`)}${field("Ícone do estudo",studyIconPicker(e?.icon||"auto"))}${field("Duração planejada",`<div class="study-v10-duration"><input data-dur type="number" min="1" value="${e?.durationValue||e?.minutes||60}"><select data-unit><option value="minutes">minutos</option><option value="hours" ${e?.durationUnit==="hours"?"selected":""}>horas</option></select></div>`)}<div class="study-notify-box"><label class="study-notify-row"><span><strong>Avisar</strong><small>Guardar lembrete para este conteúdo.</small></span><input type="checkbox" data-content-notify ${e?.notify?'checked':''}></label><label data-content-notify-wrap ${e?.notify?'':'hidden'}><span>Quando avisar?</span><select data-content-notify-when><option ${e?.notifyWhen==='No início do período'?'selected':''}>No início do período</option><option ${e?.notifyWhen==='10 min antes'?'selected':''}>10 min antes</option><option ${e?.notifyWhen==='30 min antes'?'selected':''}>30 min antes</option><option ${e?.notifyWhen==='1 hora antes'?'selected':''}>1 hora antes</option></select></label></div>${field("Observação",`<textarea data-note rows="3">${escapeHtml(e?.note||"")}</textarea>`)}<div class="study-v10-actions">${e?'<button class="danger" data-delete>Excluir</button>':""}<button class="secondary" data-cancel>Cancelar</button><button class="primary" data-save>Salvar</button></div></div>`;document.body.appendChild(dlg);bindStudyIconPicker(dlg,e?.icon||"auto");const cn=dlg.querySelector('[data-content-notify]'),cnw=dlg.querySelector('[data-content-notify-wrap]');if(cn)cn.onchange=()=>cnw.hidden=!cn.checked;dlg.querySelector(".study-v10-x").onclick=()=>dlg.close();dlg.querySelector("[data-cancel]").onclick=()=>dlg.close();dlg.querySelector("[data-delete]")?.addEventListener("click",()=>{if(!confirm(`Excluir “${e.title}”?`))return;saveStudyContents(loadStudyContents().filter(x=>x.id!==e.id));dlg.close();setTimeout(renderEstudos,0)});dlg.querySelector("[data-save]").onclick=()=>{const title=dlg.querySelector("[data-title]").value.trim();if(!title)return;const v=Math.max(1,+dlg.querySelector("[data-dur]").value||60),u=dlg.querySelector("[data-unit]").value,obj={id:e?.id||`sc-${Date.now()}`,title,group:dlg.querySelector("[data-group]").value.trim(),url:dlg.querySelector("[data-url]").value.trim(),durationValue:v,durationUnit:u,minutes:u==="hours"?v*60:v,note:dlg.querySelector("[data-note]").value.trim(),icon:dlg.dataset.studyIcon||"auto",notify:!!dlg.querySelector('[data-content-notify]')?.checked,notifyWhen:dlg.querySelector('[data-content-notify-when]')?.value||'No início do período'};saveStudyContents(e?items.map(x=>x.id===e.id?obj:x):[...items,obj]);dlg.close();renderEstudos()};dlg.onclose=()=>dlg.remove();dlg.showModal()
+}
+function field(label,html){return `<label class="study-v10-field"><span>${label}</span>${html}</label>`}
+function recordPastStudyToProgress(title,date,minutes){try{const key='bertha.time-engine.v1',e=JSON.parse(window.berthaHmlStorage.getItem(key)||'{"active":null,"history":[],"snoozed":{}}');e.history=Array.isArray(e.history)?e.history:[];const d=String(date||todayISO()),end=new Date(`${d}T20:00:00`).getTime()||Date.now(),mins=Math.max(1,+minutes||30);e.history.unshift({itemId:`study:past:${Date.now()}`,learningKey:`study:past:${String(title||'estudo').toLowerCase().replace(/[^a-z0-9]+/g,'-')}`,title:title||'Estudo',source:'Estudos',day:d,startedAt:end-mins*60000,endedAt:end,configuredMinutes:mins,plannedMinutes:mins,realMinutes:mins,status:'done',note:'Registrado manualmente'});window.berthaHmlStorage.setItem(key,JSON.stringify(e));}catch{}}
+function pastDialog(){
+ const d=loadEstudos(),dlg=document.createElement("dialog");dlg.className="study-v10-dialog study-module-dialog";dlg.innerHTML=`<div class="study-v10-modal"><div class="study-v10-head"><div><div class="eyebrow">HISTÓRICO</div><h2>Registrar estudo passado</h2><p>Para quando você estudou sem iniciar o timer.</p></div><button class="study-v10-x">×</button></div>${field("O que você estudou?",'<input data-title placeholder="Ex.: MBA · Gestão de Pessoas">')}${field("Data",`<input data-date type="date" value="${new Date().toISOString().slice(0,10)}">`)}${field("Tempo real",'<div class="study-v10-duration"><input data-dur type="number" min="1" value="30"><select data-unit><option value="minutes">minutos</option><option value="hours">horas</option></select></div>')}<div class="study-v10-actions"><button class="secondary" data-cancel>Cancelar</button><button class="primary" data-save>Salvar</button></div></div>`;document.body.appendChild(dlg);dlg.querySelector(".study-v10-x").onclick=()=>dlg.close();dlg.querySelector("[data-cancel]").onclick=()=>dlg.close();dlg.querySelector("[data-save]").onclick=()=>{const t=dlg.querySelector("[data-title]").value.trim();if(!t)return;const v=+dlg.querySelector("[data-dur]").value||30,u=dlg.querySelector("[data-unit]").value;const day=dlg.querySelector("[data-date]").value,mins=u==="hours"?v*60:v;d.sessions.push({id:`s-${Date.now()}`,subject:t,date:day,minutes:mins});saveEstudos(d);recordPastStudyToProgress(t,day,mins);dlg.close();renderEstudos()};dlg.onclose=()=>dlg.remove();dlg.showModal()
+}
+
+function openPastStudyActions(id){
+ const data=loadEstudos(),s=data.sessions.find(x=>String(x.id)===String(id));if(!s)return;
+ const dlg=document.createElement("dialog");dlg.className="study-v10-dialog study-module-dialog";
+ dlg.innerHTML=`<div class="study-v10-modal">
+   <div class="study-v10-head"><div><div class="eyebrow">ESTUDO REALIZADO</div><h2>${escapeHtml(s.subject||s.title||"Estudo")}</h2><p>${escapeHtml(s.date||"")} · ${+s.minutes||0} min</p></div><button class="study-v10-x">×</button></div>
+   <p class="study-history-copy">O que você quer fazer com este registro?</p>
+   <div class="study-history-actions">
+     <button type="button" class="danger" data-delete-session>Excluir</button>
+     <button type="button" class="secondary" data-close-session>Fechar</button>
+     <button type="button" class="primary" data-repeat-session>Repetir</button>
+   </div>
+   <small class="study-history-help">Repetir não inicia agora. O estudo volta para as sugestões da BERTH.A quando couber no seu dia.</small>
+ </div>`;
+ document.body.appendChild(dlg);
+ const close=()=>dlg.close();
+ dlg.querySelector(".study-v10-x").onclick=close;
+ dlg.querySelector("[data-close-session]").onclick=close;
+ dlg.querySelector("[data-delete-session]").onclick=()=>{
+   if(!confirm(`Excluir “${s.subject||s.title||"Estudo"}” do histórico?`))return;
+   const fresh=loadEstudos();
+   fresh.sessions=fresh.sessions.filter(x=>String(x.id)!==String(id));
+   saveEstudos(fresh);
+   close();
+   setTimeout(renderEstudos,0);
+ };
+ dlg.querySelector("[data-repeat-session]").onclick=()=>{
+   const item={
+     id:`study:history:${s.id}`,
+     repeatBaseId:`study:history:${s.id}`,
+     learningKey:`study:history:${s.id}`,
+     source:"Estudos",
+     title:s.subject||s.title||"Estudo",
+     minutes:+s.minutes||30,
+     configuredMinutes:+s.minutes||30,
+     period:"flex",
+     kind:"study"
+   };
+   if(window.BerthaRepeat?.enqueue){
+     window.BerthaRepeat.enqueue(item);
+     close();
+     setTimeout(()=>{renderEstudos();alert("Pronto. Esse estudo voltou para as sugestões da BERTH.A.");},0);
+   }else{
+     alert("Atualize também bertha-time-v1.js para habilitar Repetir.");
+   }
+ };
+ dlg.onclose=()=>dlg.remove();
+ dlg.showModal();
+}
+
+function sessionHtml(s){return `<article class="card study-history-card" data-study-session="${s.id}"><div><strong>${escapeHtml(s.subject||s.title||"Estudo")}</strong><div class="study-meta">${escapeHtml(s.date||"")} · ${+s.minutes||0} min</div></div><span class="study-history-chevron">›</span></article>`}
+
+(function(){if(document.getElementById("study-v10-css"))return;const s=document.createElement("style");s.id="study-v10-css";s.textContent=`
+.study-v10-stats{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin:12px 0 22px}.study-v10-stats div{background:linear-gradient(145deg,#fff9dc,#f2ecfb);border-radius:18px;padding:12px;text-align:center}.study-v10-stats b,.study-v10-stats span{display:block}.study-v10-stats b{font-size:20px}.study-v10-stats span{font-size:11px;color:#837985}.study-v10-summary,.study-v10-content{display:flex;justify-content:space-between;gap:12px;align-items:center}
+.study-history-card{display:flex;justify-content:space-between;align-items:center;gap:12px;cursor:pointer}
+.study-history-chevron{font-size:28px;line-height:1;color:#9a86aa}
+.study-history-copy{color:#766d78;margin:6px 0 16px}
+.study-history-actions{display:flex;justify-content:flex-end;gap:8px;flex-wrap:wrap}
+.study-history-actions .danger{margin-right:auto;border:0;border-radius:14px;padding:10px 14px;background:#fff0f1;color:#a45d65;font-weight:800}
+.study-history-help{display:block;color:#938995;line-height:1.4;margin-top:12px}
+.study-v10-summary span,.study-v10-content span,.study-v10-content small,.study-v10-content strong{display:block}.study-v10-summary span,.study-v10-content span{font-size:12px;color:#887f89;margin-top:4px}.study-v10-content small{color:#8c72a6;font-weight:800;margin-bottom:4px}.study-v10-content>div:last-child{display:flex;gap:6px;flex-wrap:wrap}.study-v10-trash{border:0!important;background:#fff0f1!important;color:#a45d65!important;width:34px;height:34px;border-radius:50%!important;font-size:18px;font-weight:800;padding:0!important}
+.study-v10-dialog{border:0;padding:0;background:transparent;max-width:none}.study-v10-dialog::backdrop{background:rgba(50,43,53,.30);backdrop-filter:blur(3px)}.study-v10-modal{box-sizing:border-box;width:min(92vw,520px);max-height:88vh;overflow:auto;background:#fffdfb;border-radius:28px;padding:20px;box-shadow:0 24px 70px rgba(60,48,66,.2)}.study-v10-modal.maplib{width:min(94vw,680px)}.study-v10-head{display:flex;justify-content:space-between;gap:12px;margin-bottom:16px}.study-v10-head h2{margin:3px 0 4px}.study-v10-head p{margin:0;color:#877e89;font-size:13px}.study-v10-x{border:0;background:#f2ecfb;color:#745d88;width:38px;height:38px;border-radius:50%;font-size:23px}.study-v10-field{display:block;margin:12px 0}.study-v10-field>span{display:block;font-size:12px;font-weight:800;margin-bottom:6px;color:#6d646f}.study-v10-field input,.study-v10-field select,.study-v10-field textarea,.study-v10-search input{box-sizing:border-box;width:100%;border:1px solid #e7dfe8;border-radius:15px;background:#fff;padding:12px;font:inherit}.study-v10-duration{display:grid;grid-template-columns:92px minmax(0,1fr);gap:8px}.study-v10-actions{display:flex;gap:8px;justify-content:flex-end;margin-top:17px}.study-v10-actions .danger{margin-right:auto;border:0;border-radius:14px;padding:10px;background:#fff0f1;color:#a45d65}.study-v10-search{display:flex;align-items:center;gap:8px;border:1px solid #e7dfe8;border-radius:16px;padding:0 11px}.study-v10-search input{border:0;padding-left:0}.study-v10-filters{display:flex;gap:6px;overflow:auto;padding:10px 0}.study-v10-filters button{white-space:nowrap;border:0;border-radius:999px;padding:8px 10px;background:#f7f3f8;color:#766d78;font-weight:800}.study-v10-filters button.active{background:#eee3fa;color:#705487}.study-v10-results{max-height:58vh;overflow:auto}.study-v10-count{font-size:12px;color:#8a818c;margin:4px 0 8px}.study-v10-map{border:1px solid #ece3ed;border-radius:18px;padding:13px;margin-bottom:8px;display:flex;justify-content:space-between;gap:12px}.study-v10-map small,.study-v10-map strong,.study-v10-map span,.study-v10-map em{display:block}.study-v10-map small{font-size:10px;color:#9377a4;font-weight:900}.study-v10-map strong{font-size:14px;margin-top:4px}.study-v10-map span,.study-v10-map em{font-size:11px;color:#857b87;margin-top:4px}.study-v10-map em{font-style:normal;color:#997e9d}.study-v10-mapactions{display:flex;gap:5px;align-items:center;flex-wrap:wrap}.study-v10-mapactions button{border:1px solid #dfd0e7;background:#f5eef8;color:#735787;border-radius:11px;min-width:34px;height:34px;font-weight:800}.study-v10-mapactions button.done{background:#e2f0e7;color:#52705d;border-color:#c8ddcf}.study-v10-mapactions .go{padding:0 9px;background:#fff4cc;color:#766127;border-color:#eadb9e}
+@media(max-width:480px){.study-v10-content,.study-v10-map{display:block}.study-v10-content>div:last-child,.study-v10-mapactions{margin-top:10px}.study-v10-modal{padding:17px;border-radius:24px}.study-v10-duration{grid-template-columns:92px minmax(0,1fr)}}`;document.head.appendChild(s)})();
+(function(){if(document.getElementById('study-v134-css'))return;const s=document.createElement('style');s.id='study-v134-css';s.textContent=`
+.study-hero{position:relative;overflow:hidden;margin:0 0 18px;padding:28px 29px 28px;border-radius:28px;border:1px solid rgba(90,124,158,.12);background:radial-gradient(circle at 16% 15%,rgba(190,219,239,.42),transparent 36%),radial-gradient(circle at 88% 80%,rgba(245,194,169,.30),transparent 39%),linear-gradient(125deg,rgba(247,252,255,.97),rgba(249,244,239,.90));box-shadow:0 11px 32px rgba(62,86,109,.045)}
+.study-hero .eyebrow{color:#5f82a0;font-size:12px;font-weight:750;letter-spacing:.18em}.study-hero h2{margin:14px 0 8px;max-width:79%;font-size:31px;line-height:1.07;letter-spacing:-.035em;font-weight:500;color:#33363d}.study-hero p{margin:0;max-width:80%;font-size:15px;line-height:1.45;color:#77747a}.study-hero-icon{position:absolute;right:26px;top:25px;width:40px;height:40px;color:#a9a5a8;opacity:.67}.study-hero-icon svg{width:100%;height:100%;fill:none;stroke:currentColor;stroke-width:1.2;stroke-linecap:round;stroke-linejoin:round}
+.study-v10-stats div{background:linear-gradient(135deg,rgba(224,239,249,.86),rgba(250,226,212,.70))!important;border:1px solid rgba(91,125,158,.08)!important;box-shadow:none!important}.study-v10-stats b{color:#3e5263}.study-v10-stats span{color:#7f7777!important}
+.study-section>.card,.study-v10-summary,.study-v10-content{background:linear-gradient(135deg,rgba(252,250,245,.96),rgba(239,247,251,.76) 55%,rgba(253,236,226,.70))!important;border:1px solid rgba(91,125,158,.08)!important;box-shadow:0 8px 24px rgba(61,79,97,.025)!important}
+.study-section .primary,.study-section .secondary,.study-v10-content .primary,.study-v10-content .secondary{border:0!important;box-shadow:none!important;color:#536574!important;background:linear-gradient(120deg,rgba(208,229,244,.96),rgba(247,207,187,.90))!important}
+.study-section .secondary,.study-v10-content .secondary{background:linear-gradient(120deg,rgba(226,239,248,.92),rgba(250,223,209,.76))!important;color:#60727f!important}
+.study-v10-content small{color:#6689a4!important}.study-v10-trash{background:linear-gradient(135deg,rgba(247,224,219,.92),rgba(239,231,226,.9))!important;color:#9a6965!important}
+.study-now-card{border-color:rgba(91,125,158,.10)!important;background:linear-gradient(135deg,rgba(226,240,249,.88),rgba(251,226,212,.76))!important;box-shadow:0 8px 24px rgba(61,79,97,.035)!important}.study-now-card .eyebrow{color:#6388a3!important}.study-now-action{border:0!important;background:linear-gradient(120deg,rgba(211,232,246,.96),rgba(248,211,191,.91))!important;color:#526979!important;box-shadow:none!important}
+.study-module-dialog .study-v10-modal{background:linear-gradient(155deg,#fffaf5 0%,#f6fbff 52%,#fff5ee 100%)!important;border:1px solid rgba(91,125,158,.10)!important}.study-module-dialog .study-v10-x{-webkit-appearance:none!important;appearance:none!important;outline:none!important;box-shadow:none!important;background:rgba(255,255,255,.44)!important;color:#77757a!important;border:1px solid rgba(91,104,116,.13)!important}.study-module-dialog input,.study-module-dialog select,.study-module-dialog textarea{font-size:16px!important;background:rgba(255,253,249,.82)!important;border-color:rgba(91,125,158,.13)!important;box-shadow:none!important}.study-module-dialog .primary,.study-module-dialog .secondary,.study-module-dialog [data-filter],.study-module-dialog .go{border:0!important;box-shadow:none!important;background:linear-gradient(120deg,rgba(207,230,245,.96),rgba(248,207,186,.90))!important;color:#556977!important}.study-module-dialog .secondary,.study-module-dialog [data-filter]{background:linear-gradient(120deg,rgba(226,239,248,.92),rgba(250,224,211,.78))!important}.study-module-dialog [data-filter].active,.study-module-dialog .study-v10-mapactions button.done{background:linear-gradient(120deg,rgba(190,219,238,.98),rgba(245,194,169,.94))!important;color:#4f6472!important}.study-module-dialog .study-v10-map{background:linear-gradient(135deg,rgba(255,252,248,.96),rgba(238,247,252,.80),rgba(253,237,228,.72))!important;border-color:rgba(91,125,158,.08)!important}
+/* v135 — Estudos: azul + pêssego puro, sem lilás */
+.study-module-dialog .study-v10-map small{color:#63839b!important}
+.study-module-dialog .study-v10-map em{color:#8b746b!important}
+.study-module-dialog .study-v10-mapactions button:not(.go){border:1px solid rgba(92,126,154,.12)!important;background:linear-gradient(120deg,rgba(226,239,248,.96),rgba(250,224,211,.86))!important;color:#587185!important}
+.study-module-dialog .study-v10-mapactions button:not(.go).done{border-color:rgba(92,126,154,.10)!important;background:linear-gradient(120deg,rgba(190,219,238,.98),rgba(245,194,169,.94))!important;color:#4f6472!important}
+.study-module-dialog .study-v10-filters button{color:#5e7484!important}
+.study-module-dialog .study-v10-filters button.active{color:#4f6472!important}
+.study-map-head-actions{display:flex;gap:8px;align-items:center}.study-map-library-tools{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:9px;align-items:center}.study-add-map-inline{min-height:44px!important;padding:0 14px!important;border-radius:14px!important}.study-v10-mapactions .edit-map{padding:0 9px!important;min-width:auto!important;background:linear-gradient(120deg,rgba(247,213,195,.94),rgba(214,232,244,.92))!important;color:#5a6d79!important}.study-map-form-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}.study-map-unit{display:flex;align-items:center;min-height:46px;padding:0 13px;border-radius:15px;background:linear-gradient(120deg,rgba(226,239,248,.72),rgba(250,224,211,.70));color:#60717c;font-size:14px;font-weight:700}.study-v10-actions .danger{background:linear-gradient(120deg,rgba(248,218,205,.90),rgba(244,228,222,.88))!important;color:#8b5f55!important;border:0!important}@media(max-width:480px){.study-map-head-actions{gap:6px}.study-map-head-actions button{padding-left:10px!important;padding-right:10px!important}.study-map-library-tools{grid-template-columns:1fr}.study-add-map-inline{width:100%}.study-map-form-grid{grid-template-columns:1fr}}
+@media(max-width:430px){.study-hero{padding:25px 24px 25px}.study-hero h2{font-size:28px;max-width:82%}.study-hero p{font-size:15px}.study-hero-icon{right:21px;top:22px;width:35px}}
+`;document.head.appendChild(s)})();
+
+
+
+const FIN_KEY="minha-vida.financeiro.v2";
+const FIN_BASE={
+ income:19172.96,
+ fixed:[
+  {id:"aluguel",name:"Aluguel da casa",value:9503.50,category:"Casa",payer:"Usuária"},
+  {id:"bb",name:"BB — dívidas/parcelamentos",value:2329.59,category:"Dívidas",payer:"Usuária"},
+  {id:"caesb",name:"CAESB + Neoenergia",value:203.79,category:"Casa",payer:"Usuária"},
+  {id:"combustivel",name:"Combustível",value:650,category:"Transporte",payer:"Usuária",kind:"teto"},
+  {id:"pets",name:"Pets",value:450,category:"Animais",payer:"Usuária",kind:"teto"},
+  {id:"itau5298",name:"Itaú 5298 — fatura agosto",value:1702.25,category:"Cartão",payer:"Usuária"}
+ ],
+ excluded:[
+  {id:"cov-itau4590",name:"Itaú 4590 — fatura alta",value:5566.54,category:"Cartão",payer:"Mãe",reason:"Pago pela mãe."},
+  {id:"cov-saude",name:"Unimed + Unidental",value:0,category:"Saúde",payer:"Empregador",reason:"Benefício coberto pelo empregador."},
+  {name:"BEC",value:0,payer:"—",reason:"Sem despesas atuais."}
+ ],
+ goals:[
+  {month:"Setembro",min:2000,max:3000,saved:0},
+  {month:"Outubro",min:2000,max:3000,saved:0},
+  {month:"Novembro",min:2000,max:3000,saved:0},
+  {month:"Dezembro",min:2000,max:3000,saved:0}
+ ],
+ transactions:[],
+ plannedBills:[]
+};
+function finIsBecRecord(x){
+ if(!x)return false;
+ const bag=[x.name,x.category,x.source,x.scope,x.note,x.payer].filter(Boolean).join(" ").toLowerCase();
+ return /(^|[^a-z])bec([^a-z]|$)|bem[- ]estar consciente/.test(bag);
+}
+function finPersonal(list){return (list||[]).filter(x=>!finIsBecRecord(x));}
+function loadFin(){
+ try{
+  const raw=JSON.parse(window.berthaHmlStorage.getItem(FIN_KEY));
+  if(raw)return {...FIN_BASE,...raw,fixed:raw.fixed||FIN_BASE.fixed,excluded:raw.excluded||FIN_BASE.excluded,goals:raw.goals||FIN_BASE.goals,transactions:raw.transactions||[],plannedBills:Array.isArray(raw.plannedBills)?raw.plannedBills:[]};
+ }catch{}
+ try{
+  const old=JSON.parse(window.berthaHmlStorage.getItem("minha-vida.financeiro.v1"));
+  if(old){const migrated={...FIN_BASE,income:old.income||FIN_BASE.income,fixed:old.expenses||FIN_BASE.fixed,excluded:old.excluded||FIN_BASE.excluded,goals:(old.goals||FIN_BASE.goals).map(g=>({...g,saved:g.saved||0})),transactions:old.transactions||[],plannedBills:[]};saveFin(migrated);return migrated;}
+ }catch{}
+ return JSON.parse(JSON.stringify(FIN_BASE));
+}
+function saveFin(d){window.berthaHmlStorage.setItem(FIN_KEY,JSON.stringify(d));}
+function money(n){return Number(n||0).toLocaleString("pt-BR",{minimumFractionDigits:2,maximumFractionDigits:2});}
+function finFixedTotal(d){return finPersonal(d.fixed).reduce((s,x)=>s+Number(x.value||0),0);}
+function finMonthTransactions(d,month){return finPersonal(d.transactions).filter(x=>(x.date||"").slice(0,7)===month);}
+function finMonthTotal(d,month){return finMonthTransactions(d,month).reduce((s,x)=>s+Number(x.value||0),0);}
+function finCategoryTotals(d,month){const out={};finMonthTransactions(d,month).forEach(x=>{const k=x.category||"Variável";out[k]=(out[k]||0)+Number(x.value||0)});return out;}
+function finCurrentMonth(){return todayISO().slice(0,7);}
+function finMonthLabel(iso){const [y,m]=iso.split("-");return new Intl.DateTimeFormat("pt-BR",{month:"long",year:"numeric"}).format(new Date(Number(y),Number(m)-1,1));}
+function finFixedHtml(x){return `<article class="card finance-row"><div><strong>${escapeHtml(x.name)}</strong><span>${escapeHtml(x.category)}${x.kind==="teto"?" · teto":""}</span></div><b>R$ ${money(x.value)}</b></article>`;}
+function finTransactionHtml(x){return `<article class="card finance-row"><div><strong>${escapeHtml(x.name)}</strong><span>${x.date?formatDate(x.date):""} · ${escapeHtml(x.category||"Variável")}</span></div><b>R$ ${money(x.value)}</b><button class="mini-delete" data-fin-delete="${x.id}" aria-label="Excluir">×</button></article>`;}
+const FIN_PRIVACY_KEY="minha-vida.financeiro.privacy.v1";
+function finPrivacyHidden(){return window.berthaHmlStorage.getItem(FIN_PRIVACY_KEY)==="hidden";}
+function finEyeIcon(hidden){return hidden?`<svg class="fin-inline-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 12s3.5-6 9-6 9 6 9 6-3.5 6-9 6-9-6-9-6Z"/><circle cx="12" cy="12" r="2.7"/></svg>`:`<svg class="fin-inline-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 3l18 18M10.6 6.2A10.6 10.6 0 0 1 12 6c5.5 0 9 6 9 6a15.8 15.8 0 0 1-2.2 3M6.2 6.2C4.2 7.7 3 12 3 12s3.5 6 9 6c1.3 0 2.5-.3 3.5-.7M9.9 9.9A3 3 0 0 0 14.1 14.1"/></svg>`;}
+function applyFinPrivacyNative(){
+ const root=document.getElementById("app"); if(!root||location.hash!=="#financeiro")return;
+ const hidden=finPrivacyHidden();
+ const btn=root.querySelector("#toggleFinPrivacy");
+ if(btn) btn.innerHTML=finEyeIcon(!hidden)+(hidden?"Mostrar valores":"Ocultar valores");
+ [...root.querySelectorAll("*")].filter(el=>!el.children.length&&/R\$\s*[\d.]+(?:,\d{2})?/.test(el.textContent||"")).forEach(el=>{
+   if(hidden){
+     if(!el.dataset.finOriginal) el.dataset.finOriginal=el.textContent;
+     el.textContent=(el.dataset.finOriginal||el.textContent).replace(/R\$\s*[\d.]+(?:,\d{2})?/g,"R$ ••••••");
+   }else if(el.dataset.finOriginal){ el.textContent=el.dataset.finOriginal; delete el.dataset.finOriginal; }
+ });
+}
+function toggleFinPrivacyNative(){window.berthaHmlStorage.setItem(FIN_PRIVACY_KEY,finPrivacyHidden()?"visible":"hidden");applyFinPrivacyNative();}
+function finIsoDate(y,m,d){const last=new Date(y,m,0).getDate();return `${y}-${String(m).padStart(2,"0")}-${String(Math.min(Math.max(1,Number(d)||1),last)).padStart(2,"0")}`;}
+function finPlannedOccurrence(b,month){
+ if(!b||b.active===false||finIsBecRecord(b))return null;
+ const rec=b.recurrence||"once"; let due="";
+ if(rec==="monthly"){
+  const start=b.startMonth||(b.dueDate||"").slice(0,7)||month;if(month<start)return null;
+  const [y,m]=month.split("-").map(Number);due=finIsoDate(y,m,b.dueDay||Number((b.dueDate||"").slice(8,10))||1);
+ }else{if(!(b.dueDate||"").startsWith(month))return null;due=b.dueDate;}
+ const payment=(b.payments||{})[month]||null;
+ return {bill:b,month,due,paid:!!payment?.paid,payment,expected:Number(b.value||0),actual:payment?.value!=null?Number(payment.value):null};
+}
+function finPlannedMonth(d,month){return finPersonal(d.plannedBills).map(b=>finPlannedOccurrence(b,month)).filter(Boolean).sort((a,b)=>a.due.localeCompare(b.due));}
+function finDaysTo(iso){const a=new Date(todayISO()+"T12:00:00"),b=new Date(iso+"T12:00:00");return Math.round((b-a)/86400000);}
+function finPlannedStatus(o){
+ if(o.paid)return {label:"Paga",cls:"paid"}; const n=finDaysTo(o.due);
+ if(n<0)return {label:`Atrasada · ${Math.abs(n)}d`,cls:"late"}; if(n===0)return {label:"Vence hoje",cls:"today"}; if(n===1)return {label:"Vence amanhã",cls:"soon"};
+ return {label:`Vence em ${n}d`,cls:n<=Number(o.bill.reminderDays??3)?"soon":"future"};
+}
+function finPlannedBillHtml(o){
+ const st=finPlannedStatus(o),b=o.bill,rem=Number(b.reminderDays??3);
+ const reminderCopy=b.reminderEnabled===false?'sem aviso':`${b.reminderDays===0?'no dia':`${rem}d antes`} · ${b.reminderTime||'09:00'}${b.repeatIfPending===false?'':` · repetir ${b.repeatReminderTime||'21:30'} se pendente`}`;
+ return `<article class="card planned-bill-row ${st.cls}"><div class="planned-bill-copy"><div class="planned-bill-top"><strong>${escapeHtml(b.name||"Conta prevista")}</strong><span class="fin-status ${st.cls}">${escapeHtml(st.label)}</span></div><span>${escapeHtml(b.category||"Outros")} · ${formatDate(o.due)}${(b.recurrence||"once")==="monthly"?" · mensal":""} · ${escapeHtml(reminderCopy)}</span>${b.note?`<small>${escapeHtml(b.note)}</small>`:""}</div><div class="planned-bill-side"><b>R$ ${money(o.paid?(o.actual??o.expected):o.expected)}</b><div class="planned-bill-actions">${o.paid?`<button type="button" class="secondary tiny" data-fin-unpay="${b.id}" data-month="${o.month}">Desfazer</button>`:`<button type="button" class="primary tiny" data-fin-pay="${b.id}" data-month="${o.month}">Marcar paga</button>`}<button type="button" class="secondary tiny" data-fin-edit-bill="${b.id}">Editar</button></div></div></article>`;
+}
+function renderFinanceiro(){
+ const d=loadFin(),month=finCurrentMonth(),fixed=finFixedTotal(d),variable=finMonthTotal(d,month),planned=fixed+variable,remaining=d.income-planned,cats=finCategoryTotals(d,month),monthBills=finPlannedMonth(d,month);
+ const openPlanned=monthBills.filter(x=>!x.paid).reduce((s,x)=>s+x.expected,0),paidPlanned=monthBills.filter(x=>x.paid).reduce((s,x)=>s+Number(x.actual??x.expected),0);
+ const catHtml=Object.entries(cats).sort((a,b)=>b[1]-a[1]).slice(0,6).map(([k,v])=>`<div class="finance-cat"><span>${escapeHtml(k)}</span><strong>R$ ${money(v)}</strong></div>`).join("")||`<div class="empty compact"><strong>Nenhum gasto variável registrado.</strong><span>Registre apenas o que realmente precisar acompanhar.</span></div>`;
+ const goalTotal=d.goals.reduce((s,g)=>s+Number(g.saved||0),0), goalMin=d.goals.reduce((s,g)=>s+Number(g.min||0),0), goalMax=d.goals.reduce((s,g)=>s+Number(g.max||0),0);
+ const alerts=monthBills.filter(o=>!o.paid&&finDaysTo(o.due)<=Number(o.bill.reminderDays??3));
+ app.innerHTML=`<section class="finance-hero"><div><span class="finance-hero-kicker">FINANCEIRO</span><h2>Know what’s ahead.<br>Make room for life.</h2><p>Você registra o essencial.<br>A BERTH.A clareia o horizonte.</p></div><span class="finance-hero-icon finance-hero-symbol" aria-hidden="true"><svg viewBox="0 0 40 40" focusable="false"><path d="M7 22.5c4.4-4.2 8.7-6.3 13-6.3s8.6 2.1 13 6.3"/><path d="M9.5 27.5h21"/><circle cx="20" cy="16.2" r="1.35"/></svg></span></section>
+ <section class="finance-summary card"><div class="finance-main"><span class="eyebrow">RENDA MENSAL</span><strong>R$ ${money(d.income)}</strong><button class="text-btn" id="editIncome">editar</button><button class="text-btn" id="toggleFinPrivacy" type="button">Ocultar valores</button></div><div class="finance-metrics"><div><span>Base</span><b>R$ ${money(fixed)}</b></div><div><span>Realizado · ${escapeHtml(finMonthLabel(month))}</span><b>R$ ${money(variable)}</b></div><div><span>Disponível conhecido</span><b>R$ ${money(remaining)}</b></div></div></section>
+ ${alerts.length?`<section class="fin-due-alert"><strong><span class="fin-alert-icon" aria-hidden="true"></span>${alerts.length===1?"1 conta pede atenção":`${alerts.length} contas pedem atenção`}</strong><span>${alerts.slice(0,3).map(o=>`${escapeHtml(o.bill.name)} · ${escapeHtml(finPlannedStatus(o).label)}`).join("<br>")}</span></section>`:""}
+ <div class="section-title">CONTAS PREVISTAS · ${escapeHtml(finMonthLabel(month).toUpperCase())}</div><section class="card planned-bills-panel"><div class="panel-head"><div><span class="eyebrow">PREVISTO → REALIZADO</span><h3>Vencimentos do mês</h3></div><button class="primary compact-btn" id="addPlannedBill">＋ Nova conta prevista</button></div><div class="planned-mini-metrics"><div><span>A vencer</span><b>R$ ${money(openPlanned)}</b></div><div><span>Já pago</span><b>R$ ${money(paidPlanned)}</b></div></div><div class="planned-bills-list">${monthBills.length?monthBills.map(finPlannedBillHtml).join(""):`<div class="empty compact"><strong>Nenhuma conta prevista neste mês.</strong><span>Cadastre vencimentos para a BERTH.A lembrar o que vem pela frente.</span></div>`}</div></section>
+ <div class="section-title">ORÇAMENTO BASE</div><div class="list">${finPersonal(d.fixed).map(finFixedHtml).join("")}</div><button class="add-full secondary" id="addFixed">＋ Adicionar item ao orçamento</button>
+ <div class="section-title">GASTOS DO MÊS</div><section class="card"><div class="panel-head"><div><span class="eyebrow">${escapeHtml(finMonthLabel(month))}</span><h3>O que saiu de verdade</h3></div><button class="primary compact-btn" id="addTransaction">＋ Registrar</button></div><div class="list inner-list">${finMonthTransactions(d,month).slice().reverse().slice(0,20).map(finTransactionHtml).join("")||`<div class="empty compact"><strong>Nenhum gasto registrado.</strong><span>O registro é opcional — use quando ajudar a enxergar seu mês.</span></div>`}</div></section>
+ <div class="section-title">POR CATEGORIA</div><section class="card finance-cats">${catHtml}</section>
+ <div class="section-title">FUNDO CARRO</div><section class="card goal-card"><div class="panel-head"><div><span class="eyebrow">SETEMBRO → DEZEMBRO</span><h3>Construção da meta</h3></div><span class="pill today">R$ ${money(goalTotal)}</span></div><p class="note">Meta mensal planejada: R$ ${money(goalMin)}–R$ ${money(goalMax)}.</p><div class="goal-list">${d.goals.map((g,i)=>`<div class="goal-row"><span>${escapeHtml(g.month)}</span><strong>R$ ${money(g.saved||0)} / ${money(g.min)}–${money(g.max)}</strong><button class="goal-toggle ${Number(g.saved||0)>=Number(g.min||0)?"done":""}" data-goal="${i}">${Number(g.saved||0)>=Number(g.min||0)?"✓":"＋"}</button></div>`).join("")}</div></section>
+ <div class="section-title finance-covered-title">DESPESAS COBERTAS</div><div class="finance-covered-intro">Compromissos que hoje não saem da sua renda.</div><div class="list finance-covered-list">${finPersonal(d.excluded).map((x,i)=>`<div class="card excluded-card"><button type="button" class="covered-edit" data-fin-covered-index="${i}" aria-label="Editar despesa coberta"><div><strong>${escapeHtml(x.name)}</strong><span>${x.value?`R$ ${money(x.value)} · `:""}${x.category?`${escapeHtml(x.category)} · `:""}${escapeHtml(x.reason||"")}</span></div><span class="pill">${escapeHtml(x.payer||"Outra fonte")}</span></button></div>`).join("")||`<div class="covered-empty">Nenhuma despesa coberta cadastrada.</div>`}</div><button class="add-full secondary covered-add" id="addCovered">＋ Adicionar despesa coberta</button>`;
+ ensureFinanceStyles();
+ document.getElementById("editIncome").onclick=()=>openFinModal("income");document.getElementById("toggleFinPrivacy").onclick=toggleFinPrivacyNative;document.getElementById("addPlannedBill").onclick=()=>openPlannedBillModal();document.getElementById("addFixed").onclick=()=>openFinModal("fixed");document.getElementById("addTransaction").onclick=()=>openFinModal("transaction");document.getElementById("addCovered").onclick=()=>openCoveredExpenseModal();document.querySelectorAll("[data-fin-covered-index]").forEach(b=>b.onclick=()=>openCoveredExpenseModal(Number(b.dataset.finCoveredIndex)));
+ document.querySelectorAll("[data-fin-edit-bill]").forEach(b=>b.onclick=()=>openPlannedBillModal(b.dataset.finEditBill));document.querySelectorAll("[data-fin-pay]").forEach(b=>b.onclick=()=>openPlannedPayModal(b.dataset.finPay,b.dataset.month));document.querySelectorAll("[data-fin-unpay]").forEach(b=>b.onclick=()=>undoPlannedPayment(b.dataset.finUnpay,b.dataset.month));
+ document.querySelectorAll("[data-fin-delete]").forEach(b=>b.onclick=()=>{const x=loadFin();x.transactions=x.transactions.filter(t=>t.id!==b.dataset.finDelete);saveFin(x);renderFinanceiro()});
+ document.querySelectorAll("[data-goal]").forEach(b=>b.onclick=()=>{const x=loadFin(),i=+b.dataset.goal;const current=Number(x.goals[i].saved||0);const next=current>=Number(x.goals[i].min||0)?0:Number(x.goals[i].min||0);x.goals[i].saved=next;saveFin(x);renderFinanceiro()});applyFinPrivacyNative();
+}
+function ensureFinanceStyles(){
+ if(document.getElementById("finance-v2-styles"))return;
+ const s=document.createElement("style");s.id="finance-v2-styles";s.textContent=`
+ .finance-summary{background:linear-gradient(135deg,#edf5f2,#f2edf8);border:1px solid rgba(92,72,104,.10)}
+ .finance-main{display:flex;align-items:center;gap:10px;flex-wrap:wrap}.finance-main strong{font-size:32px;display:block;width:100%}.text-btn{border:0;background:transparent;color:#77558a;font-weight:700;padding:0}
+ .finance-metrics{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:16px}.finance-metrics>div{background:rgba(255,255,255,.62);border-radius:16px;padding:10px}.finance-metrics span{display:block;font-size:12px;color:#817783}.finance-metrics b{display:block;margin-top:4px;font-size:14px}
+ .compact-btn{padding:9px 12px!important}.inner-list{margin-top:12px}.finance-row{position:relative;display:flex;align-items:center;justify-content:space-between;gap:10px}.finance-row>div{min-width:0}.finance-row b{white-space:nowrap}.mini-delete{border:0;background:transparent;color:#9a8e98;font-size:22px;padding:4px}.finance-cats{display:grid;gap:8px}.finance-cat{display:flex;justify-content:space-between;padding:10px 12px;border-radius:14px;background:#faf6f2}.finance-cat span{color:#655c67}.goal-toggle{min-width:38px}.goal-toggle.done{background:#e4f1eb}
+ .planned-bills-panel{padding:16px}.planned-bills-list{display:grid;gap:9px;margin-top:12px}.planned-bill-row{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:12px;align-items:center;padding:13px 14px!important}.planned-bill-copy{min-width:0}.planned-bill-top{display:flex;gap:8px;align-items:center;flex-wrap:wrap}.planned-bill-copy>span,.planned-bill-copy>small{display:block;color:#857b87;font-size:11px;margin-top:4px}.planned-bill-side{text-align:right}.planned-bill-side>b{display:block}.planned-bill-actions{display:flex;gap:5px;justify-content:flex-end;flex-wrap:wrap;margin-top:7px}.planned-bill-actions .tiny{padding:6px 8px!important;font-size:10px!important;border-radius:10px!important}.fin-status{display:inline-flex;padding:4px 7px;border-radius:999px;font-size:10px;font-weight:800;background:#f3eef5;color:#775b87}.fin-status.paid{background:#e5f1e9;color:#52705d}.fin-status.late{background:#fbe8e8;color:#99595d}.fin-status.today,.fin-status.soon{background:#fff0d7;color:#8c6721}.fin-due-alert{margin:10px 0 18px;padding:13px 15px;border-radius:18px;background:linear-gradient(135deg,#fff0d8,#f9e9ef);border:1px solid rgba(155,111,91,.10)}.fin-due-alert strong,.fin-due-alert span{display:block}.fin-due-alert span{font-size:11px;color:#776c72;line-height:1.45;margin-top:4px}.planned-mini-metrics{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:12px}.planned-mini-metrics>div{background:#faf7fb;border-radius:14px;padding:10px}.planned-mini-metrics span{display:block;font-size:11px;color:#817783}.planned-mini-metrics b{display:block;margin-top:4px}.fin-delete-bill{width:100%;border:0;border-radius:14px;padding:10px;background:#fff0f1;color:#a45d65;font-weight:800;margin-top:4px}
+ dialog.fin-planned-dialog{box-sizing:border-box!important;border:0!important;outline:0!important;padding:0!important;margin:auto!important;background:transparent!important;width:min(92vw,540px)!important;max-width:540px!important;max-height:calc(100dvh - 28px)!important;overflow:visible!important;box-shadow:none!important;}
+ dialog.fin-planned-dialog::backdrop{background:rgba(54,44,55,.28)!important;backdrop-filter:blur(3px)!important;-webkit-backdrop-filter:blur(3px)!important;}
+ dialog.fin-planned-dialog>.modal-card{box-sizing:border-box!important;width:100%!important;max-width:none!important;max-height:calc(100dvh - 28px)!important;overflow:auto!important;overscroll-behavior:contain!important;margin:0!important;padding:20px!important;border:0!important;border-radius:26px!important;background:#fffdfb!important;box-shadow:0 22px 64px rgba(58,44,63,.20)!important;}
+ dialog.fin-planned-dialog .modal-head{position:sticky!important;top:-20px!important;z-index:2!important;margin:-20px -20px 14px!important;padding:20px!important;background:rgba(255,253,251,.96)!important;backdrop-filter:blur(8px)!important;-webkit-backdrop-filter:blur(8px)!important;border-bottom:1px solid rgba(92,72,104,.08)!important;align-items:center!important;}
+ dialog.fin-planned-dialog .modal-head h2{margin:4px 0 0!important;font-size:25px!important;line-height:1.12!important;}
+ dialog.fin-planned-dialog .modal-head .icon-btn{flex:0 0 40px!important;width:40px!important;height:40px!important;min-width:40px!important;min-height:40px!important;border:0!important;border-radius:50%!important;background:#f1e9f5!important;color:#75598a!important;font-size:25px!important;line-height:1!important;padding:0!important;box-shadow:none!important;outline:none!important;}
+ dialog.fin-planned-dialog label{margin:12px 0!important;}
+ dialog.fin-planned-dialog input,dialog.fin-planned-dialog select,dialog.fin-planned-dialog textarea{box-sizing:border-box!important;width:100%!important;min-height:48px!important;border:1px solid #e7dfe8!important;border-radius:15px!important;background:#fff!important;padding:12px 14px!important;font:inherit!important;}
+ dialog.fin-planned-dialog textarea{min-height:82px!important;resize:vertical!important;}
+ dialog.fin-planned-dialog .form-grid{display:grid!important;grid-template-columns:1fr 1fr!important;gap:10px!important;}
+ dialog.fin-planned-dialog .modal-actions{position:sticky!important;bottom:-20px!important;margin:16px -20px -20px!important;padding:14px 20px calc(14px + env(safe-area-inset-bottom))!important;background:rgba(255,253,251,.96)!important;backdrop-filter:blur(8px)!important;-webkit-backdrop-filter:blur(8px)!important;border-top:1px solid rgba(92,72,104,.08)!important;}
+ @media(max-width:560px){dialog.fin-planned-dialog{width:calc(100vw - 24px)!important;max-height:calc(100dvh - 24px)!important;}dialog.fin-planned-dialog>.modal-card{max-height:calc(100dvh - 24px)!important;padding:18px!important;border-radius:24px!important;}dialog.fin-planned-dialog .modal-head{top:-18px!important;margin:-18px -18px 12px!important;padding:18px!important;}dialog.fin-planned-dialog .modal-actions{bottom:-18px!important;margin:14px -18px -18px!important;padding:12px 18px calc(12px + env(safe-area-inset-bottom))!important;}dialog.fin-planned-dialog .form-grid{grid-template-columns:1fr!important;gap:0!important;}}
+ @media(max-width:420px){.finance-metrics{grid-template-columns:1fr}.panel-head{gap:8px}.planned-bill-row{grid-template-columns:1fr}.planned-bill-side{text-align:left}.planned-bill-actions{justify-content:flex-start}}
+/* BERTH.A v2.8.107 — Financeiro: modais unificados + iOS anti-autozoom */
+dialog.fin-unified-dialog>.modal-card{background:linear-gradient(145deg,rgba(251,247,253,.99) 0%,rgba(245,240,250,.98) 48%,rgba(239,247,247,.97) 100%)!important;border:1px solid rgba(121,108,124,.10)!important;box-shadow:0 22px 64px rgba(58,44,63,.16)!important;border-radius:26px!important;padding:20px!important}
+dialog.fin-unified-dialog .modal-head{align-items:flex-start!important;background:transparent!important;border:0!important;box-shadow:none!important;margin:0 0 14px!important;padding:0!important;position:static!important}
+dialog.fin-unified-dialog .modal-head .eyebrow{color:#7b6685!important;font-size:11px!important;font-weight:760!important;letter-spacing:.18em!important}
+dialog.fin-unified-dialog .modal-head h2{font-size:25px!important;font-weight:540!important;letter-spacing:-.025em!important;line-height:1.12!important;color:#30313d!important}
+dialog.fin-unified-dialog .modal-head .icon-btn{background:rgba(255,255,255,.58)!important;color:#766d77!important;border:1px solid rgba(121,108,124,.10)!important;box-shadow:none!important;outline:none!important}
+dialog.fin-unified-dialog label{color:#77707c!important;font-size:14px!important;font-weight:680!important}
+dialog.fin-unified-dialog input,dialog.fin-unified-dialog select,dialog.fin-unified-dialog textarea{font-size:16px!important;line-height:1.25!important;color:#393641!important;background:rgba(255,255,255,.72)!important;border:1px solid rgba(121,108,124,.14)!important;box-shadow:none!important;-webkit-appearance:none}
+dialog.fin-unified-dialog select{appearance:auto!important;-webkit-appearance:menulist!important}
+dialog.fin-unified-dialog input:focus,dialog.fin-unified-dialog select:focus,dialog.fin-unified-dialog textarea:focus{outline:2px solid rgba(168,211,202,.22)!important;outline-offset:1px!important;border-color:rgba(202,167,215,.34)!important}
+dialog.fin-unified-dialog .modal-actions{position:static!important;inset:auto!important;margin:16px 0 0!important;padding:0!important;background:transparent!important;border:0!important;box-shadow:none!important;backdrop-filter:none!important;-webkit-backdrop-filter:none!important}
+dialog.fin-unified-dialog .modal-actions .secondary{background:rgba(238,229,247,.72)!important;color:#765b82!important;border:0!important}
+dialog.fin-unified-dialog .modal-actions .primary{background:linear-gradient(120deg,#caa7d7 0%,#b9b8d6 48%,#a8d3ca 100%)!important;color:#fff!important;border:0!important;box-shadow:none!important}
+dialog.fin-unified-dialog .fin-modal-x{touch-action:manipulation!important;-webkit-tap-highlight-color:transparent!important}
+
+
+/* BERTH.A Casa v2.8.127 — menu ancorado + modais blush/sálvia */
+.casa-routine-picker{position:relative;margin:0 0 14px;z-index:8}.casa-routine-picker-btn{width:100%;min-height:58px;display:flex;align-items:center;justify-content:space-between;gap:12px;padding:0 18px;border:1px solid rgba(132,106,118,.11);border-radius:20px;background:linear-gradient(105deg,rgba(249,226,233,.76),rgba(238,246,237,.86));box-shadow:0 8px 22px rgba(73,57,64,.04);color:#4b434d;font:inherit;text-align:left}.casa-routine-picker-label{display:flex;align-items:center;gap:12px;min-width:0}.casa-routine-picker-label strong{font-size:16px;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.casa-routine-picker-chevron{font-size:18px;color:#8d7f87;transition:transform .18s}.casa-routine-picker-btn[aria-expanded="true"] .casa-routine-picker-chevron{transform:rotate(180deg)}
+.casa-routine-picker-menu{position:absolute;left:0;right:0;top:calc(100% + 8px);z-index:30;padding:8px;border:1px solid rgba(132,106,118,.12);border-radius:20px;background:rgba(255,252,249,.98);box-shadow:0 20px 48px rgba(64,48,58,.16);backdrop-filter:blur(18px);-webkit-backdrop-filter:blur(18px);max-height:min(52vh,430px);overflow:auto}.casa-routine-picker-menu[hidden]{display:none!important}.casa-routine-picker-menu button{width:100%;display:flex;align-items:center;justify-content:space-between;gap:12px;padding:12px 13px;border:0;border-radius:14px;background:transparent;color:#4b434d;font:inherit;text-align:left}.casa-routine-picker-menu button+button{border-top:1px solid rgba(132,106,118,.07)}.casa-routine-picker-menu button:active{background:linear-gradient(105deg,rgba(248,226,232,.72),rgba(235,244,235,.78))}.casa-routine-picker-menu button>span{display:flex;align-items:center;gap:10px;min-width:0}.casa-routine-picker-menu button strong{font-size:15px;font-weight:700}.casa-routine-picker-menu button small{min-width:30px;text-align:center;border-radius:999px;padding:5px 8px;background:#f3e9df;color:#81746b;font-size:11px;font-weight:700}
+/* Modais Casa: identidade do módulo */
+dialog.casa-dialog::backdrop{background:rgba(61,50,57,.34)!important;backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px)}dialog.casa-dialog{border:0!important;background:transparent!important;padding:0!important;max-width:none!important;max-height:none!important}.casa-modal-card{background:linear-gradient(145deg,rgba(255,251,248,.99),rgba(253,247,247,.985) 56%,rgba(247,251,245,.98))!important;border:1px solid rgba(132,106,118,.12)!important;box-shadow:0 28px 68px rgba(58,45,54,.18)!important;color:#3e3842!important}.casa-modal-card .eyebrow{color:#8f6977!important}.casa-modal-card h2{color:#37313b!important;font-weight:560!important;letter-spacing:-.025em!important}.casa-modal-card label{color:#6f6570!important;font-weight:680!important}.casa-modal-card input,.casa-modal-card select,.casa-modal-card textarea{font-size:16px!important;background:rgba(255,255,255,.72)!important;border:1px solid rgba(132,106,118,.15)!important;border-radius:18px!important;color:#403943!important;box-shadow:none!important}.casa-modal-card input:focus,.casa-modal-card select:focus,.casa-modal-card textarea:focus{outline:2px solid rgba(186,154,166,.18)!important;border-color:rgba(166,126,143,.26)!important}.casa-modal-card .icon-btn,.casa-modal-card .study-v10-x,.casa-modal-x{color:#736a71!important;background:rgba(255,255,255,.54)!important;border:1px solid rgba(132,106,118,.10)!important;box-shadow:none!important}.casa-modal-card .modal-actions,.casa-modal-card .study-v10-actions{background:linear-gradient(to top,rgba(255,251,248,.98) 78%,rgba(255,251,248,0))!important;border-top:1px solid rgba(132,106,118,.07)!important}.casa-modal-card .secondary,.casa-modal-card .study-v10-actions .secondary{background:linear-gradient(135deg,rgba(238,246,237,.96),rgba(232,242,232,.96))!important;color:#647566!important;border:1px solid rgba(118,151,125,.10)!important}.casa-modal-card .primary,.casa-modal-card .study-v10-actions .primary{background:linear-gradient(115deg,#d8a5b3 0%,#d9b5b5 46%,#b9cfb9 100%)!important;color:#fff!important;border:0!important;box-shadow:0 8px 22px rgba(157,113,129,.12)!important}.casa-modal-card .danger{background:rgba(248,235,238,.9)!important;color:#9a5f6f!important;border:0!important}
+/* Como fazer / Manual — mesmo sistema visual e sem emojis */
+.casa-how-overlay{background:rgba(61,50,57,.34)!important;backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px)}.casa-how-modal{background:linear-gradient(145deg,rgba(255,251,248,.995),rgba(253,247,247,.99) 58%,rgba(247,251,245,.985))!important;border:1px solid rgba(132,106,118,.12)!important;box-shadow:0 28px 68px rgba(58,45,54,.18)!important}.casa-how-modal .eyebrow{color:#8f6977!important}.casa-how-modal h2{color:#3a333d!important;letter-spacing:-.025em!important}.casa-how-modal .casa-inline-icon{color:#8a7d83!important}.casa-how-meta span{display:inline-flex!important;align-items:center!important;gap:6px!important;background:linear-gradient(135deg,#f5e8ec,#edf4eb)!important;color:#76666e!important}.casa-how-section h3,.casa-how-tip strong{display:flex!important;align-items:center!important;gap:8px!important;color:#4c444e!important}.casa-how-section ul,.casa-how-section ol{padding-left:20px}.casa-how-section li{line-height:1.45}.casa-how-tip{background:linear-gradient(120deg,rgba(249,229,235,.82),rgba(235,244,235,.88))!important;border:1px solid rgba(132,106,118,.07)!important}.casa-edit-procedure{display:flex!important;align-items:center!important;justify-content:center!important;gap:8px!important;width:100%!important;background:linear-gradient(115deg,rgba(243,220,228,.96),rgba(222,237,221,.96))!important;color:#765e69!important;border:0!important}.casa-buy-mini{background:linear-gradient(135deg,#f3e3e8,#e4efe3)!important;color:#765f69!important;border:0!important}
+@media(max-width:560px){.casa-routine-picker-menu{max-height:46vh}.casa-modal-card{width:calc(100vw - 28px)!important;max-height:calc(100dvh - 28px)!important;border-radius:28px!important}.casa-how-modal{width:calc(100vw - 28px)!important;max-height:calc(100dvh - 34px)!important;border-radius:28px!important}}
+
+
+/* BERTH.A Casa v2.8.127 — menu nativo estável + ações reversíveis + dicas padronizadas */
+.casa-routine-picker-select-wrap{position:relative;margin:0 0 14px}.casa-routine-picker-select{width:100%!important;min-height:58px!important;padding:0 48px 0 48px!important;border:1px solid rgba(132,106,118,.11)!important;border-radius:20px!important;background:linear-gradient(105deg,rgba(249,226,233,.76),rgba(238,246,237,.86))!important;color:#4b434d!important;font-size:16px!important;font-weight:700!important;box-shadow:0 8px 22px rgba(73,57,64,.04)!important;appearance:auto!important;-webkit-appearance:menulist!important}.casa-routine-picker-select-wrap>.casa-inline-icon{position:absolute;left:18px;top:50%;transform:translateY(-50%);width:18px!important;height:18px!important;pointer-events:none;color:#8f6977}.casa-routine-picker-select-wrap>.casa-inline-icon svg{width:18px!important;height:18px!important;display:block!important}.casa-routine-picker-select:focus{outline:2px solid rgba(185,148,163,.18)!important;outline-offset:1px!important}
+.casa-how-modal #editCasaHow,.casa-how-modal #editManualCasa,.casa-how-modal .casa-edit-procedure,.casa-modal-card .casa-edit-procedure{background:linear-gradient(115deg,#edcbd4 0%,#e6d7d1 48%,#d5e6d4 100%)!important;color:#6f5964!important;border:0!important;box-shadow:0 7px 18px rgba(142,103,119,.08)!important}.casa-how-modal #editCasaHow:active,.casa-how-modal #editManualCasa:active{transform:translateY(1px)}
+.casa-buy-mini{cursor:pointer!important}.casa-buy-mini.is-in-list{background:linear-gradient(135deg,#e8f1e6,#dce9db)!important;color:#58705e!important}.casa-buy-mini:not(.is-in-list){background:linear-gradient(135deg,#f3e3e8,#e5efe3)!important;color:#765f69!important}
+.casa-substitute-btn{border:0!important;border-radius:999px!important;padding:7px 10px!important;background:#f2e8dd!important;color:#7f736b!important;font:inherit!important;font-size:11px!important;font-weight:800!important;letter-spacing:.02em!important}.casa-substitute-info{display:grid;gap:10px}.casa-substitute-info p{margin:0;color:#6f6570;line-height:1.45}.casa-substitute-info strong{color:#403943}.casa-substitute-actions{display:flex;gap:8px;justify-content:flex-end;margin-top:8px}
+.casa-web-card{background:linear-gradient(135deg,rgba(255,249,246,.96),rgba(247,251,245,.96))!important}.casa-web-grid{grid-template-columns:1fr 1fr!important}.casa-web-link{min-height:62px!important;display:flex!important;align-items:center!important;justify-content:space-between!important;gap:10px!important;padding:12px 13px!important;border-radius:18px!important;background:linear-gradient(115deg,rgba(249,230,236,.68),rgba(239,247,237,.76))!important;border:1px solid rgba(132,106,118,.08)!important;color:#514951!important;font-size:12px!important;font-weight:720!important;box-shadow:none!important}.casa-web-link-main{display:flex;align-items:center;gap:9px;min-width:0}.casa-web-link .casa-inline-icon{width:18px!important;height:18px!important;flex:0 0 18px;color:#8a727d}.casa-web-link .casa-inline-icon svg{width:18px!important;height:18px!important}.casa-web-link .casa-web-arrow{font-size:17px;color:#8a7d83;font-weight:500}.casa-web-link:active{background:linear-gradient(115deg,rgba(246,220,229,.8),rgba(229,241,227,.86))!important}
+@media(max-width:420px){.casa-web-grid{grid-template-columns:1fr!important}}
+
+/* BERTH.A Casa v2.8.130 — corrige escala dos ícones no modal Como Fazer */
+.casa-how-modal .casa-how-top-actions svg,
+.casa-how-modal .casa-how-meta svg,
+.casa-how-modal .casa-how-section h3>svg,
+.casa-how-modal .casa-how-tip strong>svg{width:16px!important;height:16px!important;min-width:16px!important;max-width:16px!important;flex:0 0 16px!important;display:block!important;overflow:visible!important}
+.casa-how-modal .casa-how-top-actions .casa-edit-procedure{min-height:44px!important;height:auto!important;padding:10px 14px!important;border-radius:16px!important;font-size:12.5px!important;line-height:1.2!important}
+.casa-how-modal .casa-how-top-actions{margin:10px 0 12px!important}
+.casa-how-modal .casa-how-section h3{min-height:24px!important;margin:18px 0 8px!important;font-size:14px!important}
+.casa-how-modal .casa-how-tip strong{min-height:20px!important}
+/* BERTH.A Casa v2.8.130 — Como Fazer sem ícones decorativos para evitar escala indevida no iOS */
+.casa-manual-view .casa-how-top-actions .casa-edit-procedure{display:flex!important;align-items:center!important;justify-content:center!important;min-height:44px!important;height:44px!important;padding:0 16px!important;border-radius:16px!important;font-size:12.5px!important;line-height:1!important}
+.casa-manual-view .casa-how-top-actions .casa-edit-procedure span{display:inline!important;width:auto!important;height:auto!important;margin:0!important;padding:0!important}
+.casa-manual-view .casa-how-top-actions svg,.casa-manual-view .casa-how-section h3 svg,.casa-manual-view .casa-how-tip svg,.casa-manual-view .casa-how-meta svg{display:none!important}
+.casa-manual-view .casa-how-section h3,.casa-manual-view .casa-how-tip strong{display:block!important}
+.casa-manual-view .casa-how-meta span{min-height:auto!important;padding:7px 11px!important;border-radius:999px!important;font-size:12px!important}
+
+
+/* BERTH.A Financeiro v2.8.107 */
+.finance-hero{position:relative;overflow:hidden;margin:0 0 16px;padding:22px 24px 24px;border-radius:28px;border:1px solid rgba(112,92,156,.12);background:radial-gradient(circle at 88% 82%,rgba(133,220,210,.14),transparent 34%),radial-gradient(circle at 76% 10%,rgba(150,190,244,.22),transparent 38%),linear-gradient(135deg,rgba(239,235,255,.96),rgba(247,241,255,.92) 58%,rgba(240,248,247,.72));box-shadow:0 10px 30px rgba(72,56,96,.05)}
+.finance-hero-kicker{display:block;color:#6652a0;font-size:12px;font-weight:750;letter-spacing:.18em;margin-bottom:12px}.finance-hero h2{margin:0 0 8px!important;color:#24233b;font-size:30px!important;line-height:1.06!important;letter-spacing:-.025em;font-family:inherit;font-weight:520!important}.finance-hero p{margin:0!important;color:#777184;font-size:15px!important;line-height:1.45!important}.finance-hero-icon{position:absolute;right:24px;top:24px;color:#6b78aa;font-size:28px;opacity:.8}
+.finance-summary{background:radial-gradient(circle at 92% 12%,rgba(145,203,236,.13),transparent 38%),linear-gradient(135deg,#f5f1ff,#f7f5fb 56%,#f1f7f6)!important;border-color:rgba(112,92,156,.11)!important}.finance-summary,.planned-bills-panel,.finance-cats,.goal-card,.excluded-card{border-radius:26px}.finance-main .eyebrow,.planned-bills-panel .eyebrow,.goal-card .eyebrow{color:#7356a0}.finance-metrics>div,.planned-mini-metrics>div{background:rgba(255,255,255,.62)!important}
+#addPlannedBill,#addTransaction{background:linear-gradient(105deg,#a985df 0%,#9388df 70%,#86b4d0 100%)!important;color:white!important;border:0!important;box-shadow:0 8px 20px rgba(120,93,180,.13)}#addFixed.add-full{background:linear-gradient(105deg,rgba(238,225,252,.94),rgba(232,226,249,.94))!important;color:#735696!important}
+.finance-cat{background:linear-gradient(100deg,rgba(248,244,253,.94),rgba(255,253,250,.96))!important}.finance-cat:nth-child(3n+1){box-shadow:inset 4px 0 0 rgba(166,130,222,.34)}.finance-cat:nth-child(3n+2){box-shadow:inset 4px 0 0 rgba(125,158,220,.28)}.finance-cat:nth-child(3n){box-shadow:inset 4px 0 0 rgba(116,202,191,.16)}
+.fin-inline-icon{width:17px;height:17px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round;flex:0 0 auto}.finance-main #toggleFinPrivacy{display:inline-flex;align-items:center;gap:6px}.finance-hero-icon{font-family:inherit!important;font-weight:300!important;font-size:30px!important;line-height:1!important;opacity:.58!important}.fin-alert-icon{display:inline-block;width:15px;height:15px;margin-right:8px;border:1.4px solid currentColor;border-radius:50%;vertical-align:-2px;position:relative;opacity:.72;box-sizing:border-box}.fin-alert-icon:before{content:"";position:absolute;left:6px;top:3px;width:1.3px;height:4.5px;background:currentColor;border-radius:2px}.fin-alert-icon:after{content:"";position:absolute;left:6px;top:6.8px;width:4px;height:1.3px;background:currentColor;border-radius:2px;transform:rotate(22deg);transform-origin:left center}.finance-row{border:1px solid rgba(111,154,202,.14)!important;background:radial-gradient(circle at 92% 20%,rgba(148,190,232,.07),transparent 32%),linear-gradient(110deg,rgba(250,248,253,.96),rgba(247,244,252,.90))!important;box-shadow:0 8px 24px rgba(72,56,96,.035)!important}.planned-bills-panel,.finance-cats,.goal-card{border:1px solid rgba(111,154,202,.14)!important;background:radial-gradient(circle at 92% 10%,rgba(148,190,232,.07),transparent 34%),linear-gradient(145deg,rgba(250,248,253,.96),rgba(247,244,252,.91))!important}.planned-bills-list>.empty.compact,.inner-list>.empty.compact,.finance-cats>.empty.compact{min-height:0!important;padding:22px 16px!important;border-radius:18px!important;background:linear-gradient(115deg,rgba(247,242,253,.72),rgba(248,249,255,.66))!important}.excluded-card{border:1px solid rgba(112,92,156,.08)!important;background:linear-gradient(110deg,rgba(255,255,255,.98),rgba(252,249,255,.9))!important}.goal-card{background:radial-gradient(circle at 90% 8%,rgba(122,203,193,.045),transparent 30%),linear-gradient(145deg,rgba(250,248,253,.96),rgba(247,244,252,.92))!important}.goal-toggle{background:#eee6f9!important;color:#74549a!important;border:0!important}.goal-toggle.done{background:#e8f2ef!important;color:#55796e!important}.excluded-card .pill{background:#f1e9f7;color:#71558f}.fin-due-alert{background:linear-gradient(120deg,#f7efff,#f3f5ff 74%,#f0f8f6)!important}.section-title{letter-spacing:.17em;color:#7d7582}.text-btn{color:#735696!important}
+.finance-covered-title{margin-bottom:4px!important}.finance-covered-intro{margin:0 4px 12px;color:#9a929b;font-size:12px;line-height:1.4}.finance-covered-list{gap:9px}.excluded-card{padding:0!important;background:linear-gradient(110deg,rgba(248,246,251,.78),rgba(245,247,250,.68))!important;border:1px solid rgba(112,92,156,.055)!important;box-shadow:none!important}.covered-edit{width:100%;border:0;background:transparent;padding:15px 16px;display:flex;align-items:center;justify-content:space-between;gap:12px;text-align:left;color:inherit;font:inherit}.covered-edit>div{min-width:0}.covered-edit strong{display:block;font-size:14px;font-weight:680;color:#5f5963}.covered-edit span:not(.pill){display:block;margin-top:3px;font-size:11.5px;line-height:1.35;color:#a09aa2}.covered-edit .pill{flex:0 0 auto;font-size:10.5px;background:rgba(237,229,246,.72)!important;color:#826b91!important}.covered-add{margin-top:9px!important;background:rgba(238,230,248,.62)!important;color:#775d8b!important;font-size:14px!important}.covered-empty{padding:14px 4px;color:#9a929b;font-size:13px}.finance-cats>.empty.compact,.inner-list>.empty.compact{background:transparent!important;border:0!important;padding:18px 10px!important}.goal-card{background:radial-gradient(circle at 88% 8%,rgba(129,195,205,.07),transparent 34%),linear-gradient(145deg,rgba(249,247,252,.94),rgba(244,247,249,.88))!important}.finance-hero-symbol{opacity:.48!important}.finance-hero-symbol svg{stroke-width:1.15!important}
+@media(max-width:560px){.finance-hero{padding:20px 20px 22px}.finance-hero h2{font-size:28px!important}.finance-hero p{font-size:15px!important}.finance-hero-icon{right:20px;top:20px}}
+
+/* BERTH.A Hero Symbol System v1 — abstract, module-specific marks; may become semantic references later. */
+.finance-hero-symbol{width:34px!important;height:34px!important;display:grid!important;place-items:center!important;font-size:0!important;opacity:.58!important}
+.finance-hero-symbol svg{width:100%;height:100%;overflow:visible;fill:none;stroke:currentColor;stroke-width:1.35;stroke-linecap:round;stroke-linejoin:round}
+.finance-hero-symbol circle{fill:currentColor;stroke:none}
+
+/* v2.8.182 — Financeiro · estados de contas previstos dentro da paleta do módulo */
+.fin-status.today,.fin-status.soon{
+  background:linear-gradient(135deg,rgba(226,218,249,.78),rgba(218,234,249,.72))!important;
+  color:#6f5b91!important;
+  border:1px solid rgba(111,91,145,.08)!important;
+}
+.planned-bill-row.today,.planned-bill-row.soon{
+  background:radial-gradient(circle at 94% 16%,rgba(135,190,225,.08),transparent 34%),linear-gradient(110deg,rgba(250,248,253,.97),rgba(245,245,252,.94))!important;
+  border-color:rgba(111,154,202,.14)!important;
+}
+.planned-bill-actions .primary.tiny{
+  background:linear-gradient(135deg,#a47ad8 0%,#7fa9dd 100%)!important;
+  color:#fff!important;
+  border:0!important;
+  box-shadow:none!important;
+}
+.planned-bill-actions .secondary.tiny{
+  background:rgba(239,234,247,.72)!important;
+  color:#755e8e!important;
+  border:1px solid rgba(112,92,156,.08)!important;
+  box-shadow:none!important;
+}
+.fin-due-alert{
+  background:linear-gradient(120deg,rgba(241,235,251,.90),rgba(238,243,252,.90) 72%,rgba(237,247,245,.86))!important;
+  border-color:rgba(111,154,202,.10)!important;
+}
+
+
+ `;document.head.appendChild(s);
+}
+
+
+/* v2.8.184 — Financeiro: lembrete persistente + card compacto no Meu Dia */
+(function(){if(document.getElementById('bertha-fin-reminder-v184'))return;const st=document.createElement('style');st.id='bertha-fin-reminder-v184';st.textContent=`
+.fin-reminder-settings{margin:4px 0 15px;padding:14px;border:1px solid rgba(111,154,202,.12);border-radius:18px;background:linear-gradient(125deg,rgba(244,239,251,.72),rgba(240,247,249,.68))}.fin-reminder-head{display:flex;align-items:center;justify-content:space-between;gap:12px}.fin-reminder-head strong,.fin-reminder-head small,.fin-reminder-repeat strong,.fin-reminder-repeat small{display:block}.fin-reminder-head strong,.fin-reminder-repeat strong{font-size:13px;color:#544b58}.fin-reminder-head small,.fin-reminder-repeat small{margin-top:3px;font-size:11px;line-height:1.35;color:#8a808c}.fin-reminder-switch{display:inline-flex;align-items:center;flex:0 0 auto}.fin-reminder-switch input{position:absolute;opacity:0;pointer-events:none}.fin-reminder-switch i{display:block;width:38px;height:22px;border-radius:999px;background:#e7e0eb;position:relative;transition:.2s}.fin-reminder-switch i:after{content:"";position:absolute;width:16px;height:16px;border-radius:50%;left:3px;top:3px;background:#fff;box-shadow:0 2px 6px rgba(63,49,67,.15);transition:.2s}.fin-reminder-switch input:checked+i{background:linear-gradient(135deg,#a47ad8,#7fa9dd)}.fin-reminder-switch input:checked+i:after{transform:translateX(16px)}.fin-reminder-fields{margin-top:13px}.fin-reminder-fields.is-off{opacity:.42}.fin-reminder-repeat{display:grid;grid-template-columns:auto minmax(0,1fr) 112px;align-items:center;gap:10px;margin-top:10px;padding-top:11px;border-top:1px solid rgba(112,92,156,.08)}.fin-repeat-time{margin:0!important;font-size:11px!important}.fin-repeat-time input{margin-top:5px!important}.fin-unified-dialog input[type=time],.fin-unified-dialog input[type=date],.fin-unified-dialog input[type=number],.fin-unified-dialog select,.fin-unified-dialog textarea{font-size:16px!important}
+@media(max-width:430px){.fin-reminder-repeat{grid-template-columns:auto minmax(0,1fr)}.fin-repeat-time{grid-column:2}.fin-reminder-settings{padding:13px}}
+`;document.head.appendChild(st)})();
+
+function bindFinanceModalClose(dlg){
+ const close=()=>{try{if(dlg.open)dlg.close()}catch(_e){};setTimeout(()=>{if(dlg.isConnected)dlg.remove()},0)};
+ dlg.querySelectorAll('[data-fin-close]').forEach(btn=>{btn.addEventListener('click',e=>{e.preventDefault();e.stopPropagation();close()},{passive:false})});
+ dlg.addEventListener('cancel',e=>{e.preventDefault();close()});
+ return close;
+}
+function openFinModal(type){
+ const d=loadFin(),dlg=document.createElement("dialog");dlg.className="fin-planned-dialog fin-unified-dialog";
+ const title=type==="income"?"Ajustar renda mensal":type==="fixed"?"Adicionar ao orçamento":"Registrar gasto";
+ dlg.innerHTML=`<form method="dialog" class="modal-card" id="finForm"><div class="modal-head"><div><div class="eyebrow">FINANCEIRO</div><h2>${title}</h2></div><button type="button" class="icon-btn fin-modal-x" data-fin-close aria-label="Fechar">×</button></div>
+ ${type==="income"?`<label>Renda mensal<input id="fValue" required type="number" min="0" step="0.01" value="${d.income}"></label>`:`<label>Descrição<input id="fName" required maxlength="100"></label><div class="form-grid"><label>Valor<input id="fValue" required type="number" min="0" step="0.01"></label><label>Categoria<select id="fCategory"><option>Casa</option><option>Alimentação</option><option>Transporte</option><option>Animais</option><option>Cartão</option><option>Dívidas</option><option>Henrique</option><option>Assinaturas</option><option>Saúde</option><option>Autocuidado</option><option>Lazer</option><option>Variável</option><option>Outros</option></select></label></div>${type==="transaction"?`<label>Data<input id="fDate" type="date" value="${todayISO()}"></label>`:`<label>Tipo<select id="fKind"><option>fixo</option><option>teto</option></select></label>`}`}
+ <div class="modal-actions"><div class="grow"></div><button type="button" class="secondary" id="cancelFin">Cancelar</button><button class="primary" value="default">Salvar</button></div></form>`;
+ document.body.appendChild(dlg);dlg.showModal();const closeFinDlg=bindFinanceModalClose(dlg);dlg.querySelector("#cancelFin").onclick=e=>{e.preventDefault();closeFinDlg()};
+ dlg.querySelector("#finForm").addEventListener("submit",e=>{e.preventDefault();if(type==="income"){d.income=+dlg.querySelector("#fValue").value||0}else{const obj={id:uid(),name:dlg.querySelector("#fName").value.trim(),value:+dlg.querySelector("#fValue").value||0,category:dlg.querySelector("#fCategory").value,updatedAt:Date.now()};if(type==="transaction"){obj.date=dlg.querySelector("#fDate").value;d.transactions.push(obj)}else{obj.kind=dlg.querySelector("#fKind").value;obj.payer="Usuária";d.fixed.push(obj)}}saveFin(d);dlg.close();dlg.remove();renderFinanceiro()});
+}
+function openCoveredExpenseModal(index=null){
+ const d=loadFin(),personal=finPersonal(d.excluded),existing=Number.isInteger(index)?personal[index]:null;
+ const dlg=document.createElement("dialog");dlg.className="fin-planned-dialog fin-unified-dialog";const categories=["Casa","Alimentação","Transporte","Animais","Cartão","Dívidas","Henrique","Assinaturas","Saúde","Autocuidado","Lazer","Outros"];
+ dlg.innerHTML=`<form method="dialog" class="modal-card" id="finCoveredForm"><div class="modal-head"><div><div class="eyebrow">DESPESA COBERTA</div><h2>${existing?"Editar despesa coberta":"Nova despesa coberta"}</h2></div><button type="button" class="icon-btn fin-modal-x" data-fin-close aria-label="Fechar">×</button></div><label>Nome<input id="fcName" required maxlength="100" value="${escapeHtml(existing?.name||"")}" placeholder="Ex.: Plano de saúde"></label><div class="form-grid"><label>Valor mensal <span class="muted">(se conhecido)</span><input id="fcValue" type="number" min="0" step="0.01" value="${existing?.value?Number(existing.value):""}"></label><label>Categoria<select id="fcCategory">${categories.map(x=>`<option ${x===(existing?.category||"Outros")?"selected":""}>${x}</option>`).join("")}</select></label></div><label>Quem paga<input id="fcPayer" required maxlength="80" value="${escapeHtml(existing?.payer||"")}" placeholder="Ex.: Mãe, empregador, benefício"></label><label>Observação <span class="muted">(opcional)</span><textarea id="fcReason" rows="3" placeholder="Contexto que vale a pena lembrar">${escapeHtml(existing?.reason||"")}</textarea></label>${existing?`<button type="button" class="fin-delete-bill" id="deleteCovered">Excluir despesa coberta</button>`:""}<div class="modal-actions"><div class="grow"></div><button type="button" class="secondary" id="cancelCovered">Cancelar</button><button class="primary" value="default">Salvar</button></div></form>`;
+ document.body.appendChild(dlg);dlg.showModal();const closeFinDlg=bindFinanceModalClose(dlg);dlg.querySelector("#cancelCovered").onclick=e=>{e.preventDefault();closeFinDlg()};
+ if(existing)dlg.querySelector("#deleteCovered").onclick=()=>{if(!confirm(`Excluir “${existing.name||"esta despesa"}”?`))return;const pos=d.excluded.findIndex(x=>x===existing||(x.id&&x.id===existing.id));if(pos>=0)d.excluded.splice(pos,1);saveFin(d);dlg.close();dlg.remove();renderFinanceiro()};
+ dlg.querySelector("#finCoveredForm").addEventListener("submit",e=>{e.preventDefault();const obj={...(existing||{}),id:existing?.id||uid(),name:dlg.querySelector("#fcName").value.trim(),value:+dlg.querySelector("#fcValue").value||0,category:dlg.querySelector("#fcCategory").value,payer:dlg.querySelector("#fcPayer").value.trim(),reason:dlg.querySelector("#fcReason").value.trim(),covered:true,updatedAt:Date.now()};if(existing){const pos=d.excluded.findIndex(x=>x===existing||(x.id&&x.id===existing.id));if(pos>=0)d.excluded[pos]=obj}else d.excluded.push(obj);saveFin(d);dlg.close();dlg.remove();renderFinanceiro()});
+}
+function openPlannedBillModal(id){
+ const d=loadFin(),existing=(d.plannedBills||[]).find(x=>x.id===id),b=existing||{id:uid(),name:"",value:"",category:"Casa",dueDate:todayISO(),recurrence:"monthly",reminderDays:0,reminderEnabled:true,reminderTime:"09:00",repeatIfPending:true,repeatReminderTime:"21:30",note:"",active:true,payments:{}};
+ const dlg=document.createElement("dialog");dlg.className="fin-planned-dialog fin-unified-dialog";dlg.innerHTML=`<form method="dialog" class="modal-card" id="finPlanForm"><div class="modal-head"><div><div class="eyebrow">CONTA PREVISTA</div><h2>${existing?"Editar conta prevista":"Nova conta prevista"}</h2></div><button type="button" class="icon-btn fin-modal-x" data-fin-close aria-label="Fechar">×</button></div>
+ <label>Conta / descrição<input id="pbName" required maxlength="100" value="${escapeHtml(b.name||"")}" placeholder="Ex.: Neoenergia"></label><div class="form-grid"><label>Valor previsto<input id="pbValue" required type="number" min="0" step="0.01" value="${Number(b.value||0)||""}"></label><label>Categoria<select id="pbCategory">${["Casa","Alimentação","Transporte","Animais","Cartão","Dívidas","Henrique","Assinaturas","Saúde","Autocuidado","Lazer","Outros"].map(x=>`<option ${x===(b.category||"Casa")?"selected":""}>${x}</option>`).join("")}</select></label></div>
+ <div class="form-grid"><label>Vencimento<input id="pbDue" required type="date" value="${b.dueDate||todayISO()}"></label><label>Recorrência<select id="pbRecurrence"><option value="monthly" ${(b.recurrence||"monthly")==="monthly"?"selected":""}>Mensal</option><option value="once" ${(b.recurrence||"")==="once"?"selected":""}>Somente uma vez</option></select></label></div>
+ <section class="fin-reminder-settings"><div class="fin-reminder-head"><div><strong>A BERTH.A lembra por você</strong><small>O aviso para quando a conta for marcada como paga.</small></div><label class="fin-reminder-switch"><input id="pbReminderEnabled" type="checkbox" ${b.reminderEnabled===false?'':'checked'}><i></i></label></div><div id="pbReminderFields" class="fin-reminder-fields ${b.reminderEnabled===false?'is-off':''}"><div class="form-grid"><label>Quando lembrar<select id="pbReminder"><option value="0" ${Number(b.reminderDays??0)===0?"selected":""}>No dia</option><option value="1" ${Number(b.reminderDays)===1?"selected":""}>1 dia antes</option><option value="3" ${Number(b.reminderDays)===3?"selected":""}>3 dias antes</option><option value="5" ${Number(b.reminderDays)===5?"selected":""}>5 dias antes</option><option value="7" ${Number(b.reminderDays)===7?"selected":""}>7 dias antes</option></select></label><label>Horário do aviso<input id="pbReminderTime" type="time" value="${escapeHtml(b.reminderTime||'09:00')}"></label></div><div class="fin-reminder-repeat"><label class="fin-reminder-switch"><input id="pbRepeatIfPending" type="checkbox" ${b.repeatIfPending===false?'':'checked'}><i></i></label><div><strong>Repetir se ainda estiver pendente</strong><small>A BERTH.A confere de novo no mesmo dia, antes das 22h.</small></div><label class="fin-repeat-time">Novo aviso<input id="pbRepeatReminderTime" type="time" max="21:59" value="${escapeHtml(b.repeatReminderTime||'21:30')}"></label></div></div></section>
+ <label>Observação <span class="muted">(opcional)</span><textarea id="pbNote" rows="3">${escapeHtml(b.note||"")}</textarea></label>
+ ${existing?`<button type="button" class="fin-delete-bill" id="deletePlannedBill">Excluir conta prevista</button>`:""}<div class="modal-actions"><div class="grow"></div><button type="button" class="secondary" id="cancelFinPlan">Cancelar</button><button class="primary" value="default">Salvar</button></div></form>`;
+ document.body.appendChild(dlg);dlg.showModal();const closeFinDlg=bindFinanceModalClose(dlg);dlg.querySelector("#cancelFinPlan").onclick=e=>{e.preventDefault();closeFinDlg()};
+ const en=dlg.querySelector('#pbReminderEnabled'),fields=dlg.querySelector('#pbReminderFields'),repeat=dlg.querySelector('#pbRepeatIfPending'),repeatTime=dlg.querySelector('#pbRepeatReminderTime');
+ const syncReminder=()=>{fields.classList.toggle('is-off',!en.checked);fields.querySelectorAll('input,select').forEach(x=>{if(x!==en)x.disabled=!en.checked});if(en.checked){repeatTime.disabled=!repeat.checked}};en.onchange=syncReminder;repeat.onchange=syncReminder;syncReminder();
+ if(existing)dlg.querySelector("#deletePlannedBill").onclick=()=>{if(!confirm(`Excluir “${b.name||"esta conta"}”?`))return;d.plannedBills=(d.plannedBills||[]).filter(x=>x.id!==b.id);saveFin(d);dlg.close();dlg.remove();renderFinanceiro()};
+ dlg.querySelector("#finPlanForm").addEventListener("submit",async e=>{e.preventDefault();const due=dlg.querySelector("#pbDue").value,rec=dlg.querySelector("#pbRecurrence").value,reminderEnabled=en.checked,repeatIfPending=reminderEnabled&&repeat.checked;let repeatReminderTime=dlg.querySelector('#pbRepeatReminderTime').value||'21:30';if(repeatReminderTime>'21:59')repeatReminderTime='21:59';const obj={...b,name:dlg.querySelector("#pbName").value.trim(),value:+dlg.querySelector("#pbValue").value||0,category:dlg.querySelector("#pbCategory").value,dueDate:due,recurrence:rec,startMonth:rec==="monthly"?(b.startMonth||due.slice(0,7)):due.slice(0,7),dueDay:Number(due.slice(8,10))||1,reminderDays:reminderEnabled?(+dlg.querySelector("#pbReminder").value||0):0,reminderEnabled,reminderTime:dlg.querySelector('#pbReminderTime').value||'09:00',repeatIfPending,repeatReminderTime,note:dlg.querySelector("#pbNote").value.trim(),active:true,payments:b.payments||{},updatedAt:Date.now()};d.plannedBills=existing?(d.plannedBills||[]).map(x=>x.id===obj.id?obj:x):[...(d.plannedBills||[]),obj];saveFin(d);if(window.berthaScheduleBillReminder){try{const result=await window.berthaScheduleBillReminder(obj);obj.reminderScheduleState=result?.ok?'ready':'pending';obj.reminderScheduleUpdatedAt=Date.now();d.plannedBills=(d.plannedBills||[]).map(x=>x.id===obj.id?obj:x);saveFin(d)}catch(_e){}}dlg.close();dlg.remove();renderFinanceiro()});
+}
+
+function openPlannedPayModal(id,month){
+ const d=loadFin(),b=(d.plannedBills||[]).find(x=>x.id===id);if(!b)return;const o=finPlannedOccurrence(b,month);if(!o)return;
+ const dlg=document.createElement("dialog");dlg.className="fin-planned-dialog fin-pay-dialog fin-unified-dialog";dlg.innerHTML=`<form method="dialog" class="modal-card" id="finPayForm"><div class="modal-head"><div><div class="eyebrow">✓ MARCAR COMO PAGA</div><h2>${escapeHtml(b.name)}</h2></div><button type="button" class="icon-btn fin-modal-x" data-fin-close aria-label="Fechar">×</button></div><p class="note">Previsto: R$ ${money(o.expected)} · vencimento ${formatDate(o.due)}</p><div class="form-grid"><label>Valor real pago<input id="pbActual" required type="number" min="0" step="0.01" value="${o.expected}"></label><label>Data do pagamento<input id="pbPaidDate" required type="date" value="${todayISO()}"></label></div><div class="modal-actions"><div class="grow"></div><button type="button" class="secondary" id="cancelFinPay">Cancelar</button><button class="primary" value="default">Confirmar pagamento</button></div></form>`;
+ document.body.appendChild(dlg);dlg.showModal();const closeFinDlg=bindFinanceModalClose(dlg);dlg.querySelector("#cancelFinPay").onclick=e=>{e.preventDefault();closeFinDlg()};dlg.querySelector("#finPayForm").addEventListener("submit",e=>{e.preventDefault();const actual=+dlg.querySelector("#pbActual").value||0,date=dlg.querySelector("#pbPaidDate").value;b.payments=b.payments||{};b.payments[month]={paid:true,value:actual,date,at:Date.now()};const existing=(d.transactions||[]).find(t=>t.plannedBillId===b.id&&t.plannedBillMonth===month),tx={id:existing?.id||uid(),name:b.name,value:actual,date,category:b.category||"Outros",plannedBillId:b.id,plannedBillMonth:month,note:"Conta prevista · paga",updatedAt:Date.now()};d.transactions=existing?(d.transactions||[]).map(t=>t.id===existing.id?tx:t):[...(d.transactions||[]),tx];saveFin(d);if(window.berthaResolveBillReminder){try{window.berthaResolveBillReminder({billId:b.id,month,name:b.name})}catch(_e){}}dlg.close();dlg.remove();renderFinanceiro()});
+}
+function undoPlannedPayment(id,month){const d=loadFin(),b=(d.plannedBills||[]).find(x=>x.id===id);if(!b)return;if(b.payments)delete b.payments[month];d.transactions=(d.transactions||[]).filter(t=>!(t.plannedBillId===id&&t.plannedBillMonth===month));saveFin(d);renderFinanceiro();}
+
+
+function ensureCasaManualStyles(){
+ if(document.getElementById('bertha-casa-manual-styles'))return;
+ const s=document.createElement('style');s.id='bertha-casa-manual-styles';s.textContent=`
+ .home-task-wrap{border-top:1px solid rgba(80,60,90,.10);padding:0 0 8px}.home-task-wrap .home-task{border-top:0;margin:0}
+ .home-task-actions{display:flex;gap:6px;align-items:center;justify-content:flex-end;padding:0 0 3px 39px}.home-how{border:0;background:transparent;padding:5px 0;font-size:11px;font-weight:800;color:#9a6f82}.home-edit{border:0;background:#F1E9F0;border-radius:999px;padding:6px 9px;font-size:10px;font-weight:700}
+ .casa-how-meta{display:flex;flex-wrap:wrap;gap:8px;margin:0 0 8px}.casa-how-meta span{display:inline-block;background:#F1E9F0;border-radius:999px;padding:6px 9px;font-size:11px}.casa-how-tip{padding:12px;border-radius:16px;background:#FFF3D9;margin-top:14px}.casa-how-tip p{margin:5px 0 0!important}
+ .mv-how-overlay{position:fixed;inset:0;z-index:99999;background:rgba(20,20,20,.25);display:flex;align-items:flex-end;padding:12px}.mv-how{width:min(520px,100%);max-height:86vh;overflow:auto;background:#FFFBF7;border-radius:25px;padding:20px;box-shadow:0 18px 55px rgba(0,0,0,.2)}.mv-how-x{float:right;border:0;background:transparent;font-size:27px}.mv-how h2{margin:6px 0 14px}.mv-how h3{font-size:12px;margin:18px 0 6px}.mv-how ul,.mv-how ol{margin-top:6px;padding-left:21px}.mv-how li{padding:6px 0;font-size:14px}.mv-how p{font-size:11px;opacity:.75}.mv-how label{display:block;font-size:11px;font-weight:700;margin:12px 0}.mv-how input,.mv-how textarea{display:block;width:100%;box-sizing:border-box;margin-top:5px;border:1px solid #ddd0d0;border-radius:12px;padding:10px;background:#fff;font:inherit}.mv-how textarea{min-height:110px}.mv-how .primary{border:0;border-radius:999px;padding:10px 15px;background:#F2C8D8;font-weight:800}
+ .casa-how-top-actions{display:flex;justify-content:flex-end;margin:8px 0 12px}.casa-how-top-actions .secondary{width:100%;border:0;border-radius:999px;padding:8px 12px;background:#F1E9F0;font-weight:800;font-size:11px}.casa-buy-mini{border:0;background:#f4e5ee;border-radius:999px;padding:6px 9px;font:inherit;font-size:11px;color:#865f79;white-space:nowrap}.casa-buy-mini:disabled{opacity:.7}.casa-how-shopping-note{margin-top:14px;padding:12px;border-radius:16px;background:#EAF2F7;font-size:11px;line-height:1.45}
+ .casa-schedule-card{background:linear-gradient(135deg,#fff8f1,#eef7f5 52%,#f4eef8)}.casa-schedule{display:grid;gap:0;margin-top:12px}.casa-schedule-row{display:grid;grid-template-columns:88px 1fr;gap:10px;align-items:center;padding:9px 0;border-top:1px solid rgba(120,100,120,.10)}.casa-schedule-row:first-child{border-top:0}.casa-time{font-size:11px;font-weight:800;color:#8b6b80;background:rgba(255,255,255,.72);border-radius:10px;padding:6px 7px;text-align:center}
+ .casa-manual-area{margin-bottom:14px}.casa-manual-list{display:grid;gap:0}.casa-manual-row{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:13px 0;border-top:1px solid rgba(80,60,90,.10)}.casa-manual-row>div{min-width:0;display:grid;gap:4px}.casa-manual-row strong{font-size:15px}.casa-manual-row small{color:#817985}.casa-manual-row .home-how{flex:0 0 auto}
+ .casa-recipe{margin-bottom:14px}.casa-recipe h4{margin:14px 0 7px;font-size:13px;text-transform:uppercase;letter-spacing:.08em;color:#7f667b}.casa-recipe ul,.casa-recipe ol{margin:7px 0 0;padding-left:20px}.casa-recipe li{display:flex;align-items:center;justify-content:space-between;gap:10px;margin:6px 0}.casa-recipe li span{flex:1}
+ .casa-inventory .chip-list{display:flex;flex-wrap:wrap;gap:8px;margin-top:10px}.casa-inventory .chip-list .pill{white-space:normal;height:auto;padding:7px 10px;line-height:1.25}.inventory-tools-head{margin-top:22px;padding-top:18px;border-top:1px solid rgba(80,60,90,.10)}.casa-product-list{display:grid;gap:8px;margin-top:12px}.casa-product-row{display:flex;align-items:flex-start;justify-content:space-between;gap:10px;padding:10px 0;border-top:1px solid rgba(80,60,90,.08)}.casa-product-row div{display:grid;gap:3px}.casa-product-row small{font-size:10px;opacity:.7}
+ .casa-web-card{background:linear-gradient(135deg,#FFF8F1,#F4EEF8 55%,#EDF7F3)}.casa-web-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;margin-top:12px}.casa-web-link{display:flex;justify-content:space-between;align-items:center;gap:8px;text-decoration:none;color:inherit;background:rgba(255,255,255,.82);border:1px solid rgba(120,100,120,.10);border-radius:15px;padding:11px 12px;font-size:11px;font-weight:800}
+ .casa-shopping-card{padding:16px}.casa-mini-shopping{display:grid;gap:7px}.casa-mini-shop-row{display:flex;align-items:center;gap:8px;padding:9px 10px;border-radius:13px;background:#fff}.casa-mini-shop-row label{display:flex!important;align-items:center!important;gap:8px!important;margin:0!important;flex:1}.casa-mini-shop-row input{width:auto!important;margin:0!important}.casa-mini-shop-row.done span{text-decoration:line-through;opacity:.5}
+ .casa-editor-overlay{padding:18px;align-items:flex-end}.casa-editor-card{width:min(100%,620px);max-height:88vh;overflow:auto;border:none!important;outline:none!important;box-shadow:0 -12px 40px rgba(60,45,70,.14)}.casa-editor-form{display:grid;gap:14px;margin-top:16px}.casa-editor-form label{display:grid;gap:7px;font-weight:750;color:#6f6673}.casa-editor-form label small{font-weight:500;opacity:.72}.casa-editor-form input,.casa-editor-form textarea,.casa-editor-form select{width:100%;box-sizing:border-box;border:1px solid rgba(120,100,120,.16);border-radius:16px;background:#fffdfb;padding:13px 14px;font:inherit;color:inherit;resize:vertical}.casa-editor-form textarea{line-height:1.45}.casa-editor-form .modal-actions{position:sticky;bottom:0;background:linear-gradient(to top,#fffdfb 78%,rgba(255,253,251,0));padding-top:14px;display:grid;grid-template-columns:1fr 1.25fr;gap:10px}
+ .casa-section{margin:12px 0;border:0}.casa-section>summary{list-style:none;cursor:pointer;display:flex;align-items:center;justify-content:space-between;gap:12px;padding:16px 17px;border-radius:20px;background:#fff;box-shadow:0 8px 25px rgba(60,45,70,.055);font-weight:850}.casa-section>summary::-webkit-details-marker{display:none}.casa-section>summary .casa-section-left{display:flex;align-items:center;gap:10px;min-width:0}.casa-section>summary .casa-section-left span{font-size:18px}.casa-section>summary .casa-section-meta{display:flex;align-items:center;gap:8px;color:#887d89;font-size:11px}.casa-section>summary .casa-chevron{font-size:18px;transition:transform .2s ease}.casa-section[open]>summary .casa-chevron{transform:rotate(180deg)}.casa-section-body{padding-top:10px}.casa-task-exec{display:flex;gap:7px;flex-wrap:wrap;margin-top:8px}.casa-task-exec button{border:0;border-radius:999px;padding:8px 11px;font-weight:800;font-size:11px}.casa-task-start{background:#eee5f7;color:#715781}.casa-task-finish{background:#e6f2eb;color:#557361}.casa-task-reopen{background:#fff1d8;color:#7e672f}.casa-maint-card{display:grid;gap:9px}.casa-maint-meta{display:flex;flex-wrap:wrap;gap:6px}.casa-maint-meta span{background:#f5f0f6;border-radius:999px;padding:5px 8px;font-size:10px;color:#766c78}.casa-maint-actions{display:flex;gap:7px;flex-wrap:wrap}.casa-maint-actions button{border:0;border-radius:999px;padding:8px 11px;font-size:11px;font-weight:800}.casa-maint-actions .start{background:#eee5f7;color:#715781}.casa-maint-actions .finish{background:#e6f2eb;color:#557361}.casa-maint-actions .edit{background:#f6f2f5;color:#756b77}.casa-history-row{display:flex;justify-content:space-between;gap:10px;align-items:center;padding:10px 0;border-top:1px solid rgba(80,60,90,.08)}.casa-history-row small{display:block;color:#8a808b;margin-top:3px}.casa-recipe-head-actions{display:flex;gap:7px;align-items:center}.casa-recipe-edit{border:0;border-radius:999px;padding:7px 10px;background:#f2eaf5;color:#765e82;font-weight:800;font-size:11px}.casa-inline-add{width:100%;margin:8px 0 12px}
+ @media(max-width:420px){.casa-editor-overlay{padding:0;align-items:flex-end}.casa-editor-card{border-radius:28px 28px 0 0!important;max-height:91vh;padding-bottom:calc(18px + env(safe-area-inset-bottom))}}
+
+ .casa-hero-v121{position:relative;overflow:hidden;min-height:218px;box-sizing:border-box;margin:6px 0 22px;padding:31px 34px;display:flex;justify-content:space-between;gap:18px;border:1px solid rgba(133,111,122,.14);border-radius:31px;background:radial-gradient(circle at 14% 15%,rgba(229,151,167,.28),transparent 42%),radial-gradient(circle at 88% 30%,rgba(163,190,171,.36),transparent 46%),linear-gradient(135deg,rgba(255,247,241,.94),rgba(250,236,239,.90) 52%,rgba(235,242,231,.92));box-shadow:0 8px 25px rgba(83,63,70,.035)}
+ .casa-hero-v121 .eyebrow{display:block;margin-bottom:20px;color:#8e626f;font-size:12px;letter-spacing:.18em;font-weight:820}.casa-hero-v121 h2{margin:0 0 16px;max-width:520px;font-size:34px;line-height:1.08;font-weight:500;letter-spacing:-.035em;color:#34303a}.casa-hero-v121 p{margin:0;max-width:520px;color:#7f747e;font-size:18px;line-height:1.42;font-weight:400}.casa-hero-mark{position:absolute;right:29px;top:31px;width:49px;height:38px;color:#aaa3a5;opacity:.68}.casa-hero-mark svg{width:100%;height:100%;stroke:currentColor;stroke-width:1.55;stroke-linecap:round}
+ .casa-principle-v121{background:linear-gradient(115deg,rgba(235,196,204,.42),rgba(231,242,229,.78));border:1px solid rgba(117,139,123,.10);box-shadow:none}.casa-principle-v121 strong{display:block;margin:7px 0 4px;font-size:19px}.casa-principle-v121 p{margin:0;color:#7d737c}.casa-summary-v121 .card{background:rgba(255,252,249,.78);box-shadow:none;border:1px solid rgba(126,106,117,.10)}
+ .casa-day-bridge-v121{display:grid;grid-template-columns:30px minmax(0,1fr) auto;gap:11px;align-items:center;margin:14px 0 16px;padding:12px 14px;border-radius:18px;background:linear-gradient(100deg,rgba(238,199,208,.42),rgba(239,246,234,.66));border:1px solid rgba(142,114,127,.08);color:#6d626c}.casa-day-bridge-v121 svg{width:22px;height:22px;color:#a36f7c}.casa-day-bridge-v121 strong,.casa-day-bridge-v121 small{display:block}.casa-day-bridge-v121 strong{font-size:12px}.casa-day-bridge-v121 small{font-size:10px;margin-top:2px;color:#8e838b}.casa-day-bridge-v121 a{text-decoration:none;color:#916676;font-size:11px;font-weight:800;white-space:nowrap}
+ .casa-section{margin:10px 0}.casa-section>summary{border:1px solid rgba(128,106,117,.085);box-shadow:0 6px 18px rgba(60,45,70,.032);padding:14px 16px;background:rgba(255,254,252,.84)}.casa-section>summary .casa-section-left{gap:12px}.casa-section-icon{display:grid;place-items:center;width:25px;height:25px;color:#7f777b!important}.casa-section-icon svg{width:22px;height:22px}.casa-section>summary .casa-section-meta{font-size:11px}.casa-chevron{color:#928991}
+ /* Exercícios: checkbox final, sem aparência nativa pesada */
+ #exForm #eDays label,#exForm label:has(#eNotify){position:relative}.study-v10-modal #eDays input[type=checkbox],.study-v10-modal #eNotify{appearance:none;-webkit-appearance:none;width:19px!important;height:19px!important;min-width:19px!important;border:1.4px solid #c8b8cf!important;border-radius:6px!important;background:#fffdfb!important;margin:0!important;display:grid!important;place-items:center!important}.study-v10-modal #eDays input[type=checkbox]:checked,.study-v10-modal #eNotify:checked{background:linear-gradient(135deg,#d9c5ef,#f1c7b9)!important;border-color:#bda7c8!important}.study-v10-modal #eDays input[type=checkbox]:checked:after,.study-v10-modal #eNotify:checked:after{content:'✓';font-size:12px;line-height:1;color:#6f5879;font-weight:900}
+ @media(max-width:420px){.casa-hero-v121{min-height:210px;padding:28px 30px}.casa-hero-v121 h2{font-size:32px;max-width:83%}.casa-hero-v121 p{font-size:17px;max-width:82%}.casa-hero-mark{right:25px;top:28px;width:44px}.casa-day-bridge-v121{grid-template-columns:26px 1fr}.casa-day-bridge-v121 a{grid-column:2;margin-top:2px}.casa-day-bridge-v121 small{line-height:1.3}}
+ @media(max-width:420px){.casa-web-grid{grid-template-columns:1fr}}@media(max-width:380px){.casa-schedule-row{grid-template-columns:76px 1fr}.casa-time{font-size:10px}}
+
+ /* v123 · sanfona Casa */
+ .casa-section{margin:14px 0}.casa-section>summary{min-height:62px;padding:15px 18px;border:1px solid rgba(127,103,115,.10);box-shadow:0 10px 28px rgba(73,57,64,.045);background:linear-gradient(135deg,rgba(255,248,247,.96),rgba(247,250,244,.96))}.casa-section:nth-of-type(2n)>summary{background:linear-gradient(135deg,rgba(248,251,246,.98),rgba(255,246,248,.95))}.casa-section>summary .casa-section-left{gap:12px}.casa-section>summary .casa-section-left strong{font-size:18px;letter-spacing:-.01em;color:#3f3944}.casa-section-icon,.casa-inline-icon{display:inline-grid;place-items:center;width:25px;height:25px;color:#8f7f86;flex:0 0 auto}.casa-section-icon svg,.casa-inline-icon svg,.casa-recipe .panel-head h3>svg{width:22px;height:22px;stroke-width:1.35}.casa-section>summary .casa-section-meta{font-size:12px;color:#91858e}.casa-chevron{font-family:system-ui,sans-serif;color:#9b9098;font-size:15px!important}.casa-section-body{padding-top:12px}.casa-section-body>.list>.card,.casa-section-body>.card{border:1px solid rgba(127,103,115,.09);box-shadow:0 10px 28px rgba(73,57,64,.035)}
+ .home-area{background:linear-gradient(180deg,rgba(255,255,255,.96),rgba(255,250,248,.97))}.home-area .panel-head h3,.casa-manual-area .panel-head h3,.casa-recipe .panel-head h3{display:flex;align-items:center;gap:9px}.home-task-wrap{padding:5px 0 12px}.home-task{align-items:flex-start;gap:11px}.home-task input[type=checkbox]{appearance:none;-webkit-appearance:none;width:23px!important;height:23px!important;border:1.5px solid #a899a3!important;border-radius:8px!important;background:rgba(255,255,255,.9)!important;margin-top:2px!important;display:grid!important;place-items:center!important;flex:0 0 auto}.home-task input[type=checkbox]:checked{background:linear-gradient(135deg,#d9b0bd,#bfcfbe)!important;border-color:transparent!important}.home-task input[type=checkbox]:checked:after{content:'✓';font-size:14px;font-weight:900;color:#fff}.home-task-actions{padding-left:34px;gap:10px}.home-how{color:#a06f82!important;font-size:12px!important;font-weight:800!important}.home-edit{background:linear-gradient(135deg,#f3e5ea,#edf2e8)!important;color:#756772!important;border:1px solid rgba(127,103,115,.08)!important}.casa-task-exec{margin-top:10px;padding-left:34px}.casa-task-exec button,.casa-maint-actions button{min-height:39px;padding:9px 15px!important}.casa-task-start,.casa-maint-actions .start{background:linear-gradient(135deg,#ecdce8,#f4ddd3)!important;color:#765a70!important}.casa-task-finish,.casa-maint-actions .finish{background:linear-gradient(135deg,#e9f2e8,#dce9df)!important;color:#56705e!important}.casa-task-reopen{background:linear-gradient(135deg,#f7ede5,#eef2e8)!important;color:#76655f!important}.casa-inline-add,#addMaintenance{background:linear-gradient(135deg,#e8d4df,#d9e6d9)!important;color:#6f5968!important;border:0!important}.casa-manual-area,.casa-recipe,.casa-inventory,.casa-schedule-card,.casa-web-card{background:linear-gradient(145deg,rgba(255,253,250,.98),rgba(248,251,246,.96))!important}.casa-manual-row,.casa-product-row{padding:14px 0}.casa-buy-mini{background:linear-gradient(135deg,#f3e5ea,#e8f0e7)!important;color:#7b6673!important}.casa-recipe-edit{border:0;border-radius:999px;padding:7px 10px;background:linear-gradient(135deg,#f2e2e8,#e7efe5);color:#765f6e;font-weight:800}.casa-schedule-card{background:linear-gradient(135deg,#fff9f6,#eef6ef 58%,#f8eef2)!important}.casa-time{background:rgba(255,255,255,.78)!important;color:#956f80!important}.casa-web-link{background:rgba(255,255,255,.84)!important;border-color:rgba(127,103,115,.08)!important}.casa-section .pill{background:#f2e8dd;color:#7f736b}
+ `;document.head.appendChild(s);
+}
+
+const CASA_KEY="minha-vida.casa.v1";
+const CASA_BASE={
+ areas:[
+  {id:"cozinha",title:"Cozinha",icon:"🍽️",tasks:[
+   {id:"coz1",name:"Passar pano no piso",freq:"diário",when:"manhã/noite",done:false},
+   {id:"coz2",name:"Organizar pia",freq:"diário",when:"manhã/noite",done:false},
+   {id:"coz3",name:"Limpar bancada",freq:"diário",when:"manhã/noite",done:false},
+   {id:"coz4",name:"Guardar alimentos",freq:"diário",when:"noite",done:false},
+   {id:"coz5",name:"Retirar lixo se necessário",freq:"diário",when:"noite",done:false}
+  ]},
+  {id:"limpeza",title:"Limpeza da casa",icon:"🧹",tasks:[
+   {id:"lim1",name:"Varrer/aspirar a casa",freq:"a cada 2 dias",when:"bloco doméstico",done:false},
+   {id:"lim2",name:"Varrer e passar pano na lavanderia",freq:"a cada 2 dias",when:"bloco doméstico",done:false},
+   {id:"lim3",name:"Passar pano nas áreas realmente usadas",freq:"semanal",when:"bloco doméstico",done:false},
+   {id:"lim4",name:"Limpeza pesada",freq:"quinzenal",when:"bloco doméstico",done:false}
+  ]},
+  {id:"roupas",title:"Roupas & Lavanderia",icon:"👕",tasks:[
+   {id:"roup1",name:"Separar roupas por tipo/cor",freq:"conforme volume",when:"antes da lavagem",done:false},
+   {id:"roup2",name:"Lavar roupas do dia a dia",freq:"conforme volume",when:"lavanderia",done:false},
+   {id:"roup3",name:"Cuidar das peças delicadas",freq:"conforme necessidade",when:"lavanderia",done:false},
+   {id:"roup4",name:"Tratar manchas antes da máquina",freq:"sempre que necessário",when:"antes da lavagem",done:false},
+   {id:"roup5",name:"Secar e retirar as peças no tempo certo",freq:"a cada lavagem",when:"lavanderia",done:false},
+   {id:"roup6",name:"Lavar toalhas",freq:"semanal",when:"lavanderia",done:false},
+   {id:"roup7",name:"Trocar/lavar roupa de cama",freq:"semanal",when:"lavanderia",done:false},
+   {id:"roup8",name:"Passar roupas",freq:"semanal",when:"bloco único",done:false},
+   {id:"roup9",name:"Dobrar e guardar",freq:"após secar/passar",when:"armários",done:false},
+   {id:"roup10",name:"Revisar conservação e organização do armário",freq:"quinzenal",when:"armários",done:false}
+  ]},
+  {id:"externa",title:"Jardim • Piscina • Áreas externas",icon:"🌿",tasks:[]},
+  {id:"animais",title:"Animais",icon:"🐾",tasks:[
+   {id:"ani1",name:"Alimentar animais",freq:"diário",when:"manhã/noite",done:false},
+   {id:"ani2",name:"Cuidar da Luna",freq:"diário",when:"manhã/início da noite",done:false}
+  ]},
+  {id:"henrique",title:"Henrique",icon:"👦",tasks:[
+   {id:"hen1",name:"Arrumar a própria cama",freq:"diário",when:"manhã",done:false},
+   {id:"hen2",name:"Organizar higiene, roupas e mochila",freq:"diário",when:"manhã",done:false},
+   {id:"hen3",name:"Colocar louça da lancheira na pia",freq:"diário",when:"ao chegar",done:false},
+   {id:"hen4",name:"Ajudar com os animais / Luna",freq:"diário",when:"manhã/início da noite",done:false},
+   {id:"hen5",name:"Uma ajuda doméstica eventual",freq:"eventual",when:"sem sobrecarregar",done:false}
+  ]}
+ ],
+ maintenance:[],
+ notes:""
+};
+
+const CASA_TIME_KEY="minha-vida.casa.time.v2";
+const CASA_TIME_BASE={
+ ani1:"07:00 · 18:30", ani2:"07:15 · 18:30",
+ hen1:"07:00", hen2:"07:10", hen3:"ao chegar", hen4:"18:30", hen5:"fim de semana",
+ coz1:"após as refeições", coz2:"após as refeições", coz3:"após as refeições", coz4:"após o jantar", coz5:"após o jantar",
+ lim1:"janela doméstica", lim2:"janela doméstica", lim3:"janela doméstica", lim4:"fim de semana",
+ roup1:"janela de lavanderia", roup2:"janela de lavanderia", roup3:"janela de lavanderia", roup4:"antes da lavagem", roup5:"ao fim do ciclo", roup6:"janela de lavanderia", roup7:"janela de lavanderia", roup8:"bloco de roupas", roup9:"após secar/passar", roup10:"fim de semana"
+};
+function loadCasaTimes(){try{return {...CASA_TIME_BASE,...JSON.parse(window.berthaHmlStorage.getItem(CASA_TIME_KEY)||"{}")}}catch{return {...CASA_TIME_BASE}}}
+function saveCasaTimes(x){window.berthaHmlStorage.setItem(CASA_TIME_KEY,JSON.stringify(x))}
+function casaTime(id){return loadCasaTimes()[id]||"horário a definir";}
+function casaTimeParts(id){const raw=String(casaTime(id)||"horário a definir").trim();if(!raw)return ["horário a definir"];if(raw.includes("·"))return raw.split("·").map(x=>x.trim()).filter(Boolean);return [raw];}
+function casaTimeBubbles(id){return `<span class="casa-time-stack">${casaTimeParts(id).map(x=>`<span class="casa-time">${escapeHtml(x)}</span>`).join("")}</span>`;}
+
+const CASA_HOW={
+ coz1:{title:"Passar pano no piso",time:"10–15 min",products:["Água","Detergente neutro ou produto adequado ao piso"],materials:["Vassoura/aspirador","Mop ou pano de microfibra","Balde"],steps:["Retire objetos e resíduos soltos.","Varra ou aspire primeiro; o pano vem depois para não espalhar a sujeira.","Dilua o produto conforme o rótulo.","Passe o pano úmido, sem encharcar o piso.","Deixe o ambiente secar completamente."],tip:"Para a limpeza geral, o manual da residência orienta aspirar/varrer antes do pano úmido."},
+ coz2:{title:"Organizar pia",time:"5–10 min",products:["Detergente neutro"],materials:["Esponja macia","Pano de microfibra","Escorredor"],steps:["Retire toda a louça e coloque cada item em seu lugar.","Lave o que estiver pendente.","Limpe cuba, torneira e área ao redor com detergente neutro.","Enxágue e seque as superfícies.","Finalize deixando a pia livre e pronta para o próximo uso."],tip:"A regra é deixar a cozinha pronta para o próximo dia."},
+ coz3:{title:"Limpar bancada",time:"5 min",products:["Detergente neutro"],materials:["Pano de microfibra"],steps:["Retire objetos e resíduos.","Passe pano úmido com detergente neutro.","Dê atenção às áreas de gordura e aos cantos.","Passe pano limpo e finalize com a superfície seca.","Recoloque somente o que realmente pertence à bancada."],tip:"Superfícies limpas e secas facilitam a manutenção diária."},
+ lim1:{title:"Varrer / aspirar a casa",time:"15–25 min",products:[],materials:["Aspirador ou vassoura","Pá/coletor","Pano de microfibra"],steps:["Recolha objetos que estejam no chão.","Comece pelas áreas mais altas e siga para o piso.","Varra ou aspire todos os ambientes, incluindo cantos e sob móveis quando possível.","Finalize com pano úmido apenas quando necessário."],tip:"O manual reforça: aspirador/varredura antes do pano úmido evita 'barrear' o chão."},
+ lim2:{title:"Limpar a lavanderia",time:"10–15 min",products:["Detergente neutro ou produto adequado ao piso"],materials:["Vassoura/aspirador","Mop ou pano","Balde"],steps:["Retire cestos e objetos do piso.","Varra ou aspire primeiro.","Limpe respingos e áreas próximas à máquina.","Passe pano úmido sem excesso de água.","Deixe secar e reorganize os itens."],tip:"Mantenha a área seca e livre para circulação."},
+ lim3:{title:"Passar pano nas áreas usadas",time:"10–20 min",products:["Detergente neutro ou produto adequado ao piso"],materials:["Mop/pano de microfibra","Balde"],steps:["Priorize somente os ambientes que realmente foram usados.","Retire sujeira solta com vassoura ou aspirador.","Passe pano úmido nas áreas de circulação.","Troque a água quando estiver suja.","Deixe o piso secar completamente."],tip:"A ideia é limpar o que precisa, sem transformar manutenção em uma segunda jornada."},
+ lim4:{title:"Limpeza pesada",time:"60–90 min",products:["Detergente neutro","Desinfetante adequado à superfície","Álcool ou limpa-vidros"],materials:["Luvas","Panos de microfibra","Esponja","Escova macia","Aspirador","Vassoura e pá","Balde","Toalhas limpas"],steps:["Abra as janelas e reúna todos os materiais antes de começar.","Retire objetos soltos e trabalhe de cima para baixo.","Aspire/varra pisos e áreas escondidas antes do pano.","Limpe rodapés, superfícies, portas e maçanetas.","Limpe vidros e espelhos com álcool ou limpa-vidros e seque com microfibra.","Finalize os pisos com pano úmido e deixe tudo secar.","Recoloque objetos e faça uma conferência visual final."],tip:"O manual da residência orienta trabalhar de cima para baixo, manter ventilação e nunca misturar produtos de limpeza."},
+ roup1:{title:"Separar roupas por tipo e cor",time:"5–10 min",products:[],materials:["Cesto(s) de roupa","Saquinhos para peças delicadas, se necessário"],steps:["Separe brancas, coloridas/escuras e peças que exigem cuidado especial.","Confira etiquetas e instruções de lavagem.","Separe peças delicadas e coloque-as em saco protetor quando indicado.","Verifique bolsos e fechos antes de colocar na máquina.","Trate manchas antes da lavagem."],tip:"Separar corretamente reduz transferência de cor e desgaste desnecessário."},
+ roup2:{title:"Lavar roupas do dia a dia",time:"Conforme o ciclo",products:["Sabão para roupas","Amaciante, se desejado"],materials:["Máquina de lavar","Cesto de roupas"],steps:["Separe as peças por cor e tecido.","Não sobrecarregue a máquina.","Use a quantidade de produto indicada pelo fabricante da máquina/produto.","Escolha o ciclo compatível com as etiquetas.","Retire as roupas assim que o ciclo terminar para evitar odores e vincos."],tip:"Menos produto não significa melhor sempre; siga a dosagem indicada para sua máquina e para a carga."},
+ roup3:{title:"Cuidar das peças delicadas",time:"10 min + ciclo",products:["Sabão adequado para roupas delicadas"],materials:["Saco protetor para delicadas","Máquina ou recipiente para lavagem manual"],steps:["Leia a etiqueta antes de lavar.","Separe seda, renda, tecidos finos e peças com aplicações.","Use ciclo delicado ou lavagem manual quando indicado.","Evite excesso de atrito e centrifugação agressiva.","Seque conforme a etiqueta e evite calor excessivo."],tip:"No manual de passadoria, peças delicadas entram sempre na menor temperatura."},
+ roup4:{title:"Tratar manchas antes da máquina",time:"5–15 min",products:["Produto tira-manchas compatível com o tecido"],materials:["Pano limpo ou escova macia","Luvas, se o produto exigir"],steps:["Identifique o tipo de mancha e confira a etiqueta da peça.","Aplique o produto apropriado em pequena quantidade.","Trabalhe delicadamente, sem esfregar agressivamente tecidos sensíveis.","Aguarde o tempo indicado pelo fabricante.","Lave a peça normalmente e confira a mancha antes de secar ou passar."],tip:"Não fixe a mancha com calor: confirme que ela saiu antes da secagem quente ou da passadoria."},
+ roup5:{title:"Secar e retirar as peças",time:"5–10 min",products:[],materials:["Varal ou secadora, conforme a etiqueta","Cabides quando apropriado"],steps:["Retire as peças da máquina assim que o ciclo terminar.","Sacuda e acomode as peças para reduzir vincos.","Use varal ou secadora somente de acordo com a etiqueta.","Evite deixar roupas úmidas acumuladas no cesto.","Quando estiverem secas, encaminhe para dobrar ou passar."],tip:"Retirar logo após a lavagem ajuda a evitar odores e vincos profundos."},
+ roup6:{title:"Lavar toalhas",time:"Ciclo completo",products:["Sabão em pó ou líquido","Pouco amaciante","Vinagre de álcool, conforme o manual da residência"],materials:["Máquina de lavar","Cesto"],steps:["Reúna as toalhas e trate manchas antes de colocar na máquina.","Não encha demais a máquina; deixe espaço para circulação de água.","Use pouco sabão, conforme o manual da residência.","No dispenser de amaciante, use pouco amaciante e, conforme a rotina registrada no manual, complete com um pouco de vinagre de álcool.","Use programa compatível e retire as toalhas imediatamente ao terminar.","Coloque-as para secar sem deixá-las amontoadas."],tip:"O manual da residência orienta pouco sabão e retirada imediata das toalhas após o ciclo."},
+ roup7:{title:"Trocar / lavar roupa de cama",time:"Ciclo completo",products:["Sabão para roupas","Amaciante, se desejado"],materials:["Máquina de lavar","Cesto"],steps:["Retire o jogo completo e confira manchas de suor ou oleosidade.","Trate manchas antes da lavagem.","Coloque os lençóis sem compactar demais a máquina.","Use o programa indicado para lençóis/cama ou o compatível com a etiqueta.","Retire imediatamente ao término para facilitar a secagem e a passadoria.","Dobre ou passe e guarde o jogo completo junto."],tip:"O manual recomenda espaço na máquina para evitar amassados excessivos."},
+ roup8:{title:"Passar roupas",time:"20–45 min",products:["Água","Amaciante, para a misturinha do borrifador usada no manual da residência"],materials:["Ferro","Tábua de passar","Borrifador","Cabides"],steps:["Separe as roupas por tecido e temperatura.","Comece pelas peças que exigem temperatura baixa.","Passe delicadas, coloridas e peças com elástico/aplicações antes das de temperatura média.","Borrife levemente a misturinha usada na rotina da casa.","Passe camisetas e peças de algodão em temperatura adequada.","Dobre ou coloque em cabide imediatamente."],tip:"O manual orienta começar por baixa temperatura e nunca deixar o ferro parado sobre a peça."},
+ roup9:{title:"Dobrar e guardar",time:"10–20 min",products:[],materials:["Superfície limpa e seca","Cabides, divisórias ou organizadores"],steps:["Separe as peças por categoria.","Dobre ou pendure de acordo com o tecido e o formato.","Guarde somente roupas completamente secas.","Mantenha peças delicadas sem compressão excessiva.","Agrupe conjuntos e jogos de cama para facilitar o uso."],tip:"Guardar logo após secar/passar evita uma segunda rodada de organização."},
+ roup10:{title:"Conservar e organizar o armário",time:"15–20 min",products:[],materials:["Pano de microfibra","Cabides","Organizadores, se necessários"],steps:["Retire apenas o necessário para trabalhar por uma categoria.","Confira se as peças estão limpas e completamente secas.","Limpe prateleiras e superfícies com pano adequado.","Separe peças sem uso, para conserto ou para doação.","Devolva as roupas por categoria, deixando as mais usadas acessíveis."],tip:"A organização deve facilitar a rotina, não criar um projeto permanente."}
+};
+
+
+const CASA_MANUAL_PROCEDURES=[
+ {id:"manual-coz-bancada",area:"Cozinha",title:"Bancadas e superfícies",time:"5–10 min",products:["Cif Espuma Milagrosa"],materials:["Pano de microfibra","Pano multiuso"],steps:["Retire objetos e migalhas.","Passe pano multiuso úmido.","Para gordura, aplique Cif Espuma Milagrosa na superfície compatível, aja conforme o rótulo e remova com pano limpo."],tip:"O manual recomenda produto específico para gordura e pano limpo para finalizar."},
+ {id:"manual-coz-pia",area:"Cozinha",title:"Pia",time:"5 min",products:["Qualitá Home Lava-Louças Líquido Coco"],materials:["Esponja","Pano"],steps:["Retire resíduos.","Lave com lava-louças líquido de coco e esponja.","Enxágue e seque."],tip:"Deixar a pia limpa e seca facilita a manutenção seguinte."},
+ {id:"manual-coz-fogao",area:"Cozinha",title:"Fogão / cooktop",time:"5–10 min",products:["Cif Espuma Milagrosa"],materials:["Pano","Esponja"],steps:["Remova resíduos.","Use produto apropriado para gordura.","Passe pano úmido e finalize com pano limpo."],tip:"Use somente produto compatível com a superfície."},
+ {id:"manual-coz-armarios",area:"Cozinha",title:"Frentes de armários",time:"5–10 min",products:["Cif Espuma Milagrosa"],materials:["Pano de microfibra"],steps:["Retire marcas e gordura com pano levemente úmido.","Em sujeira engordurada, use produto compatível.","Finalize com pano limpo."],tip:"Teste o produto em pequena área quando houver dúvida sobre compatibilidade."},
+ {id:"manual-coz-piso",area:"Cozinha",title:"Piso da cozinha",time:"10–15 min",products:["Solução apropriada para cerâmica"],materials:["Vassoura ou aspirador","Mop","Balde"],steps:["Remova resíduos com vassoura ou aspirador.","Passe mop com solução apropriada para cerâmica.","Evite excesso de água e deixe secar."],tip:"Remover a sujeira solta antes do pano evita espalhar resíduos."},
+ {id:"manual-sala-poeira",area:"Sala de TV, antessala e corredores",title:"Poeira de superfícies",time:"5–10 min",products:[],materials:["Espanador","Pano de microfibra","Pano multiuso"],steps:["Retire objetos.","Passe espanador ou pano de microfibra.","Finalize com pano multiuso quando necessário."],tip:"Trabalhe por partes para não espalhar a poeira."},
+ {id:"manual-sala-sofa",area:"Sala de TV, antessala e corredores",title:"Sofá",time:"10 min",products:[],materials:["Aspirador"],steps:["Aspire assentos, encostos, frestas e laterais.","Não encharque o tecido."],tip:"O manual orienta evitar água em excesso no tecido."},
+ {id:"manual-sala-esteira",area:"Sala de TV, antessala e corredores",title:"Esteira",time:"5 min",products:[],materials:["Pano de microfibra"],steps:["Remova poeira.","Limpe superfícies externas com pano levemente úmido.","Não molhe partes elétricas."],tip:"Componentes elétricos devem permanecer secos."},
+ {id:"manual-sala-livros",area:"Sala de TV, antessala e corredores",title:"Livros",time:"5–10 min",products:[],materials:["Espanador","Pano seco"],steps:["Tire poeira das capas e prateleiras.","Evite umidade excessiva."],tip:"Pano seco é a opção-base para preservar livros."},
+ {id:"manual-sala-porcelanato",area:"Sala de TV, antessala e corredores",title:"Piso de porcelanato",time:"10–15 min",products:["Solução compatível com porcelanato"],materials:["Aspirador ou vassoura","Mop"],steps:["Aspire ou varra.","Passe mop bem torcido com solução compatível.","Finalize sem excesso de água."],tip:"Evite abrasivos e excesso de produto."},
+ {id:"manual-quarto-cama",area:"Quartos",title:"Cama e organização",time:"5–10 min",products:[],materials:["Cesto de roupa","Panos"],steps:["Arrume a cama.","Recolha roupas e objetos.","Devolva cada item ao lugar."],tip:"A organização diária deve ser curta e objetiva."},
+ {id:"manual-quarto-poeira",area:"Quartos",title:"Poeira",time:"5–10 min",products:[],materials:["Pano de microfibra"],steps:["Limpe as superfícies com pano de microfibra.","Comece pelas partes mais altas."],tip:"De cima para baixo reduz retrabalho."},
+ {id:"manual-quarto-piso",area:"Quartos",title:"Piso dos quartos",time:"10 min",products:["Solução compatível com o piso"],materials:["Aspirador ou vassoura","Mop"],steps:["Aspire ou varra.","Passe mop bem torcido.","Deixe secar."],tip:"Evite excesso de água."},
+ {id:"manual-quarto-espelhos",area:"Quartos",title:"Espelhos",time:"3–5 min",products:[],materials:["Pano próprio para vidro","Rodo de vidro"],steps:["Use pouca umidade.","Limpe a superfície.","Finalize com pano ou rodo de vidro."],tip:"Evite excesso de produto e umidade."},
+ {id:"manual-banheiro-bancada",area:"Banheiros",title:"Bancada e cuba",time:"5 min",products:["Produto adequado"],materials:["Esponja","Pano"],steps:["Retire objetos.","Lave/limpe com produto compatível.","Enxágue quando necessário e seque."],tip:"A compatibilidade do produto depende da superfície."},
+ {id:"manual-banheiro-vaso",area:"Banheiros",title:"Vaso sanitário",time:"5–10 min",products:["Produto adequado para vaso sanitário"],materials:["Escova de vaso/refil","Pano"],steps:["Aplique o produto próprio na parte interna.","Escove.","Acione a descarga.","Limpe a parte externa com pano."],tip:"Use a escova/refil específico para o vaso."},
+ {id:"manual-banheiro-box",area:"Banheiros",title:"Box",time:"10 min",products:["Produto compatível com vidro e metais"],materials:["Rodo","Pano","Esponja"],steps:["Limpe os vidros com rodo e pano.","Remova resíduos de sabonete.","Limpe metais sem produto abrasivo."],tip:"Evite abrasivos nos metais."},
+ {id:"manual-banheiro-piso",area:"Banheiros",title:"Piso cerâmico",time:"10 min",products:["Solução compatível"],materials:["Vassoura","Mop","Escova"],steps:["Varra ou aspire.","Aplique solução compatível.","Esfregue pontos necessários.","Retire excesso de água."],tip:"Cuidado com rejuntes muito encharcados."},
+ {id:"manual-lav-maquina",area:"Lavanderia",title:"Máquina LG",time:"5 min",products:[],materials:["Pano de microfibra"],steps:["Após o uso, retire a roupa.","Deixe a porta aberta para ventilar.","Limpe a borracha da porta.","Limpe as superfícies externas com pano levemente úmido."],tip:"A ventilação após o uso faz parte da rotina de conservação registrada no manual."},
+ {id:"manual-lav-tanque",area:"Lavanderia",title:"Tanque e bancada",time:"5–10 min",products:["Produto compatível"],materials:["Esponja","Pano"],steps:["Retire objetos.","Limpe tanque e bancada.","Seque."],tip:"Mantenha a área livre para a próxima lavagem."},
+ {id:"manual-lav-panos",area:"Lavanderia",title:"Panos de limpeza",time:"10–15 min + ciclo",products:["Produto de lavagem adequado"],materials:["Máquina LG","Cesto"],steps:["Separe os panos conforme o uso.","Lave de acordo com o tipo de tecido e orientação da máquina.","Retire após o ciclo e encaminhe para secagem."],tip:"Separar panos por uso ajuda a evitar contaminação cruzada."},
+ {id:"manual-lav-organizacao",area:"Lavanderia",title:"Organização da lavanderia",time:"5–10 min",products:[],materials:["Recipientes/organizadores"],steps:["Mantenha produtos fechados.","Identifique os recipientes.","Separe os produtos por função."],tip:"Produtos concentrados devem permanecer em suas embalagens originais e identificadas."},
+ {id:"manual-calcados",area:"Quarto de calçados",title:"Calçados",time:"10–15 min",products:[],materials:["Escova","Pano","Secador de calçados"],steps:["Retire poeira e sujeira das solas.","Use o secador de calçados quando necessário.","Organize por categoria."],tip:"Só guarde o calçado depois de completamente seco."},
+ {id:"manual-calcados-piso",area:"Quarto de calçados",title:"Piso",time:"5–10 min",products:["Solução compatível com o piso"],materials:["Aspirador ou vassoura","Mop"],steps:["Aspire ou varra.","Passe mop bem torcido."],tip:"Evite excesso de água."},
+ {id:"manual-rouparia-prateleiras",area:"Rouparia / armário de enxoval",title:"Prateleiras",time:"10–15 min",products:[],materials:["Pano de microfibra","Espanador"],steps:["Retire itens por partes.","Tire o pó.","Limpe com pano levemente úmido.","Devolva os itens organizados."],tip:"Trabalhar por pequenas partes evita desmontar todo o armário."},
+ {id:"manual-rouparia-enxoval",area:"Rouparia / armário de enxoval",title:"Enxoval",time:"10–20 min",products:[],materials:["Organizadores"],steps:["Dobre e agrupe por categoria.","Mantenha fácil acesso às peças de uso frequente."],tip:"A organização deve favorecer o uso frequente."},
+ {id:"manual-varanda-residuos",area:"Varanda grande / área do cachorro",title:"Fezes e sujeiras pontuais",time:"3–5 min",products:[],materials:["Pá/saco","Luvas"],steps:["Recolha resíduos sólidos antes de molhar o piso.","Descarte adequadamente."],tip:"Primeiro remova os sólidos; só depois faça a lavagem."},
+ {id:"manual-varanda-poeira",area:"Varanda grande / área do cachorro",title:"Poeira, pelos e folhas",time:"10 min",products:[],materials:["Vassoura","Pá","Aspirador"],steps:["Varra ou aspire conforme o equipamento disponível.","Recolha os resíduos."],tip:"Escolha o equipamento que gere menos esforço para a área."},
+ {id:"manual-varanda-pedra",area:"Varanda grande / área do cachorro",title:"Pedra portuguesa",time:"15–30 min",products:["Produto compatível com pedra"],materials:["Vassoura","Escova","Mangueira ou WAP"],steps:["Remova sólidos primeiro.","Lave/esfregue com água e produto compatível.","Use a WAP apenas quando a pressão for adequada ao local e às juntas."],tip:"Teste produto e pressão em pequena área."},
+ {id:"manual-varanda-moveis",area:"Varanda grande / área do cachorro",title:"Mobiliário",time:"5–10 min",products:["Produto compatível com o material, quando necessário"],materials:["Pano de microfibra"],steps:["Retire poeira.","Limpe com pano compatível com o material."],tip:"A superfície do móvel determina o produto adequado."},
+ {id:"manual-garagem-piso",area:"Garagem",title:"Piso",time:"20–30 min",products:["Produto compatível com o piso, quando necessário"],materials:["Vassoura","Mangueira ou WAP"],steps:["Varra primeiro.","Lave com mangueira ou WAP quando necessário.","Direcione a água para o escoamento."],tip:"Observe sempre o escoamento antes de usar água em volume."},
+ {id:"manual-garagem-cantos",area:"Garagem",title:"Cantinhos e paredes baixas",time:"10–15 min",products:["Produto compatível, quando necessário"],materials:["Escova","Mangueira"],steps:["Escove a sujeira acumulada.","Remova com água."],tip:"Trabalhe por pequenas áreas."},
+ {id:"manual-janelas-vidros",area:"Janelas, grades e telas",title:"Vidros",time:"5–10 min por janela",products:["Produto compatível para vidro"],materials:["Pano","Rodo de vidro"],steps:["Remova poeira.","Limpe com pano adequado.","Finalize com rodo de vidro."],tip:"Limpar uma janela por vez ajuda a controlar o tempo."},
+ {id:"manual-janelas-grades",area:"Janelas, grades e telas",title:"Grades",time:"5–10 min",products:["Produto compatível"],materials:["Pano","Escova"],steps:["Limpe separadamente com pano úmido ou escova.","Não dependa do acessório de telas."],tip:"Grades e telas têm procedimentos diferentes."},
+ {id:"manual-janelas-telas",area:"Janelas, grades e telas",title:"Telas / mosquiteiros",time:"5–10 min",products:[],materials:["Ferramenta de cabo longo com cabeça própria para tela"],steps:["Use a ferramenta própria.","Faça movimentos suaves para retirar poeira."],tip:"Movimentos suaves preservam a tela."},
+ {id:"manual-jardim-folhas",area:"Jardim / áreas externas",title:"Folhas",time:"10–20 min",products:[],materials:["Vassoura","Pá"],steps:["Recolha folhas e detritos com vassoura e pá.","Descarte ou destine os resíduos adequadamente."],tip:"Faça a coleta antes de lavar as áreas externas."},
+ {id:"manual-jardim-cimento",area:"Jardim / áreas externas",title:"Área cimentada",time:"10–20 min",products:["Produto compatível, quando necessário"],materials:["Vassoura","Mangueira"],steps:["Varra.","Lave quando necessário.","Observe o escoamento."],tip:"Não espalhe resíduos de animais durante a lavagem."},
+ {id:"manual-jardim-animais",area:"Jardim / áreas externas",title:"Resíduos de animais",time:"3–5 min",products:[],materials:["Pá/saco","Luvas"],steps:["Recolha antes da lavagem.","Descarte adequadamente."],tip:"Sempre remova os resíduos sólidos antes de molhar a área."},
+ {id:"manual-piscina-superficie",area:"Piscina de 6.000 L",title:"Superfície",time:"5–10 min",products:[],materials:["Peneira/limpador de piscina"],steps:["Retire folhas e resíduos da água antes da limpeza."],tip:"Faça a remoção superficial antes de qualquer outra etapa."},
+ {id:"manual-piscina-bordas",area:"Piscina de 6.000 L",title:"Bordas",time:"5–10 min",products:["Produto compatível com o revestimento"],materials:["Pano/esponja"],steps:["Limpe a borda com produto compatível.","Enxágue sem deixar resíduos na água."],tip:"A compatibilidade com o revestimento é essencial."},
+ {id:"manual-piscina-agua",area:"Piscina de 6.000 L",title:"Tratamento da água",time:"Conforme necessidade",products:["Produtos próprios de tratamento"],materials:["Medidores"],steps:["Siga exclusivamente as instruções dos produtos específicos.","Siga também as orientações do fabricante da piscina."],tip:"Não improvise dosagens."},
+ {id:"manual-edicula-escritorio",area:"Edícula — futuro escritório",title:"Preparação",time:"20–30 min",products:[],materials:["Ferramentas apropriadas"],steps:["Quando chegar o momento, desmonte a cama.","Libere a área."],tip:"É um projeto, não uma rotina diária."},
+ {id:"manual-edicula-escritorio-piso",area:"Edícula — futuro escritório",title:"Poeira e piso",time:"15–20 min",products:["Solução compatível com o piso"],materials:["Espanador","Aspirador ou vassoura","Mop"],steps:["Remova poeira de cima para baixo.","Aspire/varra.","Limpe o piso."],tip:"Trabalhar de cima para baixo evita retrabalho."},
+ {id:"manual-deposito-org",area:"Edícula — depósito",title:"Organização",time:"20–30 min por bloco",products:[],materials:["Caixas/organizadores","Pano","Vassoura"],steps:["Separe por categorias.","Retire itens sem uso.","Limpe prateleiras.","Devolva em caixas identificadas."],tip:"O próprio manual trata essa tarefa como organização por pequenos blocos."},
+ {id:"manual-deposito-piso",area:"Edícula — depósito",title:"Limpeza do piso",time:"10–20 min",products:["Solução compatível com o piso"],materials:["Vassoura ou aspirador","Mop"],steps:["Retire objetos por pequenos blocos.","Varra/aspire.","Passe mop ou pano compatível."],tip:"Faça por pequenos blocos para não transformar a tarefa em um projeto enorme."},
+ {id:"manual-edicula-pia",area:"Edícula — varanda e pia grande",title:"Pia grande",time:"5–10 min",products:["Qualitá Home Lava-Louças Líquido Coco"],materials:["Esponja","Pano"],steps:["Remova resíduos.","Lave e enxágue.","Finalize com pano limpo."],tip:"Deixe a pia seca ao final."},
+ {id:"manual-edicula-varanda",area:"Edícula — varanda e pia grande",title:"Varanda",time:"10–20 min",products:["Produto compatível, quando necessário"],materials:["Vassoura","Mangueira","Escova"],steps:["Varra.","Retire pó e resíduos.","Lave quando necessário."],tip:"Retire resíduos sólidos antes da lavagem."},
+ {id:"manual-edicula-marcenaria",area:"Edícula — varanda e pia grande",title:"Área de marcenaria",time:"10–20 min",products:[],materials:["Vassoura ou aspirador","Pano"],steps:["Recolha serragem e resíduos primeiro.","Depois limpe bancadas e piso sem espalhar a poeira."],tip:"A primeira etapa é conter a serragem, não espalhá-la."}
+];
+
+const CASA_RECIPES=[
+ {id:"recipe-panos-multiuso",title:"Panos Multiuso Úmidos",time:"5–10 min",yieldText:"Recipiente abastecido",ingredients:[["Água","800 ml"],["Álcool líquido 70%","100 ml"],["Amaciante concentrado","50 ml"],["Lava-louças líquido de coco","50 ml"],["Panos limpos de algodão/microfibra","quantidade suficiente"]],materials:["Recipiente com tampa"],steps:["Misture 800 ml de água com 100 ml de álcool 70%.","Adicione 50 ml de amaciante concentrado.","Adicione 50 ml de lava-louças líquido de coco.","Misture suavemente.","Coloque os panos limpos no recipiente.","Umedeça os panos com a solução.","Torça/pressione até ficarem úmidos, sem excesso de líquido.","Guarde o recipiente fechado."],tip:"Uso para móveis, portas, puxadores, rodapés e pequenas sujeiras. Não usar como desinfetante nem em eletrônicos; em superfícies de preparo de alimentos, fazer a limpeza adequada posteriormente."},
+ {id:"recipe-panos-secadora",title:"Panos Reutilizáveis para Secadora",time:"5 min",yieldText:"8–10 panos de aproximadamente 15 × 15 cm",ingredients:[["Amaciante concentrado","250 ml"],["Água","250 ml"],["Panos de algodão/flanela","8–10 unidades"]],materials:["Recipiente com tampa"],steps:["Misture 250 ml de amaciante concentrado com 250 ml de água.","Coloque os panos no recipiente.","Despeje a solução sobre os panos.","Pressione para absorver.","Na hora de usar, retire um pano e torça bem: deve ficar úmido, não pingando.","Coloque 1 pano na secadora junto com a roupa.","Depois do ciclo, retire e devolva ao recipiente para reutilização."],tip:"A receita-base do manual usa proporção 1:1 e orienta retirar o excesso antes da secadora."},
+ {id:"recipe-coala",title:"Solução de Coala Chá Branco",time:"2–3 min",yieldText:"1 litro",ingredients:[["Água","1 litro"],["Coala Chá Branco concentrado","8 gotas"]],materials:["Recipiente apropriado"],steps:["Coloque 1 litro de água no recipiente.","Adicione 8 gotas de Coala Chá Branco.","Misture.","Aplique com pano úmido na superfície compatível.","Teste primeiro em pequena área."],tip:"O manual registra que não é necessário enxaguar quando usado conforme a orientação do fabricante. Não misture Coala com água sanitária, vinagre, álcool ou outros produtos sem orientação específica."}
+];
+
+const CASA_PRODUCT_CATALOG=[
+ {name:"Tudo Limpinho Petklin",use:"Áreas internas de cães e gatos; varanda/áreas dos animais",status:"SUBSTITUTO",substitute:"Manter — linha principal"},
+ {name:"Tudo Limpinho Álcool Perfumado — Glamour de Shopping",use:"Limpeza geral e acabamento/perfumação de superfícies compatíveis",status:"SUBSTITUTO",substitute:"Manter — linha principal"},
+ {name:"Tudo Limpinho Flotalim Extra Forte",use:"Gordura e sujeira pesada em superfícies compatíveis",status:"SUBSTITUTO",substitute:"Manter — linha principal"},
+ {name:"Tudo Limpinho Porcelanex",use:"Limpeza de porcelanato",status:"SUBSTITUTO",substitute:"Manter — linha principal"},
+ {name:"Tudo Limpinho Tudax Limpeza Pesada",use:"Limpeza pesada geral em superfícies laváveis",status:"SUBSTITUTO",substitute:"Manter — linha principal"},
+ {name:"Tudo Limpinho Querosene — Sabão Spray",use:"Desengorduramento/desengraxe e sujeira pesada conforme rótulo",status:"SUBSTITUTO",substitute:"Manter — uso específico"},
+ {name:"Tudo Limpinho Limpador Clorado",use:"Higienização, desengorduramento e branqueamento em superfícies compatíveis",status:"SUBSTITUTO",substitute:"Manter — linha principal"},
+ {name:"Tudo Limpinho Ultra Clean",use:"Sujeira aderida em superfícies compatíveis",status:"SUBSTITUTO",substitute:"Manter — linha principal"},
+ {name:"Tudo Limpinho Rejuntec",use:"Limpeza de rejuntes",status:"SUBSTITUTO",substitute:"Manter — linha principal"},
+ {name:"Tudo Limpinho Finisher Fresh Bouquet",use:"Finalizador/facilitador para roupas/tecidos conforme rótulo",status:"EM USO",substitute:"Manter — uso específico"},
+ {name:"Tudo Limpinho Ultra Box",use:"Limpeza do box conforme indicação do rótulo",status:"SUBSTITUTO",substitute:"Manter — linha principal"},
+ {name:"Tudo Limpinho Polimax",use:"Pasta limpadora/polidora para superfícies compatíveis",status:"SUBSTITUTO",substitute:"Manter — linha principal"},
+ {name:"Tudo Limpinho Thunder — Limpeza Pesada Porcelanato",use:"Limpeza pesada específica de porcelanato",status:"SUBSTITUTO",substitute:"Manter — linha principal"},
+ {name:"Qualitá Home Lava-Louças Líquido Coco",use:"Louça, pia e limpeza leve",status:"EM USO",substitute:"Tudo Limpinho — detergente próprio para louça"},
+ {name:"Cif Espuma Milagrosa — Derrete Gordura",use:"Desengordurante de cozinha",status:"EM USO",substitute:"Tudo Limpinho Flotalim Extra Forte"},
+ {name:"Cif Espuma Milagrosa — Extermina Limo",use:"Limo/sujeira de banheiro",status:"EM USO",substitute:"Tudo Limpinho Ultra Box / produto adequado"},
+ {name:"UAU Blindex Box",use:"Limpeza profunda de box/vidros",status:"EM USO",substitute:"Tudo Limpinho Ultra Box"},
+ {name:"Ypê Tira Limo — Cloro Ativo em Gel",use:"Limo e higienização conforme rótulo",status:"EM USO",substitute:"Tudo Limpinho Limpador Clorado, se compatível"},
+ {name:"Aromasil Saponáceo Cremoso Cloro 3 em 1",use:"Limpeza pesada de superfícies compatíveis",status:"EM USO",substitute:"Tudo Limpinho Ultra Clean/Polimax, conforme superfície"},
+ {name:"Bombril Sapólio Radium",use:"Saponáceo em pó para sujeira aderida",status:"EM USO",substitute:"Tudo Limpinho Ultra Clean/Polimax"},
+ {name:"Sol Querosene 500 ml",use:"Querosene para usos específicos compatíveis",status:"EM USO",substitute:"Tudo Limpinho Querosene — Sabão Spray"},
+ {name:"Veja Perfumes — Buquê Cerrado",use:"Limpeza perfumada de manutenção",status:"EM USO",substitute:"Tudo Limpinho Álcool Perfumado"},
+ {name:"Coala Zulu Coala Limpa Perfume",use:"Limpeza/perfumação de manutenção",status:"EM USO",substitute:"Tudo Limpinho Álcool Perfumado ou Coala Chá Branco"},
+ {name:"GloDePeroba — Jasmine",use:"Limpeza/conservação de móveis e superfícies indicadas",status:"EM USO",substitute:"Manter produto específico para madeira"},
+ {name:"Lysol — lenços desinfetantes",use:"Higienização pontual de superfícies compatíveis",status:"EM USO",substitute:"Usar até acabar; sem substituição automática"},
+ {name:"HIKO Fabric Refresher",use:"Revitalização de tecidos conforme rótulo",status:"EM USO",substitute:"Usar até acabar; não confundir com limpador de superfícies"},
+ {name:"Jakhebe Adhesive Remover",use:"Remoção de cola/adesivo em superfícies compatíveis",status:"EM USO",substitute:"Manter como produto específico"},
+ {name:"Coala Chá Branco Limpador Perfumado",use:"Limpeza perfumada concentrada para pisos, azulejos e superfícies laváveis compatíveis",status:"EM USO",substitute:"Manter como complemento"},
+ {name:"Querosene",use:"Uso específico conforme manual/rótulo",status:"EM USO",substitute:"Tudo Limpinho Querosene — Sabão Spray"},
+ {name:"Sabão de querosene",use:"Uso específico conforme manual/rótulo",status:"EM USO",substitute:"Tudo Limpinho Querosene — Sabão Spray"},
+ {name:"Água sanitária",use:"Uso específico conforme rótulo",status:"EM USO",substitute:"Tudo Limpinho Limpador Clorado, quando compatível"},
+ {name:"Tudax",use:"Limpeza pesada",status:"EM USO",substitute:"Tudo Limpinho Tudax Limpeza Pesada"},
+ {name:"Solução diluída de Coala + álcool + água já preparada",use:"Solução já preparada para usos registrados",status:"EM USO",substitute:"Repreparar somente conforme receita/uso definido"},
+ {name:"Amaciante concentrado",use:"Roupas e receitas de panos",status:"EM USO",substitute:"Manter conforme uso específico"},
+ {name:"Álcool líquido 70%",use:"Receita de panos multiuso e usos compatíveis",status:"EM USO",substitute:"Repor quando acabar"}
+];
+const CASA_INVENTORY_PRODUCTS=CASA_PRODUCT_CATALOG.map(x=>x.name);
+const CASA_INVENTORY_TOOLS=["Aspirador","Vassouras e escovas","Pá de lixo","Mop/esfregão com balde","Rodos e limpadores de vidro/box","Panos de microfibra","Esponjas e escovas","Espanador de penas","Lavadora/secadora LG Direct Drive 11/6 kg","Secador de calçados","Mangueiras — 2 unidades","Lavadora de alta pressão/WAP","Ferramenta de cabo longo para telas/mosquiteiros","Pia grande da edícula","Recipientes organizadores","Escovas para vaso sanitário e refil","Panos de algodão/microfibra e flanela","Panos próprios para secadora","Panos multiuso úmidos"];
+const CASA_CUSTOM_TOOLS_KEY="minha-vida.casa.utensilios.v1";
+function loadCasaCustomTools(){try{const x=JSON.parse(window.berthaHmlStorage.getItem(CASA_CUSTOM_TOOLS_KEY)||"[]");return Array.isArray(x)?x:[]}catch{return []}}
+function saveCasaCustomTools(x){window.berthaHmlStorage.setItem(CASA_CUSTOM_TOOLS_KEY,JSON.stringify(x||[]))}
+function openCasaToolEditor(){
+ const dlg=document.createElement("dialog");dlg.className="bertha-dialog casa-dialog casa-tool-dialog";
+ dlg.innerHTML=`<form method="dialog" class="modal-card casa-modal-card" id="casaToolForm"><div class="modal-head"><div><div class="eyebrow">INVENTÁRIO DA CASA</div><h2>Novo utensílio/equipamento</h2></div><button type="button" class="icon-btn casa-modal-x" data-close-casa-tool aria-label="Fechar">×</button></div><label>Nome<input id="casaToolName" required maxlength="120" placeholder="Ex.: Escada dobrável"></label><label>Categoria<select id="casaToolCategory"><option>Limpeza</option><option>Cozinha</option><option>Lavanderia</option><option>Jardim / área externa</option><option>Ferramentas</option><option>Eletrodomésticos</option><option>Organização</option><option>Outros</option></select></label><div class="form-grid"><label>Quantidade<input id="casaToolQty" type="number" min="1" value="1"></label><label>Onde fica<input id="casaToolPlace" placeholder="Ex.: lavanderia"></label></div><label>Observação / instrução de uso <span class="muted">opcional</span><textarea id="casaToolNote" rows="3"></textarea></label><label class="casa-tool-check"><input id="casaToolRoutines" type="checkbox" checked><span>Pode ser usado nas rotinas da Casa</span></label><div class="modal-actions"><div class="grow"></div><button type="button" class="secondary" id="cancelCasaTool">Cancelar</button><button class="primary" value="default">Salvar</button></div></form>`;
+ document.body.appendChild(dlg);dlg.showModal();const closeCasaTool=()=>dlg.close();dlg.querySelector('[data-close-casa-tool]').onclick=closeCasaTool;dlg.querySelector('#cancelCasaTool').onclick=closeCasaTool;dlg.addEventListener('close',()=>dlg.remove());
+ dlg.querySelector('#casaToolForm').addEventListener('submit',e=>{e.preventDefault();const name=dlg.querySelector('#casaToolName').value.trim();if(!name)return;const items=loadCasaCustomTools();items.push({id:uid(),name,category:dlg.querySelector('#casaToolCategory').value,qty:Math.max(1,+dlg.querySelector('#casaToolQty').value||1),place:dlg.querySelector('#casaToolPlace').value.trim(),note:dlg.querySelector('#casaToolNote').value.trim(),routines:dlg.querySelector('#casaToolRoutines').checked,createdAt:Date.now()});saveCasaCustomTools(items);dlg.close();renderCasa();});
+}
+function removeCasaCustomTool(id){const items=loadCasaCustomTools().filter(x=>String(x.id)!==String(id));saveCasaCustomTools(items);renderCasa()}
+
+
+// BERTH.A v2.8.9 — Casa: procedimentos ligados ao inventário real da residência.
+// Mantém o catálogo como fonte de verdade e evita instruções genéricas quando já existe produto/acessório cadastrado.
+const CASA_REAL_PROCEDURE_KIT={
+ coz1:{products:["Coala Chá Branco Limpador Perfumado","Tudo Limpinho Porcelanex — quando o piso for porcelanato"],materials:["Aspirador","Mop/esfregão com balde","Panos de microfibra"]},
+ coz2:{products:["Qualitá Home Lava-Louças Líquido Coco","Cif Espuma Milagrosa — Derrete Gordura, quando necessário"],materials:["Esponjas e escovas","Panos de microfibra","Panos multiuso úmidos"]},
+ coz3:{products:["Qualitá Home Lava-Louças Líquido Coco","Cif Espuma Milagrosa — Derrete Gordura, quando houver gordura"],materials:["Panos multiuso úmidos","Panos de microfibra","Esponjas e escovas"]},
+ lim1:{products:[],materials:["Aspirador","Vassouras e escovas","Pá de lixo","Panos de microfibra"]},
+ lim2:{products:["Coala Chá Branco Limpador Perfumado","Tudo Limpinho Tudax Limpeza Pesada — quando necessário"],materials:["Aspirador","Vassouras e escovas","Mop/esfregão com balde","Panos de microfibra"]},
+ lim3:{products:["Coala Chá Branco Limpador Perfumado","Tudo Limpinho Porcelanex — nos pisos compatíveis"],materials:["Aspirador","Mop/esfregão com balde","Panos de microfibra"]},
+ lim4:{products:["Tudo Limpinho Tudax Limpeza Pesada","Tudo Limpinho Limpador Clorado — somente em superfícies compatíveis","Tudo Limpinho Rejuntec","Tudo Limpinho Ultra Box","Tudo Limpinho Porcelanex","Tudo Limpinho Álcool Perfumado — Glamour de Shopping"],materials:["Aspirador","Vassouras e escovas","Pá de lixo","Mop/esfregão com balde","Panos de microfibra","Esponjas e escovas","Rodos e limpadores de vidro/box","Espanador de penas"]},
+ roup1:{products:[],materials:["Recipientes organizadores"]},
+ roup2:{products:["Sabão para roupas","Amaciante concentrado"],materials:["Lavadora/secadora LG Direct Drive 11/6 kg","Recipientes organizadores"]},
+ roup3:{products:["Sabão adequado para roupas delicadas"],materials:["Lavadora/secadora LG Direct Drive 11/6 kg","Recipientes organizadores"]},
+ roup4:{products:["Produto tira-manchas compatível com o tecido"],materials:["Esponjas e escovas","Panos de algodão/microfibra e flanela"]},
+ roup5:{products:["Tudo Limpinho Finisher Fresh Bouquet — se compatível com o uso desejado"],materials:["Lavadora/secadora LG Direct Drive 11/6 kg","Panos próprios para secadora"]},
+ roup6:{products:["Sabão para roupas","Amaciante concentrado","Vinagre de álcool — conforme a rotina registrada"],materials:["Lavadora/secadora LG Direct Drive 11/6 kg","Recipientes organizadores"]},
+ roup7:{products:["Sabão para roupas","Amaciante concentrado"],materials:["Lavadora/secadora LG Direct Drive 11/6 kg","Recipientes organizadores"]},
+ roup8:{products:["Água","Amaciante concentrado — na misturinha já registrada"],materials:["Panos de algodão/microfibra e flanela","Recipientes organizadores"]},
+ roup9:{products:[],materials:["Recipientes organizadores"]},
+ roup10:{products:["Coala Chá Branco Limpador Perfumado — somente em superfície compatível e bem diluído"],materials:["Panos de microfibra","Espanador de penas","Recipientes organizadores"]}
+};
+Object.entries(CASA_REAL_PROCEDURE_KIT).forEach(([id,kit])=>{if(CASA_HOW[id])Object.assign(CASA_HOW[id],kit)});
+
+const CASA_MANUAL_REAL_KIT={
+ "manual-coz-bancada":{products:["Cif Espuma Milagrosa — Derrete Gordura","Qualitá Home Lava-Louças Líquido Coco — para manutenção leve"],materials:["Panos multiuso úmidos","Panos de microfibra","Esponjas e escovas"]},
+ "manual-coz-pia":{products:["Qualitá Home Lava-Louças Líquido Coco"],materials:["Esponjas e escovas","Panos de microfibra"]},
+ "manual-coz-fogao":{products:["Cif Espuma Milagrosa — Derrete Gordura","Tudo Limpinho Flotalim Extra Forte — para gordura pesada e superfície compatível"],materials:["Panos de microfibra","Esponjas e escovas"]},
+ "manual-coz-armarios":{products:["Cif Espuma Milagrosa — Derrete Gordura, se compatível","Coala Chá Branco Limpador Perfumado — para manutenção compatível"],materials:["Panos de microfibra","Panos multiuso úmidos"]},
+ "manual-coz-piso":{products:["Coala Chá Branco Limpador Perfumado","Tudo Limpinho Porcelanex — se for porcelanato"],materials:["Aspirador","Vassouras e escovas","Mop/esfregão com balde"]},
+ "manual-sala-poeira":{products:["GloDePeroba — Jasmine — apenas em móveis/superfícies indicadas"],materials:["Espanador de penas","Panos de microfibra","Panos multiuso úmidos"]},
+ "manual-sala-sofa":{products:["HIKO Fabric Refresher — somente conforme rótulo, depois da limpeza"],materials:["Aspirador","Panos de microfibra"]},
+ "manual-sala-esteira":{products:["Lysol — lenços desinfetantes — apenas em superfícies compatíveis"],materials:["Panos de microfibra"]},
+ "manual-sala-livros":{products:[],materials:["Espanador de penas","Panos de algodão/microfibra e flanela"]},
+ "manual-sala-porcelanato":{products:["Tudo Limpinho Porcelanex","Coala Chá Branco Limpador Perfumado — manutenção leve"],materials:["Aspirador","Vassouras e escovas","Mop/esfregão com balde"]},
+ "manual-quarto-cama":{products:["HIKO Fabric Refresher — opcional, conforme rótulo"],materials:["Recipientes organizadores","Panos de microfibra"]},
+ "manual-quarto-poeira":{products:["GloDePeroba — Jasmine — em móveis indicados"],materials:["Espanador de penas","Panos de microfibra"]},
+ "manual-quarto-piso":{products:["Coala Chá Branco Limpador Perfumado","Tudo Limpinho Porcelanex — se compatível"],materials:["Aspirador","Vassouras e escovas","Mop/esfregão com balde"]},
+ "manual-quarto-espelhos":{products:["Tudo Limpinho Álcool Perfumado — Glamour de Shopping — somente se compatível com vidro/espelho"],materials:["Rodos e limpadores de vidro/box","Panos de microfibra"]},
+ "manual-banheiro-bancada":{products:["Aromasil Saponáceo Cremoso Cloro 3 em 1 — se compatível","Tudo Limpinho Ultra Clean — substituição futura compatível"],materials:["Esponjas e escovas","Panos de microfibra"]},
+ "manual-banheiro-vaso":{products:["Ypê Tira Limo — Cloro Ativo em Gel","Tudo Limpinho Limpador Clorado — substituição futura, conforme rótulo"],materials:["Escovas para vaso sanitário e refil","Panos de microfibra"]},
+ "manual-banheiro-box":{products:["UAU Blindex Box","Cif Espuma Milagrosa — Extermina Limo","Tudo Limpinho Ultra Box — substituição futura"],materials:["Rodos e limpadores de vidro/box","Esponjas e escovas","Panos de microfibra"]},
+ "manual-banheiro-piso":{products:["Cif Espuma Milagrosa — Extermina Limo — em áreas compatíveis","Ypê Tira Limo — Cloro Ativo em Gel — quando necessário","Tudo Limpinho Rejuntec — para rejuntes","Tudo Limpinho Limpador Clorado — substituição futura compatível"],materials:["Vassouras e escovas","Mop/esfregão com balde","Esponjas e escovas"]},
+ "manual-lav-maquina":{products:[],materials:["Lavadora/secadora LG Direct Drive 11/6 kg","Panos de microfibra"]},
+ "manual-lav-tanque":{products:["Qualitá Home Lava-Louças Líquido Coco","Tudo Limpinho Ultra Clean — para sujeira aderida e superfície compatível"],materials:["Esponjas e escovas","Panos de microfibra"]},
+ "manual-lav-panos":{products:["Sabão para roupas","Álcool líquido 70% — somente na receita específica dos panos multiuso","Amaciante concentrado — conforme receita/uso"],materials:["Lavadora/secadora LG Direct Drive 11/6 kg","Panos multiuso úmidos","Panos próprios para secadora"]},
+ "manual-lav-organizacao":{products:[],materials:["Recipientes organizadores"]},
+ "manual-calcados":{products:[],materials:["Vassouras e escovas","Panos de microfibra","Secador de calçados"]},
+ "manual-calcados-piso":{products:["Coala Chá Branco Limpador Perfumado","Tudo Limpinho Porcelanex — se compatível"],materials:["Aspirador","Vassouras e escovas","Mop/esfregão com balde"]},
+ "manual-rouparia-prateleiras":{products:["GloDePeroba — Jasmine — apenas em superfícies indicadas"],materials:["Espanador de penas","Panos de microfibra"]},
+ "manual-rouparia-enxoval":{products:[],materials:["Recipientes organizadores"]},
+ "manual-varanda-residuos":{products:["Tudo Limpinho Petklin — após recolher os resíduos, conforme rótulo"],materials:["Pá de lixo","Vassouras e escovas"]},
+ "manual-varanda-poeira":{products:[],materials:["Vassouras e escovas","Pá de lixo","Aspirador"]},
+ "manual-varanda-pedra":{products:["Tudo Limpinho Petklin — na área dos animais, conforme rótulo","Tudo Limpinho Tudax Limpeza Pesada — quando compatível"],materials:["Vassouras e escovas","Mangueiras — 2 unidades","Lavadora de alta pressão/WAP"]},
+ "manual-varanda-moveis":{products:["GloDePeroba — Jasmine — em madeira compatível","Coala Chá Branco Limpador Perfumado — em superfícies laváveis compatíveis"],materials:["Panos de microfibra"]},
+ "manual-garagem-piso":{products:["Tudo Limpinho Tudax Limpeza Pesada","Tudo Limpinho Querosene — Sabão Spray — apenas em sujeira compatível e conforme rótulo"],materials:["Vassouras e escovas","Mangueiras — 2 unidades","Lavadora de alta pressão/WAP"]},
+ "manual-garagem-cantos":{products:["Tudo Limpinho Tudax Limpeza Pesada"],materials:["Vassouras e escovas","Mangueiras — 2 unidades"]},
+ "manual-janelas-vidros":{products:["Tudo Limpinho Álcool Perfumado — Glamour de Shopping — se compatível"],materials:["Rodos e limpadores de vidro/box","Panos de microfibra"]},
+ "manual-janelas-grades":{products:["Coala Chá Branco Limpador Perfumado — se compatível"],materials:["Vassouras e escovas","Panos de microfibra"]},
+ "manual-janelas-telas":{products:[],materials:["Ferramenta de cabo longo para telas/mosquiteiros"]},
+ "manual-jardim-folhas":{products:[],materials:["Vassouras e escovas","Pá de lixo"]},
+ "manual-jardim-cimento":{products:["Tudo Limpinho Tudax Limpeza Pesada — quando necessário e compatível"],materials:["Vassouras e escovas","Mangueiras — 2 unidades","Lavadora de alta pressão/WAP"]},
+ "manual-jardim-animais":{products:["Tudo Limpinho Petklin — após a retirada dos resíduos, conforme rótulo"],materials:["Pá de lixo","Vassouras e escovas"]},
+ "manual-piscina-superficie":{products:[],materials:["Peneira/limpador de piscina"]},
+ "manual-piscina-bordas":{products:["Produto próprio e compatível com a piscina — não substituir automaticamente por limpador doméstico"],materials:["Esponjas e escovas","Panos de microfibra"]},
+ "manual-piscina-agua":{products:["Produtos próprios de tratamento da piscina — conforme rótulo"],materials:["Medidores próprios da piscina"]},
+ "manual-edicula-escritorio":{products:[],materials:["Ferramentas apropriadas"]},
+ "manual-edicula-escritorio-piso":{products:["Coala Chá Branco Limpador Perfumado","Tudo Limpinho Porcelanex — se compatível"],materials:["Espanador de penas","Aspirador","Vassouras e escovas","Mop/esfregão com balde"]},
+ "manual-deposito-org":{products:[],materials:["Recipientes organizadores","Panos de microfibra","Vassouras e escovas"]},
+ "manual-deposito-piso":{products:["Coala Chá Branco Limpador Perfumado","Tudo Limpinho Tudax Limpeza Pesada — quando necessário"],materials:["Aspirador","Vassouras e escovas","Mop/esfregão com balde"]},
+ "manual-edicula-pia":{products:["Qualitá Home Lava-Louças Líquido Coco"],materials:["Esponjas e escovas","Panos de microfibra","Pia grande da edícula"]},
+ "manual-edicula-varanda":{products:["Tudo Limpinho Tudax Limpeza Pesada — quando necessário","Tudo Limpinho Petklin — se usada pelos animais"],materials:["Vassouras e escovas","Mangueiras — 2 unidades","Lavadora de alta pressão/WAP"]},
+ "manual-edicula-marcenaria":{products:[],materials:["Aspirador","Vassouras e escovas","Panos de microfibra"]}
+};
+CASA_MANUAL_PROCEDURES.forEach(proc=>{const kit=CASA_MANUAL_REAL_KIT[proc.id];if(kit)Object.assign(proc,kit)});
+
+const CASA_WEB=[
+ ["Dicas de limpeza","https://www.google.com/search?q=dicas+de+limpeza+da+casa","clean"],
+ ["Cuidados com roupas","https://www.google.com/search?q=dicas+cuidados+com+roupas+lavagem+secagem"],
+ ["Organização da lavanderia","https://www.google.com/search?q=organizacao+da+lavanderia+dicas"],
+ ["Jardim e áreas externas","https://www.google.com/search?q=dicas+cuidados+jardim+e+areas+externas"],
+ ["Cuidados com gatos","https://www.google.com/search?q=dicas+cuidados+com+gatos+em+casa"],
+ ["Organização da casa","https://www.google.com/search?q=dicas+organizacao+da+casa"]
+];
+
+
+
+const CASA_TIPS_KEY="minha-vida.casa.dicas.v1";
+function loadCasaTips(){try{return JSON.parse(window.berthaHmlStorage.getItem(CASA_TIPS_KEY)||"[]")}catch{return[]}}
+function saveCasaTips(v){window.berthaHmlStorage.setItem(CASA_TIPS_KEY,JSON.stringify(v))}
+function openCasaTipEditor(){const dlg=document.createElement('dialog');dlg.className='bertha-dialog casa-dialog casa-tip-dialog';dlg.innerHTML=`<form class="modal-card casa-modal-card" id="casaTipForm"><div class="modal-head"><div><div class="eyebrow">CASA · DICAS</div><h2>Nova dica</h2></div><button type="button" class="icon-btn casa-modal-x" data-close>×</button></div><label>Título<input id="tipTitle" required maxlength="80"></label><label>Ícone<select id="tipIcon"><option value="info">Informação</option><option value="clean">Limpeza</option><option value="routines">Organização</option><option value="manual">Manual</option><option value="toolbox">Manutenção</option></select></label><label>Link<input id="tipLink" type="url" inputmode="url" required placeholder="https://..."></label><div class="modal-actions"><div class="grow"></div><button type="button" class="secondary" data-close>Cancelar</button><button class="primary" type="submit">Salvar</button></div></form>`;document.body.appendChild(dlg);const close=()=>dlg.close();dlg.querySelectorAll('[data-close]').forEach(b=>b.onclick=close);dlg.onclose=()=>dlg.remove();dlg.querySelector('#casaTipForm').onsubmit=e=>{e.preventDefault();const a=loadCasaTips();a.push({id:uid(),title:dlg.querySelector('#tipTitle').value.trim(),icon:dlg.querySelector('#tipIcon').value,link:dlg.querySelector('#tipLink').value.trim()});saveCasaTips(a);close();renderCasa()};dlg.showModal()}
+function casaCustomTipIcon(icon){if(icon==='clean')return casaAreaIcon('Limpeza');const raw=casaLineIcon(icon||'info');return `<span class="casa-inline-icon">${raw}</span>`}
+function casaManualById(id){return CASA_MANUAL_PROCEDURES.find(x=>x.id===id)||null;}
+function openCasaManual(id){
+ const h=casaManualViewData(id)||casaManualById(id);if(!h)return;
+ const o=document.createElement("div");o.className="mv-how-overlay casa-how-overlay";o.setAttribute('role','presentation');
+ const products=(h.products&&h.products.length?h.products:["Nenhum produto específico."]);
+ const productRows=products.map(x=>`<li><span>${escapeHtml(x)}</span><button type="button" class="casa-buy-mini" data-casa-buy="${escapeHtml(x)}">${casaBuyLabel(x)}</button></li>`).join("");
+ const materialRows=(h.materials||[]).map(x=>`<li><span>${escapeHtml(x)}</span><button type="button" class="casa-buy-mini" data-casa-buy="${escapeHtml(x)}">${casaBuyLabel(x)}</button></li>`).join("");
+ o.innerHTML=`<div class="mv-how casa-how-modal casa-manual-view" role="dialog" aria-modal="true" aria-label="Como fazer ${escapeHtml(h.title)}"><button class="mv-how-x casa-modal-x" type="button" aria-label="Fechar">×</button><div class="eyebrow">MANUAL DA CASA · ${escapeHtml(h.area)}</div><h2>${escapeHtml(h.title)}</h2>
+ <div class="casa-how-top-actions"><button type="button" class="secondary casa-edit-procedure" id="editManualCasa"><span>Editar este procedimento</span></button></div>
+ <div class="casa-how-meta"><span>${escapeHtml(h.time)}</span></div>
+ <div class="casa-how-section"><h3><span>Produtos</span></h3><ul>${productRows}</ul></div>
+ <div class="casa-how-section"><h3><span>Utensílios / materiais</span></h3><ul>${materialRows||'<li><span>Nenhum material específico.</span></li>'}</ul></div>
+ <div class="casa-how-section"><h3><span>Passo a passo</span></h3><ol>${(h.steps||[]).map(x=>`<li>${escapeHtml(x)}</li>`).join("")}</ol></div>
+ ${h.tip?`<div class="casa-how-tip"><strong><span>Dica</span></strong><p>${escapeHtml(h.tip)}</p></div>`:''}</div>`;
+ document.body.appendChild(o);const close=()=>o.remove();o.querySelector('.casa-modal-x').onclick=close;o.addEventListener('click',e=>{if(e.target===o)close()});o.querySelector('#editManualCasa').onclick=()=>{close();openCasaManualEditor(id)};o.querySelectorAll('[data-casa-buy]').forEach(b=>bindCasaBuyButton(b,b.dataset.casaBuy,h.title));
+}
+function openCasaManualEditor(id){
+ const h=casaManualById(id);if(!h)return;const custom=loadCasaHowCustom()[id]||{};const dlg=document.createElement("dialog");dlg.className="bertha-dialog casa-dialog";
+ dlg.innerHTML=`<form method="dialog" class="modal-card casa-modal-card" id="manualCasaEdit"><div class="modal-head"><div><div class="eyebrow">MANUAL DA CASA</div><h2>Editar procedimento</h2></div><button class="icon-btn" value="cancel">×</button></div><label>Ambiente<input id="mhArea" value="${escapeHtml(custom.area||h.area)}"></label><label>Atividade<input id="mhTitle" value="${escapeHtml(custom.title||h.title)}"></label><label>Tempo<input id="mhTime" value="${escapeHtml(custom.time||h.time)}"></label><label>Produtos <small>um por linha</small><textarea id="mhProducts" rows="5">${escapeHtml((custom.products||h.products).join("\n"))}</textarea></label><label>Utensílios / materiais <small>um por linha</small><textarea id="mhMaterials" rows="5">${escapeHtml((custom.materials||h.materials).join("\n"))}</textarea></label><label>Passo a passo <small>um passo por linha</small><textarea id="mhSteps" rows="8">${escapeHtml((custom.steps||h.steps).join("\n"))}</textarea></label><label>Dica<textarea id="mhTip" rows="3">${escapeHtml(custom.tip||h.tip)}</textarea></label><div class="modal-actions"><div class="grow"></div><button type="button" class="secondary" id="cancelMh">Cancelar</button><button class="primary" value="default">Salvar alterações</button></div></form>`;
+ document.body.appendChild(dlg);dlg.showModal();dlg.querySelector("#cancelMh").onclick=()=>{dlg.close();dlg.remove()};
+ dlg.querySelector("#manualCasaEdit").addEventListener("submit",e=>{e.preventDefault();const all=loadCasaHowCustom();all[id]={area:dlg.querySelector("#mhArea").value.trim()||h.area,title:dlg.querySelector("#mhTitle").value.trim()||h.title,time:dlg.querySelector("#mhTime").value.trim()||h.time,products:casaHowList(dlg.querySelector("#mhProducts").value),materials:casaHowList(dlg.querySelector("#mhMaterials").value),steps:casaHowList(dlg.querySelector("#mhSteps").value),tip:dlg.querySelector("#mhTip").value.trim()||h.tip};saveCasaHowCustom(all);dlg.close();dlg.remove();openCasaManual(id)});
+}
+function casaManualViewData(id){const h=casaManualById(id),c=loadCasaHowCustom()[id]||{};return h?{...h,...c,products:Array.isArray(c.products)?c.products:h.products,materials:Array.isArray(c.materials)?c.materials:h.materials,steps:Array.isArray(c.steps)?c.steps:h.steps}:null;}
+function renderCasaManual(){
+ const groups={};CASA_MANUAL_PROCEDURES.forEach(x=>{(groups[x.area]||(groups[x.area]=[])).push(x)});
+ return Object.entries(groups).map(([area,items])=>`<div class="card casa-manual-area"><div class="panel-head"><h3>${casaAreaIcon(area)}<span>${escapeHtml(area)}</span></h3><span class="pill">${items.length}</span></div><div class="casa-manual-list">${items.map(x=>{const h=casaManualViewData(x.id);return `<div class="casa-manual-row"><div><strong>${escapeHtml(h.title)}</strong><small>${escapeHtml(h.time)}</small></div><button type="button" class="home-how" data-casa-manual="${x.id}">Como fazer →</button></div>`}).join("")}</div></div>`).join("");
+}
+const CASA_RECIPES_KEY="minha-vida.casa.recipes.v2";
+function normalizeCasaRecipe(r,idx=0){
+ const base=(CASA_RECIPES&&CASA_RECIPES[idx])?CASA_RECIPES[idx]:{};
+ const ingRaw=Array.isArray(r?.ingredients)?r.ingredients:Array.isArray(r?.ingredientes)?r.ingredientes:[];
+ const ingredients=ingRaw.map((x,i)=>{if(Array.isArray(x))return [String(x[0]||"").trim(),String(x[1]||"").trim()];if(x&&typeof x==="object")return [String(x.name||x.nome||x.item||"").trim(),String(x.qty||x.quantidade||x.amount||"").trim()];const t=String(x||"").trim();if(!t)return null;const parts=t.split(/\s*[|—–-]\s*/,2);return [parts[0]||t,parts[1]||""]}).filter(x=>x&&x[0]);
+ const arr=v=>Array.isArray(v)?v.filter(Boolean).map(x=>String(x).trim()).filter(Boolean):typeof v==="string"?v.split(/\n|;/).map(x=>x.trim()).filter(Boolean):[];
+ return {id:r?.id||base.id||`recipe-${Date.now()}-${idx}`,title:String(r?.title||r?.name||base.title||"Receita da casa"),time:String(r?.time||r?.tempo||base.time||""),yieldText:String(r?.yieldText||r?.yield||r?.rendimento||base.yieldText||""),ingredients:ingredients.length?ingredients:(Array.isArray(base.ingredients)?base.ingredients:[]),materials:arr(r?.materials||r?.utensilios||r?.utensils).length?arr(r?.materials||r?.utensilios||r?.utensils):arr(base.materials),steps:arr(r?.steps||r?.preparo||r?.modoPreparo).length?arr(r?.steps||r?.preparo||r?.modoPreparo):arr(base.steps),tip:String(r?.tip||r?.note||r?.observacao||base.tip||"")};
+}
+function loadCasaRecipes(){
+ try{const x=JSON.parse(window.berthaHmlStorage.getItem(CASA_RECIPES_KEY)||"null");if(Array.isArray(x))return x.filter(Boolean).map(normalizeCasaRecipe);}catch{}
+ return JSON.parse(JSON.stringify(CASA_RECIPES)).map(normalizeCasaRecipe);
+}
+function saveCasaRecipes(x){window.berthaHmlStorage.setItem(CASA_RECIPES_KEY,JSON.stringify(x))}
+function renderCasaRecipes(){
+ const recipes=loadCasaRecipes();
+ return `<button type="button" class="secondary casa-inline-add" id="addCasaRecipe">＋ Nova receita da casa</button>`+recipes.map(r=>`<div class="card casa-recipe"><div class="panel-head"><h3>${casaLineIcon('pot')}<span>${escapeHtml(r.title)}</span></h3><div class="casa-recipe-head-actions"><span class="pill">${escapeHtml(r.time||"")}</span><button type="button" class="casa-recipe-edit" data-recipe-edit="${r.id}">Editar</button></div></div><p class="note">Rendimento: ${escapeHtml(r.yieldText||"—")}</p><h4>Ingredientes</h4><ul>${(r.ingredients||[]).map(([n,q])=>`<li><span>${escapeHtml(n)} — <b>${escapeHtml(q||"")}</b></span><button type="button" class="casa-buy-mini" data-recipe-buy="${escapeHtml(n)}">${casaBuyLabel(n)}</button></li>`).join("")}</ul>${(r.materials||[]).length?`<h4>Utensílios / materiais</h4><ul>${r.materials.map(x=>`<li><span>${escapeHtml(x)}</span></li>`).join("")}</ul>`:""}<h4>Preparo</h4><ol>${(r.steps||[]).map(x=>`<li>${escapeHtml(x)}</li>`).join("")}</ol><div class="casa-how-tip"><strong>Observação</strong><p>${escapeHtml(r.tip||"")}</p></div></div>`).join("");
+}
+function openCasaRecipeEditor(id){
+ const recipes=loadCasaRecipes(),r=id?recipes.find(x=>String(x.id)===String(id)):null;
+ const base=r||{id:`recipe-${Date.now()}`,title:"",time:"5 min",yieldText:"",ingredients:[],materials:[],steps:[],tip:""};
+ const dlg=document.createElement("dialog");dlg.className="study-v10-dialog casa-dialog";
+ dlg.innerHTML=`<form class="study-v10-modal casa-modal-card" id="casaRecipeForm"><div class="study-v10-head"><div><div class="eyebrow">CASA · RECEITAS</div><h2>${r?"Editar receita":"Nova receita"}</h2><p>Ingredientes, quantidades e preparo ficam editáveis.</p></div><button type="button" class="study-v10-x" data-close>×</button></div>
+ ${field("Nome",`<input id="crTitle" required value="${escapeHtml(base.title)}">`)}
+ <div class="form-grid">${field("Tempo",`<input id="crTime" value="${escapeHtml(base.time||"")}">`)}${field("Rendimento",`<input id="crYield" value="${escapeHtml(base.yieldText||"")}">`)}</div>
+ ${field("Ingredientes · um por linha: ingrediente | quantidade",`<textarea id="crIngredients" rows="7">${escapeHtml((base.ingredients||[]).map(x=>`${x[0]} | ${x[1]||""}`).join("\n"))}</textarea>`)}
+ ${field("Utensílios / materiais · um por linha",`<textarea id="crMaterials" rows="4">${escapeHtml((base.materials||[]).join("\n"))}</textarea>`)}
+ ${field("Preparo · um passo por linha",`<textarea id="crSteps" rows="7">${escapeHtml((base.steps||[]).join("\n"))}</textarea>`)}
+ ${field("Observação / dica",`<textarea id="crTip" rows="3">${escapeHtml(base.tip||"")}</textarea>`)}
+ <div class="study-v10-actions">${r?'<button type="button" class="danger" id="deleteCasaRecipe">Excluir</button>':''}<button type="button" class="secondary" data-close>Cancelar</button><button class="primary" type="submit">Salvar</button></div></form>`;
+ document.body.appendChild(dlg);const close=()=>dlg.close();dlg.querySelectorAll('[data-close]').forEach(b=>b.onclick=close);dlg.addEventListener('click',e=>{if(e.target===dlg)close()});dlg.onclose=()=>dlg.remove();
+ dlg.querySelector('#deleteCasaRecipe')?.addEventListener('click',()=>{if(!confirm(`Excluir “${base.title}”?`))return;saveCasaRecipes(recipes.filter(x=>String(x.id)!==String(base.id)));close();renderCasa()});
+ dlg.querySelector('#casaRecipeForm').addEventListener('submit',e=>{e.preventDefault();const ing=casaHowList(dlg.querySelector('#crIngredients').value).map(line=>{const [a,...rest]=line.split('|');return[(a||'').trim(),rest.join('|').trim()]});const obj={...base,title:dlg.querySelector('#crTitle').value.trim(),time:dlg.querySelector('#crTime').value.trim(),yieldText:dlg.querySelector('#crYield').value.trim(),ingredients:ing,materials:casaHowList(dlg.querySelector('#crMaterials').value),steps:casaHowList(dlg.querySelector('#crSteps').value),tip:dlg.querySelector('#crTip').value.trim()};saveCasaRecipes(r?recipes.map(x=>String(x.id)===String(base.id)?obj:x):[...recipes,obj]);close();renderCasa()});
+ dlg.showModal();
+}
+function openCasaSubstituteInfo(name){const x=CASA_PRODUCT_CATALOG.find(p=>String(p.name)===String(name));if(!x)return;const dlg=document.createElement("dialog");dlg.className="bertha-dialog casa-dialog";dlg.innerHTML=`<div class="modal-card casa-modal-card"><div class="modal-head"><div><div class="eyebrow">INVENTÁRIO DA CASA</div><h2>${escapeHtml(x.name)}</h2></div><button type="button" class="icon-btn" data-close>×</button></div><div class="casa-substitute-info"><p><strong>Status:</strong> ${escapeHtml(x.status)}</p><p>${escapeHtml(x.use)}</p><p><strong>Regra de substituição:</strong> ${escapeHtml(x.substitute)}</p><label>Produto substituto<input id="casaSubstituteName" placeholder="Nome do produto que irá substituir" value="${escapeHtml((()=>{try{return JSON.parse(window.berthaHmlStorage.getItem('minha-vida.casa.substitutos.v1')||'{}')[x.name]||''}catch{return ''}})())}"></label></div><div class="modal-actions casa-substitute-actions"><button type="button" class="secondary" data-close>Fechar</button><button type="button" class="primary" id="substituteShopping">${casaBuyLabel(x.name)}</button></div></div>`;document.body.appendChild(dlg);dlg.querySelectorAll('[data-close]').forEach(b=>b.onclick=()=>dlg.close());dlg.addEventListener('close',()=>dlg.remove());const buy=dlg.querySelector('#substituteShopping');bindCasaBuyButton(buy,x.name,'Inventário da Casa');const sub=dlg.querySelector('#casaSubstituteName');sub?.addEventListener('change',()=>{let m={};try{m=JSON.parse(window.berthaHmlStorage.getItem('minha-vida.casa.substitutos.v1')||'{}')}catch{}m[x.name]=sub.value.trim();window.berthaHmlStorage.setItem('minha-vida.casa.substitutos.v1',JSON.stringify(m))});dlg.showModal()}
+function renderCasaInventory(){const custom=loadCasaCustomTools(),total=CASA_INVENTORY_TOOLS.length+custom.length;return `<div class="card casa-inventory"><div class="panel-head"><div><h3>Produtos que você tem</h3><p class="note">Os produtos atuais permanecem em uso até acabarem. Quando precisar repor, envie direto para a Lista de Compras universal.</p></div><span class="pill">${CASA_PRODUCT_CATALOG.length}</span></div><div class="casa-product-list">${CASA_PRODUCT_CATALOG.map(x=>`<div class="casa-product-row"><div><strong>${escapeHtml(x.name)}</strong><small>${escapeHtml(x.use)}</small><small>Substituição: ${escapeHtml(x.substitute)}</small></div><div><button type="button" class="casa-substitute-btn" data-substitute-info="${escapeHtml(x.name)}">${escapeHtml(x.status)}</button><button type="button" class="casa-buy-mini" data-inventory-buy="${escapeHtml(x.name)}">${casaBuyLabel(x.name)}</button></div></div>`).join("")}</div><div class="panel-head inventory-tools-head"><div><h3>Utensílios e equipamentos</h3><p class="note">Equipamentos e materiais disponíveis para as rotinas da casa.</p></div><span class="pill">${total}</span></div><button type="button" class="secondary casa-inline-add casa-add-tool" id="addCasaTool">＋ Novo utensílio/equipamento</button><div class="chip-list casa-tools-list">${CASA_INVENTORY_TOOLS.map(x=>`<span class="pill">${escapeHtml(x)}</span>`).join("")}</div>${custom.length?`<div class="casa-custom-tools">${custom.map(x=>`<div class="casa-product-row casa-tool-row"><div><strong>${escapeHtml(x.name)}</strong><small>${escapeHtml(x.category)} · ${x.qty||1}${x.place?` · ${escapeHtml(x.place)}`:""}</small>${x.note?`<small>${escapeHtml(x.note)}</small>`:""}</div><button type="button" class="casa-tool-remove" data-remove-casa-tool="${escapeHtml(String(x.id))}" aria-label="Excluir ${escapeHtml(x.name)}">×</button></div>`).join("")}</div>`:""}</div>`;}
+
+const CASA_DURATION_KEY="minha-vida.casa.duration.v1";
+const CASA_DURATION={coz1:10,coz2:10,coz3:5,coz4:10,coz5:5,lim1:20,lim2:15,lim3:15,lim4:75,roup1:10,roup2:45,roup3:30,roup4:10,roup5:10,roup6:60,roup7:60,roup8:35,roup9:20,roup10:20,ani1:10,ani2:10,hen1:5,hen2:10,hen3:5,hen4:10,hen5:20};
+function loadCasaDurations(){try{return {...CASA_DURATION,...JSON.parse(window.berthaHmlStorage.getItem(CASA_DURATION_KEY)||"{}")}}catch{return {...CASA_DURATION}}}
+function saveCasaDurations(x){window.berthaHmlStorage.setItem(CASA_DURATION_KEY,JSON.stringify(x))}
+function casaDuration(id){return `${loadCasaDurations()[id]||15} min`}
+function casaLocalDay(ts=Date.now()){const d=new Date(ts),p=n=>String(n).padStart(2,'0');return `${d.getFullYear()}-${p(d.getMonth()+1)}-${p(d.getDate())}`}
+function casaFreqText(freq){return String(freq||'').trim().toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'')}
+function casaNextRoutineDate(freq,from=Date.now()){
+ const f=casaFreqText(freq),d=new Date(from);d.setHours(12,0,0,0);
+ let days=0,months=0;
+ if(!f) return '';
+ if(f.includes('diario'))days=1;
+ else {const m=f.match(/a cada\s+(\d+)\s+dias?/);if(m)days=Math.max(1,+m[1]);}
+ if(!days&&f.includes('semanal')&&!f.includes('quinzenal'))days=7;
+ if(!days&&f.includes('quinzenal'))days=14;
+ if(f.includes('mensal'))months=1;
+ if(days)d.setDate(d.getDate()+days);else if(months)d.setMonth(d.getMonth()+months);else return '';
+ return casaLocalDay(d.getTime());
+}
+function casaRoutineIsCyclic(task){return !['unica','única'].includes(casaFreqText(task?.freq))}
+function casaRefreshRoutineCycles(d){
+ const today=casaLocalDay();let changed=false;
+ (d.areas||[]).forEach(a=>(a.tasks||[]).forEach(t=>{
+   if(!casaRoutineIsCyclic(t))return;
+   if(t.done){
+     const fixed=t.nextDue||casaNextRoutineDate(t.freq,t.completedAt||t.lastCompletedAt||Date.now());
+     if(fixed&&!t.nextDue){t.nextDue=fixed;changed=true;}
+     const due=fixed?today>=fixed:(t.completedAt?casaLocalDay(t.completedAt)!==today:true);
+     if(due){t.done=false;delete t.completedAt;delete t.completedById;delete t.claimedById;delete t.assigneeId;delete t.pointsAwardedAt;t.declinedByIds=[];t.satelliteStatus=t.responsibility==='help'?'available':t.responsibility==='delegated'?'assigned':'open';changed=true;}
+   }
+ }));
+ return changed;
+}
+function casaRecordProgress(hit,end,minutes){
+ try{const key='bertha.time-engine.v1',e=JSON.parse(window.berthaHmlStorage.getItem(key)||'{"active":null,"history":[],"snoozed":{}}');e.history=Array.isArray(e.history)?e.history:[];const itemId=`casa:routine:${hit.task.id}`;if(!e.history.some(h=>h.itemId===itemId&&h.status==='done'&&Math.abs((+h.endedAt||0)-end)<1500)){e.history.unshift({itemId,learningKey:itemId,title:hit.task.name,source:'Casa',day:casaLocalDay(end),startedAt:end,endedAt:end,configuredMinutes:minutes,plannedMinutes:minutes,realMinutes:minutes,status:'done',category:hit.area.title});window.berthaHmlStorage.setItem(key,JSON.stringify(e));}}catch{}
+}
+function casaRemoveLatestProgress(id){
+ try{const key='bertha.time-engine.v1',e=JSON.parse(window.berthaHmlStorage.getItem(key)||'{"active":null,"history":[],"snoozed":{}}'),itemId=`casa:routine:${id}`;const i=(e.history||[]).findIndex(h=>h.itemId===itemId&&h.status==='done');if(i>=0){e.history.splice(i,1);window.berthaHmlStorage.setItem(key,JSON.stringify(e));}}catch{}
+}
+function openCasaTaskEditor(id){
+ ensureSatelliteStyles();
+ const d=loadCasa(),hit=casaTaskById(id,d),task=hit?.task;if(!task)return;const ds=loadCasaDurations(),dlg=document.createElement('dialog');dlg.className='bertha-dialog casa-dialog casa-responsibility-dialog';
+ const sat=loadSatellites(),members=(sat.members||[]).filter(m=>m.status!=='removed'&&m.permissions?.casa!==false),responsibility=task.responsibility||'owner';
+ const legacy=task.assigneeId?[String(task.assigneeId)]:[],selected=new Set((Array.isArray(task.assigneeIds)?task.assigneeIds:legacy).map(String));
+ const targetHtml=members.map(m=>`<button type="button" class="sat-target-option ${selected.has(String(m.id))?'is-checked':''}" data-target-toggle data-member-id="${escapeHtml(m.id)}" aria-pressed="${selected.has(String(m.id))?'true':'false'}"><input type="checkbox" data-sat-target value="${escapeHtml(m.id)}" ${selected.has(String(m.id))?'checked':''} tabindex="-1" aria-hidden="true"><span class="sat-target-check" aria-hidden="true"></span><span class="sat-target-copy"><strong>${escapeHtml(m.name)}</strong><small>${m.role==='kids'?'Kids':'Adulto'}</small></span></button>`).join('');
+ const emptyTargets=`<div class="sat-empty-mini"><span>Nenhum satélite com acesso à Casa.</span><button type="button" class="sat-inline-add" id="ctAddSatellite">＋ Adicionar satélite</button></div>`;
+ dlg.innerHTML=`<form method="dialog" class="modal-card casa-modal-card" id="casaTaskEdit"><div class="modal-head"><div><div class="eyebrow">CASA · RESPONSABILIDADE</div><h2>Editar rotina</h2></div><button type="button" class="icon-btn casa-modal-x" data-close aria-label="Fechar">×</button></div><label>Atividade<input id="ctName" value="${escapeHtml(task.name)}"></label><label>Duração real estimada (min)<input id="ctMin" type="number" min="5" max="480" step="5" value="${ds[id]||15}"></label><label>Horário / janela preferencial<input id="ctTime" value="${escapeHtml(casaTime(id))}"></label><label>Frequência<input id="ctFreq" value="${escapeHtml(task.freq)}"></label><div class="sat-resp-block"><span class="sat-label">Responsabilidade</span><div class="sat-resp-options" data-resp><button type="button" data-v="owner" class="${responsibility==='owner'?'active':''}">Eu faço</button><button type="button" data-v="help" class="${responsibility==='help'?'active':''}">Aceito ajuda</button><button type="button" data-v="delegated" class="${responsibility==='delegated'?'active':''}">Delegar</button></div><input type="hidden" id="ctResp" value="${escapeHtml(responsibility)}"></div><div class="sat-assignee-field" ${responsibility==='delegated'?'':'hidden'}><div class="sat-target-head"><span>Delegar para</span><button type="button" class="sat-target-all" id="ctAllTargets">Todos</button></div><div class="sat-target-grid">${targetHtml||emptyTargets}</div><small class="sat-target-note">A tarefa aparece para todos os selecionados. Quando alguém assumir ou concluir, os demais verão quem foi.</small></div><div class="sat-kids-points" hidden><button type="button" class="casa-points-toggle ${task.pointsEnabled?'is-checked':''}" data-points-toggle aria-pressed="${task.pointsEnabled?'true':'false'}"><input type="hidden" id="ctPoints" value="${task.pointsEnabled?'1':'0'}"><span class="sat-target-check" aria-hidden="true"></span><span class="casa-points-copy">Esta missão vale pontos se for concluída por um Kids</span></button><label>Pontos<input id="ctPointsValue" type="number" min="1" max="100" value="${Math.max(1,+task.pointsValue||2)}"></label></div><div class="modal-actions"><div class="grow"></div><button type="button" class="secondary" id="cancelCt">Cancelar</button><button class="primary" value="default">Salvar</button></div></form>`;
+ document.body.appendChild(dlg);dlg.showModal();const close=()=>{dlg.close();dlg.remove()};dlg.querySelectorAll('[data-close],#cancelCt').forEach(b=>b.onclick=close);
+ const respInput=dlg.querySelector('#ctResp'),assField=dlg.querySelector('.sat-assignee-field'),points=dlg.querySelector('.sat-kids-points'),targetChecks=[...dlg.querySelectorAll('[data-sat-target]')];
+ const selectedMembers=()=>targetChecks.filter(c=>c.checked).map(c=>members.find(m=>String(m.id)===String(c.value))).filter(Boolean);
+ const sync=()=>{const r=respInput.value;assField.hidden=r!=='delegated';points.hidden=!(r==='delegated'&&selectedMembers().some(m=>m.role==='kids'))};
+ dlg.querySelectorAll('[data-resp] button').forEach(b=>b.onclick=()=>{dlg.querySelectorAll('[data-resp] button').forEach(x=>x.classList.toggle('active',x===b));respInput.value=b.dataset.v;sync()});
+ targetChecks.forEach(c=>c.onchange=sync);
+
+ // RC134 — controles customizados: sem checkbox nativo/label do Safari.
+ dlg.querySelectorAll('[data-target-toggle]').forEach(row=>{
+   const input=row.querySelector('[data-sat-target]');
+   row.addEventListener('click',()=>{
+     input.checked=!input.checked;
+     row.classList.toggle('is-checked',input.checked);
+     row.setAttribute('aria-pressed',String(input.checked));
+     input.dispatchEvent(new Event('change',{bubbles:true}));
+   });
+ });
+ const pointsToggle=dlg.querySelector('[data-points-toggle]');
+ if(pointsToggle){
+   const input=pointsToggle.querySelector('#ctPoints');
+   pointsToggle.addEventListener('click',()=>{
+     const on=input.value!=='1';
+     input.value=on?'1':'0';
+     pointsToggle.classList.toggle('is-checked',on);
+     pointsToggle.setAttribute('aria-pressed',String(on));
+   });
+ }
+
+ dlg.querySelector('#ctAllTargets')?.addEventListener('click',()=>{const allSelected=targetChecks.length&&targetChecks.every(c=>c.checked);targetChecks.forEach(c=>{c.checked=!allSelected;const row=c.closest('[data-target-toggle]');row?.classList.toggle('is-checked',c.checked);row?.setAttribute('aria-pressed',String(c.checked));});sync()});
+ dlg.querySelector('#ctAddSatellite')?.addEventListener('click',()=>{close();location.hash='#satelites';setTimeout(()=>openSatelliteEditor(),80)});
+ sync();
+ dlg.querySelector('#casaTaskEdit').addEventListener('submit',e=>{
+   e.preventDefault();task.name=dlg.querySelector('#ctName').value.trim()||task.name;task.freq=dlg.querySelector('#ctFreq').value.trim()||task.freq;ds[id]=Math.max(5,+dlg.querySelector('#ctMin').value||ds[id]||15);const times=loadCasaTimes();times[id]=dlg.querySelector('#ctTime').value.trim()||times[id];
+   task.responsibility=respInput.value;
+   const ids=task.responsibility==='delegated'?targetChecks.filter(c=>c.checked).map(c=>c.value):[];
+   if(task.responsibility==='delegated'&&!ids.length){assField.classList.add('sat-target-error');return}
+   task.assigneeIds=ids;task.assigneeId=null;task.claimedById=null;task.completedById=null;delete task.pointsAwardedAt;task.declinedByIds=[];
+   task.requiresValidation=false;
+   task.pointsEnabled=!!(ids.length&&selectedMembers().some(m=>m.role==='kids')&&dlg.querySelector('#ctPoints')?.value==='1');
+   task.pointsValue=task.pointsEnabled?Math.max(1,+dlg.querySelector('#ctPointsValue')?.value||2):0;
+   task.satelliteStatus=task.responsibility==='help'?'available':task.responsibility==='delegated'?'assigned':'open';
+   saveCasa(d);saveCasaDurations(ds);saveCasaTimes(times);close();renderCasa()
+ });
+}
+function loadCasa(){
+ try{
+  const raw=JSON.parse(window.berthaHmlStorage.getItem(CASA_KEY)||"null");
+  const base=JSON.parse(JSON.stringify(CASA_BASE));
+  if(!raw||typeof raw!=="object")return base;
+  const d={...base,...raw};
+  // Compatibilidade com versões antigas da Casa: nunca deixar um schema parcial
+  // derrubar a tela inteira.
+  d.areas=Array.isArray(raw.areas)?raw.areas:base.areas;
+  d.areas=d.areas.filter(Boolean).map((a,i)=>({
+    ...(base.areas[i]||{}),...a,
+    id:a?.id||(base.areas[i]?.id)||`area-${i}`,
+    title:a?.title||(base.areas[i]?.title)||"Casa",
+    tasks:(Array.isArray(a?.tasks)?a.tasks:[]).filter(Boolean).map((t,j)=>({
+      id:String(t?.id ?? `task-${i}-${j}`),
+      name:String(t?.name ?? t?.title ?? "Rotina da casa"),
+      freq:String(t?.freq ?? t?.frequency ?? "conforme necessário"),
+      when:String(t?.when ?? t?.period ?? "horário a definir"),
+      done:!!t?.done,
+      ...(t&&typeof t==="object"?t:{}),
+      // reaplica os campos críticos já normalizados para impedir schemas antigos
+      // de sobrescrevê-los com null/número/estrutura incompatível
+      id:String(t?.id ?? `task-${i}-${j}`),
+      name:String(t?.name ?? t?.title ?? "Rotina da casa"),
+      freq:String(t?.freq ?? t?.frequency ?? "conforme necessário"),
+      when:String(t?.when ?? t?.period ?? "horário a definir"),
+      done:!!t?.done
+    }))
+  }));
+  d.maintenance=Array.isArray(raw.maintenance)?raw.maintenance:[];
+  if(casaRefreshRoutineCycles(d)) saveCasa(d);
+  return d;
+ }catch(e){console.warn("Casa: dados antigos ignorados",e);return JSON.parse(JSON.stringify(CASA_BASE));}
+}
+function saveCasa(d){window.berthaHmlStorage.setItem(CASA_KEY,JSON.stringify(d));}
+const CASA_HOW_CUSTOM_KEY="minha-vida.casa.how.v1";
+function loadCasaHowCustom(){
+  try{
+    const x=JSON.parse(window.berthaHmlStorage.getItem(CASA_HOW_CUSTOM_KEY)||"{}");
+    return x&&typeof x==="object"&&!Array.isArray(x)?x:{};
+  }catch{return {}}
+}
+function saveCasaHowCustom(x){
+  window.berthaHmlStorage.setItem(CASA_HOW_CUSTOM_KEY,JSON.stringify(x&&typeof x==="object"&&!Array.isArray(x)?x:{}));
+}
+function casaHowData(id){
+  const base=CASA_HOW[id];
+  if(!base)return null;
+  const custom=loadCasaHowCustom()[id]||{};
+  return {
+    ...base,
+    ...custom,
+    products:Array.isArray(custom.products)?custom.products:(Array.isArray(base.products)?base.products:[]),
+    materials:Array.isArray(custom.materials)?custom.materials:(Array.isArray(base.materials)?base.materials:[]),
+    steps:Array.isArray(custom.steps)?custom.steps:(Array.isArray(base.steps)?base.steps:[])
+  };
+}
+const CASA_SHOP_KEY="minha-vida.compras.casa.v1";
+const SHARED_SHOP_KEY="minha-vida.compras.v1";
+function loadSharedShopping(){try{const x=JSON.parse(window.berthaHmlStorage.getItem(SHARED_SHOP_KEY)||"[]");return Array.isArray(x)?x.filter(Boolean).map((i,idx)=>({id:i?.id||`shop-${Date.now()}-${idx}`,name:String(i?.name||i?.title||i?.item||"").trim(),source:i?.source||"Compras",category:i?.category||"Casa",cycle:i?.cycle||"monthly",createdAt:i?.createdAt||Date.now(),done:!!i?.done,qty:i?.qty??"",unit:i?.unit||"",expectedValue:i?.expectedValue??"",actualValue:i?.actualValue??"",purchasedAt:i?.purchasedAt||null,...i})).filter(i=>i.name):[]}catch{return []}}
+function saveSharedShopping(x){window.berthaHmlStorage.setItem(SHARED_SHOP_KEY,JSON.stringify(x))}
+function migrateCasaShopping(){let legacy=[];try{legacy=JSON.parse(window.berthaHmlStorage.getItem(CASA_SHOP_KEY)||"[]")||[]}catch{}const shared=loadSharedShopping();let changed=false;legacy.forEach(x=>{if(!shared.some(y=>String(y.name).toLowerCase()===String(x.name).toLowerCase())){shared.push({...x,category:"Casa",cycle:"monthly"});changed=true}});if(changed)saveSharedShopping(shared)}
+function loadCasaShopping(){migrateCasaShopping();return loadSharedShopping().filter(x=>(x.category||"Casa")==="Casa")}
+function saveCasaShopping(items){const other=loadSharedShopping().filter(x=>(x.category||"Casa")!=="Casa");saveSharedShopping([...other,...items])}
+function refreshCasaShoppingUI(){const host=document.querySelector('.casa-shopping-card');if(host){host.innerHTML=`<p class="note">Produtos e utensílios enviados pelos procedimentos aparecem aqui e também em <b>Compras do mês</b>.</p>${renderCasaShoppingMini()}`;bindCasaShoppingMini()}const meta=document.querySelector('#casa-sec-compras summary .casa-section-meta > span:first-child');if(meta)meta.textContent=`${loadCasaShopping().filter(x=>!x.done).length} pendentes`}
+function addCasaShopping(name,source){name=(name||"").trim();if(!name)return false;const items=loadSharedShopping();if(!items.some(x=>String(x.name).toLowerCase()===name.toLowerCase()&&!x.done)){items.push({id:uid(),name,source:source||"Casa",category:"Casa",cycle:"monthly",createdAt:Date.now(),done:false});saveSharedShopping(items)}refreshCasaShoppingUI();return true}
+function removeCasaShopping(id){saveSharedShopping(loadSharedShopping().filter(x=>String(x.id)!==String(id)));refreshCasaShoppingUI()}
+function casaPendingShopping(name){name=String(name||"").trim().toLocaleLowerCase("pt-BR");return loadSharedShopping().find(x=>!x.done&&String(x.name||"").trim().toLocaleLowerCase("pt-BR")===name&&(x.category||"Casa")==="Casa")||null}
+function casaBuyLabel(name){return casaPendingShopping(name)?"✓ na lista":"＋ compras"}
+function toggleCasaShopping(name,source){const pending=casaPendingShopping(name);if(pending){removeCasaShopping(pending.id);return false}addCasaShopping(name,source);return true}
+function syncCasaBuyButton(b,name){const active=!!casaPendingShopping(name);b.textContent=active?"✓ na lista":"＋ compras";b.classList.toggle("is-in-list",active);b.setAttribute("aria-pressed",String(active));b.disabled=false}
+function bindCasaBuyButton(b,name,source){syncCasaBuyButton(b,name);b.onclick=()=>{toggleCasaShopping(name,source);syncCasaBuyButton(b,name)}}
+function bindCasaShoppingMini(){document.querySelectorAll("[data-casa-shop-done]").forEach(b=>b.onchange=()=>{const all=loadSharedShopping(),x=all.find(i=>String(i.id)===String(b.dataset.casaShopDone));if(x)x.done=b.checked;saveSharedShopping(all);refreshCasaShoppingUI()});document.querySelectorAll("[data-casa-shop-del]").forEach(b=>b.onclick=()=>removeCasaShopping(b.dataset.casaShopDel))}
+function casaHowList(text){return String(text||"").split(/\n|;/).map(x=>x.trim()).filter(Boolean)}
+function openCasaHowEditor(id){
+ const h=casaHowData(id);if(!h)return;
+ const dlg=document.createElement("dialog");dlg.className="study-v10-dialog casa-dialog";
+ dlg.innerHTML=`<form class="study-v10-modal casa-modal-card" id="casaHowEdit"><div class="study-v10-head"><div><div class="eyebrow">CASA</div><h2>Editar como fazer</h2><p>Produtos, utensílios e passo a passo.</p></div><button type="button" class="study-v10-x" data-close>×</button></div>
+ ${field("Nome",`<input id="chTitle" value="${escapeHtml(h.title)}">`)}
+ ${field("Tempo estimado",`<input id="chTime" value="${escapeHtml(h.time)}">`)}
+ ${field("Produtos · um por linha",`<textarea id="chProducts" rows="5">${escapeHtml((h.products||[]).join("\n"))}</textarea>`)}
+ ${field("Utensílios / materiais · um por linha",`<textarea id="chMaterials" rows="5">${escapeHtml((h.materials||[]).join("\n"))}</textarea>`)}
+ ${field("Passo a passo · um passo por linha",`<textarea id="chSteps" rows="8">${escapeHtml((h.steps||[]).join("\n"))}</textarea>`)}
+ ${field("Dica",`<textarea id="chTip" rows="3">${escapeHtml(h.tip||"")}</textarea>`)}
+ <div class="study-v10-actions"><button type="button" class="secondary" data-close>Cancelar</button><button class="primary" type="submit">Salvar alterações</button></div></form>`;
+ document.body.appendChild(dlg);const close=()=>dlg.close();dlg.querySelectorAll('[data-close]').forEach(b=>b.onclick=close);dlg.addEventListener('click',e=>{if(e.target===dlg)close()});dlg.onclose=()=>dlg.remove();
+ dlg.querySelector("#casaHowEdit").addEventListener("submit",e=>{e.preventDefault();const all=loadCasaHowCustom();all[id]={title:dlg.querySelector("#chTitle").value.trim()||h.title,time:dlg.querySelector("#chTime").value.trim()||h.time,products:casaHowList(dlg.querySelector("#chProducts").value),materials:casaHowList(dlg.querySelector("#chMaterials").value),steps:casaHowList(dlg.querySelector("#chSteps").value),tip:dlg.querySelector("#chTip").value.trim()||h.tip};saveCasaHowCustom(all);close();openCasaHow(id)});
+ dlg.showModal();
+}
+function openCasaHow(id){
+ const h=casaHowData(id);if(!h)return;
+ const o=document.createElement("div");o.className="mv-how-overlay casa-how-overlay";o.setAttribute('role','presentation');
+ const productRows=(h.products.length?h.products:["Nenhum produto específico — siga a orientação da etiqueta ou da superfície."]).map(x=>`<li><span>${escapeHtml(x)}</span><button type="button" class="casa-buy-mini" data-casa-buy="${escapeHtml(x)}">${casaBuyLabel(x)}</button></li>`).join("");
+ const materialRows=(h.materials||[]).map(x=>`<li><span>${escapeHtml(x)}</span><button type="button" class="casa-buy-mini" data-casa-buy="${escapeHtml(x)}">${casaBuyLabel(x)}</button></li>`).join("");
+ o.innerHTML=`<div class="mv-how casa-how-modal" role="dialog" aria-modal="true" aria-label="Como fazer ${escapeHtml(h.title)}"><button class="mv-how-x casa-modal-x" type="button" aria-label="Fechar">×</button><div class="eyebrow">COMO FAZER</div><h2>${escapeHtml(h.title)}</h2>
+ <div class="casa-how-meta"><span>${casaLineIcon('clock')} ${escapeHtml(h.time)}</span></div>
+ <div class="casa-how-section"><h3>Produtos</h3><ul>${productRows}</ul></div>
+ <div class="casa-how-section"><h3>Utensílios / materiais</h3><ul>${materialRows||'<li><span>Nenhum material específico.</span></li>'}</ul></div>
+ <div class="casa-how-section"><h3>Passo a passo</h3><ol>${(h.steps||[]).map(x=>`<li>${escapeHtml(x)}</li>`).join("")}</ol></div>
+ ${h.tip?`<div class="casa-how-tip"><strong>Dica</strong><p>${escapeHtml(h.tip)}</p></div>`:''}
+ <div class="casa-how-footer"><button type="button" class="secondary casa-edit-procedure" id="editCasaHow">Editar procedimento</button></div></div>`;
+ document.body.appendChild(o);
+ const close=()=>o.remove();
+ o.querySelector('.casa-modal-x').onclick=close;
+ o.addEventListener('click',e=>{if(e.target===o)close()});
+ o.querySelector("#editCasaHow").onclick=()=>{close();openCasaHowEditor(id)};
+ o.querySelectorAll("[data-casa-buy]").forEach(b=>bindCasaBuyButton(b,b.dataset.casaBuy,h.title));
+}
+
+function renderCasaShoppingMini(){
+ const items=loadCasaShopping();
+ if(!items.length)return `<div class="empty compact"><strong>Nenhum item da casa na lista.</strong><span>Quando algum produto ou utensílio estiver acabando, você pode enviá-lo daqui.</span></div>`;
+ return `<div class="casa-mini-shopping">${items.map(x=>`<div class="casa-mini-shop-row ${x.done?'done':''}"><label><input type="checkbox" data-casa-shop-done="${x.id}" ${x.done?'checked':''}><span>${escapeHtml(x.name)}</span></label><button type="button" class="more" data-casa-shop-del="${x.id}">×</button></div>`).join("")}<a class="food-big-link blue" href="#alimentacao">🛒 Abrir Compras do mês</a></div>`;
+}
+
+const CASA_EXEC_KEY="minha-vida.casa.executions.v1";
+function loadCasaExecutions(){try{return JSON.parse(window.berthaHmlStorage.getItem(CASA_EXEC_KEY)||"[]")}catch{return[]}}
+function saveCasaExecutions(x){window.berthaHmlStorage.setItem(CASA_EXEC_KEY,JSON.stringify(x))}
+function casaTaskById(id,d=loadCasa()){for(const a of d.areas){const t=a.tasks.find(x=>String(x.id)===String(id));if(t)return {task:t,area:a}}return null}
+function casaStartRoutine(id){const hit=casaTaskById(id);if(!hit)return;const minutes=+loadCasaDurations()[id]||15;startViaBertha({id:`casa:routine:${id}`,learningKey:`casa:routine:${id}`,source:"Casa",title:hit.task.name,minutes,configuredMinutes:minutes,period:"flex",time:casaTime(id),kind:"home"})}
+function casaFinishRoutine(id){const d=loadCasa(),hit=casaTaskById(id,d);if(!hit)return;const active=window.BerthaTimeEngine?.active?.();if(active&&String(active.id)===`casa:routine:${id}`){window.BerthaTimeEngine.finish();return;}const end=Date.now(),minutes=+loadCasaDurations()[id]||15;hit.task.done=true;hit.task.completedAt=end;hit.task.lastCompletedAt=end;hit.task.nextDue=casaNextRoutineDate(hit.task.freq,end);const ex=loadCasaExecutions();ex.push({id:uid(),kind:"routine",refId:id,title:hit.task.name,area:hit.area.title,completedAt:end,nextDue:hit.task.nextDue||null,frequency:hit.task.freq||"cíclica"});saveCasaExecutions(ex);casaRecordProgress(hit,end,minutes);saveCasa(d);renderCasa()}
+function casaReopenRoutine(id){const d=loadCasa(),hit=casaTaskById(id,d);if(!hit)return;hit.task.done=false;delete hit.task.completedAt;delete hit.task.nextDue;casaRemoveLatestProgress(id);saveCasa(d);renderCasa()}
+function maintenanceMinutes(m){const v=Math.max(1,+m.durationValue||30);return m.durationUnit==="hours"?v*60:v}
+function casaStartMaintenance(id){const d=loadCasa(),m=d.maintenance.find(x=>String(x.id)===String(id));if(!m)return;const minutes=maintenanceMinutes(m);startViaBertha({id:`casa:maintenance:${id}`,learningKey:`casa:maintenance:${m.name.toLowerCase()}`,source:"Casa · Manutenção",title:m.name,minutes,configuredMinutes:minutes,date:m.date||"",period:m.period||"flex",time:m.time||"",priority:m.priority||"normal",kind:"home-maintenance"})}
+function nextMaintenanceDate(date,freq){if(!date||!freq||freq==="Única"||freq==="Conforme necessário")return date||"";const d=new Date(date+"T12:00:00");if(Number.isNaN(d.getTime()))return date;if(freq==="Diária")d.setDate(d.getDate()+1);if(freq==="Semanal")d.setDate(d.getDate()+7);if(freq==="Quinzenal")d.setDate(d.getDate()+14);if(freq==="Mensal")d.setMonth(d.getMonth()+1);return d.toISOString().slice(0,10)}
+function casaFinishMaintenance(id){const d=loadCasa(),m=d.maintenance.find(x=>String(x.id)===String(id));if(!m)return;const active=window.BerthaTimeEngine?.active?.();if(active&&String(active.id)===`casa:maintenance:${id}`){window.BerthaTimeEngine.finish();return;}const end=Date.now(),minutes=maintenanceMinutes(m);m.lastCompletedAt=end;const ex=loadCasaExecutions();ex.push({id:uid(),kind:"maintenance",refId:id,title:m.name,area:m.area||"Casa",completedAt:end});saveCasaExecutions(ex);try{const key='bertha.time-engine.v1',e=JSON.parse(window.berthaHmlStorage.getItem(key)||'{"active":null,"history":[],"snoozed":{}}');e.history=Array.isArray(e.history)?e.history:[];const itemId=`casa:maintenance:${id}`;if(!e.history.some(h=>h.itemId===itemId&&h.status==='done'&&Math.abs((+h.endedAt||0)-end)<1500)){e.history.unshift({itemId,learningKey:itemId,title:m.name,source:'Casa · Manutenção',day:casaLocalDay(end),startedAt:end,endedAt:end,configuredMinutes:minutes,plannedMinutes:minutes,realMinutes:minutes,status:'done',category:m.area||'Casa'});window.berthaHmlStorage.setItem(key,JSON.stringify(e));}}catch{}if(m.frequency&&!['Única','Conforme necessário'].includes(m.frequency)){m.date=nextMaintenanceDate(m.date,m.frequency);m.status="a_fazer"}else m.status="concluida";saveCasa(d);renderCasa()}
+function casaLineIcon(name){
+ const p={
+  routines:'<path d="M5 7h14M5 12h14M5 17h14"/><path d="M3 7h.01M3 12h.01M3 17h.01"/>',
+  toolbox:'<path d="M5 8h14v11H5z"/><path d="M9 8V5h6v3M5 12h14M12 12v2"/>',
+  manual:'<path d="M5 4h10a3 3 0 0 1 3 3v13H7a2 2 0 0 1-2-2V4z"/><path d="M7 16h11M9 8h6M9 12h6"/>',
+  pot:'<path d="M6 10h12v8H6zM5 10h14M9 7h6M12 5v2M18 12h2"/>',
+  spray:'<path d="M9 8h7l-1-3h-5zM11 8v3M8 11h7v9H8z"/><path d="M16 6h3M18 5v2"/>',
+  clock:'<circle cx="12" cy="12" r="8"/><path d="M12 8v5l3 2"/>',
+  info:'<path d="M5 7h14M5 12h10M5 17h12"/>',
+  edit:'<path d="M4 20h4l10.5-10.5a2.1 2.1 0 0 0-4-4L4 16v4z"/><path d="M13.5 6.5l4 4"/>',
+  basket:'<path d="M5 9h14l-2 10H7zM8 9l4-5 4 5M9 12v4M12 12v4M15 12v4"/>'
+ };
+ return `<svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.45" stroke-linecap="round" stroke-linejoin="round">${p[name]||p.routines}</svg>`;
+}
+function casaAreaIcon(title){
+ const t=String(title||'').toLowerCase();
+ const path=t.includes('limpeza')?'<path d="M9 4h6l1 4H8z"/><path d="M10 8v4l-4 8h12l-4-8V8"/><path d="M8 16h8M7 19h10"/>':
+  t.includes('roup')||t.includes('lavander')?'<rect x="5" y="4" width="14" height="16" rx="2"/><circle cx="12" cy="13" r="4"/><path d="M8 8h.01M11 8h.01"/>':
+  t.includes('animal')?'<path d="M8 11c-2 0-3 1.5-3 3s1.5 3 3.5 3c1.5 0 2.5-.7 3.5-1.8 1 1.1 2 1.8 3.5 1.8 2 0 3.5-1.5 3.5-3s-1-3-3-3"/><circle cx="8" cy="7" r="1.5"/><circle cx="12" cy="5.5" r="1.5"/><circle cx="16" cy="7" r="1.5"/>':
+  t.includes('henrique')?'<circle cx="12" cy="8" r="3"/><path d="M6 20c.5-4 2.5-6 6-6s5.5 2 6 6"/>':
+  t.includes('jardim')||t.includes('piscina')||t.includes('extern')?'<path d="M12 20v-8"/><path d="M12 13c-4 0-6-2-6-5 3 0 5 1 6 3 1-3 3-5 7-5 0 4-2 7-7 7z"/>':
+  t.includes('cozinha')?'<path d="M6 10h12v8H6zM5 10h14M9 7h6M12 5v2M18 12h2"/>':
+  '<path d="M5 7h14M5 12h14M5 17h14"/>';
+ return `<span class="casa-inline-icon"><svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.35" stroke-linecap="round" stroke-linejoin="round">${path}</svg></span>`;
+}
+function casaTipIcon(label){const t=String(label||'').toLowerCase();if(t.includes('limpeza'))return casaAreaIcon('Limpeza');if(t.includes('roupa')||t.includes('lavanderia'))return casaAreaIcon('Roupas & Lavanderia');if(t.includes('jardim')||t.includes('extern'))return casaAreaIcon('Jardim');if(t.includes('gato'))return casaAreaIcon('Animais');const raw=t.includes('organização')?casaLineIcon('routines'):casaLineIcon('info');return `<span class="casa-inline-icon">${raw}</span>`}
+function casaSection(icon,title,meta,body,id){return `<details class="casa-section" id="${id||""}"><summary><span class="casa-section-left"><span class="casa-section-icon">${icon}</span><strong>${title}</strong></span><span class="casa-section-meta">${meta?`<span>${meta}</span>`:""}<span class="casa-chevron">⌄</span></span></summary><div class="casa-section-body">${body}</div></details>`}
+function maintenanceCard(m){const meta=[m.area,m.type,m.date?formatDate(m.date):"",`${maintenanceMinutes(m)} min`,m.priority,m.responsible].filter(Boolean),members=loadSatellites().members||[],targets=satelliteTargets(m).map(id=>members.find(x=>String(x.id)===String(id))).filter(Boolean),claimer=members.find(x=>String(x.id)===String(m.claimedById||m.assigneeId)),completer=members.find(x=>String(x.id)===String(m.completedById||m.assigneeId)),resp=m.responsibility||'owner',status=m.satelliteStatus||'open',chip=resp==='help'?`<span class="sat-task-chip help">${completer?`Concluída por ${escapeHtml(completer.name)}`:claimer?`Assumida · ${escapeHtml(claimer.name)}`:'Aceito ajuda'}</span>`:resp==='delegated'?`<span class="sat-task-chip delegated">${completer?`Concluída por ${escapeHtml(completer.name)}${status==='completed'?' · validar':''}`:claimer?`Assumida · ${escapeHtml(claimer.name)}`:`Delegada · ${escapeHtml(targets.map(x=>x.name).join(' + ')||'Satélites')}`}</span>`:'',validate=status==='completed'?`<button type="button" class="sat-validate" data-sat-validate="${m.id}">Validar conclusão</button>`:'';return `<div class="card casa-maint-card"><div><strong>${escapeHtml(m.name)}</strong>${m.note?`<p class="note">${escapeHtml(m.note)}</p>`:""}${chip}</div><div class="casa-maint-meta">${meta.map(x=>`<span>${escapeHtml(String(x))}</span>`).join("")}</div><div class="casa-maint-actions"><button type="button" class="start" data-maint-start="${m.id}">▶ Começar</button><button type="button" class="edit" data-maint-edit="${m.id}">Editar</button><button type="button" class="finish" data-maint-finish="${m.id}">✓ Concluir</button>${validate}</div></div>`}
+function openCasaNewRoutine(areaId){
+ const d=loadCasa();const area=(d.areas||[]).find(a=>String(a.id)===String(areaId));if(!area)return;
+ const dlg=document.createElement('dialog');dlg.className='bertha-dialog casa-dialog';
+ dlg.innerHTML=`<form method="dialog" class="modal-card casa-modal-card" id="casaNewRoutineForm"><div class="modal-head"><div><div class="eyebrow">CASA · ROTINAS</div><h2>Nova rotina</h2><p class="note">${escapeHtml(area.title)}</p></div><button type="button" class="icon-btn casa-modal-x" data-close-cnr aria-label="Fechar">×</button></div><label>Atividade<input id="cnrName" required placeholder="Ex.: Limpar a varanda"></label><label>Duração estimada (min)<input id="cnrMin" type="number" min="1" max="480" step="5" value="10"></label><label>Horário / janela preferencial<input id="cnrTime" placeholder="Ex.: manhã, 18:30, janela doméstica"></label><label>Frequência<input id="cnrFreq" placeholder="Ex.: semanal, a cada 2 dias" value="conforme necessário"></label><div class="modal-actions"><div class="grow"></div><button type="button" class="secondary" id="cancelCnr">Cancelar</button><button class="primary" value="default">Salvar</button></div></form>`;
+ document.body.appendChild(dlg);dlg.showModal();const closeCnr=()=>dlg.close();dlg.querySelector('#cancelCnr').onclick=closeCnr;dlg.querySelector('[data-close-cnr]')?.addEventListener('click',closeCnr);dlg.addEventListener('close',()=>dlg.remove());
+ dlg.querySelector('#casaNewRoutineForm').addEventListener('submit',e=>{e.preventDefault();const name=dlg.querySelector('#cnrName').value.trim();if(!name)return;const id=`casa-${String(area.id).replace(/[^a-z0-9]+/gi,'-').toLowerCase()}-${Date.now()}`;area.tasks=Array.isArray(area.tasks)?area.tasks:[];area.tasks.push({id,name,freq:dlg.querySelector('#cnrFreq').value.trim()||'conforme necessário',when:dlg.querySelector('#cnrTime').value.trim()||'horário a definir',done:false});const ds=loadCasaDurations();ds[id]=Math.max(1,+dlg.querySelector('#cnrMin').value||10);saveCasaDurations(ds);const ts=loadCasaTimes();ts[id]=dlg.querySelector('#cnrTime').value.trim()||'flexível';saveCasaTimes(ts);saveCasa(d);dlg.close();renderCasa();requestAnimationFrame(()=>{const target=document.querySelector(`.casa-routine-group[data-routine-id="${CSS.escape(String(areaId))}"]`);if(target){target.open=true;target.scrollIntoView({behavior:'smooth',block:'start'})}})});
+}
+function renderCasaCore(){
+ ensureCasaManualStyles();
+ const d=loadCasa();
+ d.maintenance=(Array.isArray(d.maintenance)?d.maintenance:[]).filter(Boolean).map(m=>({status:"a_fazer",area:"Casa geral",type:"Reparo / conserto",durationValue:30,durationUnit:"minutes",priority:"normal",frequency:"Única",responsible:"Eu",notify:false,period:"flex",...m}));
+ const all=d.areas.flatMap(a=>a.tasks),done=all.filter(x=>x.done).length;
+ const routineTaskHtml=(a,t)=>{const search=[a.title,t.name,casaDuration(t.id),casaTime(t.id),t.freq||"cíclica",t.when].join(" ").toLowerCase(),sat=loadSatellites(),members=sat.members||[],resp=t.responsibility||'owner',status=t.satelliteStatus||'open',targets=satelliteTargets(t).map(id=>members.find(m=>String(m.id)===String(id))).filter(Boolean),claimer=members.find(m=>String(m.id)===String(t.claimedById||t.assigneeId)),completer=members.find(m=>String(m.id)===String(t.completedById||t.assigneeId)),targetNames=targets.map(m=>m.name).join(' + ');const respChip=resp==='help'?`<span class="sat-task-chip help">${t.done&&completer?`Concluída por ${escapeHtml(completer.name)}`:claimer?`Assumida · ${escapeHtml(claimer.name)}`:'Aceito ajuda'}</span>`:resp==='delegated'?`<span class="sat-task-chip delegated">${t.done&&completer?`Concluída por ${escapeHtml(completer.name)}${status==='completed'?' · validar':''}`:claimer?`Assumida · ${escapeHtml(claimer.name)}`:`Delegada · ${escapeHtml(targetNames||'Satélites')}`}</span>`:'';const validate=status==='completed'?`<button type="button" class="sat-validate" data-sat-validate="${t.id}">Validar conclusão</button>`:'';return `<div class="home-task-wrap casa-routine-row" data-routine-search="${escapeHtml(search)}"><label class="home-task ${t.done?"done":""}"><input type="checkbox" data-casa-task="${a.id}|${t.id}" ${t.done?"checked":""}><span><strong>${escapeHtml(t.name)}</strong><small>${escapeHtml(casaDuration(t.id))} · ${escapeHtml(casaTime(t.id))} · ${escapeHtml(t.freq||"cíclica")} · ${escapeHtml(t.when)}</small>${respChip}${t.pointsEnabled?`<span class="sat-task-chip points">+${+t.pointsValue||0} pts</span>`:''}${t.done&&t.nextDue?`<small>Período concluído${completer?` por ${escapeHtml(completer.name)}`:''} · Próxima: ${new Date(t.nextDue+"T12:00:00").toLocaleDateString("pt-BR")}</small>`:""}</span></label><div class="home-task-actions">${CASA_HOW[t.id]?`<button type="button" class="home-how" data-casa-how="${t.id}">Como fazer →</button>`:""}<button type="button" class="home-edit" data-casa-edit="${t.id}">Editar</button></div><div class="casa-task-exec">${validate}${t.done?`<button type="button" class="casa-task-reopen" data-casa-reopen="${t.id}">↻ Fazer novamente</button>`:`<button type="button" class="casa-task-start" data-casa-start="${t.id}">▶ Começar</button><button type="button" class="casa-task-finish" data-casa-finish="${t.id}">✓ Concluir</button>`}</div></div>`};
+ const areaPickerLabel=a=>{const t=String(a.title||'');if(/roup|lavander/i.test(t))return 'Lavanderia';if(/jardim|piscina|extern/i.test(t))return 'Áreas externas';return t};
+ const routinesHtml=`<div class="casa-routine-browser"><div class="casa-routine-picker"><button type="button" class="casa-routine-picker-btn" id="casaRoutineAreaPicker" aria-expanded="false"><span class="casa-routine-picker-label">${casaAreaIcon('rotinas')}<strong>Escolher uma área…</strong></span><span class="casa-routine-picker-chevron">⌄</span></button><div class="casa-routine-picker-menu" id="casaRoutineAreaMenu" hidden>${d.areas.map(a=>`<button type="button" data-area-pick="${escapeHtml(String(a.id))}"><span>${casaAreaIcon(a.title)}<strong>${escapeHtml(areaPickerLabel(a))}</strong></span><small>${a.tasks.length}</small></button>`).join("")}</div></div><div class="casa-routine-groups">${d.areas.map(a=>`<details class="casa-routine-group" data-routine-id="${escapeHtml(String(a.id))}"><summary><span>${casaAreaIcon(a.title)}<strong>${escapeHtml(a.title)}</strong></span><span class="casa-routine-count">${a.tasks.length}</span></summary><div class="casa-routine-group-body">${a.tasks.length?a.tasks.map(t=>routineTaskHtml(a,t)).join(""):`<p class="note">Sem rotina cadastrada. Mantemos espaço para incluir apenas o que realmente for necessário.</p>`}<button type="button" class="secondary casa-add-routine" data-add-casa-routine="${escapeHtml(String(a.id))}">＋ Adicionar rotina nesta área</button></div></details>`).join("")}</div></div>`
+ const scheduled=all.filter(t=>casaTime(t.id)&&casaTime(t.id)!="ao fim do ciclo").slice().sort((a,b)=>String(casaTime(a.id)).localeCompare(String(casaTime(b.id))));
+ const scheduleHtml=`<div class="card casa-schedule-card"><p class="note">Esses horários são referências para encaixe no dia — não uma agenda rígida. Para mudar um horário, edite a própria rotina.</p><div class="casa-schedule">${scheduled.map(t=>`<div class="casa-schedule-row">${casaTimeBubbles(t.id)}<strong>${escapeHtml(t.name)}</strong><button type="button" class="casa-schedule-edit" data-casa-edit="${escapeHtml(String(t.id))}">Editar</button></div>`).join("")}</div></div>`;
+ const activeMaint=d.maintenance.filter(m=>m.status!=="concluida"),closedMaint=d.maintenance.filter(m=>m.status==="concluida");
+ const maintenanceHtml=`<div class="card"><p class="note">Reparos, prevenção e melhorias da casa. Cada manutenção fica ligada a uma área, pode entrar no Meu Dia e pode usar o mesmo ciclo de execução da BERTH.A.</p><button class="secondary" id="addMaintenance">＋ Adicionar manutenção</button></div><div class="list">${activeMaint.map(maintenanceCard).join("")||`<div class="empty compact"><strong>Nenhuma manutenção pendente.</strong><span>Ótimo. Não precisamos criar trabalho só para preencher espaço.</span></div>`}</div>${closedMaint.length?`<div class="card"><div class="panel-head"><h3>Concluídas</h3><span class="pill">${closedMaint.length}</span></div>${closedMaint.slice().reverse().map(m=>`<div class="casa-history-row"><div><strong>${escapeHtml(m.name)}</strong><small>${escapeHtml(m.area||"Casa")} · ${m.lastCompletedAt?new Date(m.lastCompletedAt).toLocaleDateString('pt-BR'):''}</small></div><button type="button" class="more" data-maint-edit="${m.id}">›</button></div>`).join("")}</div>`:""}`;
+ app.innerHTML=`<section class="casa-hero-v121"><div><span class="eyebrow">CASA</span><h2>Less to manage. More to live.</h2><p>A BERTH.A organiza. Você executa.</p></div><span class="casa-hero-mark" aria-hidden="true"><svg viewBox="0 0 64 44" fill="none"><path d="M10 11H54"/><path d="M10 24c8-8 16 8 24 0s12-8 20 0"/><path d="M10 36H54"/></svg></span></section>
+ <div class="home-principle casa-principle-v121 card"><span class="eyebrow">REGRA DA CASA</span><strong>Agrupar. Delegar. Adiar quando puder.</strong><p>Não espalhar microtarefas pelo dia. O essencial entra em blocos; o resto pode esperar.</p></div>
+ <div class="home-summary casa-summary-v121"><div class="card"><span>Rotinas</span><b>${all.length}</b></div><div class="card"><span>Feitas agora</span><b>${done}</b></div></div>
+ <div class="casa-day-bridge-v121"><span class="casa-bridge-lines">${casaLineIcon('routines')}</span><span><strong>Casa também entra no Meu Dia.</strong><small>Itens de hoje e microtarefas aparecem quando couberem na sua janela.</small></span><a href="#meu-dia">Meu Dia →</a></div>
+ ${casaSection(casaLineIcon('routines'),"Rotinas da Casa",`${all.length} rotinas`,routinesHtml,"casa-sec-rotinas")}
+ ${casaSection(casaLineIcon('toolbox'),"Manutenção",activeMaint.length?`${activeMaint.length} pendente${activeMaint.length===1?'':'s'}`:"em dia",maintenanceHtml,"casa-sec-manutencao")}
+ ${casaSection(casaLineIcon('manual'),"Manual da Casa",`${CASA_MANUAL_PROCEDURES.length} procedimentos`,`<div class="list">${renderCasaManual()}</div>`,"casa-sec-manual")}
+ ${casaSection(casaLineIcon('pot'),"Receitas da Casa",`${loadCasaRecipes().length} receitas`,`<div class="list">${renderCasaRecipes()}</div>`,"casa-sec-receitas")}
+ ${casaSection(casaLineIcon('spray'),"Inventário da Casa",`${CASA_PRODUCT_CATALOG.length} produtos`,renderCasaInventory(),"casa-sec-inventario")}
+ ${casaSection(casaLineIcon('clock'),"Horários da Casa","referências",scheduleHtml,"casa-sec-horarios")}
+ ${casaSection(casaLineIcon('info'),"Dicas para a Casa","consulta",`<div class="card casa-web-card"><p class="note">Quando quiser aprofundar uma tarefa, abra um caminho para a internet. O conteúdo externo é complementar; o essencial continua dentro da BERTH.A.</p><button type="button" class="secondary casa-inline-add" id="addCasaTip">＋ Nova dica</button><div class="casa-web-grid">${CASA_WEB.map(([label,url])=>`<a class="casa-web-link" href="${url}" target="_blank" rel="noopener"><span class="casa-web-link-main">${casaTipIcon(label)}<span>${escapeHtml(label)}</span></span><span class="casa-web-arrow">↗</span></a>`).join("")}${loadCasaTips().map(t=>`<a class="casa-web-link" href="${escapeHtml(t.link)}" target="_blank" rel="noopener"><span class="casa-web-link-main">${casaCustomTipIcon(t.icon)}<span>${escapeHtml(t.title)}</span></span><span class="casa-web-arrow">↗</span></a>`).join("")}</div></div>`,"casa-sec-dicas")}`;
+ document.querySelectorAll("[data-casa-task]").forEach(el=>el.onchange=()=>{const [,tid]=el.dataset.casaTask.split("|");if(el.checked)casaFinishRoutine(tid);else casaReopenRoutine(tid);});
+ const areaPicker=document.querySelector('#casaRoutineAreaPicker'),areaMenu=document.querySelector('#casaRoutineAreaMenu');
+ if(areaPicker&&areaMenu){areaPicker.onclick=e=>{e.stopPropagation();const open=areaMenu.hidden;areaMenu.hidden=!open;areaPicker.setAttribute('aria-expanded',String(open))};areaMenu.querySelectorAll('[data-area-pick]').forEach(btn=>btn.onclick=e=>{e.stopPropagation();const id=btn.dataset.areaPick;const label=btn.querySelector('strong')?.textContent||'Escolher uma área…';areaPicker.querySelector('.casa-routine-picker-label strong').textContent=label;areaMenu.hidden=true;areaPicker.setAttribute('aria-expanded','false');const groups=[...document.querySelectorAll('.casa-routine-group')];groups.forEach(group=>group.open=false);const target=groups.find(group=>String(group.dataset.routineId)===String(id));if(target){target.open=true;requestAnimationFrame(()=>target.scrollIntoView({behavior:'smooth',block:'start'}));}});document.addEventListener('click',()=>{areaMenu.hidden=true;areaPicker.setAttribute('aria-expanded','false')});}
+ document.querySelectorAll("[data-casa-how]").forEach(b=>b.onclick=()=>openCasaHow(b.dataset.casaHow));
+ document.querySelectorAll("[data-casa-edit]").forEach(b=>b.onclick=()=>openCasaTaskEditor(b.dataset.casaEdit));
+ document.querySelectorAll("[data-add-casa-routine]").forEach(b=>b.onclick=()=>openCasaNewRoutine(b.dataset.addCasaRoutine));
+ document.querySelectorAll("[data-casa-start]").forEach(b=>b.onclick=()=>casaStartRoutine(b.dataset.casaStart));
+ document.querySelectorAll("[data-casa-finish]").forEach(b=>b.onclick=()=>casaFinishRoutine(b.dataset.casaFinish));
+ document.querySelectorAll("[data-casa-reopen]").forEach(b=>b.onclick=()=>casaReopenRoutine(b.dataset.casaReopen));
+ document.querySelectorAll("[data-sat-validate]").forEach(b=>b.onclick=()=>validateSatelliteCasaTask(b.dataset.satValidate));
+ bindCasaShoppingMini();
+ document.querySelectorAll("[data-casa-manual]").forEach(b=>b.onclick=()=>openCasaManual(b.dataset.casaManual));
+ document.querySelectorAll("[data-recipe-buy]").forEach(b=>bindCasaBuyButton(b,b.dataset.recipeBuy,"Receita da Casa"));
+ document.querySelectorAll("[data-recipe-edit]").forEach(b=>b.onclick=()=>openCasaRecipeEditor(b.dataset.recipeEdit));
+ document.querySelector("#addCasaRecipe")?.addEventListener("click",()=>openCasaRecipeEditor());
+ document.querySelectorAll("[data-inventory-buy]").forEach(b=>bindCasaBuyButton(b,b.dataset.inventoryBuy,"Inventário da Casa"));
+ document.querySelectorAll("[data-substitute-info]").forEach(b=>b.onclick=()=>openCasaSubstituteInfo(b.dataset.substituteInfo));
+ document.querySelector("#addCasaTool")?.addEventListener("click",openCasaToolEditor);
+ document.querySelectorAll("[data-remove-casa-tool]").forEach(b=>b.onclick=()=>removeCasaCustomTool(b.dataset.removeCasaTool));
+ document.querySelector("#addMaintenance")?.addEventListener("click",()=>openCasaMaintenance());
+ document.querySelector("#addCasaTip")?.addEventListener("click",openCasaTipEditor);
+ document.querySelectorAll("[data-maint-start]").forEach(b=>b.onclick=()=>casaStartMaintenance(b.dataset.maintStart));
+ document.querySelectorAll("[data-maint-finish]").forEach(b=>b.onclick=()=>casaFinishMaintenance(b.dataset.maintFinish));
+ document.querySelectorAll("[data-maint-edit]").forEach(b=>b.onclick=()=>openCasaMaintenance(b.dataset.maintEdit));
+}
+
+/* BERTH.A Satélites v1 — Owner ↔ Adulto ↔ Kids. Homologação local-first; schema cloud preparado. */
+const SATELLITES_KEY='bertha.satellites.v1',SATELLITE_PREVIEW_KEY='bertha.satellite.preview.v1',SAT_KIDS_KEY='bertha.kids.progress.v1';
+function satId(){return `sat-${Date.now()}-${Math.random().toString(36).slice(2,7)}`}
+function loadSatellites(){try{const x=JSON.parse(window.berthaHmlStorage.getItem(SATELLITES_KEY)||'null');if(x&&typeof x==='object')return {...x,members:Array.isArray(x.members)?x.members:[],invites:Array.isArray(x.invites)?x.invites:[]}}catch{}return {owner:{id:'owner',name:'Owner'},members:[],invites:[]}}
+function saveSatellites(x){window.berthaHmlStorage.setItem(SATELLITES_KEY,JSON.stringify(x))}
+function satelliteName(id){return loadSatellites().members.find(m=>String(m.id)===String(id))?.name||'Satélite'}
+function loadKidsProgress(){try{return JSON.parse(window.berthaHmlStorage.getItem(SAT_KIDS_KEY)||'{}')||{}}catch{return{}}}
+function saveKidsProgress(x){window.berthaHmlStorage.setItem(SAT_KIDS_KEY,JSON.stringify(x||{}))}
+const KIDS_REWARDS_KEY='bertha.kids.rewards.v1';
+function kidsRewardDefaults(){return {
+ medal:{points:20,name:'Primeiros passos',type:'medal'},
+ egg:{points:50,name:'Ovo surpresa',type:'egg'},
+ trophy:{points:100,name:'Guardião da Casa',type:'trophy'},
+ skin:{points:150,name:'Skin da temporada',type:'skin'}
+}}
+function loadKidsRewards(){try{const x=JSON.parse(window.berthaHmlStorage.getItem(KIDS_REWARDS_KEY)||'{}');return x&&typeof x==='object'?x:{}}catch{return {}}}
+function saveKidsRewards(x){window.berthaHmlStorage.setItem(KIDS_REWARDS_KEY,JSON.stringify(x||{}))}
+function kidsRewardsFor(memberId){const all=loadKidsRewards(),raw=all[memberId]||{},d=kidsRewardDefaults();return Object.fromEntries(Object.entries(d).map(([k,v])=>[k,{...v,...(raw[k]||{})}]))}
+function awardKidsPoints(memberId,points,title){const all=loadKidsProgress(),month=new Date().toISOString().slice(0,7),k=all[memberId]||{lifetime:0,season:0,seasonKey:month,awards:[]};if(k.seasonKey!==month){k.season=0;k.seasonKey=month}k.lifetime=(+k.lifetime||0)+points;k.season=(+k.season||0)+points;k.log=Array.isArray(k.log)?k.log:[];k.log.unshift({id:satId(),title,points,at:Date.now()});const cfg=kidsRewardsFor(memberId);const unlocks=Object.values(cfg).filter(r=>r.active!==false).map(r=>[Math.max(1,+r.points||1),r.name||'Conquista',r.type||'medal']);k.awards=Array.isArray(k.awards)?k.awards:[];unlocks.forEach(([n,name,type])=>{const key=`${month}:${type}:${n}`;if(k.season>=n&&!k.awards.some(a=>a.key===key))k.awards.push({key,name,type,at:Date.now()})});all[memberId]=k;saveKidsProgress(all)}
+function saveSatelliteOwnerEvents(x){window.berthaHmlStorage.setItem(SAT_OWNER_EVENTS_KEY,JSON.stringify((x||[]).slice(0,100)))}
+function satelliteMember(id){return loadSatellites().members.find(m=>String(m.id)===String(id))}
+function satelliteTargets(task){const legacy=task?.assigneeId?[task.assigneeId]:[];return (Array.isArray(task?.assigneeIds)&&task.assigneeIds.length?task.assigneeIds:legacy).map(String)}
+function satelliteNotifyOwner(member,task,type='completed'){
+ const event={id:satId(),type,memberId:member?.id||null,memberName:member?.name||'Satélite',taskId:task.id,taskName:task.name,at:Date.now(),read:false};
+ const events=loadSatelliteOwnerEvents();events.unshift(event);saveSatelliteOwnerEvents(events);
+ const title='BERTH.A · Casa',body=`${event.memberName} concluiu “${event.taskName}”.`;
+ try{
+   if(typeof Notification!=='undefined'&&Notification.permission==='granted'){
+     if(navigator.serviceWorker?.ready)navigator.serviceWorker.ready.then(reg=>reg.showNotification(title,{body,tag:`sat-${task.id}-${task.completedAt||Date.now()}`,data:{route:'#casa',taskId:task.id}})).catch(()=>{try{new Notification(title,{body})}catch{}});
+     else new Notification(title,{body});
+   }
+ }catch{}
+}
+async function requestSatelliteOwnerNotifications(){
+ try{if(typeof Notification==='undefined')return false;const p=await Notification.requestPermission();renderSatellites();return p==='granted'}catch{return false}
+}
+function satelliteTaskList(memberId){
+ const d=loadCasa(),out=[],mid=String(memberId);
+ const pushIfEligible=(t,area,kind='routine')=>{
+   const r=t.responsibility||'owner',targets=satelliteTargets(t),declined=(t.declinedByIds||[]).map(String),eligible=(r==='help')||(r==='delegated'&&targets.includes(mid));
+   if(!eligible||declined.includes(mid))return;
+   const status=t.satelliteStatus||'open';
+   if(['available','assigned','accepted','in_progress','completed','validated'].includes(status)||t.done||t.status==='concluida')out.push({task:t,area,kind});
+ };
+ (d.areas||[]).forEach(a=>(a.tasks||[]).forEach(t=>pushIfEligible(t,a,'routine')));
+ (d.maintenance||[]).forEach(m=>pushIfEligible(m,{id:'maintenance',title:m.area||'Manutenção'},'maintenance'));
+ return out
+}
+function setSatelliteTaskState(taskId,memberId,state){
+ const d=loadCasa(),hit=casaTaskById(taskId,d),maint=(d.maintenance||[]).find(x=>String(x.id)===String(taskId));
+ if(!hit&&!maint)return;const task=hit?.task||maint,kind=maint?'maintenance':'routine',mid=String(memberId),member=satelliteMember(mid),claimed=task.claimedById?String(task.claimedById):'';
+ if(state==='accepted'){
+   if(claimed&&claimed!==mid)return;task.claimedById=mid;task.assigneeId=mid;task.satelliteStatus='accepted';
+ }else if(state==='declined'){
+   task.declinedByIds=Array.from(new Set([...(task.declinedByIds||[]).map(String),mid]));
+   if(claimed===mid){task.claimedById=null;task.assigneeId=null;task.satelliteStatus=task.responsibility==='help'?'available':'assigned'}
+ }else if(state==='in_progress'){
+   if(claimed&&claimed!==mid)return;task.claimedById=mid;task.assigneeId=mid;task.satelliteStatus='in_progress';
+ }else if(state==='completed'){
+   if(claimed&&claimed!==mid)return;const end=Date.now();task.claimedById=mid;task.assigneeId=mid;task.completedById=mid;task.completedAt=end;task.lastCompletedAt=end;
+   const needsValidation=member?.role==='kids'||!!member?.requiresValidation;task.requiresValidation=needsValidation;task.satelliteStatus=needsValidation?'completed':'validated';
+   if(kind==='routine'){task.done=true;task.nextDue=casaNextRoutineDate(task.freq,end);casaRecordProgress(hit,end,Math.max(5,+loadCasaDurations()[task.id]||15));}
+   else {task.status=needsValidation?'aguardando_validacao':((task.frequency&&!['Única','Conforme necessário'].includes(task.frequency))?'a_fazer':'concluida');if(!needsValidation&&task.status==='a_fazer')task.date=nextMaintenanceDate(task.date,task.frequency);try{const key='bertha.time-engine.v1',e=JSON.parse(window.berthaHmlStorage.getItem(key)||'{"active":null,"history":[],"snoozed":{}}');e.history=Array.isArray(e.history)?e.history:[];const itemId=`casa:maintenance:${task.id}`,mins=maintenanceMinutes(task);if(!e.history.some(h=>h.itemId===itemId&&h.status==='done'&&Math.abs((+h.endedAt||0)-end)<1500)){e.history.unshift({itemId,learningKey:itemId,title:task.name,source:'Casa · Manutenção',day:casaLocalDay(end),startedAt:end,endedAt:end,configuredMinutes:mins,plannedMinutes:mins,realMinutes:mins,status:'done',category:task.area||'Casa'});window.berthaHmlStorage.setItem(key,JSON.stringify(e))}}catch{}}
+   if(member?.role==='kids'&&task.pointsEnabled&&!needsValidation)awardKidsPoints(member.id,Math.max(1,+task.pointsValue||1),task.name);satelliteNotifyOwner(member,task,'completed');
+ }
+ saveCasa(d);renderSatelliteDay()
+}
+function validateSatelliteCasaTask(taskId){
+ const d=loadCasa(),hit=casaTaskById(taskId,d),maint=(d.maintenance||[]).find(x=>String(x.id)===String(taskId));if(!hit&&!maint)return;const task=hit?.task||maint,member=satelliteMember(task.completedById||task.claimedById||task.assigneeId);
+ task.satelliteStatus='validated';if(maint){if(task.frequency&&!['Única','Conforme necessário'].includes(task.frequency)){task.date=nextMaintenanceDate(task.date,task.frequency);task.status='a_fazer';task.claimedById=null;task.assigneeId=null;task.completedById=null;task.declinedByIds=[];task.satelliteStatus=task.responsibility==='help'?'available':task.responsibility==='delegated'?'assigned':'open'}else task.status='concluida'}else task.done=true;
+ if(member?.role==='kids'&&task.pointsEnabled&&!task.pointsAwardedAt){awardKidsPoints(member.id,Math.max(1,+task.pointsValue||1),task.name);task.pointsAwardedAt=Date.now()}saveCasa(d);renderCasa()
+}
+function ensureSatelliteStyles(){if(document.getElementById('bertha-sat-v3'))return;const s=document.createElement('style');s.id='bertha-sat-v3';s.textContent=`
+.sat-page{display:grid!important;gap:14px!important;padding:0 0 10px!important}
+.sat-hero{display:block!important;padding:22px!important;border-radius:28px!important;background:linear-gradient(135deg,#fbf4ec 0%,#edf3f4 52%,#f3edf7 100%)!important;border:1px solid rgba(113,96,130,.09)!important;box-shadow:0 12px 28px rgba(74,57,69,.05)!important}
+.sat-hero .eyebrow,.sat-card .eyebrow,.sat-mini-card .eyebrow{font-size:10px;letter-spacing:.18em;font-weight:500;color:#84778b}
+.sat-hero h2{margin:7px 0 9px!important;font-size:27px!important;font-weight:430!important;color:#3f3944!important;line-height:1.12!important}
+.sat-hero p{margin:0!important;color:#766f7a!important;font-size:13px!important;line-height:1.48!important}
+.sat-hero-badges{display:flex;flex-wrap:wrap;gap:8px;margin-top:14px}
+.sat-hero-badges span{display:inline-flex;align-items:center;justify-content:center;padding:7px 11px;border-radius:999px;background:rgba(255,255,255,.8);border:1px solid rgba(113,96,130,.08);color:#706775;font-size:11px;font-weight:500}
+.sat-actions{display:flex!important;gap:8px!important;flex-wrap:wrap!important;align-items:center!important}
+.sat-actions button,.sat-card button,.sat-page .primary,.sat-page .secondary{border-radius:999px;min-height:40px;padding:9px 14px;font-size:12px;font-weight:500}
+.sat-page .primary{border:1px solid rgba(170,133,157,.16);background:linear-gradient(115deg,#f1c4d5,#e7d7f1 50%,#d7eee8);color:#5f5260}
+.sat-page .secondary{border:1px solid rgba(113,96,130,.10);background:rgba(255,255,255,.88);color:#766d77}
+.sat-cloud-note{display:flex!important;gap:10px!important;align-items:flex-start!important;padding:12px 14px!important;border-radius:18px!important;background:linear-gradient(145deg,rgba(237,244,242,.88),rgba(252,248,243,.92))!important;border:1px solid rgba(113,96,130,.07)!important;font-size:11.5px!important;color:#6f7773!important;line-height:1.45!important}
+.sat-intro-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}
+.sat-mini-card{padding:14px 15px;border-radius:20px;background:linear-gradient(145deg,rgba(255,255,255,.9),rgba(249,246,243,.96));border:1px solid rgba(113,96,130,.08)}
+.sat-mini-card strong{display:block;font-size:13px;font-weight:520;color:#49414e}
+.sat-mini-card small{display:block;margin-top:4px;font-size:11px;line-height:1.45;color:#877e88}
+.sat-card.card{display:block!important;padding:16px!important;border-radius:26px!important;background:linear-gradient(145deg,rgba(255,255,255,.93),rgba(250,247,244,.98))!important;border:1px solid rgba(113,96,130,.08)!important;box-shadow:0 10px 24px rgba(74,57,69,.04)!important}
+.sat-member{display:grid!important;grid-template-columns:46px minmax(0,1fr) auto!important;gap:12px!important;align-items:center!important;padding:16px!important;border-radius:22px!important;background:linear-gradient(145deg,rgba(255,255,255,.86),rgba(248,246,243,.94))!important;border:1px solid rgba(113,96,130,.08)!important}
+.sat-member+.sat-member{margin-top:10px}
+.sat-avatar{width:46px;height:46px;border-radius:16px;display:grid;place-items:center;background:linear-gradient(135deg,#f3dde7,#e2efe7 58%,#ece6f6);font-size:18px;color:#6a6071}
+.sat-member strong{display:block;font-weight:520;color:#443d48}
+.sat-member small{display:block;margin-top:4px;color:#8a818c;line-height:1.35}
+.sat-role{display:inline-flex;font-size:10px;padding:5px 8px;border-radius:999px;background:#f5ede8;color:#7b6d72;margin-bottom:8px}
+.sat-empty{padding:26px 18px;border-radius:20px;text-align:center;color:#8a818c;background:linear-gradient(145deg,rgba(249,247,244,.8),rgba(255,255,255,.95));border:1px dashed rgba(113,96,130,.16);line-height:1.45}
+.sat-empty-mini{display:grid;gap:8px;padding:12px;border-radius:16px;background:linear-gradient(145deg,rgba(249,247,244,.8),rgba(255,255,255,.95));border:1px dashed rgba(113,96,130,.16)}
+.sat-inline-add{border:0;background:linear-gradient(115deg,#f1c4d5,#e7d7f1 50%,#d7eee8);color:#5d5360;border-radius:999px;min-height:36px;padding:0 14px;font-size:12px;font-weight:520;justify-self:start}
+.sat-resp-block{display:grid;gap:7px;margin:12px 0}.sat-label{font-size:13px;font-weight:500;color:#5f5662}.sat-resp-options{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;background:rgba(255,255,255,.45);padding:4px;border-radius:16px}.sat-resp-options button{border:0;background:transparent;border-radius:13px;min-height:38px;color:#756d78;font-weight:500}.sat-resp-options button.active{background:linear-gradient(135deg,#ecdce5,#dce9df);color:#654f5d}
+.sat-check{display:flex!important;align-items:flex-start!important;gap:12px!important;padding:12px!important;margin:0!important;border-radius:18px!important;background:rgba(255,255,255,.82)!important;border:1px solid rgba(113,96,130,.09)!important;cursor:pointer!important;user-select:none!important;position:relative!important}
+.sat-check input[type=checkbox]{-webkit-appearance:none!important;appearance:none!important;width:20px!important;height:20px!important;min-width:20px!important;min-height:20px!important;max-width:20px!important;max-height:20px!important;border-radius:6px!important;border:1.5px solid rgba(137,121,142,.34)!important;background:#fffdfa!important;display:inline-grid!important;place-content:center!important;box-shadow:none!important;margin:1px 0 0!important;padding:0!important;flex:0 0 20px!important;position:relative!important;opacity:1!important;pointer-events:auto!important}
+.sat-check input[type=checkbox]:checked{background:linear-gradient(135deg,#dca7b5,#cbd9ea 70%,#bfe1d1)!important;border-color:transparent!important}
+.sat-check input[type=checkbox]:checked::after{content:'✓'!important;color:#fff!important;font-size:13px!important;line-height:1!important;font-weight:700!important}
+.sat-check span{display:grid!important;gap:3px!important;min-width:0!important}
+.sat-check span strong{font-size:13px!important;font-weight:520!important;color:#4b4350!important}
+.sat-check span small{font-size:11px!important;line-height:1.38!important;color:#8a808c!important}
+.sat-permissions{display:grid;gap:10px;margin:4px 0 2px}
+.sat-editor-form{gap:14px!important}
+.sat-editor-fields{display:grid;gap:12px}
+.sat-task-chip{display:inline-flex!important;width:max-content;margin:6px 5px 0 0;padding:4px 8px;border-radius:999px;font-size:9.5px!important;font-weight:500!important}.sat-task-chip.help{background:#eef1e4;color:#687057}.sat-task-chip.delegated{background:#f1e7ec;color:#775d6c}.sat-task-chip.points{background:#fff0c9;color:#80681d}.sat-validate{background:linear-gradient(135deg,#ead5df,#dce8dc)!important;color:#685566!important}
+.sat-day-head{display:flex;align-items:center;justify-content:space-between;gap:10px}.sat-day-back{border:0;background:rgba(255,255,255,.7);border-radius:999px;padding:8px 11px;color:#706672}.sat-mission{padding:15px;border-radius:20px;background:rgba(255,255,255,.78);border:1px solid rgba(113,96,130,.08);display:grid;gap:9px}.sat-mission strong{font-weight:520}.sat-mission small{color:#837a85}.sat-mission-actions{display:flex;gap:7px;flex-wrap:wrap}.sat-mission-actions button{border:0;border-radius:999px;padding:8px 12px;background:#f2e9ee;color:#6d5966;font-weight:500}.sat-mission-actions .go{background:linear-gradient(135deg,#e8d8e1,#dbe8df)}
+.kids-hero{background:linear-gradient(135deg,#fff2cf,#e4eefc 52%,#efdef3)}.kids-progress{height:10px;border-radius:999px;background:rgba(255,255,255,.75);overflow:hidden;margin-top:9px}.kids-progress span{display:block;height:100%;background:linear-gradient(90deg,#84b6e7,#d7a8d1);border-radius:inherit}.kids-awards{display:flex;gap:7px;flex-wrap:wrap}.kids-awards span{padding:7px 10px;border-radius:999px;background:#fff7e1;font-size:11px}
+.sat-event-list{display:grid;gap:10px;margin-top:12px}.sat-event{display:grid;grid-template-columns:28px minmax(0,1fr);gap:10px;align-items:flex-start;padding:12px;border-radius:18px;background:rgba(255,255,255,.82);border:1px solid rgba(113,96,130,.08)}.sat-event>span{width:28px;height:28px;border-radius:999px;display:grid;place-items:center;background:linear-gradient(135deg,#e9d4df,#dceae2);color:#6a5965;font-size:13px;font-weight:700}.sat-event small{display:block;margin-top:4px;color:#8a808a}.sat-event.unread{background:linear-gradient(145deg,rgba(252,245,249,.96),rgba(244,248,246,.96))}
+.sat-modal .modal-card{background:linear-gradient(145deg,#fbf7ef,#f4f5f0)!important}
+@media(max-width:560px){.sat-intro-grid{grid-template-columns:1fr}.sat-member{grid-template-columns:42px minmax(0,1fr);align-items:start}.sat-member>span:last-child{grid-column:2/3}.sat-actions{align-items:stretch}.sat-actions button{flex:1 1 auto}}
+`;document.head.appendChild(s)}
+function ensureSatelliteIdentityV4(){if(document.getElementById('bertha-sat-v4'))return;const s=document.createElement('style');s.id='bertha-sat-v4';s.textContent=`
+.sat-hero-ideal{min-height:190px!important;display:flex!important;justify-content:space-between!important;align-items:flex-start!important;gap:18px!important;background:linear-gradient(135deg,rgba(249,205,218,.68) 0%,rgba(255,245,224,.78) 42%,rgba(218,234,252,.86) 100%)!important;border-color:rgba(170,157,177,.13)!important}.sat-hero-copy{min-width:0}.sat-hero-ideal h2{font-size:29px!important;font-weight:400!important;letter-spacing:-.025em!important;line-height:1.06!important;color:#3f3945!important}.sat-hero-ideal p{font-size:14px!important;max-width:470px!important;color:#756d78!important}.sat-hero-icon{width:48px;height:48px;flex:0 0 48px;display:grid;place-items:center;color:rgba(105,116,151,.5);font-size:30px}.sat-hero-icon svg{width:42px;height:42px;fill:none;stroke:currentColor;stroke-width:1.35;stroke-linecap:round;stroke-linejoin:round}.sat-main-actions .primary{width:100%;min-height:48px!important;background:linear-gradient(100deg,rgba(231,143,177,.9),rgba(247,215,183,.9) 48%,rgba(195,219,244,.92))!important;color:#fff!important;border:1px solid rgba(181,145,169,.15)!important;font-size:14px!important;font-weight:520!important}.sat-main-actions .secondary{width:100%;min-height:44px!important}.sat-modal .modal-card{background:linear-gradient(145deg,rgba(255,247,245,.99),rgba(255,250,238,.98) 48%,rgba(235,245,255,.98))!important}.sat-modal .modal-head h2{font-weight:430!important;letter-spacing:-.018em!important}.sat-permission{width:100%!important;display:grid!important;grid-template-columns:24px minmax(0,1fr)!important;gap:12px!important;text-align:left!important;align-items:start!important;padding:13px 14px!important;border-radius:18px!important;border:1px solid rgba(125,116,138,.11)!important;background:rgba(255,255,255,.78)!important;color:#514955!important;min-height:66px!important;cursor:pointer!important;-webkit-tap-highlight-color:transparent!important}.sat-permission .sat-perm-check{width:22px!important;height:22px!important;border-radius:7px!important;border:1.5px solid rgba(126,117,137,.34)!important;background:#fff!important;display:grid!important;place-items:center!important;color:#fff!important;font-size:13px!important;font-weight:700!important}.sat-permission span:last-child{display:grid!important;gap:3px!important}.sat-permission strong{font-size:13px!important;font-weight:520!important}.sat-permission small{font-size:11px!important;font-weight:400!important;line-height:1.4!important;color:#8a818c!important}.sat-permission.is-on{background:linear-gradient(135deg,rgba(249,224,231,.9),rgba(246,241,231,.9) 52%,rgba(229,239,250,.92))!important;border-color:rgba(187,151,174,.18)!important}.sat-permission.is-on .sat-perm-check{background:linear-gradient(135deg,#dfa9ba,#aebfdf)!important;border-color:transparent!important}.sat-kids-config{padding:16px;border-radius:22px;background:linear-gradient(135deg,rgba(255,240,210,.72),rgba(239,230,250,.78),rgba(224,240,249,.78));border:1px solid rgba(140,123,150,.10)}.sat-kids-config[hidden]{display:none!important}.sat-kids-config p{font-size:11.5px;color:#7c7480;line-height:1.45}.sat-kids-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:12px}.sat-kids-grid label{font-size:11px!important}.sat-kids-grid input{margin-top:5px!important}.invite-hero .sat-hero-icon{font-size:38px}@media(max-width:560px){.sat-hero-ideal{min-height:178px!important}.sat-hero-ideal h2{font-size:27px!important}.sat-kids-grid{grid-template-columns:1fr 1fr}}
+`;document.head.appendChild(s)}
+function satelliteAvatarIcon(key='family'){
+ const icons={
+  family:'<circle cx="8" cy="8" r="2.4"/><circle cx="16" cy="8" r="2.4"/><circle cx="12" cy="13" r="2.2"/><path d="M3.5 20c.5-3.4 2.2-5 4.8-5M20.5 20c-.5-3.4-2.2-5-4.8-5M7.5 21c.5-3.1 2-4.6 4.5-4.6s4 1.5 4.5 4.6"/>',
+  son:'<circle cx="12" cy="9" r="3.1"/><path d="M7.2 20c.7-4 2.4-6 4.8-6s4.1 2 4.8 6M9 6.8c.6-1.9 2.1-3.1 4.1-3.1 1.3 0 2.3.4 3.1 1.1"/>',
+  daughter:'<circle cx="12" cy="9.2" r="3"/><path d="M7.2 20c.7-4 2.4-6 4.8-6s4.1 2 4.8 6M8.5 7c.4-2.2 1.8-3.5 3.7-3.5 2 0 3.4 1.2 3.8 3.4M8.7 8.4c-.9.4-1.6 1.2-1.9 2.2M15.3 8.4c.9.4 1.6 1.2 1.9 2.2"/>',
+  partner_m:'<circle cx="10" cy="8" r="2.8"/><path d="M4.8 20c.7-4.1 2.5-6.1 5.2-6.1s4.5 2 5.2 6"/><path d="M16.4 8.2c1.6-2.2 4.6-.9 4.6 1.4 0 2.7-4.6 5.5-4.6 5.5s-4.6-2.8-4.6-5.5c0-2.3 3-3.6 4.6-1.4Z"/>',
+  partner_f:'<circle cx="10" cy="8.2" r="2.8"/><path d="M4.8 20c.7-4.1 2.5-6.1 5.2-6.1s4.5 2 5.2 6M7.2 7.8c.2-2.4 1.3-3.7 3-3.7 1.8 0 3 1.2 3.3 3.5"/><path d="M16.4 8.2c1.6-2.2 4.6-.9 4.6 1.4 0 2.7-4.6 5.5-4.6 5.5s-4.6-2.8-4.6-5.5c0-2.3 3-3.6 4.6-1.4Z"/>',
+  friend_m:'<circle cx="8.5" cy="8" r="2.5"/><circle cx="15.5" cy="8" r="2.5"/><path d="M3.5 20c.6-3.7 2.3-5.6 5-5.6M20.5 20c-.6-3.7-2.3-5.6-5-5.6M8.5 15.5c.8 1.1 2 1.7 3.5 1.7s2.7-.6 3.5-1.7"/>',
+  friend_f:'<circle cx="8.5" cy="8.3" r="2.5"/><circle cx="15.5" cy="8.3" r="2.5"/><path d="M3.5 20c.6-3.7 2.3-5.6 5-5.6M20.5 20c-.6-3.7-2.3-5.6-5-5.6M6 7.2c.3-2 1.2-3 2.7-3M13 7.2c.3-2 1.2-3 2.7-3"/>',
+  mother:'<circle cx="12" cy="8.5" r="2.8"/><path d="M6.5 20c.7-4 2.5-6 5.5-6s4.8 2 5.5 6M8.5 7.3c.3-2.4 1.5-3.7 3.5-3.7s3.2 1.3 3.5 3.7"/><path d="M5.5 10.5c-.8 2.3.2 4.4 2.4 5.5M18.5 10.5c.8 2.3-.2 4.4-2.4 5.5"/>',
+  father:'<circle cx="12" cy="8" r="2.8"/><path d="M6.5 20c.7-4 2.5-6 5.5-6s4.8 2 5.5 6M9 5.2c1.3-1.2 3.7-1.5 5.2-.3"/>',
+  // legacy keys kept so existing saved satellites never break
+  person:'<circle cx="12" cy="8" r="3"/><path d="M5.5 20c.8-4 3-6 6.5-6s5.7 2 6.5 6"/>',
+  people:'<circle cx="9" cy="8" r="2.6"/><circle cx="16.5" cy="9" r="2.2"/><path d="M3.8 19c.7-3.6 2.8-5.5 5.8-5.5 2.6 0 4.5 1.4 5.3 4M14.5 14.5c2.7.1 4.5 1.5 5.2 4.5"/>',
+  star:'<path d="m12 3 2.3 4.8 5.2.7-3.8 3.7.9 5.3-4.6-2.5-4.6 2.5.9-5.3-3.8-3.7 5.2-.7z"/>',
+  heart:'<path d="M20 7.2c0 5-8 10.3-8 10.3S4 12.2 4 7.2A4.2 4.2 0 0 1 11.5 4L12 4.6l.5-.6A4.2 4.2 0 0 1 20 7.2z"/>',
+  bolt:'<path d="M13.5 2 6 13h5l-1 9 8-12h-5z"/>',
+  home:'<path d="M4 11.5 12 5l8 6.5"/><path d="M6.5 10.5V20h11v-9.5M10 20v-5h4v5"/>',
+  book:'<path d="M4 5.5A3.5 3.5 0 0 1 7.5 2H11v17H7.5A3.5 3.5 0 0 0 4 22zM20 5.5A3.5 3.5 0 0 0 16.5 2H13v17h3.5A3.5 3.5 0 0 1 20 22z"/>',
+  sport:'<circle cx="12" cy="5" r="2"/><path d="m9.5 9 2.5-2 2.5 2 2 4M12 11l-2 4-4 3M13 13l3 3 2 4"/>',
+  pet:'<path d="M8 10c-1.4 0-2.5-1.3-2.5-2.8S6.3 4.5 7.6 4.5 10 5.8 10 7.2 9.4 10 8 10Zm8 0c-1.4 0-2.5-1.3-2.5-2.8S14.3 4.5 15.6 4.5 18 5.8 18 7.2 17.4 10 16 10Z"/><path d="M12 11.5c4 0 6.5 3 5.2 5.4-.9 1.6-2.8 1.1-5.2 1.1s-4.3.5-5.2-1.1C5.5 14.5 8 11.5 12 11.5Z"/>'
+ };
+ return `<svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.45" stroke-linecap="round" stroke-linejoin="round">${icons[key]||icons.family}</svg>`
+}
+const SATELLITE_AVATARS=[['son','Filho'],['daughter','Filha'],['partner_m','Companheiro'],['partner_f','Companheira'],['friend_m','Amigo'],['friend_f','Amiga'],['mother','Mãe'],['father','Pai'],['family','Família']];
+function satelliteAvatarChooser(selected='person'){return `<div class="sat-avatar-picker" role="radiogroup" aria-label="Ícone do satélite">${SATELLITE_AVATARS.map(([k,l])=>`<button type="button" class="sat-avatar-choice ${k===selected?'active':''}" data-avatar="${k}" role="radio" aria-checked="${k===selected?'true':'false'}" aria-label="${l}">${satelliteAvatarIcon(k)}<small>${l}</small></button>`).join('')}</div>`}
+function openSatelliteEditor(id){
+ ensureSatelliteStyles();ensureSatelliteIdentityV4();
+ const data=loadSatellites(),old=data.members.find(m=>String(m.id)===String(id)),dlg=document.createElement('dialog');
+ dlg.className='bertha-dialog casa-dialog sat-modal sat-ideal-modal';
+ const perms=old?.permissions||{};
+ const kids=old?.kids||{points:true,medals:true,trophy:true,skins:true};
+ const avatar=old?.avatarKey||'family';
+ dlg.innerHTML=`<form class="modal-card casa-modal-card sat-editor-form" id="satForm"><div class="modal-head"><div><div class="eyebrow">REDE BERTH.A</div><h2>${old?'Editar satélite':'Novo satélite'}</h2></div><button type="button" class="icon-btn casa-modal-x" data-close>×</button></div><div class="sat-editor-fields"><label>Nome<input id="satName" required value="${escapeHtml(old?.name||'')}" placeholder="Ex.: Henrique"></label><label>Tipo<select id="satRole"><option value="adult" ${old?.role==='adult'?'selected':''}>Adulto</option><option value="kids" ${old?.role==='kids'?'selected':''}>Kids</option></select></label><div class="sat-avatar-field"><span>Quem é essa pessoa para você?</span>${satelliteAvatarChooser(avatar)}<input type="hidden" id="satAvatarKey" value="${avatar}"></div></div><div class="sat-permissions"><div class="eyebrow">PERMISSÕES</div>${satPermissionRow('satCasa','Casa e tarefas compartilhadas','Recebe rotinas delegadas, aceita ajuda e pode ter Meu Dia próprio.',perms.casa!==false)}${satPermissionRow('satCompras','Lista de Compras','Visualiza a lista compartilhada e pode ajudar nas compras.',!!perms.compras)}${satPermissionRow('satPlanos','Planos compartilhados','Recebe apenas os planos que você autorizar.',!!perms.planos)}${satPermissionRow('satConvites','Convites','Pode receber convites para almoço, academia, passeios e outros momentos compartilhados.',!!perms.convites)}</div><div id="satKidsBlock" class="sat-kids-settings" ${old?.role==='kids'?'':'hidden'}><div class="eyebrow">GAMIFICAÇÃO KIDS</div><p class="sat-section-note">A BERTH.A registra progresso e conquistas. A recompensa real continua sendo combinada em casa.</p>${satPermissionRow('satKidsPoints','Pontos por missões','Tarefas concluídas podem somar pontos à temporada.',kids.points!==false)}${satPermissionRow('satKidsMedals','Medalhas','Desbloqueia medalhas conforme o progresso.',kids.medals!==false)}${satPermissionRow('satKidsTrophy','Troféu da temporada','Permite uma conquista especial no ciclo.',kids.trophy!==false)}${satPermissionRow('satKidsSkins','Skins e desbloqueios','Libera elementos visuais conforme as conquistas.',kids.skins!==false)}</div>${satPermissionRow('satValidation','Conclusões precisam de validação do Owner','O período é concluído pelo satélite; a validação confirma a conquista/pontuação.',old?.requiresValidation||old?.role==='kids')}<div class="modal-actions"><div class="grow"></div><button type="button" class="secondary" data-close>Cancelar</button><button class="primary" type="submit">Salvar</button></div></form>`;
+ document.body.appendChild(dlg);
+ const close=()=>dlg.close();dlg.querySelectorAll('[data-close]').forEach(b=>b.onclick=close);dlg.onclose=()=>dlg.remove();
+ dlg.querySelectorAll('.sat-permission').forEach(row=>row.addEventListener('click',e=>{e.preventDefault();const input=row.querySelector('input');input.checked=!input.checked;row.setAttribute('aria-checked',String(input.checked));row.classList.toggle('is-checked',input.checked)}));
+ dlg.querySelectorAll('[data-avatar]').forEach(b=>b.onclick=()=>{dlg.querySelectorAll('[data-avatar]').forEach(x=>{x.classList.toggle('active',x===b);x.setAttribute('aria-checked',String(x===b))});dlg.querySelector('#satAvatarKey').value=b.dataset.avatar});
+ const syncKids=()=>{const isKids=dlg.querySelector('#satRole').value==='kids';dlg.querySelector('#satKidsBlock').hidden=!isKids;if(isKids){dlg.querySelector('#satValidation').checked=true;const r=dlg.querySelector('#satValidation').closest('.sat-permission');r?.classList.add('is-checked');r?.setAttribute('aria-checked','true');}};dlg.querySelector('#satRole').onchange=syncKids;syncKids();
+ dlg.querySelector('#satForm').onsubmit=e=>{e.preventDefault();const m=old||{id:satId(),status:'active',createdAt:Date.now()};m.name=dlg.querySelector('#satName').value.trim();m.role=dlg.querySelector('#satRole').value;m.avatarKey=dlg.querySelector('#satAvatarKey').value||'person';m.permissions={casa:dlg.querySelector('#satCasa').checked,compras:dlg.querySelector('#satCompras').checked,planos:dlg.querySelector('#satPlanos').checked,convites:dlg.querySelector('#satConvites').checked};m.requiresValidation=m.role==='kids'||dlg.querySelector('#satValidation').checked;m.kids={points:dlg.querySelector('#satKidsPoints').checked,medals:dlg.querySelector('#satKidsMedals').checked,trophy:dlg.querySelector('#satKidsTrophy').checked,skins:dlg.querySelector('#satKidsSkins').checked};if(!m.name){dlg.querySelector('#satName').focus();return}if(!old)data.members.push(m);saveSatellites(data);close();renderSatellites()};
+ dlg.showModal()
+}
+function satPermissionRow(id,title,desc,checked){return `<button type="button" class="sat-permission ${checked?'is-checked':''}" role="checkbox" aria-checked="${checked?'true':'false'}"><input type="checkbox" id="${id}" ${checked?'checked':''} tabindex="-1" aria-hidden="true"><span class="sat-checkbox" aria-hidden="true"></span><span class="sat-permission-copy"><strong>${title}</strong><small>${desc}</small></span></button>`}
+
+function renderSatellites(){
+ ensureSatelliteStyles();ensureSatelliteIdentityV4();
+ const data=loadSatellites(),members=data.members.filter(m=>m.status!=='removed'),events=loadSatelliteOwnerEvents(),unread=events.filter(e=>!e.read).length,permission=(typeof Notification!=='undefined'?Notification.permission:'unsupported');
+ const networkMark=`<svg class="sat-hero-icon" viewBox="0 0 48 48" aria-hidden="true"><circle cx="15" cy="21" r="4"/><circle cx="33" cy="21" r="4"/><circle cx="24" cy="28" r="3.6"/><path d="M8 38c.9-6 3.4-9 7-9M40 38c-.9-6-3.4-9-7-9M17.5 40c.8-5 3-7.5 6.5-7.5s5.7 2.5 6.5 7.5"/><path d="M24 9.7c1.5-2 4.4-.8 4.4 1.4 0 2.5-4.4 5-4.4 5s-4.4-2.5-4.4-5c0-2.2 2.9-3.4 4.4-1.4Z"/></svg>`;
+ app.innerHTML=`<div class="sat-page"><section class="sat-hero sat-ideal-hero"><div class="sat-hero-copy"><div class="eyebrow">REDE BERTH.A</div><h2>Everything handled.<br>Nothing carried.</h2><p>Você conta com a BERTH.A. A BERTH.A conta com os seus.</p></div>${networkMark}</section><div class="sat-actions"><button class="primary sat-main-cta" id="addSatellite">＋ Adicionar satélite</button>${permission!=='granted'&&permission!=='unsupported'?'<button class="secondary" id="satEnableNotifications">Ativar notificações do Owner</button>':''}</div><div class="sat-cloud-note">Compartilhe apenas o que faz sentido. Cada satélite recebe somente os recortes que você autorizar.</div>${events.length?`<section class="sat-card card"><div class="panel-head"><div><h3>Atividade da rede</h3><p class="note">${unread?`${unread} nova${unread===1?'':'s'} para o Owner.`:'Tudo visto.'}</p></div><button type="button" class="secondary" id="satMarkRead">Marcar como visto</button></div><div class="sat-event-list">${events.slice(0,6).map(e=>`<div class="sat-event ${e.read?'':'unread'}"><span>✓</span><div><strong>${escapeHtml(e.memberName)} concluiu ${escapeHtml(e.taskName)}</strong><small>${new Date(e.at).toLocaleString('pt-BR',{day:'2-digit',month:'2-digit',hour:'2-digit',minute:'2-digit'})}</small></div></div>`).join('')}</div></section>`:''}<section class="sat-card card"><div class="panel-head"><div><h3>Minha rede</h3><p class="note">Pessoas que participam apenas dos recortes que você compartilha.</p></div><span class="pill">${members.length}</span></div>${members.length?members.map(m=>`<div class="sat-member"><span class="sat-avatar">${satelliteAvatarIcon(m.avatarKey||'family')}</span><span><strong>${escapeHtml(m.name)}</strong><small>${[m.permissions?.casa!==false?'Casa':'',m.permissions?.compras?'Compras':'',m.permissions?.planos?'Planos':'',m.permissions?.convites?'Convites':''].filter(Boolean).join(' · ')}</small></span><span><span class="sat-role">${m.role==='kids'?'KIDS':'ADULTO'}</span><div class="sat-actions"><button type="button" class="secondary" data-sat-preview="${m.id}">Ver perfil</button><button type="button" class="secondary" data-sat-edit="${m.id}">Editar</button></div></span></div>`).join(''):`<div class="sat-empty">Adicione o primeiro satélite para começar sua rede.</div>`}</section></div>`;
+ document.querySelector('#addSatellite').onclick=()=>openSatelliteEditor();document.querySelector('#satEnableNotifications')?.addEventListener('click',requestSatelliteOwnerNotifications);document.querySelector('#satMarkRead')?.addEventListener('click',()=>{const x=loadSatelliteOwnerEvents();x.forEach(e=>e.read=true);saveSatelliteOwnerEvents(x);renderSatellites()});document.querySelectorAll('[data-sat-edit]').forEach(b=>b.onclick=()=>openSatelliteEditor(b.dataset.satEdit));document.querySelectorAll('[data-sat-preview]').forEach(b=>b.onclick=()=>{window.berthaHmlStorage.setItem(SATELLITE_PREVIEW_KEY,b.dataset.satPreview);location.hash='#satelite'})
+}
+
+function renderSatelliteDay(){
+ ensureSatelliteStyles();ensureSatelliteIdentityV4();const data=loadSatellites(),id=window.berthaHmlStorage.getItem(SATELLITE_PREVIEW_KEY),m=data.members.find(x=>String(x.id)===String(id));if(!m){location.hash='#satelites';return}
+ const tasks=m.permissions?.casa===false?[]:satelliteTaskList(m.id),kids=loadKidsProgress()[m.id]||{lifetime:0,season:0,awards:[]},next=50-(kids.season%50||0),pct=Math.min(100,(kids.season%50)/50*100);
+ const missionHtml=({task,area,kind})=>{const claimed=satelliteMember(task.claimedById||task.assigneeId),completed=satelliteMember(task.completedById),mine=String(task.claimedById||task.assigneeId||'')===String(m.id),done=kind==='maintenance'?task.status==='concluida':!!task.done;let actions='';
+   if(done){actions=`<span class="sat-task-chip ${task.satelliteStatus==='completed'?'delegated':'help'}">${completed?`Concluída por ${escapeHtml(completed.name)}`:'Concluída'}${task.satelliteStatus==='completed'?' · aguardando validação':''}</span>`}
+   else if(claimed&&!mine){actions=`<span class="sat-task-chip delegated">Assumida por ${escapeHtml(claimed.name)}</span>`}
+   else if(task.satelliteStatus==='available'||task.satelliteStatus==='assigned'){actions=`<button data-sat-accept="${task.id}" class="go">${task.satelliteStatus==='available'?'Assumir':'Aceitar'}</button><button data-sat-decline="${task.id}">Agora não</button>`}
+   else if(task.satelliteStatus==='accepted'&&mine){actions=`<button data-sat-start="${task.id}" class="go">Começar</button>`}
+   else if(task.satelliteStatus==='in_progress'&&mine){actions=`<button data-sat-complete="${task.id}" class="go">Concluir</button>`}
+   const detail=kind==='maintenance'?`${escapeHtml(area.title)} · ${maintenanceMinutes(task)} min${task.date?` · ${formatDate(task.date)}`:''}`:`${escapeHtml(area.title)} · ${escapeHtml(casaDuration(task.id))} · ${escapeHtml(casaTime(task.id))}`;return `<div class="sat-mission ${done?'done':''}"><div><strong>${escapeHtml(task.name)}</strong><small>${detail}</small>${task.pointsEnabled&&m.role==='kids'?`<span class="sat-task-chip points">+${+task.pointsValue||0} pts</span>`:''}</div><div class="sat-mission-actions">${actions}</div></div>`};
+ app.innerHTML=`<div class="sat-page"><div class="sat-day-head"><button class="sat-day-back" id="satBack">← Owner</button><span class="sat-role">${m.role==='kids'?'KIDS':'SATÉLITE'}</span></div><section class="sat-hero sat-ideal-hero sat-member-hero"><div class="sat-hero-copy"><div class="eyebrow">${m.role==='kids'?'MINHA TEMPORADA':'SEU ESPAÇO NA REDE'}</div><h2>Your life, with somewhere to land.</h2><p>${m.role==='kids'?`Missões, convites e recortes compartilhados com você chegam aqui. ${kids.season||0} pontos nesta temporada.`:'Aqui chegam apenas tarefas, convites e planos que foram compartilhados com você.'}</p>${m.role==='kids'?`<div class="kids-progress"><span style="width:${pct}%"></span></div>`:''}</div><span class="sat-hero-icon sat-member-avatar">${satelliteAvatarIcon(m.avatarKey||'family')}</span></section>${m.role==='kids'&&kids.awards?.length?`<section class="card"><div class="eyebrow">CONQUISTAS</div><div class="kids-awards">${kids.awards.slice(-8).map(a=>`<span>${a.type==='egg'?'🥚':a.type==='trophy'?'🏆':a.type==='skin'?'✦':'●'} ${escapeHtml(a.name)}</span>`).join('')}</div></section>`:''}<section class="card"><div class="panel-head"><div><h3>${m.role==='kids'?'Missões':'Tarefas'}</h3><p class="note">${m.role==='kids'?'Conclua missões para ganhar pontos e desbloquear conquistas.':'Assuma ajuda ou execute o que foi delegado a você.'}</p></div><span class="pill">${tasks.filter(x=>!x.task.done).length}</span></div>${tasks.length?tasks.map(missionHtml).join(''):`<div class="sat-empty">Nada pendente por aqui.</div>`}</section></div>`;
+ document.querySelector('#satBack').onclick=()=>{location.hash='#satelites'};
+ document.querySelectorAll('[data-sat-accept]').forEach(b=>b.onclick=()=>setSatelliteTaskState(b.dataset.satAccept,m.id,'accepted'));
+ document.querySelectorAll('[data-sat-decline]').forEach(b=>b.onclick=()=>setSatelliteTaskState(b.dataset.satDecline,m.id,'declined'));
+ document.querySelectorAll('[data-sat-start]').forEach(b=>b.onclick=()=>setSatelliteTaskState(b.dataset.satStart,m.id,'in_progress'));
+ document.querySelectorAll('[data-sat-complete]').forEach(b=>b.onclick=()=>setSatelliteTaskState(b.dataset.satComplete,m.id,'completed'))
+}
+const SAT_INVITES_KEY='bertha.satellites.invites.v1';
+function renderKidsRewards(){
+ ensureSatelliteStyles();ensureSatelliteIdentityV4();
+ const data=loadSatellites(),kids=(data.members||[]).filter(m=>m.status!=='removed'&&m.role==='kids');
+ const awardIcon=(t)=>t==='egg'?'◯':t==='trophy'?'♕':t==='skin'?'✦':'◇';
+ app.innerHTML=`<div class="sat-page rewards-page"><section class="sat-hero sat-ideal-hero rewards-hero"><div class="sat-hero-copy"><div class="eyebrow">KIDS · PREMIAÇÕES</div><h2>Pequenas conquistas.<br>Progresso visível.</h2><p>Defina os marcos que transformam pontos em medalhas, ovos, troféus e skins dentro da BERTH.A.</p></div><svg class="sat-hero-icon" viewBox="0 0 48 48" aria-hidden="true"><path d="M24 6l4.5 9 10 1.5-7.2 7 1.7 10-9-4.7-9 4.7 1.7-10-7.2-7 10-1.5z"/><path d="M18 35v7l6-3 6 3v-7"/></svg></section>${kids.length?kids.map(m=>{const c=kidsRewardsFor(m.id);return `<section class="sat-card card rewards-kid" data-rewards-kid="${m.id}"><div class="panel-head"><div><h3>${escapeHtml(m.name)}</h3><p class="note">Configure os desbloqueios desta criança.</p></div><span class="sat-avatar">${satelliteAvatarIcon(m.avatarKey||'son')}</span></div><div class="rewards-grid">${Object.entries(c).map(([key,r])=>`<div class="reward-row"><span class="reward-symbol">${awardIcon(r.type)}</span><label><span>${r.type==='medal'?'Medalha':r.type==='egg'?'Ovo / cápsula':r.type==='trophy'?'Troféu':'Skin'}</span><input type="text" data-reward-name="${key}" value="${escapeHtml(r.name||'')}"></label><label class="reward-points"><span>Pontos</span><input type="number" min="1" max="9999" inputmode="numeric" data-reward-points="${key}" value="${Math.max(1,+r.points||1)}"></label></div>`).join('')}</div><button type="button" class="primary rewards-save" data-rewards-save="${m.id}">Salvar premiações</button></section>`}).join(''):`<section class="sat-card card"><div class="sat-empty">Cadastre um satélite como Kids para configurar premiações.</div></section>`}</div>`;
+ document.querySelectorAll('[data-rewards-save]').forEach(btn=>{
+   btn.onclick=()=>{
+     const id=btn.dataset.rewardsSave;
+     const card=btn.closest('[data-rewards-kid]');
+     const all=loadKidsRewards();
+     const cfg=kidsRewardsFor(id);
+     Object.keys(cfg).forEach(key=>{
+       const nameEl=card.querySelector(`[data-reward-name="${key}"]`);
+       const pointsEl=card.querySelector(`[data-reward-points="${key}"]`);
+       cfg[key].name=nameEl?.value.trim()||cfg[key].name;
+       cfg[key].points=Math.max(1,+pointsEl?.value||cfg[key].points);
+     });
+     all[id]=cfg;
+     saveKidsRewards(all);
+     btn.textContent='Salvo';
+     setTimeout(()=>btn.textContent='Salvar premiações',900);
+   };
+ });
+}
+
+function renderConvites(){ensureSatelliteStyles();ensureSatelliteIdentityV4();const members=loadSatellites().members.filter(m=>m.status!=='removed'&&m.permissions?.convites),items=berthaRead(SAT_INVITES_KEY,[]);app.innerHTML=`<div class="sat-page"><section class="sat-hero sat-ideal-hero"><div class="sat-hero-copy"><div class="eyebrow">CONVITES</div><h2>Space to think.<br>Space to live.</h2><p>Você convida. A BERTH.A organiza o encontro.</p></div><svg class="sat-hero-icon" viewBox="0 0 64 64" aria-hidden="true"><path d="M20 18v-6M44 18v-6M14 25h36M16 16h32a4 4 0 0 1 4 4v30H12V20a4 4 0 0 1 4-4z"/><path d="M24 36l6 6 11-13"/></svg></section><button class="primary sat-main-cta" id="newInvite">＋ Novo convite</button><section class="sat-card card"><div class="panel-head"><div><h3>Convites</h3><p class="note">Cada pessoa escolhe se vai, talvez ou não vai.</p></div><span class="pill">${items.length}</span></div>${items.length?items.map(x=>`<div class="sat-member"><span class="sat-avatar">○</span><span><strong>${escapeHtml(x.title)}</strong><small>${escapeHtml(x.when||'Sem horário')} · ${x.targets?.length||0} convidado(s)</small></span></div>`).join(''):`<div class="sat-empty">Nenhum convite criado ainda.</div>`}</section></div>`;document.querySelector('#newInvite').onclick=()=>openInviteEditor(members)}
+function openInviteEditor(members){ensureSatelliteStyles();ensureSatelliteIdentityV4();const d=document.createElement('dialog');d.className='bertha-dialog casa-dialog sat-modal sat-ideal-modal';d.innerHTML=`<form class="modal-card casa-modal-card sat-editor-form" id="inviteForm"><div class="modal-head"><div><div class="eyebrow">CONVITES</div><h2>Novo convite</h2></div><button type="button" class="icon-btn casa-modal-x" data-close>×</button></div><div class="sat-editor-fields"><label>Convite<input id="inviteTitle" required placeholder="Ex.: Academia"></label><label>Quando?<input id="inviteWhen" placeholder="Ex.: Hoje · 18h"></label></div><div class="sat-permissions"><div class="eyebrow">CONVIDAR</div>${members.length?members.map(m=>satPermissionRow('invite_'+m.id,m.name,m.role==='kids'?'Kids':'Adulto',true)).join(''):'<div class="sat-empty">Nenhum satélite tem permissão para receber convites.</div>'}</div><div class="modal-actions"><div class="grow"></div><button type="button" class="secondary" data-close>Cancelar</button><button class="primary" type="submit" ${members.length?'':'disabled'}>Enviar convite</button></div></form>`;document.body.appendChild(d);d.querySelectorAll('[data-close]').forEach(b=>b.onclick=()=>d.close());d.onclose=()=>d.remove();d.querySelectorAll('.sat-permission').forEach(row=>row.onclick=e=>{e.preventDefault();const i=row.querySelector('input');i.checked=!i.checked;row.classList.toggle('is-checked',i.checked);row.setAttribute('aria-checked',String(i.checked))});d.querySelector('#inviteForm').onsubmit=e=>{e.preventDefault();const title=d.querySelector('#inviteTitle').value.trim();if(!title)return;const items=berthaRead(SAT_INVITES_KEY,[]);items.unshift({id:satId(),title,when:d.querySelector('#inviteWhen').value.trim(),targets:members.filter(m=>d.querySelector('#invite_'+m.id)?.checked).map(m=>m.id),createdAt:Date.now()});window.berthaHmlStorage.setItem(SAT_INVITES_KEY,JSON.stringify(items));d.close();renderConvites()};d.showModal()}
+
+window.renderSatellites=renderSatellites;window.renderSatelliteDay=renderSatelliteDay;window.validateSatelliteCasaTask=validateSatelliteCasaTask;window.renderConvites=renderConvites;
+
+function renderCasa(){
+ try{return renderCasaCore();}
+ catch(e){
+  console.error("BERTH.A Casa render error",e);
+  try{window.berthaHmlStorage.setItem("bertha.casa.lastError",String(e?.stack||e));}catch{}
+  app.innerHTML=`<section class="hero"><h2>🏠 Casa</h2><p>O módulo encontrou um dado antigo incompatível e foi recuperado.</p></section><div class="card"><strong>Casa recuperada</strong><p class="note">Seções antigas foram normalizadas para abrir sem perder seus dados.</p><button type="button" class="primary" id="retryCasa">Abrir Casa</button></div>`;
+  document.querySelector('#retryCasa')?.addEventListener('click',()=>{try{window.berthaHmlStorage.removeItem(CASA_RECIPES_KEY)}catch{};renderCasaCore()});
+ }
+}
+const casaV128=document.createElement('style');casaV128.id='casa-v128-final';casaV128.textContent=`
+.casa-routine-picker{position:relative;margin:0 0 14px;z-index:8}.casa-routine-picker-btn{width:100%!important;min-height:48px!important;display:flex!important;align-items:center!important;justify-content:space-between!important;padding:0 13px!important;border:1px solid rgba(132,106,118,.10)!important;border-radius:16px!important;background:linear-gradient(105deg,rgba(249,226,233,.72),rgba(238,246,237,.82))!important;color:#4b434d!important;box-shadow:none!important}.casa-routine-picker-label{display:flex!important;align-items:center!important;gap:8px!important;min-width:0}.casa-routine-picker-label strong{font-size:13.5px!important;font-weight:620!important;white-space:nowrap!important;overflow:hidden!important;text-overflow:ellipsis!important}.casa-routine-picker-label .casa-inline-icon{width:15px!important;height:15px!important;flex:0 0 15px!important}.casa-routine-picker-chevron{font-size:15px!important;color:#8a7d83!important}.casa-routine-picker-menu{position:relative!important;left:auto!important;right:auto!important;top:auto!important;margin-top:6px!important;padding:5px!important;border-radius:15px!important;background:rgba(255,252,249,.99)!important;border:1px solid rgba(132,106,118,.10)!important;box-shadow:0 10px 24px rgba(64,48,58,.08)!important;max-height:none!important}.casa-routine-picker-menu[hidden]{display:none!important}.casa-routine-picker-menu button{min-height:40px!important;width:100%!important;display:flex!important;align-items:center!important;justify-content:space-between!important;padding:8px 9px!important;border:0!important;border-radius:10px!important;background:transparent!important;color:#4b434d!important;text-align:left!important}.casa-routine-picker-menu button>span{display:flex!important;align-items:center!important;gap:8px!important}.casa-routine-picker-menu button strong{font-size:12.5px!important;font-weight:650!important}.casa-routine-picker-menu button small{font-size:9.5px!important;min-width:24px!important;padding:4px 7px!important;border-radius:999px!important;background:#f1e7dd!important;color:#7d7169!important;text-align:center!important}.casa-routine-picker-menu .casa-inline-icon{width:15px!important;height:15px!important;flex:0 0 15px!important}.casa-routine-picker-menu .casa-inline-icon svg{width:15px!important;height:15px!important}.casa-add-routine{width:100%!important;margin:12px 0 4px!important;min-height:42px!important;border-radius:14px!important;background:linear-gradient(115deg,rgba(244,221,229,.92),rgba(221,237,222,.96))!important;color:#685961!important;border:1px solid rgba(132,106,118,.08)!important;font-size:12.5px!important;font-weight:720!important}.casa-schedule-row{grid-template-columns:82px minmax(0,1fr) auto!important}.casa-schedule-edit{border:0!important;background:linear-gradient(115deg,#ecd1d9,#dbe9db)!important;color:#675962!important;border-radius:999px!important;padding:6px 9px!important;font-size:10.5px!important;font-weight:760!important}.casa-modal-card .modal-actions .primary,.casa-modal-card .study-v10-actions .primary,.casa-how-modal .casa-edit-procedure,.casa-how-modal #editCasaHow,.casa-how-modal #editManualCasa,.casa-recipe-edit,.home-edit{background:linear-gradient(110deg,#dca7b5 0%,#e6c6ba 45%,#bdd5bf 100%)!important;background-image:linear-gradient(110deg,#dca7b5 0%,#e6c6ba 45%,#bdd5bf 100%)!important;color:#5e5057!important;border:0!important;box-shadow:none!important}.casa-modal-card .modal-actions .secondary,.casa-modal-card .study-v10-actions .secondary{background:linear-gradient(135deg,#e6f0e5,#dcebdc)!important;color:#5d6e5f!important}.casa-web-grid{display:grid!important;grid-template-columns:1fr!important;gap:7px!important}.casa-web-link{min-height:48px!important;display:flex!important;align-items:center!important;justify-content:space-between!important;padding:9px 11px!important;border-radius:14px!important;background:linear-gradient(115deg,rgba(248,229,235,.62),rgba(238,247,237,.78))!important;border:1px solid rgba(132,106,118,.08)!important;color:#514951!important;font-size:12.5px!important;font-weight:650!important;box-shadow:none!important}.casa-web-link-main{display:flex!important;align-items:center!important;gap:9px!important;min-width:0!important}.casa-web-link .casa-inline-icon{width:16px!important;height:16px!important;flex:0 0 16px!important}.casa-web-link .casa-inline-icon svg{width:16px!important;height:16px!important}.casa-web-arrow{font-size:14px!important}.casa-web-card .note{font-size:12.5px!important;line-height:1.45!important;margin-bottom:9px!important}@media(max-width:560px){.casa-schedule-row{grid-template-columns:72px minmax(0,1fr) auto!important;gap:7px!important}.casa-schedule-edit{padding:6px 8px!important;font-size:10px!important}}
+`;document.head.appendChild(casaV128);
+const casaV132=document.createElement('style');casaV132.id='casa-v132-horarios-fonte';casaV132.textContent=`
+.casa-schedule-row{grid-template-columns:112px minmax(0,1fr) auto!important;align-items:center!important;gap:10px!important}
+.casa-time-stack{display:grid!important;gap:6px!important;justify-items:start!important;align-content:start!important;min-width:0!important}
+.casa-time-stack .casa-time{display:inline-flex!important;align-items:center!important;justify-content:center!important;min-height:28px!important;max-width:100%!important;padding:6px 8px!important;box-sizing:border-box!important;line-height:1.08!important;white-space:normal!important;text-align:center!important;font-size:10px!important;font-weight:800!important;overflow-wrap:break-word!important;word-break:normal!important}
+.casa-schedule-row>strong{line-height:1.18!important}
+.casa-product-row>div:last-child{display:grid!important;justify-items:end!important;gap:8px!important}
+.casa-substitute-btn{-webkit-appearance:none!important;appearance:none!important;-webkit-tap-highlight-color:transparent!important;outline:none!important;box-shadow:none!important;display:inline-flex!important;align-items:center!important;justify-content:center!important;min-height:30px!important;padding:0 12px!important;border-radius:999px!important;border:1px solid rgba(134,117,105,.12)!important;background:linear-gradient(115deg,rgba(245,235,225,.96),rgba(240,233,227,.96))!important;color:#776a61!important;text-transform:uppercase!important;letter-spacing:.04em!important;font-size:10.5px!important;font-weight:800!important}
+.casa-substitute-btn:focus,.casa-substitute-btn:focus-visible,.casa-substitute-btn:active{outline:none!important;box-shadow:none!important;background:linear-gradient(115deg,rgba(243,232,222,.98),rgba(236,229,223,.98))!important;color:#6f635b!important}
+@media(max-width:560px){.casa-schedule-row{grid-template-columns:100px minmax(0,1fr) auto!important;gap:8px!important}.casa-time-stack .casa-time{font-size:9.5px!important;padding:6px 7px!important}.casa-product-row{gap:12px!important}.casa-product-row>div:first-child{min-width:0!important}.casa-product-row>div:last-child{flex:0 0 auto!important}}
+`;document.head.appendChild(casaV132);
+
+function openCasaMaintenance(id){
+ const d=loadCasa();d.maintenance=d.maintenance||[];const current=id?d.maintenance.find(x=>String(x.id)===String(id)):null;
+ const m={id:current?.id||uid(),name:"",area:"Casa geral",type:"Reparo / conserto",date:"",durationValue:30,durationUnit:"minutes",priority:"normal",frequency:"Única",responsible:"Eu",notify:false,notifyWhen:"No horário da tarefa",period:"flex",time:"",note:"",status:"a_fazer",responsibility:"owner",assigneeIds:[],pointsEnabled:false,pointsValue:2,satelliteStatus:"open",claimedById:null,assigneeId:null,completedById:null,declinedByIds:[],...current};
+ const areas=["Casa geral",...(Array.isArray(d.areas)?d.areas:[]).map(a=>a.title),"Piscina","Jardim","Garagem","Edícula","Área externa"];
+ const sat=loadSatellites(),members=(sat.members||[]).filter(x=>x.status!=="removed"&&x.permissions?.casa!==false);
+ const selected=new Set((Array.isArray(m.assigneeIds)?m.assigneeIds:[]).map(String));
+ const targetHtml=members.map(x=>`<button type="button" class="maint-sat-option ${selected.has(String(x.id))?'is-selected':''}" data-maint-sat="${escapeHtml(x.id)}" aria-pressed="${selected.has(String(x.id))?'true':'false'}"><span class="maint-sat-check">${selected.has(String(x.id))?'✓':''}</span><span><strong>${escapeHtml(x.name)}</strong><small>${x.role==='kids'?'Kids':'Adulto'}</small></span></button>`).join('');
+ const dlg=document.createElement("dialog");dlg.className="study-v10-dialog casa-maint-dialog";
+ dlg.innerHTML=`<form class="study-v10-modal casa-maint-modal" id="casaMaintForm"><div class="study-v10-head"><div><div class="eyebrow">CASA · MANUTENÇÃO</div><h2>${current?"Editar manutenção":"Nova manutenção"}</h2><p>Ligada à área da casa, ao Meu Dia e ao tempo real.</p></div><button type="button" class="study-v10-x" data-close>×</button></div>
+ ${field("O que precisa ser feito?",`<input id="mName" required maxlength="100" value="${escapeHtml(m.name)}">`)}
+ <div class="form-grid">${field("Área / ambiente",`<select id="mArea">${areas.map(x=>`<option ${x===m.area?'selected':''}>${escapeHtml(x)}</option>`).join('')}</select>`)}${field("Tipo",`<select id="mType">${["Preventiva","Reparo / conserto","Melhoria","Limpeza técnica","Compra / instalação"].map(x=>`<option ${x===m.type?'selected':''}>${x}</option>`).join('')}</select>`)}</div>
+ <div class="form-grid">${field("Quando",`<input id="mDate" type="date" value="${escapeHtml(m.date||'')}">`)}${field("Período / janela",`<select id="mPeriod"><option value="flex" ${m.period==='flex'?'selected':''}>Flexível</option><option value="morning" ${m.period==='morning'?'selected':''}>Manhã</option><option value="afternoon" ${m.period==='afternoon'?'selected':''}>Tarde</option><option value="evening" ${m.period==='evening'?'selected':''}>Noite</option><option value="fixed" ${m.period==='fixed'?'selected':''}>Horário fixo</option></select>`)}</div>
+ ${field("Horário opcional",`<input id="mTime" type="time" value="${escapeHtml(m.time||'')}">`)}
+ ${field("Duração estimada",`<div class="study-v10-duration"><input id="mDur" type="number" min="1" value="${+m.durationValue||30}"><select id="mDurUnit"><option value="minutes" ${m.durationUnit==='minutes'?'selected':''}>minutos</option><option value="hours" ${m.durationUnit==='hours'?'selected':''}>horas</option></select></div>`)}
+ <div class="form-grid">${field("Prioridade",`<select id="mPriority"><option value="baixa" ${m.priority==='baixa'?'selected':''}>Baixa</option><option value="normal" ${m.priority==='normal'?'selected':''}>Normal</option><option value="alta" ${m.priority==='alta'?'selected':''}>Alta</option><option value="urgente" ${m.priority==='urgente'?'selected':''}>Urgente</option></select>`)}${field("Frequência",`<select id="mFreq">${["Única","Diária","Semanal","Quinzenal","Mensal","Conforme necessário"].map(x=>`<option ${x===m.frequency?'selected':''}>${x}</option>`).join('')}</select>`)}</div>
+
+ <div class="maint-share-block">
+   <span class="maint-share-label">Compartilhamento</span>
+   <div class="sat-resp-options maint-resp-options" data-maint-resp>
+     <button type="button" data-v="owner" class="${m.responsibility==='owner'?'active':''}">Eu faço</button>
+     <button type="button" data-v="help" class="${m.responsibility==='help'?'active':''}">Aceito ajuda</button>
+     <button type="button" data-v="delegated" class="${m.responsibility==='delegated'?'active':''}">Delegar</button>
+   </div>
+   <input type="hidden" id="mResponsibility" value="${escapeHtml(m.responsibility||'owner')}">
+   <div class="maint-sat-targets" ${m.responsibility==='delegated'?'':'hidden'}>
+     <div class="sat-target-head"><span>Delegar para</span><button type="button" class="sat-target-all" id="mAllTargets">Todos</button></div>
+     <div class="maint-sat-grid">${targetHtml||'<div class="sat-empty-mini">Nenhum satélite com acesso à Casa.</div>'}</div>
+     <small class="sat-target-note">A manutenção será compartilhada apenas com os satélites selecionados.</small>
+   </div>
+ </div>
+ <div class="maint-kids-points" hidden>
+   <button type="button" class="casa-points-toggle ${m.pointsEnabled?'is-checked':''}" data-maint-points-toggle aria-pressed="${m.pointsEnabled?'true':'false'}">
+     <input type="hidden" id="mPoints" value="${m.pointsEnabled?'1':'0'}">
+     <span class="sat-target-check" aria-hidden="true"></span><span class="casa-points-copy">Esta missão vale pontos se for concluída por um Kids</span>
+   </button>
+   ${field("Pontos",`<input id="mPointsValue" type="number" min="1" max="100" value="${Math.max(1,+m.pointsValue||2)}">`)}
+ </div>
+
+ ${field("Responsável externo / referência",`<select id="mResp">${["Eu","Henrique","Thiago","Prestador / profissional"].map(x=>`<option ${x===m.responsible?'selected':''}>${x}</option>`).join('')}</select>`)}
+ <label class="study-v10-field" style="display:flex;align-items:center;gap:10px"><input id="mNotify" type="checkbox" ${m.notify?'checked':''} style="width:auto"><span style="margin:0">Me avisar?</span></label>
+ <div id="mNotifyWrap" style="${m.notify?'':'display:none'}">${field("Quando avisar?",`<select id="mNotifyWhen">${["No horário da tarefa","10 min antes","30 min antes","1 hora antes","No início do período","Em um horário escolhido"].map(x=>`<option ${x===m.notifyWhen?'selected':''}>${x}</option>`).join('')}</select>`)}</div>
+ ${field("Observação",`<textarea id="mNote" rows="3">${escapeHtml(m.note||'')}</textarea>`)}
+ <div class="study-v10-actions">${current?'<button type="button" class="danger" id="deleteMaint">Excluir</button>':''}<button type="button" class="secondary" data-close>Cancelar</button><button class="primary" type="submit">Salvar</button></div></form>`;
+ document.body.appendChild(dlg);
+ const close=()=>dlg.close();
+ dlg.querySelectorAll('[data-close]').forEach(b=>b.onclick=close);
+ dlg.addEventListener('click',e=>{if(e.target===dlg)close()});
+ dlg.onclose=()=>dlg.remove();
+ dlg.querySelector('#mNotify').onchange=e=>dlg.querySelector('#mNotifyWrap').style.display=e.target.checked?'':'none';
+
+ const respInput=dlg.querySelector('#mResponsibility');
+ const targetsWrap=dlg.querySelector('.maint-sat-targets');
+ const pointsWrap=dlg.querySelector('.maint-kids-points');
+ const satButtons=[...dlg.querySelectorAll('[data-maint-sat]')];
+ const selectedMembers=()=>satButtons.filter(b=>b.getAttribute('aria-pressed')==='true').map(b=>members.find(m=>String(m.id)===String(b.dataset.maintSat))).filter(Boolean);
+ const syncTargets=()=>{targetsWrap.hidden=respInput.value!=='delegated';pointsWrap.hidden=!(respInput.value==='delegated'&&selectedMembers().some(x=>x.role==='kids'))};
+ dlg.querySelectorAll('[data-maint-resp] button').forEach(b=>b.onclick=()=>{
+   dlg.querySelectorAll('[data-maint-resp] button').forEach(x=>x.classList.toggle('active',x===b));
+   respInput.value=b.dataset.v;
+   syncTargets();
+ });
+ satButtons.forEach(b=>b.onclick=()=>{
+   const on=b.getAttribute('aria-pressed')!=='true';
+   b.setAttribute('aria-pressed',String(on));
+   b.classList.toggle('is-selected',on);
+   b.querySelector('.maint-sat-check').textContent=on?'✓':'';
+   syncTargets();
+ });
+ dlg.querySelector('#mAllTargets')?.addEventListener('click',()=>{
+   const allOn=satButtons.length&&satButtons.every(b=>b.getAttribute('aria-pressed')==='true');
+   satButtons.forEach(b=>{
+     b.setAttribute('aria-pressed',String(!allOn));
+     b.classList.toggle('is-selected',!allOn);
+     b.querySelector('.maint-sat-check').textContent=!allOn?'✓':'';
+   });
+   syncTargets();
+ });
+ const pointsToggle=dlg.querySelector('[data-maint-points-toggle]');
+ if(pointsToggle){
+   const input=pointsToggle.querySelector('#mPoints');
+   pointsToggle.onclick=()=>{const on=input.value!=='1';input.value=on?'1':'0';pointsToggle.classList.toggle('is-checked',on);pointsToggle.setAttribute('aria-pressed',String(on))};
+ }
+ syncTargets();
+
+ dlg.querySelector('#deleteMaint')?.addEventListener('click',()=>{if(!confirm(`Excluir “${m.name}”?`))return;d.maintenance=d.maintenance.filter(x=>String(x.id)!==String(m.id));saveCasa(d);close();renderCasa()});
+ dlg.querySelector('#casaMaintForm').addEventListener('submit',e=>{
+   e.preventDefault();
+   const responsibility=respInput.value||'owner';
+   const assigneeIds=responsibility==='delegated'?satButtons.filter(b=>b.getAttribute('aria-pressed')==='true').map(b=>b.dataset.maintSat):[];
+   if(responsibility==='delegated'&&!assigneeIds.length){targetsWrap.classList.add('sat-target-error');return}
+   const hasKids=assigneeIds.some(id=>members.find(x=>String(x.id)===String(id))?.role==='kids');
+   const pointsEnabled=!!(responsibility==='delegated'&&hasKids&&dlg.querySelector('#mPoints')?.value==='1');
+   const obj={...m,name:dlg.querySelector('#mName').value.trim(),area:dlg.querySelector('#mArea').value,type:dlg.querySelector('#mType').value,date:dlg.querySelector('#mDate').value,period:dlg.querySelector('#mPeriod').value,time:dlg.querySelector('#mTime').value,durationValue:Math.max(1,+dlg.querySelector('#mDur').value||30),durationUnit:dlg.querySelector('#mDurUnit').value,priority:dlg.querySelector('#mPriority').value,frequency:dlg.querySelector('#mFreq').value,responsible:dlg.querySelector('#mResp').value,notify:dlg.querySelector('#mNotify').checked,notifyWhen:dlg.querySelector('#mNotifyWhen').value,note:dlg.querySelector('#mNote').value.trim(),responsibility,assigneeIds,pointsEnabled,pointsValue:pointsEnabled?Math.max(1,+dlg.querySelector('#mPointsValue')?.value||2):0,claimedById:null,assigneeId:null,completedById:null,declinedByIds:[],satelliteStatus:responsibility==='help'?'available':responsibility==='delegated'?'assigned':'open',status:m.status||'a_fazer',updatedAt:Date.now()};
+   d.maintenance=current?d.maintenance.map(x=>String(x.id)===String(m.id)?obj:x):[...d.maintenance,{...obj,createdAt:Date.now()}];
+   saveCasa(d);close();renderCasa()
+ });
+ dlg.showModal();
+}
+
+
+/* v2.8.221 — iPhone: trava a página atrás do modal de Exercícios e ancora o diálogo ao viewport visual */
+let __exerciseModalLockDepth=0;
+let __exerciseModalScrollY=0;
+let __exerciseModalBodySnapshot=null;
+function lockExerciseModalPage(){
+  __exerciseModalLockDepth++;
+  if(__exerciseModalLockDepth>1)return;
+  __exerciseModalScrollY=window.scrollY||window.pageYOffset||0;
+  const b=document.body;
+  __exerciseModalBodySnapshot={position:b.style.position,top:b.style.top,left:b.style.left,right:b.style.right,width:b.style.width,overflow:b.style.overflow};
+  document.documentElement.classList.add('exercise-modal-locked');
+  b.classList.add('exercise-modal-locked');
+  b.style.position='fixed';
+  b.style.top=`-${__exerciseModalScrollY}px`;
+  b.style.left='0';b.style.right='0';b.style.width='100%';b.style.overflow='hidden';
+}
+function unlockExerciseModalPage(){
+  __exerciseModalLockDepth=Math.max(0,__exerciseModalLockDepth-1);
+  if(__exerciseModalLockDepth)return;
+  const b=document.body,s=__exerciseModalBodySnapshot||{};
+  document.documentElement.classList.remove('exercise-modal-locked');b.classList.remove('exercise-modal-locked');
+  b.style.position=s.position||'';b.style.top=s.top||'';b.style.left=s.left||'';b.style.right=s.right||'';b.style.width=s.width||'';b.style.overflow=s.overflow||'';
+  const y=__exerciseModalScrollY;__exerciseModalBodySnapshot=null;
+  requestAnimationFrame(()=>window.scrollTo(0,y));
+}
+function openExerciseDialogStable(dlg){
+  /* RC80 — acabamento estável dos modais de Exercícios no Safari/iPhone. */
+  try{
+    dlg.style.setProperty('border','0','important');
+    dlg.style.setProperty('outline','0','important');
+    dlg.style.setProperty('background','transparent','important');
+    dlg.style.setProperty('padding','0','important');
+    const panel=dlg.querySelector('.bertha-modal,.study-v10-modal');
+    if(panel){
+      panel.style.setProperty('border','0','important');
+      panel.style.setProperty('outline','0','important');
+      panel.style.setProperty('box-shadow','inset 0 0 0 1px rgba(145,120,158,.10), 0 22px 54px rgba(55,43,67,.13)','important');
+    }
+    const actions=dlg.querySelector('.study-v10-actions,.modal-actions');
+    if(actions){
+      actions.style.setProperty('position','static','important');
+      actions.style.setProperty('inset','auto','important');
+      actions.style.setProperty('bottom','auto','important');
+      actions.style.setProperty('left','auto','important');
+      actions.style.setProperty('right','auto','important');
+      actions.style.setProperty('transform','none','important');
+      actions.style.setProperty('margin','22px 0 0','important');
+      actions.style.setProperty('padding','0','important');
+      actions.style.setProperty('background','transparent','important');
+      actions.style.setProperty('box-shadow','none','important');
+      actions.style.setProperty('backdrop-filter','none','important');
+      actions.style.setProperty('-webkit-backdrop-filter','none','important');
+      actions.style.setProperty('z-index','auto','important');
+    }
+  }catch{}
+  lockExerciseModalPage();
+  let released=false;
+  const release=()=>{if(released)return;released=true;unlockExerciseModalPage();if(window.visualViewport){window.visualViewport.removeEventListener('scroll',sync);window.visualViewport.removeEventListener('resize',sync)}};
+  const sync=()=>{
+    const vv=window.visualViewport;
+    if(!vv||!dlg.open)return;
+    // Compensa o deslocamento que o Safari aplica ao visual viewport quando teclado/barra mudam.
+    dlg.style.setProperty('--exercise-vv-top',`${Math.max(0,vv.offsetTop||0)}px`);
+    dlg.style.setProperty('--exercise-vv-left',`${Math.max(0,vv.offsetLeft||0)}px`);
+  };
+  dlg.addEventListener('close',release,{once:true});
+  if(window.visualViewport){window.visualViewport.addEventListener('scroll',sync,{passive:true});window.visualViewport.addEventListener('resize',sync,{passive:true})}
+  try{dlg.showModal();sync();const panel=dlg.querySelector('.bertha-modal');if(panel)panel.scrollTop=0;}catch(err){release();throw err}
+}
+
+const EX_KEY="minha-vida.exercicios.v1";
+const EX_BASE={
+  plans:[
+    {id:"treino1",name:"Esteira",type:"Cardio",durationValue:20,durationUnit:"minutes",frequency:"Dias específicos",weeklyTarget:5,days:["Seg","Ter","Qua","Qui","Sex"],period:"morning",time:"",untilMode:"none",untilDate:"",notify:false,notifyWhen:"No início do período",note:"O objetivo é manter o ritual da manhã, não buscar perfeição.",plan:"",link:"",cycleId:"",active:true},
+    {id:"treino2",name:"Treino de força",type:"Força",durationValue:30,durationUnit:"minutes",frequency:"Conforme necessário",weeklyTarget:2,days:[],period:"flex",time:"",untilMode:"none",untilDate:"",notify:false,notifyWhen:"No início do período",note:"",plan:"",link:"",cycleId:"",active:true}
+  ], cycles:[], sessions:[], weeklyPlan:{daysPerWeek:5,cycles:[]}, notes:""
+};
+function exMinutes(p){const n=Math.max(1,+p.durationValue||parseInt(String(p.target||'').match(/\d+/)?.[0]||30));return p.durationUnit==='hours'?n*60:n}
+function normalizeExPlan(p={}){const target=String(p.target||'');const n=parseInt(target.match(/\d+/)?.[0]||30);return {id:p.id||uid(),name:String(p.name||'Treino'),type:String(p.type||'Treino'),durationValue:Math.max(1,+p.durationValue||n||30),durationUnit:p.durationUnit||'minutes',frequency:p.frequency||(Array.isArray(p.days)&&p.days.length?'Dias específicos':'Conforme necessário'),weeklyTarget:Math.max(1,+p.weeklyTarget||2),days:Array.isArray(p.days)?p.days:[],period:p.period||((p.name||'').toLowerCase().includes('esteira')?'morning':'flex'),time:p.time||'',untilMode:p.untilMode||'none',untilDate:p.untilDate||'',notify:!!p.notify,notifyWhen:p.notifyWhen||'No início do período',note:p.note||'',plan:p.plan||'',link:p.link||'',cycleId:p.cycleId||'',icon:p.icon||'',active:p.active!==false};}
+function normalizeExCycle(c={}){const legacyType=c.goal||'Cardio',legacyMinutes=Math.max(1,+c.totalMinutes||30);const blocks=Array.isArray(c.blocks)&&c.blocks.length?c.blocks.map(b=>({type:String(b.type||'Cardio'),minutes:Math.max(1,+b.minutes||10)})):[{type:legacyType,minutes:legacyMinutes}];return {id:c.id||uid(),name:String(c.name||'Novo ciclo'),icon:'cycle',blocks,note:c.note||'',active:c.active!==false};}
+function exCycleMinutes(c){return (c.blocks||[]).reduce((n,b)=>n+Math.max(1,+b.minutes||0),0)}
+function exWeeklyPlan(d){const w=d.weeklyPlan||{};return {daysPerWeek:Math.min(7,Math.max(1,+w.daysPerWeek||5)),cycles:Array.isArray(w.cycles)?w.cycles:[]}}
+function loadEx(){try{const raw=JSON.parse(window.berthaHmlStorage.getItem(EX_KEY));if(raw){return {...EX_BASE,...raw,plans:(Array.isArray(raw.plans)?raw.plans:EX_BASE.plans).map(normalizeExPlan),cycles:(Array.isArray(raw.cycles)?raw.cycles:[]).map(normalizeExCycle),sessions:Array.isArray(raw.sessions)?raw.sessions:[],weeklyPlan:exWeeklyPlan(raw)};}}catch{}return JSON.parse(JSON.stringify(EX_BASE));}
+function saveEx(d){window.berthaHmlStorage.setItem(EX_KEY,JSON.stringify(d));}
+function exWeekStart(dateStr=null){const d=dateStr?new Date(dateStr+'T12:00:00'):new Date();const x=new Date(d);const day=x.getDay();const diff=day===0?-6:1-day;x.setDate(x.getDate()+diff);return x.toISOString().slice(0,10)}
+function exWeeklyDone(p,d=loadEx()){const ws=exWeekStart();return d.sessions.filter(s=>s.date>=ws && (String(s.planId||'')===String(p.id)||(!s.planId&&s.name===p.name))).length}
+function exDueToday(p,d=loadEx()){if(!p.active)return false;if(p.untilMode==='date'&&p.untilDate&&p.untilDate<new Date().toISOString().slice(0,10))return false;const dow=['Dom','Seg','Ter','Qua','Qui','Sex','Sáb'][new Date().getDay()];if(p.frequency==='Dias específicos')return !p.days.length||p.days.includes(dow);if(p.frequency==='X vezes por semana')return exWeeklyDone(p,d)<Math.max(1,+p.weeklyTarget||1);return true;}
+function exPeriodText(p){return ({morning:'Manhã',afternoon:'Tarde',evening:'Noite',flex:'Flexível'})[p.period]||'Flexível'}
+function exerciseHeroIcon(){return `<svg viewBox="0 0 42 42" aria-hidden="true"><path d="M9 11h15l9 9-15 15H9z"/><path d="M9 11l9 9 15 0"/></svg>`}
+function exerciseIconSvg(key='cycle'){const k=String(key||'cycle').toLowerCase();if(k==='strength'||k.includes('força')||k.includes('forca'))return `<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3.5 9v6M6.5 7.5v9M17.5 7.5v9M20.5 9v6M6.5 12h11"/></svg>`;if(k==='cardio'||k.includes('cardio'))return `<svg viewBox="0 0 32 32"><path d="M5 17h5l2.3-5.2 3.8 10.4 3-6.2 2 1H27"/><path d="M8.2 9.2c2.2-2.8 6.2-2.5 7.8.5 1.7-3 5.8-3.3 8-.7 3.1 4.2-.4 9.2-8 14.2-7.7-5-11.1-9.7-7.8-14z"/></svg>`;if(k==='mobility'||k.includes('mobil')||k.includes('yoga')||k.includes('pilates'))return `<svg viewBox="0 0 32 32"><circle cx="16" cy="6.5" r="2.4"/><path d="M16 10v8m0-4-6 4m6-4 6 4m-6 0-5 7m5-7 5 7"/></svg>`;if(k==='walk'||k.includes('caminh'))return `<svg viewBox="0 0 32 32"><circle cx="18.5" cy="5.5" r="2.3"/><path d="M17 9.5l-3.2 7.2 5.1 2.6 3.2 6.7M14.2 13.2l-5.4 4.2M18.8 12.2l5.1 3.1M18.9 19.3l-5.7 7.1"/></svg>`;if(k==='run')return `<svg viewBox="0 0 32 32"><circle cx="20" cy="5.5" r="2.2"/><path d="M17.7 9.5l-4.8 6.1 5.8 3.1 5.3 5.8M13.5 13.8l-6 1.8M18.3 11.5l5.6 3.3M18.7 18.7l-8.2 7.1M24 24.5h4"/></svg>`;if(k==='bike')return `<svg viewBox="0 0 32 32"><circle cx="8" cy="22" r="5"/><circle cx="24" cy="22" r="5"/><path d="M8 22l5-10 5 10H8l8-7h5m-8-3h4"/></svg>`;if(k==='stairs')return `<svg viewBox="0 0 32 32"><path d="M5 25h7v-6h7v-6h8"/><circle cx="11" cy="7" r="2"/><path d="M12 10l4 4 4-2m-4 2-3 5"/></svg>`;if(k==='boxing')return `<svg viewBox="0 0 32 32"><path d="M8 18c0-5 3-9 8-9h4c3 0 5 2 5 5v4c0 5-4 8-9 8h-3c-3 0-5-3-5-8z"/><path d="M12 10V7m4 2V6m4 3V7"/></svg>`;if(k==='stretch')return `<svg viewBox="0 0 32 32"><circle cx="16" cy="6" r="2"/><path d="M16 10v8m0-5L7 10m9 3 9-3m-9 8-7 8m7-8 7 8"/></svg>`;if(k==='meditation')return `<svg viewBox="0 0 32 32"><circle cx="16" cy="7" r="2"/><path d="M16 11v7m0-3-6 5m6-5 6 5M8 25c3-5 13-5 16 0M6 27h20"/></svg>`;if(k==='upper')return `<svg viewBox="0 0 32 32"><circle cx="16" cy="6" r="2"/><path d="M16 10v9m0-6L8 16m8-3 8 3m-12 3h8"/></svg>`;if(k==='lower')return `<svg viewBox="0 0 32 32"><circle cx="16" cy="6" r="2"/><path d="M16 10v9m0 0-6 8m6-8 6 8"/></svg>`;if(k==='weights')return `<svg viewBox="0 0 32 32"><path d="M4 13v6m4-9v12m16-9v6m-4-9v12M8 16h12"/></svg>`;if(k==='core')return `<svg viewBox="0 0 32 32"><circle cx="16" cy="6" r="2"/><path d="M12 11h8l2 12H10zM13 16h6m-5 4h4"/></svg>`;if(k==='treadmill')return `<svg viewBox="0 0 32 32"><circle cx="17" cy="7" r="2"/><path d="M15 11l-2 6 5 3 3 5m-8-8-4 3m9 0 4-5M6 27h20M9 24h15l2 3"/></svg>`;if(k==='elliptical')return `<svg viewBox="0 0 32 32"><circle cx="17" cy="6" r="2"/><path d="M16 10l-2 7 4 4m-4-4-4 5m8-1 5 5M8 27c2-4 14-4 17 0M22 10v14"/></svg>`;if(k==='rope')return `<svg viewBox="0 0 32 32"><circle cx="16" cy="6" r="2"/><path d="M16 10v9m0-6-6 4m6-4 6 4m-6 2-5 7m5-7 5 7M8 11c-5 5-4 13 1 16m15-16c5 5 4 13-1 16"/></svg>`;if(k==='dance')return `<svg viewBox="0 0 32 32"><circle cx="17" cy="6" r="2"/><path d="M16 10l-3 7 5 2 4 7m-9-9-6-3m11 5 6-5m-11 5-3 7"/></svg>`;if(k==='swim')return `<svg viewBox="0 0 32 32"><circle cx="21" cy="9" r="2"/><path d="M7 17l7-5 6 4 5-1M5 21c3-2 5 2 8 0s5 2 8 0 5 2 7 0M5 26c3-2 5 2 8 0s5 2 8 0 5 2 7 0"/></svg>`;if(k==='rowing')return `<svg viewBox="0 0 32 32"><circle cx="13" cy="8" r="2"/><path d="M12 12l5 5 7-3M8 23h17M7 19l4 4m8-8 7 11"/></svg>`;if(k==='hiit')return `<svg viewBox="0 0 32 32"><circle cx="16" cy="16" r="10"/><path d="M16 10v6l4 3M12 4h8M16 2v3"/></svg>`;if(k==='fullbody')return `<svg viewBox="0 0 32 32"><circle cx="16" cy="6" r="2"/><path d="M16 10v9m0-6-7 4m7-4 7 4m-7 2-6 8m6-8 6 8"/></svg>`;if(k==='glutes')return `<svg viewBox="0 0 32 32"><path d="M11 7c-2 5-3 11-1 18m11-18c2 5 3 11 1 18M10 17c3-2 9-2 12 0M16 9v16"/></svg>`;if(k==='legs')return `<svg viewBox="0 0 32 32"><path d="M12 5c0 7 1 11 3 14l-4 8m9-22c0 7-1 11-3 14l4 8M12 13h8"/></svg>`;if(k==='arms')return `<svg viewBox="0 0 32 32"><path d="M7 20c3-1 4-4 5-7l3 2 2 5c2-3 4-5 7-4 2 1 2 4 0 6-4 4-12 5-17-2z"/></svg>`;if(k==='back')return `<svg viewBox="0 0 32 32"><circle cx="16" cy="6" r="2"/><path d="M11 11c2-2 8-2 10 0l2 14M11 11 9 25m3-8h8m-4-6v14"/></svg>`;if(k==='chest')return `<svg viewBox="0 0 32 32"><circle cx="16" cy="6" r="2"/><path d="M10 11c3-2 9-2 12 0l2 14H8zM10 16h12M16 11v14"/></svg>`;if(k==='yoga')return `<svg viewBox="0 0 32 32"><circle cx="16" cy="7" r="2"/><path d="M16 11v7m0-4-7-4m7 4 7-4M7 25c3-5 15-5 18 0M10 25l6-7 6 7"/></svg>`;if(k==='pilates')return `<svg viewBox="0 0 32 32"><circle cx="9" cy="10" r="2"/><path d="M11 12l6 5 8-2M17 17l-5 8m5-8 7 8M5 27h22"/></svg>`;if(k==='balance')return `<svg viewBox="0 0 32 32"><circle cx="16" cy="6" r="2"/><path d="M16 10v9m0-5-8 2m8-2 8-2m-8 7-5 8m5-8 6 6"/></svg>`;if(k==='breathing')return `<svg viewBox="0 0 32 32"><path d="M15 7v9c-2-4-7-6-9-2-3 6 2 12 9 11m2-18v9c2-4 7-6 9-2 3 6-2 12-9 11M16 7v19"/></svg>`;if(k==='functional')return `<svg viewBox="0 0 32 32"><path d="M10 23h12M12 23l-2-10h12l-2 10M13 9h6M16 5v4"/><circle cx="16" cy="4" r="1.5"/></svg>`;if(k==='wellness')return `<svg viewBox="0 0 32 32"><path d="M16 26S6 20.5 6 12.5C6 8.8 8.8 6 12.3 6c2 0 3.3 1 3.7 2 .5-1 1.8-2 3.8-2C23.2 6 26 8.8 26 12.5 26 20.5 16 26 16 26z"/></svg>`;return `<svg viewBox="0 0 32 32"><path d="M25 11a10 10 0 0 0-17-2l-2 3"/><path d="M6 7v5h5"/><path d="M7 21a10 10 0 0 0 17 2l2-3"/><path d="M26 25v-5h-5"/></svg>`}
+function exerciseTypeIcon(type='Outro'){const t=String(type).toLowerCase();if(t.includes('cardio'))return exerciseIconSvg('cardio');if(t.includes('força')||t.includes('forca'))return exerciseIconSvg('strength');if(t.includes('yoga')||t.includes('mobil')||t.includes('pilates'))return exerciseIconSvg('mobility');if(t.includes('caminh'))return exerciseIconSvg('walk');return exerciseIconSvg('cycle')}
+function exercisePlanIcon(p={}){return p.icon?exerciseIconSvg(p.icon):exerciseTypeIcon(p.type||'Outro')}
+function exerciseCycleIcon(icon='cycle'){return exerciseIconSvg(icon)}
+function exerciseRecordProgress({name,minutes,date,plannedName=null,substituted=false,note='Registrado manualmente',progressItemId=null}){
+ try{const key='bertha.time-engine.v1',e=JSON.parse(window.berthaHmlStorage.getItem(key)||'{"active":null,"history":[],"snoozed":{}}');e.history=Array.isArray(e.history)?e.history:[];const day=date||new Date().toISOString().slice(0,10),stamp=Date.now(),itemId=progressItemId||`exercise-manual:${stamp}`;const row={itemId,learningKey:`exercise-manual:${String(name||'movimento').toLowerCase().replace(/[^a-z0-9]+/g,'-')}`,title:name||'Movimento',source:'Exercícios',day,startedAt:stamp-Math.max(1,+minutes||1)*60000,endedAt:stamp,configuredMinutes:Math.max(1,+minutes||1),plannedMinutes:Math.max(1,+minutes||1),plannedItemId:substituted?'exercise-substitution':null,plannedName:plannedName||name||'Movimento',category:'movimento',realMinutes:Math.max(1,+minutes||1),status:'done',note};const i=e.history.findIndex(h=>String(h.itemId)===String(itemId));if(i>=0)e.history[i]={...e.history[i],...row};else e.history.unshift(row);window.berthaHmlStorage.setItem(key,JSON.stringify(e));return itemId;}catch{}return progressItemId||'';
+}
+function exerciseCycleProgress(c,d){const wp=exWeeklyPlan(d),pref=wp.cycles.find(x=>String(x.cycleId)===String(c.id)),target=Math.max(0,+pref?.times||0),ws=exWeekStart(),done=d.sessions.filter(s=>s.date>=ws&&String(s.cycleId||'')===String(c.id)).length;return {done,target,pct:target?Math.min(100,Math.round(done/target*100)):0};}
+function renderExercicios(){
+ const d=loadEx(),today=new Date().toISOString().slice(0,10),sessions=d.sessions.slice().reverse(),due=d.plans.filter(p=>exDueToday(p,d)),focus=due[0],active=window.BerthaTimeEngine?.active?.();
+ app.innerHTML=`<section class="exercise-hero"><div><span class="eyebrow">EXERCÍCIOS</span><h2>Room to move. Room to live.</h2><p>Você se movimenta. A BERTH.A sustenta o ritmo.</p></div><span class="exercise-hero-icon">${exerciseHeroIcon()}</span></section>
+ ${focus?`<div class="exercise-focus card"><span class="eyebrow">HOJE</span><strong>${escapeHtml(focus.name)} · ${exMinutes(focus)} min</strong><p>${escapeHtml(exPeriodText(focus))}${focus.time?` · ${escapeHtml(focus.time)}`:''}. ${focus.frequency==='X vezes por semana'?`${exWeeklyDone(focus,d)}/${focus.weeklyTarget} nesta semana. `:''}${escapeHtml(focus.note||'Movimento possível, sem rigidez.')}</p><div class="exercise-focus-actions">${active&&String(active.id)===`exercise:${focus.id}`?`<button class="primary" id="finishExercise">Concluir treino</button>`:`<button class="primary" id="startExercise">Começar treino</button>`}<button class="secondary" id="doneExercise">Já fiz</button><button class="text-btn" id="otherExercise">Fiz outro</button></div></div>`:''}
+ <div class="section-title">PLANEJAMENTO SEMANAL</div>
+ <div class="card exercise-week-plan" id="exerciseWeekPlan"><div><span class="eyebrow">MEU RITMO</span><strong>${exWeeklyPlan(d).daysPerWeek} dias de exercício por semana</strong><p>${exWeeklyPlan(d).cycles.length?exWeeklyPlan(d).cycles.map(x=>{const c=d.cycles.find(y=>String(y.id)===String(x.cycleId));return c?`${escapeHtml(c.name)} · ${Math.max(1,+x.times||1)}x`:''}).filter(Boolean).join(' · '):'Escolha os ciclos e quantas vezes prefere fazer cada um.'}</p></div><button class="secondary" id="editExerciseWeek" type="button">Ajustar semana</button></div>
+ <div class="section-title">CICLOS</div>
+ <div class="exercise-cycle-list">${d.cycles.filter(c=>c.active!==false).map(c=>{const pg=exerciseCycleProgress(c,d),count=d.plans.filter(p=>String(p.cycleId)===String(c.id)).length;return `<div class="card exercise-cycle" data-cycle="${c.id}"><div class="exercise-cycle-head"><span class="exercise-icon">${exerciseCycleIcon(c.icon)}</span><div class="exercise-cycle-copy"><strong>${escapeHtml(c.name)}</strong><span>${exCycleMinutes(c)} min · ${(c.blocks||[]).map(b=>`${escapeHtml(b.type)} ${Math.max(1,+b.minutes||0)} min`).join(' + ')}</span><small>${pg.target?`${pg.done}/${pg.target} nesta semana`:`${pg.done} realizado${pg.done===1?'':'s'} nesta semana`}</small></div><button class="secondary exercise-cycle-start" type="button" data-start-cycle="${c.id}">${active&&String(active.id)===`cycle:${c.id}`?'Concluir':'Começar'}</button></div><div class="exercise-cycle-progress"><i style="width:${pg.pct}%"></i></div></div>`}).join('')||`<div class="empty compact"><strong>Nenhum ciclo criado.</strong><span>Monte ciclos com a composição e o tempo que fizer sentido para você.</span></div>`}</div>
+ <button class="secondary add-full exercise-add" id="addCycle">＋ Novo ciclo</button>
+ <div class="section-title">ROTINA DE MOVIMENTO</div>
+ <div class="list exercise-plan-list">${d.plans.map(p=>{const c=d.cycles.find(x=>String(x.id)===String(p.cycleId));return `<div class="card exercise-plan" data-plan="${p.id}"><div class="exercise-plan-main"><span class="exercise-icon">${exercisePlanIcon(p)}</span><div class="exercise-plan-copy"><strong>${escapeHtml(p.name)}</strong><span>${escapeHtml(p.type)} · ${exMinutes(p)} min · ${escapeHtml(exPeriodText(p))}</span>${p.frequency==='X vezes por semana'?`<small>${exWeeklyDone(p,d)}/${p.weeklyTarget} nesta semana${c?` · ${escapeHtml(c.name)}`:''}</small>`:p.days.length?`<small>${p.days.join(' · ')}${c?` · ${escapeHtml(c.name)}`:''}</small>`:`<small>${escapeHtml(p.frequency)}${c?` · ${escapeHtml(c.name)}`:''}</small>`}${p.link?`<a class="exercise-external-link" href="${escapeHtml(p.link)}" target="_blank" rel="noopener" data-ex-link="${p.id}">Abrir treino ↗</a>`:''}</div></div><div class="exercise-plan-actions"><span class="pill">${p.active?'Ativo':'Pausado'}</span>${p.active?`<button class="secondary" type="button" data-start-plan="${p.id}">Iniciar agora</button>`:''}</div></div>`}).join('')}</div>
+ <button class="secondary add-full exercise-add" id="addPlan">＋ Adicionar treino</button>
+ <div class="section-title">REGISTRO</div>
+ <div class="list">${sessions.slice(0,12).map(s=>`<div class="card exercise-session" data-session="${s.id}"><div><strong>${escapeHtml(s.name)}</strong><span>${formatDate(s.date)} · ${escapeHtml(s.duration||'')} ${s.note?`· ${escapeHtml(s.note)}`:''}</span></div><div class="exercise-session-actions"><button class="exercise-edit" data-edit-ex="${s.id}">Editar</button><button class="more" data-ex="${s.id}">×</button></div></div>`).join('')||`<div class="empty compact"><strong>Nenhum treino registrado ainda.</strong><span>Quando você concluir um treino, ele aparece aqui.</span></div>`}</div>
+ <div class="card exercise-note"><span class="eyebrow">REGRA</span><p>Se o dia apertar, o treino pode ser reduzido. Descanso não é falha — é parte do sistema.</p></div>`;
+ document.querySelector('#addPlan').onclick=()=>openExercisePlan();document.querySelector('#addCycle').onclick=()=>openExerciseCycle();document.querySelector('#editExerciseWeek')?.addEventListener('click',openExerciseWeekPlan);document.querySelectorAll('[data-cycle]').forEach(el=>el.onclick=e=>{if(e.target.closest('[data-start-cycle]'))return;openExerciseCycle(el.dataset.cycle)});document.querySelectorAll('[data-start-cycle]').forEach(btn=>btn.onclick=e=>{e.stopPropagation();const c=d.cycles.find(x=>String(x.id)===String(btn.dataset.startCycle));if(!c)return;if(active&&String(active.id)===`cycle:${c.id}`){window.BerthaTimeEngine?.finish?.();setTimeout(renderExercicios,100);return}const mins=exCycleMinutes(c),item={id:`cycle:${c.id}`,selectedCycleId:c.id,learningKey:`exercise-cycle-v1:${c.id}`,source:'Exercícios',title:c.name,minutes:mins,configuredMinutes:mins,kind:'exercise',category:'movimento'};window.BerthaTimeEngine?.start?.(item);setTimeout(renderExercicios,80)});
+ document.querySelectorAll('[data-plan]').forEach(el=>el.onclick=e=>{if(e.target.closest('[data-start-plan],[data-ex-link]'))return;openExercisePlan(el.dataset.plan)});document.querySelectorAll('[data-ex-link]').forEach(a=>a.addEventListener('click',e=>e.stopPropagation()));
+ const startPlan=p=>{const item={id:`exercise:${p.id}`,selectedPlanId:p.id,learningKey:`exercise-plan-v2:${p.id}`,source:'Exercícios',title:p.name,minutes:exMinutes(p),configuredMinutes:exMinutes(p),period:p.period,kind:'exercise'};if(window.BerthaDurationLearning)item.minutes=window.BerthaDurationLearning.effectiveMinutes(item);window.BerthaTimeEngine?.start?.(item);};
+ document.querySelectorAll('[data-start-plan]').forEach(btn=>btn.addEventListener('click',e=>{e.stopPropagation();const p=d.plans.find(x=>String(x.id)===String(btn.dataset.startPlan));if(!p)return;startPlan(p);setTimeout(renderExercicios,80)}));document.querySelector('#startExercise')?.addEventListener('click',()=>{startPlan(focus);setTimeout(renderExercicios,80)});document.querySelector('#finishExercise')?.addEventListener('click',()=>{window.BerthaTimeEngine?.finish?.();setTimeout(renderExercicios,100)});
+ document.querySelector('#doneExercise')?.addEventListener('click',()=>addExerciseSession(focus.name,exMinutes(focus),today,'Registrado manualmente',{plannedName:focus.name,planId:focus.id,cycleId:focus.cycleId,substituted:false,recordProgress:true}));document.querySelector('#otherExercise')?.addEventListener('click',()=>openOtherExercise(focus));
+ document.querySelectorAll('[data-edit-ex]').forEach(b=>b.onclick=e=>{e.stopPropagation();openExerciseSession(b.dataset.editEx)});document.querySelectorAll('[data-ex]').forEach(b=>b.onclick=e=>{e.stopPropagation();const x=loadEx(),sess=x.sessions.find(s=>String(s.id)===String(b.dataset.ex));if(sess?.progressItemId){try{const k='bertha.time-engine.v1',en=JSON.parse(window.berthaHmlStorage.getItem(k)||'{}');en.history=(en.history||[]).filter(h=>String(h.itemId)!==String(sess.progressItemId));window.berthaHmlStorage.setItem(k,JSON.stringify(en));}catch{}}x.sessions=x.sessions.filter(s=>String(s.id)!==String(b.dataset.ex));saveEx(x);renderExercicios();});
+}
+function addExerciseSession(name,minutes,date,note='',opts={}){const d=loadEx();if(d.sessions.some(s=>s.date===date&&s.name===name)){alert('Esse treino já foi registrado hoje.');return;}const mins=Math.max(1,+minutes||30);const progressItemId=opts.recordProgress?exerciseRecordProgress({name,minutes:mins,date,plannedName:opts.plannedName||name,substituted:!!opts.substituted,note}):'';d.sessions.push({id:uid(),name,duration:`${mins} min`,minutes:mins,date,note,planId:opts.planId||'',cycleId:opts.cycleId||'',progressItemId,plannedName:opts.plannedName||name,substituted:!!opts.substituted,createdAt:Date.now()});saveEx(d);renderExercicios();}
+function openExerciseSession(id){const d=loadEx(),s=d.sessions.find(x=>String(x.id)===String(id));if(!s)return;const dlg=document.createElement('dialog');dlg.className='bertha-dialog exercise-dialog exercise-edit-record-dialog';dlg.innerHTML=`<form class="bertha-modal study-v10-modal" id="editExSession"><div class="bertha-modal-head"><div><div class="eyebrow">EXERCÍCIOS · REGISTRO</div><h2>Editar realizado</h2></div><button type="button" data-close>×</button></div>${field('Nome',`<input id="sName" required maxlength="70" value="${escapeHtml(s.name)}">`)}<div class="form-grid">${field('Data',`<input id="sDate" type="date" value="${escapeHtml(s.date)}">`)}${field('Duração real (min)',`<input id="sDur" type="number" min="1" value="${Math.max(1,+s.minutes||parseInt(s.duration)||20)}">`)}</div>${field('Observação',`<textarea id="sNote" rows="3">${escapeHtml(s.note||'')}</textarea>`)}<div class="study-v10-actions"><button type="button" class="secondary" data-close>Cancelar</button><button class="primary" type="submit">Salvar</button></div></form>`;document.body.appendChild(dlg);const close=()=>dlg.close();dlg.querySelectorAll('[data-close]').forEach(b=>b.onclick=close);dlg.onclose=()=>dlg.remove();dlg.querySelector('#editExSession').onsubmit=e=>{e.preventDefault();const name=dlg.querySelector('#sName').value.trim(),date=dlg.querySelector('#sDate').value,minutes=Math.max(1,+dlg.querySelector('#sDur').value||20),note=dlg.querySelector('#sNote').value.trim();let pid=s.progressItemId||'';if(!pid){try{const en=JSON.parse(window.berthaHmlStorage.getItem('bertha.time-engine.v1')||'{}');const h=(en.history||[]).find(h=>h.source==='Exercícios'&&h.day===s.date&&h.title===s.name);pid=h?.itemId||'';}catch{}}if(pid)exerciseRecordProgress({name,minutes,date,plannedName:s.plannedName||name,substituted:!!s.substituted,note,progressItemId:pid});const row={...s,name,date,minutes,duration:`${minutes} min`,note,progressItemId:pid};d.sessions=d.sessions.map(x=>String(x.id)===String(id)?row:x);saveEx(d);close();renderExercicios();};openExerciseDialogStable(dlg);}
+function openOtherExercise(focus){const d=loadEx(),dlg=document.createElement('dialog');dlg.className='bertha-dialog exercise-dialog';dlg.innerHTML=`<div class="bertha-modal study-v10-modal exercise-other-modal"><div class="bertha-modal-head"><div><div class="eyebrow">FIZ OUTRO</div><h2>O que você fez?</h2><p>Registre o movimento real sem perder o planejado.</p></div><button type="button" data-close>×</button></div><div class="exercise-other-list">${d.plans.filter(p=>String(p.id)!==String(focus?.id)).map(p=>`<button type="button" data-other-plan="${p.id}"><strong>${escapeHtml(p.name)}</strong><span>${escapeHtml(p.type)} · ${exMinutes(p)} min</span></button>`).join('')}<button type="button" data-other-new><strong>Registrar outro treino</strong><span>Nome e duração rápidos.</span></button></div></div>`;document.body.appendChild(dlg);const close=()=>dlg.close();dlg.querySelectorAll('[data-close]').forEach(b=>b.onclick=close);dlg.addEventListener('click',e=>{if(e.target===dlg)close()});dlg.onclose=()=>dlg.remove();dlg.querySelectorAll('[data-other-plan]').forEach(b=>b.onclick=()=>{const p=d.plans.find(x=>String(x.id)===String(b.dataset.otherPlan));if(!p)return;addExerciseSession(p.name,exMinutes(p),new Date().toISOString().slice(0,10),'Substituiu o treino planejado',{plannedName:focus?.name||'',planId:p.id,cycleId:p.cycleId,substituted:true,recordProgress:true});close()});dlg.querySelector('[data-other-new]').onclick=()=>{close();setTimeout(()=>openQuickExercise(focus),60)};openExerciseDialogStable(dlg);requestAnimationFrame(()=>{try{dlg.querySelector('[data-close]')?.focus({preventScroll:true})}catch{}});}
+function openQuickExercise(focus){const dlg=document.createElement('dialog');dlg.className='bertha-dialog exercise-dialog exercise-quick-dialog';dlg.innerHTML=`<form class="bertha-modal study-v10-modal" id="quickExForm"><div class="bertha-modal-head"><div><div class="eyebrow">EXERCÍCIOS</div><h2>Registrar treino</h2></div><button type="button" data-close>×</button></div>${field('Nome',`<input id="qExName" required maxlength="70" placeholder="Ex.: Caminhada">`)}${field('Duração real (min)',`<input id="qExDur" type="number" min="1" value="20">`)}<div class="study-v10-actions"><button type="button" class="secondary" data-close>Cancelar</button><button class="primary" type="submit">Registrar</button></div></form>`;document.body.appendChild(dlg);const close=()=>dlg.close();dlg.querySelectorAll('[data-close]').forEach(b=>b.onclick=close);dlg.onclose=()=>dlg.remove();dlg.querySelector('#quickExForm').onsubmit=e=>{e.preventDefault();addExerciseSession(dlg.querySelector('#qExName').value.trim(),+dlg.querySelector('#qExDur').value||20,new Date().toISOString().slice(0,10),'Substituiu o treino planejado',{plannedName:focus?.name||'',substituted:true,recordProgress:true});close()};openExerciseDialogStable(dlg);}
+function openExerciseCycle(id=null){
+ const d=loadEx(),current=id?d.cycles.find(x=>String(x.id)===String(id)):null,c=normalizeExCycle(current||{}),dlg=document.createElement('dialog');dlg.className='bertha-dialog exercise-dialog exercise-cycle-dialog';
+ const types=['Cardio','Força','Mobilidade','Alongamento','Meditação','Pilates','Yoga','Outro'];
+ const blockRow=(b={type:'Cardio',minutes:10})=>`<div class="exercise-cycle-block"><select data-block-type>${types.map(x=>`<option ${x===b.type?'selected':''}>${x}</option>`).join('')}</select><div class="exercise-unit-input"><input data-block-min type="number" min="1" max="240" value="${Math.max(1,+b.minutes||10)}"><span>min</span></div><button type="button" class="exercise-block-remove" data-remove-block aria-label="Remover">×</button></div>`;
+ dlg.innerHTML=`<form class="bertha-modal study-v10-modal exercise-cycle-modal" id="exCycleForm"><div class="bertha-modal-head"><div><div class="eyebrow">EXERCÍCIOS · CICLO</div><h2>${current?'Editar ciclo':'Novo ciclo'}</h2><p>Monte o ciclo com os tipos de movimento e o tempo de cada parte.</p></div><button type="button" data-close>×</button></div>
+ ${field('Nome do ciclo',`<input id="cName" required maxlength="70" value="${escapeHtml(current?c.name:'')}" placeholder="Ex.: Cardio + força">`)}
+ <div class="exercise-cycle-section"><span class="exercise-cycle-label">Composição do ciclo</span><p class="exercise-cycle-help">Adicione quantos blocos quiser. O tempo total é calculado automaticamente.</p><div id="cycleBlocks">${c.blocks.map(blockRow).join('')}</div><button type="button" class="secondary exercise-add-block" id="addCycleBlock">＋ Adicionar bloco</button><div class="exercise-cycle-total"><span>Tempo total do ciclo</span><strong id="cycleTotal">${exCycleMinutes(c)} min</strong></div></div>
+ ${field('Observações',`<textarea id="cNote" rows="3" placeholder="Objetivo, restrições ou orientação geral">${escapeHtml(c.note||'')}</textarea>`)}
+ ${field('Status',`<select id="cActive"><option value="1" ${c.active?'selected':''}>Ativo</option><option value="0" ${!c.active?'selected':''}>Pausado</option></select>`)}
+ <div class="study-v10-actions">${current?'<button type="button" class="danger" id="deleteExCycle">Excluir</button>':''}<button type="button" class="secondary" data-close>Cancelar</button><button class="primary" type="submit">Salvar</button></div></form>`;
+ document.body.appendChild(dlg);const close=()=>dlg.close();dlg.querySelectorAll('[data-close]').forEach(b=>b.onclick=close);dlg.addEventListener('cancel',e=>{e.preventDefault();close()});dlg.onclose=()=>dlg.remove();
+ const syncTotal=()=>{const total=[...dlg.querySelectorAll('[data-block-min]')].reduce((n,x)=>n+Math.max(1,+x.value||0),0);dlg.querySelector('#cycleTotal').textContent=`${total} min`};
+ const bindBlocks=()=>{dlg.querySelectorAll('[data-block-min]').forEach(x=>x.oninput=syncTotal);dlg.querySelectorAll('[data-remove-block]').forEach(b=>b.onclick=()=>{if(dlg.querySelectorAll('.exercise-cycle-block').length<=1)return;b.closest('.exercise-cycle-block').remove();syncTotal()})};bindBlocks();
+ dlg.querySelector('#addCycleBlock').onclick=()=>{dlg.querySelector('#cycleBlocks').insertAdjacentHTML('beforeend',blockRow());bindBlocks();syncTotal()};
+ dlg.querySelector('#deleteExCycle')?.addEventListener('click',()=>{if(!confirm(`Excluir o ciclo “${c.name}”?`))return;d.cycles=d.cycles.filter(x=>String(x.id)!==String(c.id));d.weeklyPlan=exWeeklyPlan(d);d.weeklyPlan.cycles=d.weeklyPlan.cycles.filter(x=>String(x.cycleId)!==String(c.id));saveEx(d);close();renderExercicios()});
+ dlg.querySelector('#exCycleForm').onsubmit=e=>{e.preventDefault();const blocks=[...dlg.querySelectorAll('.exercise-cycle-block')].map(r=>({type:r.querySelector('[data-block-type]').value,minutes:Math.max(1,+r.querySelector('[data-block-min]').value||10)}));const obj={...c,id:current?c.id:uid(),name:dlg.querySelector('#cName').value.trim(),icon:'cycle',blocks,note:dlg.querySelector('#cNote').value.trim(),active:dlg.querySelector('#cActive').value==='1'};d.cycles=current?d.cycles.map(x=>String(x.id)===String(c.id)?obj:x):[...d.cycles,obj];saveEx(d);close();renderExercicios();};openExerciseDialogStable(dlg);
+}
+function openExerciseWeekPlan(){
+ const d=loadEx(),w=exWeeklyPlan(d),dlg=document.createElement('dialog');dlg.className='bertha-dialog exercise-dialog exercise-week-dialog';
+ dlg.innerHTML=`<form class="bertha-modal study-v10-modal exercise-cycle-modal" id="exerciseWeekForm"><div class="bertha-modal-head"><div><div class="eyebrow">EXERCÍCIOS · SEMANA</div><h2>Meu ritmo semanal</h2><p>Defina quantos dias quer se exercitar e quais ciclos a BERTH.A pode encaixar nas suas janelas.</p></div><button type="button" data-close>×</button></div>
+ ${field('Quantos dias por semana?',`<input id="weekDays" type="number" min="1" max="7" value="${w.daysPerWeek}">`)}
+ <div class="exercise-cycle-section"><span class="exercise-cycle-label">Ciclos desta semana</span><p class="exercise-cycle-help">Escolha os ciclos e indique quantas vezes prefere cada um. Você pode ajustar depois.</p><div class="exercise-week-cycle-list">${d.cycles.filter(c=>c.active!==false).map(c=>{const pref=w.cycles.find(x=>String(x.cycleId)===String(c.id));return `<label class="exercise-week-cycle"><input type="checkbox" data-week-cycle="${c.id}" ${pref?'checked':''}><span><strong>${escapeHtml(c.name)}</strong><small>${exCycleMinutes(c)} min</small></span><div class="exercise-unit-input"><input type="number" min="1" max="7" data-week-times="${c.id}" value="${Math.max(1,+pref?.times||1)}"><span>x/sem</span></div></label>`}).join('')||'<p class="note">Cadastre pelo menos um ciclo primeiro.</p>'}</div></div>
+ <div class="exercise-week-warning" id="weekWarning"></div>
+ <div class="study-v10-actions"><button type="button" class="secondary" data-close>Cancelar</button><button class="primary" type="submit">Salvar</button></div></form>`;
+ document.body.appendChild(dlg);const close=()=>dlg.close();dlg.querySelectorAll('[data-close]').forEach(b=>b.onclick=close);dlg.onclose=()=>dlg.remove();
+ const check=()=>{const days=Math.min(7,Math.max(1,+dlg.querySelector('#weekDays').value||1)),chosen=[...dlg.querySelectorAll('[data-week-cycle]:checked')],sum=chosen.reduce((n,x)=>n+Math.max(1,+dlg.querySelector(`[data-week-times="${x.dataset.weekCycle}"]`).value||1),0),box=dlg.querySelector('#weekWarning');if(!chosen.length){box.textContent='Escolha ao menos um ciclo para a BERTH.A distribuir.';box.classList.add('on')}else if(sum>days){box.textContent=`Você selecionou ${sum} sessões para ${days} dias. A BERTH.A pode ajustar a distribuição sem criar novas combinações.`;box.classList.add('on')}else if(sum<days){box.textContent=`Sua preferência soma ${sum} sessões para ${days} dias. A BERTH.A poderá repetir os ciclos selecionados para completar a semana.`;box.classList.add('on')}else{box.textContent='A distribuição fecha exatamente com a sua meta semanal.';box.classList.add('on')}};
+ dlg.querySelectorAll('input').forEach(x=>x.addEventListener('input',check));check();
+ dlg.querySelector('#exerciseWeekForm').onsubmit=e=>{e.preventDefault();const days=Math.min(7,Math.max(1,+dlg.querySelector('#weekDays').value||1)),chosen=[...dlg.querySelectorAll('[data-week-cycle]:checked')].map(x=>({cycleId:x.dataset.weekCycle,times:Math.max(1,+dlg.querySelector(`[data-week-times="${x.dataset.weekCycle}"]`).value||1)}));d.weeklyPlan={daysPerWeek:days,cycles:chosen};saveEx(d);close();renderExercicios()};openExerciseDialogStable(dlg);
+}
+
+function openExercisePlan(id=null){
+ const d=loadEx(),current=id?d.plans.find(x=>String(x.id)===String(id)):null,p=normalizeExPlan(current||{}),dlg=document.createElement('dialog');dlg.className='bertha-dialog exercise-dialog exercise-plan-dialog';
+ const types=['Cardio','Força','Mobilidade','Alongamento','Meditação','Caminhada','Pilates','Yoga','Outro'],days=['Seg','Ter','Qua','Qui','Sex','Sáb','Dom'];
+ dlg.innerHTML=`<form class="bertha-modal study-v10-modal" id="exForm"><div class="bertha-modal-head"><div><div class="eyebrow">EXERCÍCIOS</div><h2>${current?'Editar treino':'Novo treino'}</h2></div><button type="button" data-close>×</button></div>
+ ${field('Nome',`<input id="eName" required maxlength="70" value="${escapeHtml(current?p.name:'')}" placeholder="Ex.: Pilates">`)}
+ ${field('Tipo',`<select id="eType">${types.map(x=>`<option ${x===p.type?'selected':''}>${x}</option>`).join('')}</select>`)}
+ <div class="exercise-cycle-section exercise-plan-icon-section"><span class="exercise-cycle-label">Ícone do treino</span><p class="exercise-cycle-help">Escolha entre os ícones do tipo selecionado. Use a busca para encontrar outro símbolo. Automático usa o tipo ou o nome como referência.</p><div class="exercise-icon-tools"><input id="exerciseIconSearch" type="search" placeholder="Buscar ícone…" aria-label="Buscar ícone do treino"><div class="exercise-icon-categories">${[['all','Todos'],['cardio','Cardio'],['strength','Força'],['mobility','Mobilidade'],['mind','Bem-estar']].map(([k,l])=>`<button type="button" class="exercise-icon-filter" data-icon-filter="${k}">${l}</button>`).join('')}</div></div><div class="exercise-icon-picker">${[['','Automático','all'],['walk','Caminhada','cardio'],['run','Corrida','cardio'],['treadmill','Esteira','cardio'],['bike','Bicicleta','cardio'],['stairs','Escada','cardio'],['elliptical','Elíptico','cardio'],['rowing','Remo','cardio'],['rope','Pular corda','cardio'],['dance','Dança','cardio'],['swim','Natação','cardio'],['boxing','Boxe','cardio'],['hiit','HIIT','cardio'],['weights','Halteres','strength'],['strength','Força','strength'],['upper','Superior','strength'],['lower','Inferior','strength'],['legs','Pernas','strength'],['glutes','Glúteos','strength'],['arms','Braços','strength'],['back','Costas','strength'],['chest','Peito','strength'],['core','Core','strength'],['fullbody','Corpo inteiro','strength'],['functional','Funcional','strength'],['stretch','Alongamento','mobility'],['mobility','Mobilidade','mobility'],['balance','Equilíbrio','mobility'],['yoga','Yoga','mobility'],['pilates','Pilates','mobility'],['meditation','Meditação','mind'],['breathing','Respiração','mind'],['wellness','Bem-estar','mind']].map(([k,l,c])=>`<button type="button" class="exercise-icon-choice ${(p.icon||'')===k?'selected':''}" data-plan-icon="${k}" data-icon-category="${c}" data-icon-name="${l.toLowerCase()}" aria-label="${l}"><span>${k?exerciseIconSvg(k):exerciseTypeIcon(p.type)}</span><small>${l}</small></button>`).join('')}</div><div class="exercise-icon-empty" hidden>Nenhum ícone encontrado.</div><input type="hidden" id="eIcon" value="${escapeHtml(p.icon||'')}"></div>
+ <div class="form-grid">${field('Duração',`<input id="eDur" type="number" min="1" value="${p.durationValue}">`)}${field('Unidade',`<select id="eDurUnit"><option value="minutes" ${p.durationUnit==='minutes'?'selected':''}>minutos</option><option value="hours" ${p.durationUnit==='hours'?'selected':''}>horas</option></select>`)}</div>
+ ${field('Frequência',`<select id="eFreq"><option ${p.frequency==='Dias específicos'?'selected':''}>Dias específicos</option><option ${p.frequency==='X vezes por semana'?'selected':''}>X vezes por semana</option><option ${p.frequency==='Conforme necessário'?'selected':''}>Conforme necessário</option></select>`)}
+ <div id="eWeeklyWrap" style="${p.frequency==='X vezes por semana'?'':'display:none'}">${field('Quantas vezes por semana?',`<input id="eWeeklyTarget" type="number" min="1" max="14" value="${p.weeklyTarget}">`)}</div>
+ <div id="eDays" style="display:flex;gap:7px;flex-wrap:wrap;margin:0 0 18px">${days.map(x=>`<label style="display:flex;gap:5px;align-items:center"><input type="checkbox" value="${x}" ${p.days.includes(x)?'checked':''}>${x}</label>`).join('')}</div>
+ <div class="form-grid">${field('Período / janela',`<select id="ePeriod"><option value="flex" ${p.period==='flex'?'selected':''}>Flexível</option><option value="morning" ${p.period==='morning'?'selected':''}>Manhã</option><option value="afternoon" ${p.period==='afternoon'?'selected':''}>Tarde</option><option value="evening" ${p.period==='evening'?'selected':''}>Noite</option></select>`)}${field('Horário opcional',`<input id="eTime" type="time" value="${escapeHtml(p.time)}">`)}</div>
+ ${field('Até quando?',`<select id="eUntil"><option value="none" ${p.untilMode==='none'?'selected':''}>Sem data final</option><option value="date" ${p.untilMode==='date'?'selected':''}>Até uma data</option></select><input id="eUntilDate" type="date" value="${escapeHtml(p.untilDate)}" style="margin-top:8px;${p.untilMode==='date'?'':'display:none'}">`)}
+ ${field('Me avisar?',`<label style="display:flex;gap:10px;align-items:center"><input id="eNotify" type="checkbox" ${p.notify?'checked':''}> Sim</label>`)}
+ <div id="eNotifyWrap" style="${p.notify?'':'display:none'}">${field('Quando avisar?',`<select id="eNotifyWhen">${['No horário da tarefa','10 min antes','30 min antes','1 hora antes','No início do período','Em um horário escolhido'].map(x=>`<option ${x===p.notifyWhen?'selected':''}>${x}</option>`).join('')}</select>`)}</div>
+ ${field('Como fazer / plano (opcional)',`<textarea id="ePlan" rows="4" placeholder="Exercícios, séries, repetições ou orientação geral">${escapeHtml(p.plan)}</textarea>`)}${field('Link do treino (opcional)',`<input id="eLink" type="url" value="${escapeHtml(p.link)}" placeholder="https://…">`)}${field('Observação',`<textarea id="eNote" rows="3">${escapeHtml(p.note)}</textarea>`)}${field('Status',`<select id="eActive"><option value="1" ${p.active?'selected':''}>Ativo</option><option value="0" ${!p.active?'selected':''}>Pausado</option></select>`)}
+ <div class="study-v10-actions">${current?'<button type="button" class="danger" id="deleteExPlan">Excluir</button>':''}<button type="button" class="secondary" data-close>Cancelar</button><button class="primary" type="submit">Salvar</button></div></form>`;
+ document.body.appendChild(dlg);const close=()=>dlg.close();dlg.querySelectorAll('[data-close]').forEach(b=>b.onclick=close);dlg.addEventListener('click',e=>{if(e.target===dlg)close()});dlg.addEventListener('cancel',e=>{e.preventDefault();close()});dlg.onclose=()=>dlg.remove();
+ dlg.querySelector('#eUntil').onchange=e=>dlg.querySelector('#eUntilDate').style.display=e.target.value==='date'?'':'none';dlg.querySelector('#eNotify').onchange=e=>dlg.querySelector('#eNotifyWrap').style.display=e.target.checked?'':'none';const syncFreq=()=>{const v=dlg.querySelector('#eFreq').value;dlg.querySelector('#eDays').style.display=v==='Dias específicos'?'flex':'none';dlg.querySelector('#eWeeklyWrap').style.display=v==='X vezes por semana'?'':'none'};dlg.querySelector('#eFreq').onchange=syncFreq;syncFreq();
+ const syncAutoPlanIcon=()=>{const auto=dlg.querySelector('[data-plan-icon=""] span');if(auto)auto.innerHTML=exerciseTypeIcon(dlg.querySelector('#eType').value)};dlg.querySelector('#eType').addEventListener('change',syncAutoPlanIcon);syncAutoPlanIcon();dlg.querySelectorAll('[data-plan-icon]').forEach(b=>b.addEventListener('click',()=>{dlg.querySelectorAll('[data-plan-icon]').forEach(x=>x.classList.remove('selected'));b.classList.add('selected');dlg.querySelector('#eIcon').value=b.dataset.planIcon||''}));const iconSearch=dlg.querySelector('#exerciseIconSearch'),iconFilters=[...dlg.querySelectorAll('[data-icon-filter]')];const typeToIconCategory=t=>{const v=String(t||'').toLowerCase();if(v.includes('cardio')||v.includes('caminh'))return 'cardio';if(v.includes('força')||v.includes('forca'))return 'strength';if(v.includes('mobil')||v.includes('along')||v.includes('pilates')||v.includes('yoga'))return 'mobility';if(v.includes('medita'))return 'mind';return 'all'};let activeIconFilter=typeToIconCategory(dlg.querySelector('#eType').value);const markIconFilter=()=>iconFilters.forEach(x=>x.classList.toggle('selected',(x.dataset.iconFilter||'all')===activeIconFilter));const filterExerciseIcons=()=>{const q=(iconSearch?.value||'').trim().toLowerCase();let visible=0;dlg.querySelectorAll('[data-plan-icon]').forEach(b=>{const cat=b.dataset.iconCategory||'all',name=b.dataset.iconName||'';const show=(cat==='all'||activeIconFilter==='all'||cat===activeIconFilter||!!q)&&(!q||name.includes(q));b.hidden=!show;if(show)visible++});const empty=dlg.querySelector('.exercise-icon-empty');if(empty)empty.hidden=visible>0;markIconFilter()};iconSearch?.addEventListener('input',filterExerciseIcons);iconFilters.forEach(b=>b.addEventListener('click',()=>{activeIconFilter=b.dataset.iconFilter||'all';filterExerciseIcons()}));dlg.querySelector('#eType').addEventListener('change',()=>{if(!(iconSearch?.value||'').trim())activeIconFilter=typeToIconCategory(dlg.querySelector('#eType').value);filterExerciseIcons()});filterExerciseIcons();
+ dlg.querySelector('#deleteExPlan')?.addEventListener('click',()=>{if(!confirm(`Excluir “${p.name}”?`))return;d.plans=d.plans.filter(x=>String(x.id)!==String(p.id));saveEx(d);close();renderExercicios()});
+ dlg.querySelector('#exForm').addEventListener('submit',e=>{e.preventDefault();const obj={...p,name:dlg.querySelector('#eName').value.trim(),type:dlg.querySelector('#eType').value,icon:dlg.querySelector('#eIcon').value,cycleId:p.cycleId||'',durationValue:Math.max(1,+dlg.querySelector('#eDur').value||30),durationUnit:dlg.querySelector('#eDurUnit').value,frequency:dlg.querySelector('#eFreq').value,weeklyTarget:Math.max(1,+dlg.querySelector('#eWeeklyTarget').value||1),days:[...dlg.querySelectorAll('#eDays input:checked')].map(x=>x.value),period:dlg.querySelector('#ePeriod').value,time:dlg.querySelector('#eTime').value,untilMode:dlg.querySelector('#eUntil').value,untilDate:dlg.querySelector('#eUntilDate').value,notify:dlg.querySelector('#eNotify').checked,notifyWhen:dlg.querySelector('#eNotifyWhen').value,plan:dlg.querySelector('#ePlan').value.trim(),link:dlg.querySelector('#eLink').value.trim(),note:dlg.querySelector('#eNote').value.trim(),active:dlg.querySelector('#eActive').value==='1'};d.plans=current?d.plans.map(x=>String(x.id)===String(p.id)?obj:x):[...d.plans,{...obj,id:uid()}];saveEx(d);close();renderExercicios()});openExerciseDialogStable(dlg);
+}
+
+const FOOD_KEY="minha-vida.alimentacao.v1";
+const FOOD_BASE={
+ week:1,
+ breakfasts:[
+  ["Segunda","Pão frito + café com leite"],["Terça","Crepioca de cottage"],["Quarta","Waffle de queijo"],["Quinta","Panqueca"],["Sexta","Pão frito"],["Sábado","Cuscuz + queijo"],["Domingo","Panquecas + café com leite"]
+ ],
+ lunchboxes:[
+  ["Segunda","Lancheira a definir"],["Terça","Lancheira a definir"],["Quarta","Lancheira a definir"],["Quinta","Lancheira a definir"],["Sexta","Lancheira a definir"],["Sábado","Lancheira a definir"],["Domingo","Lancheira a definir"]
+ ],
+ dinners:[
+  ["Segunda","Frango assado com batatas + arroz + salada","terça"],
+  ["Terça","Strogonoff de frango + arroz + batata palha + salada","quarta"],
+  ["Quarta","Bife de alcatra acebolado + purê + brócolis","quinta"],
+  ["Quinta","Ragu de carne + arroz + legumes","sexta"],
+  ["Sexta","Hambúrguer caseiro + batata assada + salada",""],
+  ["Sábado","Pizza caseira / noite de pizza",""],
+  ["Domingo","Carne de panela com músculo + arroz + feijão + legumes",""]
+ ],
+ mealTypes:[],lunchbox:true,shoppingWeekly:true,cookingDone:false,mealLog:{}
+};
+function foodSafeId(v='cardapio'){return String(v||'cardapio').normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,'').slice(0,36)||'cardapio'}
+function foodScheduleFrom(rows=[],fallback='A definir'){const days=['Segunda','Terça','Quarta','Quinta','Sexta','Sábado','Domingo'];return days.map(day=>{const r=(rows||[]).find(x=>x&&x[0]===day);return [day,String(r?.[1]||fallback)]})}
+function normalizeFoodMealTypes(d,migrateLegacy=true){
+ if(Array.isArray(d.mealTypes)&&d.mealTypes.length){
+  d.mealTypes=d.mealTypes.map((x,i)=>({id:String(x.id||`meal-${i+1}`),label:String(x.label||`Cardápio ${i+1}`),owner:x.owner==='other'?'other':'self',personName:String(x.personName||''),trackProgress:x.owner==='other'?false:x.trackProgress!==false,mode:x.mode==='previousDinner'?'previousDinner':'schedule',schedule:foodScheduleFrom(x.schedule||[]),order:Number.isFinite(+x.order)?+x.order:i})).sort((a,b)=>a.order-b.order);return d;
+ }
+ if(!migrateLegacy){d.mealTypes=[];return d}
+ d.mealTypes=[
+  {id:'breakfast',label:'Café da manhã',owner:'self',personName:'',trackProgress:true,mode:'schedule',schedule:foodScheduleFrom(d.breakfasts||FOOD_BASE.breakfasts),order:0},
+  {id:'lunchbox',label:'Lancheira do Henrique',owner:'other',personName:'Henrique',trackProgress:false,mode:'schedule',schedule:foodScheduleFrom(d.lunchboxes||FOOD_BASE.lunchboxes,'Lancheira a definir'),order:1},
+  {id:'lunch',label:'Marmita',owner:'self',personName:'',trackProgress:true,mode:'previousDinner',schedule:foodScheduleFrom([], 'Marmita a definir'),order:2},
+  {id:'dinner',label:'Jantar',owner:'self',personName:'',trackProgress:true,mode:'schedule',schedule:foodScheduleFrom(d.dinners||FOOD_BASE.dinners),order:3}
+ ];return d;
+}
+function syncFoodLegacyFromMealTypes(d){const by=id=>(d.mealTypes||[]).find(x=>x.id===id);const b=by('breakfast'),lb=by('lunchbox'),din=by('dinner');if(b)d.breakfasts=foodScheduleFrom(b.schedule);if(lb)d.lunchboxes=foodScheduleFrom(lb.schedule,'Lancheira a definir');if(din)d.dinners=foodScheduleFrom(din.schedule);return d}
+function loadFood(){try{const raw=window.berthaHmlStorage.getItem(FOOD_KEY);if(raw){const parsed=JSON.parse(raw),d={...FOOD_BASE,...parsed,breakfasts:Array.isArray(parsed.breakfasts)?parsed.breakfasts:FOOD_BASE.breakfasts,lunchboxes:Array.isArray(parsed.lunchboxes)?parsed.lunchboxes:FOOD_BASE.lunchboxes,dinners:Array.isArray(parsed.dinners)?parsed.dinners:FOOD_BASE.dinners,mealLog:parsed.mealLog||{},cookingHistory:Array.isArray(parsed.cookingHistory)?parsed.cookingHistory:[],lastCookedRecipeIds:Array.isArray(parsed.lastCookedRecipeIds)?parsed.lastCookedRecipeIds:[]};return normalizeFoodMealTypes(d,true)}}catch{}const base=JSON.parse(JSON.stringify(FOOD_BASE));base.cookingHistory=[];base.lastCookedRecipeIds=[];return normalizeFoodMealTypes(base,false)}
+function saveFood(d){normalizeFoodMealTypes(d,false);syncFoodLegacyFromMealTypes(d);window.berthaHmlStorage.setItem(FOOD_KEY,JSON.stringify(d));syncFoodPrepIntelligence(d);}
+const FOOD_INTELLIGENCE_KEY='bertha.food-intelligence.v1';
+function syncFoodPrepIntelligence(foodData=loadFood()){
+ const history=(Array.isArray(foodData?.cookingHistory)?foodData.cookingHistory:[]).slice().sort((a,b)=>(+b.completedAt||0)-(+a.completedAt||0));
+ const recent=history.slice(0,6),freq={};recent.forEach(batch=>(batch.recipeIds||[]).forEach(id=>{freq[id]=(freq[id]||0)+1}));
+ const ctx={version:1,updatedAt:Date.now(),lastBatch:recent[0]||null,recentBatches:recent,recentPreparedRecipeIds:[...new Set(recent.flatMap(x=>x.recipeIds||[]))],frequencyByRecipe:freq,nextCookingDate:foodData?.nextCookingDate||null};
+ try{window.berthaHmlStorage.setItem(FOOD_INTELLIGENCE_KEY,JSON.stringify(ctx));}catch{}
+ return ctx;
+}
+window.berthaFoodIntelligenceContext=()=>{try{return JSON.parse(window.berthaHmlStorage.getItem(FOOD_INTELLIGENCE_KEY)||'{}')}catch{return {}}};
+function foodTodayISO(){const x=new Date(),y=x.getFullYear(),m=String(x.getMonth()+1).padStart(2,"0"),d=String(x.getDate()).padStart(2,"0");return `${y}-${m}-${d}`;}
+function foodDayName(){return ["Domingo","Segunda","Terça","Quarta","Quinta","Sexta","Sábado"][new Date().getDay()];}
+function plannedDinnerToday(d=loadFood()){const day=foodDayName();return d.dinners.find(x=>x[0]===day)||d.dinners[0];}
+function recipeForMealName(name=""){const q=name.toLowerCase();const aliases=[
+ ["frango assado","frango-assado"],["strogonoff","strogonoff"],["alcatra","alcatra"],["ragu","ragu"],["hambúrguer","hamburguer"],["hamburguer","hamburguer"],["carne de panela","musculo"],["panqueca","panquecas"],["frango grelhado","frango-grelhado"],["frango desfiado","frango-desfiado"],["risoto","risoto"],["porco assado","porco"],["carne moída","carne-legumes"],["frango gratinado","frango-gratinado"],["almôndega","almondegas"],["coxa","coxa-sobrecoxa"],["arroz de forno","arroz-forno"],["porco desfiado","porco-rap10"],["fraldinha","fraldinha"],["crepioca","crepioca"],["cuscuz","cuscuz"]
+ ]; const hit=aliases.find(([a])=>q.includes(a));return hit?getRecipeById(hit[1]):null;}
+function recipeForMealNameFlexible(name=""){const raw=String(name||'').replace(/^Marmita:\s*/i,'').trim(),norm=v=>String(v||'').normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase().replace(/[^a-z0-9]+/g,' ').trim();const q=norm(raw),recipes=allRecipes();let hit=recipes.find(r=>norm(r.name)===q);if(!hit)hit=recipes.find(r=>q&&q.includes(norm(r.name)));if(!hit)hit=recipes.find(r=>norm(r.name)&&norm(r.name).includes(q));return hit||recipeForMealName(raw)}
+function foodMealTypeById(id,d=loadFood()){return (d.mealTypes||[]).find(x=>String(x.id)===String(id))||null}
+function foodMealTypeTracksProgress(id,d=loadFood()){const t=foodMealTypeById(id,d);return !!(t&&t.owner!=='other'&&t.trackProgress!==false)}
+function foodDayIndex(){return new Date().getDay();}
+function foodBreakfastToday(d=loadFood()){const t=foodMealTypeById('breakfast',d),day=foodDayName();return t?.schedule?.find(x=>x[0]===day)||null}
+function foodYesterdayName(){return ["Domingo","Segunda","Terça","Quarta","Quinta","Sexta","Sábado"][(new Date().getDay()+6)%7];}
+function foodMealNameForType(type,day,d=loadFood()){if(!type)return 'A definir';if(type.mode==='previousDinner'){const days=foodWeekDays(),i=days.indexOf(day),prev=days[(i+6)%7],dinner=(d.mealTypes||[]).find(x=>x.id==='dinner')||(d.mealTypes||[]).find(x=>/jantar/i.test(x.label));const row=dinner?.schedule?.find(x=>x[0]===prev);const base=String(row?.[1]||'').split(' + ')[0];return base?`Marmita: ${base}`:'Marmita a definir'}const row=(type.schedule||[]).find(x=>x[0]===day);return String(row?.[1]||'A definir')}
+function foodLunchToday(d=loadFood()){const t=foodMealTypeById('lunch',d);return t?foodMealNameForType(t,foodDayName(),d):'Marmita / almoço de hoje'}
+function foodMealsForDay(day,key,d=loadFood(),includeOther=false){return (d.mealTypes||[]).filter(t=>includeOther||t.owner!=='other').map(t=>{const name=foodMealNameForType(t,day,d),recipe=recipeForMealNameFlexible(name);return {id:t.id,label:t.label,name,recipe,trackProgress:t.trackProgress!==false,owner:t.owner,personName:t.personName||'',log:(d.mealLog[key]?.meals||{})[t.id]||{}}})}
+function getTodayMeals(){const d=loadFood(),key=foodTodayISO();return foodMealsForDay(foodDayName(),key,d,false)}
+function getTodayMealState(mealId='dinner'){const d=loadFood(),key=foodTodayISO(),meals=getTodayMeals(),meal=meals.find(x=>x.id===mealId)||meals[0]||{id:mealId,label:'Refeição',name:'A definir',recipe:null,log:{}},log=meal.log||{},selected=getRecipeById(log.selectedRecipeId)||meal.recipe;return {d,key,meal,plannedRecipe:meal.recipe,log,selected};}
+function saveTodayMealChoice(mealId,recipeId,source="planned",otherText=""){const {d,key,meal}=getTodayMealState(mealId);d.mealLog[key]=d.mealLog[key]||{};d.mealLog[key].meals=d.mealLog[key].meals||{};d.mealLog[key].meals[mealId]={...(d.mealLog[key].meals[mealId]||{}),plannedRecipeId:meal.recipe?.id||null,selectedRecipeId:recipeId||null,otherText:otherText||'',source,selectedAt:new Date().toISOString()};saveFood(d);}
+function foodISOForOffset(offset=0){const x=new Date();x.setHours(12,0,0,0);x.setDate(x.getDate()+offset);const y=x.getFullYear(),m=String(x.getMonth()+1).padStart(2,"0"),d=String(x.getDate()).padStart(2,"0");return `${y}-${m}-${d}`;}
+function foodDayNameForOffset(offset=0){const x=new Date();x.setHours(12,0,0,0);x.setDate(x.getDate()+offset);return ["Domingo","Segunda","Terça","Quarta","Quinta","Sexta","Sábado"][x.getDay()];}
+function getMealsForOffset(offset=0){if(offset===0)return getTodayMeals();const d=loadFood(),key=foodISOForOffset(offset),day=foodDayNameForOffset(offset);return foodMealsForDay(day,key,d,false)}
+function getFutureMealState(offset,mealId='dinner'){const d=loadFood(),key=foodISOForOffset(offset),meal=getMealsForOffset(offset).find(x=>x.id===mealId)||getMealsForOffset(offset)[2],log=meal.log||{},selected=getRecipeById(log.selectedRecipeId)||meal.recipe;return {d,key,meal,plannedRecipe:meal.recipe,log,selected};}
+function saveFutureMealChoice(offset,mealId,recipeId,source='advance-choice'){const {d,key,meal}=getFutureMealState(offset,mealId);d.mealLog[key]=d.mealLog[key]||{};d.mealLog[key].meals=d.mealLog[key].meals||{};d.mealLog[key].meals[mealId]={...(d.mealLog[key].meals[mealId]||{}),plannedRecipeId:meal.recipe?.id||null,selectedRecipeId:recipeId||null,otherText:'',source,selectedAt:new Date().toISOString(),plannedInAdvance:true};saveFood(d);}
+function openChooseFutureRecipe(offset=1,mealId='dinner'){const old=document.querySelector('#chooseFutureFoodDialog');if(old)old.remove();const dlg=document.createElement('dialog');dlg.id='chooseFutureFoodDialog';dlg.className='study-v10-dialog recipe-dialog';dlg.innerHTML=`<div class="study-v10-modal"><div class="study-v10-head"><div><div class="eyebrow">ESCOLHER OUTRA</div><h2>${escapeHtml(foodDayNameForOffset(offset))}</h2><p>Escolha agora o que você pretende fazer. Isso ainda não conta como realizado.</p></div><button type="button" class="study-v10-x" data-close>×</button></div><input id="chooseFutureFoodSearch" placeholder="Buscar nas minhas receitas…"><div class="list" id="chooseFutureFoodList" style="max-height:52vh;overflow:auto;margin-top:10px"></div></div>`;document.body.appendChild(dlg);const draw=()=>{const q=(dlg.querySelector('#chooseFutureFoodSearch')?.value||'').toLowerCase();dlg.querySelector('#chooseFutureFoodList').innerHTML=allRecipes().filter(r=>!q||r.name.toLowerCase().includes(q)||recipeCategory(r).toLowerCase().includes(q)||(r.ingredients||[]).join(' ').toLowerCase().includes(q)).map(r=>`<button type="button" class="card recipe-pick" data-choose-future="${r.id}"><span class="eyebrow">${escapeHtml(recipeCategory(r))}</span><strong>${escapeHtml(r.name)}</strong><small>${escapeHtml(r.yield||'Rendimento não informado')}</small></button>`).join('');dlg.querySelectorAll('[data-choose-future]').forEach(b=>b.onclick=()=>{saveFutureMealChoice(offset,mealId,b.dataset.chooseFuture,'advance-choice');dlg.close();if(state.route==='receitas')renderReceitas();else if(state.route==='meu-dia')renderMeuDia()})};dlg.querySelector('[data-close]').onclick=()=>dlg.close();dlg.addEventListener('close',()=>dlg.remove());dlg.querySelector('#chooseFutureFoodSearch').oninput=draw;draw();dlg.showModal();}
+function renderUpcomingRecipes(){const meals=getMealsForOffset(1);return `<section class="recipe-today recipe-upcoming card"><div class="recipe-today-head"><div><span class="eyebrow">AMANHÃ · ${escapeHtml(foodDayNameForOffset(1).toUpperCase())}</span><h3>Próximas receitas</h3></div></div><div class="recipe-meals">${meals.map(m=>{const selected=getRecipeById(m.log.selectedRecipeId)||m.recipe,name=selected?.name||m.name,changed=!!m.log.selectedRecipeId&&String(m.log.selectedRecipeId)!==String(m.log.plannedRecipeId||m.recipe?.id||'');return `<div class="recipe-meal"><span class="recipe-meal-icon">${recipeMealIcon()}</span><div class="recipe-meal-copy"><small>${escapeHtml(m.label)}${changed?' · ESCOLHIDA POR VOCÊ':''}</small><strong>${escapeHtml(name)}</strong></div><div class="recipe-meal-actions"><button type="button" data-future-keep="${m.id}">${changed?'Escolhida':'Manter esta'}</button><button type="button" data-future-other="${m.id}">Escolher outra</button>${selected?`<button type="button" class="recipe-view" data-future-view="${m.id}" aria-label="Ver receita">›</button>`:''}</div></div>`}).join('')}</div><p class="muted" style="margin:10px 0 8px;font-size:12px">Escolher outra altera apenas o planejamento de amanhã. O progresso só é alimentado quando você registrar o que realmente fez.</p></section>`;}
+function bindFutureFoodActions(){document.querySelectorAll('[data-future-other]').forEach(b=>b.onclick=()=>openChooseFutureRecipe(1,b.dataset.futureOther));document.querySelectorAll('[data-future-view]').forEach(b=>b.onclick=()=>{const st=getFutureMealState(1,b.dataset.futureView);if(st.selected)openFoodRecipe(st.selected.id,false)});document.querySelectorAll('[data-future-keep]').forEach(b=>b.onclick=()=>{const st=getFutureMealState(1,b.dataset.futureKeep);if(!st.log.selectedRecipeId&&st.meal.recipe)saveFutureMealChoice(1,b.dataset.futureKeep,st.meal.recipe.id,'advance-confirmed');b.textContent='Confirmada';});}
+function foodNumeric(v){const n=Number(String(v??'').replace(',','.'));return Number.isFinite(n)?n:null;}
+function foodRecipeCalories(recipe){
+ if(!recipe?.nutrition)return {kcal:null,source:'Sem informação nutricional cadastrada',complete:false};
+ const kcal=foodNumeric(recipe.nutrition.kcal);if(kcal==null)return {kcal:null,source:'Sem kcal cadastradas na receita',complete:false};
+ const ref=recipe.nutrition.reference||'100g';
+ if(ref==='portion')return {kcal:Math.round(kcal),source:'Receita cadastrada · por porção',complete:true};
+ if(ref==='whole'){
+  const m=String(recipe.yield||'').match(/([0-9]+(?:[.,][0-9]+)?)\s*(?:porç|unid)/i),portions=m?foodNumeric(m[1]):null;
+  if(portions&&portions>0)return {kcal:Math.round(kcal/portions),source:`Receita cadastrada · prato completo ÷ ${String(portions).replace('.',',')} porções`,complete:true};
+  return {kcal:null,source:'Receita cadastrada · prato completo, porção consumida não informada',complete:false};
+ }
+ if(ref==='100g')return {kcal:null,source:'Receita cadastrada · kcal/100 g, quantidade consumida não informada',complete:false};
+ return {kcal:null,source:'Informação nutricional de ingrediente; total da refeição não calculado',complete:false};
+}
+function foodRecipeMacros(recipe){
+ const kcalInfo=foodRecipeCalories(recipe),n=recipe?.nutrition||{},protein=foodNumeric(n.protein),ref=n.reference||'100g';
+ let proteinValue=null,proteinSource='Sem proteína calculável para a porção';
+ if(protein!=null){
+  if(ref==='portion'){proteinValue=Math.round(protein*10)/10;proteinSource='Receita cadastrada · por porção'}
+  else if(ref==='whole'){
+   const m=String(recipe?.yield||'').match(/([0-9]+(?:[.,][0-9]+)?)\s*(?:porç|unid)/i),portions=m?foodNumeric(m[1]):null;
+   if(portions&&portions>0){proteinValue=Math.round((protein/portions)*10)/10;proteinSource=`Receita cadastrada · prato completo ÷ ${String(portions).replace('.',',')} porções`}
+  }
+ }
+ return {...kcalInfo,protein:proteinValue,proteinSource};
+}
+function foodRecipeNutritionLabel(recipe){
+ const n=recipe?.nutrition||{},k=foodNumeric(n.kcal),p=foodNumeric(n.protein),ref=n.reference||'100g';
+ const refLabel=ref==='portion'?'por porção':ref==='whole'?'prato completo':ref==='100g'?'por 100 g':'referência cadastrada';
+ const bits=[k!=null?`${Math.round(k)} kcal`:'Calorias: não cadastrado',p!=null?`${String(Math.round(p*10)/10).replace('.',',')} g proteína`:'Proteína: não cadastrada'];
+ const hasAny=k!=null||p!=null;
+ return `${bits.join(' · ')}${hasAny?` · ${refLabel}`:''}`;
+}
+function recordRecipeConsumption(mealId,title,source){
+ try{
+  const st=getTodayMealState(mealId),recipe=st.selected||null,nut=foodRecipeMacros(recipe),d=loadRec(),date=foodTodayISO(),key=`${date}:${mealId}`;
+  d.consumptionLog=(d.consumptionLog||[]).filter(x=>x.key!==key);
+  d.consumptionLog.push({key,date,mealId,mealLabel:st.meal?.label||mealId,plannedRecipeId:st.plannedRecipe?.id||null,recipeId:recipe?.id||null,title:title||recipe?.name||st.meal?.name||'Refeição',source:source||'planned',kcal:nut.kcal,kcalSource:nut.source,kcalComplete:!!nut.complete,protein:nut.protein,proteinSource:nut.proteinSource,recordedAt:new Date().toISOString()});
+  saveRec(d);
+ }catch(e){console.warn('BERTH.A receitas/consumo',e)}
+}
+function removeRecipeConsumption(mealId,date=foodTodayISO()){try{const d=loadRec(),key=`${date}:${mealId}`;d.consumptionLog=(d.consumptionLog||[]).filter(x=>x.key!==key);saveRec(d)}catch(e){console.warn('BERTH.A receitas/desfazer consumo',e)}}
+function recordFoodProgress(mealId,title,source){
+ try{
+  const st=getTodayMealState(mealId),recipe=st.selected||null,nut=foodRecipeMacros(recipe),data=JSON.parse(window.berthaHmlStorage.getItem('bertha.time-engine.v1')||'{}');data.history=Array.isArray(data.history)?data.history:[];const key=`food:${foodTodayISO()}:${mealId}`;data.history=data.history.filter(h=>h.itemId!==key);data.history.push({id:`${key}:${Date.now()}`,itemId:key,source:'Alimentação',category:'Alimentação',title:title||'Refeição',status:'done',startedAt:Date.now(),endedAt:Date.now(),realMinutes:0,learningKey:`meal:${mealId}`,mealId,recipeId:recipe?.id||null,plannedRecipeId:st.plannedRecipe?.id||null,mealSource:source||'planned',kcal:nut.kcal,kcalSource:nut.source,kcalComplete:!!nut.complete,protein:nut.protein,proteinSource:nut.proteinSource});window.berthaHmlStorage.setItem('bertha.time-engine.v1',JSON.stringify(data));
+ }catch(e){console.warn('BERTH.A alimentação/progresso',e)}
+}
+function refreshFoodRoute(){if(state.route==='receitas')renderReceitas();else if(state.route==='alimentacao')renderAlimentacao();else if(state.route==='meu-dia')renderMeuDia();else if(state.route==='progresso')renderProgressOverview();}
+function setTodayMealConsumption(mealId,status,title,source){const {d,key}=getTodayMealState(mealId);d.mealLog[key]=d.mealLog[key]||{};d.mealLog[key].meals=d.mealLog[key].meals||{};d.mealLog[key].meals[mealId]={...(d.mealLog[key].meals[mealId]||{}),consumption:status,consumedAt:status==='consumed'?new Date().toISOString():null,skippedAt:status==='skipped'?new Date().toISOString():null};saveFood(d);const tracks=foodMealTypeTracksProgress(mealId,d);if(status==='consumed'&&tracks){recordRecipeConsumption(mealId,title,source);recordFoodProgress(mealId,title,source)}else{removeRecipeConsumption(mealId,key);try{const data=JSON.parse(window.berthaHmlStorage.getItem('bertha.time-engine.v1')||'{}');data.history=Array.isArray(data.history)?data.history:[];const progressKey=`food:${key}:${mealId}`;data.history=data.history.filter(h=>h.itemId!==progressKey);window.berthaHmlStorage.setItem('bertha.time-engine.v1',JSON.stringify(data));}catch(e){console.warn('BERTH.A alimentação/não comi',e)}}refreshFoodRoute();}
+function undoTodayMeal(mealId){const d=loadFood(),key=foodTodayISO();if(d.mealLog?.[key]?.meals?.[mealId]){delete d.mealLog[key].meals[mealId];if(!Object.keys(d.mealLog[key].meals).length)delete d.mealLog[key];saveFood(d)}removeRecipeConsumption(mealId,key);try{const data=JSON.parse(window.berthaHmlStorage.getItem('bertha.time-engine.v1')||'{}');data.history=Array.isArray(data.history)?data.history:[];const progressKey=`food:${key}:${mealId}`;data.history=data.history.filter(h=>h.itemId!==progressKey);window.berthaHmlStorage.setItem('bertha.time-engine.v1',JSON.stringify(data));}catch(e){console.warn('BERTH.A alimentação/desfazer',e)}refreshFoodRoute();}
+function openRecipeInRecipes(recipeId){
+ if(!recipeId)return;
+ try{sessionStorage.setItem('bertha.recipe.origin','alimentacao')}catch{}
+ window.location.hash='#receitas';
+ setTimeout(()=>{try{state.route='receitas';renderReceitas();openFoodRecipe(recipeId,false,'dinner','receitas')}catch(e){console.warn('BERTH.A abrir receita',e)}},120);
+}
+function ensureFoodModuleStyles(){
+ if(document.getElementById('bertha-food-v115-styles'))return;
+ const st=document.createElement('style');st.id='bertha-food-v115-styles';st.textContent=`
+ .food-v115{--food-blue:#6f98bd;--food-blue-deep:#547ca2;--food-blue-soft:#eaf3fb;--food-butter:#fff4d7;--food-peach:#f9eadf;--food-ink:#35303d;--food-muted:#8b838e}
+ .food-v115-hero{position:relative;overflow:hidden;margin:2px 0 18px;padding:24px 26px 25px;border:1px solid rgba(113,137,164,.18);border-radius:26px;background:radial-gradient(circle at 18% 16%,rgba(199,225,247,.72),transparent 42%),radial-gradient(circle at 83% 80%,rgba(255,234,197,.68),transparent 38%),linear-gradient(135deg,rgba(242,248,252,.94),rgba(255,250,242,.94));box-shadow:0 14px 36px rgba(79,93,110,.055)}
+ .food-v115-hero .eyebrow{display:block;margin-bottom:13px;color:#537fa6;letter-spacing:.18em;font-weight:800}
+ .food-v115-hero h2{max-width:82%;margin:0 0 8px;color:#343441;font-size:30px;line-height:1.06;font-weight:520;letter-spacing:-.025em}
+ .food-v115-hero p{max-width:82%;margin:13px 0 0;color:#7f7b84;font-size:17px;line-height:1.42}
+ .food-v115-abstract{position:absolute;right:28px;top:28px;width:28px;height:24px;color:rgba(109,113,122,.42)}
+ .food-v115-abstract:before{content:"";position:absolute;left:0;top:1px;width:28px;border-top:1.5px solid currentColor}
+ .food-v115-abstract:after{content:"";position:absolute;left:0;top:7px;width:25px;height:12px;border:1.5px solid currentColor;border-top:0;border-radius:0 0 14px 14px}
+ .food-v115-today{margin:0 0 18px;padding:20px 22px;border:1px solid rgba(109,136,164,.14);border-radius:25px;background:radial-gradient(circle at 84% 12%,rgba(255,236,199,.20),transparent 34%),linear-gradient(135deg,rgba(255,254,250,.92),rgba(255,250,240,.76));box-shadow:0 12px 30px rgba(72,89,106,.045)}
+ .food-v115-today-head{display:flex;justify-content:space-between;gap:12px;align-items:flex-start;padding-bottom:14px;border-bottom:1px solid rgba(80,103,126,.09)}
+ .food-v115-today-head h3{margin:4px 0 0;font-size:24px;color:#3c3742;letter-spacing:-.02em}.food-v115-today-head .eyebrow{color:#657f99}
+ .food-v115-today-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:0}
+ .food-v115-meal{min-width:0;padding:16px 14px 4px}.food-v115-meal+ .food-v115-meal{border-left:1px solid rgba(80,103,126,.09)}
+ .food-v115-meal-label{display:flex;align-items:center;gap:7px;color:#7d858d;font-size:11px;font-weight:800;letter-spacing:.08em;text-transform:uppercase}
+ .food-v115-meal-icon{width:22px;height:22px;display:grid;place-items:center;color:var(--food-blue-deep)}
+ .food-v115-meal-icon svg{width:20px;height:20px;fill:none;stroke:currentColor;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round}
+ .food-v115-meal strong{display:block;margin-top:9px;color:#34323b;font-size:14px;line-height:1.28;min-height:36px}
+ .food-v115-actions{display:flex;gap:6px;align-items:center;flex-wrap:wrap;margin-top:11px}
+ .food-v115-actions button{min-height:34px!important;padding:7px 10px!important;border-radius:999px!important;border:1px solid rgba(93,132,166,.22)!important;background:rgba(235,244,251,.58)!important;color:#557b9d!important;font-size:11px!important;font-weight:760!important;box-shadow:none!important}
+ .food-v115-actions button:hover{background:rgba(226,239,249,.8)!important}.food-v115-actions .food-view-btn{width:34px;padding:0!important;display:grid;place-items:center}
+ .food-v115-actions .food-done-state{background:linear-gradient(135deg,rgba(223,239,250,.86),rgba(255,244,215,.74))!important}
+ .food-v115-week{margin:0 0 18px}.food-v115-section-kicker{display:flex;align-items:center;justify-content:space-between;gap:12px;margin:0 3px 9px}.food-v115-section-kicker .eyebrow{color:#6f7f90}
+ .food-v115-card{border:1px solid rgba(104,125,146,.13)!important;border-radius:24px!important;background:radial-gradient(circle at 88% 10%,rgba(255,237,203,.14),transparent 32%),linear-gradient(145deg,rgba(255,254,250,.91),rgba(255,251,243,.72))!important;box-shadow:0 11px 26px rgba(72,89,106,.04)!important}
+ .food-v115-breakfast{padding:17px 18px!important}.food-v115-breakfast-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px}.food-v115-breakfast-head h3{margin:0;font-size:19px}.food-v115-pill{border-radius:999px;padding:6px 10px;background:rgba(255,239,211,.78);color:#8b7862;font-size:11px;font-weight:800}
+ .food-v115-days{display:flex;gap:7px;overflow-x:auto;padding:2px 0 4px;scrollbar-width:none}.food-v115-days::-webkit-scrollbar{display:none}.food-v115-day{flex:0 0 92px;padding:11px 9px;border:1px solid rgba(98,126,154,.1);border-radius:15px;background:linear-gradient(145deg,rgba(255,249,238,.76),rgba(255,254,250,.78));text-align:center}.food-v115-day.today{background:linear-gradient(145deg,rgba(220,237,250,.9),rgba(245,249,252,.86));border-color:rgba(91,135,174,.17)}.food-v115-day b{display:block;color:#65798d;font-size:10px;letter-spacing:.08em;text-transform:uppercase}.food-v115-day span{display:block;margin-top:6px;color:#514c55;font-size:11px;line-height:1.25}
+ .food-v115-dinner{padding:17px 18px!important;margin-top:10px}.food-v115-dinner-head{display:flex;align-items:center;justify-content:space-between;gap:10px;padding-bottom:8px}.food-v115-dinner-head h3{margin:0;font-size:20px}.food-v115-dinner-row{display:grid;grid-template-columns:50px minmax(0,1fr) auto;gap:10px;align-items:center;padding:11px 0;border-top:1px solid rgba(84,105,126,.08)}.food-v115-dinner-row:first-of-type{border-top:0}.food-v115-daytag{display:inline-flex;justify-content:center;padding:6px 7px;border-radius:999px;background:var(--food-blue-soft);color:#5d84a7;font-size:10px;font-weight:850}.food-v115-dinner-row strong{font-size:13px;line-height:1.25;color:#3f3a43}.food-v115-dinner-row small{display:block;margin-top:3px;color:#9a929b}.food-v115-recipe-btn{width:34px;height:34px;border:1px solid rgba(93,132,166,.18)!important;border-radius:12px!important;background:rgba(239,246,251,.64)!important;color:#5c83a5!important;padding:0!important;display:grid!important;place-items:center!important;box-shadow:none!important}
+ .food-v115-routine-title{margin:20px 3px 9px;color:#74707b;letter-spacing:.16em}.food-v115-routine{padding:18px!important}.food-v115-routine label{display:grid;grid-template-columns:auto 1fr;gap:13px;align-items:center}.food-v115-routine input{width:24px;height:24px;accent-color:#6d95b8}.food-v115-routine strong,.food-v115-routine small{display:block}.food-v115-routine strong{font-size:17px}.food-v115-routine small{margin-top:3px;color:#8d858f;line-height:1.35}.food-v115-cookdate{margin-top:5px!important;color:#6f89a2!important;font-size:12px!important;font-weight:650;letter-spacing:.01em}
+
+ /* RC40 — modais abertos por Alimentação mantêm identidade e contexto do módulo */
+ dialog.food-context-dialog>.study-v10-modal{
+   background:radial-gradient(circle at 88% 8%,rgba(255,235,194,.18),transparent 32%),linear-gradient(145deg,rgba(247,252,255,.98),rgba(255,250,240,.97))!important;
+ }
+ dialog.food-context-dialog .eyebrow{color:#5f86a8!important}
+ dialog.food-context-dialog .primary{background:linear-gradient(135deg,#8db7d7 0%,#e6bf8d 100%)!important;color:#fff!important;border:0!important}
+ dialog.food-context-dialog .secondary{background:rgba(244,249,252,.82)!important;color:#587d9e!important;border:1px solid rgba(93,132,166,.16)!important}
+ dialog.food-context-dialog input:focus,dialog.food-context-dialog select:focus,dialog.food-context-dialog textarea:focus{border-color:#8db7d7!important;box-shadow:0 0 0 3px rgba(141,183,215,.14)!important}
+ dialog.food-context-dialog .recipe-detail-card,dialog.food-context-dialog .recipe-choice,dialog.food-context-dialog .recipe-pick{border-color:rgba(93,132,166,.12)!important;background:linear-gradient(145deg,rgba(255,254,250,.92),rgba(241,248,252,.82))!important}
+
+ @media(max-width:520px){.food-v115-hero{padding:22px 22px 23px}.food-v115-hero h2{font-size:28px}.food-v115-hero h2,.food-v115-hero p{max-width:84%}.food-v115-abstract{right:24px;top:27px;width:28px;height:24px}.food-v115-today{padding:18px 16px}.food-v115-today-grid{grid-template-columns:1fr}.food-v115-meal{padding:13px 2px}.food-v115-meal+.food-v115-meal{border-left:0;border-top:1px solid rgba(80,103,126,.08)}.food-v115-meal strong{min-height:0;font-size:15px}.food-v115-actions{margin-top:9px}.food-v115-dinner-row{grid-template-columns:44px minmax(0,1fr) auto}}
+ `;document.head.appendChild(st)
+}
+function foodMealLineIcon(id){const icons={breakfast:'<path d="M4 8h12v5a5 5 0 0 1-5 5H9a5 5 0 0 1-5-5V8z"/><path d="M16 10h2a2 2 0 0 1 0 4h-2"/><path d="M7 5c0-1 1-1 1-2M11 5c0-1 1-1 1-2"/>',lunch:'<path d="M7 3v8M4 3v5c0 2 6 2 6 0V3M7 11v10M16 3v18M16 3c4 3 4 8 0 10"/>',dinner:'<path d="M20 14.5A8 8 0 0 1 9.5 4a7 7 0 1 0 10.5 10.5z"/>'};return `<svg viewBox="0 0 24 24" aria-hidden="true">${icons[id]||icons.dinner}</svg>`}
+function renderTodayFoodCard(){
+ const meals=getTodayMeals();
+ return `<section class="food-v115-today"><div class="food-v115-today-head"><div><span class="eyebrow">HOJE · ${escapeHtml(foodDayName().toUpperCase())}</span><h3>O que estava previsto para hoje.</h3><p>Marque o que realmente aconteceu. Só “Comi” entra no Meu Progresso.</p></div></div><div class="food-v115-today-grid">${meals.map(m=>{const selected=getRecipeById(m.log.selectedRecipeId)||m.recipe,name=m.log.otherText||selected?.name||m.name,status=m.log.consumption||'',nutrition=foodRecipeNutritionLabel(selected);return `<article class="food-v115-meal ${status?'has-status '+status:''}"><div class="food-v115-meal-label"><span class="food-v115-meal-icon">${foodMealLineIcon(m.id)}</span>${escapeHtml(m.label)}</div><strong>${escapeHtml(name)}</strong><small class="food-v115-nutrition">${escapeHtml(nutrition)}</small><div class="food-v115-actions food-v115-consumption"><button type="button" class="food-status-btn food-eaten ${status==='consumed'?'selected':''}" data-food-status="consumed" data-food-meal="${m.id}">Comi</button><button type="button" class="food-status-btn food-skipped ${status==='skipped'?'selected':''}" data-food-status="skipped" data-food-meal="${m.id}">Não comi</button>${selected?`<button type="button" class="food-recipe-link" data-food-open-recipe="${selected.id}">Ver receita</button>`:''}</div></article>`}).join('')}</div></section>`;
+}
+function bindTodayFoodActions(){
+ document.querySelectorAll('[data-food-status]').forEach(b=>b.onclick=()=>{const mealId=b.dataset.foodMeal,status=b.dataset.foodStatus,s=getTodayMealState(mealId),title=s.log.otherText||s.selected?.name||s.meal.name;setTodayMealConsumption(mealId,status,title,s.log.source||'planned')});
+ document.querySelectorAll('[data-food-open-recipe]').forEach(b=>b.onclick=()=>openRecipeInRecipes(b.dataset.foodOpenRecipe));
+ requestAnimationFrame(()=>{document.querySelectorAll('.food-week-track').forEach(track=>{const card=track.querySelector('.food-week-day.today');if(!card)return;const left=Math.max(0,card.offsetLeft-track.clientWidth*0.08);track.scrollLeft=left;});});
+}
+function renderFoodMeuDiaMini(){
+ return `<div class="home-recipes-shortcut-wrap"><a class="home-recipes-shortcut" href="#receitas" onclick="setTimeout(()=>document.querySelector('.recipe-today')?.scrollIntoView({behavior:'smooth',block:'start'}),90)"><span class="home-recipes-shortcut-icon">${recipeMealIcon()}</span><span>Receitas do dia</span><b>→</b></a><a class="home-recipes-shortcut home-recipes-next" href="#receitas" onclick="setTimeout(()=>document.querySelector('.recipe-upcoming')?.scrollIntoView({behavior:'smooth',block:'start'}),90)"><span class="home-recipes-shortcut-icon">${recipeMealIcon()}</span><span>Receitas de amanhã</span><b>→</b></a></div>`;
+}
+function foodPrepProgressKey(d){return d?.cookingProgressKey||null;}
+function foodPrepBatchRecipeNames(ids=[]){return ids.map(id=>getRecipeById(id)?.name).filter(Boolean)}
+function recordFoodPrepProgress(recipeIds=[]){
+ const d=loadFood(),now=Date.now(),iso=foodTodayISO(),key=`foodprep:${iso}:quinzenal`,ids=[...new Set((recipeIds||[]).map(String))],names=foodPrepBatchRecipeNames(ids);
+ d.cookingDone=true;d.cookingDoneAt=now;d.cookingProgressKey=key;d.lastCookedRecipeIds=ids;
+ d.cookingHistory=Array.isArray(d.cookingHistory)?d.cookingHistory:[];
+ d.cookingHistory=d.cookingHistory.filter(x=>x.progressKey!==key);
+ d.cookingHistory.push({id:`batch:${now}`,progressKey:key,completedAt:now,date:iso,recipeIds:ids,recipeNames:names});
+ saveFood(d);
+ const intelligence=syncFoodPrepIntelligence(d);
+ try{const data=JSON.parse(window.berthaHmlStorage.getItem('bertha.time-engine.v1')||'{}');data.history=Array.isArray(data.history)?data.history:[];data.history=data.history.filter(h=>h.itemId!==key);data.history.push({id:`${key}:${now}`,itemId:key,source:'Alimentação',category:'Alimentação',title:'Cozinha quinzenal',status:'done',startedAt:now,endedAt:now,realMinutes:0,learningKey:'food-prep:quinzenal',activityType:'foodPrep',recipeIds:ids,recipeNames:names,intelligenceContext:{kind:'food-prep',recentPreparedRecipeIds:intelligence.recentPreparedRecipeIds,frequencyByRecipe:intelligence.frequencyByRecipe,nextCookingDate:intelligence.nextCookingDate}});window.berthaHmlStorage.setItem('bertha.time-engine.v1',JSON.stringify(data));}catch(e){console.warn('BERTH.A preparo/progresso',e)}
+}
+function undoFoodPrepProgress(){
+ const d=loadFood(),key=foodPrepProgressKey(d);d.cookingDone=false;d.cookingDoneAt=null;d.cookingProgressKey=null;d.lastCookedRecipeIds=[];d.cookingHistory=(Array.isArray(d.cookingHistory)?d.cookingHistory:[]).filter(x=>x.progressKey!==key);saveFood(d);
+ if(key)try{const data=JSON.parse(window.berthaHmlStorage.getItem('bertha.time-engine.v1')||'{}');data.history=Array.isArray(data.history)?data.history:[];data.history=data.history.filter(h=>h.itemId!==key);window.berthaHmlStorage.setItem('bertha.time-engine.v1',JSON.stringify(data));}catch(e){console.warn('BERTH.A preparo/desfazer',e)}
+}
+function foodPrepDateLabel(ts){if(!ts)return'';try{return new Date(ts).toLocaleDateString('pt-BR')}catch{return''}}
+function openFoodPrepCompleteDialog(preselected=[]){
+ const old=document.querySelector('#foodPrepCompleteDialog');if(old)old.remove();const dlg=document.createElement('dialog');dlg.id='foodPrepCompleteDialog';dlg.className='study-v10-dialog food-context-dialog food-prep-complete-dialog';
+ const chosen=new Set((preselected||[]).map(String));
+ dlg.innerHTML=`<form class="study-v10-modal" id="foodPrepCompleteForm"><div class="study-v10-head"><div><div class="eyebrow">ALIMENTAÇÃO · COZINHA QUINZENAL</div><h2>O que você preparou?</h2><p>Selecione as receitas feitas nesta cozinha. A BERTH.A usa esse histórico para distribuir melhor os próximos cardápios.</p></div><button type="button" class="study-v10-x" data-close>×</button></div><input id="foodPrepRecipeSearch" type="search" placeholder="Buscar receita…"><div class="food-prep-recipe-list" id="foodPrepRecipeList"></div><div class="study-v10-actions"><button type="button" class="secondary" data-close>Cancelar</button><button type="submit" class="primary">Concluir cozinha</button></div></form>`;
+ document.body.appendChild(dlg);
+ const draw=()=>{const q=(dlg.querySelector('#foodPrepRecipeSearch').value||'').toLowerCase();const list=allRecipes().filter(r=>!q||r.name.toLowerCase().includes(q)||recipeCategory(r).toLowerCase().includes(q));dlg.querySelector('#foodPrepRecipeList').innerHTML=list.map(r=>`<label class="food-prep-recipe-row"><input type="checkbox" value="${escapeHtml(String(r.id))}" ${chosen.has(String(r.id))?'checked':''}><span><strong>${escapeHtml(r.name)}</strong><small>${escapeHtml(recipeCategory(r))}${r.prep?` · ${escapeHtml(r.prep)}`:''}</small></span></label>`).join('')||'<div class="empty compact">Nenhuma receita encontrada.</div>';dlg.querySelectorAll('#foodPrepRecipeList input').forEach(cb=>cb.onchange=()=>cb.checked?chosen.add(String(cb.value)):chosen.delete(String(cb.value)))};
+ const cancel=()=>{dlg.close();renderAlimentacao()};dlg.querySelectorAll('[data-close]').forEach(b=>b.onclick=cancel);dlg.addEventListener('cancel',e=>{e.preventDefault();cancel()});dlg.onclose=()=>dlg.remove();dlg.querySelector('#foodPrepRecipeSearch').oninput=draw;dlg.querySelector('#foodPrepCompleteForm').onsubmit=e=>{e.preventDefault();recordFoodPrepProgress([...chosen]);dlg.close();renderAlimentacao()};draw();dlg.showModal();
+}
+function openFoodNextPrepDialog(){
+ const d=loadFood(),dlg=document.createElement('dialog');dlg.className='study-v10-dialog food-next-prep-dialog';const base=new Date();base.setDate(base.getDate()+14);const suggested=d.nextCookingDate||base.toISOString().slice(0,10);dlg.innerHTML=`<form class="study-v10-modal" id="foodNextPrepForm"><div class="study-v10-head"><div><div class="eyebrow">ALIMENTAÇÃO · ROTINA DE PREPARO</div><h2>Programar próxima</h2><p>Defina quando pretende fazer a próxima cozinha quinzenal.</p></div><button type="button" class="study-v10-x" data-close>×</button></div><label>Data<input type="date" id="foodNextPrepDate" value="${escapeHtml(suggested)}" required></label><div class="study-v10-actions"><button type="button" class="secondary" data-close>Cancelar</button><button type="submit" class="primary">Salvar</button></div></form>`;document.body.appendChild(dlg);const close=()=>dlg.close();dlg.querySelectorAll('[data-close]').forEach(b=>b.onclick=close);dlg.onclose=()=>dlg.remove();dlg.querySelector('#foodNextPrepForm').onsubmit=e=>{e.preventDefault();d.nextCookingDate=dlg.querySelector('#foodNextPrepDate').value;saveFood(d);close();renderAlimentacao()};dlg.showModal();
+}
+
+function ensureFoodPolishStylesRC87(){
+ if(document.getElementById('bertha-food-polish-rc87'))return;
+ const st=document.createElement('style');st.id='bertha-food-polish-rc87';st.textContent=`
+ /* RC87 — ALIMENTAÇÃO: tipografia leve + modal system único, suave e coerente. */
+ .food-v115{font-family:"Avenir Next","Montserrat",Inter,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}
+ .food-v115 .eyebrow,.food-v115-section-kicker .eyebrow{
+   font-size:10px!important;font-weight:500!important;letter-spacing:.22em!important;color:#8b7f88!important
+ }
+ .food-v115-hero h2{font-weight:500!important;letter-spacing:-.03em!important}
+ .food-v115-hero p{font-weight:400!important}
+ .food-v115 :is(h3,.food-v115-today-head h3,.food-v115-breakfast-head h3,.food-v115-dinner-head h3){font-weight:500!important;letter-spacing:-.015em!important}
+ .food-v115 :is(strong,.food-v115-meal strong,.food-v115-dinner-row strong,.food-v115-routine strong){font-weight:500!important}
+ .food-v115 :is(.food-v115-pill,.food-v115-day b,.food-v115-daytag,.food-v115-actions button,.food-program-next){font-weight:500!important}
+ .food-v115 :is(small,.food-v115-day span,.food-v115-routine small){font-weight:400!important}
+ .food-v115-routine-title{font-weight:500!important;letter-spacing:.20em!important}
+ .food-v115-actions button{font-size:11.5px!important}
+
+ /* Modal master Alimentação — contexto de receitas */
+ html body dialog.food-context-dialog[open]{
+   position:fixed!important;inset:0!important;width:100vw!important;height:100dvh!important;max-width:none!important;max-height:none!important;
+   margin:0!important;padding:14px!important;border:0!important;border-radius:0!important;background:transparent!important;transform:none!important;
+   overflow:hidden!important;display:grid!important;place-items:center!important;
+ }
+ html body dialog.food-context-dialog[open]>.study-v10-modal,
+ html body dialog#recipeFormDialog.food-context-dialog[open]>#recipeForm{
+   box-sizing:border-box!important;width:min(100%,520px)!important;max-width:520px!important;max-height:calc(100dvh - 28px)!important;
+   margin:auto!important;padding:22px!important;overflow-y:auto!important;overflow-x:hidden!important;-webkit-overflow-scrolling:touch!important;overscroll-behavior:contain!important;
+   border-radius:28px!important;border:1px solid rgba(174,136,151,.14)!important;
+   background:linear-gradient(145deg,#fbf7ef 0%,#f9eff1 52%,#eef5ef 100%)!important;
+   box-shadow:0 18px 48px rgba(63,48,66,.10)!important;
+ }
+ html body dialog.food-context-dialog .study-v10-head{display:flex!important;align-items:flex-start!important;justify-content:space-between!important;gap:16px!important;margin:0 0 18px!important;padding:0!important}
+ html body dialog.food-context-dialog .study-v10-head>div{min-width:0!important}
+ html body dialog.food-context-dialog .study-v10-head .eyebrow{font-size:10px!important;font-weight:500!important;letter-spacing:.22em!important;color:#8b7a85!important;margin:0 0 6px!important}
+ html body dialog.food-context-dialog .study-v10-head h2{margin:0!important;font-size:27px!important;line-height:1.08!important;font-weight:500!important;letter-spacing:-.025em!important;color:#433d45!important}
+ html body dialog.food-context-dialog .study-v10-head p{margin:8px 0 0!important;font-size:13.5px!important;line-height:1.45!important;font-weight:400!important;color:#857b83!important}
+ html body dialog.food-context-dialog .study-v10-x{
+   position:static!important;inset:auto!important;transform:none!important;flex:0 0 40px!important;width:40px!important;height:40px!important;min-width:40px!important;
+   margin:0 0 0 auto!important;padding:0!important;display:grid!important;place-items:center!important;border-radius:50%!important;
+   border:1px solid rgba(132,111,121,.13)!important;background:rgba(255,252,248,.56)!important;color:#81777f!important;box-shadow:none!important;
+   font-size:25px!important;font-weight:300!important;line-height:1!important;
+ }
+ html body dialog.food-context-dialog :is(label,.recipe-nutrition-head strong){font-size:13.5px!important;font-weight:500!important;color:#5c535b!important}
+ html body dialog.food-context-dialog :is(input:not([type=checkbox]):not([type=radio]),select,textarea){
+   box-sizing:border-box!important;width:100%!important;min-height:50px!important;border:1px solid rgba(136,113,124,.14)!important;border-radius:17px!important;
+   background:rgba(255,253,250,.78)!important;color:#4b454c!important;font:400 16px/1.35 inherit!important;padding:12px 15px!important;box-shadow:none!important
+ }
+ html body dialog.food-context-dialog textarea{min-height:112px!important;resize:vertical!important}
+ html body dialog.food-context-dialog :is(input,textarea)::placeholder{color:#aca3a8!important;font-weight:400!important;opacity:1!important}
+ html body dialog.food-context-dialog .form-grid{gap:12px!important}
+ html body dialog.food-context-dialog :is(.recipe-detail-card,.recipe-choice,.recipe-pick,.recipe-nutrition-box,.card){
+   border:1px solid rgba(143,117,129,.10)!important;border-radius:20px!important;background:rgba(255,253,250,.62)!important;box-shadow:none!important
+ }
+ html body dialog#foodRecipeDialog.food-context-dialog .recipe-detail-card{margin-top:10px!important;padding:18px!important}
+ html body dialog#foodRecipeDialog.food-context-dialog .recipe-detail-card h3{margin:4px 0 10px!important;font-size:18px!important;line-height:1.2!important;font-weight:500!important;color:#474047!important}
+ html body dialog#foodRecipeDialog.food-context-dialog .recipe-detail-card :is(li,p){font-size:15.5px!important;line-height:1.5!important;font-weight:400!important;color:#4f494f!important}
+ html body dialog#foodRecipeDialog.food-context-dialog .recipe-detail-card :is(ul,ol){margin:0 0 18px!important;padding-left:22px!important}
+ html body dialog#foodRecipeDialog.food-context-dialog .recipe-detail-card strong{font-weight:500!important}
+ html body dialog.food-context-dialog .recipe-choice strong,
+ html body dialog.food-context-dialog .recipe-pick strong{font-weight:500!important;color:#4c454c!important}
+ html body dialog.food-context-dialog .recipe-choice small,
+ html body dialog.food-context-dialog .recipe-pick small{font-weight:400!important;color:#8d838a!important}
+
+ html body dialog.food-context-dialog :is(.modal-actions,.recipe-modal-actions,.study-v10-actions){position:static!important;inset:auto!important;margin:18px 0 0!important;padding:0!important;background:transparent!important;border:0!important;box-shadow:none!important}
+ html body dialog#foodRecipeDialog.food-context-dialog .recipe-modal-actions{display:grid!important;grid-template-columns:1fr 1fr!important;gap:10px!important}
+ html body dialog#foodRecipeDialog.food-context-dialog #recipeToShopping{grid-column:1/-1!important}
+ html body dialog.food-context-dialog :is(.primary,.secondary,[type=submit]){
+   min-height:46px!important;border-radius:16px!important;padding:10px 16px!important;font-size:14px!important;font-weight:500!important;box-shadow:none!important
+ }
+ html body dialog.food-context-dialog :is(.secondary){background:rgba(255,253,249,.82)!important;color:#6f666d!important;border:1px solid rgba(139,112,124,.12)!important}
+ html body dialog.food-context-dialog :is(.primary,[type=submit]){background:linear-gradient(135deg,#e7bcc3 0%,#e8c9bd 56%,#c8dccd 100%)!important;color:#fff!important;border:0!important}
+ html body dialog.food-context-dialog input[type=checkbox]{appearance:none!important;-webkit-appearance:none!important;width:21px!important;height:21px!important;min-width:21px!important;margin:1px 0 0!important;border-radius:7px!important;border:1px solid rgba(139,112,124,.22)!important;background:rgba(255,253,250,.84)!important;display:grid!important;place-items:center!important}
+ html body dialog.food-context-dialog input[type=checkbox]:checked{background:linear-gradient(135deg,#e6b3bd,#bcd5c2)!important;border-color:transparent!important;box-shadow:none!important}
+ html body dialog.food-context-dialog input[type=checkbox]:checked:after{content:'✓';font-size:13px;line-height:1;color:#fff;font-weight:600}
+
+ /* Receita aberta: uma hierarquia cromática sóbria — blush primário, neutro secundário e menta terciária. */
+ html body dialog#foodRecipeDialog.food-context-dialog #chooseThisFood{
+   background:linear-gradient(135deg,#e7bcc3 0%,#e9c1b5 100%)!important;color:#fff!important;border:0!important
+ }
+ html body dialog#foodRecipeDialog.food-context-dialog #chooseOtherFromRecipe{
+   background:rgba(255,253,249,.86)!important;color:#6c636a!important;border:1px solid rgba(139,112,124,.12)!important
+ }
+ html body dialog#foodRecipeDialog.food-context-dialog #recipeToShopping{
+   background:linear-gradient(135deg,rgba(244,236,237,.94),rgba(226,239,229,.94))!important;color:#676066!important;border:1px solid rgba(127,145,130,.10)!important
+ }
+
+ /* Programar próxima — mesma estrutura aprovada, só com cor suavizada e X neutro. */
+ html body dialog.food-next-prep-dialog[open]{
+   position:fixed!important;inset:0!important;width:100vw!important;height:100dvh!important;max-width:none!important;max-height:none!important;
+   margin:0!important;padding:14px!important;border:0!important;border-radius:0!important;background:transparent!important;transform:none!important;
+   overflow:hidden!important;display:grid!important;place-items:center!important
+ }
+ html body dialog.food-next-prep-dialog[open]>.study-v10-modal{
+   box-sizing:border-box!important;width:min(100%,480px)!important;max-width:480px!important;height:auto!important;max-height:calc(100dvh - 28px)!important;
+   margin:auto!important;padding:22px!important;overflow:auto!important;border-radius:28px!important;border:1px solid rgba(143,119,129,.12)!important;
+   background:linear-gradient(145deg,#f7fbfb 0%,#f3f8f5 56%,#fbf8ea 100%)!important;
+   box-shadow:0 18px 46px rgba(58,49,60,.10)!important;color:#484148!important
+ }
+ html body dialog.food-next-prep-dialog .study-v10-head{display:flex!important;align-items:flex-start!important;justify-content:space-between!important;gap:16px!important;margin:0 0 18px!important;padding:0!important}
+ html body dialog.food-next-prep-dialog .study-v10-head .eyebrow{font-size:10px!important;font-weight:500!important;letter-spacing:.22em!important;color:#8b7f87!important}
+ html body dialog.food-next-prep-dialog .study-v10-head h2{margin:0!important;font-size:26px!important;line-height:1.08!important;font-weight:500!important;letter-spacing:-.025em!important;color:#433d44!important}
+ html body dialog.food-next-prep-dialog .study-v10-head p{margin:8px 0 0!important;font-size:13.5px!important;line-height:1.45!important;font-weight:400!important;color:#857d83!important}
+ html body dialog.food-next-prep-dialog .study-v10-x{
+   position:static!important;inset:auto!important;transform:none!important;flex:0 0 40px!important;width:40px!important;height:40px!important;min-width:40px!important;
+   margin:0 0 0 auto!important;padding:0!important;display:grid!important;place-items:center!important;border-radius:50%!important;
+   border:1px solid rgba(132,111,121,.12)!important;background:rgba(255,253,250,.58)!important;color:#817a80!important;box-shadow:none!important;
+   font-size:24px!important;font-weight:300!important;line-height:1!important
+ }
+ html body dialog.food-next-prep-dialog label{font-size:13.5px!important;font-weight:400!important;color:#5f575e!important}
+ html body dialog.food-next-prep-dialog input[type=date]{
+   min-height:48px!important;border:1px solid rgba(136,113,124,.13)!important;border-radius:17px!important;background:rgba(255,253,250,.82)!important;
+   color:#4d474c!important;font-size:16px!important;font-weight:400!important;padding:10px 14px!important;box-shadow:none!important
+ }
+ html body dialog.food-next-prep-dialog .study-v10-actions{position:static!important;display:flex!important;justify-content:flex-end!important;gap:10px!important;margin:18px 0 0!important;padding:0!important;background:transparent!important;border:0!important;box-shadow:none!important}
+ html body dialog.food-next-prep-dialog .study-v10-actions button{min-height:46px!important;min-width:112px!important;border-radius:16px!important;padding:10px 16px!important;font-size:14px!important;font-weight:500!important;box-shadow:none!important}
+ html body dialog.food-next-prep-dialog .secondary{background:rgba(255,253,249,.84)!important;color:#6e666c!important;border:1px solid rgba(139,112,124,.12)!important}
+ html body dialog.food-next-prep-dialog .primary{background:linear-gradient(135deg,#cfe6eb 0%,#d8eadf 58%,#eee2b8 100%)!important;color:#5f6666!important;border:0!important}
+
+ @media(max-width:480px){
+   html body dialog.food-context-dialog[open]{padding:12px!important}
+   html body dialog.food-context-dialog[open]>.study-v10-modal,
+   html body dialog#recipeFormDialog.food-context-dialog[open]>#recipeForm{width:calc(100vw - 24px)!important;max-height:calc(100dvh - 24px)!important;padding:19px!important}
+   html body dialog.food-context-dialog .study-v10-head h2{font-size:24px!important}
+   html body dialog#foodRecipeDialog.food-context-dialog .recipe-detail-card :is(li,p){font-size:15px!important}
+ }
+ `;document.head.appendChild(st)
+}
+
+function ensureFoodArchitectureRC88(){
+ if(document.getElementById('bertha-food-architecture-rc88'))return;
+ const st=document.createElement('style');st.id='bertha-food-architecture-rc88';st.textContent=`
+ .food-v115-today-head p{margin:7px 0 0;color:#978e96;font-size:12.5px;line-height:1.4;font-weight:400}
+ .food-v115-today-grid{grid-template-columns:1fr!important;gap:10px!important;margin-top:12px}
+ .food-v115-meal{padding:14px 15px!important;border:1px solid rgba(111,106,117,.07)!important;border-radius:18px!important;background:rgba(255,253,249,.72)!important}
+ .food-v115-meal+.food-v115-meal{border-left:1px solid rgba(111,106,117,.07)!important;border-top:1px solid rgba(111,106,117,.07)!important}
+ .food-v115-meal strong{min-height:0!important;margin-top:7px!important;font-size:15px!important;font-weight:500!important;color:#4b454e!important}
+ .food-v115-meal-label{font-weight:500!important;letter-spacing:.13em!important;color:#8d808a!important}
+ .food-v115-nutrition{display:block;margin-top:5px;color:#918890;font-size:11.5px;line-height:1.35;font-weight:400}.food-v115-nutrition.muted{opacity:.72}
+ .food-v115-consumption{display:grid!important;grid-template-columns:auto auto 1fr!important;gap:7px!important;margin-top:12px!important}
+ .food-v115-consumption button{min-height:34px!important;font-weight:500!important}
+ .food-v115-consumption .food-status-btn{background:rgba(255,251,247,.78)!important;color:#716873!important;border-color:rgba(113,101,116,.10)!important}
+ .food-v115-consumption .food-eaten.selected{background:linear-gradient(135deg,rgba(203,229,244,.96),rgba(218,237,247,.94),rgba(232,241,244,.90))!important;color:#536f7d!important;border-color:rgba(92,137,158,.16)!important}
+ .food-v115-consumption .food-skipped.selected{background:linear-gradient(135deg,rgba(255,249,224,.98),rgba(250,238,191,.94),rgba(247,229,176,.90))!important;color:#7c7051!important;border-color:rgba(166,145,91,.15)!important}
+ .food-v115-consumption .food-recipe-link{justify-self:end;background:transparent!important;border:0!important;color:#7d7580!important;text-decoration:underline;text-underline-offset:3px;padding-inline:6px!important}
+ .food-week-carousel{padding:17px 18px!important;margin-top:10px!important}
+ .food-week-carousel-head{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:12px}.food-week-carousel-head h3{margin:0;font-size:18px;font-weight:500;color:#4a454d}
+ .food-week-track{display:flex;gap:9px;overflow-x:auto;padding:2px 1px 6px;scroll-snap-type:x proximity;scrollbar-width:none}.food-week-track::-webkit-scrollbar{display:none}
+ .food-week-day{flex:0 0 150px;min-height:142px;padding:13px;border:1px solid rgba(111,106,117,.07);border-radius:17px;background:linear-gradient(145deg,rgba(255,252,247,.86),rgba(250,247,245,.72));scroll-snap-align:start;display:flex;flex-direction:column}
+ .food-week-day.today{background:linear-gradient(145deg,rgba(225,241,245,.92),rgba(231,242,234,.90),rgba(250,245,221,.88));border-color:rgba(105,137,139,.13);box-shadow:0 7px 18px rgba(84,111,110,.05)}
+ .food-week-day>b{font-size:10px;letter-spacing:.16em;color:#8c7f89;font-weight:600}.food-week-day>strong{margin-top:7px;font-size:13px;line-height:1.28;color:#4f4951;font-weight:500}.food-week-day>small{margin-top:6px;color:#958b94;font-size:10.5px;line-height:1.3;font-weight:400}
+ .food-week-day>button{margin-top:auto;align-self:flex-start;border:0!important;background:transparent!important;color:#7e7680!important;padding:8px 0 0!important;min-height:auto!important;font-size:11px!important;font-weight:500!important;text-decoration:underline;text-underline-offset:3px;box-shadow:none!important}
+ @media(max-width:520px){.food-v115-consumption{grid-template-columns:1fr 1fr!important}.food-v115-consumption .food-recipe-link{grid-column:1/-1;justify-self:start}.food-week-day{flex-basis:142px}}
+ `;document.head.appendChild(st)
+}
+function foodWeekDays(){return ['Segunda','Terça','Quarta','Quinta','Sexta','Sábado','Domingo']}
+function foodDinnerForDay(day,d=loadFood()){const t=foodMealTypeById('dinner',d)||(d.mealTypes||[]).find(x=>/jantar/i.test(x.label));const name=t?foodMealNameForType(t,day,d):'';return name?[day,name]:null}
+function foodMarmitaForDay(day,d=loadFood()){const t=foodMealTypeById('lunch',d);if(!t)return null;const name=foodMealNameForType(t,day,d);return {name,recipe:recipeForMealNameFlexible(name)}}
+function foodPlanItem(day,type,d=loadFood()){const t=typeof type==='string'?foodMealTypeById(type,d):type;if(!t)return {name:'A definir',recipe:null};const name=foodMealNameForType(t,day,d);return {name,recipe:recipeForMealNameFlexible(name),type:t}}
+function renderFoodWeekCarousel(type,d,today){
+ const days=foodWeekDays(),dayAbbr={Segunda:'SEG',Terça:'TER',Quarta:'QUA',Quinta:'QUI',Sexta:'SEX',Sábado:'SÁB',Domingo:'DOM'};
+ return `<div class="card food-v115-card food-week-carousel" data-food-type-card="${escapeHtml(type.id)}"><div class="food-week-carousel-head"><h3>${escapeHtml(type.label)}</h3><div class="food-carousel-tools"><span class="food-v115-pill">7 dias</span><button type="button" class="food-carousel-edit" data-food-edit-type="${escapeHtml(type.id)}" aria-label="Editar ${escapeHtml(type.label)}">Editar</button></div></div><div class="food-week-track">${days.map(day=>{const item=foodPlanItem(day,type,d),nut=foodRecipeNutritionLabel(item.recipe);return `<article class="food-week-day ${day===today?'today':''}"><b>${dayAbbr[day]}</b><strong>${escapeHtml(item.name)}</strong><small>${escapeHtml(nut)}</small>${item.recipe?`<button type="button" data-food-open-recipe="${item.recipe.id}">Ver receita</button>`:''}</article>`}).join('')}</div></div>`;
+}
+function ensureFoodOwnerConfigStyles(){if(document.getElementById('bertha-food-owner-config-rc99'))return;const st=document.createElement('style');st.id='bertha-food-owner-config-rc99';st.textContent=`
+.food-v115-section-kicker{align-items:center!important}.food-owner-actions{display:flex;gap:8px;align-items:center;flex-wrap:wrap}.food-owner-actions button,.food-carousel-edit{min-height:34px!important;padding:7px 11px!important;border-radius:999px!important;border:1px solid rgba(105,132,151,.12)!important;background:rgba(255,253,249,.76)!important;color:#687681!important;font-size:11px!important;font-weight:500!important;box-shadow:none!important}.food-carousel-tools{display:flex;align-items:center;gap:7px}.food-empty-plans{padding:22px!important;text-align:center}.food-empty-plans h3{margin:0 0 7px!important;font-size:19px!important;font-weight:500!important;color:#474149!important}.food-empty-plans p{margin:0 0 14px!important;color:#8a8188!important;font-size:13px!important;line-height:1.45!important}
+html body dialog.food-owner-dialog[open]{position:fixed!important;inset:0!important;z-index:9999!important;box-sizing:border-box!important;width:100%!important;height:100dvh!important;max-width:none!important;max-height:none!important;margin:0!important;padding:12px!important;border:0!important;background:transparent!important;display:block!important;overflow:hidden!important;overscroll-behavior:none!important;touch-action:none!important}html body dialog.food-owner-dialog[open]::backdrop{background:rgba(44,39,44,.30)!important;backdrop-filter:blur(8px)!important;-webkit-backdrop-filter:blur(8px)!important}html body dialog.food-owner-dialog[open]>.study-v10-modal{position:absolute!important;top:50%!important;left:50%!important;right:auto!important;bottom:auto!important;transform:translate(-50%,-50%)!important;box-sizing:border-box!important;width:min(calc(100vw - 24px),520px)!important;max-width:520px!important;height:auto!important;max-height:calc(100dvh - 24px)!important;margin:0!important;overflow-x:hidden!important;overflow-y:auto!important;overscroll-behavior:contain!important;-webkit-overflow-scrolling:touch!important;touch-action:pan-y!important;padding:20px!important;border-radius:26px!important;border:1px solid rgba(98,112,120,.10)!important;background:linear-gradient(145deg,rgba(241,248,251,.98) 0%,rgba(249,248,239,.98) 56%,rgba(255,249,231,.98) 100%)!important;box-shadow:0 18px 46px rgba(58,49,60,.12)!important}.food-owner-list{display:grid;gap:9px;margin-top:12px}.food-owner-row{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:10px;align-items:center;padding:12px 13px;border:1px solid rgba(121,116,124,.09);border-radius:17px;background:rgba(255,254,251,.72)}.food-owner-row strong{display:block;font-size:14px;font-weight:500;color:#4d474d}.food-owner-row small{display:block;margin-top:3px;font-size:11px;font-weight:400;color:#938990}.food-owner-row-actions{display:flex;gap:5px}.food-owner-row-actions button{min-width:34px!important;min-height:34px!important;padding:6px 8px!important;border-radius:11px!important;border:1px solid rgba(122,112,121,.10)!important;background:rgba(255,253,249,.84)!important;color:#756d73!important;font-size:12px!important;box-shadow:none!important}.food-owner-grid{display:grid;gap:12px}.food-owner-grid label{display:grid;gap:6px;font-size:12px;font-weight:500;color:#625a61}.food-owner-grid input:not([type=checkbox]),.food-owner-grid select{min-height:48px;border:1px solid rgba(130,113,122,.12);border-radius:16px;background:rgba(255,253,250,.82);padding:10px 13px;font-size:16px;color:#4e484e}.food-owner-check{display:grid!important;grid-template-columns:22px minmax(0,1fr)!important;gap:10px!important;align-items:start!important}.food-owner-check input{width:20px!important;height:20px!important;margin:1px 0 0!important}.food-owner-schedule{display:grid;gap:8px;margin-top:8px}.food-owner-day{display:grid;grid-template-columns:62px minmax(0,1fr);gap:9px;align-items:center}.food-owner-day b{font-size:10px;letter-spacing:.12em;color:#8b8088;font-weight:500}.food-owner-day input{min-width:0}.food-owner-dialog .study-v10-actions{position:static!important;display:flex!important;justify-content:flex-end!important;gap:9px!important;margin-top:18px!important;padding:0!important;background:transparent!important}.food-owner-dialog .study-v10-actions button{min-height:44px!important;border-radius:15px!important;padding:9px 15px!important;font-size:13px!important;font-weight:500!important}.food-owner-dialog .primary{background:linear-gradient(135deg,#cfe5ec,#dceadf,#eee2bd)!important;color:#596363!important;border:0!important}.food-owner-dialog .secondary{background:rgba(255,253,249,.84)!important;color:#6d656b!important;border:1px solid rgba(139,112,124,.11)!important}
+/* RC98 — modal Editar/Novo cardápio centralizado e estável no Safari */
+html body #foodMealTypeDialog.food-owner-dialog[open]>.study-v10-modal{padding:20px!important;border-radius:26px!important;background:linear-gradient(145deg,rgba(239,248,252,.98) 0%,rgba(250,249,241,.98) 58%,rgba(255,249,230,.98) 100%)!important;border:1px solid rgba(100,128,145,.10)!important}
+html body #foodMealTypeDialog .study-v10-head{display:flex!important;align-items:flex-start!important;justify-content:space-between!important;gap:16px!important;margin:0 0 18px!important;padding:0!important}
+html body #foodMealTypeDialog .study-v10-head>div{min-width:0!important}
+html body #foodMealTypeDialog .study-v10-head .eyebrow{margin:0 0 6px!important;font-size:10px!important;line-height:1.2!important;font-weight:500!important;letter-spacing:.22em!important;color:#7e8890!important}
+html body #foodMealTypeDialog .study-v10-head h2{margin:0!important;font-size:26px!important;line-height:1.08!important;font-weight:500!important;letter-spacing:-.025em!important;color:#3f4348!important}
+html body #foodMealTypeDialog .study-v10-head p{margin:8px 0 0!important;font-size:13.5px!important;line-height:1.45!important;font-weight:400!important;color:#82868a!important}
+html body #foodMealTypeDialog .study-v10-x{position:static!important;flex:0 0 40px!important;width:40px!important;height:40px!important;min-width:40px!important;min-height:40px!important;padding:0!important;border-radius:50%!important;border:1px solid rgba(106,118,126,.10)!important;background:rgba(255,254,250,.68)!important;color:#74797d!important;font-size:27px!important;font-weight:300!important;line-height:1!important;display:grid!important;place-items:center!important;box-shadow:none!important}
+html body #foodMealTypeDialog .food-owner-grid{gap:14px!important}
+html body #foodMealTypeDialog .food-owner-grid label{gap:7px!important;font-size:13px!important;font-weight:400!important;color:#5c6267!important}
+html body #foodMealTypeDialog .food-owner-grid input:not([type=checkbox]),html body #foodMealTypeDialog .food-owner-grid select{width:100%!important;min-height:48px!important;border:1px solid rgba(108,125,136,.12)!important;border-radius:16px!important;background:rgba(255,254,250,.84)!important;padding:10px 13px!important;font-size:16px!important;font-weight:400!important;color:#454b50!important;box-shadow:none!important}
+html body #foodMealTypeDialog .food-owner-check{padding:2px 0!important;font-size:12.5px!important;line-height:1.45!important;color:#777d82!important}
+html body #foodMealTypeDialog .food-owner-check input{appearance:none!important;-webkit-appearance:none!important;width:20px!important;height:20px!important;min-width:20px!important;border-radius:7px!important;border:1px solid rgba(108,125,136,.18)!important;background:rgba(255,254,250,.90)!important;display:grid!important;place-items:center!important}
+html body #foodMealTypeDialog .food-owner-check input:checked{background:linear-gradient(135deg,#cce6ef 0%,#eee1b9 100%)!important;border-color:transparent!important}
+html body #foodMealTypeDialog .food-owner-check input:checked:after{content:'✓';font-size:12px!important;color:#5f6b70!important;font-weight:600!important}
+html body #foodMealTypeDialog #fmtScheduleWrap>.eyebrow{margin:5px 0 2px!important;font-size:10px!important;font-weight:500!important;letter-spacing:.20em!important;color:#818b91!important}
+html body #foodMealTypeDialog .food-owner-schedule{gap:8px!important}
+html body #foodMealTypeDialog .food-owner-day{grid-template-columns:54px minmax(0,1fr)!important;gap:10px!important}
+html body #foodMealTypeDialog .food-owner-day b{font-size:10px!important;font-weight:500!important;letter-spacing:.14em!important;color:#858b90!important}
+html body #foodMealTypeDialog .study-v10-actions{position:static!important;display:flex!important;justify-content:flex-end!important;align-items:center!important;gap:10px!important;margin:20px 0 0!important;padding:0!important;background:transparent!important;border:0!important;box-shadow:none!important}
+html body #foodMealTypeDialog .study-v10-actions button{min-width:112px!important;min-height:46px!important;padding:10px 16px!important;border-radius:16px!important;font-size:14px!important;font-weight:500!important;box-shadow:none!important}
+html body #foodMealTypeDialog .study-v10-actions .secondary{background:rgba(255,253,249,.86)!important;color:#687077!important;border:1px solid rgba(108,125,136,.11)!important}
+html body #foodMealTypeDialog .study-v10-actions .primary{background:linear-gradient(135deg,#cde5ee 0%,#d9eadf 58%,#eee1b7 100%)!important;color:#59666b!important;border:0!important}
+`;document.head.appendChild(st)}
+function foodNewMealType(label='Novo cardápio'){const d=loadFood(),base=foodSafeId(label),used=new Set((d.mealTypes||[]).map(x=>x.id));let id=base,n=2;while(used.has(id))id=`${base}-${n++}`;return {id,label,owner:'self',personName:'',trackProgress:true,mode:'schedule',schedule:foodScheduleFrom([], 'A definir'),order:(d.mealTypes||[]).length}}
+function openFoodMealTypeDialog(typeId=null){ensureFoodOwnerConfigStyles();ensureFoodMasterRC99();const d=loadFood(),existing=typeId?foodMealTypeById(typeId,d):null,t=existing?JSON.parse(JSON.stringify(existing)):foodNewMealType('Novo cardápio'),old=document.querySelector('#foodMealTypeDialog');if(old)old.remove();const dlg=document.createElement('dialog');dlg.id='foodMealTypeDialog';dlg.className='study-v10-dialog food-owner-dialog';const recipes=allRecipes().map(r=>r.name).sort((a,b)=>a.localeCompare(b,'pt-BR'));dlg.innerHTML=`<form class="study-v10-modal" id="foodMealTypeForm"><div class="study-v10-head"><div><div class="eyebrow">ALIMENTAÇÃO · CARDÁPIOS</div><h2>${existing?'Editar cardápio':'Novo cardápio'}</h2><p>Defina o nome, para quem é e o que aparece em cada dia.</p></div><button type="button" class="study-v10-x" data-close>×</button></div><div class="food-owner-grid"><label>Nome do cardápio<input id="fmtLabel" required maxlength="50" value="${escapeHtml(t.label)}" placeholder="Ex.: Lanche da tarde"></label><label>Para quem?<select id="fmtOwner"><option value="self" ${t.owner!=='other'?'selected':''}>Meu cardápio</option><option value="other" ${t.owner==='other'?'selected':''}>Outra pessoa</option></select></label><label id="fmtPersonWrap" style="${t.owner==='other'?'':'display:none'}">Nome da pessoa<input id="fmtPerson" maxlength="40" value="${escapeHtml(t.personName||'')}" placeholder="Ex.: Henrique"></label><label class="food-owner-check" id="fmtProgressWrap" style="${t.owner==='other'?'display:none':''}"><input id="fmtProgress" type="checkbox" ${t.trackProgress!==false?'checked':''}><span>Quando eu marcar “Comi”, incluir calorias e proteína no Meu Progresso.</span></label>${t.id==='lunch'||t.mode==='previousDinner'?`<label class="food-owner-check"><input id="fmtPreviousDinner" type="checkbox" ${t.mode==='previousDinner'?'checked':''}><span>Montar automaticamente com o jantar do dia anterior.</span></label>`:''}<div id="fmtScheduleWrap"><div class="eyebrow" style="margin-top:4px">PROGRAMAÇÃO SEMANAL</div><datalist id="foodRecipeNames">${recipes.map(x=>`<option value="${escapeHtml(x)}"></option>`).join('')}</datalist><div class="food-owner-schedule">${foodWeekDays().map(day=>{const row=(t.schedule||[]).find(x=>x[0]===day);return `<label class="food-owner-day"><b>${escapeHtml(day.slice(0,3).toUpperCase())}</b><input data-food-day="${escapeHtml(day)}" list="foodRecipeNames" value="${escapeHtml(row?.[1]||'')}" placeholder="A definir"></label>`}).join('')}</div></div></div><div class="study-v10-actions"><button type="button" class="secondary" data-close>Cancelar</button><button type="submit" class="primary">Salvar</button></div></form>`;document.body.appendChild(dlg);const close=()=>dlg.close();dlg.querySelectorAll('[data-close]').forEach(b=>b.onclick=close);const owner=dlg.querySelector('#fmtOwner'),person=dlg.querySelector('#fmtPersonWrap'),prog=dlg.querySelector('#fmtProgressWrap'),auto=dlg.querySelector('#fmtPreviousDinner'),schedule=dlg.querySelector('#fmtScheduleWrap');const sync=()=>{const other=owner.value==='other';person.style.display=other?'':'none';prog.style.display=other?'none':'';if(schedule)schedule.style.display=auto?.checked?'none':''};owner.onchange=sync;if(auto)auto.onchange=sync;sync();dlg.querySelector('#foodMealTypeForm').onsubmit=e=>{e.preventDefault();const nd=loadFood(),obj={...t,label:dlg.querySelector('#fmtLabel').value.trim()||'Cardápio',owner:owner.value==='other'?'other':'self',personName:owner.value==='other'?dlg.querySelector('#fmtPerson').value.trim():'',trackProgress:owner.value==='other'?false:!!dlg.querySelector('#fmtProgress')?.checked,mode:auto?.checked?'previousDinner':'schedule',schedule:foodWeekDays().map(day=>[day,dlg.querySelector(`[data-food-day="${day}"]`)?.value.trim()||'A definir'])};nd.mealTypes=existing?(nd.mealTypes||[]).map(x=>x.id===existing.id?obj:x):[...(nd.mealTypes||[]),obj];nd.mealTypes.forEach((x,i)=>x.order=i);saveFood(nd);close();renderAlimentacao()};dlg.addEventListener('close',()=>dlg.remove());dlg.showModal()}
+function moveFoodMealType(id,dir){const d=loadFood(),a=d.mealTypes||[],i=a.findIndex(x=>x.id===id),j=i+dir;if(i<0||j<0||j>=a.length)return;[a[i],a[j]]=[a[j],a[i]];a.forEach((x,k)=>x.order=k);d.mealTypes=a;saveFood(d);openFoodMealTypesManager(true);renderAlimentacao()}
+function deleteFoodMealType(id){const d=loadFood(),t=foodMealTypeById(id,d);if(!t||!confirm(`Remover o cardápio “${t.label}”?`))return;d.mealTypes=(d.mealTypes||[]).filter(x=>x.id!==id);d.mealTypes.forEach((x,k)=>x.order=k);saveFood(d);renderAlimentacao();openFoodMealTypesManager(true)}
+function openFoodMealTypesManager(reopen=false){ensureFoodOwnerConfigStyles();document.querySelector('#foodMealTypesManager')?.remove();const d=loadFood(),dlg=document.createElement('dialog');dlg.id='foodMealTypesManager';dlg.className='study-v10-dialog food-owner-dialog';dlg.innerHTML=`<div class="study-v10-modal"><div class="study-v10-head"><div><div class="eyebrow">ALIMENTAÇÃO</div><h2>Meus cardápios</h2><p>Crie, edite e organize as faixas de alimentação. O app pode começar vazio e ser definido pelo owner.</p></div><button type="button" class="study-v10-x" data-close>×</button></div><button type="button" class="primary" id="foodAddMealType">+ Novo cardápio</button><div class="food-owner-list">${(d.mealTypes||[]).map((t,i)=>`<div class="food-owner-row"><div><strong>${escapeHtml(t.label)}</strong><small>${t.owner==='other'?`Para ${escapeHtml(t.personName||'outra pessoa')} · não entra no Meu Progresso`:(t.trackProgress!==false?'Meu cardápio · entra no Meu Progresso':'Meu cardápio · sem Progresso')}</small></div><div class="food-owner-row-actions"><button type="button" data-up="${t.id}" ${i===0?'disabled':''}>↑</button><button type="button" data-down="${t.id}" ${i===(d.mealTypes.length-1)?'disabled':''}>↓</button><button type="button" data-edit="${t.id}">Editar</button><button type="button" data-del="${t.id}">×</button></div></div>`).join('')||'<div class="food-empty-plans"><h3>Nenhum cardápio ainda</h3><p>Crie Café da manhã, Lanche da tarde, Marmita, Jantar ou qualquer outra faixa que faça sentido para esta pessoa.</p></div>'}</div></div>`;document.body.appendChild(dlg);dlg.querySelector('[data-close]').onclick=()=>dlg.close();dlg.querySelector('#foodAddMealType').onclick=()=>{dlg.close();openFoodMealTypeDialog()};dlg.querySelectorAll('[data-edit]').forEach(b=>b.onclick=()=>{const id=b.dataset.edit;dlg.close();openFoodMealTypeDialog(id)});dlg.querySelectorAll('[data-up]').forEach(b=>b.onclick=()=>{dlg.close();moveFoodMealType(b.dataset.up,-1)});dlg.querySelectorAll('[data-down]').forEach(b=>b.onclick=()=>{dlg.close();moveFoodMealType(b.dataset.down,1)});dlg.querySelectorAll('[data-del]').forEach(b=>b.onclick=()=>{dlg.close();deleteFoodMealType(b.dataset.del)});dlg.addEventListener('close',()=>dlg.remove());dlg.showModal()}
+
+
+function ensureRC94FoodRecipeArchitectureStyles(){
+ if(document.getElementById('bertha-rc94-food-recipe-architecture'))return;const st=document.createElement('style');st.id='bertha-rc94-food-recipe-architecture';st.textContent=`
+ html body dialog#foodRecipeDialog.recipe-dialog:not(.food-context-dialog) .recipe-modal-actions{display:flex!important;justify-content:flex-end!important;gap:10px!important;flex-wrap:wrap!important}
+ html body dialog#foodRecipeDialog.recipe-dialog:not(.food-context-dialog) .recipe-modal-actions button{min-height:44px!important;padding:10px 18px!important;width:auto!important;flex:0 0 auto!important}
+ html body dialog#foodRecipeDialog.recipe-dialog:not(.food-context-dialog) #recipeToShopping{background:rgba(255,252,247,.86)!important;color:#765d66!important;border:1px solid rgba(174,116,129,.16)!important}
+ html body dialog#foodRecipeDialog.recipe-dialog:not(.food-context-dialog) #editThisRecipe{background:linear-gradient(135deg,rgba(239,196,201,.92),rgba(237,180,159,.86))!important;color:#fff!important;border:1px solid rgba(190,125,137,.12)!important}
+ html body dialog.food-prep-complete-dialog>.study-v10-modal{background:linear-gradient(145deg,rgba(248,253,255,.98),rgba(250,254,246,.97),rgba(255,251,235,.97))!important}
+ .food-prep-recipe-list{margin-top:12px;max-height:48vh;overflow:auto;display:grid;gap:8px;padding-right:2px;-webkit-overflow-scrolling:touch}
+ .food-prep-recipe-row{display:grid!important;grid-template-columns:24px minmax(0,1fr)!important;gap:11px!important;align-items:center!important;padding:12px 13px!important;border:1px solid rgba(104,125,146,.11)!important;border-radius:16px!important;background:rgba(255,254,250,.80)!important}
+ .food-prep-recipe-row input{width:20px!important;height:20px!important;margin:0!important;accent-color:#8fb9d2!important}
+ .food-prep-recipe-row strong,.food-prep-recipe-row small{display:block!important}.food-prep-recipe-row strong{font-size:14px!important;font-weight:500!important;color:#4b4750!important}.food-prep-recipe-row small{margin-top:3px!important;color:#958c94!important;font-size:11px!important;font-weight:400!important}
+ .food-v115-cookrecipes{color:#687e8e!important;font-weight:400!important;line-height:1.4!important}.food-edit-prep{margin-top:10px!important;margin-right:8px!important}
+ `;document.head.appendChild(st)
+}
+
+function ensureFoodMasterRC99(){
+ if(document.getElementById('bertha-food-master-rc99'))return;
+ const st=document.createElement('style');st.id='bertha-food-master-rc99';st.textContent=`
+ /* RC99 — ALIMENTAÇÃO · master visual + modal owner estável */
+ .food-v115{
+   --food99-blue:#dceef7;--food99-blue2:#cfe6f2;--food99-butter:#f6ebc8;--food99-cream:#fffdf8;
+   --food99-ink:#454249;--food99-muted:#8e878e;--food99-border:rgba(103,118,130,.10);
+   font-family:"Avenir Next","Montserrat",Inter,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif!important;
+   color:var(--food99-ink)!important;
+ }
+ .food-v115 :is(.eyebrow,.food-v115-section-kicker .eyebrow,.food-v115-routine-title){
+   font-size:10px!important;font-weight:450!important;letter-spacing:.22em!important;color:#7f8990!important;
+ }
+ .food-v115-hero{
+   background:linear-gradient(145deg,rgba(224,241,249,.92) 0%,rgba(249,248,239,.94) 58%,rgba(250,240,205,.84) 100%)!important;
+   border:1px solid var(--food99-border)!important;box-shadow:none!important;
+ }
+ .food-v115-hero h2{font-size:29px!important;font-weight:450!important;letter-spacing:-.025em!important;color:#3f4248!important}
+ .food-v115-hero p{font-size:16px!important;font-weight:400!important;color:#858187!important}
+ .food-v115-today,.food-v115-card,.food-v115-routine{
+   background:linear-gradient(145deg,rgba(255,254,250,.94),rgba(250,249,242,.88))!important;
+   border:1px solid var(--food99-border)!important;box-shadow:none!important;
+ }
+ .food-v115 :is(h3,.food-v115-today-head h3,.food-week-carousel-head h3,.food-v115-routine strong){font-weight:450!important;color:#47444a!important}
+ .food-v115 :is(strong,.food-v115-meal strong,.food-week-day>strong){font-weight:450!important;color:#4a474d!important}
+ .food-v115 :is(p,small,.food-v115-nutrition,.food-v115-routine small){font-weight:400!important;color:#8d878d!important}
+ .food-owner-actions button,.food-carousel-edit{
+   background:rgba(255,253,249,.88)!important;border:1px solid var(--food99-border)!important;color:#69757c!important;
+   font-weight:450!important;box-shadow:none!important;
+ }
+ .food-week-day{background:rgba(255,253,249,.86)!important;border:1px solid var(--food99-border)!important;box-shadow:none!important}
+ .food-week-day.today{background:linear-gradient(145deg,rgba(214,236,247,.90),rgba(246,240,213,.86))!important;border-color:rgba(104,132,145,.13)!important;box-shadow:none!important}
+ .food-v115-consumption button{font-weight:450!important}
+ .food-v115-pill{background:rgba(248,235,198,.72)!important;color:#82745d!important;font-weight:450!important}
+
+ /* Editar/Novo cardápio: casca fixa no viewport. Sem transform e sem deslocamento do Safari. */
+ html body dialog#foodMealTypeDialog.food-owner-dialog[open]{
+   position:fixed!important;top:0!important;right:0!important;bottom:0!important;left:0!important;inset:0!important;
+   z-index:10000!important;box-sizing:border-box!important;width:auto!important;height:auto!important;max-width:none!important;max-height:none!important;
+   margin:0!important;padding:12px!important;border:0!important;border-radius:0!important;background:transparent!important;
+   display:flex!important;align-items:center!important;justify-content:center!important;overflow:hidden!important;
+   transform:none!important;overscroll-behavior:none!important;touch-action:none!important;
+ }
+ html body dialog#foodMealTypeDialog.food-owner-dialog[open]::backdrop{
+   background:rgba(43,40,44,.30)!important;backdrop-filter:blur(8px)!important;-webkit-backdrop-filter:blur(8px)!important;
+ }
+ html body dialog#foodMealTypeDialog.food-owner-dialog[open]>.study-v10-modal{
+   position:relative!important;top:auto!important;left:auto!important;right:auto!important;bottom:auto!important;transform:none!important;
+   flex:0 1 480px!important;box-sizing:border-box!important;width:calc(100% - 2px)!important;max-width:480px!important;
+   height:auto!important;max-height:min(82dvh,760px)!important;margin:0!important;padding:20px!important;
+   overflow-x:hidden!important;overflow-y:auto!important;-webkit-overflow-scrolling:touch!important;overscroll-behavior:contain!important;touch-action:pan-y!important;
+   border-radius:26px!important;border:1px solid rgba(105,126,138,.10)!important;
+   background:linear-gradient(145deg,rgba(229,244,251,.98) 0%,rgba(248,248,239,.98) 58%,rgba(249,239,204,.96) 100%)!important;
+   box-shadow:0 18px 46px rgba(54,48,59,.12)!important;color:#45474b!important;
+ }
+ html body #foodMealTypeDialog .study-v10-head{display:flex!important;align-items:flex-start!important;justify-content:space-between!important;gap:14px!important;margin:0 0 18px!important;padding:0!important}
+ html body #foodMealTypeDialog .study-v10-head .eyebrow{font-size:10px!important;line-height:1.2!important;font-weight:450!important;letter-spacing:.22em!important;color:#7d898f!important}
+ html body #foodMealTypeDialog .study-v10-head h2{margin:0!important;font-size:25px!important;line-height:1.08!important;font-weight:450!important;letter-spacing:-.024em!important;color:#40454a!important}
+ html body #foodMealTypeDialog .study-v10-head p{margin:8px 0 0!important;font-size:13.5px!important;line-height:1.45!important;font-weight:400!important;color:#85888a!important}
+ html body #foodMealTypeDialog .study-v10-x{
+   position:static!important;flex:0 0 38px!important;width:38px!important;height:38px!important;min-width:38px!important;min-height:38px!important;
+   padding:0!important;margin:0!important;display:grid!important;place-items:center!important;border-radius:50%!important;
+   border:1px solid rgba(105,126,138,.10)!important;background:rgba(255,254,250,.64)!important;color:#767d80!important;
+   font-size:24px!important;font-weight:300!important;line-height:1!important;box-shadow:none!important;
+ }
+ html body #foodMealTypeDialog .food-owner-grid{gap:13px!important}
+ html body #foodMealTypeDialog .food-owner-grid label{gap:7px!important;font-size:12.5px!important;font-weight:400!important;color:#61676b!important}
+ html body #foodMealTypeDialog .food-owner-grid :is(input:not([type=checkbox]),select){
+   width:100%!important;min-height:47px!important;border:1px solid rgba(105,126,138,.11)!important;border-radius:16px!important;
+   background:rgba(255,254,250,.88)!important;padding:10px 13px!important;font-size:16px!important;font-weight:400!important;color:#474d51!important;box-shadow:none!important;
+ }
+ html body #foodMealTypeDialog .food-owner-check{font-size:12.5px!important;font-weight:400!important;color:#777d80!important}
+ html body #foodMealTypeDialog .food-owner-check input{appearance:none!important;-webkit-appearance:none!important;width:20px!important;height:20px!important;min-width:20px!important;border-radius:7px!important;border:1px solid rgba(105,126,138,.16)!important;background:#fffdf8!important;display:grid!important;place-items:center!important}
+ html body #foodMealTypeDialog .food-owner-check input:checked{background:linear-gradient(135deg,#cbe4f0 0%,#f0dfaa 100%)!important;border-color:transparent!important}
+ html body #foodMealTypeDialog .food-owner-check input:checked:after{content:'✓';font-size:12px!important;color:#59666b!important;font-weight:600!important}
+ html body #foodMealTypeDialog .food-owner-day{grid-template-columns:54px minmax(0,1fr)!important;gap:9px!important}
+ html body #foodMealTypeDialog .food-owner-day b{font-size:10px!important;font-weight:450!important;letter-spacing:.14em!important;color:#848b8f!important}
+ html body #foodMealTypeDialog .study-v10-actions{
+   position:static!important;display:flex!important;justify-content:flex-end!important;align-items:center!important;gap:9px!important;
+   margin:18px 0 0!important;padding:0!important;background:transparent!important;border:0!important;box-shadow:none!important;
+ }
+ html body #foodMealTypeDialog .study-v10-actions button{min-width:108px!important;min-height:44px!important;padding:9px 15px!important;border-radius:15px!important;font-size:13.5px!important;font-weight:500!important;box-shadow:none!important}
+ html body #foodMealTypeDialog .study-v10-actions .secondary{background:rgba(255,253,249,.88)!important;color:#697176!important;border:1px solid rgba(105,126,138,.10)!important}
+ html body #foodMealTypeDialog .study-v10-actions .primary{background:linear-gradient(135deg,#c8e3ef 0%,#dce8df 55%,#efdfaa 100%)!important;color:#586569!important;border:0!important}
+ @media(max-width:480px){
+   html body dialog#foodMealTypeDialog.food-owner-dialog[open]{padding:12px!important}
+   html body dialog#foodMealTypeDialog.food-owner-dialog[open]>.study-v10-modal{width:100%!important;max-width:480px!important;max-height:82dvh!important;padding:18px!important;border-radius:24px!important}
+   html body #foodMealTypeDialog .study-v10-head h2{font-size:23px!important}
+ }
+ `;document.head.appendChild(st)
+}
+
+function renderAlimentacao(){
+ ensureFoodModuleStyles();ensureRC94FoodRecipeArchitectureStyles();ensureFoodPolishStylesRC87();ensureFoodArchitectureRC88();ensureFoodOwnerConfigStyles();ensureFoodMasterRC99();
+ const d=loadFood(),today=foodDayName(),types=(d.mealTypes||[]).slice().sort((a,b)=>a.order-b.order);
+ app.innerHTML=`<div class="food-v115"><section class="food-v115-hero"><span class="eyebrow">ALIMENTAÇÃO</span><h2>Know what’s next.</h2><p>Cardápio claro. Consumo real. O detalhe da receita mora em Receitas.</p><span class="food-v115-abstract" aria-hidden="true"></span></section>${types.some(t=>t.owner!=='other')?renderTodayFoodCard():''}<section class="food-v115-week"><div class="food-v115-section-kicker"><span class="eyebrow">SEMANA ${escapeHtml(String(d.week||1))} · CARDÁPIO</span><div class="food-owner-actions"><button type="button" id="foodManageMealTypes">Editar cardápios</button><button type="button" id="foodAddMealTypeQuick">+ Novo cardápio</button></div></div>${types.length?types.map(t=>renderFoodWeekCarousel(t,d,today)).join(''):`<div class="card food-v115-card food-empty-plans"><h3>Seu cardápio começa aqui.</h3><p>Crie as refeições que fizerem sentido para esta pessoa. Você pode começar com o app completamente limpo.</p><button type="button" class="primary" id="foodCreateFirstPlan">+ Criar cardápio</button></div>`}</section><div class="section-title food-v115-routine-title">ROTINA DE PREPARO</div><div class="card food-v115-card food-v115-routine"><label><input type="checkbox" id="foodCook" ${d.cookingDone?'checked':''}><span><strong>Cozinha quinzenal</strong><small>Produzir bases, porcionar, etiquetar e congelar.</small>${d.cookingDoneAt?`<small class="food-v115-cookdate">Concluída em ${foodPrepDateLabel(d.cookingDoneAt)}</small>${(d.lastCookedRecipeIds||[]).length?`<small class="food-v115-cookrecipes">Preparadas: ${escapeHtml(foodPrepBatchRecipeNames(d.lastCookedRecipeIds).join(' · '))}</small>`:''}`:''}${d.nextCookingDate?`<small class="food-v115-cookdate">Próxima programada: ${new Date(d.nextCookingDate+'T12:00:00').toLocaleDateString('pt-BR')}</small>`:''}</span></label>${d.cookingDone?'<button type="button" class="secondary food-edit-prep" id="foodEditPrep">Editar receitas preparadas</button>':''}<button type="button" class="secondary food-program-next" id="foodProgramNext">Programar próxima</button></div></div>`;
+ document.querySelector('#foodCook').onchange=e=>{if(e.target.checked)openFoodPrepCompleteDialog(d.lastCookedRecipeIds||[]);else{undoFoodPrepProgress();renderAlimentacao()}};document.querySelector('#foodEditPrep')?.addEventListener('click',()=>openFoodPrepCompleteDialog(d.lastCookedRecipeIds||[]));document.querySelector('#foodProgramNext')?.addEventListener('click',openFoodNextPrepDialog);document.querySelector('#foodManageMealTypes')?.addEventListener('click',()=>openFoodMealTypesManager());document.querySelector('#foodAddMealTypeQuick')?.addEventListener('click',()=>openFoodMealTypeDialog());document.querySelector('#foodCreateFirstPlan')?.addEventListener('click',()=>openFoodMealTypeDialog());document.querySelectorAll('[data-food-edit-type]').forEach(b=>b.onclick=()=>openFoodMealTypeDialog(b.dataset.foodEditType));bindTodayFoodActions();document.querySelectorAll('[data-food-open-recipe]').forEach(b=>b.onclick=()=>openRecipeInRecipes(b.dataset.foodOpenRecipe));
+}
+// ===== BERTH.A v2.8.60 · Lista de Compras Universal + Saúde + Meu Progresso =====
+const HEALTH_KEY="minha-vida.saude.v1";
+const SHOP_BASE_KEY="minha-vida.compras.base.v1";
+const SHOP_STOCK_KEY="bertha.compras.estoque.v1";
+function loadHealth(){try{const d=JSON.parse(window.berthaHmlStorage.getItem(HEALTH_KEY)||"[]");return Array.isArray(d)?d.filter(Boolean):[]}catch{return []}}
+function saveHealth(items){window.berthaHmlStorage.setItem(HEALTH_KEY,JSON.stringify(items||[]))}
+function shopMoney(v){const n=Number(String(v??"").replace(',','.'));return Number.isFinite(n)?n:0}
+function shopMoneyBR(v){return new Intl.NumberFormat('pt-BR',{style:'currency',currency:'BRL'}).format(shopMoney(v))}
+function shopDateLabel(ts){if(!ts)return'';const d=new Date(ts);return Number.isNaN(d.getTime())?'':d.toLocaleDateString('pt-BR',{day:'2-digit',month:'2-digit',year:'numeric'})}
+function shopCategoryLabel(v){return v||'Outros'}
+function shopSvg(name){const p={bag:'<path d="M6 8h12l1 13H5L6 8z"/><path d="M9 9V6a3 3 0 0 1 6 0v3"/>',edit:'<path d="M4 20h4l11-11-4-4L4 16v4z"/><path d="M13.5 6.5l4 4"/>',trash:'<path d="M4 7h16M9 7V4h6v3M7 7l1 13h8l1-13"/>',plus:'<path d="M12 5v14M5 12h14"/>',trend:'<path d="M4 17l5-5 4 4 7-8"/><path d="M15 8h5v5"/>',heart:'<path d="M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.6l-1-1a5.5 5.5 0 0 0-7.8 7.8l1 1L12 21l7.8-7.6 1-1a5.5 5.5 0 0 0 0-7.8z"/>',check:'<path d="M5 12l4 4L19 6"/>'};return `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${p[name]||p.bag}</svg>`}
+function ensureShoppingStyles(){if(document.getElementById('bertha-shopping-styles-v170'))return;const st=document.createElement('style');st.id='bertha-shopping-styles-v170';st.textContent=`
+/* v2.8.178 — Lista de Compras · hero organizado na homologação */
+.shop-page{padding-bottom:18px}
+.shop-hero{
+  position:relative;overflow:hidden;
+  display:flex;align-items:flex-start;justify-content:space-between;gap:16px;
+  margin:4px 0 14px;padding:22px 22px 21px;border-radius:28px;
+  border:1px solid rgba(118,96,121,.08);
+  background:
+    radial-gradient(circle at 18% 12%,rgba(255,255,255,.42),transparent 42%),
+    linear-gradient(135deg,rgba(247,219,230,.90) 0%,rgba(229,217,246,.88) 52%,rgba(207,231,246,.88) 100%);
+  box-shadow:0 10px 28px rgba(80,61,85,.04);
+}
+.shop-hero:after{
+  content:"";position:absolute;right:24px;bottom:-34px;width:112px;height:112px;border-radius:36px;
+  border:1px solid rgba(112,94,121,.10);transform:rotate(28deg);pointer-events:none;
+}
+.shop-hero>div,.shop-hero>button{position:relative;z-index:1}
+.shop-hero>div{min-width:0;max-width:calc(100% - 46px);padding-right:4px}
+.shop-hero .eyebrow{color:#9a7088!important}
+.shop-hero h2{
+  margin:7px 0 8px;font-family:"Montserrat","Avenir Next",Inter,sans-serif;
+  max-width:285px;font-size:25px;font-weight:550;line-height:1.10;letter-spacing:-.032em;color:#443a49
+}
+.shop-hero p{margin:0;max-width:270px;color:#7d727f;font-size:14px;line-height:1.42}
+.shop-hero-mark{position:absolute;right:20px;top:24px;width:38px;height:38px;display:grid;place-items:center;color:rgba(91,87,96,.24);z-index:1}
+.shop-hero-mark svg{width:28px;height:28px;fill:none;stroke:currentColor;stroke-width:1.05;stroke-linecap:round;stroke-linejoin:round}
+.shop-icon-btn{
+  width:44px;height:44px;border:0;border-radius:15px;
+  background:rgba(255,250,246,.68);color:#8a6a7b;
+  display:grid;place-items:center;box-shadow:inset 0 0 0 1px rgba(111,89,116,.055)
+}
+.shop-icon-btn svg{width:21px;height:21px}
+
+.shop-summary{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px}
+.shop-summary .card{
+  padding:14px 15px;border-radius:19px!important;
+  background:#fff9f1!important;border:1px solid rgba(118,96,121,.07)!important;
+  box-shadow:0 5px 16px rgba(75,59,79,.025)!important
+}
+.shop-summary b{display:block;margin-top:3px;font-size:24px;color:#493e4f}
+.shop-summary span{font-size:11.5px;color:#817681}
+
+.shop-main-actions{
+  display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:12px
+}
+.shop-main-actions button{
+  min-height:48px;border-radius:16px!important;font-size:14px!important;font-weight:750!important
+}
+.shop-main-actions .secondary{
+  background:#fff9f1!important;color:#756279!important;
+  border:1px solid rgba(117,94,121,.08)!important
+}
+.shop-main-actions .primary{
+  background:linear-gradient(135deg,#f5aa84 0%,#ee9677 54%,#e3866b 100%)!important;
+  color:#fff!important;border:0!important;box-shadow:0 6px 16px rgba(224,136,104,.13)!important
+}
+.shop-main-actions button:disabled{opacity:.42!important;box-shadow:none!important}
+
+.shop-filter{
+  display:flex;gap:7px;overflow:auto;padding:1px 1px 5px;margin-bottom:8px;
+  scrollbar-width:none
+}
+.shop-filter::-webkit-scrollbar{display:none}
+.shop-filter button{
+  white-space:nowrap;border:1px solid rgba(116,93,120,.09);
+  background:#fff9f1;border-radius:999px;padding:8px 12px;color:#756b77;font-size:13px
+}
+.shop-filter button.active{
+  background:linear-gradient(135deg,rgba(246,219,231,.88),rgba(226,217,245,.88));
+  color:#745d78;border-color:rgba(149,112,141,.12)
+}
+
+.shop-section{margin:13px 0}
+#shoppingPendingCard{
+  display:grid;gap:9px;padding:0!important;background:transparent!important;
+  border:0!important;box-shadow:none!important
+}
+.shop-row{
+  display:grid;grid-template-columns:auto minmax(0,1fr) auto;
+  gap:11px;align-items:center;padding:13px 13px;
+  border:1px solid rgba(116,94,119,.07)!important;border-radius:18px;
+  background:#fff9f1;box-shadow:0 5px 16px rgba(74,58,77,.024)
+}
+.shop-row:last-child{border-bottom:1px solid rgba(116,94,119,.07)!important}
+.shop-row.done .shop-main strong{text-decoration:line-through;opacity:.58}
+.shop-row input[type=checkbox]{
+  appearance:none;-webkit-appearance:none;
+  width:23px;height:23px;margin:0;border-radius:8px;
+  border:1.5px solid #b5aab4;background:#fffdfa;display:grid;place-items:center
+}
+.shop-row input[type=checkbox]:checked{
+  background:linear-gradient(135deg,#f3aa84,#df8c75);border-color:#e39879
+}
+.shop-row input[type=checkbox]:checked:after{
+  content:"✓";color:#fff;font-size:14px;font-weight:900;line-height:1
+}
+.shop-main{min-width:0}
+.shop-main strong,.shop-main small{display:block}
+.shop-main strong{font-size:15px;line-height:1.28;color:#463e49}
+.shop-main small{margin-top:3px;color:#867b86;line-height:1.32;font-size:11.5px}
+.shop-actions{display:flex;gap:1px}
+.shop-actions button{
+  width:34px;height:34px;border:0;background:transparent;border-radius:11px;
+  color:#7c6d7d;display:grid;place-items:center
+}
+.shop-actions button:active{background:rgba(235,224,234,.55)}
+.shop-actions svg{width:18px;height:18px}
+
+.shop-add{
+  width:100%;min-height:48px;display:flex;gap:8px;align-items:center;justify-content:center;
+  border-radius:16px!important;background:#fff9f1!important;color:#7a657c!important;
+  border:1px solid rgba(117,94,121,.08)!important;font-weight:750!important
+}
+.shop-add svg{width:18px;height:18px}
+
+.shop-section-head{
+  display:flex;justify-content:space-between;align-items:center;gap:10px;margin-bottom:8px
+}
+.shop-section-head h3{margin:0;font-size:16px;color:#443c47}
+.shop-section-head a{
+  color:#9b6b7e;text-decoration:none;font-size:12.5px;font-weight:750
+}
+.shop-section>.card{
+  background:#fff9f1!important;border:1px solid rgba(116,94,119,.07)!important;
+  border-radius:19px!important;box-shadow:0 5px 16px rgba(74,58,77,.024)!important
+}
+.shop-history-row{
+  display:grid;grid-template-columns:minmax(0,1fr) auto;gap:12px;
+  padding:11px 0;border-bottom:1px solid rgba(91,72,96,.065)
+}
+.shop-history-row:last-child{border-bottom:0}
+.shop-history-row small{display:block;color:#817783;margin-top:3px}
+
+.shopping-modal-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.shopping-modal-grid label{min-width:0}
+.shopping-modal-grid input,.shopping-modal-grid select{width:100%;box-sizing:border-box}
+
+/* Modal System BERTH.A v1 aplicado à Lista de Compras */
+dialog.shop-dialog,
+dialog.close-purchase-dialog{
+  border:0!important;padding:0!important;border-radius:28px!important;
+  background:#fff9f1!important;box-shadow:0 24px 70px rgba(54,42,58,.25)!important
+}
+dialog.shop-dialog::backdrop,
+dialog.close-purchase-dialog::backdrop{
+  background:rgba(54,43,57,.27)!important;backdrop-filter:blur(7px)!important
+}
+.shop-dialog .study-v10-modal,
+.close-purchase-dialog .study-v10-modal{
+  background:#fff9f1!important;border-radius:28px!important
+}
+.shop-dialog .study-v10-head,
+.close-purchase-dialog .study-v10-head{
+  background:
+    radial-gradient(circle at 12% 6%,rgba(255,255,255,.45),transparent 44%),
+    linear-gradient(135deg,rgba(247,219,230,.86),rgba(227,218,245,.86),rgba(211,232,245,.84))!important;
+  border-bottom:1px solid rgba(116,94,119,.07)!important
+}
+.shop-dialog .study-v10-x,
+.close-purchase-dialog .study-v10-x{
+  background:rgba(255,250,246,.70)!important;color:#817780!important;border:0!important
+}
+.shop-dialog input,.shop-dialog select,.shop-dialog textarea,
+.close-purchase-dialog input,.close-purchase-dialog select,.close-purchase-dialog textarea{
+  font-size:16px!important;background:#fffdfa!important
+}
+.shop-dialog .primary,.close-purchase-dialog .primary{
+  background:linear-gradient(135deg,#f5aa84,#ee9677 55%,#e3866b)!important;color:#fff!important
+}
+.shop-dialog .secondary,.close-purchase-dialog .secondary{
+  background:#f3eee9!important;color:#746a72!important
+}
+
+/* Lista de Compras · modal alinhado ao sistema BERTH.A */
+.shop-dialog{width:min(92vw,560px)!important;max-width:560px!important;overflow:hidden!important}
+.shop-dialog .shop-item-modal{width:100%!important;max-width:none!important;max-height:min(86vh,760px)!important;padding:0!important;overflow:auto!important;background:#fff9f1!important}
+.shop-dialog .shop-modal-head{margin:0!important;padding:24px 24px 20px!important;align-items:flex-start!important;background:radial-gradient(circle at 14% 0%,rgba(255,255,255,.58),transparent 43%),linear-gradient(120deg,rgba(250,224,217,.84),rgba(241,221,235,.80) 48%,rgba(219,232,246,.78))!important}
+.shop-dialog .shop-modal-head .eyebrow{font-size:11px!important;letter-spacing:.18em!important;color:#9d7080!important;font-weight:800!important}
+.shop-dialog .shop-modal-head h2{margin:6px 0 0!important;font-size:30px!important;line-height:1.05!important;font-weight:520!important;color:#403846!important}
+.shop-dialog .study-v10-x{flex:0 0 44px!important;width:44px!important;height:44px!important;border-radius:50%!important;font-size:27px!important;line-height:1!important;background:rgba(255,250,246,.72)!important;color:#82777e!important;border:1px solid rgba(116,94,119,.08)!important;outline:none!important;box-shadow:none!important;-webkit-tap-highlight-color:transparent!important}
+.shop-dialog .study-v10-x:focus,.shop-dialog .study-v10-x:focus-visible{outline:none!important;box-shadow:none!important}
+.shop-dialog .shop-modal-body{padding:22px 24px 4px!important;display:grid!important;gap:15px!important}
+.shop-dialog .shop-field{display:block!important;margin:0!important;min-width:0!important;color:#625967!important;font-size:14px!important;font-weight:720!important}
+.shop-dialog .shop-field>span{display:block!important;margin:0 0 7px!important;line-height:1.2!important}
+.shop-dialog .shop-field>span small{font-size:12px!important;font-weight:500!important;color:#9a9099!important}
+.shop-dialog .shop-field input,.shop-dialog .shop-field select{display:block!important;width:100%!important;height:52px!important;box-sizing:border-box!important;margin:0!important;padding:0 15px!important;border:1px solid rgba(111,91,116,.12)!important;border-radius:16px!important;background:rgba(255,253,249,.92)!important;color:#443c47!important;font-size:16px!important;font-family:inherit!important;outline:none!important;box-shadow:none!important;-webkit-appearance:none!important;appearance:none!important}
+.shop-dialog .shop-field select{padding-right:38px!important;background-image:linear-gradient(45deg,transparent 50%,#756b73 50%),linear-gradient(135deg,#756b73 50%,transparent 50%)!important;background-position:calc(100% - 19px) 22px,calc(100% - 14px) 22px!important;background-size:5px 5px,5px 5px!important;background-repeat:no-repeat!important}
+.shop-dialog .shop-field input:focus,.shop-dialog .shop-field select:focus{border-color:rgba(226,139,113,.46)!important;box-shadow:0 0 0 3px rgba(244,174,145,.10)!important}
+.shop-dialog .shopping-modal-grid{display:grid!important;grid-template-columns:.78fr 1.22fr!important;gap:14px 10px!important}
+.shop-dialog .shop-modal-actions{display:flex!important;justify-content:flex-end!important;gap:10px!important;margin:14px 0 0!important;padding:18px 24px 24px!important;border-top:1px solid rgba(116,94,119,.06)!important;background:rgba(255,250,246,.72)!important;position:sticky!important;bottom:0!important}
+.shop-dialog .shop-modal-actions button{min-width:112px!important;height:48px!important;border-radius:16px!important;border:0!important;font-size:16px!important;font-weight:760!important}
+.shop-dialog .shop-modal-actions .secondary{background:#f3eee9!important;color:#746a72!important}
+.shop-dialog .shop-modal-actions .primary{background:linear-gradient(110deg,#f7b27f 0%,#f19b78 48%,#e9876c 100%)!important;color:#fff!important;box-shadow:none!important}
+@media(max-width:480px){
+  .shopping-modal-grid{grid-template-columns:1fr}
+  .shop-dialog .shopping-modal-grid{grid-template-columns:.78fr 1.22fr!important}
+  .shop-summary{grid-template-columns:1fr 1fr}
+  .shop-row{grid-template-columns:auto minmax(0,1fr) auto}
+  .shop-dialog .shop-modal-head{padding:22px 20px 18px!important}
+  .shop-dialog .shop-modal-body{padding:20px 20px 3px!important}
+  .shop-dialog .shop-modal-actions{padding:16px 20px 22px!important}
+}
+/* Compra concluída · Modal System BERTH.A v1 */
+.purchase-done-dialog{width:min(92vw,560px)!important;max-width:560px!important;overflow:hidden!important}
+.purchase-done-dialog .purchase-done-modal{width:100%!important;max-width:none!important;max-height:min(86dvh,760px)!important;padding:0!important;overflow:auto!important;background:#fff9f1!important;border-radius:28px!important}
+.purchase-done-dialog .purchase-done-head{margin:0!important;padding:24px 24px 20px!important;align-items:flex-start!important}
+.purchase-done-dialog .purchase-done-head>div{min-width:0!important;padding-right:4px!important}
+.purchase-done-dialog .purchase-done-head h2{max-width:100%!important;overflow-wrap:anywhere!important;word-break:normal!important;font-size:28px!important;line-height:1.08!important;font-weight:560!important;letter-spacing:-.025em!important}
+.purchase-done-dialog .purchase-done-head p{max-width:390px!important;font-size:14px!important;line-height:1.4!important;color:#81767f!important}
+.purchase-done-dialog .purchase-done-body{padding:22px 24px 6px!important;gap:16px!important}
+.purchase-done-dialog .shopping-modal-grid{grid-template-columns:minmax(0,.85fr) minmax(0,1.15fr)!important;gap:12px!important}
+.purchase-done-dialog .shop-field>span{font-size:13px!important;font-weight:720!important;color:#625967!important}
+.purchase-done-dialog .shop-field>span small{font-size:12px!important;font-weight:500!important;color:#9a9099!important}
+.purchase-done-dialog .shop-field input,.purchase-done-dialog .shop-field select{height:52px!important;border-radius:16px!important;font-size:16px!important}
+.purchase-done-dialog .purchase-done-actions{justify-content:flex-end!important}
+.purchase-done-dialog .purchase-done-actions .secondary,.purchase-done-dialog .purchase-done-actions .primary{min-width:132px!important}
+@media(max-width:380px){
+  .purchase-done-dialog .purchase-done-head{padding:21px 19px 18px!important}
+  .purchase-done-dialog .purchase-done-body{padding:19px 19px 5px!important}
+  .purchase-done-dialog .purchase-done-actions{padding:15px 19px calc(20px + env(safe-area-inset-bottom))!important}
+  .purchase-done-dialog .purchase-done-head h2{font-size:25px!important}
+}
+/* Encerrar compra · Modal System BERTH.A v1 · v2.8.180 */
+.close-purchase-dialog{width:min(92vw,560px)!important;max-width:560px!important;overflow:hidden!important}
+.close-purchase-dialog .close-purchase-modal{width:100%!important;max-width:none!important;max-height:min(86dvh,760px)!important;padding:0!important;overflow:hidden!important;display:flex!important;flex-direction:column!important;background:#fff9f1!important;border-radius:28px!important}
+.close-purchase-dialog .close-purchase-head{margin:0!important;padding:24px 24px 20px!important;align-items:flex-start!important;flex:0 0 auto!important;background:radial-gradient(circle at 14% 0%,rgba(255,255,255,.58),transparent 43%),linear-gradient(120deg,rgba(250,224,217,.84),rgba(241,221,235,.80) 48%,rgba(219,232,246,.78))!important}
+.close-purchase-dialog .close-purchase-head>div{min-width:0!important;padding-right:8px!important}
+.close-purchase-dialog .close-purchase-head .eyebrow{font-size:11px!important;letter-spacing:.18em!important;color:#9d7080!important;font-weight:800!important}
+.close-purchase-dialog .close-purchase-head h2{margin:6px 0 7px!important;font-size:30px!important;line-height:1.05!important;font-weight:520!important;letter-spacing:-.025em!important;color:#403846!important}
+.close-purchase-dialog .close-purchase-head p{margin:0!important;max-width:400px!important;font-size:14px!important;line-height:1.42!important;color:#81767f!important}
+.close-purchase-dialog .study-v10-x{flex:0 0 44px!important;width:44px!important;height:44px!important;border-radius:50%!important;font-size:27px!important;line-height:1!important;background:rgba(255,250,246,.72)!important;color:#82777e!important;border:1px solid rgba(116,94,119,.08)!important;outline:none!important;box-shadow:none!important;-webkit-tap-highlight-color:transparent!important}
+.close-purchase-dialog .study-v10-x:focus,.close-purchase-dialog .study-v10-x:focus-visible{outline:none!important;box-shadow:none!important}
+.close-purchase-dialog .close-purchase-body{padding:20px 24px 6px!important;display:flex!important;flex-direction:column!important;gap:13px!important;min-height:0!important;overflow:auto!important}
+.close-purchase-dialog .close-purchase-list{display:grid!important;gap:10px!important;overflow:visible!important;padding:0!important;min-height:0!important}
+.close-purchase-dialog .close-purchase-item{display:grid!important;grid-template-columns:30px minmax(0,1fr)!important;align-items:center!important;gap:12px!important;margin:0!important;padding:15px 16px!important;border:1px solid rgba(111,91,116,.11)!important;border-radius:17px!important;background:rgba(255,253,249,.92)!important;cursor:pointer!important;box-shadow:none!important}
+.close-purchase-dialog .close-purchase-item input{position:absolute!important;opacity:0!important;pointer-events:none!important}
+.close-purchase-dialog .close-purchase-check{width:25px!important;height:25px!important;border:1.5px solid #c9bccd!important;border-radius:8px!important;background:#fffdfa!important;display:grid!important;place-items:center!important;box-sizing:border-box!important}
+.close-purchase-dialog .close-purchase-item input:checked+.close-purchase-check{background:#9a789f!important;border-color:#9a789f!important}
+.close-purchase-dialog .close-purchase-item input:checked+.close-purchase-check:after{content:'✓'!important;color:#fff!important;font-size:15px!important;font-weight:800!important;line-height:1!important}
+.close-purchase-dialog .close-purchase-copy{min-width:0!important}
+.close-purchase-dialog .close-purchase-copy strong,.close-purchase-dialog .close-purchase-copy small{display:block!important}
+.close-purchase-dialog .close-purchase-copy strong{font-size:15px!important;line-height:1.25!important;font-weight:760!important;color:#514854!important;overflow-wrap:anywhere!important}
+.close-purchase-dialog .close-purchase-copy small{margin-top:4px!important;font-size:12px!important;line-height:1.3!important;color:#8c818e!important}
+.close-purchase-dialog .close-purchase-hint{font-size:12px!important;line-height:1.45!important;color:#8a808b!important;padding:1px 2px 4px!important}
+.close-purchase-dialog .close-purchase-actions{display:flex!important;justify-content:flex-end!important;gap:10px!important;margin:0!important;padding:18px 24px calc(22px + env(safe-area-inset-bottom))!important;border-top:1px solid rgba(116,94,119,.06)!important;background:rgba(255,250,246,.96)!important;position:sticky!important;bottom:0!important;flex:0 0 auto!important;z-index:2!important}
+.close-purchase-dialog .close-purchase-actions .grow{display:none!important}
+.close-purchase-dialog .close-purchase-actions button{height:48px!important;border-radius:16px!important;border:0!important;font-size:16px!important;font-weight:760!important;padding:0 20px!important}
+.close-purchase-dialog .close-purchase-actions .secondary{min-width:118px!important;background:#f3eee9!important;color:#746a72!important}
+.close-purchase-dialog .close-purchase-actions .primary{min-width:170px!important;background:linear-gradient(110deg,#f7b27f 0%,#f19b78 48%,#e9876c 100%)!important;color:#fff!important;box-shadow:none!important}
+@media(max-width:480px){
+  .close-purchase-dialog .close-purchase-head{padding:22px 20px 18px!important}
+  .close-purchase-dialog .close-purchase-head h2{font-size:29px!important}
+  .close-purchase-dialog .close-purchase-body{padding:18px 20px 5px!important}
+  .close-purchase-dialog .close-purchase-actions{padding:16px 20px calc(20px + env(safe-area-inset-bottom))!important}
+  .close-purchase-dialog .close-purchase-actions .secondary{min-width:0!important;flex:1 1 40%!important}
+  .close-purchase-dialog .close-purchase-actions .primary{min-width:0!important;flex:1 1 60%!important}
+}
+/* RC116 — Lista de Compras: tipografia leve, botões no padrão e estoque doméstico. */
+.shop-hero .eyebrow{font-weight:500!important;letter-spacing:.18em!important}
+.shop-hero h2{font-weight:400!important}
+.shop-hero p{font-weight:400!important}
+.shop-summary b{font-weight:450!important}
+.shop-summary span{font-weight:400!important}
+.shop-main-actions button,.shop-add{font-weight:500!important}
+.shop-main-actions .primary,.shop-dialog .primary,.close-purchase-dialog .primary{
+  background:linear-gradient(115deg,#edd0d9 0%,#f2e3cf 48%,#d2e5ee 100%)!important;
+  color:#665b66!important;border:1px solid rgba(153,124,139,.12)!important;box-shadow:none!important
+}
+.shop-filter button{font-weight:400!important}.shop-filter button.active{font-weight:500!important}
+.shop-main strong{font-weight:450!important}.shop-main small{font-weight:400!important}
+.shop-section-head h3{font-weight:450!important}.shop-section-head a,.shop-month-count{font-weight:400!important}
+.shop-history-row strong,.shop-history-row b{font-weight:450!important}.shop-history-row small{font-weight:400!important}
+.shop-dialog .shop-modal-head .eyebrow,.close-purchase-dialog .close-purchase-head .eyebrow{font-weight:500!important}
+.shop-dialog .shop-modal-head h2,.close-purchase-dialog .close-purchase-head h2,.purchase-done-dialog .purchase-done-head h2{font-weight:400!important}
+.shop-dialog .shop-modal-head p,.close-purchase-dialog .close-purchase-head p,.purchase-done-dialog .purchase-done-head p{font-weight:400!important}
+.shop-dialog .shop-field,.purchase-done-dialog .shop-field>span{font-weight:450!important}
+.shop-dialog .shop-field>span small,.purchase-done-dialog .shop-field>span small{font-weight:400!important}
+.shop-dialog .shop-field input,.shop-dialog .shop-field select,.close-purchase-dialog input,.close-purchase-dialog select{font-weight:400!important}
+.shop-dialog .shop-modal-actions button,.close-purchase-dialog .close-purchase-actions button{font-weight:500!important}
+.close-purchase-dialog .close-purchase-copy strong{font-weight:450!important}.close-purchase-dialog .close-purchase-copy small{font-weight:400!important}
+.close-purchase-dialog .close-purchase-item input:checked+.close-purchase-check:after{font-weight:600!important}
+.shop-stock-section .shop-section-head>div small{display:block;margin-top:3px;color:#8a808b;font-size:11.5px;font-weight:400}
+.shop-stock-manage{border:0;background:transparent;color:#8c6f7d;font:inherit;font-size:12.5px;font-weight:500;padding:7px 0}
+.shop-stock-card{padding:6px 15px!important}
+.shop-stock-row{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:12px;align-items:center;padding:11px 0;border-bottom:1px solid rgba(91,72,96,.065)}
+.shop-stock-row:last-child{border-bottom:0}.shop-stock-row strong,.shop-stock-row small{display:block}.shop-stock-row strong{font-size:14px;font-weight:450;color:#4a414c}.shop-stock-row small{margin-top:3px;font-size:11px;font-weight:400;color:#8a808b}.shop-stock-row b{font-size:14px;font-weight:500;color:#665b66}
+.shop-stock-modal .shop-modal-head p{margin:7px 0 0!important;max-width:410px!important;font-size:13px!important;line-height:1.45!important;color:#837983!important}
+.shop-stock-body{display:grid!important;gap:9px!important}
+.shop-stock-edit-row{display:grid;grid-template-columns:minmax(0,1fr) 82px 104px 34px;gap:8px;align-items:center;padding:10px 0;border-bottom:1px solid rgba(91,72,96,.065)}
+.shop-stock-name{min-width:0}.shop-stock-name strong,.shop-stock-name small{display:block}.shop-stock-name strong{font-size:14px;font-weight:450;color:#4a414c;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.shop-stock-name small{margin-top:3px;font-size:11px;color:#8a808b}
+.shop-stock-edit-row input,.shop-stock-edit-row select{height:44px!important;border-radius:14px!important;padding:0 11px!important;background:#fffdfa!important;border:1px solid rgba(111,91,116,.12)!important;font-size:15px!important;font-weight:400!important;min-width:0}
+.shop-stock-edit-row button{width:34px;height:34px;border-radius:50%;border:1px solid rgba(116,94,119,.10);background:rgba(255,255,255,.72);color:#8b8089;font-size:20px;line-height:1}
+.purchase-stock-toggle{display:grid!important;grid-template-columns:22px minmax(0,1fr)!important;gap:10px!important;align-items:start!important;padding:13px 14px!important;border:1px solid rgba(116,94,119,.09)!important;border-radius:16px!important;background:rgba(255,253,249,.75)!important}
+.purchase-stock-toggle input{appearance:none!important;-webkit-appearance:none!important;width:21px!important;height:21px!important;margin:1px 0 0!important;padding:0!important;border-radius:7px!important;border:1.5px solid rgba(142,121,143,.36)!important;background:#fffdfa!important;display:grid!important;place-content:center!important}
+.purchase-stock-toggle input:checked{background:linear-gradient(135deg,#d9b8c9,#c9dce8)!important;border-color:transparent!important}.purchase-stock-toggle input:checked:after{content:'✓';color:#fff;font-size:13px;font-weight:600;line-height:1}
+.purchase-stock-toggle span strong,.purchase-stock-toggle span small{display:block}.purchase-stock-toggle span strong{font-size:13.5px;font-weight:500;color:#5d535f}.purchase-stock-toggle span small{margin-top:3px;font-size:11.5px;font-weight:400;color:#8a808b;line-height:1.35}
+@media(max-width:480px){.shop-stock-edit-row{grid-template-columns:minmax(0,1fr) 72px 88px 30px;gap:6px}.shop-stock-edit-row button{width:30px;height:30px}.shop-stock-name strong{font-size:13px}}
+`;document.head.appendChild(st)}
+function loadShoppingBase(){try{const x=JSON.parse(window.berthaHmlStorage.getItem(SHOP_BASE_KEY)||"[]");return Array.isArray(x)?x.filter(Boolean):[]}catch{return []}}
+function saveShoppingBase(x){window.berthaHmlStorage.setItem(SHOP_BASE_KEY,JSON.stringify(x||[]))}
+function shopNormName(v){return String(v||'').trim().toLocaleLowerCase('pt-BR')}
+function shopNum(v){const n=parseFloat(String(v??'').replace(/\s/g,'').replace(',','.'));return Number.isFinite(n)?n:null}
+function shopQtyText(v){const n=shopNum(v);if(n==null)return String(v??'');return Number.isInteger(n)?String(n):String(Math.round(n*100)/100).replace('.',',')}
+function loadShoppingStock(){try{const x=JSON.parse(window.berthaHmlStorage.getItem(SHOP_STOCK_KEY)||"[]");return Array.isArray(x)?x.filter(Boolean).map((i,idx)=>({id:i.id||`stock-${idx}`,name:String(i.name||'').trim(),qty:i.qty??'',unit:i.unit||'',category:i.category||'Outros',updatedAt:i.updatedAt||Date.now(),...i})).filter(i=>i.name):[]}catch{return []}}
+function saveShoppingStock(x){window.berthaHmlStorage.setItem(SHOP_STOCK_KEY,JSON.stringify(x||[]))}
+function stockForName(name){const key=shopNormName(name);return loadShoppingStock().find(x=>shopNormName(x.name)===key)||null}
+function stockAvailableText(item){const s=stockForName(item?.name);if(!s)return'';return `${shopQtyText(s.qty)}${s.unit?` ${s.unit}`:''}`}
+function shopSuggestedNeed(item){const desired=shopNum(item?.targetQty??item?.qty),s=stockForName(item?.name);if(desired==null||!s)return null;const have=shopNum(s.qty);if(have==null)return null;const itemUnit=String(item?.unit||'').trim(),stockUnit=String(s.unit||'').trim();if(itemUnit&&stockUnit&&itemUnit!==stockUnit)return null;return Math.max(0,Math.round((desired-have)*1000)/1000)}
+function addPurchasedToStock(item,qty,unit){const amount=shopNum(qty);if(amount==null||amount<=0)return;const stock=loadShoppingStock(),key=shopNormName(item.name),i=stock.findIndex(s=>shopNormName(s.name)===key),now=Date.now();if(i>=0){const current=shopNum(stock[i].qty),compatible=!stock[i].unit||!unit||stock[i].unit===unit;stock[i]={...stock[i],name:item.name,category:item.category||stock[i].category||'Outros',unit:unit||stock[i].unit||'',qty:compatible&&current!=null?Math.round((current+amount)*1000)/1000:amount,updatedAt:now}}else stock.push({id:uid(),name:item.name,qty:amount,unit:unit||'',category:item.category||'Outros',updatedAt:now});saveShoppingStock(stock)}
+function openShoppingStockModal(){ensureShoppingStyles();const stock=loadShoppingStock(),dlg=document.createElement('dialog');dlg.className='study-v10-dialog shop-dialog shop-stock-dialog';const rows=stock.length?stock.map((s,i)=>`<div class="shop-stock-edit-row" data-stock-row="${i}"><div class="shop-stock-name"><strong>${escapeHtml(s.name)}</strong><small>${escapeHtml(shopCategoryLabel(s.category))}</small></div><input data-stock-qty="${i}" inputmode="decimal" value="${escapeHtml(shopQtyText(s.qty))}" aria-label="Quantidade de ${escapeHtml(s.name)}"><select data-stock-unit="${i}" aria-label="Unidade de ${escapeHtml(s.name)}"><option value="">sem unidade</option>${['un','caixa','pacote','pote','garrafa','kg','g','L','ml'].map(u=>`<option value="${u}" ${s.unit===u?'selected':''}>${u}</option>`).join('')}</select><button type="button" data-stock-delete="${i}" aria-label="Remover do estoque">×</button></div>`).join(''):`<div class="empty compact"><strong>Seu estoque começa depois da primeira compra.</strong><span>Ao marcar uma compra como concluída, a BERTH.A registra o que entrou em casa.</span></div>`;dlg.innerHTML=`<form class="study-v10-modal shop-item-modal shop-stock-modal" id="shopStockForm"><div class="study-v10-head shop-modal-head"><div><div class="eyebrow">LISTA DE COMPRAS · ESTOQUE</div><h2>O que tenho em casa</h2><p>Ajuste as quantidades conforme for usando. A BERTH.A usa esse saldo para calcular quanto falta comprar.</p></div><button type="button" class="study-v10-x" data-close aria-label="Fechar">×</button></div><div class="shop-modal-body shop-stock-body">${rows}</div><div class="modal-actions shop-modal-actions"><button type="button" class="secondary" data-close>Cancelar</button><button type="submit" class="primary">Salvar estoque</button></div></form>`;document.body.appendChild(dlg);dlg.querySelectorAll('[data-close]').forEach(b=>b.onclick=()=>dlg.close());dlg.querySelectorAll('[data-stock-delete]').forEach(b=>b.onclick=()=>{const idx=+b.dataset.stockDelete;stock.splice(idx,1);saveShoppingStock(stock);dlg.close();openShoppingStockModal()});dlg.addEventListener('close',()=>dlg.remove());dlg.querySelector('#shopStockForm').onsubmit=e=>{e.preventDefault();stock.forEach((s,i)=>{const q=dlg.querySelector(`[data-stock-qty="${i}"]`),u=dlg.querySelector(`[data-stock-unit="${i}"]`);if(q)s.qty=q.value.trim();if(u)s.unit=u.value;s.updatedAt=Date.now()});saveShoppingStock(stock.filter(s=>shopNum(s.qty)==null||shopNum(s.qty)>0));dlg.close();renderShoppingUniversal()};dlg.showModal()}
+function shoppingPending(){return loadSharedShopping().filter(x=>!x.done)}
+function addBaseToCurrent(){const base=loadShoppingBase(),all=loadSharedShopping();let added=0;base.forEach(b=>{const key=shopNormName(b.name);if(!key||all.some(x=>!x.done&&shopNormName(x.name)===key))return;const desired=shopNum(b.qty),stock=stockForName(b.name),have=stock&&(!b.unit||!stock.unit||b.unit===stock.unit)?shopNum(stock.qty):null;const needed=desired!=null&&have!=null?Math.max(0,Math.round((desired-have)*1000)/1000):null;if(needed===0)return;all.push({id:uid(),name:b.name,qty:needed!=null?shopQtyText(needed):(b.qty??''),targetQty:b.qty??'',unit:b.unit||'',category:b.category||'Outros',source:'Lista base',expectedValue:b.expectedValue??'',actualValue:'',createdAt:Date.now(),done:false,cycle:'base'});added++});if(added)saveSharedShopping(all);renderShoppingUniversal()}
+function openClosePurchaseDialog(){const all=loadSharedShopping(),session=all.filter(x=>x.done&&!x.closedAt);if(!session.length){alert('Ainda não há itens comprados para encerrar nesta compra.');return}const base=loadShoppingBase(),baseKeys=new Set(base.map(x=>String(x.name||'').trim().toLocaleLowerCase('pt-BR'))),dlg=document.createElement('dialog');dlg.className='study-v10-dialog close-purchase-dialog';dlg.innerHTML=`<form class="study-v10-modal close-purchase-modal" id="closePurchaseForm"><div class="study-v10-head close-purchase-head"><div><div class="eyebrow">ENCERRAR COMPRA</div><h2>Compra concluída</h2><p>Selecione os itens que deseja manter na Lista base para próximas compras.</p></div><button type="button" class="study-v10-x" data-close aria-label="Fechar">×</button></div><div class="close-purchase-body"><div class="close-purchase-list">${session.map((x,i)=>`<label class="close-purchase-item"><input type="checkbox" data-keep-base="${i}" ${baseKeys.has(String(x.name||'').trim().toLocaleLowerCase('pt-BR'))?'checked':''}><span class="close-purchase-check" aria-hidden="true"></span><span class="close-purchase-copy"><strong>${escapeHtml(x.name)}</strong>${shoppingMeta(x)?`<small>${escapeHtml(shoppingMeta(x))}</small>`:''}</span></label>`).join('')}</div><div class="close-purchase-hint">Os itens não selecionados permanecem no histórico, mas não entram na Lista base.</div></div><div class="modal-actions close-purchase-actions"><button type="button" class="secondary" data-close>Cancelar</button><button type="submit" class="primary">Encerrar compra</button></div></form>`;document.body.appendChild(dlg);dlg.querySelectorAll('[data-close]').forEach(b=>b.onclick=()=>dlg.close());dlg.addEventListener('close',()=>dlg.remove());dlg.querySelector('#closePurchaseForm').onsubmit=e=>{e.preventDefault();const next=[...base];session.forEach((x,i)=>{if(dlg.querySelector(`[data-keep-base="${i}"]`)?.checked){const key=String(x.name||'').trim().toLocaleLowerCase('pt-BR'),j=next.findIndex(b=>String(b.name||'').trim().toLocaleLowerCase('pt-BR')===key),entry={id:j>=0?next[j].id:uid(),name:x.name,qty:x.qty??'',unit:x.unit||'',category:x.category||'Outros',expectedValue:x.expectedValue??'',updatedAt:Date.now()};if(j>=0)next[j]={...next[j],...entry};else next.push(entry)}x.closedAt=Date.now()});saveShoppingBase(next);saveSharedShopping(all);dlg.close();renderShoppingUniversal()};dlg.showModal()}
+function markShoppingDone(id,done){const all=loadSharedShopping(),x=all.find(i=>String(i.id)===String(id));if(!x)return;x.done=!!done;if(x.done){x.purchasedAt=x.purchasedAt||Date.now()}else{x.purchasedAt=null;x.actualValue=""}saveSharedShopping(all)}
+function shoppingMeta(x){const q=[x.qty,x.unit].filter(Boolean).join(' '),parts=[];if(q)parts.push(q);if(x.category)parts.push(x.category);if(x.source)parts.push(x.source);return parts.join(' · ')}
+function renderShoppingUniversal(){ensureShoppingStyles();const items=loadSharedShopping(),pending=items.filter(x=>!x.done),done=items.filter(x=>x.done).sort((a,b)=>(b.purchasedAt||b.createdAt||0)-(a.purchasedAt||a.createdAt||0)),base=loadShoppingBase(),stock=loadShoppingStock(),openBought=done.filter(x=>!x.closedAt);const cats=[...new Set(pending.map(x=>shopCategoryLabel(x.category)))];const monthBought=done.filter(x=>new Date(x.purchasedAt||0).toISOString().slice(0,7)===new Date().toISOString().slice(0,7)).length;const stockPositive=stock.filter(s=>shopNum(s.qty)==null||shopNum(s.qty)>0);app.innerHTML=`<div class="shop-page"><section class="shop-hero"><div><div class="eyebrow">LISTA DE COMPRAS</div><h2>What matters, remembered for you.</h2><p>Você lista. A BERTH.A reúne — e considera o que já existe em casa.</p></div><span class="shop-hero-mark" aria-hidden="true">${shopSvg('bag')}</span></section><div class="shop-summary"><div class="card"><span>Pendentes</span><b>${pending.length}</b></div><div class="card"><span>Em casa</span><b>${stockPositive.length}</b></div></div><div class="shop-main-actions"><button class="secondary" id="shopUseBase" ${base.length?'':'disabled'}>Usar Lista base${base.length?` · ${base.length}`:''}</button><button class="primary" id="shopClosePurchase" ${openBought.length?'':'disabled'}>Encerrar compra${openBought.length?` · ${openBought.length}`:''}</button></div><div class="shop-filter" id="shopFilter"><button class="active" data-shop-filter="all">Todos</button>${cats.map(c=>`<button data-shop-filter="${escapeHtml(c)}">${escapeHtml(c)}</button>`).join('')}</div><section class="shop-section"><div id="shoppingPendingCard">${renderShoppingRows(pending)}</div><button class="secondary shop-add" id="shopAddBottom" style="margin-top:10px">${shopSvg('plus')}<span>Adicionar item</span></button></section><section class="shop-section shop-stock-section"><div class="shop-section-head"><div><h3>O que tenho em casa</h3><small>Saldo atualizado após as compras.</small></div><button type="button" class="shop-stock-manage" id="shopManageStock">Ajustar estoque</button></div><div class="card shop-stock-card">${stockPositive.length?stockPositive.slice(0,10).map(s=>`<div class="shop-stock-row"><div><strong>${escapeHtml(s.name)}</strong><small>${escapeHtml(shopCategoryLabel(s.category))}</small></div><b>${escapeHtml(shopQtyText(s.qty))}${s.unit?` ${escapeHtml(s.unit)}`:''}</b></div>`).join(''):'<div class="empty compact"><strong>Ainda não há estoque registrado.</strong><span>Ao concluir uma compra, a BERTH.A registra o que entrou em casa.</span></div>'}</div></section><section class="shop-section"><div class="shop-section-head"><h3>Comprados recentemente</h3><span class="shop-month-count">${monthBought} neste mês</span></div><div class="card">${done.length?done.slice(0,12).map(x=>`<div class="shop-history-row"><div><strong>${escapeHtml(x.name)}</strong><small>${escapeHtml(shoppingMeta(x))}${x.purchasedAt?` · ${shopDateLabel(x.purchasedAt)}`:''}</small></div><b>${shopMoney(x.actualValue)?shopMoneyBR(x.actualValue):'—'}</b></div>`).join(''):'<div class="empty compact"><strong>Ainda não há compras registradas.</strong><span>Quando marcar um item como comprado, ele aparece aqui.</span></div>'}</div></section></div>`;bindShoppingUniversal()}
+function renderShoppingRows(items){return items.length?items.map(x=>{const stock=stockForName(x.name),need=shopSuggestedNeed(x),have=stock?stockAvailableText(x):'',baseMeta=shoppingMeta(x),extra=stock?` · em casa ${have}`:'',needMeta=need!=null?` · comprar ${shopQtyText(need)}${x.unit?` ${x.unit}`:''}`:'';return `<div class="shop-row ${x.done?'done':''}" data-shop-row="${x.id}" data-shop-category="${escapeHtml(shopCategoryLabel(x.category))}"><input type="checkbox" data-shop-toggle="${x.id}" ${x.done?'checked':''} aria-label="Marcar comprado"><div class="shop-main"><strong>${escapeHtml(x.name)}</strong><small>${escapeHtml(baseMeta)}${extra}${needMeta}${shopMoney(x.expectedValue)?` · previsto ${shopMoneyBR(x.expectedValue)}`:''}</small></div><div class="shop-actions"><button type="button" data-shop-edit="${x.id}" aria-label="Editar">${shopSvg('edit')}</button><button type="button" data-shop-delete="${x.id}" aria-label="Excluir">${shopSvg('trash')}</button></div></div>`}).join(''):'<div class="empty compact"><strong>Nada para comprar.</strong><span>A lista está livre por enquanto.</span></div>'}
+function bindShoppingUniversal(){document.querySelector('#shopUseBase')?.addEventListener('click',addBaseToCurrent);document.querySelector('#shopManageStock')?.addEventListener('click',openShoppingStockModal);document.querySelector('#shopClosePurchase')?.addEventListener('click',openClosePurchaseDialog);document.querySelectorAll('[data-shop-toggle]').forEach(cb=>cb.onchange=()=>{const id=cb.dataset.shopToggle;if(cb.checked){openPurchasedModal(id)}else{markShoppingDone(id,false);renderShoppingUniversal()}});document.querySelectorAll('[data-shop-edit]').forEach(b=>b.onclick=()=>openShoppingItemModal(b.dataset.shopEdit));document.querySelectorAll('[data-shop-delete]').forEach(b=>b.onclick=()=>{if(confirm('Excluir este item da lista?')){saveSharedShopping(loadSharedShopping().filter(x=>String(x.id)!==String(b.dataset.shopDelete)));renderShoppingUniversal()}});document.querySelectorAll('#shopAddTop,#shopAddBottom').forEach(b=>b.onclick=()=>openShoppingItemModal());document.querySelectorAll('[data-shop-filter]').forEach(b=>b.onclick=()=>{document.querySelectorAll('[data-shop-filter]').forEach(x=>x.classList.toggle('active',x===b));const f=b.dataset.shopFilter;document.querySelectorAll('[data-shop-row]').forEach(r=>r.style.display=f==='all'||r.dataset.shopCategory===f?'':'none')})}
+function openShoppingItemModal(id=null){ensureShoppingStyles();const all=loadSharedShopping(),x=id?all.find(i=>String(i.id)===String(id)):null;const dlg=document.createElement('dialog');dlg.className='study-v10-dialog shop-dialog';dlg.innerHTML=`<form class="study-v10-modal shop-item-modal" id="shoppingItemForm"><div class="study-v10-head shop-modal-head"><div><div class="eyebrow">LISTA DE COMPRAS</div><h2>${x?'Editar item':'Adicionar item'}</h2></div><button type="button" class="study-v10-x" data-close aria-label="Fechar">×</button></div><div class="shop-modal-body"><label class="shop-field shop-field-full"><span>Item</span><input id="shopName" required value="${escapeHtml(x?.name||'')}" placeholder="Ex.: Leite integral"></label><div class="shopping-modal-grid"><label class="shop-field"><span>Quantidade</span><input id="shopQty" inputmode="decimal" value="${escapeHtml(x?.qty??'')}" placeholder="Ex.: 6"></label><label class="shop-field"><span>Unidade</span><select id="shopUnit"><option value="">Sem unidade</option>${['un','caixa','pacote','pote','garrafa','kg','g','L','ml'].map(u=>`<option ${x?.unit===u?'selected':''}>${u}</option>`).join('')}</select></label><label class="shop-field"><span>Categoria</span><select id="shopCategory">${['Alimentação','Casa','Saúde','Autocuidado','Pets','Outros'].map(c=>`<option ${shopCategoryLabel(x?.category)===c?'selected':''}>${c}</option>`).join('')}</select></label><label class="shop-field"><span>Valor previsto <small>opcional</small></span><input id="shopExpected" inputmode="decimal" value="${escapeHtml(x?.expectedValue??'')}" placeholder="0,00"></label></div><label class="shop-field shop-field-full"><span>Origem</span><input id="shopSource" value="${escapeHtml(x?.source||'Manual')}" placeholder="Manual"></label></div><div class="modal-actions shop-modal-actions"><button type="button" class="secondary" data-close>Cancelar</button><button type="submit" class="primary">Salvar</button></div></form>`;document.body.appendChild(dlg);dlg.querySelectorAll('[data-close]').forEach(b=>b.onclick=()=>dlg.close());dlg.addEventListener('close',()=>dlg.remove());dlg.querySelector('#shoppingItemForm').onsubmit=e=>{e.preventDefault();const name=dlg.querySelector('#shopName').value.trim();if(!name)return;const item=x||{id:uid(),createdAt:Date.now(),done:false,cycle:'monthly'};Object.assign(item,{name,qty:dlg.querySelector('#shopQty').value.trim(),unit:dlg.querySelector('#shopUnit').value,category:dlg.querySelector('#shopCategory').value,expectedValue:dlg.querySelector('#shopExpected').value.trim(),source:dlg.querySelector('#shopSource').value.trim()||'Manual'});if(!x)all.push(item);saveSharedShopping(all);dlg.close();if(state.route==='compras')renderShoppingUniversal();};dlg.showModal()}
+function openPurchasedModal(id){const all=loadSharedShopping(),x=all.find(i=>String(i.id)===String(id));if(!x)return;const currentStock=stockForName(x.name),dlg=document.createElement('dialog');dlg.className='study-v10-dialog shop-dialog purchase-done-dialog';dlg.innerHTML=`<form class="study-v10-modal purchase-done-modal" id="purchaseDoneForm"><div class="study-v10-head shop-modal-head purchase-done-head"><div><div class="eyebrow">COMPRA CONCLUÍDA</div><h2>${escapeHtml(x.name)}</h2><p>Registre o que foi comprado. A BERTH.A pode somar essa quantidade ao que você já tem em casa.</p></div><button type="button" class="study-v10-x" data-close aria-label="Fechar">×</button></div><div class="shop-modal-body purchase-done-body"><div class="shopping-modal-grid"><label class="shop-field"><span>Quantidade comprada</span><input id="purchaseQty" inputmode="decimal" value="${escapeHtml(x.qty??'')}" placeholder="Ex.: 2"></label><label class="shop-field"><span>Unidade</span><select id="purchaseUnit"><option value="">Sem unidade</option>${['un','caixa','pacote','pote','garrafa','kg','g','L','ml'].map(u=>`<option ${x.unit===u?'selected':''}>${u}</option>`).join('')}</select></label></div><label class="shop-field shop-field-full"><span>Valor total pago <small>opcional</small></span><input id="purchaseValue" inputmode="decimal" placeholder="0,00" value="${escapeHtml(x.actualValue??'')}"></label><label class="purchase-stock-toggle"><input type="checkbox" id="purchaseToStock" checked><span><strong>Adicionar ao que tenho em casa</strong><small>${currentStock?`Hoje: ${escapeHtml(shopQtyText(currentStock.qty))}${currentStock.unit?` ${escapeHtml(currentStock.unit)}`:''}`:'A BERTH.A cria o saldo deste item no seu estoque.'}</small></span></label></div><div class="modal-actions shop-modal-actions purchase-done-actions"><button type="button" class="secondary" data-close>Cancelar</button><button type="submit" class="primary">Marcar comprado</button></div></form>`;document.body.appendChild(dlg);let cancelled=true;dlg.querySelectorAll('[data-close]').forEach(b=>b.onclick=()=>dlg.close());dlg.addEventListener('close',()=>{if(cancelled){const cb=document.querySelector(`[data-shop-toggle="${CSS.escape(String(id))}"]`);if(cb)cb.checked=false}dlg.remove()});dlg.querySelector('#purchaseDoneForm').onsubmit=e=>{e.preventDefault();x.qty=dlg.querySelector('#purchaseQty').value.trim();x.unit=dlg.querySelector('#purchaseUnit').value;x.actualValue=dlg.querySelector('#purchaseValue').value.trim();x.done=true;x.purchasedAt=Date.now();if(dlg.querySelector('#purchaseToStock')?.checked)addPurchasedToStock(x,x.qty,x.unit);saveSharedShopping(all);cancelled=false;dlg.close();renderShoppingUniversal();};dlg.showModal()}
+function monthKeyNow(){const d=new Date();return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}`}
+function purchasedThisMonth(){const m=monthKeyNow();return loadSharedShopping().filter(x=>x.done&&x.purchasedAt&&new Date(x.purchasedAt).toISOString().slice(0,7)===m)}
+function progressGroup(items){const map=new Map();items.forEach(x=>{const k=shopCategoryLabel(x.category);if(!map.has(k))map.set(k,[]);map.get(k).push(x)});return [...map.entries()].sort((a,b)=>a[0].localeCompare(b[0],'pt-BR'))}
+function progressGoalsStore(){try{return JSON.parse(window.berthaHmlStorage.getItem('bertha.progress-goals.v1')||'{}')||{}}catch{return {}}}
+function progressEngineHistory(){try{return (JSON.parse(window.berthaHmlStorage.getItem('bertha.time-engine.v1')||'{}').history||[])}catch{return []}}
+function progressWeekStart(){const d=new Date();const day=(d.getDay()+6)%7;d.setHours(0,0,0,0);d.setDate(d.getDate()-day);return d.getTime()}
+function progressAreaFromHistory(h){const t=`${h.source||''} ${h.category||''} ${h.title||''} ${h.itemId||''} ${h.plannedItemId||''} ${h.learningKey||''}`.toLowerCase();if(/exerc|exercise|moviment|treino|esteira/.test(t))return'movimento';if(/ritual capilar|ritual/.test(t))return'rituais';if(/autocuidado/.test(t))return'autocuidado';if(/estud/.test(t))return'estudos';if(/casa/.test(t))return'casa';if(/crefito|trabalho|bec|tiktok/.test(t))return'trabalho';if(/projeto|criaç|ideia/.test(t))return'projetos';if(/alimenta|refei|comida/.test(t))return'alimentacao';return'outros'}
+function progressGoalSummary(area,g){if(!g)return'';const nf=v=>String(v).replace('.',',');if(area==='movimento'){const a=[];if(g.sessionsPerWeek)a.push(`${nf(g.sessionsPerWeek)} sessões/sem`);if(g.minutesPerWeek)a.push(`${nf(g.minutesPerWeek)} min/sem`);return a.join(' · ')}if(area==='alimentacao'&&g.adherencePercent)return`${nf(g.adherencePercent)}% do planejamento`;if(area==='autocuidado'&&g.sessionsPerWeek)return`${nf(g.sessionsPerWeek)} momentos/sem`;if(area==='estudos'&&g.hoursPerWeek)return`${nf(g.hoursPerWeek)} h/sem`;if(area==='projetos'&&g.onTimePercent)return`${nf(g.onTimePercent)}% no prazo`;if(area==='trabalho'&&g.prioritiesPerWeek)return`${nf(g.prioritiesPerWeek)} prioridades/sem`;if(area==='casa'&&g.routinesPerWeek)return`${nf(g.routinesPerWeek)} rotinas/sem`;if(area==='rituais'&&g.sessionsPerWeek)return`${nf(g.sessionsPerWeek)} rituais/sem`;return''}
+function progressActualSummary(area,g,arr){const mins=arr.reduce((s,x)=>s+(+x.realMinutes||0),0),n=arr.length;if(area==='movimento')return g?`${n}${g.sessionsPerWeek?`/${g.sessionsPerWeek}`:''} ${n===1?'sessão':'sessões'}${g.minutesPerWeek?` · ${mins}/${g.minutesPerWeek} min`:mins?` · ${mins} min`:''}`:`${n} sessão${n===1?'':'ões'} · ${mins} min`;if(area==='estudos')return`${(mins/60).toFixed(1).replace('.',',')}${g?.hoursPerWeek?`/${String(g.hoursPerWeek).replace('.',',')}`:''} h`;if(['autocuidado','rituais'].includes(area))return`${n}${g?.sessionsPerWeek?`/${g.sessionsPerWeek}`:''} realizado${n===1?'':'s'}`;if(area==='trabalho')return`${n}${g?.prioritiesPerWeek?`/${g.prioritiesPerWeek}`:''} conclusão${n===1?'':'ões'}`;if(area==='casa')return`${n}${g?.routinesPerWeek?`/${g.routinesPerWeek}`:''} rotina${n===1?'':'s'}`;if(area==='projetos')return n?`${n} atividade${n===1?'':'s'} de projeto`:'Ainda sem conclusão';if(area==='alimentacao'){const meals=arr.filter(x=>x.activityType!=='foodPrep'),preps=arr.filter(x=>x.activityType==='foodPrep');if(!meals.length&&!preps.length)return'Nenhum registro';const bits=[];if(meals.length){const planned=meals.filter(x=>x.mealSource==='planned').length,pct=Math.round(planned/meals.length*100),known=meals.filter(x=>Number.isFinite(+x.kcal)),kcal=known.reduce((s,x)=>s+(+x.kcal||0),0);bits.push(`${pct}% conforme planejado · ${meals.length} ${meals.length===1?'refeição':'refeições'}`);if(known.length)bits.push(`${Math.round(kcal)} kcal${known.length<meals.length?' parciais':''}`);const pKnown=meals.filter(x=>Number.isFinite(+x.protein)),protein=pKnown.reduce((sum,x)=>sum+(+x.protein||0),0);if(pKnown.length)bits.push(`${String(Math.round(protein*10)/10).replace('.',',')} g proteína${pKnown.length<meals.length?' parcial':''}`)}if(preps.length)bits.push(`${preps.length} preparo${preps.length===1?'':'s'}`);return bits.join(' · ');}return`${n} realizado${n===1?'':'s'}`}
+function progressFinanceRow(){const d=loadFin(),month=finCurrentMonth(),fixed=finFixedTotal(d),variable=finMonthTotal(d,month),bills=finPlannedMonth(d,month),paid=bills.filter(x=>x.paid),open=bills.filter(x=>!x.paid),covered=finPersonal(d.excluded).reduce((sum,x)=>sum+Number(x.value||0),0),remaining=Number(d.income||0)-fixed-variable;return `<details class="progress-category"><summary class="progress-category-head"><strong>Financeiro</strong><b>R$ ${money(remaining)} disponíveis</b></summary><small>${paid.length}/${bills.length} contas previstas pagas · realizado R$ ${money(variable)}</small><div class="progress-detail"><div><span>Orçamento base</span><span>R$ ${money(fixed)}</span></div><div><span>Gastos registrados no mês</span><span>R$ ${money(variable)}</span></div><div><span>Contas previstas pendentes</span><span>${open.length} · R$ ${money(open.reduce((sum,x)=>sum+x.expected,0))}</span></div><div><span>Despesas cobertas hoje</span><span>R$ ${money(covered)}</span></div></div></details>`}
+function progressFoodCaloriesByDay(arr){
+ const meals=arr.filter(x=>x.activityType!=='foodPrep'),map=new Map();
+ meals.forEach(h=>{const ts=+h.endedAt||+h.startedAt||0,day=new Date(ts);if(!ts||Number.isNaN(day.getTime()))return;const key=`${day.getFullYear()}-${String(day.getMonth()+1).padStart(2,'0')}-${String(day.getDate()).padStart(2,'0')}`;if(!map.has(key))map.set(key,{date:day,items:[]});map.get(key).items.push(h)});
+ return [...map.values()].sort((a,b)=>b.date-a.date).map(g=>{const known=g.items.filter(x=>Number.isFinite(+x.kcal)),total=Math.round(known.reduce((s,x)=>s+(+x.kcal||0),0)),partial=known.length<g.items.length,pKnown=g.items.filter(x=>Number.isFinite(+x.protein)),protein=Math.round(pKnown.reduce((s,x)=>s+(+x.protein||0),0)*10)/10,proteinPartial=pKnown.length<g.items.length;const sources=[...new Set(g.items.map(x=>x.kcalSource).filter(Boolean))];return {date:g.date,total,known:known.length,count:g.items.length,partial,sources,protein,proteinKnown:pKnown.length,proteinPartial};});
+}
+function progressFoodExtraDetail(arr){const days=progressFoodCaloriesByDay(arr);if(!days.length)return'';return `<div class="progress-food-calories"><strong>Consumo registrado por dia</strong>${days.map(d=>`<div class="progress-food-kcal-row"><span>${d.date.toLocaleDateString('pt-BR',{weekday:'short',day:'2-digit',month:'2-digit'})}</span><span>${d.known?`${d.total} kcal${d.partial?' · parcial':''}`:'Sem kcal calculáveis'}${d.proteinKnown?` · ${String(d.protein).replace('.',',')} g proteína${d.proteinPartial?' parcial':''}`:''}</span><small>Fonte: ${escapeHtml(d.sources.length?d.sources.join(' · '):'sem informação nutricional suficiente')}</small></div>`).join('')}</div>`}
+function ensureProgressStyles(){if(document.getElementById('bertha-progress-styles-v181'))return;const st=document.createElement('style');st.id='bertha-progress-styles-v181';st.textContent=`
+/* v2.8.181 — Meu Progresso · refinamento visual homologação */
+.progress-page{padding-bottom:24px}
+.progress-hero{margin-bottom:23px!important;min-height:158px;padding:22px 23px 20px!important;background:radial-gradient(circle at 18% 2%,rgba(255,255,255,.60),transparent 46%),linear-gradient(132deg,rgba(250,226,219,.78) 0%,rgba(247,226,235,.76) 36%,rgba(233,228,248,.76) 68%,rgba(221,238,248,.76) 100%)!important;border-color:rgba(103,86,111,.055)!important;box-shadow:0 8px 26px rgba(67,55,73,.025)!important}
+.progress-hero:after{display:none!important}
+.progress-hero .eyebrow{color:#9f7483!important;letter-spacing:.20em!important}
+.progress-hero h2{max-width:335px;font-size:24px!important;line-height:1.08!important;font-weight:470!important;letter-spacing:-.034em!important;margin:7px 0 10px!important;color:#443e47!important}
+.progress-hero p{font-size:13.5px!important;color:#8f858f!important;line-height:1.42!important}
+.progress-hero-mark{position:absolute;right:22px;top:24px;width:38px;height:38px;color:rgba(81,80,88,.25);z-index:1;display:grid;place-items:center}
+.progress-hero-mark svg{width:31px;height:31px;fill:none;stroke:currentColor;stroke-width:.82!important;stroke-linecap:round;stroke-linejoin:round}
+.progress-section-head{display:flex;align-items:flex-end;justify-content:space-between;gap:12px;margin:0 3px 12px}
+.progress-section-head>div>span{display:block;font-size:10px;letter-spacing:.20em;font-weight:760;color:#9f7583;margin-bottom:5px}
+.progress-section-head h3{margin:0;font-size:17.5px;line-height:1.15;color:#4d4750;font-weight:630;letter-spacing:-.012em}
+.progress-section-head>small{font-size:11px;color:#9c929c;padding-bottom:2px;font-weight:450}
+.progress-week{margin-bottom:25px}
+.progress-area-list{display:grid;gap:9px}
+.progress-category.progress-area-card,.progress-practical-list>.progress-category{margin:0!important;padding:0!important;border-radius:19px!important;background:rgba(255,249,241,.94)!important;border:1px solid rgba(112,91,115,.06)!important;box-shadow:0 4px 14px rgba(72,57,76,.018)!important;overflow:hidden}
+.progress-area-card .progress-category-head,.progress-practical-list .progress-category-head{list-style:none;display:flex;align-items:center;justify-content:space-between;gap:14px;padding:14px 15px!important;cursor:pointer}
+.progress-area-card .progress-category-head::-webkit-details-marker,.progress-practical-list .progress-category-head::-webkit-details-marker{display:none}
+.progress-area-copy{min-width:0;display:flex;flex-direction:column;gap:4px}
+.progress-area-name{font-size:15px;font-weight:690;color:#49424b}
+.progress-area-copy small{font-size:11.5px;color:#948993;line-height:1.25}
+.progress-area-result{display:flex;align-items:center;gap:9px;flex:0 0 auto;max-width:48%;text-align:right}
+.progress-area-result b{font-size:13.5px;line-height:1.22;color:#766879;font-weight:680}
+.progress-area-result i,.progress-purchases summary i{font-style:normal;color:#9a8f99;font-size:17px;transition:transform .18s ease}
+.progress-area-card[open] .progress-area-result i,.progress-purchases[open] summary i{transform:rotate(180deg)}
+.progress-area-card .progress-detail,.progress-practical-list .progress-detail{margin:0 16px 14px!important;padding:12px 0 0!important;border-top:1px solid rgba(102,82,107,.07)!important}
+.progress-area-card .progress-detail>div,.progress-practical-list .progress-detail>div{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:10px;padding:7px 0;font-size:11.5px;color:#7e747f}
+.progress-area-card .progress-detail>div span:last-child,.progress-practical-list .progress-detail>div span:last-child{text-align:right;color:#948995}
+.progress-food-calories{margin:0 16px 14px;padding-top:10px;border-top:1px solid rgba(102,82,107,.07)}
+.progress-food-calories>strong{font-size:12px;color:#5d515f}
+.progress-food-kcal-row{display:grid;grid-template-columns:1fr auto;gap:3px 10px;padding:7px 0;font-size:11px;color:#7e747f}
+.progress-food-kcal-row small{grid-column:1/-1;color:#a095a0}
+.progress-empty{padding:19px 18px;border-radius:20px;background:rgba(255,249,241,.78);border:1px solid rgba(112,91,115,.055);box-shadow:0 5px 18px rgba(72,57,76,.015);text-align:center}
+.progress-empty strong,.progress-empty span{display:block}.progress-empty strong{color:#514a53;font-size:13.5px;font-weight:620}.progress-empty span{color:#948a94;font-size:11.7px;margin-top:6px;line-height:1.45}
+.progress-practical{margin-top:6px}
+.progress-practical-list{display:grid;gap:9px}
+.progress-practical-list>.progress-category>small{display:block;padding:0 16px 12px;color:#928793;font-size:11.5px}
+.progress-shopping-summary{display:grid;grid-template-columns:1fr 1fr;gap:9px;margin-top:9px}
+.progress-shopping-summary>div{padding:13px 15px;border-radius:20px;background:rgba(255,249,241,.88);border:1px solid rgba(112,91,115,.055);box-shadow:0 5px 16px rgba(72,57,76,.018)}
+.progress-shopping-summary span{display:block;color:#8d828d;font-size:11.5px}.progress-shopping-summary b{display:block;margin-top:4px;color:#493f4c;font-size:19px;line-height:1.1}
+.progress-purchases{margin-top:9px;border-radius:20px;background:rgba(255,249,241,.88);border:1px solid rgba(112,91,115,.055);box-shadow:0 5px 16px rgba(72,57,76,.016);overflow:hidden}
+.progress-purchases>summary{list-style:none;display:flex;justify-content:space-between;align-items:center;gap:12px;padding:15px 16px;cursor:pointer}.progress-purchases>summary::-webkit-details-marker{display:none}
+.progress-purchases>summary span{display:flex;flex-direction:column;gap:3px}.progress-purchases>summary strong{font-size:14.5px;color:#463e49}.progress-purchases>summary small{font-size:11.5px;color:#948994;text-transform:capitalize}
+.progress-purchases-body{padding:0 16px 14px;border-top:1px solid rgba(102,82,107,.07)}
+.progress-purchase-group{padding:12px 0 5px;border-bottom:1px solid rgba(102,82,107,.06)}.progress-purchase-group:last-child{border-bottom:0}
+.progress-purchase-group-head,.progress-purchase-row{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:10px}.progress-purchase-group-head{font-size:12px;color:#5a4f5c;margin-bottom:5px}.progress-purchase-row{padding:5px 0;font-size:11px;color:#847985}.progress-purchase-row span:last-child{text-align:right;color:#9a8f99}
+@media(max-width:480px){.progress-hero{min-height:158px}.progress-hero h2{font-size:24px!important}.progress-area-result{max-width:46%}.progress-shopping-summary{grid-template-columns:1fr 1fr}}
+`;document.head.appendChild(st)}
+
+function renderProgressOverview(){
+ ensureShoppingStyles();
+ ensureProgressStyles();
+ const items=purchasedThisMonth(),groups=progressGroup(items),total=items.reduce((sum,x)=>sum+shopMoney(x.actualValue),0);
+ const goals=progressGoalsStore(),week=progressEngineHistory().filter(h=>h.status==='done'&&(+h.endedAt||+h.startedAt||0)>=progressWeekStart());
+ const areas=[['movimento','Exercícios'],['alimentacao','Alimentação'],['autocuidado','Autocuidado'],['estudos','Estudos'],['projetos','Projetos'],['trabalho','Trabalho'],['casa','Casa'],['rituais','Rituais']];
+ const lifeRows=areas.map(([id,label])=>{
+   const arr=week.filter(h=>progressAreaFromHistory(h)===id),g=goals[id];
+   if(!g&&!arr.length)return'';
+   const expected=progressGoalSummary(id,g),actual=progressActualSummary(id,g,arr);
+   const detail=arr.length?arr.map(h=>`<div><span>${escapeHtml(h.title||label)}</span><span>${id==='alimentacao'?`${h.activityType==='foodPrep'?'Preparo':(h.mealSource==='planned'?'Como planejado':'Substituição')} · ${new Date(h.endedAt||h.startedAt).toLocaleDateString('pt-BR')}`:`${+h.realMinutes||0} min · ${new Date(h.endedAt||h.startedAt).toLocaleDateString('pt-BR')}`}</span></div>`).join(''):`<div><span>${id==='alimentacao'?'Nenhuma refeição registrada nesta semana.':'Nenhuma conclusão registrada nesta semana.'}</span><span>—</span></div>`;
+   return `<details class="progress-category progress-area-card" data-progress-area="${id}"><summary class="progress-category-head"><span class="progress-area-copy"><span class="progress-area-name">${escapeHtml(label)}</span><small>${g&&expected?`Referência · ${escapeHtml(expected)}`:'Referência ainda não definida'}</small></span><span class="progress-area-result"><b>${escapeHtml(actual)}</b><i aria-hidden="true">⌄</i></span></summary><div class="progress-detail">${detail}</div>${id==='alimentacao'?progressFoodExtraDetail(arr):''}</details>`
+ }).join('');
+ const finance=progressFinanceRow();
+ app.innerHTML=`<div class="progress-page"><section class="shop-hero progress-hero"><div><div class="eyebrow">MEU PROGRESSO</div><h2>Everything in its place.<br>Life in motion.</h2><p>Você vive. A BERTH.A acompanha.</p></div><span class="progress-hero-mark" aria-hidden="true">${shopSvg('trend')}</span></section><section class="progress-week"><div class="progress-section-head"><div><span>ESTA SEMANA</span><h3>Como estou caminhando?</h3></div><small>Esperado × realizado</small></div><div class="progress-area-list">${lifeRows||'<div class="progress-empty"><strong>Seu progresso começa no que você vive.</strong><span>Defina referências no Meu Dia Ideal e conclua normalmente suas atividades.</span></div>'}</div></section><section class="progress-practical"><div class="progress-section-head"><div><span>VIDA PRÁTICA</span><h3>O que também está andando</h3></div></div><div class="progress-practical-list">${finance}</div><div class="progress-shopping-summary"><div><span>Itens comprados no mês</span><b>${items.length}</b></div><div><span>Valor registrado</span><b>${shopMoneyBR(total)}</b></div></div><details class="progress-purchases"><summary><span><strong>Compras do mês</strong><small>${new Date().toLocaleDateString('pt-BR',{month:'long',year:'numeric'})}</small></span><i aria-hidden="true">⌄</i></summary><div class="progress-purchases-body">${groups.length?groups.map(([cat,arr])=>{const subtotal=arr.reduce((sum,x)=>sum+shopMoney(x.actualValue),0);const consolidated=new Map();arr.forEach(x=>{const k=String(x.name).trim().toLowerCase();if(!consolidated.has(k))consolidated.set(k,{name:x.name,qty:0,unit:x.unit||'',value:0,count:0});const z=consolidated.get(k);const q=Number(String(x.qty||'').replace(',','.'));if(Number.isFinite(q)&&q)z.qty+=q;z.value+=shopMoney(x.actualValue);z.count++});return `<div class="progress-purchase-group"><div class="progress-purchase-group-head"><strong>${escapeHtml(cat)}</strong><b>${shopMoneyBR(subtotal)}</b></div>${[...consolidated.values()].map(z=>`<div class="progress-purchase-row"><span>${escapeHtml(z.name)}</span><span>${z.qty?`${String(z.qty).replace('.',',')} ${escapeHtml(z.unit)}`:`${z.count} compra${z.count===1?'':'s'}`} · ${shopMoneyBR(z.value)}</span></div>`).join('')}</div>`}).join(''):'<div class="progress-empty compact"><strong>Ainda não há compras registradas neste mês.</strong><span>As compras reais aparecem aqui quando forem concluídas.</span></div>'}</div></details></section></div>`
+}
+
+function healthStatus(item){if(!item.reorderDate)return item.usageMode==='prazo'?'Uso com prazo':'Uso contínuo';const t=new Date();t.setHours(0,0,0,0);const d=new Date(item.reorderDate+'T12:00:00');const days=Math.ceil((d-t)/86400000);if(days<0)return 'Reposição atrasada';if(days===0)return 'Repor hoje';if(days<=7)return `Repor em ${days}d`;return `Próxima reposição ${formatDate(item.reorderDate)}`}
+function renderHealthMini(){const h=loadHealth();return `<section class="day-section home-health-mini"><div class="section-head"><h2>Saúde</h2><button type="button" class="secondary" id="healthAddHome">Adicionar</button></div><div class="card health-mini-list">${h.length?h.map(x=>`<div class="health-mini-row"><div><strong>${escapeHtml(x.name)}</strong><small>${escapeHtml(x.type||'Medicamento')} · ${escapeHtml(healthStatus(x))}${shopMoney(x.expectedValue)?` · ${shopMoneyBR(x.expectedValue)}`:''}</small></div><div class="health-mini-actions"><button type="button" data-health-buy="${x.id}">À lista</button><button type="button" data-health-edit="${x.id}">Editar</button></div></div>`).join(''):'<div class="empty compact"><strong>Nenhum item cadastrado.</strong><span>Use apenas para medicamentos e suplementos que realmente precisam de acompanhamento.</span></div>'}</div></section>`}
+function openHealthModal(id=null){const all=loadHealth(),x=id?all.find(i=>String(i.id)===String(id)):null;const dlg=document.createElement('dialog');dlg.className='study-v10-dialog';dlg.innerHTML=`<form class="study-v10-modal" id="healthForm"><div class="study-v10-head"><div><div class="eyebrow">SAÚDE</div><h2>${x?'Editar item':'Novo item'}</h2></div><button type="button" class="study-v10-x" data-close>×</button></div><label>Nome<input id="healthName" required value="${escapeHtml(x?.name||'')}" placeholder="Medicamento ou suplemento"></label><div class="shopping-modal-grid"><label>Tipo<select id="healthType"><option ${x?.type==='Medicamento'?'selected':''}>Medicamento</option><option ${x?.type==='Suplemento'?'selected':''}>Suplemento</option></select></label><label>Uso<select id="healthUsage"><option value="continuo" ${x?.usageMode!=='prazo'?'selected':''}>Uso contínuo</option><option value="prazo" ${x?.usageMode==='prazo'?'selected':''}>Uso com prazo</option></select></label><label>Próxima reposição<input id="healthReorder" type="date" value="${escapeHtml(x?.reorderDate||'')}"></label><label>Valor previsto<input id="healthValue" inputmode="decimal" value="${escapeHtml(x?.expectedValue??'')}" placeholder="0,00"></label></div><div class="modal-actions">${x?'<button type="button" class="secondary" id="healthDelete">Excluir</button>':''}<div class="grow"></div><button type="button" class="secondary" data-close>Cancelar</button><button type="submit" class="primary">Salvar</button></div></form>`;document.body.appendChild(dlg);dlg.querySelectorAll('[data-close]').forEach(b=>b.onclick=()=>dlg.close());dlg.addEventListener('close',()=>dlg.remove());dlg.querySelector('#healthDelete')?.addEventListener('click',()=>{if(confirm('Excluir este item de Saúde?')){saveHealth(all.filter(i=>String(i.id)!==String(id)));dlg.close();if(location.hash==='#meu-dia'||!location.hash)window.render?.()}});dlg.querySelector('#healthForm').onsubmit=e=>{e.preventDefault();const item=x||{id:uid(),createdAt:Date.now()};Object.assign(item,{name:dlg.querySelector('#healthName').value.trim(),type:dlg.querySelector('#healthType').value,usageMode:dlg.querySelector('#healthUsage').value,reorderDate:dlg.querySelector('#healthReorder').value,expectedValue:dlg.querySelector('#healthValue').value.trim()});if(!item.name)return;if(!x)all.push(item);saveHealth(all);dlg.close();if(location.hash==='#meu-dia'||!location.hash)window.render?.()};dlg.showModal()}
+function bindHealthMini(){document.querySelector('#healthAddHome')?.addEventListener('click',()=>openHealthModal());document.querySelectorAll('[data-health-edit]').forEach(b=>b.onclick=()=>openHealthModal(b.dataset.healthEdit));document.querySelectorAll('[data-health-buy]').forEach(b=>b.onclick=()=>{const x=loadHealth().find(i=>String(i.id)===String(b.dataset.healthBuy));if(!x)return;const items=loadSharedShopping(),key=x.name.trim().toLowerCase();if(!items.some(i=>!i.done&&i.name.trim().toLowerCase()===key)){items.push({id:uid(),name:x.name,category:'Saúde',source:x.type||'Saúde',expectedValue:x.expectedValue||'',cycle:'monthly',createdAt:Date.now(),done:false});saveSharedShopping(items)}b.textContent='Na lista';b.disabled=true;})}
+window.BerthaShopping={pendingCount:()=>shoppingPending().length,renderHealthMini,bindHealthMini,openHealthModal};
+
+const REC_KEY="minha-vida.receitas.v1";
+const RECIPES=[
+ {id:"frango-assado",name:"Frango assado com batatas",cat:"Frango",yield:"4 porções",prep:"Produção quinzenal",finish:"Finalizar com arroz + salada",ingredients:["1 kg de coxa/sobrecoxa ou peito em pedaços","600 g de batatas","4 dentes de alho","1 cebola","Azeite, sal, páprica e ervas"],steps:["Tempere o frango e deixe tomar gosto.","Corte as batatas e disponha com o frango em assadeira.","Asse até dourar e cozinhar por completo, virando se necessário.","Porcione com o caldo da assadeira; deixe salada e itens frescos para o dia."]},
+ {id:"strogonoff",name:"Strogonoff de frango",cat:"Frango",yield:"4 porções",prep:"Produção quinzenal",finish:"Servir com arroz + batata palha",ingredients:["700 g de peito de frango em cubos","1 cebola","2 dentes de alho","200 g de creme de leite","Molho de tomate ou passata","Mostarda, sal e pimenta"],steps:["Doure o frango em etapas.","Refogue cebola e alho e devolva o frango.","Junte molho e mostarda; cozinhe até ficar macio.","Finalize com creme de leite sem ferver demais. Batata palha só na hora de servir."]},
+ {id:"alcatra",name:"Bife de alcatra acebolado",cat:"Carne bovina",yield:"3–4 porções",prep:"Preparar próximo ao consumo",finish:"Servir com purê + brócolis",ingredients:["600–700 g de bifes de alcatra","2 cebolas","Alho, sal e pimenta","Manteiga ou azeite"],steps:["Tempere os bifes pouco antes de preparar.","Sele em frigideira bem quente sem sobrecarregar.","Reserve e doure as cebolas na mesma frigideira.","Volte os bifes rapidamente para envolver no sabor."]},
+ {id:"ragu",name:"Ragu de carne",cat:"Carne bovina",yield:"4 porções",prep:"Congelar em pote de 600–700 g",finish:"Servir com arroz ou massa + legumes",ingredients:["700 g de carne bovina em cubos ou moída","1 cebola","2 dentes de alho","400 g de tomate/passata","Cenoura opcional","Sal, pimenta e ervas"],steps:["Doure bem a carne.","Refogue cebola, alho e cenoura.","Junte tomate e cozinhe em fogo baixo até encorpar.","Esfrie antes de porcionar e congelar."]},
+ {id:"hamburguer",name:"Hambúrguer caseiro",cat:"Carne bovina",yield:"1 unidade/pessoa",prep:"Modelar e congelar",finish:"Servir com batata + salada",ingredients:["150–180 g de carne moída por hambúrguer","Sal e pimenta","Queijo opcional"],steps:["Divida a carne sem compactar demais.","Modele discos e faça leve cavidade no centro.","Congele separados por papel próprio, se desejar.","Tempere com sal só ao grelhar e cozinhe até o ponto desejado."]},
+ {id:"musculo",name:"Carne de panela com músculo",cat:"Carne bovina",yield:"4 porções",prep:"Produção quinzenal",finish:"Servir com arroz + feijão + legumes",ingredients:["800 g de músculo em cubos","1 cebola","3 dentes de alho","2 tomates","Cenoura opcional","Sal, pimenta e louro"],steps:["Sele o músculo na panela de pressão.","Refogue os aromáticos e junte tomate.","Adicione água suficiente e cozinhe na pressão até ficar macio.","Ajuste o caldo e porcione após esfriar."]},
+ {id:"panquecas",name:"Panquecas salgadas de carne e queijo",cat:"Coringas",yield:"8–10 unidades",prep:"Pode congelar prontas",finish:"Aquecer e servir com salada",ingredients:["2 ovos","2 xícaras de leite","1½ xícara de farinha","500 g de carne moída","Queijo","Molho de tomate"],steps:["Bata a massa e faça discos finos em frigideira.","Prepare o recheio de carne moída.","Recheie, enrole e cubra com molho e queijo.","Congele em porções; aqueça até o centro estar bem quente."]},
+ {id:"frango-grelhado",name:"Filé de frango grelhado",cat:"Frango",yield:"3–4 porções",prep:"Preparar próximo ao consumo",finish:"Servir com arroz + feijão + legumes",ingredients:["700 g de filé de frango","Alho","Limão opcional","Sal, pimenta e páprica","Azeite"],steps:["Tempere o frango.","Aqueça bem a frigideira.","Grelhe sem movimentar excessivamente e vire para dourar o outro lado.","Descanse alguns minutos antes de cortar."]},
+ {id:"frango-desfiado",name:"Frango desfiado cremoso para Rap10",cat:"Frango",yield:"3–4 porções",prep:"Congelar o recheio",finish:"Aquecer + Rap10 + salada fresca",ingredients:["600 g de peito de frango cozido e desfiado","1 cebola","2 dentes de alho","Requeijão ou creme de ricota/cottage","Tomate ou passata","Temperos"],steps:["Refogue cebola e alho.","Junte frango e tomate e deixe reduzir.","Finalize com o ingrediente cremoso.","Congele só o recheio; monte o Rap10 na hora."]},
+ {id:"risoto",name:"Risoto rápido de frango/carne",cat:"Coringas",yield:"3–4 porções",prep:"Preparar no dia",finish:"Servir com salada",ingredients:["2 xícaras de arroz já cozido ou arroz para risoto","300 g de frango ou carne pronta","Caldo","Queijo","Legumes opcionais"],steps:["Aqueça a proteína e os legumes.","Junte o arroz e um pouco de caldo.","Mexa até ficar cremoso.","Finalize com queijo e sirva imediatamente."]},
+ {id:"porco",name:"Porco assado",cat:"Porco",yield:"3–4 porções",prep:"Produção quinzenal",finish:"Servir com acompanhamentos",ingredients:["800 g de lombo/pernil suíno","Alho","Limão ou laranja","Sal, pimenta e ervas","Azeite"],steps:["Tempere a carne e deixe marinar se possível.","Sele ou leve diretamente ao forno conforme o corte.","Asse até ficar cozido e dourado, sem ressecar.","Fatie depois de descansar e porcione."]},
+ {id:"carne-legumes",name:"Carne moída com legumes",cat:"Carne bovina",yield:"3–4 porções",prep:"Produção quinzenal",finish:"Servir com arroz + feijão",ingredients:["600 g de carne moída","1 cebola","2 dentes de alho","Cenoura e abobrinha","Tomate","Sal e temperos"],steps:["Doure a carne até perder o excesso de líquido.","Junte cebola e alho.","Adicione legumes e tomate e cozinhe sem desmanchar demais.","Esfrie e porcione."]},
+ {id:"frango-gratinado",name:"Frango gratinado com queijo",cat:"Frango",yield:"4 porções",prep:"Montar e congelar se desejado",finish:"Gratinar antes de servir",ingredients:["600 g de frango cozido/desfiado","Molho de tomate ou creme leve","200 g de queijo","Temperos"],steps:["Prepare o frango temperado.","Coloque em refratário com o molho.","Cubra com queijo.","Gratine até borbulhar e dourar."]},
+ {id:"almondegas",name:"Almôndegas",cat:"Carne bovina",yield:"12–20 unidades",prep:"Congelar com molho",finish:"Servir com acompanhamento",ingredients:["600 g de carne moída","1 ovo","Aveia ou farinha de rosca","Alho e cebola","Molho de tomate","Sal e temperos"],steps:["Misture sem sovar excessivamente.","Modele as almôndegas.","Doure no forno ou frigideira.","Finalize no molho e congele já porcionado."]},
+ {id:"coxa-sobrecoxa",name:"Coxa/sobrecoxa",cat:"Frango",yield:"Conforme compra",prep:"Produção quinzenal",finish:"Finalizar no forno",ingredients:["Coxas/sobrecoxas","Alho","Limão opcional","Páprica, sal e pimenta","Azeite"],steps:["Tempere com antecedência.","Disponha sem amontoar.","Asse até dourar e cozinhar por completo.","Porcione com os próprios sucos."]},
+ {id:"arroz-forno",name:"Arroz de forno com frango",cat:"Coringas",yield:"4 porções",prep:"Montar e congelar antes de gratinar",finish:"Gratinar até aquecer e dourar",ingredients:["3 xícaras de arroz cozido","400 g de frango desfiado","Legumes","Molho ou requeijão","Queijo"],steps:["Misture arroz, frango, legumes e molho.","Coloque em refratário.","Cubra com queijo.","Congele montado ou gratine para servir."]},
+ {id:"porco-rap10",name:"Porco desfiado com Rap10",cat:"Porco",yield:"3–4 porções",prep:"Congelar apenas o porco",finish:"Aquecer + Rap10 + queijo + salada",ingredients:["600 g de porco cozido e desfiado","Cebola","Alho","Tomate/passata","Rap10","Queijo e salada"],steps:["Refogue o porco desfiado com os aromáticos e tomate.","Deixe o recheio úmido, mas sem excesso de líquido.","Congele em porções.","Aqueça e monte o Rap10 somente na hora."]},
+ {id:"fraldinha",name:"Churrasco de fraldinha",cat:"Carne bovina",yield:"3–4 porções",prep:"Congelar a peça crua",finish:"Descongelar na geladeira + churrasqueira",ingredients:["1 peça de fraldinha","Sal grosso ou sal de parrilla","Pimenta opcional"],steps:["Descongele completamente na geladeira.","Tempere próximo ao preparo.","Asse/grelhe controlando o ponto.","Descanse e corte contra as fibras."]},
+ {id:"crepioca",name:"Crepioca de cottage",cat:"Café da manhã",yield:"1 porção",prep:"Preparar na hora",finish:"Ovo + tapioca + cottage",ingredients:["1 ovo","2 colheres de sopa de tapioca","2 colheres de sopa de cottage","Sal"],steps:["Misture ovo e tapioca.","Despeje em frigideira antiaderente.","Vire quando firmar.","Recheie com cottage e dobre."]},
+ {id:"cuscuz",name:"Cuscuz com queijo",cat:"Café da manhã",yield:"3 porções",prep:"Preparar na hora",finish:"Servir com queijo e, se desejar, manteiga",ingredients:["1½ xícara de flocão","Água para hidratar","Sal","Queijo"],steps:["Hidrate o flocão com água e sal por alguns minutos.","Cozinhe na cuscuzeira até ficar macio.","Sirva com queijo."]},
+ {id:"pico-morango",name:"Picolé de morango cremoso",cat:"Picolé",yield:"6–8 unidades",prep:"Produção quinzenal",finish:"Manter congelado",ingredients:["300 g de morango","Iogurte natural ou leite","Adoçante/açúcar opcional"],steps:["Bata os ingredientes.","Distribua nas formas.","Congele até firmar."]},
+ {id:"pico-coco",name:"Picolé de coco",cat:"Picolé",yield:"6–8 unidades",prep:"Produção quinzenal",finish:"Manter congelado",ingredients:["Leite de coco","Leite ou iogurte","Coco ralado","Adoçante/açúcar opcional"],steps:["Misture ou bata os ingredientes.","Distribua nas formas.","Congele até firmar."]},
+ {id:"pico-maracuja",name:"Picolé de maracujá cremoso",cat:"Picolé",yield:"6–8 unidades",prep:"Produção quinzenal",finish:"Manter congelado",ingredients:["Polpa de maracujá","Iogurte ou leite","Adoçante/açúcar opcional"],steps:["Bata os ingredientes, reservando sementes se desejar.","Distribua nas formas.","Congele até firmar."]},
+ {id:"pico-banana",name:"Picolé de banana com canela",cat:"Picolé",yield:"6–8 unidades",prep:"Produção quinzenal",finish:"Manter congelado",ingredients:["3 bananas maduras","Leite ou iogurte","Canela"],steps:["Bata tudo até ficar cremoso.","Distribua nas formas.","Congele até firmar."]}
+];
+
+const RECIPE_CATEGORIES=["Refeições","Carnes & proteínas","Massas & acompanhamentos","Lanches & café da manhã","Sobremesas","Molhos & complementos","Bebidas","Outros"];
+function recipeCategory(r){
+ const c=String(r?.category||r?.cat||"").trim();
+ if(RECIPE_CATEGORIES.includes(c))return c;
+ if(["Frango","Carne bovina","Porco"].includes(c))return "Carnes & proteínas";
+ if(c==="Café da manhã")return "Lanches & café da manhã";
+ if(c==="Picolé")return "Sobremesas";
+ if(c==="Coringas")return "Refeições";
+ return "Outros";
+}
+function loadRec(){try{const d=JSON.parse(window.berthaHmlStorage.getItem(REC_KEY));return {...(d||{}),favorites:Array.isArray(d?.favorites)?d.favorites:[],customRecipes:Array.isArray(d?.customRecipes)?d.customRecipes:[],consumptionLog:Array.isArray(d?.consumptionLog)?d.consumptionLog:[]};}catch{return {favorites:[],customRecipes:[],consumptionLog:[]};}}
+function saveRec(d){window.berthaHmlStorage.setItem(REC_KEY,JSON.stringify(d));}
+function allRecipes(){const d=loadRec(),overrides=new Map((d.customRecipes||[]).map(r=>[String(r.id),r]));const merged=RECIPES.map(base=>overrides.has(String(base.id))?{...base,...overrides.get(String(base.id)),baseRecipe:true}:{...base,baseRecipe:true});for(const r of (d.customRecipes||[]))if(!RECIPES.some(base=>String(base.id)===String(r.id)))merged.push(r);return merged.map(r=>({...r,cat:recipeCategory(r),category:recipeCategory(r)}));}
+function getRecipeById(id){return allRecipes().find(r=>String(r.id)===String(id));}
+function isCustomRecipe(id){return loadRec().customRecipes.some(r=>String(r.id)===String(id));}
+function recipeSearchUrl(r,mode="variations"){const ing=(r.ingredients||[]).slice(0,5).map(x=>x.replace(/^\d+[\d\s½¼¾⅓⅔.,/-]*\s*(kg|g|ml|l|xícara|xícaras|colher|colheres|unidade|unidades)?\s*(de\s+)?/i,"")).join(" ");const q=mode==="ingredients"?`receitas com ${ing}`:`${r.name} receita variações`;return `https://www.google.com/search?q=${encodeURIComponent(q)}`;}
+
+function addSharedShoppingItem(name,source,category="Outros"){
+ name=String(name||"").trim();if(!name)return false;
+ const items=loadSharedShopping();
+ const key=name.toLowerCase();
+ if(!items.some(x=>String(x.name||"").trim().toLowerCase()===key&&!x.done)){
+   items.push({id:uid(),name,source:source||"BERTH.A",category:category==="Alimentos"?"Alimentação":(category||"Outros"),cycle:"monthly",createdAt:Date.now(),done:false,qty:"",unit:"",expectedValue:"",actualValue:"",purchasedAt:null});
+   saveSharedShopping(items);
+ }
+ refreshCasaShoppingUI();
+ const c=document.querySelector('#monthlyShoppingCard');if(c){c.innerHTML=renderMonthlyShopping();bindMonthlyShopping()}
+ return true;
+}
+function openRecipeShoppingDialog(r,context=(state.route==='alimentacao'?'alimentacao':'receitas')){
+ const old=document.querySelector('#recipeShoppingDialog');if(old)old.remove();
+ const ingredients=(r?.ingredients||[]).filter(Boolean);
+ const dlg=document.createElement('dialog');dlg.id='recipeShoppingDialog';dlg.className='study-v10-dialog recipe-dialog recipe-shopping-dialog'+(context==='alimentacao'?' food-context-dialog':'');
+ dlg.innerHTML=`<div class="study-v10-modal"><div class="study-v10-head"><div><div class="eyebrow">LISTA DE COMPRAS</div><h2>Adicionar ingredientes</h2><p>${escapeHtml(r?.name||'Receita')}</p></div><button type="button" class="study-v10-x" data-close>×</button></div>
+ <div class="card"><p class="note">Desmarque o que você já tem em casa.</p><div class="casa-mini-shopping">${ingredients.map((x,i)=>`<div class="casa-mini-shop-row"><label><input type="checkbox" data-recipe-shop-item="${i}" checked><span>${escapeHtml(x)}</span></label></div>`).join('')||'<div class="empty compact"><strong>Sem ingredientes cadastrados.</strong></div>'}</div></div>
+ <div class="modal-actions"><button type="button" class="secondary" data-close>Cancelar</button><div class="grow"></div><button type="button" class="primary" id="confirmRecipeShopping" ${ingredients.length?'':'disabled'}>Adicionar selecionados</button></div></div>`;
+ document.body.appendChild(dlg);
+ const close=()=>dlg.close();dlg.querySelectorAll('[data-close]').forEach(b=>b.onclick=close);dlg.addEventListener('close',()=>dlg.remove());
+ dlg.querySelector('#confirmRecipeShopping')?.addEventListener('click',()=>{
+   const selected=[...dlg.querySelectorAll('[data-recipe-shop-item]:checked')].map(cb=>ingredients[Number(cb.dataset.recipeShopItem)]).filter(Boolean);
+   selected.forEach(x=>addSharedShoppingItem(x,`Receita · ${r.name}`,'Alimentos'));
+   close();
+   const btn=document.querySelector('#recipeToShopping');if(btn)btn.textContent=selected.length?`✓ ${selected.length} ingrediente${selected.length===1?'':'s'} na lista`:'Adicionar ingredientes à lista';
+ });
+ dlg.showModal();
+}
+function openFoodRecipe(id,doing=false,mealId='dinner',context=(state.route==='alimentacao'?'alimentacao':'receitas')){
+ const r=getRecipeById(id);if(!r)return;const old=document.querySelector('#foodRecipeDialog');if(old)old.remove();
+ const dlg=document.createElement('dialog');dlg.id='foodRecipeDialog';dlg.className='study-v10-dialog recipe-dialog'+(context==='alimentacao'?' food-context-dialog':'');
+ const nutriRef=r.nutrition?.reference==='100g'?' / 100 g':r.nutrition?.reference==='portion'?' / porção':'';
+ const kcal=r.nutrition?.kcal?`<span class="recipe-nutri-line">${escapeHtml(r.nutrition.kcal)} kcal${nutriRef}</span>`:'';
+ const protein=r.nutrition?.protein?`<span class="recipe-nutri-line">${escapeHtml(r.nutrition.protein)} g proteínas${nutriRef}</span>`:'';
+ const recipeOnlyActions=context!=='alimentacao';
+ dlg.innerHTML=`<div class="study-v10-modal"><div class="study-v10-head"><div><div class="eyebrow">${escapeHtml(recipeCategory(r))}</div><h2>${escapeHtml(r.name)}</h2><p>${escapeHtml(r.yield||'Rendimento não informado')} · ${escapeHtml(r.prep||'Preparo livre')} ${kcal}${protein}</p></div><button type="button" class="study-v10-x" data-close>×</button></div><div class="card recipe-detail-card"><h3>Ingredientes</h3><ul>${(r.ingredients||[]).map(x=>`<li>${escapeHtml(x)}</li>`).join('')||'<li>Sem ingredientes cadastrados.</li>'}</ul><h3>Modo de preparo</h3><ol>${(r.steps||[]).map(x=>`<li>${escapeHtml(x)}</li>`).join('')||'<li>Sem modo de preparo cadastrado.</li>'}</ol><p><strong>Finalização:</strong> ${escapeHtml(r.finish||'—')}</p>${r.notes?`<p><strong>Observações:</strong> ${escapeHtml(r.notes)}</p>`:''}</div><div class="recipe-modal-actions">${recipeOnlyActions?`<button type="button" class="secondary" id="recipeToShopping">Ingredientes à lista</button><button type="button" class="primary" id="editThisRecipe">Editar</button>`:`<button type="button" class="primary" id="chooseThisFood">${doing?'✓ Comi':'Comi'}</button><button type="button" class="secondary" id="chooseOtherFromRecipe">Escolher outra</button>`}</div></div>`;
+ document.body.appendChild(dlg);const close=()=>dlg.close();dlg.querySelector('[data-close]').onclick=close;dlg.addEventListener('close',()=>dlg.remove());
+ dlg.querySelector('#recipeToShopping')?.addEventListener('click',()=>openRecipeShoppingDialog(r,context));
+ dlg.querySelector('#editThisRecipe')?.addEventListener('click',()=>{close();openRecipeForm(r.id)});
+ dlg.querySelector('#chooseThisFood')?.addEventListener('click',()=>{const st=getTodayMealState(mealId),isPlanned=String(st.plannedRecipe?.id||'')===String(r.id),src=isPlanned?'planned':'chosen';saveTodayMealChoice(mealId,r.id,src);setTodayMealConsumption(mealId,'consumed',r.name,src);close()});
+ dlg.querySelector('#chooseOtherFromRecipe')?.addEventListener('click',()=>{close();openChooseRecipe(mealId,context)});
+ dlg.showModal();
+}
+function openQuickOther(mealId,context='alimentacao'){const dlg=document.createElement('dialog');dlg.className='study-v10-dialog recipe-dialog'+(context==='alimentacao'?' food-context-dialog':'');dlg.innerHTML=`<form class="study-v10-modal" id="quickOtherForm"><div class="study-v10-head"><div><div class="eyebrow">FIZ OUTRA</div><h2>Outra coisa</h2><p>Registre sem precisar transformar em receita.</p></div><button type="button" class="study-v10-x" data-close>×</button></div><label>O que você fez?<input id="quickOtherText" required maxlength="120" placeholder="Ex.: Pão com queijo e café"></label><div class="modal-actions"><button type="button" class="secondary" data-close>Cancelar</button><button type="submit" class="primary">Registrar</button></div></form>`;document.body.appendChild(dlg);dlg.querySelectorAll('[data-close]').forEach(b=>b.onclick=()=>dlg.close());dlg.addEventListener('close',()=>dlg.remove());dlg.querySelector('#quickOtherForm').onsubmit=e=>{e.preventDefault();const text=dlg.querySelector('#quickOtherText').value.trim();if(!text)return;saveTodayMealChoice(mealId,null,'other',text);setTodayMealConsumption(mealId,'consumed',text,'other');dlg.close()};dlg.showModal();}
+function openChooseRecipe(mealId='dinner',context=(state.route==='alimentacao'?'alimentacao':'receitas')){const old=document.querySelector('#chooseFoodDialog');if(old)old.remove();const dlg=document.createElement('dialog');dlg.id='chooseFoodDialog';dlg.className='study-v10-dialog recipe-dialog'+(context==='alimentacao'?' food-context-dialog':'');dlg.innerHTML=`<div class="study-v10-modal"><div class="study-v10-head"><div><div class="eyebrow">FIZ OUTRA</div><h2>O que você fez?</h2><p>Escolha como registrar esta refeição.</p></div><button type="button" class="study-v10-x" data-close>×</button></div><div class="recipe-choice-stack"><button type="button" class="recipe-choice" id="chooseExisting"><span class="recipe-line-icon">⌕</span><span><strong>Buscar nas minhas receitas</strong><small>Escolha uma receita já cadastrada.</small></span></button><button type="button" class="recipe-choice" id="chooseNew"><span class="recipe-line-icon">＋</span><span><strong>Cadastrar nova receita</strong><small>Salva na biblioteca e registra como realizada.</small></span></button><button type="button" class="recipe-choice" id="chooseQuick"><span class="recipe-line-icon">—</span><span><strong>Outra coisa</strong><small>Registre rapidamente sem salvar como receita.</small></span></button></div><div id="chooseExistingWrap" hidden><input id="chooseFoodSearch" placeholder="Buscar nas minhas receitas…"><div class="list" id="chooseFoodList" style="max-height:42vh;overflow:auto;margin-top:10px"></div></div></div>`;document.body.appendChild(dlg);const draw=()=>{const q=(dlg.querySelector('#chooseFoodSearch')?.value||'').toLowerCase();dlg.querySelector('#chooseFoodList').innerHTML=allRecipes().filter(r=>!q||r.name.toLowerCase().includes(q)||recipeCategory(r).toLowerCase().includes(q)||(r.ingredients||[]).join(' ').toLowerCase().includes(q)).map(r=>`<button type="button" class="card recipe-pick" data-choose-food="${r.id}"><span class="eyebrow">${escapeHtml(recipeCategory(r))}</span><strong>${escapeHtml(r.name)}</strong><small>${escapeHtml(r.yield||'Rendimento não informado')}</small></button>`).join('');dlg.querySelectorAll('[data-choose-food]').forEach(b=>b.onclick=()=>{const r=getRecipeById(b.dataset.chooseFood);saveTodayMealChoice(mealId,b.dataset.chooseFood,'alternative');setTodayMealConsumption(mealId,'consumed',r?.name||'Outra receita','alternative');dlg.close()})};dlg.querySelector('[data-close]').onclick=()=>dlg.close();dlg.addEventListener('close',()=>dlg.remove());dlg.querySelector('#chooseExisting').onclick=()=>{dlg.querySelector('.recipe-choice-stack').hidden=true;dlg.querySelector('#chooseExistingWrap').hidden=false;draw()};dlg.querySelector('#chooseFoodSearch').oninput=draw;dlg.querySelector('#chooseNew').onclick=()=>{dlg.close();openRecipeForm(null,{mealId,markDone:true,origin:context})};dlg.querySelector('#chooseQuick').onclick=()=>{dlg.close();openQuickOther(mealId,context)};dlg.showModal();}
+function newRecipeId(){return "custom-"+Date.now().toString(36)+"-"+Math.random().toString(36).slice(2,7);}
+function recipeLines(v){return String(v||"").split(/\n+/).map(x=>x.trim()).filter(Boolean);}
+function openRecipeForm(recipeId=null,context={}){
+ const data=loadRec(); const existing=recipeId?getRecipeById(recipeId):null;
+ const old=document.querySelector('#recipeFormDialog');if(old)old.remove();const dlg=document.createElement('dialog');dlg.id='recipeFormDialog';dlg.className='study-v10-dialog recipe-dialog'+(context?.origin==='alimentacao'?' food-context-dialog':'');const n=existing?.nutrition||{},deletable=!!existing&&isCustomRecipe(existing.id)&&!RECIPES.some(base=>String(base.id)===String(existing.id));
+ dlg.innerHTML=`<form class="study-v10-modal" id="recipeForm"><div class="study-v10-head"><div><div class="eyebrow">RECEITAS</div><h2>${existing?'Editar receita':'Nova receita'}</h2><p>Cadastre uma vez. A BERTH.A reaproveita quando fizer sentido.</p></div><button type="button" class="study-v10-x" data-close>×</button></div><label>Nome da receita<input id="newRecipeName" required maxlength="120" value="${escapeHtml(existing?.name||'')}" placeholder="Ex.: Escondidinho de carne"></label><label>Categoria<select id="newRecipeCategory" required>${RECIPE_CATEGORIES.map(c=>`<option value="${escapeHtml(c)}" ${recipeCategory(existing||{})===c?'selected':''}>${escapeHtml(c)}</option>`).join('')}</select></label><div class="form-grid"><label>Rendimento<input id="newRecipeYield" value="${escapeHtml(existing?.yield||'')}" placeholder="Ex.: 4 porções"></label><label>Preparo / tempo<input id="newRecipePrep" value="${escapeHtml(existing?.prep||'')}" placeholder="Ex.: 40 min"></label></div><label>Ingredientes <span class="muted">(um por linha, com quantidade)</span><textarea id="newRecipeIngredients" rows="6" required placeholder="500 g de carne moída\n1 cebola">${escapeHtml((existing?.ingredients||[]).join('\n'))}</textarea></label><label>Modo de preparo <span class="muted">(um passo por linha)</span><textarea id="newRecipeSteps" rows="6" required>${escapeHtml((existing?.steps||[]).join('\n'))}</textarea></label><label>Finalização<input id="newRecipeFinish" value="${escapeHtml(existing?.finish||'')}" placeholder="Ex.: Servir com salada"></label><div class="recipe-nutrition-box"><div class="recipe-nutrition-head"><span class="recipe-line-icon">◇</span><div><strong>Informação nutricional</strong><small>Opcional. Preencha quando tiver os dados.</small></div></div><div class="form-grid"><label>Referência<select id="newRecipeNutriRef"><option value="100g" ${n.reference==='100g'?'selected':''}>Por 100 g</option><option value="portion" ${n.reference==='portion'?'selected':''}>Por porção</option><option value="whole" ${n.reference==='whole'?'selected':''}>Prato completo</option><option value="ingredient" ${n.reference==='ingredient'?'selected':''}>Ingrediente</option></select></label><label>kcal<input id="newRecipeKcal" inputmode="decimal" value="${escapeHtml(n.kcal||'')}" placeholder="Ex.: 180"></label><label>Proteínas (g)<input id="newRecipeProtein" inputmode="decimal" value="${escapeHtml(n.protein||'')}" placeholder="Ex.: 28"></label></div></div><label>Observações <span class="muted">(opcional)</span><textarea id="newRecipeNotes" rows="3">${escapeHtml(existing?.notes||'')}</textarea></label><div class="modal-actions">${deletable?'<button type="button" class="secondary" id="deleteRecipeBtn">Excluir</button>':''}<div class="grow"></div><button type="button" class="secondary" data-close>Cancelar</button><button type="submit" class="primary">Salvar receita</button></div></form>`;
+ document.body.appendChild(dlg);dlg.querySelectorAll('[data-close]').forEach(b=>b.onclick=()=>dlg.close());dlg.addEventListener('close',()=>dlg.remove());
+ dlg.querySelector('#recipeForm').onsubmit=e=>{e.preventDefault();const name=dlg.querySelector('#newRecipeName').value.trim(),ingredients=recipeLines(dlg.querySelector('#newRecipeIngredients').value),steps=recipeLines(dlg.querySelector('#newRecipeSteps').value);if(!name||!ingredients.length||!steps.length)return;const x=loadRec();const rec={id:existing?.id||newRecipeId(),name,cat:dlg.querySelector('#newRecipeCategory').value,category:dlg.querySelector('#newRecipeCategory').value,yield:dlg.querySelector('#newRecipeYield').value.trim(),prep:dlg.querySelector('#newRecipePrep').value.trim(),finish:dlg.querySelector('#newRecipeFinish').value.trim(),ingredients,steps,notes:dlg.querySelector('#newRecipeNotes').value.trim(),nutrition:{reference:dlg.querySelector('#newRecipeNutriRef').value,kcal:dlg.querySelector('#newRecipeKcal').value.trim(),protein:dlg.querySelector('#newRecipeProtein').value.trim()},custom:true,updatedAt:new Date().toISOString(),createdAt:existing?.createdAt||new Date().toISOString()};const i=x.customRecipes.findIndex(r=>String(r.id)===String(rec.id));if(i>=0)x.customRecipes[i]=rec;else x.customRecipes.push(rec);saveRec(x);if(context?.mealId&&context?.markDone){saveTodayMealChoice(context.mealId,rec.id,'new-recipe');setTodayMealConsumption(context.mealId,'consumed',rec.name,'new-recipe')}dlg.close();if(state.route==='receitas')renderReceitas()};
+ dlg.querySelector('#deleteRecipeBtn')?.addEventListener('click',()=>{if(!confirm('Excluir esta receita?'))return;const x=loadRec();x.customRecipes=x.customRecipes.filter(r=>String(r.id)!==String(existing.id));x.favorites=x.favorites.filter(id=>String(id)!==String(existing.id));saveRec(x);dlg.close();if(state.route==='receitas')renderReceitas()});dlg.showModal();
+}
+function recipeHeroIcon(){return `<svg viewBox="0 0 48 48" aria-hidden="true"><path d="M24 8 39 24 24 40 9 24Z"/><path d="M24 14 33 24 24 34 15 24Z"/></svg>`}
+function recipeMealIcon(){return `<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 8h14M7 12h10M9 16h6"/></svg>`}
+function renderRecipeToday(){const meals=getTodayMeals();return `<section class="recipe-today card"><div class="recipe-today-head"><div><span class="eyebrow">HOJE · ${escapeHtml(foodDayName().toUpperCase())}</span><h3>O que entra no seu dia</h3></div><a href="#meu-dia">Meu Dia →</a></div><div class="recipe-meals">${meals.map(m=>{const selected=getRecipeById(m.log.selectedRecipeId)||m.recipe,name=m.log.otherText||selected?.name||m.name,done=m.log.consumption==='consumed';return `<div class="recipe-meal ${done?'done':''}"><span class="recipe-meal-icon">${recipeMealIcon()}</span><div class="recipe-meal-copy"><small>${escapeHtml(m.label)}</small><strong>${escapeHtml(name)}</strong></div><div class="recipe-meal-actions">${done?`<button type="button" data-food-undo="${m.id}">Desfazer</button><button type="button" data-food-other="${m.id}">Alterar</button>`:`<button type="button" data-food-done="${m.id}">Fiz esta</button><button type="button" data-food-other="${m.id}">Fiz outra</button>`}${selected?`<button type="button" class="recipe-view" data-food-view="${m.id}" aria-label="Ver receita">›</button>`:''}</div></div>`}).join('')}</div></section>`}
+function renderReceitas(){
+ ensureRC94FoodRecipeArchitectureStyles();
+ const d=loadRec();
+ app.innerHTML=`<section class="recipe-hero"><div><span class="eyebrow">RECEITAS</span><h2>Sua biblioteca de receitas.</h2><p>Cadastre, consulte e organize. O que você vai comer fica em Alimentação.</p></div><span class="recipe-hero-icon">${recipeHeroIcon()}</span></section><div class="recipe-tools"><input id="recipeSearch" placeholder="Buscar receita ou ingrediente…"><button type="button" id="addFoodRecipe">＋ Nova receita</button></div><div class="recipe-library-head"><div><span class="eyebrow">BIBLIOTECA</span><h3>Minhas receitas</h3></div></div><div class="recipe-category-row" id="recipeCategoryRow">${['Todas',...RECIPE_CATEGORIES].map((c,i)=>`<button type="button" data-recipe-cat="${i?escapeHtml(c):''}" class="${i===0?'active':''}">${escapeHtml(c)}</button>`).join('')}</div><div class="list" id="recipeList"></div><div class="card freezer-rule recipe-freezer"><span class="eyebrow">FREEZER</span><p>Identifique cada preparo com <strong>nome · data · nº de porções · finalização</strong>.</p></div>`;
+ let cat='';const update=()=>{const q=(document.querySelector('#recipeSearch')?.value||'').toLowerCase();const list=allRecipes().filter(r=>(!q||r.name.toLowerCase().includes(q)||(r.ingredients||[]).join(' ').toLowerCase().includes(q))&&(!cat||recipeCategory(r)===cat));document.querySelector('#recipeList').innerHTML=recipeCards(list,loadRec());bindRecipeCards(update)};
+ document.querySelector('#addFoodRecipe').onclick=()=>openRecipeForm();document.querySelector('#recipeSearch').oninput=()=>update();document.querySelectorAll('[data-recipe-cat]').forEach(b=>b.onclick=()=>{cat=b.dataset.recipeCat;document.querySelectorAll('[data-recipe-cat]').forEach(x=>x.classList.toggle('active',x===b));update()});bindTodayFoodActions();bindFutureFoodActions();update();
+}
+function bindRecipeCards(refresh){document.querySelectorAll("[data-open-recipe]").forEach(b=>b.onclick=()=>openFoodRecipe(b.dataset.openRecipe,false));document.querySelectorAll("[data-edit-recipe]").forEach(b=>b.onclick=e=>{e.stopPropagation();openRecipeForm(b.dataset.editRecipe);});document.querySelectorAll("[data-fav]").forEach(b=>b.onclick=e=>{e.stopPropagation();const x=loadRec(),id=b.dataset.fav;x.favorites=x.favorites.includes(id)?x.favorites.filter(v=>v!==id):[...x.favorites,id];saveRec(x);refresh();});}
+function recipeCards(list,d){return list.map(r=>`<article class="card recipe-card"><div class="recipe-main"><div><span class="eyebrow">${escapeHtml(recipeCategory(r))}</span><h3>${escapeHtml(r.name)}</h3><span>${escapeHtml(r.yield||"Rendimento não informado")} · ${escapeHtml(r.prep||"Preparo livre")}</span></div><button class="favorite ${d.favorites.includes(r.id)?"active":""}" data-fav="${r.id}">${d.favorites.includes(r.id)?"♥":"♡"}</button></div><p><strong>Finalização:</strong> ${escapeHtml(r.finish||"—")}</p><div style="display:flex;gap:8px;flex-wrap:wrap"><button type="button" class="secondary" data-open-recipe="${r.id}">Ver receita</button><button type="button" class="secondary" data-edit-recipe="${r.id}">Editar</button></div></article>`).join("")||`<div class="empty compact"><strong>Nenhuma receita encontrada.</strong></div>`;}
+function renderPlaceholder() {
+  const data = {
+    ideias: ["💡", "Criação & Ideias", "Este espaço vem em seguida. A ideia é registrar sem transformar tudo em obrigação."],
+    rituais: ["✨", "Rituais", "O próximo módulo será construído depois de Criação & Ideias — incluindo o Ritual Capilar."]
+  };
+  const item = data[state.route] || ["💜", "Minha Vida", "Os módulos serão construídos de baixo para cima, na ordem definida."];
+  app.innerHTML = `
+    <section class="hero">
+      <h2>${item[0]} ${item[1]}</h2>
+      <p>${item[2]}</p>
+    </section>
+    <div class="module-grid">
+      <button class="module" data-route="pendencias"><span class="emoji">📝</span><strong>Pendências</strong><span>Descarregar a cabeça.</span></button>
+      <button class="module" data-route="ideias"><span class="emoji">💡</span><strong>Criação & Ideias</strong><span>Guardar sem obrigação.</span></button>
+      <button class="module" data-route="rituais"><span class="emoji">✨</span><strong>Rituais</strong><span>Rotinas que viram cuidado.</span></button>
+      <button class="module" data-route="mais"><span class="emoji">＋</span><strong>Próximos módulos</strong><span>Construídos um por vez.</span></button>
+    </div>`;
+  document.querySelectorAll("[data-route]").forEach(b => b.onclick = () => {
+    state.route=b.dataset.route;
+    location.hash = state.route;
+    render();
+  });
+}
+
+document.querySelector("#homeBtn").onclick = (e) => {
+  e.preventDefault();
+  state.route="meu-dia";
+  location.hash = "meu-dia";
+  render();
+};
+
+document.querySelector("#backBtn").onclick = () => {
+  const route=(location.hash||"").replace("#","");
+  // Dentro de um ritual, a seta global respeita a hierarquia
+  // Meu Dia → Rituais → ritual específico.
+  if (route.startsWith("ritual-")) {
+    state.route="rituais";
+    location.hash="rituais";
+    render();
+    window.scrollTo(0,0);
+    return;
+  }
+  // Receitas abertas a partir de Alimentação retornam ao módulo de origem.
+  if (route === 'receitas') {
+    let origin=''; try{origin=sessionStorage.getItem('bertha.recipe.origin')||''}catch{}
+    if(origin==='alimentacao'){ try{sessionStorage.removeItem('bertha.recipe.origin')}catch{}; state.route='alimentacao'; location.hash='alimentacao'; render(); window.scrollTo(0,0); return; }
+  }
+  // Dentro de uma frente de Trabalho, voltar retorna à tela Trabalho,
+  // e não à Home.
+  if (route.startsWith("trabalho-")) {
+    state.route="trabalho";
+    location.hash="trabalho";
+    return;
+  }
+  // Planos é o pai de Tarefas e Compromissos.
+  if (route === "pendencias" || route === "compromissos") {
+    state.route="planos";
+    location.hash="planos";
+    render();
+    window.scrollTo(0,0);
+    return;
+  }
+  state.route="meu-dia";
+  location.hash="meu-dia";
+  render();
+};
+
+if ("serviceWorker" in navigator) {
+  window.addEventListener("load", () =>
+    navigator.serviceWorker.register("sw.js").catch(console.warn)
+  );
+}
+
+
+/* BERTH.A v2.8.185 — Financeiro consolidado
+   Diagnóstico homologado: passado auditável + presente claro + futuro previsível.
+   Camada aditiva: preserva dados existentes, torna o Financeiro limpo em instalações novas
+   e acrescenta edição de orçamento, pagamentos auditáveis, recorrência visível e metas reais. */
+(() => {
+  const FIN_CLEAN_BASE = {income:0,fixed:[],excluded:[],goals:[],transactions:[],plannedBills:[],paymentMethods:[],paymentSources:[]};
+  const clone = x => JSON.parse(JSON.stringify(x));
+  const monthNames=['Janeiro','Fevereiro','Março','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'];
+  const defaultMethods=['Pix','Boleto','Débito','Crédito','Transferência','Dinheiro','Débito automático'];
+  const defaultSources=['CC BB','CC Itaú','CC CEF','Poupança'];
+  const cats=['Casa','Alimentação','Transporte','Animais','Cartão','Dívidas','Henrique','Assinaturas','Saúde','Autocuidado','Lazer','Variável','Outros'];
+
+  function normalizeGoal(g){
+    const out={...g,id:g.id||uid()};
+    if(!Array.isArray(out.contributions)){
+      const legacy=Number(out.saved||0);
+      out.contributions=legacy>0?[{id:uid(),value:legacy,date:todayISO(),note:'Valor anterior à atualização'}]:[];
+    }
+    out.saved=out.contributions.reduce((s,x)=>s+Number(x.value||0),0);
+    return out;
+  }
+  function normalizeFin(d){
+    const out={...FIN_CLEAN_BASE,...(d||{})};
+    out.fixed=Array.isArray(out.fixed)?out.fixed:[];
+    out.excluded=Array.isArray(out.excluded)?out.excluded:[];
+    out.transactions=Array.isArray(out.transactions)?out.transactions:[];
+    out.plannedBills=Array.isArray(out.plannedBills)?out.plannedBills:[];
+    out.goals=Array.isArray(out.goals)?out.goals.map(normalizeGoal):[];
+    out.paymentMethods=Array.isArray(out.paymentMethods)?out.paymentMethods:[];
+    out.paymentSources=Array.isArray(out.paymentSources)?out.paymentSources:[];
+    return out;
+  }
+  loadFin = function(){
+    try{
+      const raw=JSON.parse(window.berthaHmlStorage.getItem(FIN_KEY));
+      if(raw)return normalizeFin(raw);
+    }catch(_e){}
+    try{
+      const old=JSON.parse(window.berthaHmlStorage.getItem('minha-vida.financeiro.v1'));
+      if(old){
+        const migrated=normalizeFin({income:old.income||0,fixed:old.expenses||[],excluded:old.excluded||[],goals:old.goals||[],transactions:old.transactions||[],plannedBills:[]});
+        saveFin(migrated);return migrated;
+      }
+    }catch(_e){}
+    return clone(FIN_CLEAN_BASE);
+  };
+  const oldSaveFin=saveFin;
+  saveFin=function(d){oldSaveFin(normalizeFin(d));};
+
+  function finAddUnique(list,value){
+    value=String(value||'').trim(); if(!value)return list||[];
+    const arr=Array.isArray(list)?list.slice():[];
+    if(!arr.some(x=>String(x).toLowerCase()===value.toLowerCase()))arr.push(value);
+    return arr;
+  }
+  function finPaymentStats(d,month){
+    const pays=[];
+    finPersonal(d.plannedBills).forEach(b=>{
+      const p=(b.payments||{})[month]; if(!p?.paid)return;
+      pays.push({bill:b,payment:p});
+    });
+    const late=pays.filter(x=>Number(x.payment.daysLate||0)>0);
+    const ontime=pays.filter(x=>Number(x.payment.daysLate||0)<=0);
+    const interest=pays.reduce((s,x)=>s+Number(x.payment.interest||0),0);
+    const fine=pays.reduce((s,x)=>s+Number(x.payment.fine||0),0);
+    const other=pays.reduce((s,x)=>s+Number(x.payment.otherCharges||0),0);
+    const discount=pays.reduce((s,x)=>s+Number(x.payment.discount||0),0);
+    return {pays,late,ontime,interest,fine,other,discount,loss:interest+fine};
+  }
+  function finNextMonthKey(month=finCurrentMonth()){
+    const [y,m]=month.split('-').map(Number),d=new Date(y,m,1);return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}`;
+  }
+  function finNextMonthLabel(month=finCurrentMonth()){return finMonthLabel(finNextMonthKey(month));}
+  function finNextOccurrenceHtml(o){
+    return `<div class="fin-next-row"><div><strong>${escapeHtml(o.bill.name||'Conta prevista')}</strong><span>${escapeHtml(o.bill.category||'Outros')} · ${formatDate(o.due)}${(o.bill.recurrence||'once')==='monthly'?' · mensal':''}</span></div><b>R$ ${money(o.expected)}</b></div>`;
+  }
+  function finPaymentDetail(o){
+    const p=o.payment||{}, parts=[];
+    parts.push(`${escapeHtml(p.categorySnapshot||o.bill.category||'Outros')}`);
+    if(p.date)parts.push(`paga em ${formatDate(p.date)}`);
+    if(Number(p.daysLate||0)>0)parts.push(`${Number(p.daysLate)}d de atraso`); else parts.push('no prazo');
+    if((o.bill.recurrence||'once')==='monthly')parts.push('mensal');
+    return parts.join(' · ');
+  }
+  finPlannedBillHtml=function(o){
+    const st=finPlannedStatus(o),b=o.bill,rem=Number(b.reminderDays??0),now=new Date(),hhmm=`${String(now.getHours()).padStart(2,'0')}:${String(now.getMinutes()).padStart(2,'0')}`;
+    let meta='';
+    if(o.paid){meta=finPaymentDetail(o);}
+    else if(st.cls==='late'){
+      meta=`${escapeHtml(b.category||'Outros')} · ${formatDate(o.due)}`;
+      if(b.reminderEnabled!==false&&b.repeatIfPending!==false&&hhmm<(b.repeatReminderTime||'21:30'))meta+=` · próximo aviso ${escapeHtml(b.repeatReminderTime||'21:30')}`;
+    }else{
+      const reminderCopy=b.reminderEnabled===false?'sem aviso':`${Number(b.reminderDays??0)===0?'no dia':`${rem}d antes`} · ${b.reminderTime||'09:00'}${b.repeatIfPending===false?'':` · repetir ${b.repeatReminderTime||'21:30'} se pendente`}`;
+      meta=`${escapeHtml(b.category||'Outros')} · ${formatDate(o.due)}${(b.recurrence||'once')==='monthly'?' · mensal':''} · ${escapeHtml(reminderCopy)}`;
+    }
+    return `<article class="card planned-bill-row ${st.cls}"><div class="planned-bill-copy"><div class="planned-bill-top"><strong>${escapeHtml(b.name||'Conta prevista')}</strong><span class="fin-status ${st.cls}">${escapeHtml(st.label)}</span></div><span>${meta}</span>${b.note?`<small>${escapeHtml(b.note)}</small>`:''}</div><div class="planned-bill-side"><b>R$ ${money(o.paid?(o.actual??o.expected):o.expected)}</b><div class="planned-bill-actions">${o.paid?`<button type="button" class="secondary tiny" data-fin-unpay="${b.id}" data-month="${o.month}">Desfazer</button>`:`<button type="button" class="primary tiny" data-fin-pay="${b.id}" data-month="${o.month}">Marcar paga</button>`}<button type="button" class="secondary tiny" data-fin-edit-bill="${b.id}">Editar</button></div></div></article>`;
+  };
+  finFixedHtml=function(x){return `<article class="card finance-row fin-budget-row"><button type="button" class="fin-budget-edit" data-fin-edit-fixed="${escapeHtml(x.id||'')}"><div><strong>${escapeHtml(x.name)}</strong><span>${escapeHtml(x.category||'Outros')}${x.kind==='teto'?' · teto':' · fixo'}</span></div><b>R$ ${money(x.value)}</b><span class="fin-edit-mark" aria-hidden="true">›</span></button></article>`;};
+  finTransactionHtml=function(x){const meta=[x.date?formatDate(x.date):'',escapeHtml(x.category||'Variável'),x.paymentMethod?escapeHtml(x.paymentMethod):'',x.paymentSource?escapeHtml(x.paymentSource):''].filter(Boolean).join(' · ');return `<article class="card finance-row"><div><strong>${escapeHtml(x.name)}</strong><span>${meta}</span>${Number(x.interest||0)+Number(x.fine||0)>0?`<small>Juros + multa: R$ ${money(Number(x.interest||0)+Number(x.fine||0))}</small>`:''}</div><b>R$ ${money(x.value)}</b>${x.plannedBillId?'':`<button class="mini-delete" data-fin-delete="${x.id}" aria-label="Excluir">×</button>`}</article>`;};
+
+  function openFixedBudgetModal(id=null){
+    const d=loadFin(),x=id?(d.fixed||[]).find(v=>v.id===id):null,b=x||{id:uid(),name:'',value:'',category:'Casa',kind:'fixo',payer:'Usuária'};
+    const dlg=document.createElement('dialog');dlg.className='fin-planned-dialog fin-unified-dialog';
+    dlg.innerHTML=`<form method="dialog" class="modal-card" id="finFixedForm"><div class="modal-head"><div><div class="eyebrow">ORÇAMENTO BASE</div><h2>${x?'Editar item':'Novo item'}</h2></div><button type="button" class="icon-btn fin-modal-x" data-fin-close aria-label="Fechar">×</button></div><label>Descrição<input id="ffName" required maxlength="100" value="${escapeHtml(b.name||'')}"></label><div class="form-grid"><label>Valor mensal<input id="ffValue" required inputmode="decimal" type="number" min="0" step="0.01" value="${Number(b.value||0)||''}"></label><label>Categoria<select id="ffCategory">${cats.map(c=>`<option ${c===(b.category||'Casa')?'selected':''}>${c}</option>`).join('')}</select></label></div><label>Tipo<select id="ffKind"><option value="fixo" ${(b.kind||'fixo')==='fixo'?'selected':''}>Fixo</option><option value="teto" ${b.kind==='teto'?'selected':''}>Teto mensal</option><option value="estimativa" ${b.kind==='estimativa'?'selected':''}>Estimativa</option></select></label>${x?'<button type="button" class="fin-delete-bill fin-danger-soft" id="deleteFixed">Excluir item do orçamento</button>':''}<div class="modal-actions"><div class="grow"></div><button type="button" class="secondary" id="cancelFixed">Cancelar</button><button class="primary">Salvar</button></div></form>`;
+    document.body.appendChild(dlg);dlg.showModal();const close=bindFinanceModalClose(dlg);dlg.querySelector('#cancelFixed').onclick=e=>{e.preventDefault();close()};
+    if(x)dlg.querySelector('#deleteFixed').onclick=()=>{if(!confirm(`Excluir “${x.name}” do orçamento base? O histórico já realizado não será alterado.`))return;d.fixed=(d.fixed||[]).filter(v=>v.id!==x.id);saveFin(d);dlg.close();dlg.remove();renderFinanceiro()};
+    dlg.querySelector('#finFixedForm').onsubmit=e=>{e.preventDefault();const obj={...b,id:b.id||uid(),name:dlg.querySelector('#ffName').value.trim(),value:Number(dlg.querySelector('#ffValue').value||0),category:dlg.querySelector('#ffCategory').value,kind:dlg.querySelector('#ffKind').value,payer:b.payer||'Usuária',updatedAt:Date.now()};d.fixed=x?(d.fixed||[]).map(v=>v.id===x.id?obj:v):[...(d.fixed||[]),obj];saveFin(d);dlg.close();dlg.remove();renderFinanceiro()};
+  }
+
+  function goalRowTemplate(g,i){
+    const total=Number(g.saved||0),state=total<Number(g.min||0)?'below':total<=Number(g.max||0)?'range':'above';
+    const stateText=state==='below'?'abaixo da faixa':state==='range'?'na faixa':'acima da faixa';
+    return `<div class="goal-row fin-goal-real"><span><b>${escapeHtml(g.month||`Meta ${i+1}`)}</b><small>${(g.contributions||[]).length} aporte${(g.contributions||[]).length===1?'':'s'} · ${stateText}</small></span><strong>R$ ${money(total)} <em>/ ${money(g.min)}–${money(g.max)}</em></strong><button class="goal-toggle" data-goal="${i}" aria-label="Registrar aportes">＋</button></div>`;
+  }
+  function openGoalContributionModal(index=null){
+    const d=loadFin(),existing=Number.isInteger(index)?d.goals[index]:null,g=existing?{...existing,contributions:[...(existing.contributions||[])]}:{id:uid(),month:'',min:0,max:0,saved:0,contributions:[]};
+    const dlg=document.createElement('dialog');dlg.className='fin-planned-dialog fin-unified-dialog fin-goal-dialog';
+    const rows=(g.contributions.length?g.contributions:[{id:uid(),value:'',date:todayISO(),note:''}]).map(c=>`<div class="fin-contribution-row" data-contribution="${escapeHtml(c.id||uid())}"><input class="gcValue" type="number" min="0" step="0.01" inputmode="decimal" value="${c.value?Number(c.value):''}" placeholder="0,00" aria-label="Valor"><input class="gcDate" type="date" value="${escapeHtml(c.date||todayISO())}" aria-label="Data"><input class="gcNote" maxlength="70" value="${escapeHtml(c.note||'')}" placeholder="Observação" aria-label="Observação"><button type="button" class="gcRemove" aria-label="Remover">×</button></div>`).join('');
+    dlg.innerHTML=`<form method="dialog" class="modal-card" id="goalRealForm"><div class="modal-head"><div><div class="eyebrow">META · PLANEJADO × REAL</div><h2>${existing?'Editar evolução':'Nova meta financeira'}</h2></div><button type="button" class="icon-btn fin-modal-x" data-fin-close aria-label="Fechar">×</button></div><label>Mês / etapa<input id="goalLabel" required maxlength="40" value="${escapeHtml(g.month||'')}" placeholder="Ex.: Outubro"></label><div class="form-grid"><label>Planejado mínimo<input id="goalMin" type="number" min="0" step="0.01" inputmode="decimal" value="${Number(g.min||0)||''}"></label><label>Planejado máximo<input id="goalMax" type="number" min="0" step="0.01" inputmode="decimal" value="${Number(g.max||0)||''}"></label></div><div class="fin-contribution-head"><strong>Aportes reais</strong><button type="button" class="secondary tiny" id="addContribution">＋ Adicionar aporte</button></div><div id="contributionRows" class="fin-contribution-list">${rows}</div><div class="fin-goal-live-total"><span>Realizado nesta etapa</span><strong id="goalLiveTotal">R$ 0,00</strong></div><p class="note">O planejado é referência. O realizado registra exatamente o que aconteceu — abaixo, dentro ou acima da faixa.</p>${existing?'<button type="button" class="fin-delete-bill fin-danger-soft" id="deleteGoal">Excluir meta</button>':''}<div class="modal-actions"><div class="grow"></div><button type="button" class="secondary" id="cancelGoalReal">Cancelar</button><button class="primary">Salvar meta</button></div></form>`;
+    document.body.appendChild(dlg);dlg.showModal();const close=bindFinanceModalClose(dlg);dlg.querySelector('#cancelGoalReal').onclick=e=>{e.preventDefault();close()};
+    const list=dlg.querySelector('#contributionRows'),totalEl=dlg.querySelector('#goalLiveTotal');
+    const bindRow=row=>{row.querySelector('.gcRemove').onclick=()=>{row.remove();recalc()};row.querySelector('.gcValue').oninput=recalc;};
+    const recalc=()=>{const total=[...list.querySelectorAll('.gcValue')].reduce((s,x)=>s+Number(x.value||0),0);totalEl.textContent=`R$ ${money(total)}`;};
+    [...list.children].forEach(bindRow);recalc();
+    dlg.querySelector('#addContribution').onclick=()=>{const row=document.createElement('div');row.className='fin-contribution-row';row.dataset.contribution=uid();row.innerHTML=`<input class="gcValue" type="number" min="0" step="0.01" inputmode="decimal" placeholder="0,00" aria-label="Valor"><input class="gcDate" type="date" value="${todayISO()}" aria-label="Data"><input class="gcNote" maxlength="70" placeholder="Observação" aria-label="Observação"><button type="button" class="gcRemove" aria-label="Remover">×</button>`;list.appendChild(row);bindRow(row);row.querySelector('.gcValue').focus();recalc()};
+    if(existing)dlg.querySelector('#deleteGoal').onclick=()=>{if(!confirm(`Excluir a meta “${g.month}”?`))return;d.goals=d.goals.filter((_,i)=>i!==index);saveFin(d);dlg.close();dlg.remove();renderFinanceiro()};
+    dlg.querySelector('#goalRealForm').onsubmit=e=>{e.preventDefault();const cs=[...list.querySelectorAll('.fin-contribution-row')].map(row=>({id:row.dataset.contribution||uid(),value:Number(row.querySelector('.gcValue').value||0),date:row.querySelector('.gcDate').value||todayISO(),note:row.querySelector('.gcNote').value.trim()})).filter(x=>x.value>0);const obj={...g,month:dlg.querySelector('#goalLabel').value.trim(),min:Number(dlg.querySelector('#goalMin').value||0),max:Number(dlg.querySelector('#goalMax').value||0),contributions:cs,saved:cs.reduce((s,x)=>s+x.value,0),updatedAt:Date.now()};d.goals=existing?d.goals.map((v,i)=>i===index?obj:v):[...d.goals,obj];saveFin(d);dlg.close();dlg.remove();renderFinanceiro()};
+  }
+
+  openPlannedPayModal=function(id,month){
+    const d=loadFin(),b=(d.plannedBills||[]).find(x=>x.id===id);if(!b)return;const o=finPlannedOccurrence(b,month);if(!o)return;
+    const methodOptions=[...new Set([...defaultMethods,...(d.paymentMethods||[])])],sourceOptions=[...new Set([...defaultSources,...(d.paymentSources||[])])];
+    const dlg=document.createElement('dialog');dlg.className='fin-planned-dialog fin-pay-dialog fin-unified-dialog';
+    dlg.innerHTML=`<form method="dialog" class="modal-card" id="finPayForm"><div class="modal-head"><div><div class="eyebrow">MARCAR COMO PAGA</div><h2>${escapeHtml(b.name)}</h2></div><button type="button" class="icon-btn fin-modal-x" data-fin-close aria-label="Fechar">×</button></div><p class="note">Previsto: R$ ${money(o.expected)} · vencimento ${formatDate(o.due)}</p><div class="form-grid"><label>Valor principal pago<input id="pbPrincipal" required type="text" inputmode="decimal" value="${money(o.expected)}"></label><label>Data do pagamento<input id="pbPaidDate" required type="date" value="${todayISO()}"></label></div><div class="fin-pay-cost-grid"><label>Juros<input id="pbInterest" type="text" inputmode="decimal" value="0,00"></label><label>Multa<input id="pbFine" type="text" inputmode="decimal" value="0,00"></label><label>Desconto<input id="pbDiscount" type="text" inputmode="decimal" value="0,00"></label><label>Outros encargos<input id="pbOther" type="text" inputmode="decimal" value="0,00"></label></div><div class="form-grid"><label>Forma de pagamento<input id="pbMethod" list="finMethodList" maxlength="50" placeholder="Ex.: Pix"><datalist id="finMethodList">${methodOptions.map(x=>`<option value="${escapeHtml(x)}"></option>`).join('')}</datalist></label><label>Conta / origem do dinheiro<input id="pbSource" list="finSourceList" maxlength="60" placeholder="Ex.: CC BB"><datalist id="finSourceList">${sourceOptions.map(x=>`<option value="${escapeHtml(x)}"></option>`).join('')}</datalist></label></div><div class="fin-payment-total"><span>Total desembolsado</span><strong id="pbTotalText">R$ ${money(o.expected)}</strong><small>principal + juros + multa + encargos − desconto</small></div><div class="modal-actions"><div class="grow"></div><button type="button" class="secondary" id="cancelFinPay">Cancelar</button><button class="primary">Confirmar pagamento</button></div></form>`;
+    document.body.appendChild(dlg);dlg.showModal();const close=bindFinanceModalClose(dlg);dlg.querySelector('#cancelFinPay').onclick=e=>{e.preventDefault();close()};
+    const ids=['#pbPrincipal','#pbInterest','#pbFine','#pbDiscount','#pbOther'];
+    const parseBR=v=>{v=String(v??'').trim().replace(/\s/g,'').replace(/R\$/gi,'');if(v.includes(',')&&v.includes('.'))v=v.replace(/\./g,'').replace(',','.');else if(v.includes(','))v=v.replace(',','.');return Number(v)||0};
+    const fmtInput=el=>{const n=parseBR(el.value);el.value=money(n)};
+    const calc=()=>{const [p,j,m,desc,out]=ids.map(sel=>parseBR(dlg.querySelector(sel).value));const total=Math.max(0,p+j+m+out-desc);dlg.querySelector('#pbTotalText').textContent=`R$ ${money(total)}`;return {principal:p,interest:j,fine:m,discount:desc,otherCharges:out,total}};ids.forEach(sel=>{const el=dlg.querySelector(sel);el.oninput=calc;el.onblur=()=>{fmtInput(el);calc()}});
+    dlg.querySelector('#finPayForm').onsubmit=e=>{e.preventDefault();const costs=calc(),date=dlg.querySelector('#pbPaidDate').value,method=dlg.querySelector('#pbMethod').value.trim(),source=dlg.querySelector('#pbSource').value.trim();const due=new Date(o.due+'T12:00:00'),paid=new Date(date+'T12:00:00'),daysLate=Math.max(0,Math.round((paid-due)/86400000));b.payments=b.payments||{};b.payments[month]={paid:true,value:costs.total,principal:costs.principal,interest:costs.interest,fine:costs.fine,discount:costs.discount,otherCharges:costs.otherCharges,total:costs.total,date,daysLate,onTime:daysLate===0,paymentMethod:method,paymentSource:source,categorySnapshot:b.category||'Outros',expectedSnapshot:o.expected,dueSnapshot:o.due,at:Date.now()};const existing=(d.transactions||[]).find(t=>t.plannedBillId===b.id&&t.plannedBillMonth===month),tx={id:existing?.id||uid(),name:b.name,value:costs.total,date,category:b.category||'Outros',plannedBillId:b.id,plannedBillMonth:month,note:`Conta prevista · paga${daysLate?` · ${daysLate}d atraso`:' · no prazo'}`,paymentMethod:method,paymentSource:source,principal:costs.principal,interest:costs.interest,fine:costs.fine,discount:costs.discount,otherCharges:costs.otherCharges,dueDate:o.due,daysLate,updatedAt:Date.now()};d.transactions=existing?(d.transactions||[]).map(t=>t.id===existing.id?tx:t):[...(d.transactions||[]),tx];d.paymentMethods=finAddUnique(d.paymentMethods,method);d.paymentSources=finAddUnique(d.paymentSources,source);saveFin(d);if(window.berthaResolveBillReminder){try{window.berthaResolveBillReminder({billId:b.id,month,name:b.name})}catch(_e){}}dlg.close();dlg.remove();renderFinanceiro()};
+  };
+
+  function financeAlertSvg(){return `<svg class="fin-alert-svg" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="8.2"></circle><path d="M12 7.6v5.2"></path><path d="M12 16.6h.01"></path></svg>`;}
+  renderFinanceiro=function(){
+    const d=loadFin(),month=finCurrentMonth(),fixed=finFixedTotal(d),variable=finMonthTotal(d,month),planned=fixed+variable,remaining=Number(d.income||0)-planned,catsMap=finCategoryTotals(d,month),monthBills=finPlannedMonth(d,month),nextMonth=finNextMonthKey(month),nextBills=finPlannedMonth(d,nextMonth);
+    const openPlanned=monthBills.filter(x=>!x.paid).reduce((s,x)=>s+x.expected,0),paidPlanned=monthBills.filter(x=>x.paid).reduce((s,x)=>s+Number(x.actual??x.expected),0),afterKnown=remaining-openPlanned;
+    const catHtml=Object.entries(catsMap).sort((a,b)=>b[1]-a[1]).slice(0,6).map(([k,v])=>`<div class="finance-cat"><span>${escapeHtml(k)}</span><strong>R$ ${money(v)}</strong></div>`).join('')||`<div class="empty compact"><strong>Nenhum gasto variável registrado.</strong><span>Registre apenas o que realmente precisar acompanhar.</span></div>`;
+    const goalTotal=d.goals.reduce((s,g)=>s+Number(g.saved||0),0), goalMin=d.goals.reduce((s,g)=>s+Number(g.min||0),0), goalMax=d.goals.reduce((s,g)=>s+Number(g.max||0),0);
+    const alerts=monthBills.filter(o=>!o.paid&&o.bill.reminderEnabled!==false&&finDaysTo(o.due)<=Number(o.bill.reminderDays??0));
+    const stats=finPaymentStats(d,month);
+    app.innerHTML=`<section class="finance-hero"><div><span class="finance-hero-kicker">FINANCEIRO</span><h2>Know what’s ahead.<br>Make room for life.</h2><p>Você registra o essencial.<br>A BERTH.A clareia o horizonte.</p></div><span class="finance-hero-icon finance-hero-symbol" aria-hidden="true"><svg viewBox="0 0 40 40" focusable="false"><path d="M7 22.5c4.4-4.2 8.7-6.3 13-6.3s8.6 2.1 13 6.3"/><path d="M9.5 27.5h21"/><circle cx="20" cy="16.2" r="1.35"/></svg></span></section>
+    <section class="finance-summary card"><div class="finance-main"><span class="eyebrow">RENDA MENSAL</span><strong>R$ ${money(d.income)}</strong><button class="text-btn" id="editIncome">editar</button><button class="text-btn" id="toggleFinPrivacy" type="button">Ocultar valores</button></div><div class="finance-metrics"><div><span>Base</span><b>R$ ${money(fixed)}</b></div><div><span>Realizado · ${escapeHtml(finMonthLabel(month))}</span><b>R$ ${money(variable)}</b></div><div><span>Disponível conhecido</span><b>R$ ${money(remaining)}</b></div></div><div class="fin-forecast-strip"><span>Depois das contas previstas ainda pendentes</span><strong>R$ ${money(afterKnown)}</strong></div></section>
+    ${alerts.length?`<section class="fin-due-alert"><strong>${financeAlertSvg()}${alerts.length===1?'1 conta pede atenção':`${alerts.length} contas pedem atenção`}</strong><span>${alerts.slice(0,3).map(o=>`${escapeHtml(o.bill.name)} · ${escapeHtml(finPlannedStatus(o).label)}`).join('<br>')}</span></section>`:''}
+    <div class="section-title">CONTAS PREVISTAS · ${escapeHtml(finMonthLabel(month).toUpperCase())}</div><section class="card planned-bills-panel"><div class="panel-head"><div><span class="eyebrow">PREVISTO → REALIZADO</span><h3>Vencimentos do mês</h3></div><button class="primary compact-btn" id="addPlannedBill">＋ Nova conta prevista</button></div><div class="planned-mini-metrics"><div><span>A vencer</span><b>R$ ${money(openPlanned)}</b></div><div><span>Já pago</span><b>R$ ${money(paidPlanned)}</b></div></div><div class="planned-bills-list">${monthBills.length?monthBills.map(finPlannedBillHtml).join(''):`<div class="empty compact"><strong>Nenhuma conta prevista neste mês.</strong><span>Cadastre vencimentos para a BERTH.A lembrar o que vem pela frente.</span></div>`}</div></section>
+    <div class="section-title">PRÓXIMOS VENCIMENTOS</div><section class="card fin-next-panel"><div class="panel-head"><div><span class="eyebrow">${escapeHtml(finNextMonthLabel(month).toUpperCase())}</span><h3>O que já sabemos que vem</h3></div><span class="pill">${nextBills.length}</span></div><div class="fin-next-list">${nextBills.length?nextBills.map(finNextOccurrenceHtml).join(''):`<div class="empty compact"><strong>Nada previsto para o próximo mês.</strong><span>Contas recorrentes e vencimentos futuros aparecem aqui.</span></div>`}</div></section>
+    <div class="section-title">ORÇAMENTO BASE</div><div class="list">${finPersonal(d.fixed).map(finFixedHtml).join('')||`<div class="empty compact"><strong>Seu orçamento base está vazio.</strong><span>Adicione apenas compromissos que realmente fazem parte da sua estrutura mensal.</span></div>`}</div><button class="add-full secondary" id="addFixed">＋ Adicionar item ao orçamento</button>
+    <div class="section-title">GASTOS DO MÊS</div><section class="card"><div class="panel-head"><div><span class="eyebrow">${escapeHtml(finMonthLabel(month))}</span><h3>O que saiu de verdade</h3></div><button class="primary compact-btn" id="addTransaction">＋ Registrar</button></div><div class="list inner-list">${finMonthTransactions(d,month).slice().reverse().slice(0,20).map(finTransactionHtml).join('')||`<div class="empty compact"><strong>Nenhum gasto registrado.</strong><span>O registro é opcional — use quando ajudar a enxergar seu mês.</span></div>`}</div></section>
+    <div class="section-title">PONTUALIDADE</div><section class="card fin-punctuality"><div><span>Pagas no prazo</span><b>${stats.ontime.length}</b></div><div><span>Pagas em atraso</span><b>${stats.late.length}</b></div><div><span>Juros + multas</span><b>R$ ${money(stats.loss)}</b></div></section>
+    <div class="section-title">POR CATEGORIA</div><section class="card finance-cats">${catHtml}</section>
+    <div class="section-title">METAS FINANCEIRAS</div><section class="card goal-card"><div class="panel-head"><div><span class="eyebrow">PLANEJADO × REAL</span><h3>Evolução das metas</h3></div><div class="fin-goal-head-actions"><span class="pill today">R$ ${money(goalTotal)}</span><button type="button" class="secondary compact-btn" id="addGoal">＋ Nova meta</button></div></div><p class="note">A faixa é referência. O realizado registra exatamente o que aconteceu.</p><div class="goal-list">${d.goals.length?d.goals.map(goalRowTemplate).join(''):`<div class="empty compact"><strong>Nenhuma meta financeira cadastrada.</strong><span>As metas podem ser adicionadas quando fizer sentido.</span></div>`}</div></section>
+    <div class="section-title finance-covered-title">DESPESAS COBERTAS</div><div class="finance-covered-intro">Compromissos que hoje não saem da sua renda.</div><div class="list finance-covered-list">${finPersonal(d.excluded).map((x,i)=>`<div class="card excluded-card"><button type="button" class="covered-edit" data-fin-covered-index="${i}" aria-label="Editar despesa coberta"><div><strong>${escapeHtml(x.name)}</strong><span>${x.value?`R$ ${money(x.value)} · `:''}${x.category?`${escapeHtml(x.category)} · `:''}${escapeHtml(x.reason||'')}</span></div><span class="pill">${escapeHtml(x.payer||'Outra fonte')}</span></button></div>`).join('')||`<div class="covered-empty">Nenhuma despesa coberta cadastrada.</div>`}</div><button class="add-full secondary covered-add" id="addCovered">＋ Adicionar despesa coberta</button>`;
+    ensureFinanceStyles();ensureFinance185Styles();
+    document.getElementById('editIncome').onclick=()=>openFinModal('income');document.getElementById('toggleFinPrivacy').onclick=toggleFinPrivacyNative;document.getElementById('addPlannedBill').onclick=()=>openPlannedBillModal();document.getElementById('addFixed').onclick=()=>openFixedBudgetModal();document.getElementById('addTransaction').onclick=()=>openFinModal('transaction');document.getElementById('addCovered').onclick=()=>openCoveredExpenseModal();document.querySelectorAll('[data-fin-covered-index]').forEach(b=>b.onclick=()=>openCoveredExpenseModal(Number(b.dataset.finCoveredIndex)));
+    document.querySelectorAll('[data-fin-edit-bill]').forEach(b=>b.onclick=()=>openPlannedBillModal(b.dataset.finEditBill));document.querySelectorAll('[data-fin-pay]').forEach(b=>b.onclick=()=>openPlannedPayModal(b.dataset.finPay,b.dataset.month));document.querySelectorAll('[data-fin-unpay]').forEach(b=>b.onclick=()=>undoPlannedPayment(b.dataset.finUnpay,b.dataset.month));document.querySelectorAll('[data-fin-edit-fixed]').forEach(b=>b.onclick=()=>openFixedBudgetModal(b.dataset.finEditFixed));
+    document.querySelectorAll('[data-fin-delete]').forEach(b=>b.onclick=()=>{const x=loadFin();x.transactions=x.transactions.filter(t=>t.id!==b.dataset.finDelete);saveFin(x);renderFinanceiro()});document.querySelectorAll('[data-goal]').forEach(b=>b.onclick=()=>openGoalContributionModal(Number(b.dataset.goal)));const addGoal=document.getElementById('addGoal');if(addGoal)addGoal.onclick=()=>openGoalContributionModal(null);applyFinPrivacyNative();
+  };
+
+  progressFinanceRow=function(){
+    const d=loadFin(),month=finCurrentMonth(),fixed=finFixedTotal(d),variable=finMonthTotal(d,month),bills=finPlannedMonth(d,month),paid=bills.filter(x=>x.paid),open=bills.filter(x=>!x.paid),covered=finPersonal(d.excluded).reduce((sum,x)=>sum+Number(x.value||0),0),remaining=Number(d.income||0)-fixed-variable,stats=finPaymentStats(d,month),goalTotal=(d.goals||[]).reduce((s,g)=>s+Number(g.saved||0),0);
+    return `<details class="progress-category"><summary class="progress-category-head"><strong>Financeiro</strong><b>R$ ${money(remaining)} disponíveis</b></summary><small>${paid.length}/${bills.length} contas previstas pagas · realizado R$ ${money(variable)}</small><div class="progress-detail"><div><span>Orçamento base</span><span>R$ ${money(fixed)}</span></div><div><span>Gastos registrados no mês</span><span>R$ ${money(variable)}</span></div><div><span>Contas previstas pendentes</span><span>${open.length} · R$ ${money(open.reduce((sum,x)=>sum+x.expected,0))}</span></div><div><span>Pagas no prazo</span><span>${stats.ontime.length}</span></div><div><span>Pagas em atraso</span><span>${stats.late.length}</span></div><div><span>Juros e multas no mês</span><span>R$ ${money(stats.loss)}</span></div><div><span>Dinheiro perdido por atraso</span><span>R$ ${money(stats.loss)}</span></div><div><span>Metas · realizado acumulado</span><span>R$ ${money(goalTotal)}</span></div><div><span>Despesas cobertas hoje</span><span>R$ ${money(covered)}</span></div></div></details>`;
+  };
+
+  function ensureFinance185Styles(){
+    if(document.getElementById('finance-v185-styles'))return;const st=document.createElement('style');st.id='finance-v185-styles';st.textContent=`
+      .fin-alert-svg{width:18px;height:18px;fill:none;stroke:currentColor;stroke-width:1.45;stroke-linecap:round;stroke-linejoin:round;flex:0 0 auto}.fin-due-alert>strong{display:flex!important;align-items:center;gap:8px}.fin-due-alert{background:linear-gradient(135deg,rgba(234,228,248,.88),rgba(227,240,245,.90))!important;border-color:rgba(117,101,154,.10)!important;color:#665d75!important}.fin-due-alert span{color:#7d7583!important}
+      .fin-delete-bill.fin-danger-soft,.fin-delete-bill{background:rgba(255,253,251,.80)!important;border:1px solid rgba(151,93,103,.18)!important;color:#95666e!important;box-shadow:none!important}.fin-budget-row{padding:0!important;overflow:hidden}.fin-budget-edit{width:100%;border:0;background:transparent;display:grid;grid-template-columns:minmax(0,1fr) auto 18px;align-items:center;gap:10px;padding:14px;text-align:left;color:inherit;font:inherit}.fin-budget-edit div{min-width:0}.fin-budget-edit strong,.fin-budget-edit span{display:block}.fin-budget-edit span{font-size:11px;color:#817783;margin-top:3px}.fin-budget-edit b{white-space:nowrap}.fin-edit-mark{font-size:20px!important;color:#9a909d!important;margin:0!important}.fin-forecast-strip{margin-top:12px;padding:10px 12px;border-radius:15px;background:rgba(255,255,255,.46);display:flex;justify-content:space-between;gap:12px;align-items:center}.fin-forecast-strip span{font-size:11px;color:#817783}.fin-forecast-strip strong{font-size:13px;color:#5e5665;white-space:nowrap}
+      .fin-next-panel{padding:16px}.fin-next-list{display:grid;gap:0;margin-top:8px}.fin-next-row{display:flex;justify-content:space-between;gap:12px;align-items:center;padding:11px 0;border-top:1px solid rgba(92,72,104,.08)}.fin-next-row:first-child{border-top:0}.fin-next-row strong,.fin-next-row span{display:block}.fin-next-row span{font-size:11px;color:#817783;margin-top:3px}.fin-next-row b{white-space:nowrap;font-size:13px}.fin-punctuality{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;padding:12px}.fin-punctuality>div{padding:11px;border-radius:14px;background:linear-gradient(145deg,rgba(248,246,252,.92),rgba(241,247,248,.84))}.fin-punctuality span{display:block;font-size:11px;color:#817783}.fin-punctuality b{display:block;margin-top:5px;font-size:15px}
+      .fin-pay-cost-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}.fin-payment-total{margin:14px 0 2px;padding:14px;border-radius:17px;background:linear-gradient(120deg,rgba(238,230,248,.70),rgba(228,240,246,.78));display:grid;gap:3px}.fin-payment-total span,.fin-payment-total small{color:#7b7280;font-size:11px}.fin-payment-total strong{font-size:20px;font-weight:650}.fin-goal-head-actions{display:flex;align-items:center;gap:7px;flex-wrap:wrap;justify-content:flex-end}.fin-goal-real{align-items:center}.fin-goal-real>span{display:grid;gap:2px}.fin-goal-real>span b{font-size:14px}.fin-goal-real>span small{font-size:10px;color:#8a808b}.fin-goal-real strong{font-size:13px}.fin-goal-real strong em{font-style:normal;font-weight:500;color:#928995}.fin-goal-plan,.fin-goal-live-total{display:flex;justify-content:space-between;gap:12px;align-items:center;padding:13px 14px;border-radius:16px;background:linear-gradient(120deg,rgba(238,230,248,.68),rgba(229,241,246,.70));margin:4px 0 14px}.fin-goal-plan span,.fin-goal-live-total span{font-size:12px;color:#7b7280}.fin-contribution-head{display:flex;justify-content:space-between;align-items:center;gap:8px;margin:8px 0}.fin-contribution-list{display:grid;gap:8px}.fin-contribution-row{display:grid;grid-template-columns:1fr 1.1fr 1.3fr 34px;gap:6px;align-items:center}.fin-contribution-row input{min-height:43px!important;padding:9px 10px!important}.fin-contribution-row .gcRemove{width:34px;height:34px;border-radius:50%;border:1px solid rgba(151,93,103,.16);background:transparent;color:#95666e;font-size:18px}.fin-goal-live-total{margin-top:12px}.fin-goal-live-total strong{font-size:18px}
+      .planned-bill-row.paid{background:linear-gradient(140deg,rgba(244,249,246,.96),rgba(250,249,252,.93))!important}.planned-bill-row.paid .planned-bill-copy>span{color:#7a817d!important}
+      @media(max-width:560px){.fin-punctuality{grid-template-columns:1fr 1fr 1fr}.fin-pay-cost-grid{grid-template-columns:1fr 1fr}.fin-contribution-row{grid-template-columns:1fr 1fr 34px}.fin-contribution-row .gcNote{grid-column:1/3}.fin-forecast-strip{align-items:flex-start}.fin-next-row{align-items:flex-start}}
+    `;document.head.appendChild(st);
+  }
+  window.__berthaCoreRenderFinanceiro=renderFinanceiro;
+  window.__berthaFinance185={openGoalContributionModal,openFixedBudgetModal};
+})();
+
+
+render();
+
+window.renderShoppingUniversal=renderShoppingUniversal;window.renderProgressOverview=renderProgressOverview;
+
+/* v2.8.184 — Financeiro · lembrete persistente até resolução + Meu Dia compacto */
+
+/* BERTH.A Financeiro focused patch — based on stable v185-navfix.
+   Scope: privacy immediate toggle + named independent financial goals + Progress cards.
+   Does not replace navigation or the stable Financeiro renderer. */
+(()=>{
+  const baseRenderFinanceiro=renderFinanceiro;
+  const baseProgressFinanceRow=progressFinanceRow;
+  const FIN_GOALS_PATCH='bertha.finance.goals.named.v1';
+
+  function fgNormalizePeriod(p){
+    const cs=Array.isArray(p.contributions)?p.contributions.map(c=>({...c,id:c.id||uid(),value:Number(c.value||0)})):(Number(p.saved||0)>0?[{id:uid(),value:Number(p.saved||0),date:todayISO(),note:'Valor anterior à atualização'}]:[]);
+    return {id:p.id||uid(),label:p.label||p.month||'Etapa',min:Number(p.min||0),max:Number(p.max||0),contributions:cs};
+  }
+  function fgNormalizeGoal(g){
+    return {id:g.id||uid(),name:g.name||'Meta financeira',description:g.description||'',periods:(Array.isArray(g.periods)?g.periods:[]).map(fgNormalizePeriod),createdAt:g.createdAt||Date.now(),updatedAt:g.updatedAt||Date.now()};
+  }
+  function fgLoad(){
+    try{
+      const saved=JSON.parse(window.berthaHmlStorage.getItem(FIN_GOALS_PATCH)||'null');
+      if(Array.isArray(saved)) return saved.map(fgNormalizeGoal);
+    }catch{}
+    const d=loadFin();
+    const legacy=Array.isArray(d.goals)?d.goals:[];
+    const meaningful=legacy.filter(p=>p && (p.month||Number(p.saved||0)||Number(p.min||0)||Number(p.max||0)));
+    if(!meaningful.length)return [];
+    const migrated=[fgNormalizeGoal({id:'fundo-carro',name:'Fundo Carro',description:'',periods:meaningful})];
+    fgSave(migrated);return migrated;
+  }
+  function fgSave(goals){window.berthaHmlStorage.setItem(FIN_GOALS_PATCH,JSON.stringify(goals.map(fgNormalizeGoal)));}
+  function fgPeriodTotal(p){return (p.contributions||[]).reduce((s,c)=>s+Number(c.value||0),0);}
+  function fgGoalTotal(g){return (g.periods||[]).reduce((s,p)=>s+fgPeriodTotal(p),0);}
+  function fgPlanRange(g){return (g.periods||[]).reduce((a,p)=>({min:a.min+Number(p.min||0),max:a.max+Number(p.max||0)}),{min:0,max:0});}
+
+  toggleFinPrivacyNative=function(){
+    const next=finPrivacyHidden()?'visible':'hidden';
+    window.berthaHmlStorage.setItem(FIN_PRIVACY_KEY,next);
+    renderFinanceiro();
+  };
+
+  function fgCard(g){
+    const total=fgGoalTotal(g),plan=fgPlanRange(g);
+    const periods=(g.periods||[]).map(p=>{const real=fgPeriodTotal(p);return `<div class="fg-period-row"><div class="fg-period-name"><strong>${escapeHtml(p.label)}</strong><small>${(p.contributions||[]).length} aporte${(p.contributions||[]).length===1?'':'s'}</small></div><div class="fg-period-values"><b>R$ ${money(real)}</b><span><i>Planejado</i> R$ ${money(p.min)}–${money(p.max)}</span></div><button type="button" class="fg-plus" data-fg-add="${g.id}" data-fg-period="${p.id}" aria-label="Adicionar aporte">＋</button></div>`}).join('');
+    return `<article class="fg-goal-card"><div class="fg-goal-head"><div><span class="eyebrow">META FINANCEIRA</span><h3>${escapeHtml(g.name)}</h3>${g.description?`<p>${escapeHtml(g.description)}</p>`:''}</div><button type="button" class="fg-edit" data-fg-edit="${g.id}">Editar</button></div><div class="fg-goal-summary"><div><span>Realizado acumulado</span><strong>R$ ${money(total)}</strong></div><div><span>Planejado acumulado</span><strong>R$ ${money(plan.min)}–${money(plan.max)}</strong></div></div><div class="fg-period-list">${periods||'<div class="empty compact"><strong>Nenhuma etapa cadastrada.</strong></div>'}</div></article>`;
+  }
+  function fgRenderIntoFinance(){
+    const title=[...document.querySelectorAll('.section-title')].find(x=>x.textContent.trim()==='METAS FINANCEIRAS');
+    const section=title?.nextElementSibling;if(!section)return;
+    const goals=fgLoad();
+    section.className='fg-shell';
+    section.innerHTML=`<div class="fg-shell-head"><div><h3>Metas financeiras</h3></div><div class="fg-shell-actions"><button type="button" class="secondary compact-btn" id="fgNew">＋ Nova meta</button></div></div><p class="note">Cada meta tem seu próprio planejamento e seus aportes reais.</p><div class="fg-goals">${goals.length?goals.map(fgCard).join(''):'<div class="empty compact"><strong>Nenhuma meta financeira cadastrada.</strong><span>Crie uma meta quando fizer sentido.</span></div>'}</div>`;
+    section.querySelector('#fgNew').onclick=()=>fgOpenGoal();
+    section.querySelectorAll('[data-fg-edit]').forEach(b=>b.onclick=()=>fgOpenGoal(b.dataset.fgEdit));
+    section.querySelectorAll('[data-fg-add]').forEach(b=>b.onclick=()=>fgOpenContribution(b.dataset.fgAdd,b.dataset.fgPeriod));
+  }
+
+  function fgPeriodEditorRow(p={}){return `<div class="fg-period-edit" data-fg-period-edit="${escapeHtml(p.id||uid())}"><input class="fgLabel" maxlength="40" value="${escapeHtml(p.label||'')}" placeholder="Ex.: Outubro" aria-label="Mês ou etapa"><input class="fgMin" type="number" min="0" step="0.01" inputmode="decimal" value="${Number(p.min||0)||''}" placeholder="Mínimo" aria-label="Planejado mínimo"><input class="fgMax" type="number" min="0" step="0.01" inputmode="decimal" value="${Number(p.max||0)||''}" placeholder="Máximo" aria-label="Planejado máximo"><button type="button" class="fgRemovePeriod" aria-label="Remover etapa">×</button></div>`;}
+  function fgOpenGoal(goalId=null){
+    const goals=fgLoad(),old=goals.find(g=>g.id===goalId),g=old?JSON.parse(JSON.stringify(old)):{id:uid(),name:'',description:'',periods:[]};
+    const dlg=document.createElement('dialog');dlg.className='fin-planned-dialog fin-unified-dialog fg-dialog';
+    dlg.innerHTML=`<form method="dialog" class="modal-card" id="fgGoalForm"><div class="modal-head"><div><div class="eyebrow">META FINANCEIRA</div><h2>${old?'Editar meta':'Nova meta'}</h2></div><button type="button" class="icon-btn fin-modal-x" data-fin-close aria-label="Fechar">×</button></div><label>Nome da meta<input id="fgName" required maxlength="60" value="${escapeHtml(g.name||'')}" placeholder="Ex.: Reserva de emergência"></label><label>Objetivo / descrição <span class="optional">opcional</span><input id="fgDescription" maxlength="100" value="${escapeHtml(g.description||'')}" placeholder="Para que é esta meta?"></label><div class="fg-editor-head"><strong>Planejamento por mês / etapa</strong><button type="button" class="secondary tiny" id="fgAddPeriod">＋ Adicionar etapa</button></div><div id="fgPeriodEditor" class="fg-period-editor">${g.periods.length?g.periods.map(fgPeriodEditorRow).join(''):fgPeriodEditorRow({label:'',min:0,max:0})}</div>${old?'<button type="button" class="fin-delete-bill fin-danger-soft" id="fgDeleteGoal">Excluir meta</button>':''}<div class="modal-actions"><div class="grow"></div><button type="button" class="secondary" id="fgCancel">Cancelar</button><button class="primary">Salvar meta</button></div></form>`;
+    document.body.appendChild(dlg);dlg.showModal();const close=bindFinanceModalClose(dlg);dlg.querySelector('#fgCancel').onclick=e=>{e.preventDefault();close()};
+    const editor=dlg.querySelector('#fgPeriodEditor');const bind=r=>r.querySelector('.fgRemovePeriod').onclick=()=>{if(editor.children.length>1)r.remove();else{r.querySelector('.fgLabel').value='';r.querySelector('.fgMin').value='';r.querySelector('.fgMax').value='';}};[...editor.children].forEach(bind);
+    dlg.querySelector('#fgAddPeriod').onclick=()=>{const wrap=document.createElement('div');wrap.innerHTML=fgPeriodEditorRow({});const row=wrap.firstElementChild;editor.appendChild(row);bind(row);row.querySelector('.fgLabel').focus();};
+    if(old)dlg.querySelector('#fgDeleteGoal').onclick=()=>{if(!confirm(`Excluir a meta “${old.name}”?`))return;fgSave(goals.filter(x=>x.id!==old.id));dlg.close();dlg.remove();renderFinanceiro();};
+    dlg.querySelector('#fgGoalForm').onsubmit=e=>{e.preventDefault();const name=dlg.querySelector('#fgName').value.trim();if(!name)return;const periods=[...editor.querySelectorAll('.fg-period-edit')].map(r=>{const prior=(g.periods||[]).find(p=>p.id===r.dataset.fgPeriodEdit);return {id:r.dataset.fgPeriodEdit||uid(),label:r.querySelector('.fgLabel').value.trim(),min:Number(r.querySelector('.fgMin').value||0),max:Number(r.querySelector('.fgMax').value||0),contributions:prior?.contributions||[]};}).filter(p=>p.label);const obj=fgNormalizeGoal({...g,name,description:dlg.querySelector('#fgDescription').value.trim(),periods,updatedAt:Date.now()});fgSave(old?goals.map(x=>x.id===old.id?obj:x):[...goals,obj]);dlg.close();dlg.remove();renderFinanceiro();};
+  }
+  function fgOpenContribution(goalId,periodId){
+    const goals=fgLoad(),g=goals.find(x=>x.id===goalId),p=g?.periods.find(x=>x.id===periodId);if(!g||!p)return;
+    const dlg=document.createElement('dialog');dlg.className='fin-planned-dialog fin-unified-dialog fg-dialog';
+    dlg.innerHTML=`<form method="dialog" class="modal-card" id="fgContributionForm"><div class="modal-head"><div><div class="eyebrow">APORTE · ${escapeHtml(g.name)}</div><h2>${escapeHtml(p.label)}</h2></div><button type="button" class="icon-btn fin-modal-x" data-fin-close aria-label="Fechar">×</button></div><label>Valor aportado<input id="fgContributionValue" required type="number" min="0.01" step="0.01" inputmode="decimal" placeholder="0,00"></label><label>Data<input id="fgContributionDate" type="date" value="${todayISO()}"></label><label>Observação <span class="optional">opcional</span><input id="fgContributionNote" maxlength="80" placeholder="Ex.: aporte extra"></label><div class="fg-existing"><strong>Aportes registrados</strong>${(p.contributions||[]).length?(p.contributions||[]).map(c=>`<div><span>${formatDate(c.date||todayISO())}${c.note?` · ${escapeHtml(c.note)}`:''}</span><b>R$ ${money(c.value)}</b></div>`).join(''):'<small>Nenhum aporte ainda.</small>'}</div><div class="modal-actions"><div class="grow"></div><button type="button" class="secondary" id="fgContributionCancel">Cancelar</button><button class="primary">Registrar aporte</button></div></form>`;
+    document.body.appendChild(dlg);dlg.showModal();const close=bindFinanceModalClose(dlg);dlg.querySelector('#fgContributionCancel').onclick=e=>{e.preventDefault();close()};dlg.querySelector('#fgContributionForm').onsubmit=e=>{e.preventDefault();p.contributions=[...(p.contributions||[]),{id:uid(),value:Number(dlg.querySelector('#fgContributionValue').value||0),date:dlg.querySelector('#fgContributionDate').value||todayISO(),note:dlg.querySelector('#fgContributionNote').value.trim()}];g.updatedAt=Date.now();fgSave(goals);dlg.close();dlg.remove();renderFinanceiro();};
+  }
+
+  renderFinanceiro=function(){baseRenderFinanceiro();fgRenderIntoFinance();applyFinPrivacyNative();};
+
+  progressFinanceRow=function(){
+    const base=baseProgressFinanceRow();
+    const goals=fgLoad();if(!goals.length)return base;
+    const cards=goals.map(g=>{const total=fgGoalTotal(g),plan=fgPlanRange(g);return `<div class="progress-fin-goal"><div><strong>${escapeHtml(g.name)}</strong><small>Realizado acumulado</small></div><b>R$ ${money(total)}</b><div class="progress-fin-goal-plan"><span>Planejado acumulado</span><span>R$ ${money(plan.min)}–R$ ${money(plan.max)}</span></div></div>`}).join('');
+    return `${base}<div class="progress-fin-goals"><span class="eyebrow">METAS FINANCEIRAS</span>${cards}</div>`;
+  };
+
+  if(!document.getElementById('finance-focused-patch-styles')){const st=document.createElement('style');st.id='finance-focused-patch-styles';st.textContent=`
+  .fg-shell{padding:16px;border-radius:24px;background:rgba(255,253,249,.88);border:1px solid rgba(102,82,107,.07);box-shadow:0 7px 22px rgba(65,50,72,.025)}.fg-shell-head{display:flex;justify-content:space-between;gap:12px;align-items:flex-start}.fg-shell-head h3{margin:3px 0 0;font-size:19px;color:#48414b}.fg-shell-actions{display:flex;gap:7px;align-items:center;flex-wrap:wrap;justify-content:flex-end}.fg-goals{display:grid;gap:12px;margin-top:13px}.fg-goal-card{padding:15px;border-radius:20px;background:linear-gradient(140deg,rgba(248,244,252,.88),rgba(239,247,248,.82));border:1px solid rgba(104,88,120,.07)}.fg-goal-head{display:flex;justify-content:space-between;gap:12px;align-items:flex-start}.fg-goal-head h3{margin:2px 0 0;font-size:18px}.fg-goal-head p{margin:4px 0 0;font-size:11px;color:#8a808b}.fg-edit{border:0;background:transparent;color:#7b6d83;font-weight:700}.fg-goal-summary{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin:12px 0}.fg-goal-summary>div{padding:11px;border-radius:15px;background:rgba(255,255,255,.48)}.fg-goal-summary span,.fg-goal-summary strong{display:block}.fg-goal-summary span{font-size:10px;color:#8c818e}.fg-goal-summary strong{margin-top:3px;font-size:14px}.fg-period-list{display:grid;gap:6px}.fg-period-row{display:grid;grid-template-columns:minmax(0,1fr) auto 32px;gap:8px;align-items:center;padding:10px 0;border-top:1px solid rgba(95,78,106,.07)}.fg-period-row:first-child{border-top:0}.fg-period-row strong,.fg-period-row small{display:block}.fg-period-row small{font-size:10px;color:#918793;margin-top:2px}.fg-period-values{text-align:right}.fg-period-values b,.fg-period-values span{display:block}.fg-period-values b{font-size:13px}.fg-period-values span{font-size:9.5px;color:#918793;margin-top:2px}.fg-plus{width:30px;height:30px;border-radius:50%;border:0;background:linear-gradient(135deg,#ded3ee,#d6e8ef);color:#655b70;font-size:17px}.fg-editor-head{display:flex;justify-content:space-between;align-items:center;gap:8px;margin:10px 0}.fg-period-editor{display:grid;gap:8px}.fg-period-edit{display:grid;grid-template-columns:1.3fr 1fr 1fr 34px;gap:6px;align-items:center}.fg-period-edit input{min-width:0}.fgRemovePeriod{width:34px;height:34px;border-radius:50%;border:1px solid rgba(151,93,103,.16);background:transparent;color:#95666e;font-size:18px}.fg-existing{margin-top:10px;padding:12px;border-radius:16px;background:rgba(245,241,248,.65)}.fg-existing>strong{display:block;margin-bottom:7px}.fg-existing>div{display:flex;justify-content:space-between;gap:10px;padding:6px 0;border-top:1px solid rgba(95,78,106,.06);font-size:11px}.progress-fin-goals{display:grid;gap:8px;margin-top:9px}.progress-fin-goals>.eyebrow{margin:8px 3px 0}.progress-fin-goal{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:5px 12px;padding:14px 15px;border-radius:19px;background:rgba(255,249,241,.94);border:1px solid rgba(112,91,115,.06)}.progress-fin-goal strong,.progress-fin-goal small{display:block}.progress-fin-goal small{font-size:10.5px;color:#918793;margin-top:3px}.progress-fin-goal>b{align-self:center;font-size:14px;color:#6f6273}.progress-fin-goal-plan{grid-column:1/-1;display:flex;justify-content:space-between;gap:10px;padding-top:8px;border-top:1px solid rgba(95,78,106,.06);font-size:10.5px;color:#8d828e}@media(max-width:520px){.fg-goal-summary{grid-template-columns:1fr}.fg-period-edit{grid-template-columns:1fr 1fr 34px}.fg-period-edit .fgLabel{grid-column:1/-1}.fg-shell-head{align-items:flex-start}.fg-shell-actions{max-width:48%}}
+  `;document.head.appendChild(st);}
+})();
+
+/* BERTH.A v2.8.194 — Fluxo do dinheiro
+   Base: v2.8.193 homologada. Camada cirúrgica: registra COMO saiu e DE ONDE veio,
+   sem alterar metas, navegação, privacidade ou cálculo já homologado. */
+(()=>{
+  const priorOpenFinModal194 = openFinModal;
+  const priorRenderFinanceiro194 = renderFinanceiro;
+  const priorProgressFinanceRow194 = progressFinanceRow;
+  const METHOD_DEFAULTS_194=['Pix','Boleto','Débito','Crédito','Transferência','Dinheiro','Débito automático'];
+  const SOURCE_DEFAULTS_194=['Salário','Aluguel','Reembolso','Ajuda de terceiro','Reserva','Outra entrada'];
+
+  function unique194(arr){
+    const seen=new Set();return (arr||[]).map(x=>String(x||'').trim()).filter(x=>x&&!seen.has(x.toLocaleLowerCase('pt-BR'))&&seen.add(x.toLocaleLowerCase('pt-BR')));
+  }
+  function monthTx194(d,month){
+    return finPersonal(d.transactions||[]).filter(t=>String(t.date||'').slice(0,7)===month);
+  }
+  function group194(items,keyFn){
+    const map=new Map();
+    items.forEach(t=>{const key=String(keyFn(t)||'Não informado').trim()||'Não informado';if(!map.has(key))map.set(key,{label:key,total:0,items:[]});const g=map.get(key);g.total+=Number(t.value||0);g.items.push(t);});
+    return [...map.values()].sort((a,b)=>b.total-a.total);
+  }
+  function flowData194(){
+    const d=loadFin(),month=finCurrentMonth(),tx=monthTx194(d,month);
+    return {d,month,tx,total:tx.reduce((s,t)=>s+Number(t.value||0),0),bySource:group194(tx,t=>t.paymentSource),byMethod:group194(tx,t=>t.paymentMethod),byCategory:group194(tx,t=>t.category)};
+  }
+  function flowGroupHtml194(title,subtitle,groups,compact=false){
+    const rows=groups.length?groups.map(g=>`<details class="fin-flow-group"><summary><span>${escapeHtml(g.label)}</span><b>R$ ${money(g.total)}</b></summary><div class="fin-flow-audit">${g.items.slice().reverse().map(t=>`<div><span>${escapeHtml(t.name||'Lançamento')}${t.date?` · ${formatDate(t.date)}`:''}</span><strong>R$ ${money(t.value)}</strong></div>`).join('')}</div></details>`).join(''):`<div class="fin-flow-empty">Ainda não há informação suficiente.</div>`;
+    return `<section class="${compact?'progress-fin-flow-block':'fin-flow-block'}"><div class="fin-flow-title"><div><span class="eyebrow">${escapeHtml(title)}</span><small>${escapeHtml(subtitle)}</small></div></div>${rows}</section>`;
+  }
+  function flowFinanceHtml194(){
+    const f=flowData194();
+    return `<div class="section-title">FLUXO DO DINHEIRO</div><section class="card fin-flow-shell"><div class="panel-head"><div><span class="eyebrow">${escapeHtml(finMonthLabel(f.month))}</span><h3>Como o dinheiro circulou</h3></div><strong class="fin-flow-total">R$ ${money(f.total)}</strong></div><p class="note">Os totais abaixo usam somente gastos efetivamente registrados. Toque em cada linha para ver o que compõe o valor.</p>${flowGroupHtml194('DE ONDE VEIO','Origem do dinheiro usado para pagar',f.bySource)}${flowGroupHtml194('COMO FOI PAGO','Forma usada para a saída',f.byMethod)}${flowGroupHtml194('PARA ONDE FOI','Destino por categoria',f.byCategory)}</section>`;
+  }
+  function installFlowInFinance194(){
+    if(location.hash!=='#financeiro')return;
+    const root=document.getElementById('app');if(!root||root.querySelector('.fin-flow-shell'))return;
+    const categoryTitle=[...root.querySelectorAll('.section-title')].find(x=>x.textContent.trim()==='POR CATEGORIA');
+    const categoryCard=categoryTitle?.nextElementSibling;
+    if(categoryCard)categoryCard.insertAdjacentHTML('afterend',flowFinanceHtml194());
+    else root.insertAdjacentHTML('beforeend',flowFinanceHtml194());
+  }
+
+  openFinModal=function(type){
+    if(type!=='transaction')return priorOpenFinModal194(type);
+    const d=loadFin(),dlg=document.createElement('dialog');dlg.className='fin-planned-dialog fin-unified-dialog';
+    const methods=unique194([...METHOD_DEFAULTS_194,...(d.paymentMethods||[])]),sources=unique194([...SOURCE_DEFAULTS_194,...(d.paymentSources||[])]);
+    dlg.innerHTML=`<form method="dialog" class="modal-card" id="finForm194"><div class="modal-head"><div><div class="eyebrow">FINANCEIRO</div><h2>Registrar gasto</h2></div><button type="button" class="icon-btn fin-modal-x" data-fin-close aria-label="Fechar">×</button></div><label>Descrição<input id="fName194" required maxlength="100"></label><div class="form-grid"><label>Valor<input id="fValue194" required type="number" min="0" step="0.01" inputmode="decimal"></label><label>Categoria<select id="fCategory194">${['Casa','Alimentação','Transporte','Animais','Cartão','Dívidas','Henrique','Assinaturas','Saúde','Autocuidado','Lazer','Variável','Outros'].map(c=>`<option>${c}</option>`).join('')}</select></label></div><label>Data<input id="fDate194" type="date" value="${todayISO()}"></label><div class="fin-flow-fields"><label>Como foi pago<input id="fMethod194" list="finMethodList194" maxlength="50" placeholder="Ex.: Pix, débito, crédito"><datalist id="finMethodList194">${methods.map(x=>`<option value="${escapeHtml(x)}"></option>`).join('')}</datalist><small>Forma usada para a saída.</small></label><label>De onde veio o dinheiro<input id="fSource194" list="finSourceList194" maxlength="60" placeholder="Ex.: salário, aluguel, reserva"><datalist id="finSourceList194">${sources.map(x=>`<option value="${escapeHtml(x)}"></option>`).join('')}</datalist><small>Origem do recurso que bancou este gasto.</small></label></div><div class="modal-actions"><div class="grow"></div><button type="button" class="secondary" id="cancelFin194">Cancelar</button><button class="primary">Salvar</button></div></form>`;
+    document.body.appendChild(dlg);dlg.showModal();const close=bindFinanceModalClose(dlg);dlg.querySelector('#cancelFin194').onclick=e=>{e.preventDefault();close()};
+    dlg.querySelector('#finForm194').onsubmit=e=>{e.preventDefault();const method=dlg.querySelector('#fMethod194').value.trim(),source=dlg.querySelector('#fSource194').value.trim();d.transactions.push({id:uid(),name:dlg.querySelector('#fName194').value.trim(),value:Number(dlg.querySelector('#fValue194').value||0),category:dlg.querySelector('#fCategory194').value,date:dlg.querySelector('#fDate194').value||todayISO(),paymentMethod:method,paymentSource:source,updatedAt:Date.now()});d.paymentMethods=unique194([...(d.paymentMethods||[]),method]);d.paymentSources=unique194([...(d.paymentSources||[]),source]);saveFin(d);dlg.close();dlg.remove();renderFinanceiro();};
+  };
+
+  renderFinanceiro=function(){priorRenderFinanceiro194();installFlowInFinance194();applyFinPrivacyNative();};
+
+  progressFinanceRow=function(){
+    const base=priorProgressFinanceRow194();
+    const f=flowData194();if(!f.tx.length)return base;
+    const extra=`<div class="progress-fin-flow"><span class="eyebrow">FLUXO DO DINHEIRO · ${escapeHtml(finMonthLabel(f.month).toUpperCase())}</span><div class="progress-fin-flow-total"><span>Saídas registradas</span><strong>R$ ${money(f.total)}</strong></div>${flowGroupHtml194('DE ONDE VEIO','Origem do recurso',f.bySource,true)}${flowGroupHtml194('COMO FOI PAGO','Forma de pagamento',f.byMethod,true)}${flowGroupHtml194('PARA ONDE FOI','Categorias das saídas',f.byCategory,true)}</div>`;
+    return base+extra;
+  };
+
+  document.addEventListener('click',e=>{
+    if(!e.target.closest?.('[data-fin-pay]'))return;
+    setTimeout(()=>{
+      const dlg=[...document.querySelectorAll('dialog.fin-planned-dialog[open]')].pop();if(!dlg)return;
+      const method=dlg.querySelector('#pbMethod'),source=dlg.querySelector('#pbSource');
+      if(method){const lab=method.closest('label');if(lab&&lab.firstChild?.nodeType===3)lab.firstChild.nodeValue='Como foi pago';method.placeholder='Ex.: Pix, débito, crédito';}
+      if(source){const lab=source.closest('label');if(lab&&lab.firstChild?.nodeType===3)lab.firstChild.nodeValue='De onde veio o dinheiro';source.placeholder='Ex.: salário, aluguel, reserva';const list=dlg.querySelector('#finSourceList');if(list){const existing=new Set([...list.options].map(o=>o.value.toLocaleLowerCase('pt-BR')));SOURCE_DEFAULTS_194.forEach(v=>{if(!existing.has(v.toLocaleLowerCase('pt-BR'))){const o=document.createElement('option');o.value=v;list.appendChild(o);}})}}
+    },0);
+  });
+
+  if(!document.getElementById('finance-flow-v194-styles')){const st=document.createElement('style');st.id='finance-flow-v194-styles';st.textContent=`
+    .fin-flow-fields{display:grid;grid-template-columns:1fr 1fr;gap:10px}.fin-flow-fields label{min-width:0}.fin-flow-fields small{display:block;margin-top:5px;color:#918793;font-size:10.5px;line-height:1.35}.fin-flow-shell{padding:16px}.fin-flow-total{white-space:nowrap;color:#665a6b}.fin-flow-block{margin-top:14px;padding-top:13px;border-top:1px solid rgba(95,78,106,.07)}.fin-flow-title{margin-bottom:6px}.fin-flow-title small{display:block;margin-top:3px;color:#918793;font-size:10.5px}.fin-flow-group{border-top:1px solid rgba(95,78,106,.065)}.fin-flow-group:first-of-type{border-top:0}.fin-flow-group summary{list-style:none;display:flex;justify-content:space-between;gap:12px;align-items:center;padding:10px 1px;cursor:pointer}.fin-flow-group summary::-webkit-details-marker{display:none}.fin-flow-group summary span{font-size:12px;color:#615763}.fin-flow-group summary b{font-size:12px;color:#665a6b;white-space:nowrap}.fin-flow-group summary:after{content:'›';font-size:17px;color:#9a909d;transform:rotate(90deg);margin-left:2px}.fin-flow-group[open] summary:after{transform:rotate(-90deg)}.fin-flow-audit{padding:0 0 8px 9px}.fin-flow-audit>div{display:flex;justify-content:space-between;gap:10px;padding:6px 0;color:#8a808b;font-size:10.5px}.fin-flow-audit strong{color:#726775;white-space:nowrap}.fin-flow-empty{padding:9px 0;color:#918793;font-size:11px}.progress-fin-flow{display:grid;gap:8px;margin-top:12px}.progress-fin-flow>.eyebrow{margin:8px 3px 0}.progress-fin-flow-total{display:flex;justify-content:space-between;gap:12px;padding:13px 15px;border-radius:18px;background:rgba(255,249,241,.94);border:1px solid rgba(112,91,115,.06)}.progress-fin-flow-total span{color:#817783;font-size:11px}.progress-fin-flow-total strong{color:#625765}.progress-fin-flow-block{padding:12px 14px;border-radius:18px;background:rgba(255,249,241,.82);border:1px solid rgba(112,91,115,.055)}.progress-fin-flow-block .fin-flow-title{margin-bottom:3px}.progress-fin-flow-block .fin-flow-group summary{padding:8px 0}.progress-fin-flow-block .fin-flow-audit{padding-left:4px}
+    @media(max-width:560px){.fin-flow-fields{grid-template-columns:1fr}.fin-flow-shell .panel-head{align-items:flex-start}.fin-flow-total{font-size:14px}}
+  `;document.head.appendChild(st);}
+
+  window.__berthaFinanceFlow194={flowData:flowData194};
+})();
+
+/* BERTH.A v2.8.195 — Fluxo do dinheiro: correção de renderização
+   Base funcional homologada: v193 + registro v194. Não altera dados, metas ou cálculos. */
+(()=>{
+  const priorFinance195 = renderFinanceiro;
+  const priorProgress195 = renderProgressOverview;
+
+  function flow195(){
+    const d=loadFin(), month=finCurrentMonth();
+    const tx=finPersonal(d.transactions||[]).filter(t=>String(t.date||'').slice(0,7)===month);
+    const group=(key)=>{
+      const m=new Map();
+      tx.forEach(t=>{const label=String(t[key]||'Não informado').trim()||'Não informado';if(!m.has(label))m.set(label,{label,total:0,items:[]});const g=m.get(label);g.total+=Number(t.value||0);g.items.push(t)});
+      return [...m.values()].sort((a,b)=>b.total-a.total);
+    };
+    return {month,tx,total:tx.reduce((s,t)=>s+Number(t.value||0),0),source:group('paymentSource'),method:group('paymentMethod'),category:group('category')};
+  }
+  function auditRows195(groups){
+    if(!groups.length)return '<div class="fin-flow-empty">Ainda não há informação suficiente.</div>';
+    return groups.map(g=>`<details class="fin-flow-group"><summary><span>${escapeHtml(g.label)}</span><b>R$ ${money(g.total)}</b></summary><div class="fin-flow-audit">${g.items.slice().reverse().map(t=>`<div><span>${escapeHtml(t.name||'Lançamento')}${t.date?` · ${formatDate(t.date)}`:''}</span><strong>R$ ${money(t.value)}</strong></div>`).join('')}</div></details>`).join('');
+  }
+  function financeBlock195(){
+    const f=flow195();
+    return `<div class="fin-flow-v195"><div class="section-title">FLUXO DO DINHEIRO</div><section class="card fin-flow-shell"><div class="panel-head"><div><span class="eyebrow">${escapeHtml(finMonthLabel(f.month).toUpperCase())}</span><h3>Como o dinheiro circulou</h3></div><strong class="fin-flow-total">R$ ${money(f.total)}</strong></div><p class="note">Toque nas linhas para conferir exatamente quais lançamentos formam cada valor.</p><div class="fin-flow-block"><div class="fin-flow-title"><div><span class="eyebrow">DE ONDE VEIO</span><small>Origem do dinheiro usado para pagar</small></div></div>${auditRows195(f.source)}</div><div class="fin-flow-block"><div class="fin-flow-title"><div><span class="eyebrow">COMO FOI PAGO</span><small>Forma usada para a saída</small></div></div>${auditRows195(f.method)}</div><div class="fin-flow-block"><div class="fin-flow-title"><div><span class="eyebrow">PARA ONDE FOI</span><small>Destino por categoria</small></div></div>${auditRows195(f.category)}</div></section></div>`;
+  }
+  function progressBlock195(){
+    const f=flow195();
+    if(!f.tx.length)return '';
+    const group=(title,subtitle,groups)=>`<section class="progress-fin-flow-block"><div class="fin-flow-title"><div><span class="eyebrow">${title}</span><small>${subtitle}</small></div></div>${auditRows195(groups)}</section>`;
+    return `<div class="progress-fin-flow-v195"><span class="eyebrow">FLUXO DO DINHEIRO · ${escapeHtml(finMonthLabel(f.month).toUpperCase())}</span><div class="progress-fin-flow-total"><span>Saídas registradas</span><strong>R$ ${money(f.total)}</strong></div>${group('DE ONDE VEIO','Origem do recurso',f.source)}${group('COMO FOI PAGO','Forma de pagamento',f.method)}${group('PARA ONDE FOI','Categorias das saídas',f.category)}</div>`;
+  }
+  function injectFinance195(){
+    const root=document.getElementById('app');if(!root)return;
+    root.querySelectorAll('.fin-flow-v195').forEach(n=>n.remove());
+    // Remove a renderização v194 se tiver entrado, para não duplicar.
+    root.querySelectorAll('.fin-flow-shell').forEach(n=>{if(!n.closest('.fin-flow-v195')){const prev=n.previousElementSibling;if(prev?.classList.contains('section-title')&&prev.textContent.trim()==='FLUXO DO DINHEIRO')prev.remove();n.remove();}});
+    const metaTitle=[...root.querySelectorAll('.section-title')].find(x=>x.textContent.trim()==='METAS FINANCEIRAS');
+    if(metaTitle)metaTitle.insertAdjacentHTML('beforebegin',financeBlock195());
+    else root.insertAdjacentHTML('beforeend',financeBlock195());
+  }
+  function injectProgress195(){
+    const root=document.getElementById('app');if(!root)return;
+    root.querySelectorAll('.progress-fin-flow-v195,.progress-fin-flow').forEach(n=>n.remove());
+    const html=progressBlock195();if(!html)return;
+    const list=root.querySelector('.progress-practical-list');if(!list)return;
+    const goals=list.querySelector('.progress-fin-goals');
+    if(goals)goals.insertAdjacentHTML('afterend',html);
+    else list.insertAdjacentHTML('beforeend',html);
+  }
+
+  renderFinanceiro=function(){priorFinance195();injectFinance195();applyFinPrivacyNative();};
+  window.renderFinanceiro=renderFinanceiro;
+  window.__berthaCoreRenderFinanceiro=renderFinanceiro;
+
+  renderProgressOverview=function(){priorProgress195();injectProgress195();};
+  window.renderProgressOverview=renderProgressOverview;
+
+  if(!document.getElementById('finance-flow-v195-styles')){
+    const st=document.createElement('style');st.id='finance-flow-v195-styles';st.textContent=`
+      .fin-flow-v195{display:block}.progress-fin-flow-v195{display:grid;gap:8px;margin-top:9px}.progress-fin-flow-v195>.eyebrow{margin:8px 3px 0}.progress-fin-flow-v195 .fin-flow-group summary{padding:8px 0}.progress-fin-flow-v195 .fin-flow-audit{padding-left:4px}
+    `;document.head.appendChild(st);
+  }
+})();
+
+/* BERTH.A v2.8.196 — Fontes financeiras + resumo editorial do fluxo
+   Base: v195 validada. Mantém metas, navegação, privacidade e histórico.
+   Remove fontes pessoais pré-definidas da UX e passa a usar cadastro do próprio usuário. */
+(()=>{
+  const priorFinance196 = renderFinanceiro;
+  const priorProgress196 = renderProgressOverview;
+  const priorOpenFinModal196 = openFinModal;
+  const METHODS_196=['Pix','Boleto','Débito','Crédito','Transferência','Dinheiro','Débito automático'];
+
+  function sources196(d=loadFin()){
+    return Array.isArray(d.financialSources)?d.financialSources.filter(s=>s&&s.active!==false):[];
+  }
+  function sourceTotal196(d=loadFin()){
+    const s=sources196(d);return s.length?s.reduce((sum,x)=>sum+Number(x.monthlyEntry||0),0):Number(d.income||0);
+  }
+  function monthTx196(d=loadFin(),month=finCurrentMonth()){
+    return finPersonal(d.transactions||[]).filter(t=>String(t.date||'').slice(0,7)===month);
+  }
+  function same196(a,b){return String(a||'').trim().toLocaleLowerCase('pt-BR')===String(b||'').trim().toLocaleLowerCase('pt-BR');}
+  function sourceRows196(d=loadFin(),month=finCurrentMonth()){
+    const tx=monthTx196(d,month),rows=sources196(d).map(s=>{
+      const out=tx.filter(t=>same196(t.paymentSource,s.name)).reduce((sum,t)=>sum+Number(t.value||0),0);
+      const incoming=Number(s.monthlyEntry||0);
+      return {...s,incoming,out,balance:incoming-out};
+    });
+    const registered=new Set(rows.map(s=>String(s.name||'').trim().toLocaleLowerCase('pt-BR')));
+    const unregistered=tx.filter(t=>{const k=String(t.paymentSource||'').trim().toLocaleLowerCase('pt-BR');return !k||!registered.has(k)});
+    const unregisteredOut=unregistered.reduce((sum,t)=>sum+Number(t.value||0),0);
+    return {rows,unregisteredOut,unregistered};
+  }
+  function totals196(d=loadFin(),month=finCurrentMonth()){
+    const incoming=sourceTotal196(d),out=monthTx196(d,month).reduce((s,t)=>s+Number(t.value||0),0);
+    return {incoming,out,balance:incoming-out};
+  }
+  function sourceOptions196(d=loadFin()){
+    return sources196(d).map(s=>s.name).filter(Boolean);
+  }
+  function saveSources196(d){
+    d.financialSources=Array.isArray(d.financialSources)?d.financialSources:[];
+    // Fontes explicam a origem do dinheiro; não substituem a renda mensal geral.
+    saveFin(d);
+  }
+  function repairIncome197(){
+    const marker='bertha.fin197.income-repair.v1';
+    if(window.berthaHmlStorage.getItem(marker)==='done')return;
+    const d=loadFin(), src=sources196(d);
+    const sourceSum=src.reduce((sum,x)=>sum+Number(x.monthlyEntry||0),0);
+    const baseIncome=(typeof FIN_BASE!=='undefined'&&FIN_BASE&&Number(FIN_BASE.income||0))||0;
+    // v196 sobrescrevia d.income com a soma das fontes. Repara somente esse caso reconhecível.
+    if(src.length && baseIncome>0 && Math.abs(Number(d.income||0)-sourceSum)<0.01 && Math.abs(baseIncome-sourceSum)>0.01){
+      d.income=baseIncome;
+      saveFin(d);
+    }
+    window.berthaHmlStorage.setItem(marker,'done');
+  }
+  function sourceModal196(id=null){
+    const d=loadFin();d.financialSources=Array.isArray(d.financialSources)?d.financialSources:[];
+    const old=id?d.financialSources.find(s=>String(s.id)===String(id)):null;
+    const s=old?{...old}:{id:uid(),name:'',monthlyEntry:'',note:'',active:true};
+    const dlg=document.createElement('dialog');dlg.className='fin-planned-dialog fin-unified-dialog fin-source-dialog';
+    dlg.innerHTML=`<form method="dialog" class="modal-card" id="finSourceForm196"><div class="modal-head"><div><div class="eyebrow">FONTE FINANCEIRA</div><h2>${old?'Editar fonte':'Nova fonte'}</h2></div><button type="button" class="icon-btn fin-modal-x" data-fin-close aria-label="Fechar">×</button></div><label>Nome da fonte<input id="fsName196" required maxlength="60" value="${escapeHtml(s.name||'')}" placeholder="Ex.: salário, conta principal, aluguel"></label><label>Entrada mensal conhecida<input id="fsEntry196" type="number" min="0" step="0.01" inputmode="decimal" value="${Number(s.monthlyEntry||0)||''}" placeholder="0,00"><small>É o valor que esta fonte coloca à disposição no mês.</small></label><label>Observação <span class="optional">opcional</span><input id="fsNote196" maxlength="100" value="${escapeHtml(s.note||'')}" placeholder="Ex.: recebe dia 5"></label>${old?'<button type="button" class="fin-delete-bill fin-danger-soft" id="deleteSource196">Excluir fonte</button>':''}<div class="modal-actions"><div class="grow"></div><button type="button" class="secondary" id="cancelSource196">Cancelar</button><button class="primary">Salvar fonte</button></div></form>`;
+    document.body.appendChild(dlg);dlg.showModal();const close=bindFinanceModalClose(dlg);dlg.querySelector('#cancelSource196').onclick=e=>{e.preventDefault();close()};
+    if(old)dlg.querySelector('#deleteSource196').onclick=()=>{if(!confirm(`Excluir a fonte “${old.name}”? Os lançamentos anteriores serão preservados.`))return;d.financialSources=d.financialSources.filter(x=>String(x.id)!==String(old.id));saveSources196(d);dlg.close();dlg.remove();renderFinanceiro();};
+    dlg.querySelector('#finSourceForm196').onsubmit=e=>{e.preventDefault();const name=dlg.querySelector('#fsName196').value.trim();if(!name)return;const obj={...s,id:s.id||uid(),name,monthlyEntry:Number(dlg.querySelector('#fsEntry196').value||0),note:dlg.querySelector('#fsNote196').value.trim(),active:true,updatedAt:Date.now()};d.financialSources=old?d.financialSources.map(x=>String(x.id)===String(old.id)?obj:x):[...d.financialSources,obj];saveSources196(d);dlg.close();dlg.remove();renderFinanceiro();};
+  }
+  function summaryMetrics196(t){
+    return `<div class="fin-flow-metrics196"><div><span>Entradas</span><strong>R$ ${money(t.incoming)}</strong></div><div><span>Saídas</span><strong>R$ ${money(t.out)}</strong></div><div><span>Saldo</span><strong>R$ ${money(t.balance)}</strong></div></div>`;
+  }
+  function financeSourcesHtml196(){
+    const d=loadFin(),month=finCurrentMonth(),data=sourceRows196(d,month),t=totals196(d,month);
+    const cards=data.rows.length?data.rows.map(s=>`<button type="button" class="fin-source-row196" data-fin-source-edit196="${escapeHtml(s.id)}"><div class="fin-source-name196"><strong>${escapeHtml(s.name)}</strong>${s.note?`<small>${escapeHtml(s.note)}</small>`:''}</div><div class="fin-source-numbers196"><span>Entrada <b>R$ ${money(s.incoming)}</b></span><span>Saídas <b>R$ ${money(s.out)}</b></span><span>Saldo <b>R$ ${money(s.balance)}</b></span></div><span class="fin-source-arrow196">›</span></button>`).join(''):`<div class="fin-source-empty196"><strong>Cadastre as fontes que sustentam o seu mês.</strong><span>Elas podem ser salário, aluguel, uma conta, uma reserva ou qualquer origem que faça sentido para você.</span></div>`;
+    const orphan=data.unregisteredOut>0?`<div class="fin-source-orphan196"><span>Saídas ainda sem fonte cadastrada</span><strong>R$ ${money(data.unregisteredOut)}</strong></div>`:'';
+    return `<div class="fin-sources-v196"><div class="section-title">FONTES DO DINHEIRO</div><section class="card fin-sources-shell196"><div class="panel-head"><div><span class="eyebrow">${escapeHtml(finMonthLabel(month).toUpperCase())}</span><h3>De onde o dinheiro vem</h3></div><button type="button" class="secondary compact-btn" id="addSource196">＋ Nova fonte</button></div>${summaryMetrics196(t)}<div class="fin-source-list196">${cards}</div>${orphan}</section></div>`;
+  }
+  function audit196(items,key){
+    const m=new Map();items.forEach(t=>{const label=String(t[key]||'Não informado').trim()||'Não informado';if(!m.has(label))m.set(label,{label,total:0,items:[]});const g=m.get(label);g.total+=Number(t.value||0);g.items.push(t)});
+    const groups=[...m.values()].sort((a,b)=>b.total-a.total);if(!groups.length)return '<div class="fin-flow-empty">Sem lançamentos neste mês.</div>';
+    return groups.map(g=>`<details class="fin-flow-group"><summary><span>${escapeHtml(g.label)}</span><b>R$ ${money(g.total)}</b></summary><div class="fin-flow-audit">${g.items.slice().reverse().map(t=>`<div><span>${escapeHtml(t.name||'Lançamento')}${t.date?` · ${formatDate(t.date)}`:''}</span><strong>R$ ${money(t.value)}</strong></div>`).join('')}</div></details>`).join('');
+  }
+  function financeFlowCompact196(){
+    const d=loadFin(),month=finCurrentMonth(),tx=monthTx196(d,month);
+    return `<div class="fin-flow-v196"><div class="section-title">FLUXO DO MÊS</div><section class="card fin-flow-shell196"><div class="panel-head"><div><span class="eyebrow">${escapeHtml(finMonthLabel(month).toUpperCase())}</span><h3>Como o dinheiro saiu</h3></div></div><div class="fin-flow-detail196"><div class="fin-flow-mini196"><span class="eyebrow">COMO FOI PAGO</span>${audit196(tx,'paymentMethod')}</div><div class="fin-flow-mini196"><span class="eyebrow">PARA ONDE FOI</span>${audit196(tx,'category')}</div></div></section></div>`;
+  }
+  repairIncome197();
+  function injectFinance196(){
+    const root=document.getElementById('app');if(!root)return;
+    root.querySelectorAll('.fin-flow-v195,.fin-flow-v196,.fin-sources-v196').forEach(n=>n.remove());
+    root.querySelectorAll('.fin-flow-shell').forEach(n=>{const p=n.previousElementSibling;if(p?.classList.contains('section-title')&&p.textContent.trim()==='FLUXO DO DINHEIRO')p.remove();n.remove();});
+    const summary=root.querySelector('.finance-summary');
+    if(summary){summary.insertAdjacentHTML('afterend',financeSourcesHtml196());const main=summary.querySelector('.finance-main');if(main){const eye=main.querySelector('.eyebrow');if(eye)eye.textContent=sources196().length?'RECEITAS CONHECIDAS':'RENDA MENSAL';const btn=main.querySelector('#editIncome');if(btn){btn.textContent=sources196().length?'fontes':'cadastrar fontes';btn.onclick=()=>sourceModal196();}}}
+    const metaTitle=[...root.querySelectorAll('.section-title')].find(x=>x.textContent.trim()==='METAS FINANCEIRAS');if(metaTitle)metaTitle.insertAdjacentHTML('beforebegin',financeFlowCompact196());else root.insertAdjacentHTML('beforeend',financeFlowCompact196());
+    root.querySelector('#addSource196')?.addEventListener('click',()=>sourceModal196());
+    root.querySelectorAll('[data-fin-source-edit196]').forEach(b=>b.onclick=()=>sourceModal196(b.dataset.finSourceEdit196));
+  }
+  function progressFlow196(){
+    const d=loadFin(),month=finCurrentMonth(),t=totals196(d,month),data=sourceRows196(d,month);
+    const rows=data.rows.map(s=>`<div class="progress-source-row196"><strong>${escapeHtml(s.name)}</strong><span><small>Entradas</small><b>R$ ${money(s.incoming)}</b></span><span><small>Saídas</small><b>R$ ${money(s.out)}</b></span><span><small>Saldo</small><b>R$ ${money(s.balance)}</b></span></div>`).join('');
+    return `<div class="progress-fin-flow-v196"><span class="eyebrow">FLUXO FINANCEIRO · ${escapeHtml(finMonthLabel(month).toUpperCase())}</span>${summaryMetrics196(t)}${rows?`<div class="progress-source-list196">${rows}</div>`:'<div class="progress-source-empty196">Cadastre suas fontes no Financeiro para ver o saldo de cada uma aqui.</div>'}</div>`;
+  }
+  function injectProgress196(){
+    const root=document.getElementById('app');if(!root)return;
+    root.querySelectorAll('.progress-fin-flow-v195,.progress-fin-flow,.progress-fin-flow-v196').forEach(n=>n.remove());
+    const list=root.querySelector('.progress-practical-list');if(!list)return;
+    const goals=list.querySelector('.progress-fin-goals');if(goals)goals.insertAdjacentHTML('afterend',progressFlow196());else list.insertAdjacentHTML('beforeend',progressFlow196());
+  }
+
+  openFinModal=function(type){
+    if(type!=='transaction')return priorOpenFinModal196(type);
+    const d=loadFin(),dlg=document.createElement('dialog');dlg.className='fin-planned-dialog fin-unified-dialog';
+    const methods=[...new Set([...METHODS_196,...(d.paymentMethods||[])].filter(Boolean))],sources=sourceOptions196(d);
+    dlg.innerHTML=`<form method="dialog" class="modal-card" id="finForm196"><div class="modal-head"><div><div class="eyebrow">FINANCEIRO</div><h2>Registrar gasto</h2></div><button type="button" class="icon-btn fin-modal-x" data-fin-close aria-label="Fechar">×</button></div><label>Descrição<input id="fName196" required maxlength="100"></label><div class="form-grid"><label>Valor<input id="fValue196" required type="number" min="0" step="0.01" inputmode="decimal"></label><label>Categoria<select id="fCategory196">${['Casa','Alimentação','Transporte','Animais','Cartão','Dívidas','Henrique','Assinaturas','Saúde','Autocuidado','Lazer','Variável','Outros'].map(c=>`<option>${c}</option>`).join('')}</select></label></div><label>Data<input id="fDate196" type="date" value="${todayISO()}"></label><div class="fin-flow-fields"><label>Como foi pago<input id="fMethod196" list="finMethodList196" maxlength="50" placeholder="Ex.: Pix, débito, crédito"><datalist id="finMethodList196">${methods.map(x=>`<option value="${escapeHtml(x)}"></option>`).join('')}</datalist><small>Forma usada para a saída.</small></label><label>Fonte do dinheiro<select id="fSource196"><option value="">Não informar</option>${sources.map(x=>`<option value="${escapeHtml(x)}">${escapeHtml(x)}</option>`).join('')}</select><small>${sources.length?'Escolha uma fonte cadastrada.':'Cadastre suas fontes no Financeiro para vinculá-las aos gastos.'}</small></label></div><div class="modal-actions"><div class="grow"></div><button type="button" class="secondary" id="cancelFin196">Cancelar</button><button class="primary">Salvar</button></div></form>`;
+    document.body.appendChild(dlg);dlg.showModal();const close=bindFinanceModalClose(dlg);dlg.querySelector('#cancelFin196').onclick=e=>{e.preventDefault();close()};
+    dlg.querySelector('#finForm196').onsubmit=e=>{e.preventDefault();const method=dlg.querySelector('#fMethod196').value.trim(),source=dlg.querySelector('#fSource196').value.trim();d.transactions.push({id:uid(),name:dlg.querySelector('#fName196').value.trim(),value:Number(dlg.querySelector('#fValue196').value||0),category:dlg.querySelector('#fCategory196').value,date:dlg.querySelector('#fDate196').value||todayISO(),paymentMethod:method,paymentSource:source,updatedAt:Date.now()});d.paymentMethods=[...new Set([...(d.paymentMethods||[]),method].filter(Boolean))];saveFin(d);dlg.close();dlg.remove();renderFinanceiro();};
+  };
+
+  // Contas previstas: a origem passa a usar apenas as fontes cadastradas.
+  document.addEventListener('click',e=>{
+    if(!e.target.closest?.('[data-fin-pay]'))return;
+    setTimeout(()=>{
+      const dlg=[...document.querySelectorAll('dialog.fin-planned-dialog[open]')].pop();if(!dlg)return;
+      const source=dlg.querySelector('#pbSource');if(!source)return;
+      const names=sourceOptions196();
+      const list=dlg.querySelector('#finSourceList');if(list)list.innerHTML=names.map(v=>`<option value="${escapeHtml(v)}"></option>`).join('');
+      source.setAttribute('placeholder',names.length?'Escolha uma fonte cadastrada':'Cadastre uma fonte no Financeiro');
+      source.value=names.some(n=>same196(n,source.value))?source.value:'';
+    },10);
+  },true);
+
+  renderFinanceiro=function(){priorFinance196();injectFinance196();applyFinPrivacyNative();};
+  window.renderFinanceiro=renderFinanceiro;window.__berthaCoreRenderFinanceiro=renderFinanceiro;
+  renderProgressOverview=function(){priorProgress196();injectProgress196();};window.renderProgressOverview=renderProgressOverview;
+
+  if(!document.getElementById('finance-v196-styles')){const st=document.createElement('style');st.id='finance-v196-styles';st.textContent=`
+    .fin-sources-shell196,.fin-flow-shell196{padding:17px;border-radius:25px;background:linear-gradient(145deg,rgba(255,253,249,.96),rgba(246,244,251,.76) 54%,rgba(238,247,248,.72));border:1px solid rgba(106,88,116,.07);box-shadow:0 10px 28px rgba(65,50,72,.025)}
+    .fin-flow-metrics196{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;margin:14px 0}.fin-flow-metrics196>div{padding:12px 10px;border-radius:16px;background:rgba(255,255,255,.52);border:1px solid rgba(108,90,116,.045);min-width:0}.fin-flow-metrics196 span,.fin-flow-metrics196 strong{display:block}.fin-flow-metrics196 span{font-size:10.5px;color:#918793}.fin-flow-metrics196 strong{margin-top:4px;font-size:13.5px;color:#5f5665;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+    .fin-source-list196{display:grid;gap:7px}.fin-source-row196{width:100%;border:0;background:rgba(255,253,250,.58);border-radius:17px;padding:12px 13px;display:grid;grid-template-columns:minmax(0,1fr) auto 14px;gap:10px;align-items:center;text-align:left;color:inherit;font:inherit}.fin-source-name196 strong,.fin-source-name196 small{display:block}.fin-source-name196 strong{font-size:13px;color:#504751}.fin-source-name196 small{margin-top:3px;font-size:9.5px;color:#988f99}.fin-source-numbers196{display:grid;grid-template-columns:repeat(3,auto);gap:11px;text-align:right}.fin-source-numbers196 span{font-size:9px;color:#968c98}.fin-source-numbers196 b{display:block;margin-top:2px;font-size:10.5px;color:#6b6070;white-space:nowrap}.fin-source-arrow196{font-size:19px;color:#a297a5}.fin-source-empty196{padding:13px 3px;color:#8f8491}.fin-source-empty196 strong,.fin-source-empty196 span{display:block}.fin-source-empty196 strong{font-size:12.5px;color:#625967}.fin-source-empty196 span{margin-top:4px;font-size:10.5px;line-height:1.45}.fin-source-orphan196{display:flex;justify-content:space-between;gap:12px;margin-top:9px;padding:10px 12px;border-radius:14px;background:rgba(248,241,244,.64);font-size:10.5px;color:#897d88}.fin-source-orphan196 strong{white-space:nowrap;color:#756876}
+    .fin-flow-detail196{display:grid;grid-template-columns:1fr 1fr;gap:9px}.fin-flow-mini196{padding:12px 13px;border-radius:17px;background:rgba(255,255,255,.38);border:1px solid rgba(106,88,116,.045)}.fin-flow-mini196>.eyebrow{display:block;margin-bottom:5px}.fin-flow-mini196 .fin-flow-group summary{padding:8px 0}.fin-flow-mini196 .fin-flow-audit{padding-left:2px}
+    .progress-fin-flow-v196{display:grid;gap:8px;margin-top:10px}.progress-fin-flow-v196>.eyebrow{margin:8px 3px 0}.progress-fin-flow-v196 .fin-flow-metrics196{margin:0}.progress-source-list196{display:grid;gap:7px}.progress-source-row196{display:grid;grid-template-columns:minmax(0,1.15fr) repeat(3,minmax(0,.85fr));gap:8px;align-items:center;padding:11px 13px;border-radius:17px;background:rgba(255,249,241,.82);border:1px solid rgba(112,91,115,.055)}.progress-source-row196>strong{font-size:11.5px;color:#5e5561;min-width:0;overflow:hidden;text-overflow:ellipsis}.progress-source-row196 span{text-align:right;min-width:0}.progress-source-row196 small,.progress-source-row196 b{display:block}.progress-source-row196 small{font-size:8.5px;color:#9a909b}.progress-source-row196 b{margin-top:2px;font-size:10px;color:#6d6270;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.progress-source-empty196{padding:12px 14px;border-radius:17px;background:rgba(255,249,241,.72);font-size:10.5px;line-height:1.45;color:#8d828e}
+    .fin-source-dialog label small{display:block;margin-top:5px;color:#918793;font-size:10.5px;line-height:1.35}
+    @media(max-width:560px){.fin-source-row196{grid-template-columns:minmax(0,1fr) 14px}.fin-source-numbers196{grid-column:1/-1;grid-row:2;grid-template-columns:repeat(3,1fr);text-align:left}.fin-source-arrow196{grid-column:2;grid-row:1}.fin-flow-detail196{grid-template-columns:1fr}.progress-source-row196{grid-template-columns:1fr repeat(3,minmax(0,.92fr));padding:10px}.progress-source-row196>strong{font-size:10.5px}.progress-source-row196 small{font-size:7.8px}.progress-source-row196 b{font-size:9.2px}.fin-flow-metrics196 strong{font-size:12.5px}}
+  `;document.head.appendChild(st);}
+})();
+
+/* v2.8.199 — acabamento final das metas financeiras */
+(function(){
+  const style=document.createElement('style');
+  style.textContent=`
+    .fg-shell-head{align-items:center}
+    .fg-shell-head h3{margin:0;font-size:19px;color:#48414b}
+    .fg-shell-actions{flex:0 0 auto;max-width:none}
+    .fg-period-row{grid-template-columns:minmax(0,1fr) minmax(168px,190px) 32px;column-gap:10px}
+    .fg-period-name{min-width:0}
+    .fg-period-values{width:100%;text-align:right;font-variant-numeric:tabular-nums lining-nums}
+    .fg-period-values b{font-size:13px;line-height:1.25;white-space:nowrap}
+    .fg-period-values span{display:flex;justify-content:flex-end;gap:4px;align-items:baseline;font-size:9.5px;line-height:1.3;white-space:nowrap}
+    .fg-period-values span i{font-style:normal;color:#9a909b}
+    .fg-goal-summary strong{font-variant-numeric:tabular-nums lining-nums}
+    @media(max-width:520px){
+      .fg-shell-head{display:grid;grid-template-columns:minmax(0,1fr) auto;align-items:center}
+      .fg-shell-actions{max-width:none}
+      .fg-period-row{grid-template-columns:minmax(0,1fr) 174px 32px;gap:8px}
+      .fg-period-values b{font-size:12.5px}
+      .fg-period-values span{font-size:9px}
+    }
+    @media(max-width:390px){
+      .fg-period-row{grid-template-columns:minmax(0,1fr) 154px 30px;gap:6px}
+      .fg-period-values span{font-size:8.6px;letter-spacing:-.01em}
+      .fg-plus{width:28px;height:28px}
+    }
+  `;
+  document.head.appendChild(style);
+})();
+
+/* v2.8.201 — alinhamento visual do bloco "Como o dinheiro saiu" */
+(function(){
+  if(document.getElementById('fin-flow-align-v200')) return;
+  const st=document.createElement('style');
+  st.id='fin-flow-align-v200';
+  st.textContent=`
+    .fin-flow-mini196 .fin-flow-group summary{
+      display:grid!important;
+      grid-template-columns:minmax(0,1fr) 118px 16px!important;
+      column-gap:10px!important;
+      align-items:center!important;
+      width:100%!important;
+      box-sizing:border-box!important;
+    }
+    .fin-flow-mini196 .fin-flow-group summary>span{
+      min-width:0!important;
+      text-align:left!important;
+    }
+    .fin-flow-mini196 .fin-flow-group summary>b{
+      width:118px!important;
+      justify-self:end!important;
+      text-align:right!important;
+      font-variant-numeric:tabular-nums!important;
+    }
+    .fin-flow-mini196 .fin-flow-group summary:after{
+      width:16px!important;
+      margin-left:0!important;
+      justify-self:end!important;
+      text-align:center!important;
+    }
+    .fin-flow-mini196 .fin-flow-audit>div{
+      display:grid!important;
+      grid-template-columns:minmax(0,1fr) 118px!important;
+      column-gap:10px!important;
+      align-items:center!important;
+    }
+    .fin-flow-mini196 .fin-flow-audit strong{
+      width:118px!important;
+      justify-self:end!important;
+      text-align:right!important;
+      font-variant-numeric:tabular-nums!important;
+    }
+    @media(max-width:560px){
+      .fin-flow-mini196 .fin-flow-group summary{
+        grid-template-columns:minmax(0,1fr) 110px 16px!important;
+        column-gap:8px!important;
+      }
+      .fin-flow-mini196 .fin-flow-group summary>b,
+      .fin-flow-mini196 .fin-flow-audit strong{width:110px!important}
+      .fin-flow-mini196 .fin-flow-audit>div{grid-template-columns:minmax(0,1fr) 110px!important;column-gap:8px!important}
+    }
+  `;
+  document.head.appendChild(st);
+})();
+
+
+/* v2.8.201 — coluna absoluta para valores do bloco "Como o dinheiro saiu" */
+(function(){
+  if(document.getElementById('fin-flow-align-v201')) return;
+  const st=document.createElement('style');
+  st.id='fin-flow-align-v201';
+  st.textContent=`
+    .fin-flow-mini196 .fin-flow-group summary{
+      position:relative!important;
+      display:block!important;
+      min-height:42px!important;
+      padding:10px 160px 10px 0!important;
+      box-sizing:border-box!important;
+    }
+    .fin-flow-mini196 .fin-flow-group summary>span{
+      display:block!important;
+      min-width:0!important;
+      text-align:left!important;
+      white-space:normal!important;
+    }
+    .fin-flow-mini196 .fin-flow-group summary>b{
+      position:absolute!important;
+      right:28px!important;
+      top:50%!important;
+      transform:translateY(-50%)!important;
+      width:122px!important;
+      margin:0!important;
+      text-align:right!important;
+      font-variant-numeric:tabular-nums!important;
+      white-space:nowrap!important;
+    }
+    .fin-flow-mini196 .fin-flow-group summary:after{
+      position:absolute!important;
+      right:0!important;
+      top:50%!important;
+      margin:0!important;
+      transform:translateY(-50%) rotate(90deg)!important;
+      width:16px!important;
+      text-align:center!important;
+    }
+    .fin-flow-mini196 .fin-flow-group[open] summary:after{
+      transform:translateY(-50%) rotate(-90deg)!important;
+    }
+    .fin-flow-mini196 .fin-flow-audit>div{
+      display:grid!important;
+      grid-template-columns:minmax(0,1fr) 122px!important;
+      column-gap:10px!important;
+      align-items:center!important;
+    }
+    .fin-flow-mini196 .fin-flow-audit strong{
+      width:122px!important;
+      justify-self:end!important;
+      text-align:right!important;
+      font-variant-numeric:tabular-nums!important;
+    }
+    @media(max-width:560px){
+      .fin-flow-mini196 .fin-flow-group summary{
+        padding-right:145px!important;
+      }
+      .fin-flow-mini196 .fin-flow-group summary>b{
+        right:26px!important;
+        width:112px!important;
+      }
+      .fin-flow-mini196 .fin-flow-audit>div{
+        grid-template-columns:minmax(0,1fr) 112px!important;
+        column-gap:8px!important;
+      }
+      .fin-flow-mini196 .fin-flow-audit strong{width:112px!important}
+    }
+  `;
+  document.head.appendChild(st);
+})();
+
+/* BERTH.A RC26 — Lista de Desejos integrada ao Financeiro */
+(()=>{
+  const WISH_KEY='bertha.finance.wishes.v1';
+  const GOALS_KEY='bertha.finance.goals.named.v1';
+  const priorFinanceWish=renderFinanceiro;
+  const wishLoad=()=>{try{const x=JSON.parse(window.berthaHmlStorage.getItem(WISH_KEY)||'[]');return Array.isArray(x)?x:[]}catch{return[]}};
+  const wishSave=x=>window.berthaHmlStorage.setItem(WISH_KEY,JSON.stringify(x));
+  const goalLoad=()=>{try{const x=JSON.parse(window.berthaHmlStorage.getItem(GOALS_KEY)||'[]');return Array.isArray(x)?x:[]}catch{return[]}};
+  const goalSave=x=>window.berthaHmlStorage.setItem(GOALS_KEY,JSON.stringify(x));
+  const wishStatusLabel=s=>({wish:'Desejo',planning:'Planejando',goal:'Meta criada',ready:'Pronto para comprar',done:'Realizado',archived:'Arquivado'}[s]||'Desejo');
+  const wishPriorityLabel=s=>({low:'Baixa',medium:'Média',high:'Alta'}[s]||'Média');
+  const wishCard=w=>{if(w.status==='goal'&&!w.goalId)w={...w,status:'planning'};return `<article class="wish-card ${w.status==='done'?'is-done':''}"><div class="wish-card-top"><div><span class="eyebrow">${escapeHtml(w.category||'DESEJO')}</span><h3>${escapeHtml(w.name||'Desejo')}</h3></div><button type="button" class="fg-edit" data-wish-edit="${w.id}">Editar</button></div><div class="wish-tags"><span>${wishStatusLabel(w.status)}</span><span>Prioridade ${wishPriorityLabel(w.priority).toLowerCase()}</span>${w.deadline?`<span>Até ${formatDate(w.deadline)}</span>`:''}</div>${Number(w.value||0)>0?`<strong class="wish-value">R$ ${money(Number(w.value))}</strong>`:''}${w.note?`<p>${escapeHtml(w.note)}</p>`:''}<div class="wish-actions">${w.link?`<a class="secondary tiny wish-link" href="${escapeHtml(w.link)}" target="_blank" rel="noopener">Abrir link ↗</a>`:''}${w.goalId?`<span class="wish-goal-chip">Vinculado a uma meta</span>`:`<button type="button" class="secondary tiny wish-create-goal" data-wish-goal-one="${w.id}">Criar meta</button>`}</div></article>`};
+  function injectWishlist(){
+    const root=document.getElementById('app'); if(!root||location.hash!=='#financeiro')return;
+    root.querySelector('.wish-shell')?.remove();
+    const wishes=wishLoad().filter(w=>w.status!=='archived');
+    const block=document.createElement('div');block.className='wish-shell';
+    block.innerHTML=`<div class="section-title">LISTA DE DESEJOS</div><section class="card wish-panel"><div class="wish-head"><div><h3>Desejos</h3><p>Guarde o que você quer sem transformar tudo em obrigação.</p></div><div class="wish-head-actions"><button type="button" class="secondary compact-btn" id="wishGoal">Criar meta</button><button type="button" class="primary compact-btn" id="wishNew">＋ Novo desejo</button></div></div><div class="wish-grid">${wishes.length?wishes.map(wishCard).join(''):'<div class="empty compact"><strong>Nenhum desejo cadastrado.</strong><span>De pequenos itens para a casa a grandes planos.</span></div>'}</div></section>`;
+    const metaTitle=[...root.querySelectorAll('.section-title')].find(x=>x.textContent.trim()==='METAS FINANCEIRAS');
+    if(metaTitle)metaTitle.before(block); else root.appendChild(block);
+    block.querySelector('#wishNew').onclick=()=>openWish();
+    block.querySelector('#wishGoal').onclick=()=>openWishGoal();
+    block.querySelectorAll('[data-wish-edit]').forEach(b=>b.onclick=()=>openWish(b.dataset.wishEdit));block.querySelectorAll('[data-wish-goal-one]').forEach(b=>b.onclick=()=>openWishGoal([b.dataset.wishGoalOne]));
+  }
+  function openWish(id=null){
+    const all=wishLoad(),old=all.find(x=>x.id===id),w=old?{...old,status:(old.status==='goal'&&!old.goalId?'planning':old.status)}:{id:uid(),name:'',category:'Casa',value:'',priority:'medium',deadline:'',link:'',note:'',status:'wish',goalId:'',createdAt:Date.now()};
+    const dlg=document.createElement('dialog');dlg.className='fin-unified-dialog wish-dialog';
+    dlg.innerHTML=`<form method="dialog" class="modal-card" id="wishForm"><div class="modal-head"><div><div class="eyebrow">LISTA DE DESEJOS</div><h2>${old?'Editar desejo':'Novo desejo'}</h2></div><button type="button" class="icon-btn fin-modal-x" data-fin-close aria-label="Fechar">×</button></div><label>Nome<input id="wishName" required maxlength="90" value="${escapeHtml(w.name||'')}" placeholder="Ex.: Aspirador vertical"></label><div class="form-grid"><label>Categoria<select id="wishCategory">${['Casa','Tecnologia','Carro','Viagem','Autocuidado','Família','Pets','Lazer','Trabalho','Outro'].map(x=>`<option ${x===w.category?'selected':''}>${x}</option>`).join('')}</select></label><label>Valor estimado <span class="optional">opcional</span><input id="wishValue" type="number" min="0" step="0.01" inputmode="decimal" value="${escapeHtml(w.value||'')}" placeholder="R$"></label></div><div class="form-grid"><label>Prioridade<select id="wishPriority"><option value="low" ${w.priority==='low'?'selected':''}>Baixa</option><option value="medium" ${w.priority==='medium'?'selected':''}>Média</option><option value="high" ${w.priority==='high'?'selected':''}>Alta</option></select></label><label>Prazo desejado <span class="optional">opcional</span><input id="wishDeadline" type="date" value="${escapeHtml(w.deadline||'')}"></label></div><label>Link <span class="optional">opcional</span><input id="wishLink" type="url" inputmode="url" value="${escapeHtml(w.link||'')}" placeholder="https://..."><small>Produto, orçamento, referência ou página que você queira guardar.</small></label><label>Observação <span class="optional">opcional</span><textarea id="wishNote" rows="3" maxlength="400" placeholder="Medidas, modelo, detalhes, por que quero isso…">${escapeHtml(w.note||'')}</textarea></label><label>Estado<select id="wishStatus"><option value="wish" ${w.status==='wish'?'selected':''}>Desejo</option><option value="planning" ${w.status==='planning'?'selected':''}>Planejando</option><option value="ready" ${w.status==='ready'?'selected':''}>Pronto para comprar</option><option value="done" ${w.status==='done'?'selected':''}>Realizado</option><option value="archived" ${w.status==='archived'?'selected':''}>Arquivar</option></select></label>${old?'<button type="button" class="fin-delete-bill fin-danger-soft" id="wishDelete">Excluir desejo</button>':''}<div class="modal-actions"><div class="grow"></div><button type="button" class="secondary" id="wishCancel">Cancelar</button><button class="primary">Salvar desejo</button></div></form>`;
+    document.body.appendChild(dlg);dlg.showModal();const close=bindFinanceModalClose(dlg);dlg.querySelector('#wishCancel').onclick=e=>{e.preventDefault();close()};
+    if(old)dlg.querySelector('#wishDelete').onclick=()=>{if(!confirm(`Excluir “${old.name}”?`))return;wishSave(all.filter(x=>x.id!==old.id));close();renderFinanceiro();};
+    dlg.querySelector('#wishForm').onsubmit=e=>{e.preventDefault();const obj={...w,name:dlg.querySelector('#wishName').value.trim(),category:dlg.querySelector('#wishCategory').value,value:Number(dlg.querySelector('#wishValue').value||0),priority:dlg.querySelector('#wishPriority').value,deadline:dlg.querySelector('#wishDeadline').value,link:dlg.querySelector('#wishLink').value.trim(),note:dlg.querySelector('#wishNote').value.trim(),status:dlg.querySelector('#wishStatus').value,updatedAt:Date.now()};wishSave(old?all.map(x=>x.id===old.id?obj:x):[...all,obj]);close();renderFinanceiro();};
+  }
+  function openWishGoal(presetIds=[]){
+    const all=wishLoad().filter(w=>w.status!=='done'&&w.status!=='archived');if(!all.length){openWish();return;}
+    const goals=goalLoad();const dlg=document.createElement('dialog');dlg.className='fin-unified-dialog wish-dialog wish-goal-dialog';
+    dlg.innerHTML=`<form method="dialog" class="modal-card" id="wishGoalForm"><div class="modal-head"><div><div class="eyebrow">LISTA DE DESEJOS</div><h2>Criar meta com desejos</h2></div><button type="button" class="icon-btn fin-modal-x" data-fin-close aria-label="Fechar">×</button></div><p class="note">Selecione um ou vários desejos. Você pode criar uma nova meta ou vinculá-los a uma que já existe.</p><div class="wish-select-list">${all.map(w=>`<label class="wish-select"><input type="checkbox" value="${w.id}" ${presetIds.includes(w.id)?'checked':''}><span><strong>${escapeHtml(w.name)}</strong><small>${Number(w.value||0)>0?`R$ ${money(Number(w.value))}`:'Sem valor estimado'}</small></span></label>`).join('')}</div><label>Destino<select id="wishGoalMode"><option value="new">Criar nova meta</option>${goals.map(g=>`<option value="${g.id}">Vincular a: ${escapeHtml(g.name)}</option>`).join('')}</select></label><label id="wishGoalNameWrap">Nome da nova meta<input id="wishGoalName" maxlength="70" placeholder="Ex.: Renovar a sala"></label><div class="wish-goal-total"><span>Total estimado selecionado</span><strong id="wishGoalTotal">R$ 0,00</strong></div><div class="modal-actions"><div class="grow"></div><button type="button" class="secondary" id="wishGoalCancel">Cancelar</button><button class="primary">Criar / vincular</button></div></form>`;
+    document.body.appendChild(dlg);dlg.showModal();const close=bindFinanceModalClose(dlg);dlg.querySelector('#wishGoalCancel').onclick=e=>{e.preventDefault();close()};
+    const checks=[...dlg.querySelectorAll('.wish-select input')],mode=dlg.querySelector('#wishGoalMode'),nameWrap=dlg.querySelector('#wishGoalNameWrap');
+    const refresh=()=>{const ids=checks.filter(c=>c.checked).map(c=>c.value),total=all.filter(w=>ids.includes(w.id)).reduce((s,w)=>s+Number(w.value||0),0);dlg.querySelector('#wishGoalTotal').textContent=`R$ ${money(total)}`;nameWrap.hidden=mode.value!=='new';};checks.forEach(c=>c.onchange=refresh);mode.onchange=refresh;refresh();
+    dlg.querySelector('#wishGoalForm').onsubmit=e=>{e.preventDefault();const ids=checks.filter(c=>c.checked).map(c=>c.value);if(!ids.length){alert('Selecione pelo menos um desejo.');return;}let goalId=mode.value;if(goalId==='new'){const name=dlg.querySelector('#wishGoalName').value.trim();if(!name){dlg.querySelector('#wishGoalName').focus();return;}const total=all.filter(w=>ids.includes(w.id)).reduce((s,w)=>s+Number(w.value||0),0);goalId=uid();const selected=all.filter(w=>ids.includes(w.id));goals.push({id:goalId,name,description:`Lista de Desejos · ${selected.map(w=>w.name).join(' + ')}`,periods:[{id:uid(),label:'Objetivo',min:total,max:total,contributions:[]}],wishIds:[...ids],createdAt:Date.now(),updatedAt:Date.now()});goalSave(goals);}const raw=wishLoad();wishSave(raw.map(w=>ids.includes(w.id)?{...w,goalId,status:'goal',updatedAt:Date.now()}:w));close();renderFinanceiro();};
+  }
+  renderFinanceiro=function(){priorFinanceWish();injectWishlist();};window.renderFinanceiro=renderFinanceiro;window.__berthaCoreRenderFinanceiro=renderFinanceiro;
+  const st=document.createElement('style');st.id='wishlist-rc26-styles';st.textContent=`
+    .wish-panel{display:grid;gap:16px}.wish-head{display:flex;justify-content:space-between;align-items:flex-start;gap:14px}.wish-head h3{margin:0 0 4px}.wish-head p{margin:0;color:#807781;font-size:12px}.wish-head-actions{display:flex;gap:8px;flex-wrap:wrap;justify-content:flex-end}.wish-grid{display:grid;gap:10px}.wish-card{padding:15px;border-radius:19px;border:1px solid rgba(113,101,118,.10);background:linear-gradient(135deg,rgba(250,246,240,.98),rgba(239,235,247,.60));box-shadow:0 7px 20px rgba(69,54,76,.05)}.wish-card-top{display:flex;justify-content:space-between;gap:10px}.wish-card h3{margin:2px 0 0;font-size:16px}.wish-card p{margin:9px 0 0;color:#756d78;font-size:12px}.wish-tags{display:flex;gap:6px;flex-wrap:wrap;margin-top:8px}.wish-tags span,.wish-goal-chip{font-size:10px;padding:5px 8px;border-radius:999px;background:rgba(226,235,232,.72);color:#68736f}.wish-value{display:block;margin-top:10px;font-size:17px}.wish-actions{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-top:10px}.wish-link{text-decoration:none!important}.wish-card.is-done{opacity:.68}.wish-select-list{display:grid;gap:8px;max-height:34vh;overflow:auto;padding:2px}.wish-select{display:flex!important;align-items:center;gap:10px;padding:11px 12px;border:1px solid rgba(113,101,118,.11);border-radius:15px;background:rgba(255,255,255,.42)}.wish-select input{width:18px!important;height:18px!important;min-height:0!important;accent-color:#a99abd}.wish-select span{display:grid;gap:2px}.wish-select small{color:#837987}.wish-goal-total{display:flex;justify-content:space-between;align-items:center;padding:13px 14px;border-radius:16px;background:linear-gradient(120deg,rgba(238,230,248,.68),rgba(229,241,246,.70));margin-top:8px}.wish-dialog>.modal-card{background:#fbf7f0!important}.wish-dialog .primary{background:linear-gradient(120deg,#b6a5c8,#a9c9c0)!important;color:#fff!important;border:0!important}@media(max-width:560px){.wish-head{display:grid}.wish-head-actions{justify-content:flex-start}.wish-head-actions button{flex:1}.wish-dialog>.modal-card{padding:20px!important}}
+  `;document.head.appendChild(st);
+})();
+
+/* RC46 — MEU PROGRESSO · vida real × vida ideal · semanal/mensal/anual */
+(function(){
+  const priorProgressRC46=renderProgressOverview;
+  const DIMENSIONS_RC46=[['autocuidado','Autocuidado'],['intelectual','Intelectual'],['disciplina','Disciplina'],['financeiro','Financeiro'],['casa','Casa & organização']];
+  function stampRC46(h){return +h.endedAt||+h.startedAt||0}
+  function rangeRC46(mode){const now=new Date(),end=Date.now(),start=new Date(now);start.setHours(0,0,0,0);if(mode==='week'){const day=(start.getDay()+6)%7;start.setDate(start.getDate()-day)}else if(mode==='month')start.setDate(1);else{start.setMonth(0,1)}return [start.getTime(),end]}
+  function periodLabelRC46(mode){return mode==='week'?'Esta semana':mode==='month'?'Este mês':'Este ano'}
+  function refsRC46(h){const raw=[h.reference,h.referenceTo,h.relatedTo,h.references,h.links,h.tags].flat(Infinity).filter(Boolean).join(' ').toLowerCase();return raw}
+  function modulesRC46(h){const t=`${h.source||''} ${h.category||''} ${h.title||''} ${h.itemId||''} ${h.plannedItemId||''} ${h.learningKey||''} ${refsRC46(h)}`.toLowerCase(),out=[];if(/exerc|exercise|moviment|treino|esteira/.test(t))out.push('exercicios');if(/ritual|autocuidado|capilar/.test(t))out.push('rituais');if(/alimenta|refei|comida|food/.test(t))out.push('alimentacao');if(/estud/.test(t))out.push('estudos');if(/crefito|trabalho|work|bec|tiktok/.test(t))out.push('trabalho');if(/projeto|criaç|ideia/.test(t))out.push('projetos');if(/casa/.test(t))out.push('casa');return [...new Set(out)]}
+  function dimsRC46(h){const mods=modulesRC46(h),r=refsRC46(h),out=[];if(mods.some(x=>['exercicios','rituais','alimentacao'].includes(x))||/autocuidado|cuidado/.test(r))out.push('autocuidado');if(mods.some(x=>['estudos','trabalho','projetos'].includes(x))||/intelect/.test(r))out.push('intelectual');if(mods.length||/disciplina|consist/.test(r))out.push('disciplina');if(mods.includes('casa')||/casa|organiza/.test(r))out.push('casa');return [...new Set(out)]}
+  function oldGoalScoreRC46(mod,arr,goals,days){const factor=days/7,g=goals||{};if(mod==='exercicios'){const x=g.movimento||{},target=(+x.sessionsPerWeek||0)*factor;return target?Math.min(100,arr.length/target*100):null}if(mod==='rituais'){const x=g.rituais||{},target=(+x.sessionsPerWeek||0)*factor;return target?Math.min(100,arr.length/target*100):null}if(mod==='estudos'){const x=g.estudos||{},target=(+x.hoursPerWeek||0)*60*factor,mins=arr.reduce((s,h)=>s+(+h.realMinutes||0),0);return target?Math.min(100,mins/target*100):null}if(mod==='trabalho'){const x=g.trabalho||{},target=(+x.prioritiesPerWeek||0)*factor;return target?Math.min(100,arr.length/target*100):null}if(mod==='casa'){const x=g.casa||{},target=(+x.routinesPerWeek||0)*factor;return target?Math.min(100,arr.length/target*100):null}if(mod==='alimentacao'){const meals=arr.filter(h=>h.activityType!=='foodPrep');if(!meals.length)return null;return meals.filter(h=>h.mealSource==='planned').length/meals.length*100}if(mod==='projetos')return arr.length?100:null;return null}
+  function financeRC46(){try{const d=loadFin(),month=finCurrentMonth(),bills=finPlannedMonth(d,month),stats=finPaymentStats?finPaymentStats(d,month):{ontime:bills.filter(x=>x.paid),late:[]};const paid=(stats.ontime||[]).length+(stats.late||[]).length,onTime=paid?Math.round((stats.ontime||[]).length/paid*100):null;let goalPct=null;try{const gs=typeof fgLoad==='function'?fgLoad():[];const vals=gs.map(g=>{const plan=fgPlanRange(g),real=fgGoalTotal(g);return plan.min>0?Math.min(100,real/plan.min*100):null}).filter(x=>x!=null);if(vals.length)goalPct=Math.round(vals.reduce((a,b)=>a+b,0)/vals.length)}catch{}return {onTime,goalPct,paid,total:bills.length}}catch{return {onTime:null,goalPct:null,paid:0,total:0}}}
+  function scoreRC46(dim,hist,goals,days){const vals=[];const add=mod=>{const a=hist.filter(h=>modulesRC46(h).includes(mod)),v=oldGoalScoreRC46(mod,a,goals,days);if(v!=null)vals.push(v)};if(dim==='autocuidado'){add('exercicios');add('rituais');add('alimentacao')}if(dim==='intelectual'){add('estudos');add('trabalho');add('projetos')}if(dim==='disciplina'){['exercicios','rituais','alimentacao','estudos','trabalho','projetos','casa'].forEach(add)}if(dim==='casa')add('casa');if(dim==='financeiro'){const f=financeRC46();if(f.onTime!=null)vals.push(f.onTime);if(f.goalPct!=null)vals.push(f.goalPct)}return vals.length?Math.round(vals.reduce((a,b)=>a+b,0)/vals.length):null}
+  function renderRC46(mode='week'){
+    ensureShoppingStyles();ensureProgressStyles();const [a,b]=rangeRC46(mode),hist=progressEngineHistory().filter(h=>h.status==='done'&&stampRC46(h)>=a&&stampRC46(h)<=b),goals=progressGoalsStore(),days=Math.max(1,(b-a)/86400000),scores=DIMENSIONS_RC46.map(([id,label])=>[id,label,scoreRC46(id,hist,goals,days)]),known=scores.filter(x=>x[2]!=null),overall=known.length?Math.round(known.reduce((s,x)=>s+x[2],0)/known.length):null,f=financeRC46(),projects=hist.filter(h=>modulesRC46(h).includes('projetos')).length;
+    const cards=scores.map(([id,label,v])=>`<article class="progress-life-card46"><div><strong>${escapeHtml(label)}</strong><small>${v==null?'Ainda sem dados suficientes':'Vida real × referências configuradas'}</small></div><b>${v==null?'—':`${v}%`}</b><div class="progress-life-bar46"><i style="width:${v==null?0:v}%"></i></div></article>`).join('');
+    app.innerHTML=`<div class="progress-page progress-v46"><section class="shop-hero progress-hero"><div><div class="eyebrow">MEU PROGRESSO</div><h2>Minha vida real.<br>Comparada ao meu ideal.</h2><p>Você vive. A BERTH.A conecta os sinais.</p></div><span class="progress-hero-mark" aria-hidden="true">${shopSvg('trend')}</span></section><div class="progress-period46"><button data-p46="week" class="${mode==='week'?'active':''}">Semanal</button><button data-p46="month" class="${mode==='month'?'active':''}">Mensal</button><button data-p46="year" class="${mode==='year'?'active':''}">Anual</button></div><section class="progress-alignment46"><span>${periodLabelRC46(mode).toUpperCase()}</span><strong>${overall==null?'Construindo sua referência':`${overall}% alinhada ao seu ideal`}</strong><p>${overall==null?'À medida que você define referências no Meu Dia Ideal e usa os módulos, a comparação ganha precisão.':'O resultado reúne as dimensões com dados mensuráveis no período.'}</p></section><section><div class="progress-section-head"><div><span>DIMENSÕES DA VIDA</span><h3>Onde estou mantendo continuidade?</h3></div></div><div class="progress-life-grid46">${cards}</div></section><section><div class="progress-section-head"><div><span>EVIDÊNCIAS DO PERÍODO</span><h3>O que está por trás do resultado</h3></div></div><div class="progress-evidence46"><div><span>Projetos / etapas concluídas</span><b>${projects}</b></div><div><span>Pagamentos em dia</span><b>${f.onTime==null?'—':`${f.onTime}%`}</b></div><div><span>Alcance das metas financeiras</span><b>${f.goalPct==null?'—':`${f.goalPct}%`}</b></div><div><span>Conclusões registradas</span><b>${hist.length}</b></div></div><p class="progress-method46">Uma mesma ação pode contribuir para mais de uma dimensão, inclusive pelos vínculos “faz referência a”, mas continua sendo um único evento realizado. O percentual é limitado a 100% para que excesso em uma área não esconda outra que ficou sem atenção.</p></section></div>`;
+    document.querySelectorAll('[data-p46]').forEach(x=>x.onclick=()=>renderRC46(x.dataset.p46));
+  }
+  renderProgressOverview=function(){renderRC46('week')};window.renderProgressOverview=renderProgressOverview;
+  const st=document.createElement('style');st.id='progress-v46-styles';st.textContent=`.progress-period46{display:grid;grid-template-columns:repeat(3,1fr);gap:7px;margin:14px 0 18px}.progress-period46 button{border:1px solid rgba(104,88,116,.08);background:rgba(255,253,249,.72);border-radius:15px;padding:10px 7px;color:#827684;font:inherit;font-size:12px;font-weight:700}.progress-period46 button.active{background:linear-gradient(135deg,rgba(232,221,244,.92),rgba(220,239,233,.9));color:#62596b}.progress-alignment46{padding:20px;border-radius:25px;background:linear-gradient(145deg,rgba(251,247,239,.98),rgba(239,231,247,.72),rgba(225,241,235,.68));border:1px solid rgba(104,88,116,.07);margin-bottom:20px}.progress-alignment46 span,.progress-alignment46 strong{display:block}.progress-alignment46 span{font-size:10px;letter-spacing:.15em;color:#8d8190;font-weight:800}.progress-alignment46 strong{font-size:22px;margin-top:6px;color:#4d4553}.progress-alignment46 p{margin:7px 0 0;color:#857a86;font-size:11.5px;line-height:1.45}.progress-life-grid46{display:grid;gap:9px}.progress-life-card46{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:5px 12px;padding:15px 16px;border-radius:20px;background:rgba(255,250,244,.86);border:1px solid rgba(106,88,116,.06)}.progress-life-card46 strong,.progress-life-card46 small{display:block}.progress-life-card46 strong{font-size:14px;color:#504752}.progress-life-card46 small{margin-top:3px;font-size:10.5px;color:#948995}.progress-life-card46>b{font-size:17px;color:#75687b}.progress-life-bar46{grid-column:1/-1;height:5px;border-radius:99px;background:rgba(120,104,127,.07);overflow:hidden}.progress-life-bar46 i{display:block;height:100%;border-radius:inherit;background:linear-gradient(90deg,#d8c8e8,#c7e1da)}.progress-evidence46{display:grid;grid-template-columns:1fr 1fr;gap:9px}.progress-evidence46>div{padding:14px;border-radius:18px;background:rgba(255,250,244,.82);border:1px solid rgba(106,88,116,.055)}.progress-evidence46 span,.progress-evidence46 b{display:block}.progress-evidence46 span{font-size:10.5px;line-height:1.3;color:#8e838f}.progress-evidence46 b{margin-top:5px;font-size:18px;color:#5f5563}.progress-method46{font-size:10.5px;line-height:1.5;color:#938894;margin:12px 3px 0}@media(max-width:420px){.progress-evidence46{grid-template-columns:1fr 1fr}.progress-alignment46 strong{font-size:20px}}`;document.head.appendChild(st);
+})();
+
+
+
+
+
+
+/* RC84 — EXERCÍCIOS · MODAL MASTER ÚNICO
+   Fonte única de cor, largura, altura, X, campos e ações.
+   Remove a divergência entre Novo treino, Novo ciclo, ritmo semanal e registros. */
+(()=>{
+  const id='bertha-rc84-exercise-modal-master';
+  document.getElementById(id)?.remove();
+  const st=document.createElement('style');
+  st.id=id;
+  st.textContent=`
+html body dialog.exercise-dialog{
+  --ex84-bg:linear-gradient(145deg,#f7f2fa 0%,#f4edf7 54%,#faeeee 100%);
+  --ex84-primary:linear-gradient(135deg,#d7c6ea 0%,#ddc4df 50%,#edc9c9 100%);
+  --ex84-border:rgba(126,105,139,.13);
+  --ex84-ink:#403947;
+  --ex84-muted:#857d88;
+  border:0!important;outline:0!important;background:transparent!important;padding:0!important;box-shadow:none!important;
+}
+html body dialog.exercise-dialog::backdrop{background:rgba(54,49,53,.30)!important;backdrop-filter:blur(4px)!important;-webkit-backdrop-filter:blur(4px)!important}
+html body dialog.exercise-dialog[open] > :is(.bertha-modal,.study-v10-modal){
+  box-sizing:border-box!important;
+  width:min(calc(100vw - 32px),390px)!important;max-width:390px!important;
+  max-height:78dvh!important;height:auto!important;
+  margin:auto!important;padding:18px!important;
+  border:0!important;outline:0!important;border-radius:26px!important;
+  background:var(--ex84-bg)!important;background-image:var(--ex84-bg)!important;background-color:#f6eef7!important;
+  color:var(--ex84-ink)!important;
+  box-shadow:inset 0 0 0 1px var(--ex84-border),0 20px 52px rgba(47,37,58,.14)!important;
+  overflow-y:auto!important;overflow-x:hidden!important;-webkit-overflow-scrolling:touch!important;
+}
+/* Novo treino e Novo ciclo usam exatamente a mesma caixa visual. */
+html body dialog.exercise-dialog.exercise-plan-dialog[open] > :is(.bertha-modal,.study-v10-modal),
+html body dialog.exercise-dialog.exercise-cycle-dialog[open] > :is(.bertha-modal,.study-v10-modal){
+  height:min(78dvh,650px)!important;max-height:min(78dvh,650px)!important;
+}
+html body dialog.exercise-dialog .bertha-modal-head{position:relative!important;display:flex!important;align-items:flex-start!important;justify-content:space-between!important;gap:12px!important;margin:0 0 14px!important;padding:0 48px 0 0!important;background:transparent!important;border:0!important;box-shadow:none!important}
+html body dialog.exercise-dialog .bertha-modal-head .eyebrow{font-size:10px!important;line-height:1.2!important;font-weight:500!important;letter-spacing:.22em!important;color:#81748a!important;text-transform:uppercase!important}
+html body dialog.exercise-dialog .bertha-modal-head h2{margin:7px 0 0!important;font-size:22px!important;line-height:1.12!important;font-weight:420!important;color:#403947!important}
+html body dialog.exercise-dialog .bertha-modal-head p{margin:10px 0 0!important;font-size:14px!important;line-height:1.45!important;font-weight:400!important;color:#716977!important}
+html body dialog.exercise-dialog .bertha-modal-head > button[data-close]{position:absolute!important;top:0!important;right:0!important;width:38px!important;height:38px!important;min-width:38px!important;min-height:38px!important;margin:0!important;padding:0!important;display:grid!important;place-items:center!important;border-radius:50%!important;border:1px solid var(--ex84-border)!important;background:rgba(255,255,255,.54)!important;color:#827982!important;font-size:24px!important;font-weight:300!important;line-height:1!important;box-shadow:none!important;outline:0!important}
+html body dialog.exercise-dialog :is(.study-v10-field>span,.exercise-cycle-label,label){font-size:12px!important;line-height:1.25!important;font-weight:430!important;color:#635c67!important}
+html body dialog.exercise-dialog :is(input:not([type=checkbox]):not([type=radio]),select,textarea){box-sizing:border-box!important;width:100%!important;min-height:46px!important;border-radius:16px!important;border:1px solid var(--ex84-border)!important;background:#fffdfa!important;padding:11px 12px!important;font-size:16px!important;font-weight:400!important;color:#403947!important;box-shadow:none!important;outline:0!important}
+html body dialog.exercise-dialog textarea{min-height:92px!important;resize:vertical!important}
+html body dialog.exercise-dialog :is(.study-v10-field,.field){margin:10px 0!important}
+html body dialog.exercise-dialog .form-grid{gap:10px!important}
+html body dialog.exercise-dialog .exercise-cycle-section{margin-top:12px!important}
+html body dialog.exercise-dialog .exercise-cycle-help{font-size:13px!important;line-height:1.45!important;color:#918895!important;font-weight:400!important}
+html body dialog.exercise-dialog .exercise-cycle-block{gap:8px!important;align-items:center!important}
+html body dialog.exercise-dialog .exercise-cycle-block select,html body dialog.exercise-dialog .exercise-unit-input{min-height:46px!important;height:46px!important;border-radius:16px!important}
+html body dialog.exercise-dialog .exercise-block-remove{width:40px!important;height:40px!important;min-width:40px!important;min-height:40px!important;border-radius:14px!important;border:1px solid var(--ex84-border)!important;background:rgba(255,255,255,.62)!important;color:#817780!important;box-shadow:none!important}
+html body dialog.exercise-dialog .exercise-cycle-total{border-radius:16px!important;background:rgba(255,255,255,.42)!important;padding:13px 14px!important}
+html body dialog.exercise-dialog .exercise-cycle-total strong{font-size:18px!important;font-weight:500!important}
+html body dialog.exercise-dialog .study-v10-actions,html body dialog.exercise-dialog .modal-actions{position:static!important;inset:auto!important;display:flex!important;justify-content:flex-end!important;align-items:center!important;gap:9px!important;margin:16px 0 0!important;padding:0!important;background:transparent!important;border:0!important;box-shadow:none!important;backdrop-filter:none!important;-webkit-backdrop-filter:none!important}
+html body dialog.exercise-dialog .study-v10-actions button,html body dialog.exercise-dialog .modal-actions button,html body dialog.exercise-dialog button.primary,html body dialog.exercise-dialog button.secondary{box-sizing:border-box!important;width:auto!important;min-width:108px!important;height:44px!important;min-height:44px!important;padding:0 16px!important;border-radius:15px!important;font-size:14px!important;line-height:1!important;font-weight:500!important;box-shadow:none!important}
+html body dialog.exercise-dialog button.secondary{background:rgba(255,255,255,.76)!important;border:1px solid var(--ex84-border)!important;color:#6f6872!important}
+html body dialog.exercise-dialog button.primary{background:var(--ex84-primary)!important;background-image:var(--ex84-primary)!important;border:1px solid rgba(127,99,145,.08)!important;color:#fff!important}
+html body dialog.exercise-dialog input[type=checkbox]{-webkit-appearance:none!important;appearance:none!important;width:20px!important;height:20px!important;min-width:20px!important;min-height:20px!important;border-radius:6px!important;border:1px solid var(--ex84-border)!important;background:#fffdfa!important;box-shadow:none!important;display:inline-grid!important;place-content:center!important;margin:0!important}
+html body dialog.exercise-dialog input[type=checkbox]:checked{background:var(--ex84-primary)!important;border-color:rgba(127,99,145,.16)!important}
+html body dialog.exercise-dialog input[type=checkbox]:checked::after{content:'✓'!important;color:#fff!important;font-size:13px!important;line-height:1!important;font-weight:500!important}
+html body dialog.exercise-dialog .exercise-icon-filter{min-height:34px!important;border:1px solid var(--ex84-border)!important;border-radius:999px!important;background:rgba(255,255,255,.58)!important;color:#706775!important;font-weight:430!important}
+html body dialog.exercise-dialog .exercise-icon-filter.selected{background:var(--ex84-primary)!important;color:#65536e!important}
+html body dialog.exercise-dialog .exercise-icon-choice{border:1px solid var(--ex84-border)!important;border-radius:18px!important;background:rgba(255,255,255,.46)!important;box-shadow:none!important;font-weight:400!important}
+html body dialog.exercise-dialog .exercise-icon-choice.selected{box-shadow:inset 0 0 0 1px rgba(137,109,153,.18)!important;background:rgba(255,255,255,.52)!important}
+html body dialog.exercise-dialog .exercise-icon-choice small{font-weight:400!important;color:#817780!important}
+html body dialog.exercise-dialog.exercise-plan-dialog .exercise-plan-icon-section,html body dialog.exercise-dialog.exercise-plan-dialog .exercise-icon-picker{max-height:none!important;height:auto!important;overflow:visible!important}
+html body dialog.exercise-dialog.exercise-plan-dialog .study-v10-actions{position:static!important;margin-top:16px!important}
+@media(max-width:480px){
+ html body dialog.exercise-dialog[open] > :is(.bertha-modal,.study-v10-modal){width:calc(100vw - 32px)!important;max-width:390px!important;padding:18px!important;border-radius:26px!important}
+ html body dialog.exercise-dialog.exercise-plan-dialog[open] > :is(.bertha-modal,.study-v10-modal),html body dialog.exercise-dialog.exercise-cycle-dialog[open] > :is(.bertha-modal,.study-v10-modal){height:min(78dvh,650px)!important;max-height:min(78dvh,650px)!important}
+}
+`;
+  document.head.appendChild(st);
+})();
+
+
+/* RC92 — RECEITAS · TIPOGRAFIA + BLUSH/BEGE + RESPIRO
+   Escopo exclusivo do módulo Receitas. Alimentação permanece intacta. */
+(()=>{
+  const id='bertha-rc92-recipes-refinement';
+  document.getElementById(id)?.remove();
+  const st=document.createElement('style');
+  st.id=id;
+  st.textContent=`
+/* Página Receitas — paleta exclusiva blush + bege/creme */
+html body[data-bertha-route="receitas"] #app{
+  --rc92-blush:#f7e5e4;
+  --rc92-blush-2:#f2d8d6;
+  --rc92-beige:#fbf5ec;
+  --rc92-cream:#fffaf4;
+  --rc92-ink:#49434b;
+  --rc92-muted:#8d858d;
+  --rc92-rose:#9a6674;
+  --rc92-border:rgba(153,111,121,.13);
+}
+html body[data-bertha-route="receitas"] .recipe-hero{
+  background:linear-gradient(145deg,rgba(255,250,244,.98) 0%,rgba(249,232,231,.82) 58%,rgba(250,239,232,.92) 100%)!important;
+  border:1px solid var(--rc92-border)!important;
+  box-shadow:0 10px 28px rgba(86,65,72,.035)!important;
+}
+html body[data-bertha-route="receitas"] .recipe-hero .eyebrow,
+html body[data-bertha-route="receitas"] .recipe-library-head .eyebrow,
+html body[data-bertha-route="receitas"] .recipe-card .eyebrow,
+html body[data-bertha-route="receitas"] .recipe-freezer .eyebrow{
+  font-weight:500!important;letter-spacing:.20em!important;color:#9a6875!important;
+}
+html body[data-bertha-route="receitas"] .recipe-hero h2{
+  font-size:32px!important;line-height:1.08!important;font-weight:420!important;letter-spacing:-.028em!important;color:#413c45!important;
+}
+html body[data-bertha-route="receitas"] .recipe-hero p{
+  font-size:15.5px!important;line-height:1.48!important;font-weight:400!important;color:#837b84!important;
+}
+html body[data-bertha-route="receitas"] .recipe-tools input{
+  background:rgba(255,252,247,.88)!important;border:1px solid var(--rc92-border)!important;color:var(--rc92-ink)!important;font-weight:400!important;
+}
+html body[data-bertha-route="receitas"] .recipe-tools button,
+html body[data-bertha-route="receitas"] #toggleAllRecipes{
+  background:linear-gradient(135deg,rgba(248,226,222,.95),rgba(247,236,226,.96))!important;
+  border:1px solid var(--rc92-border)!important;color:#955e70!important;font-weight:500!important;box-shadow:none!important;
+}
+html body[data-bertha-route="receitas"] .recipe-library-head h3{
+  margin:5px 0 0!important;font-size:23px!important;line-height:1.15!important;font-weight:420!important;color:#49434b!important;
+}
+html body[data-bertha-route="receitas"] .recipe-category-row button{
+  background:rgba(255,251,246,.82)!important;border:1px solid var(--rc92-border)!important;color:#827a82!important;font-weight:400!important;
+}
+html body[data-bertha-route="receitas"] .recipe-category-row button.active{
+  background:linear-gradient(135deg,#f8e2e1,#f7ece3)!important;color:#956273!important;border-color:rgba(153,102,117,.16)!important;
+}
+html body[data-bertha-route="receitas"] .recipe-card{
+  padding:18px!important;
+  background:linear-gradient(145deg,rgba(255,253,249,.96),rgba(252,242,238,.78))!important;
+  border:1px solid var(--rc92-border)!important;box-shadow:0 8px 24px rgba(74,55,62,.025)!important;
+}
+html body[data-bertha-route="receitas"] .recipe-card h3{
+  margin:6px 0 7px!important;font-size:18px!important;line-height:1.22!important;font-weight:440!important;color:#4a444c!important;
+}
+html body[data-bertha-route="receitas"] .recipe-card span{
+  font-size:12px!important;line-height:1.4!important;font-weight:400!important;color:#8e858d!important;
+}
+html body[data-bertha-route="receitas"] .recipe-card p{
+  margin:14px 0 0!important;font-size:12.5px!important;line-height:1.45!important;font-weight:400!important;color:#615a62!important;
+}
+html body[data-bertha-route="receitas"] .recipe-card p strong{font-weight:500!important}
+html body[data-bertha-route="receitas"] .recipe-card>div:last-child{
+  margin-top:18px!important;gap:10px!important;
+}
+html body[data-bertha-route="receitas"] .recipe-card .secondary{
+  min-height:42px!important;padding:10px 15px!important;border-radius:15px!important;
+  background:linear-gradient(135deg,rgba(250,230,228,.90),rgba(252,241,232,.90))!important;
+  color:#8f6070!important;border:1px solid var(--rc92-border)!important;font-weight:500!important;box-shadow:none!important;
+}
+html body[data-bertha-route="receitas"] .recipe-card .favorite{color:#a86d7e!important;font-weight:300!important}
+html body[data-bertha-route="receitas"] .recipe-freezer{
+  background:linear-gradient(145deg,rgba(255,250,244,.96),rgba(248,230,229,.62),rgba(251,241,232,.90))!important;
+  border:1px solid var(--rc92-border)!important;box-shadow:none!important;
+}
+html body[data-bertha-route="receitas"] .recipe-freezer p{font-weight:400!important;color:#837a82!important}
+
+/* Modal de detalhe em Receitas — sem azul/menta */
+html body dialog.recipe-dialog:not(.food-context-dialog)[open]>.study-v10-modal,
+html body #recipeFormDialog:not(.food-context-dialog)[open]>#recipeForm{
+  background:linear-gradient(145deg,#fffaf5 0%,#f9e7e6 58%,#faeee5 100%)!important;
+  background-image:linear-gradient(145deg,#fffaf5 0%,#f9e7e6 58%,#faeee5 100%)!important;
+  border:0!important;outline:0!important;border-radius:26px!important;
+  box-shadow:inset 0 0 0 1px rgba(154,103,117,.12),0 20px 52px rgba(50,39,45,.14)!important;
+  color:#49434b!important;
+}
+html body dialog.recipe-dialog:not(.food-context-dialog) .study-v10-head .eyebrow,
+html body #recipeFormDialog:not(.food-context-dialog) .study-v10-head .eyebrow{
+  font-weight:500!important;letter-spacing:.20em!important;color:#986777!important;
+}
+html body dialog.recipe-dialog:not(.food-context-dialog) .study-v10-head h2,
+html body #recipeFormDialog:not(.food-context-dialog) .study-v10-head h2{
+  font-weight:420!important;letter-spacing:-.02em!important;color:#443f47!important;
+}
+html body dialog.recipe-dialog:not(.food-context-dialog) .study-v10-head p,
+html body #recipeFormDialog:not(.food-context-dialog) .study-v10-head p{
+  font-weight:400!important;color:#8a8189!important;
+}
+html body dialog.recipe-dialog:not(.food-context-dialog) .study-v10-x,
+html body #recipeFormDialog:not(.food-context-dialog) .study-v10-x{
+  background:rgba(255,252,248,.66)!important;border:1px solid rgba(154,103,117,.12)!important;color:#7f777f!important;box-shadow:none!important;font-weight:300!important;
+}
+html body dialog.recipe-dialog:not(.food-context-dialog) .recipe-detail-card{
+  background:rgba(255,253,249,.88)!important;border:1px solid rgba(154,103,117,.10)!important;border-radius:22px!important;box-shadow:none!important;
+}
+html body dialog.recipe-dialog:not(.food-context-dialog) .recipe-detail-card h3{
+  font-size:18px!important;font-weight:500!important;color:#4c464e!important;
+}
+html body dialog.recipe-dialog:not(.food-context-dialog) .recipe-detail-card :is(li,p){
+  font-weight:400!important;color:#544e55!important;line-height:1.5!important;
+}
+html body dialog.recipe-dialog:not(.food-context-dialog) .recipe-detail-card strong{font-weight:500!important}
+html body dialog.recipe-dialog:not(.food-context-dialog) .recipe-modal-actions{
+  margin-top:18px!important;gap:10px!important;
+}
+html body dialog.recipe-dialog:not(.food-context-dialog) .recipe-modal-actions button{
+  min-height:44px!important;border-radius:15px!important;font-weight:500!important;border:1px solid rgba(154,103,117,.12)!important;box-shadow:none!important;
+}
+html body dialog.recipe-dialog:not(.food-context-dialog) .recipe-modal-actions .primary{
+  background:linear-gradient(135deg,#efc9c8,#e9b8ae)!important;color:#fff!important;
+}
+html body dialog.recipe-dialog:not(.food-context-dialog) .recipe-modal-actions .secondary{
+  background:linear-gradient(135deg,rgba(255,249,245,.94),rgba(248,232,229,.82))!important;color:#8c6170!important;
+}
+
+/* Nova/Editar receita — tipografia e fundo somente blush + bege */
+html body #recipeFormDialog:not(.food-context-dialog) #recipeForm>label,
+html body #recipeFormDialog:not(.food-context-dialog) #recipeForm .form-grid>label{
+  font-weight:430!important;color:#645d64!important;
+}
+html body #recipeFormDialog:not(.food-context-dialog) #recipeForm .muted{font-weight:400!important;color:#9a9198!important}
+html body #recipeFormDialog:not(.food-context-dialog) #recipeForm :is(input,select,textarea){
+  background:#fffdfa!important;border:1px solid rgba(154,103,117,.13)!important;color:#4b454c!important;font-weight:400!important;box-shadow:none!important;
+}
+html body #recipeFormDialog:not(.food-context-dialog) #recipeForm :is(input,textarea)::placeholder{color:#b3aaaf!important;font-weight:400!important}
+html body #recipeFormDialog:not(.food-context-dialog) .recipe-nutrition-box{
+  background:linear-gradient(145deg,rgba(255,249,245,.84),rgba(249,231,230,.58),rgba(251,241,233,.82))!important;
+  border:1px solid rgba(154,103,117,.11)!important;box-shadow:none!important;
+}
+html body #recipeFormDialog:not(.food-context-dialog) .recipe-nutrition-head strong{font-weight:500!important;color:#4f4850!important}
+html body #recipeFormDialog:not(.food-context-dialog) .recipe-nutrition-head small{font-weight:400!important;color:#91878e!important}
+html body #recipeFormDialog:not(.food-context-dialog) .recipe-line-icon{color:#a56f7f!important;background:rgba(248,228,227,.70)!important}
+html body #recipeFormDialog:not(.food-context-dialog) .modal-actions button{font-weight:500!important;box-shadow:none!important}
+html body #recipeFormDialog:not(.food-context-dialog) .modal-actions .primary{
+  background:linear-gradient(135deg,#efc7c5,#e8b5aa)!important;color:#fff!important;border:1px solid rgba(154,103,117,.10)!important;
+}
+html body #recipeFormDialog:not(.food-context-dialog) .modal-actions .secondary{
+  background:rgba(255,251,247,.84)!important;color:#86616d!important;border:1px solid rgba(154,103,117,.12)!important;
+}
+`;
+  document.head.appendChild(st);
+})();
+
+/* RC105 — CRIAÇÃO & IDEIAS · checkbox mestre de acompanhamento
+   Correção isolada do checkbox "Quero que a BERTA acompanhe este projeto".
+   Replica exatamente o checkbox dos itens internos e impede estilos de toggle/segmento. */
+(()=>{
+  const id='idea-rc105-projecttrack-checkbox';
+  document.getElementById(id)?.remove();
+  const s=document.createElement('style');
+  s.id=id;
+  s.textContent=`
+  html body #ideaDialog #ideaConditional .project-track-master{
+    display:flex!important;
+    align-items:flex-start!important;
+    gap:10px!important;
+  }
+  html body #ideaDialog #ideaConditional .project-track-master>#projectTrack[type="checkbox"]{
+    -webkit-appearance:none!important;
+    appearance:none!important;
+    display:inline-grid!important;
+    place-content:center!important;
+    box-sizing:border-box!important;
+    width:20px!important;
+    min-width:20px!important;
+    max-width:20px!important;
+    height:20px!important;
+    min-height:20px!important;
+    max-height:20px!important;
+    flex:0 0 20px!important;
+    margin:2px 0 0!important;
+    padding:0!important;
+    border:1px solid rgba(92,126,161,.28)!important;
+    border-radius:6px!important;
+    background:rgba(255,255,255,.80)!important;
+    box-shadow:none!important;
+    outline:0!important;
+    transform:none!important;
+  }
+  html body #ideaDialog #ideaConditional .project-track-master>#projectTrack[type="checkbox"]:checked{
+    background:linear-gradient(135deg,#86b6df 0%,#9ba9e3 100%)!important;
+    border-color:rgba(92,126,161,.18)!important;
+  }
+  html body #ideaDialog #ideaConditional .project-track-master>#projectTrack[type="checkbox"]:checked::after{
+    content:''!important;
+    display:block!important;
+    box-sizing:border-box!important;
+    width:6px!important;
+    height:10px!important;
+    border:0!important;
+    border-right:2px solid #fff!important;
+    border-bottom:2px solid #fff!important;
+    transform:rotate(45deg) translate(-1px,-1px)!important;
+    transform-origin:center!important;
+  }
+  html body #ideaDialog #ideaConditional .project-track-copy{
+    min-width:0!important;
+    flex:1 1 auto!important;
+  }
+  `;
+  document.head.appendChild(s);
+})();
+;(function(){if(document.getElementById('bertha-sat-v2'))return;const st=document.createElement('style');st.id='bertha-sat-v2';st.textContent=`
+.sat-assignee-field{display:grid;gap:8px;margin:12px 0}.sat-assignee-field[hidden]{display:none!important}
+.sat-target-head{display:flex;align-items:center;justify-content:space-between;gap:10px;color:#5f5662;font-size:13px;font-weight:500}
+.sat-target-all{border:1px solid rgba(113,96,130,.10)!important;background:rgba(255,255,255,.72)!important;color:#706672!important;border-radius:999px!important;min-height:32px!important;padding:6px 11px!important;font-size:11px!important;font-weight:500!important}
+.sat-target-grid{display:grid;gap:7px;padding:8px;border-radius:17px;background:rgba(255,255,255,.52);border:1px solid rgba(113,96,130,.08)}
+.sat-target-option{display:flex!important;align-items:center!important;gap:10px!important;padding:9px 10px!important;margin:0!important;border-radius:13px!important;background:rgba(255,255,255,.76)!important;font-weight:400!important}
+.sat-target-option input{width:18px!important;height:18px!important;accent-color:#b890a7!important}.sat-target-option span{display:block}
+.sat-target-option strong{display:block;font-size:13px;font-weight:500;color:#514954}.sat-target-option small{display:block;margin-top:2px;font-size:10.5px;color:#948a95}
+.sat-target-note{font-size:10.5px!important;line-height:1.4!important;color:#8d838e!important}.sat-target-error{outline:2px solid rgba(190,108,126,.22);border-radius:18px;padding:6px}
+.sat-event-list{display:grid;gap:7px}.sat-event{display:grid;grid-template-columns:24px 1fr;gap:9px;align-items:start;padding:10px 11px;border-radius:15px;background:rgba(255,255,255,.58)}.sat-event.unread{background:linear-gradient(110deg,rgba(248,232,238,.82),rgba(235,245,236,.82))}
+.sat-event>span{width:24px;height:24px;border-radius:50%;display:grid;place-items:center;background:#eef3eb;color:#657260;font-size:11px}.sat-event strong{display:block;font-size:12px;font-weight:500;color:#554d57}.sat-event small{display:block;margin-top:3px;font-size:10px;color:#918892}
+.sat-mission.done{opacity:.72}.sat-mission.done strong{text-decoration:line-through;text-decoration-thickness:1px}
+`;document.head.appendChild(st)})();
+
+;(function(){if(document.getElementById('rc119-satellite-controls'))return;const st=document.createElement('style');st.id='rc119-satellite-controls';st.textContent=`
+/* RC119 — Casa/Satélites: controles de responsabilidade sempre visíveis e acionáveis */
+.casa-responsibility-dialog .sat-resp-options{display:grid!important;grid-template-columns:repeat(3,minmax(0,1fr))!important;gap:7px!important;padding:5px!important;border-radius:17px!important;background:rgba(255,255,255,.58)!important;border:1px solid rgba(113,96,130,.08)!important}
+.casa-responsibility-dialog .sat-resp-options button{appearance:none!important;-webkit-appearance:none!important;border:0!important;background:transparent!important;color:#706873!important;border-radius:13px!important;min-height:42px!important;padding:8px 7px!important;font-size:13px!important;line-height:1.15!important;font-weight:500!important;text-decoration:none!important}
+.casa-responsibility-dialog .sat-resp-options button.active{background:linear-gradient(135deg,rgba(239,222,231,.96),rgba(223,235,226,.96))!important;color:#5e4e59!important;box-shadow:0 1px 0 rgba(80,65,78,.04)!important}
+.casa-responsibility-dialog .sat-resp-options button:focus{outline:2px solid rgba(184,144,167,.18)!important;outline-offset:1px!important}
+.sat-empty-mini{display:grid;gap:10px;padding:12px!important;color:#7f7682;font-size:12px;line-height:1.35}
+.sat-inline-add{justify-self:start;border:1px solid rgba(113,96,130,.10)!important;background:linear-gradient(135deg,#f3e7ed,#e6efe8)!important;color:#695a64!important;border-radius:999px!important;padding:8px 12px!important;min-height:36px!important;font-size:11.5px!important;font-weight:500!important}
+`;document.head.appendChild(st)})();
+
+;(function(){if(document.getElementById('bertha-sat-v4-identity'))return;const s=document.createElement('style');s.id='bertha-sat-v4-identity';s.textContent=`
+.sat-ideal-hero{position:relative!important;overflow:hidden!important;min-height:190px!important;padding:28px 30px!important;background:linear-gradient(125deg,rgba(248,210,222,.86) 0%,rgba(252,243,224,.84) 43%,rgba(222,235,250,.92) 100%)!important;border:1px solid rgba(149,132,153,.12)!important;box-shadow:none!important}
+.sat-ideal-hero:after{content:'';position:absolute;inset:-35%;background:radial-gradient(circle at 25% 30%,rgba(255,255,255,.62),transparent 34%),radial-gradient(circle at 78% 72%,rgba(222,213,248,.35),transparent 32%);pointer-events:none}
+.sat-hero-copy{position:relative;z-index:2;max-width:82%}.sat-ideal-hero h2{font-size:29px!important;line-height:1.08!important;font-weight:400!important;letter-spacing:-.025em!important;margin:10px 0 14px!important;color:#3f3944!important}.sat-ideal-hero p{font-size:14px!important;line-height:1.5!important;font-weight:400!important;color:#746c78!important}.sat-hero-icon{position:absolute;z-index:2;right:24px;top:28px;width:44px;height:44px;fill:none;stroke:#8e88a0;stroke-width:1.5;opacity:.46;stroke-linecap:round;stroke-linejoin:round}
+.sat-main-cta{width:100%!important;min-height:52px!important;border-radius:18px!important;background:linear-gradient(105deg,#e8a9c1 0%,#f1d8bd 48%,#c9ddf0 100%)!important;color:#fff!important;border:1px solid rgba(184,147,169,.14)!important;font-size:15px!important;font-weight:520!important;box-shadow:none!important}
+.sat-cloud-note{background:rgba(255,255,255,.48)!important;border:1px solid rgba(150,133,153,.10)!important;color:#77707a!important}
+.sat-modal .modal-card{background:linear-gradient(145deg,rgba(252,236,240,.98) 0%,rgba(252,247,236,.98) 48%,rgba(233,242,251,.99) 100%)!important;border:1px solid rgba(147,131,152,.13)!important}.sat-modal .modal-head h2{font-weight:430!important;letter-spacing:-.02em!important}.sat-modal label{font-weight:450!important}.sat-modal input,.sat-modal select{font-weight:400!important}
+.sat-permission{width:100%!important;display:grid!important;grid-template-columns:24px minmax(0,1fr)!important;gap:12px!important;align-items:start!important;text-align:left!important;padding:14px!important;margin:0!important;border-radius:18px!important;background:rgba(255,255,255,.72)!important;border:1px solid rgba(137,121,142,.11)!important;color:#4b4350!important;box-shadow:none!important;min-height:68px!important;cursor:pointer!important}.sat-permission input{position:absolute!important;opacity:0!important;pointer-events:none!important;width:1px!important;height:1px!important}.sat-checkbox{width:22px;height:22px;border-radius:7px;border:1.5px solid rgba(137,121,142,.32);background:#fffdfa;display:grid;place-items:center;margin-top:1px}.sat-permission.is-checked .sat-checkbox{background:linear-gradient(135deg,#e4a9bd,#c8daf0 72%,#d9e9de);border-color:transparent}.sat-permission.is-checked .sat-checkbox:after{content:'✓';color:white;font-size:13px;font-weight:700}.sat-permission-copy{display:grid;gap:4px}.sat-permission-copy strong{font-size:13.5px;font-weight:520!important;color:#4a424e}.sat-permission-copy small{font-size:11.5px;line-height:1.4;font-weight:400;color:#88808a}.sat-kids-settings{display:grid;gap:10px;padding:14px;border-radius:22px;background:rgba(255,255,255,.34);border:1px solid rgba(150,133,153,.08)}.sat-kids-settings[hidden]{display:none!important}.sat-section-note{margin:-2px 0 2px;font-size:11.5px;line-height:1.45;color:#827a85}.sat-modal .modal-actions .primary{background:linear-gradient(105deg,#e8a9c1,#f1d8bd 48%,#c9ddf0)!important;color:#fff!important;font-weight:520!important}.sat-modal .modal-actions .secondary{background:rgba(255,255,255,.72)!important;color:#706875!important;font-weight:500!important}
+`;document.head.appendChild(s)})();
+
+
+;(function(){if(document.getElementById('rc124-satellites-visual-lock'))return;const s=document.createElement('style');s.id='rc124-satellites-visual-lock';s.textContent=`
+/* RC124 — Satélites/Convites: identidade fechada pela família Meu Dia Ideal */
+html body .sat-ideal-hero{
+ display:grid!important;grid-template-columns:minmax(0,1fr) 56px!important;gap:14px!important;align-items:start!important;
+ min-height:0!important;padding:24px 22px 22px!important;border-radius:29px!important;
+ border:1px solid rgba(152,165,189,.14)!important;
+ background:linear-gradient(135deg,rgba(246,213,223,.80) 0%,rgba(252,246,239,.96) 27%,rgba(230,241,255,.96) 100%)!important;
+ box-shadow:0 12px 34px rgba(87,87,111,.05)!important;filter:saturate(1.10) contrast(1.015)!important;
+}
+html body .sat-ideal-hero:after{content:""!important;position:absolute!important;inset:-38px -36px auto auto!important;width:220px!important;height:220px!important;border-radius:50%!important;background:radial-gradient(circle,rgba(209,231,248,.22),rgba(209,231,248,0) 68%)!important;pointer-events:none!important}
+html body .sat-hero-copy{max-width:none!important;position:relative!important;z-index:1!important}
+html body .sat-ideal-hero .eyebrow{font-size:11px!important;letter-spacing:.19em!important;font-weight:800!important;color:#847b8f!important;margin:0 0 7px!important}
+html body .sat-ideal-hero h2{margin:0 0 10px!important;font-size:28px!important;line-height:1.04!important;letter-spacing:-.034em!important;font-weight:500!important;color:#2f344d!important;max-width:310px!important}
+html body .sat-ideal-hero p{margin:0!important;max-width:300px!important;font-size:13.5px!important;line-height:1.42!important;color:#6b6e7f!important;font-weight:400!important}
+html body .sat-ideal-hero .sat-hero-icon{position:relative!important;right:auto!important;top:auto!important;width:42px!important;height:42px!important;place-self:start end!important;padding-top:4px!important;stroke:#a4a9b8!important;stroke-width:1.25!important;opacity:.72!important;color:#a4a9b8!important;z-index:1!important}
+html body .sat-main-cta,html body .sat-page>.sat-actions>.primary,html body .sat-modal .modal-actions .primary{
+ background:linear-gradient(135deg,rgba(223,160,183,.99) 0%,rgba(245,224,200,.98) 44%,rgba(210,227,244,.99) 100%)!important;
+ color:#fff!important;border:1px solid rgba(193,149,171,.24)!important;box-shadow:0 10px 24px rgba(196,170,198,.08)!important;font-weight:520!important
+}
+html body .sat-modal .modal-card{background:#fbf7ef!important;border:1px solid rgba(120,108,126,.08)!important;box-shadow:none!important}
+html body .sat-modal .modal-head{background:#fbf7ef!important;border-bottom:1px solid rgba(120,108,126,.08)!important;padding-bottom:14px!important;margin-bottom:14px!important}
+html body .sat-modal .modal-head h2{font-size:20px!important;font-weight:500!important;color:#3b3544!important}
+html body .sat-modal .casa-modal-x{background:transparent!important;border:0!important;color:#8c858e!important;box-shadow:none!important}
+html body .sat-modal input:not([type=checkbox]),html body .sat-modal select{background:#fffdfa!important;border:1px solid rgba(122,108,128,.13)!important;color:#403946!important;box-shadow:none!important}
+html body .sat-modal .secondary{background:rgba(255,253,249,.86)!important;border:1px solid rgba(122,108,128,.09)!important;color:#706875!important;box-shadow:none!important}
+html body .sat-permission{background:rgba(255,253,249,.76)!important;border:1px solid rgba(122,108,128,.09)!important}
+html body .sat-permission.is-checked{background:linear-gradient(135deg,rgba(251,247,239,.98),rgba(248,237,240,.44) 42%,rgba(237,246,252,.34) 100%)!important;border-color:rgba(152,165,189,.14)!important}
+html body .sat-checkbox{background:#fffdfa!important;border:1.5px solid rgba(122,108,128,.22)!important}
+html body .sat-permission.is-checked .sat-checkbox{background:linear-gradient(135deg,rgba(223,160,183,.99),rgba(245,224,200,.98) 44%,rgba(210,227,244,.99) 100%)!important;border-color:transparent!important}
+html body .sat-kids-settings{background:linear-gradient(135deg,rgba(251,247,239,.97),rgba(248,237,240,.38) 42%,rgba(237,246,252,.30) 100%)!important;border:1px solid rgba(122,108,128,.08)!important}
+html body .sat-avatar{background:rgba(255,253,249,.82)!important;border:1px solid rgba(122,108,128,.08)!important;color:#7c879e!important}
+html body .sat-avatar svg{width:25px!important;height:25px!important}
+html body .sat-role{background:rgba(250,244,236,.94)!important;color:#7a7078!important;border:1px solid rgba(122,108,128,.06)!important}
+html body .sat-card.card{background:rgba(255,253,249,.76)!important}
+html body .sat-cloud-note{background:linear-gradient(135deg,rgba(251,247,239,.95),rgba(237,246,252,.28))!important;border:1px solid rgba(122,108,128,.07)!important}
+html body .sat-avatar-field{display:grid!important;gap:8px!important}
+html body .sat-avatar-field>span{font-size:13px!important;font-weight:500!important;color:#554d5b!important}
+html body .sat-avatar-picker{display:grid!important;grid-template-columns:repeat(5,minmax(0,1fr))!important;gap:8px!important}
+html body .sat-avatar-choice{-webkit-appearance:none!important;appearance:none!important;display:grid!important;place-items:center!important;gap:4px!important;min-height:66px!important;padding:8px 4px!important;border-radius:15px!important;border:1px solid rgba(122,108,128,.09)!important;background:rgba(255,253,249,.74)!important;color:#7c879e!important;box-shadow:none!important}
+html body .sat-avatar-choice svg{width:24px!important;height:24px!important}
+html body .sat-avatar-choice small{font-size:9px!important;font-weight:500!important;color:#8c8490!important}
+html body .sat-avatar-choice.active{background:linear-gradient(135deg,rgba(251,247,239,.98),rgba(248,237,240,.48) 42%,rgba(237,246,252,.38) 100%)!important;border-color:rgba(193,149,171,.24)!important;box-shadow:inset 0 0 0 1px rgba(193,149,171,.08)!important;color:#69758d!important}
+@media(max-width:480px){html body .sat-avatar-picker{grid-template-columns:repeat(3,minmax(0,1fr))!important}}
+`;document.head.appendChild(s)})();
+
+
+;(function(){if(document.getElementById('rc125-satellites-brand-final'))return;const s=document.createElement('style');s.id='rc125-satellites-brand-final';s.textContent=`
+/* RC125 — Satélites/Convites: família visual Meu Dia Ideal + checkboxes unificados */
+html body .sat-ideal-hero,
+html body .sat-member-hero{
+ background:linear-gradient(135deg,rgba(246,213,223,.80) 0%,rgba(252,246,239,.96) 27%,rgba(230,241,255,.96) 100%)!important;
+ border:1px solid rgba(152,165,189,.14)!important;
+ box-shadow:0 12px 34px rgba(87,87,111,.05)!important;
+ filter:saturate(1.05)!important;
+}
+html body .sat-member-hero{min-height:168px!important}
+html body .sat-member-hero .sat-hero-copy{max-width:calc(100% - 58px)!important}
+html body .sat-member-hero h2{max-width:330px!important;font-size:27px!important;font-weight:400!important;line-height:1.05!important;letter-spacing:-.03em!important}
+html body .sat-member-hero p{max-width:350px!important;font-size:13px!important;line-height:1.45!important}
+html body .sat-member-avatar{width:42px!important;height:42px!important;color:#98a2b7!important;opacity:.72!important;padding:3px!important}
+html body .sat-member-avatar svg{width:32px!important;height:32px!important;stroke-width:1.35!important}
+html body .kids-progress{height:8px!important;margin-top:13px!important;background:rgba(255,255,255,.68)!important}
+html body .kids-progress span{background:linear-gradient(90deg,rgba(223,160,183,.95),rgba(245,224,200,.95),rgba(210,227,244,.95))!important}
+
+/* Um único desenho de checkbox em toda a experiência Satélites/Convites */
+html body .sat-permission{background:rgba(255,253,249,.84)!important;border:1px solid rgba(122,108,128,.09)!important}
+html body .sat-permission.is-checked{background:rgba(255,253,249,.94)!important;border-color:rgba(201,170,176,.28)!important;box-shadow:inset 0 0 0 1px rgba(201,170,176,.05)!important}
+html body .sat-checkbox,
+html body .sat-check input[type=checkbox]{
+ width:21px!important;height:21px!important;min-width:21px!important;min-height:21px!important;max-width:21px!important;max-height:21px!important;
+ border-radius:6px!important;border:1.5px solid rgba(128,118,132,.28)!important;background:#fffdfa!important;box-shadow:none!important;
+}
+html body .sat-permission.is-checked .sat-checkbox,
+html body .sat-check input[type=checkbox]:checked{
+ background:#d9b1ba!important;border-color:#d9b1ba!important;
+}
+html body .sat-permission.is-checked .sat-checkbox:after{content:'✓'!important;color:#fff!important;font-size:13px!important;line-height:1!important;font-weight:700!important}
+html body .sat-check input[type=checkbox]:checked:after{content:'✓'!important;color:#fff!important;font-size:13px!important;line-height:1!important;font-weight:700!important}
+
+/* Botões e modais na mesma família do Meu Dia Ideal */
+html body .sat-main-cta,
+html body .sat-page>.sat-actions>.primary,
+html body .sat-modal .modal-actions .primary{
+ background:linear-gradient(100deg,rgba(231,143,177,.92),rgba(247,215,183,.92) 48%,rgba(195,219,244,.94))!important;
+ color:#fff!important;border:1px solid rgba(181,145,169,.15)!important;box-shadow:none!important;
+}
+html body .sat-modal .modal-card,
+html body .sat-modal .modal-head{background:#fbf7ef!important}
+html body .sat-modal .secondary{background:#fffdfa!important;color:#6d6673!important;border:1px solid rgba(122,108,128,.10)!important}
+`;
+document.head.appendChild(s)})();
+
+
+/* RC126 — Satélites: modal conversa com o hero + relações reais + avatar sem quadrado colorido */
+;(function(){if(document.getElementById('rc126-satellites-relations'))return;const st=document.createElement('style');st.id='rc126-satellites-relations';st.textContent=`
+html body dialog.sat-modal .modal-card{
+  background:linear-gradient(125deg,rgba(252,232,238,.98) 0%,rgba(255,247,231,.985) 43%,rgba(232,242,253,.985) 100%)!important;
+  border:1px solid rgba(149,132,153,.12)!important;
+  box-shadow:none!important;
+}
+html body dialog.sat-modal .modal-head .eyebrow{color:#847b8f!important;font-weight:700!important;letter-spacing:.18em!important}
+html body dialog.sat-modal .modal-head h2{color:#343744!important;font-weight:450!important;letter-spacing:-.022em!important}
+html body dialog.sat-modal :is(input,select,textarea){background:rgba(255,253,249,.88)!important;border-color:rgba(137,124,142,.17)!important;color:#47424b!important;box-shadow:none!important}
+html body dialog.sat-modal .sat-avatar-field>span{font-size:13px!important;font-weight:500!important;color:#5b5360!important}
+html body dialog.sat-modal .sat-avatar-picker{gap:8px!important}
+html body dialog.sat-modal .sat-avatar-choice{
+  background:rgba(255,253,249,.62)!important;
+  border:1px solid rgba(132,119,139,.10)!important;
+  color:#788198!important;
+  box-shadow:none!important;
+}
+html body dialog.sat-modal .sat-avatar-choice.active{
+  background:rgba(255,253,249,.94)!important;
+  border-color:rgba(197,153,174,.34)!important;
+  box-shadow:inset 0 0 0 1px rgba(197,153,174,.08)!important;
+  color:#69758d!important;
+}
+html body dialog.sat-modal .sat-avatar-choice svg{width:25px!important;height:25px!important;stroke-width:1.45!important}
+html body dialog.sat-modal .sat-avatar-choice small{font-size:9.5px!important;color:#817987!important}
+html body .sat-member .sat-avatar{
+  width:42px!important;height:42px!important;min-width:42px!important;
+  background:transparent!important;border:0!important;border-radius:0!important;
+  box-shadow:none!important;color:#7b8498!important;
+}
+html body .sat-member .sat-avatar svg{width:30px!important;height:30px!important;stroke-width:1.45!important}
+html body .sat-member-hero .sat-member-avatar{
+  background:transparent!important;border:0!important;border-radius:0!important;box-shadow:none!important;
+}
+html body .sat-hero-icon{color:#989fb0!important;stroke:#989fb0!important;opacity:.62!important}
+html body .sat-permission.is-checked,
+html body .sat-permission.is-on{
+  background:rgba(255,253,249,.78)!important;
+  border-color:rgba(184,151,169,.18)!important;
+}
+html body .sat-permission.is-checked .sat-perm-check,
+html body .sat-permission.is-on .sat-perm-check{
+  background:linear-gradient(135deg,#dba8b8 0%,#e9cdb8 50%,#c8d9ec 100%)!important;
+}
+`;
+document.head.appendChild(st)})();
+
+
+/* RC127 — Satélites: fundo do modal exatamente na mesma família do hero */
+;(function(){if(document.getElementById('rc127-sat-modal-bg'))return;const st=document.createElement('style');st.id='rc127-sat-modal-bg';st.textContent=`
+html body dialog.sat-modal{background:transparent!important}
+html body dialog.sat-modal>.modal-card,
+html body dialog.sat-modal .modal-card{
+  background:linear-gradient(135deg,#fbf4ec 0%,#edf3f4 52%,#f3edf7 100%)!important;
+  border:1px solid rgba(113,96,130,.09)!important;
+  box-shadow:0 18px 44px rgba(74,57,69,.10)!important;
+}
+html body dialog.sat-modal .modal-head{
+  background:transparent!important;
+  border-bottom:0!important;
+}
+html body dialog.sat-modal .modal-actions{
+  background:linear-gradient(to top,rgba(243,237,247,.96) 58%,rgba(243,237,247,0))!important;
+  border-top:0!important;
+}
+`;document.head.appendChild(st)})();
+
+
+/* RC128 — Satélites/Convites: modal usa EXATAMENTE a paleta do módulo
+   blush + pêssego + azul névoa. Sem menta e sem lavanda. */
+;(function(){
+  if(document.getElementById('rc128-sat-modal-module-color')) return;
+  const st=document.createElement('style');
+  st.id='rc128-sat-modal-module-color';
+  st.textContent=`
+  html body dialog.sat-modal{
+    background:transparent!important;
+  }
+  html body dialog.sat-modal>.modal-card,
+  html body dialog.sat-modal .modal-card{
+    background:
+      linear-gradient(
+        135deg,
+        rgba(249,205,218,.68) 0%,
+        rgba(255,245,224,.78) 42%,
+        rgba(218,234,252,.86) 100%
+      )!important;
+    border:1px solid rgba(170,157,177,.13)!important;
+    box-shadow:0 18px 44px rgba(74,57,69,.10)!important;
+  }
+  html body dialog.sat-modal .modal-head{
+    background:transparent!important;
+    border-bottom:0!important;
+  }
+  html body dialog.sat-modal .modal-actions{
+    background:transparent!important;
+    border-top:0!important;
+  }
+  html body dialog.sat-modal :is(input:not([type=checkbox]),select,textarea){
+    background:rgba(255,253,249,.90)!important;
+    border:1px solid rgba(137,124,142,.15)!important;
+    color:#47424b!important;
+    box-shadow:none!important;
+  }
+  html body dialog.sat-modal .sat-permission,
+  html body dialog.sat-modal .sat-avatar-choice,
+  html body dialog.sat-modal .sat-kids-settings{
+    background:rgba(255,253,249,.68)!important;
+    border-color:rgba(137,124,142,.10)!important;
+  }
+  html body dialog.sat-modal .sat-permission.is-checked,
+  html body dialog.sat-modal .sat-permission.is-on,
+  html body dialog.sat-modal .sat-avatar-choice.active{
+    background:rgba(255,253,249,.88)!important;
+    border-color:rgba(207,159,179,.24)!important;
+  }
+  html body dialog.sat-modal .sat-permission.is-checked .sat-checkbox,
+  html body dialog.sat-modal .sat-permission.is-on .sat-checkbox,
+  html body dialog.sat-modal .sat-permission.is-checked .sat-perm-check,
+  html body dialog.sat-modal .sat-permission.is-on .sat-perm-check{
+    background:linear-gradient(135deg,#dda7b9 0%,#efc8b7 52%,#bdd2ea 100%)!important;
+    border-color:transparent!important;
+  }
+  html body dialog.sat-modal .modal-actions .primary{
+    background:linear-gradient(100deg,#e78fb1 0%,#f7d7b7 48%,#c3dbf4 100%)!important;
+    color:#fff!important;
+    border:1px solid rgba(181,145,169,.15)!important;
+    box-shadow:none!important;
+  }
+  html body dialog.sat-modal .modal-actions .secondary{
+    background:rgba(255,253,249,.86)!important;
+    color:#706875!important;
+    border:1px solid rgba(122,108,128,.09)!important;
+    box-shadow:none!important;
+  }
+  `;
+  document.head.appendChild(st);
+})();
+
+
+/* RC129 — Satélites/Convites · tipografia leve nos modais */
+;(function(){
+  if(document.getElementById('rc129-sat-modal-type'))return;
+  const st=document.createElement('style');
+  st.id='rc129-sat-modal-type';
+  st.textContent=`
+  html body dialog.sat-modal .modal-head .eyebrow{
+    font-weight:500!important;
+    letter-spacing:.17em!important;
+  }
+  html body dialog.sat-modal .modal-head h2{
+    font-size:20px!important;
+    line-height:1.18!important;
+    font-weight:400!important;
+    letter-spacing:-.018em!important;
+    color:#3f3945!important;
+  }
+  html body dialog.sat-modal .sat-editor-fields>label,
+  html body dialog.sat-modal .sat-avatar-field>span,
+  html body dialog.sat-modal .sat-permissions>.eyebrow,
+  html body dialog.sat-modal .sat-kids-settings>.eyebrow{
+    font-weight:450!important;
+  }
+  html body dialog.sat-modal label{
+    font-weight:400!important;
+  }
+  html body dialog.sat-modal :is(input:not([type=checkbox]),select,textarea){
+    font-weight:400!important;
+  }
+  html body dialog.sat-modal .sat-avatar-choice small{
+    font-weight:400!important;
+  }
+  html body dialog.sat-modal .sat-permission-copy strong,
+  html body dialog.sat-modal .sat-permission strong{
+    font-weight:450!important;
+  }
+  html body dialog.sat-modal .sat-permission-copy small,
+  html body dialog.sat-modal .sat-permission small,
+  html body dialog.sat-modal .sat-section-note{
+    font-weight:400!important;
+  }
+  html body dialog.sat-modal .modal-actions .primary,
+  html body dialog.sat-modal .modal-actions .secondary{
+    font-weight:450!important;
+  }
+  `;
+  document.head.appendChild(st);
+})();
+
+
+/* RC130 — Satélites/Convites · redução VISÍVEL do peso tipográfico dos modais */
+;(function(){
+  if(document.getElementById('rc130-sat-modal-type-visible')) return;
+  const st=document.createElement('style');
+  st.id='rc130-sat-modal-type-visible';
+  st.textContent=`
+  html body dialog.sat-modal,
+  html body dialog.sat-modal *{
+    font-synthesis:none!important;
+  }
+
+  html body dialog.sat-modal .modal-head .eyebrow,
+  html body dialog.sat-modal .sat-permissions>.eyebrow,
+  html body dialog.sat-modal .sat-kids-settings>.eyebrow{
+    font-weight:450!important;
+  }
+
+  html body dialog.sat-modal .modal-head h2{
+    font-size:20px!important;
+    line-height:1.2!important;
+    font-weight:300!important;
+    letter-spacing:-.012em!important;
+  }
+
+  html body dialog.sat-modal .sat-editor-fields>label,
+  html body dialog.sat-modal .sat-avatar-field>span{
+    font-weight:350!important;
+  }
+
+  html body dialog.sat-modal :is(input:not([type=checkbox]),select,textarea){
+    font-weight:300!important;
+  }
+
+  html body dialog.sat-modal .sat-avatar-choice,
+  html body dialog.sat-modal .sat-avatar-choice *,
+  html body dialog.sat-modal .sat-avatar-choice small{
+    font-weight:350!important;
+  }
+
+  html body dialog.sat-modal .sat-permission-copy strong,
+  html body dialog.sat-modal .sat-permission strong{
+    font-weight:350!important;
+  }
+
+  html body dialog.sat-modal .sat-permission-copy small,
+  html body dialog.sat-modal .sat-permission small,
+  html body dialog.sat-modal .sat-section-note,
+  html body dialog.sat-modal .sat-kids-settings p{
+    font-weight:300!important;
+  }
+
+  html body dialog.sat-modal .modal-actions .primary,
+  html body dialog.sat-modal .modal-actions .secondary{
+    font-weight:400!important;
+  }
+
+  html body dialog.sat-modal strong{
+    font-weight:350!important;
+  }
+  `;
+  document.head.appendChild(st);
+})();
+
+
+/* RC131 FINAL — Satélites e Convites
+   Fundo opaco na paleta EXATA do módulo + tipografia realmente leve. */
+;(function(){
+  if(document.getElementById('rc131-sat-final-visual')) return;
+  const st=document.createElement('style');
+  st.id='rc131-sat-final-visual';
+  st.textContent=`
+  html body dialog.sat-modal{
+    background:transparent!important;
+  }
+  html body dialog.sat-modal > form.modal-card.casa-modal-card,
+  html body dialog.sat-modal > .modal-card.casa-modal-card,
+  html body dialog.sat-modal .modal-card.casa-modal-card,
+  html body dialog.sat-modal .sat-editor-form{
+    background:linear-gradient(135deg,#F9DDE6 0%,#FFF3DF 46%,#DCEBFA 100%)!important;
+    background-color:#FFF3E9!important;
+    border:1px solid rgba(170,157,177,.13)!important;
+    box-shadow:0 22px 58px rgba(64,53,66,.14)!important;
+    color:#47414B!important;
+  }
+  html body dialog.sat-modal .modal-head,
+  html body dialog.sat-modal .modal-actions{
+    background:transparent!important;
+    background-image:none!important;
+    border-color:rgba(130,117,135,.08)!important;
+  }
+  html body dialog.sat-modal .modal-head h2{
+    font-family:-apple-system,BlinkMacSystemFont,"SF Pro Display","Helvetica Neue",Arial,sans-serif!important;
+    font-size:20px!important;
+    line-height:1.16!important;
+    font-weight:400!important;
+    letter-spacing:-.018em!important;
+    color:#3F3945!important;
+  }
+  html body dialog.sat-modal .modal-head .eyebrow,
+  html body dialog.sat-modal .sat-permissions>.eyebrow,
+  html body dialog.sat-modal .sat-kids-settings>.eyebrow{
+    font-family:-apple-system,BlinkMacSystemFont,"SF Pro Text","Helvetica Neue",Arial,sans-serif!important;
+    font-weight:500!important;
+    letter-spacing:.18em!important;
+    color:#7E7684!important;
+  }
+  html body dialog.sat-modal .sat-editor-fields>label,
+  html body dialog.sat-modal .sat-avatar-field>span,
+  html body dialog.sat-modal label{
+    font-family:-apple-system,BlinkMacSystemFont,"SF Pro Text","Helvetica Neue",Arial,sans-serif!important;
+    font-weight:400!important;
+    color:#625A66!important;
+  }
+  html body dialog.sat-modal :is(input:not([type=checkbox]),select,textarea){
+    font-family:-apple-system,BlinkMacSystemFont,"SF Pro Text","Helvetica Neue",Arial,sans-serif!important;
+    font-weight:400!important;
+    color:#45404A!important;
+    background:#FFFDFC!important;
+    border:1px solid rgba(126,115,132,.14)!important;
+    box-shadow:none!important;
+  }
+  html body dialog.sat-modal .sat-avatar-choice{
+    background:#FFFDFC!important;
+    border:1px solid rgba(126,115,132,.10)!important;
+    box-shadow:none!important;
+    color:#7A8299!important;
+  }
+  html body dialog.sat-modal .sat-avatar-choice.active{
+    background:#FFFDFC!important;
+    border-color:rgba(216,157,183,.34)!important;
+    box-shadow:inset 0 0 0 1px rgba(216,157,183,.08)!important;
+  }
+  html body dialog.sat-modal .sat-avatar-choice small{
+    font-weight:400!important;
+    color:#77707C!important;
+  }
+  html body dialog.sat-modal .sat-permission{
+    background:#FFFDFC!important;
+    border:1px solid rgba(126,115,132,.10)!important;
+    box-shadow:none!important;
+  }
+  html body dialog.sat-modal .sat-permission.is-checked{
+    background:#FFFDFC!important;
+    border-color:rgba(216,157,183,.24)!important;
+    box-shadow:none!important;
+  }
+  html body dialog.sat-modal .sat-permission-copy strong,
+  html body dialog.sat-modal .sat-permission strong{
+    font-family:-apple-system,BlinkMacSystemFont,"SF Pro Text","Helvetica Neue",Arial,sans-serif!important;
+    font-size:13.5px!important;
+    line-height:1.3!important;
+    font-weight:400!important;
+    color:#4B4550!important;
+  }
+  html body dialog.sat-modal .sat-permission-copy small,
+  html body dialog.sat-modal .sat-permission small,
+  html body dialog.sat-modal .sat-section-note,
+  html body dialog.sat-modal .sat-kids-settings p{
+    font-family:-apple-system,BlinkMacSystemFont,"SF Pro Text","Helvetica Neue",Arial,sans-serif!important;
+    font-weight:400!important;
+    color:#817A84!important;
+  }
+  html body dialog.sat-modal .sat-kids-settings{
+    background:#FFF9F4!important;
+    border:1px solid rgba(126,115,132,.08)!important;
+    box-shadow:none!important;
+  }
+  html body dialog.sat-modal .sat-checkbox,
+  html body dialog.sat-modal .sat-perm-check{
+    background:#FFFDFC!important;
+    border-color:rgba(126,115,132,.28)!important;
+  }
+  html body dialog.sat-modal .sat-permission.is-checked .sat-checkbox,
+  html body dialog.sat-modal .sat-permission.is-checked .sat-perm-check{
+    background:linear-gradient(135deg,#DE9FB8 0%,#F0C9B4 54%,#BFD5ED 100%)!important;
+    border-color:transparent!important;
+  }
+  html body dialog.sat-modal .modal-actions .secondary{
+    background:#FFFDFC!important;
+    background-image:none!important;
+    color:#6F6873!important;
+    border:1px solid rgba(126,115,132,.10)!important;
+    font-weight:400!important;
+    box-shadow:none!important;
+  }
+  html body dialog.sat-modal .modal-actions .primary{
+    background:linear-gradient(100deg,#E58EAF 0%,#F4CDB7 48%,#BFD6EE 100%)!important;
+    background-image:linear-gradient(100deg,#E58EAF 0%,#F4CDB7 48%,#BFD6EE 100%)!important;
+    color:#fff!important;
+    border:1px solid rgba(181,145,169,.14)!important;
+    font-weight:400!important;
+    box-shadow:none!important;
+  }
+  `;
+  document.head.appendChild(st);
+})();
+
+/* RC132 — Refino final: tipografia mais leve + checkboxes corretos nos modais de Casa */
+;(function(){
+  if(document.getElementById('rc132-sat-casa-final')) return;
+  const st=document.createElement('style');
+  st.id='rc132-sat-casa-final';
+  st.textContent=`
+  /* Tipografia — Satélites / Convites */
+  html body .sat-page h3,
+  html body .sat-card h3,
+  html body .sat-card .panel-head h3{
+    font-weight:500!important;
+    letter-spacing:-.018em!important;
+    color:#3f3945!important;
+  }
+  html body .sat-member strong,
+  html body .sat-member small,
+  html body .sat-role,
+  html body .sat-actions button,
+  html body .sat-page .primary,
+  html body .sat-page .secondary,
+  html body .sat-cloud-note,
+  html body .sat-card .note{
+    font-weight:400!important;
+  }
+  html body .sat-member strong{font-size:18px!important;line-height:1.18!important}
+  html body .sat-role{letter-spacing:.04em!important}
+
+  /* Tipografia — modal de Satélites ainda mais leve */
+  html body dialog.sat-modal .modal-head h2{
+    font-weight:380!important;
+    letter-spacing:-.02em!important;
+  }
+  html body dialog.sat-modal .modal-head .eyebrow,
+  html body dialog.sat-modal .sat-permissions>.eyebrow,
+  html body dialog.sat-modal .sat-kids-settings>.eyebrow,
+  html body dialog.sat-modal .sat-editor-fields>label,
+  html body dialog.sat-modal .sat-avatar-field>span,
+  html body dialog.sat-modal label,
+  html body dialog.sat-modal .sat-avatar-choice small,
+  html body dialog.sat-modal .sat-permission-copy strong,
+  html body dialog.sat-modal .sat-permission strong,
+  html body dialog.sat-modal .sat-permission-copy small,
+  html body dialog.sat-modal .sat-permission small,
+  html body dialog.sat-modal .sat-section-note,
+  html body dialog.sat-modal .sat-kids-settings p,
+  html body dialog.sat-modal .modal-actions .primary,
+  html body dialog.sat-modal .modal-actions .secondary{
+    font-weight:400!important;
+  }
+
+  /* Checkboxes — modal de Casa */
+  html body dialog.casa-dialog.casa-responsibility-dialog .modal-card.casa-modal-card{
+    background:linear-gradient(135deg,#F9DDE6 0%,#FFF3DF 46%,#DCEBFA 100%)!important;
+    background-color:#FFF3E9!important;
+  }
+  html body dialog.casa-dialog.casa-responsibility-dialog .sat-target-grid{
+    background:rgba(255,253,249,.58)!important;
+    border:1px solid rgba(126,115,132,.09)!important;
+  }
+  html body dialog.casa-dialog.casa-responsibility-dialog .sat-target-option{
+    display:grid!important;
+    grid-template-columns:24px minmax(0,1fr)!important;
+    align-items:center!important;
+    gap:12px!important;
+    padding:14px!important;
+    border-radius:18px!important;
+    background:#FFFDFC!important;
+    border:1px solid rgba(126,115,132,.09)!important;
+    box-shadow:none!important;
+  }
+  html body dialog.casa-dialog.casa-responsibility-dialog .sat-target-option:has(input:checked){
+    border-color:rgba(216,157,183,.26)!important;
+    background:rgba(255,253,249,.97)!important;
+  }
+  html body dialog.casa-dialog.casa-responsibility-dialog .sat-target-option input[type=checkbox],
+  html body dialog.casa-dialog.casa-responsibility-dialog .sat-check input[type=checkbox]{
+    -webkit-appearance:none!important;
+    appearance:none!important;
+    width:24px!important;
+    height:24px!important;
+    min-width:24px!important;
+    min-height:24px!important;
+    max-width:24px!important;
+    max-height:24px!important;
+    margin:0!important;
+    padding:0!important;
+    border-radius:8px!important;
+    border:1.5px solid rgba(126,115,132,.26)!important;
+    background:#FFFDFC!important;
+    display:grid!important;
+    place-content:center!important;
+    box-shadow:none!important;
+    position:relative!important;
+    flex:0 0 24px!important;
+    accent-color:initial!important;
+    outline:none!important;
+  }
+  html body dialog.casa-dialog.casa-responsibility-dialog .sat-target-option input[type=checkbox]::after,
+  html body dialog.casa-dialog.casa-responsibility-dialog .sat-check input[type=checkbox]::after{
+    content:''!important;
+    width:0!important;
+    height:0!important;
+  }
+  html body dialog.casa-dialog.casa-responsibility-dialog .sat-target-option input[type=checkbox]:checked,
+  html body dialog.casa-dialog.casa-responsibility-dialog .sat-check input[type=checkbox]:checked{
+    background:linear-gradient(135deg,#DE9FB8 0%,#F0C9B4 54%,#BFD5ED 100%)!important;
+    border-color:transparent!important;
+  }
+  html body dialog.casa-dialog.casa-responsibility-dialog .sat-target-option input[type=checkbox]:checked::after,
+  html body dialog.casa-dialog.casa-responsibility-dialog .sat-check input[type=checkbox]:checked::after{
+    content:'✓'!important;
+    color:#fff!important;
+    font-size:14px!important;
+    line-height:1!important;
+    font-weight:700!important;
+  }
+  html body dialog.casa-dialog.casa-responsibility-dialog .sat-target-option strong,
+  html body dialog.casa-dialog.casa-responsibility-dialog .sat-check span strong,
+  html body dialog.casa-dialog.casa-responsibility-dialog .sat-label,
+  html body dialog.casa-dialog.casa-responsibility-dialog label,
+  html body dialog.casa-dialog.casa-responsibility-dialog .sat-target-head span,
+  html body dialog.casa-dialog.casa-responsibility-dialog .sat-target-all,
+  html body dialog.casa-dialog.casa-responsibility-dialog .sat-target-note,
+  html body dialog.casa-dialog.casa-responsibility-dialog .sat-resp-options button,
+  html body dialog.casa-dialog.casa-responsibility-dialog .modal-actions .primary,
+  html body dialog.casa-dialog.casa-responsibility-dialog .modal-actions .secondary{
+    font-weight:400!important;
+  }
+  html body dialog.casa-dialog.casa-responsibility-dialog .sat-target-option strong,
+  html body dialog.casa-dialog.casa-responsibility-dialog .sat-check span strong{
+    font-size:13.5px!important;
+    color:#4B4550!important;
+  }
+  html body dialog.casa-dialog.casa-responsibility-dialog .sat-target-option small,
+  html body dialog.casa-dialog.casa-responsibility-dialog .sat-check span small,
+  html body dialog.casa-dialog.casa-responsibility-dialog .sat-target-note{
+    color:#817A84!important;
+  }
+  html body dialog.casa-dialog.casa-responsibility-dialog .sat-resp-options{
+    background:rgba(255,253,249,.64)!important;
+    border:1px solid rgba(126,115,132,.08)!important;
+  }
+  html body dialog.casa-dialog.casa-responsibility-dialog .sat-resp-options button.active{
+    background:linear-gradient(135deg,rgba(222,159,184,.22),rgba(240,201,180,.22) 54%,rgba(191,213,237,.22) 100%)!important;
+    color:#4B4550!important;
+  }
+  `;
+  document.head.appendChild(st);
+})();
+
+;(function(){
+  if(document.getElementById('rc133-casa-check-click'))return;
+  const st=document.createElement('style');
+  st.id='rc133-casa-check-click';
+  st.textContent=`
+    html body dialog.casa-dialog.casa-responsibility-dialog .sat-target-option,
+    html body dialog.casa-dialog.casa-responsibility-dialog .sat-kids-points .sat-check{
+      cursor:pointer!important;
+      touch-action:manipulation!important;
+      -webkit-tap-highlight-color:transparent!important;
+      position:relative!important;
+      z-index:1!important;
+    }
+    html body dialog.casa-dialog.casa-responsibility-dialog .sat-target-option input[type=checkbox],
+    html body dialog.casa-dialog.casa-responsibility-dialog .sat-kids-points .sat-check input[type=checkbox]{
+      pointer-events:auto!important;
+      opacity:1!important;
+      position:relative!important;
+      z-index:2!important;
+    }
+  `;
+  document.head.appendChild(st);
+})();
+
+
+;(function(){if(document.getElementById('rc134-casa-custom-check'))return;const st=document.createElement('style');st.id='rc134-casa-custom-check';st.textContent=`
+html body dialog.casa-dialog.casa-responsibility-dialog .sat-target-option,
+html body dialog.casa-dialog.casa-responsibility-dialog .casa-points-toggle{
+  -webkit-appearance:none!important;appearance:none!important;width:100%!important;
+  display:grid!important;grid-template-columns:24px minmax(0,1fr)!important;align-items:center!important;
+  gap:12px!important;text-align:left!important;padding:14px!important;margin:0!important;border-radius:18px!important;
+  border:1px solid rgba(126,115,132,.09)!important;background:#FFFDFC!important;color:#4B4550!important;
+  box-shadow:none!important;cursor:pointer!important;touch-action:manipulation!important;-webkit-tap-highlight-color:transparent!important;
+}
+html body dialog.casa-dialog.casa-responsibility-dialog .sat-target-option.is-checked,
+html body dialog.casa-dialog.casa-responsibility-dialog .casa-points-toggle.is-checked{
+  border-color:rgba(216,157,183,.26)!important;background:#FFFDFC!important;
+}
+html body dialog.casa-dialog.casa-responsibility-dialog .sat-target-option input[type=checkbox],
+html body dialog.casa-dialog.casa-responsibility-dialog .casa-points-toggle input[type=checkbox]{
+  position:absolute!important;opacity:0!important;pointer-events:none!important;width:1px!important;height:1px!important;
+}
+html body dialog.casa-dialog.casa-responsibility-dialog .sat-target-check{
+  width:24px!important;height:24px!important;border-radius:8px!important;border:1.5px solid rgba(126,115,132,.26)!important;
+  background:#FFFDFC!important;display:grid!important;place-items:center!important;box-sizing:border-box!important;
+}
+html body dialog.casa-dialog.casa-responsibility-dialog .sat-target-option.is-checked .sat-target-check,
+html body dialog.casa-dialog.casa-responsibility-dialog .casa-points-toggle.is-checked .sat-target-check{
+  background:linear-gradient(135deg,#DE9FB8 0%,#F0C9B4 54%,#BFD5ED 100%)!important;border-color:transparent!important;
+}
+html body dialog.casa-dialog.casa-responsibility-dialog .sat-target-option.is-checked .sat-target-check:after,
+html body dialog.casa-dialog.casa-responsibility-dialog .casa-points-toggle.is-checked .sat-target-check:after{
+  content:'✓'!important;color:#fff!important;font-size:14px!important;font-weight:700!important;line-height:1!important;
+}
+html body dialog.casa-dialog.casa-responsibility-dialog .sat-target-copy{display:block!important;min-width:0!important}
+html body dialog.casa-dialog.casa-responsibility-dialog .sat-target-copy strong{display:block!important;font-weight:400!important;font-size:13.5px!important}
+html body dialog.casa-dialog.casa-responsibility-dialog .sat-target-copy small{display:block!important;margin-top:3px!important;font-weight:400!important}
+html body dialog.casa-dialog.casa-responsibility-dialog .casa-points-toggle>span:last-child{font-weight:400!important;line-height:1.35!important}
+`;document.head.appendChild(st)})();
+
+/* RC135 — Casa: restaura SOMENTE a identidade cromática original do módulo.
+   Mantém os controles customizados/clicáveis da RC134. */
+;(function(){
+  if(document.getElementById('rc135-casa-color-restore'))return;
+  const st=document.createElement('style');
+  st.id='rc135-casa-color-restore';
+  st.textContent=`
+  html body dialog.casa-dialog.casa-responsibility-dialog .modal-card.casa-modal-card{
+    background:linear-gradient(145deg,rgba(255,251,248,.99),rgba(253,247,247,.985) 56%,rgba(247,251,245,.98))!important;
+    background-color:#fbf7f0!important;
+    border:1px solid rgba(132,106,118,.12)!important;
+    box-shadow:0 28px 68px rgba(58,45,54,.18)!important;
+    color:#3e3842!important;
+  }
+  html body dialog.casa-dialog.casa-responsibility-dialog .modal-head,
+  html body dialog.casa-dialog.casa-responsibility-dialog .modal-actions{
+    background:transparent!important;
+    background-image:none!important;
+  }
+  html body dialog.casa-dialog.casa-responsibility-dialog .sat-resp-options{
+    background:rgba(255,255,255,.58)!important;
+    border:1px solid rgba(113,96,130,.08)!important;
+  }
+  html body dialog.casa-dialog.casa-responsibility-dialog .sat-resp-options button.active{
+    background:linear-gradient(135deg,rgba(239,222,231,.96),rgba(223,235,226,.96))!important;
+    color:#5e4e59!important;
+    box-shadow:0 1px 0 rgba(80,65,78,.04)!important;
+  }
+  html body dialog.casa-dialog.casa-responsibility-dialog .sat-target-grid{
+    background:rgba(255,255,255,.52)!important;
+    border:1px solid rgba(113,96,130,.08)!important;
+  }
+  html body dialog.casa-dialog.casa-responsibility-dialog .modal-actions .secondary{
+    background:linear-gradient(135deg,rgba(238,246,237,.96),rgba(232,242,232,.96))!important;
+    color:#647566!important;
+    border:1px solid rgba(118,151,125,.10)!important;
+    box-shadow:none!important;
+  }
+  html body dialog.casa-dialog.casa-responsibility-dialog .modal-actions .primary{
+    background:linear-gradient(115deg,#d8a5b3 0%,#d9b5b5 46%,#b9cfb9 100%)!important;
+    background-image:linear-gradient(115deg,#d8a5b3 0%,#d9b5b5 46%,#b9cfb9 100%)!important;
+    color:#5e5057!important;
+    border:0!important;
+    box-shadow:none!important;
+  }
+  `;
+  document.head.appendChild(st);
+})();
+
+
+/* RC136 — Premiações em Mais + checkbox de vale-pontos sem controle nativo */
+;(function(){if(document.getElementById('rc136-rewards-points'))return;const st=document.createElement('style');st.id='rc136-rewards-points';st.textContent=`
+html body dialog.casa-dialog.casa-responsibility-dialog .casa-points-toggle{
+  -webkit-appearance:none!important;appearance:none!important;width:100%!important;
+  display:grid!important;grid-template-columns:24px minmax(0,1fr)!important;align-items:center!important;
+  gap:12px!important;text-align:left!important;padding:14px!important;margin:0!important;border-radius:18px!important;
+  border:1px solid rgba(126,115,132,.09)!important;background:#fffdfa!important;color:#4b4550!important;
+  box-shadow:none!important;cursor:pointer!important;touch-action:manipulation!important;-webkit-tap-highlight-color:transparent!important;
+}
+html body dialog.casa-dialog.casa-responsibility-dialog .casa-points-toggle input[type=hidden]{display:none!important}
+html body dialog.casa-dialog.casa-responsibility-dialog .casa-points-toggle .sat-target-check{
+  width:24px!important;height:24px!important;border-radius:8px!important;border:1.5px solid rgba(126,115,132,.26)!important;
+  background:#fffdfa!important;display:grid!important;place-items:center!important;box-sizing:border-box!important;
+}
+html body dialog.casa-dialog.casa-responsibility-dialog .casa-points-toggle.is-checked .sat-target-check{
+  background:linear-gradient(135deg,#d8a5b3 0%,#d9b5b5 46%,#b9cfb9 100%)!important;border-color:transparent!important;
+}
+html body dialog.casa-dialog.casa-responsibility-dialog .casa-points-toggle.is-checked .sat-target-check:after{
+  content:'✓'!important;color:#fff!important;font-size:14px!important;font-weight:700!important;line-height:1!important;
+}
+html body dialog.casa-dialog.casa-responsibility-dialog .casa-points-copy{display:block!important;font-weight:400!important;line-height:1.35!important;min-width:0!important}
+.rewards-page{padding-bottom:20px!important}.rewards-hero{min-height:170px!important}.rewards-kid{display:grid!important;gap:14px!important}.rewards-grid{display:grid;gap:10px}.reward-row{display:grid;grid-template-columns:34px minmax(0,1fr) 90px;gap:10px;align-items:end;padding:12px;border-radius:18px;background:#fffdfa;border:1px solid rgba(126,115,132,.09)}.reward-symbol{width:34px;height:34px;display:grid;place-items:center;border-radius:12px;border:1px solid rgba(126,115,132,.10);color:#7d8294;font-size:18px}.reward-row label{display:grid;gap:5px;font-size:10.5px;font-weight:400;color:#817a84}.reward-row input{min-height:42px;border-radius:13px;border:1px solid rgba(126,115,132,.13);background:#fff;padding:9px 10px;font-size:16px;font-weight:400;color:#49434d}.rewards-save{justify-self:stretch;min-height:46px!important}@media(max-width:480px){.reward-row{grid-template-columns:32px minmax(0,1fr) 78px}.reward-row input{padding:8px}}
+`;document.head.appendChild(st)})();
+
+/* RC137 — Premiações universais: Owner · Kids · Reconhecimentos */
+const BERTHA_OWNER_REWARDS_KEY='bertha.owner.rewards.v1';
+const BERTHA_RECOGNITIONS_KEY='bertha.recognitions.v1';
+const BERTHA_RECOGNITION_PRESETS_KEY='bertha.recognition.presets.v1';
+
+function rewardOwnerDefaults(){return [
+ {id:'owner-100',name:'100% alinhada',icon:'✦',description:'Quando uma dimensão do Meu Progresso chega a 100%.',criterion:'progress100',value:100,recurrence:'monthly',type:'badge',visual:'Selo BERTH.A',active:true},
+ {id:'owner-goal',name:'Meta alcançada',icon:'◇',description:'Quando uma meta configurada é concluída.',criterion:'goal',value:1,recurrence:'each',type:'badge',visual:'Marco',active:true},
+ {id:'owner-streak',name:'Constância',icon:'○',description:'Uma sequência de dias mantendo continuidade.',criterion:'streak',value:7,recurrence:'each',type:'badge',visual:'Selo de constância',active:true},
+ {id:'owner-cycle',name:'Ciclo concluído',icon:'△',description:'Ao concluir um ciclo de rotina, treino ou projeto.',criterion:'cycle',value:1,recurrence:'each',type:'badge',visual:'Marco de ciclo',active:true}
+]}
+function loadOwnerRewards(){try{const x=JSON.parse(window.berthaHmlStorage.getItem(BERTHA_OWNER_REWARDS_KEY)||'null');return Array.isArray(x)&&x.length?x:rewardOwnerDefaults()}catch{return rewardOwnerDefaults()}}
+function saveOwnerRewards(x){window.berthaHmlStorage.setItem(BERTHA_OWNER_REWARDS_KEY,JSON.stringify(x||[]))}
+function recognitionDefaults(){return [
+ {id:'flower',icon:'✿',name:'Uma flor para você',message:'Obrigada por estar comigo nisso.',active:true},
+ {id:'heart',icon:'♡',name:'Obrigada',message:'Fez diferença no meu dia.',active:true},
+ {id:'star',icon:'☆',name:'Você salvou meu dia',message:'Sua ajuda deixou tudo mais leve.',active:true},
+ {id:'spark',icon:'✦',name:'Ajuda incrível',message:'A BERTH.A registrou: essa ajuda foi especial.',active:true}
+]}
+function loadRecognitionPresets(){try{const x=JSON.parse(window.berthaHmlStorage.getItem(BERTHA_RECOGNITION_PRESETS_KEY)||'null');return Array.isArray(x)&&x.length?x:recognitionDefaults()}catch{return recognitionDefaults()}}
+function saveRecognitionPresets(x){window.berthaHmlStorage.setItem(BERTHA_RECOGNITION_PRESETS_KEY,JSON.stringify(x||[]))}
+function loadRecognitions(){try{return JSON.parse(window.berthaHmlStorage.getItem(BERTHA_RECOGNITIONS_KEY)||'[]')||[]}catch{return []}}
+function saveRecognitions(x){window.berthaHmlStorage.setItem(BERTHA_RECOGNITIONS_KEY,JSON.stringify((x||[]).slice(0,200)))}
+
+function rewardsHubStyles(){if(document.getElementById('rc137-rewards-hub'))return;const st=document.createElement('style');st.id='rc137-rewards-hub';st.textContent=`
+.rewards-tabs{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;padding:4px;border-radius:18px;background:rgba(255,255,255,.54);border:1px solid rgba(126,115,132,.08)}
+.rewards-tabs button{min-height:40px;border:0;border-radius:14px;background:transparent;color:#77707c;font-weight:400}.rewards-tabs button.active{background:#fffdfa;color:#4b4550;box-shadow:0 4px 14px rgba(74,57,69,.04)}
+.rewards-pane{display:grid;gap:12px}.rewards-pane[hidden]{display:none!important}.reward-config-card{display:grid;gap:11px;padding:15px;border-radius:20px;background:#fffdfa;border:1px solid rgba(126,115,132,.09)}
+.reward-config-head{display:grid;grid-template-columns:38px minmax(0,1fr) auto;gap:10px;align-items:center}.reward-config-icon{width:38px;height:38px;display:grid;place-items:center;border:1px solid rgba(126,115,132,.10);border-radius:13px;color:#7a8194;font-size:19px}.reward-config-head strong{font-weight:450;color:#47414b}.reward-config-head small{display:block;margin-top:2px;color:#8a818b;font-size:11px;line-height:1.35}.reward-active{display:inline-flex;align-items:center;gap:6px;font-size:10px;color:#817984}.reward-active input{width:18px;height:18px;accent-color:#d79ead}.reward-form-grid{display:grid;grid-template-columns:1fr 1fr;gap:9px}.reward-form-grid label,.reward-config-card>label{display:grid;gap:5px;font-size:10.5px;font-weight:400;color:#817984}.reward-form-grid input,.reward-form-grid select,.reward-config-card>label input,.reward-config-card>label select{min-height:42px;border-radius:13px;border:1px solid rgba(126,115,132,.13);background:#fff;padding:9px 10px;font-size:16px;font-weight:400;color:#49434d}.reward-config-actions{display:flex;justify-content:flex-end}.reward-config-actions button{min-height:40px;border:0;border-radius:14px;padding:0 14px;background:linear-gradient(100deg,#e7a6bb,#f2d2bc 48%,#c5daef);color:#5f5662;font-weight:400}.recognition-preview{display:flex;align-items:center;gap:10px;padding:11px 12px;border-radius:16px;background:#fffdfa;border:1px solid rgba(126,115,132,.08)}.recognition-preview .symbol{font-size:23px;color:#7b8294}.recognition-history{display:grid;gap:8px}.recognition-history .item{padding:11px 12px;border-radius:16px;background:#fffdfa;border:1px solid rgba(126,115,132,.08)}.recognition-history strong{font-weight:430}.recognition-history small{display:block;margin-top:3px;color:#8a818b}.sat-recognize{background:#fffdfa!important;border:1px solid rgba(126,115,132,.10)!important;color:#716975!important}.recognition-choice{display:grid;grid-template-columns:repeat(2,1fr);gap:8px}.recognition-choice button{display:grid;gap:4px;justify-items:start;text-align:left;min-height:72px;padding:12px;border:1px solid rgba(126,115,132,.10);border-radius:16px;background:#fffdfa;color:#4b4550}.recognition-choice button span{font-size:21px}.recognition-choice button strong{font-weight:430}.recognition-choice button small{font-size:10.5px;color:#8a818b}.recognition-choice button.active{border-color:rgba(216,157,183,.30);box-shadow:inset 0 0 0 1px rgba(216,157,183,.08)}
+@media(max-width:520px){.reward-form-grid{grid-template-columns:1fr}.rewards-tabs button{font-size:11px}.recognition-choice{grid-template-columns:1fr 1fr}}
+`;document.head.appendChild(st)}
+
+function renderUniversalRewards(){
+ ensureSatelliteStyles();ensureSatelliteIdentityV4();rewardsHubStyles();
+ const data=loadSatellites(),kids=(data.members||[]).filter(m=>m.status!=='removed'&&m.role==='kids'),adults=(data.members||[]).filter(m=>m.status!=='removed'&&m.role!=='kids');
+ const owner=loadOwnerRewards(),presets=loadRecognitionPresets(),history=loadRecognitions();
+ const icon=(t)=>t==='egg'?'◯':t==='trophy'?'♕':t==='skin'?'✦':t==='companion'?'♡':'◇';
+ app.innerHTML=`<div class="sat-page rewards-page"><section class="sat-hero sat-ideal-hero rewards-hero"><div class="sat-hero-copy"><div class="eyebrow">PREMIAÇÕES</div><h2>Progress deserves<br>somewhere to land.</h2><p>Conquistas para você. Gamificação para Kids. Reconhecimento para quem caminha junto.</p></div><svg class="sat-hero-icon" viewBox="0 0 48 48" aria-hidden="true"><path d="M24 7l4 8 9 1.3-6.5 6.3 1.5 9-8-4.2-8 4.2 1.5-9L11 16.3 20 15z"/><path d="M18 34v7l6-3 6 3v-7"/></svg></section><div class="rewards-tabs"><button class="active" data-reward-tab="owner">Owner</button><button data-reward-tab="kids">Kids</button><button data-reward-tab="helpers">Reconhecimentos</button></div>
+ <section class="rewards-pane" data-reward-pane="owner"><div class="sat-card card"><div class="panel-head"><div><h3>Minhas conquistas</h3><p class="note">Defina o que merece ser reconhecido na sua própria jornada.</p></div></div><div class="rewards-grid">${owner.map((r,i)=>`<div class="reward-config-card" data-owner-reward="${i}"><div class="reward-config-head"><span class="reward-config-icon">${escapeHtml(r.icon||'◇')}</span><div><strong>${escapeHtml(r.name)}</strong><small>${escapeHtml(r.description||'')}</small></div><label class="reward-active"><input type="checkbox" data-or-active ${r.active!==false?'checked':''}>Ativa</label></div><div class="reward-form-grid"><label>Nome<input data-or-name value="${escapeHtml(r.name)}"></label><label>Ícone<input data-or-icon maxlength="2" value="${escapeHtml(r.icon||'◇')}"></label><label>Critério<select data-or-criterion><option value="progress100" ${r.criterion==='progress100'?'selected':''}>Progresso em 100%</option><option value="goal" ${r.criterion==='goal'?'selected':''}>Meta concluída</option><option value="streak" ${r.criterion==='streak'?'selected':''}>Sequência de dias</option><option value="cycle" ${r.criterion==='cycle'?'selected':''}>Ciclo concluído</option></select></label><label>Valor/meta<input type="number" min="1" data-or-value value="${Math.max(1,+r.value||1)}"></label><label>Recorrência<select data-or-rec><option value="once" ${r.recurrence==='once'?'selected':''}>Única</option><option value="each" ${r.recurrence==='each'?'selected':''}>A cada conquista</option><option value="weekly" ${r.recurrence==='weekly'?'selected':''}>Semanal</option><option value="monthly" ${r.recurrence==='monthly'?'selected':''}>Mensal</option></select></label><label>Visual<input data-or-visual value="${escapeHtml(r.visual||'Selo BERTH.A')}"></label></div><label>Descrição<input data-or-desc value="${escapeHtml(r.description||'')}"></label></div>`).join('')}</div><div class="reward-config-actions"><button id="saveOwnerRewards">Salvar conquistas</button></div></div></section>
+ <section class="rewards-pane" data-reward-pane="kids" hidden>${kids.length?kids.map(m=>{const c=kidsRewardsFor(m.id);return `<section class="sat-card card rewards-kid" data-rewards-kid="${m.id}"><div class="panel-head"><div><h3>${escapeHtml(m.name)}</h3><p class="note">Escolha o marco, o tipo de desbloqueio e o visual.</p></div><span class="sat-avatar">${satelliteAvatarIcon(m.avatarKey||'son')}</span></div><div class="rewards-grid">${Object.entries(c).map(([key,r])=>`<div class="reward-config-card" data-kid-reward="${key}"><div class="reward-config-head"><span class="reward-config-icon">${icon(r.type)}</span><div><strong>${escapeHtml(r.name||'Conquista')}</strong><small>${r.type==='medal'?'Medalha':r.type==='egg'?'Ovo / cápsula':r.type==='trophy'?'Troféu':r.type==='skin'?'Skin':'Desbloqueio'}</small></div><label class="reward-active"><input type="checkbox" data-kr-active ${r.active!==false?'checked':''}>Ativa</label></div><div class="reward-form-grid"><label>Nome<input data-kr-name value="${escapeHtml(r.name||'')}"></label><label>Pontos<input type="number" min="1" max="9999" data-kr-points value="${Math.max(1,+r.points||1)}"></label><label>Tipo<select data-kr-type><option value="medal" ${r.type==='medal'?'selected':''}>Medalha</option><option value="egg" ${r.type==='egg'?'selected':''}>Ovo / cápsula</option><option value="trophy" ${r.type==='trophy'?'selected':''}>Troféu</option><option value="skin" ${r.type==='skin'?'selected':''}>Skin</option><option value="companion" ${r.type==='companion'?'selected':''}>Personagem</option></select></label><label>Recorrência<select data-kr-rec><option value="season" ${r.recurrence!=='once'?'selected':''}>Por temporada</option><option value="once" ${r.recurrence==='once'?'selected':''}>Uma vez</option></select></label><label>Visual / item<input data-kr-visual value="${escapeHtml(r.visual||r.name||'')}"></label><label>Descrição<input data-kr-desc value="${escapeHtml(r.description||'')}"></label></div></div>`).join('')}</div><div class="reward-config-actions"><button class="saveKidRewards">Salvar premiações</button></div></section>`}).join(''):`<div class="sat-empty">Cadastre um perfil Kids em Satélites para configurar a gamificação.</div>`}</section>
+ <section class="rewards-pane" data-reward-pane="helpers" hidden><section class="sat-card card"><div class="panel-head"><div><h3>Reconhecimentos</h3><p class="note">Gestos leves para agradecer quem ajuda — sem pontos ou ranking.</p></div></div><div class="rewards-grid">${presets.map((r,i)=>`<div class="reward-config-card" data-rec-preset="${i}"><div class="reward-config-head"><span class="reward-config-icon">${escapeHtml(r.icon||'✿')}</span><div><strong>${escapeHtml(r.name)}</strong><small>${escapeHtml(r.message||'')}</small></div><label class="reward-active"><input type="checkbox" data-rp-active ${r.active!==false?'checked':''}>Ativo</label></div><div class="reward-form-grid"><label>Símbolo<input data-rp-icon maxlength="2" value="${escapeHtml(r.icon||'✿')}"></label><label>Nome<input data-rp-name value="${escapeHtml(r.name)}"></label></div><label>Mensagem<input data-rp-message value="${escapeHtml(r.message||'')}"></label></div>`).join('')}</div><div class="reward-config-actions"><button id="saveRecognitionPresets">Salvar reconhecimentos</button></div></section>${adults.length?`<section class="sat-card card"><div class="panel-head"><div><h3>Helpers da sua rede</h3><p class="note">O botão Reconhecer também aparece no card de cada satélite adulto.</p></div></div>${adults.map(m=>`<div class="recognition-preview"><span class="symbol">${satelliteAvatarIcon(m.avatarKey||'friend')}</span><div><strong>${escapeHtml(m.name)}</strong><small>${history.filter(x=>String(x.memberId)===String(m.id)).length} reconhecimento(s) recebido(s)</small></div></div>`).join('')}</section>`:''}${history.length?`<section class="sat-card card"><div class="panel-head"><div><h3>Histórico</h3><p class="note">Últimos agradecimentos enviados.</p></div></div><div class="recognition-history">${history.slice(0,8).map(x=>`<div class="item"><strong>${escapeHtml(x.icon||'✿')} ${escapeHtml(x.name||'Reconhecimento')} · ${escapeHtml(x.memberName||'Satélite')}</strong><small>${escapeHtml(x.message||'')} · ${new Date(x.at).toLocaleDateString('pt-BR')}</small></div>`).join('')}</div></section>`:''}</section></div>`;
+ document.querySelectorAll('[data-reward-tab]').forEach(b=>b.onclick=()=>{document.querySelectorAll('[data-reward-tab]').forEach(x=>x.classList.toggle('active',x===b));document.querySelectorAll('[data-reward-pane]').forEach(p=>p.hidden=p.dataset.rewardPane!==b.dataset.rewardTab)});
+ document.querySelector('#saveOwnerRewards')?.addEventListener('click',()=>{const rows=[...document.querySelectorAll('[data-owner-reward]')];const vals=rows.map((row,i)=>({...owner[i],name:row.querySelector('[data-or-name]').value.trim()||owner[i].name,icon:row.querySelector('[data-or-icon]').value.trim()||'◇',criterion:row.querySelector('[data-or-criterion]').value,value:Math.max(1,+row.querySelector('[data-or-value]').value||1),recurrence:row.querySelector('[data-or-rec]').value,visual:row.querySelector('[data-or-visual]').value.trim(),description:row.querySelector('[data-or-desc]').value.trim(),active:row.querySelector('[data-or-active]').checked}));saveOwnerRewards(vals);const btn=document.querySelector('#saveOwnerRewards');btn.textContent='Salvo';setTimeout(()=>btn.textContent='Salvar conquistas',900)});
+ document.querySelectorAll('[data-rewards-kid]').forEach(section=>{section.querySelector('.saveKidRewards').onclick=()=>{const all=loadKidsRewards(),mid=section.dataset.rewardsKid,current=kidsRewardsFor(mid);section.querySelectorAll('[data-kid-reward]').forEach(row=>{const key=row.dataset.kidReward;current[key]={...current[key],name:row.querySelector('[data-kr-name]').value.trim()||current[key].name,points:Math.max(1,+row.querySelector('[data-kr-points]').value||1),type:row.querySelector('[data-kr-type]').value,recurrence:row.querySelector('[data-kr-rec]').value,visual:row.querySelector('[data-kr-visual]').value.trim(),description:row.querySelector('[data-kr-desc]').value.trim(),active:row.querySelector('[data-kr-active]').checked}});all[mid]=current;saveKidsRewards(all);const btn=section.querySelector('.saveKidRewards');btn.textContent='Salvo';setTimeout(()=>btn.textContent='Salvar premiações',900)}});
+ document.querySelector('#saveRecognitionPresets')?.addEventListener('click',()=>{const vals=[...document.querySelectorAll('[data-rec-preset]')].map((row,i)=>({...presets[i],icon:row.querySelector('[data-rp-icon]').value.trim()||'✿',name:row.querySelector('[data-rp-name]').value.trim()||presets[i].name,message:row.querySelector('[data-rp-message]').value.trim(),active:row.querySelector('[data-rp-active]').checked}));saveRecognitionPresets(vals);const btn=document.querySelector('#saveRecognitionPresets');btn.textContent='Salvo';setTimeout(()=>btn.textContent='Salvar reconhecimentos',900)});
+}
+
+function openRecognitionModal(memberId){rewardsHubStyles();const member=satelliteMember(memberId);if(!member)return;const options=loadRecognitionPresets().filter(x=>x.active!==false);const d=document.createElement('dialog');d.className='bertha-dialog casa-dialog sat-modal';d.innerHTML=`<form class="modal-card casa-modal-card" id="recognitionForm"><div class="modal-head"><div><div class="eyebrow">RECONHECIMENTO</div><h2>Um gesto para ${escapeHtml(member.name)}</h2></div><button type="button" class="icon-btn casa-modal-x" data-close>×</button></div><div class="recognition-choice">${options.map((r,i)=>`<button type="button" data-rec-choice="${i}" ${i===0?'class="active"':''}><span>${escapeHtml(r.icon||'✿')}</span><strong>${escapeHtml(r.name)}</strong><small>${escapeHtml(r.message||'')}</small></button>`).join('')}</div><div class="modal-actions"><div class="grow"></div><button type="button" class="secondary" data-close>Cancelar</button><button class="primary" type="submit">Enviar</button></div></form>`;document.body.appendChild(d);let selected=0;d.querySelectorAll('[data-close]').forEach(b=>b.onclick=()=>d.close());d.querySelectorAll('[data-rec-choice]').forEach(b=>b.onclick=()=>{selected=+b.dataset.recChoice;d.querySelectorAll('[data-rec-choice]').forEach(x=>x.classList.toggle('active',x===b))});d.querySelector('#recognitionForm').onsubmit=e=>{e.preventDefault();const r=options[selected];if(!r)return;const hist=loadRecognitions();hist.unshift({id:satId(),memberId:member.id,memberName:member.name,icon:r.icon,name:r.name,message:r.message,at:Date.now()});saveRecognitions(hist);d.close()};d.onclose=()=>d.remove();d.showModal()}
+
+/* A rota existente passa a renderizar o hub universal. */
+renderKidsRewards=renderUniversalRewards;
+
+/* Acrescenta "Reconhecer" aos satélites adultos sem reescrever o módulo inteiro. */
+const _renderSatellitesRC137=renderSatellites;
+renderSatellites=function(){_renderSatellitesRC137();const data=loadSatellites();document.querySelectorAll('[data-sat-preview]').forEach(btn=>{const m=data.members.find(x=>String(x.id)===String(btn.dataset.satPreview));if(!m||m.role==='kids')return;const actions=btn.closest('.sat-actions');if(!actions||actions.querySelector('[data-sat-recognize]'))return;const b=document.createElement('button');b.type='button';b.className='secondary sat-recognize';b.dataset.satRecognize=m.id;b.textContent='Reconhecer';b.onclick=()=>openRecognitionModal(m.id);actions.appendChild(b)})};
+window.renderSatellites=renderSatellites;
+
+;(function(){
+  if(document.getElementById('rc139-casa-maint-share'))return;
+  const st=document.createElement('style');
+  st.id='rc139-casa-maint-share';
+  st.textContent=`
+    html body .casa-maint-modal .maint-share-block{display:grid;gap:10px;margin:12px 0 16px}
+    html body .casa-maint-modal .maint-share-label{font-size:13px;font-weight:400;color:#5f5662}
+    html body .casa-maint-modal .maint-sat-targets[hidden]{display:none!important}
+    html body .casa-maint-modal .maint-sat-targets{display:grid;gap:8px}
+    html body .casa-maint-modal .maint-sat-grid{display:grid;gap:8px;padding:8px;border-radius:18px;background:rgba(255,255,255,.52);border:1px solid rgba(113,96,130,.08)}
+    html body .casa-maint-modal .maint-sat-option{-webkit-appearance:none;appearance:none;width:100%;display:grid;grid-template-columns:24px minmax(0,1fr);align-items:center;gap:12px;text-align:left;padding:13px 14px;border-radius:17px;border:1px solid rgba(126,115,132,.10);background:#fffdfa;color:#4b4550}
+    html body .casa-maint-modal .maint-sat-option strong{display:block;font-size:13.5px;font-weight:400}
+    html body .casa-maint-modal .maint-sat-option small{display:block;margin-top:2px;font-size:11px;font-weight:400;color:#817a84}
+    html body .casa-maint-modal .maint-sat-check{width:24px;height:24px;border-radius:8px;border:1.5px solid rgba(126,115,132,.26);background:#fff;display:grid;place-items:center;color:#fff;font-size:14px;font-weight:700}
+    html body .casa-maint-modal .maint-sat-option.is-selected{border-color:rgba(216,157,183,.25)}
+    html body .casa-maint-modal .maint-sat-option.is-selected .maint-sat-check{background:linear-gradient(135deg,#DE9FB8 0%,#F0C9B4 54%,#BFD5ED 100%);border-color:transparent}
+    html body .casa-maint-modal .maint-resp-options button,
+    html body .casa-maint-modal .sat-target-head,
+    html body .casa-maint-modal .sat-target-note,
+    html body .casa-maint-modal .sat-target-all{font-weight:400!important}
+  `;
+  document.head.appendChild(st);
+})();
+
+
+/* RC140 — Premiações: hero neutro + ícones refinados/personalizáveis + temas Kids */
+const BERTHA_KIDS_REWARD_THEMES_KEY='bertha.kids.reward.themes.v1';
+function loadKidsRewardThemes(){try{return JSON.parse(window.berthaHmlStorage.getItem(BERTHA_KIDS_REWARD_THEMES_KEY)||'{}')||{}}catch{return{}}}
+function saveKidsRewardThemes(x){window.berthaHmlStorage.setItem(BERTHA_KIDS_REWARD_THEMES_KEY,JSON.stringify(x||{}))}
+
+function rewardsVisualRC140(){
+  if(document.getElementById('rc140-rewards-visual'))return;
+  const st=document.createElement('style');
+  st.id='rc140-rewards-visual';
+  st.textContent=`
+    html body .rewards-hero{min-height:176px!important;display:flex!important;align-items:center!important;position:relative!important;overflow:hidden!important}
+    html body .rewards-hero .sat-hero-copy{max-width:100%!important}
+    html body .rewards-hero .sat-hero-icon{display:none!important}
+    html body .rewards-hero h2{font-weight:400!important;letter-spacing:-.028em!important;max-width:470px!important}
+    html body .rewards-hero p{max-width:500px!important;font-weight:400!important}
+    html body .rewards-hero:after{
+      content:'';position:absolute;right:-48px;bottom:-58px;width:210px;height:210px;border-radius:50%;
+      background:radial-gradient(circle,rgba(199,220,242,.24) 0%,rgba(247,222,226,.10) 44%,rgba(255,255,255,0) 72%);
+      pointer-events:none!important
+    }
+
+    html body .reward-config-icon{
+      background:linear-gradient(145deg,#fff9f4,#f3f7fc)!important;
+      border:1px solid rgba(126,115,132,.09)!important;
+      box-shadow:0 5px 14px rgba(73,61,76,.05)!important;
+      font-size:19px!important
+    }
+    html body .rc140-icon-wrap{display:grid;gap:6px}
+    html body .rc140-icon-label{font-size:10.5px;color:#817984;font-weight:400}
+    html body .rc140-icon-picker{display:flex;gap:8px;flex-wrap:wrap}
+    html body .rc140-icon-picker button{
+      -webkit-appearance:none;appearance:none;width:42px;height:42px;padding:0;border-radius:13px;
+      border:1px solid rgba(126,115,132,.10);background:#fffdfa;color:#697287;
+      display:grid;place-items:center;font-size:19px;box-shadow:none
+    }
+    html body .rc140-icon-picker button:nth-child(4n+1){background:linear-gradient(145deg,#fbecf0,#fff7eb)}
+    html body .rc140-icon-picker button:nth-child(4n+2){background:linear-gradient(145deg,#edf5fc,#f5f0fb)}
+    html body .rc140-icon-picker button:nth-child(4n+3){background:linear-gradient(145deg,#eef7f1,#fff8eb)}
+    html body .rc140-icon-picker button:nth-child(4n+4){background:linear-gradient(145deg,#fff2e9,#eef4fb)}
+    html body .rc140-icon-picker button.active{
+      border-color:rgba(124,134,166,.36)!important;
+      box-shadow:inset 0 0 0 1px rgba(124,134,166,.10),0 5px 14px rgba(73,61,76,.05)!important
+    }
+    html body .rc140-icon-input{position:absolute!important;opacity:0!important;pointer-events:none!important;width:1px!important;height:1px!important}
+
+    html body .kids-theme-box{
+      display:grid;gap:9px;padding:13px 14px;border-radius:18px;
+      background:rgba(255,253,249,.72);border:1px solid rgba(126,115,132,.08)
+    }
+    html body .kids-theme-box strong{font-size:12.5px;font-weight:430;color:#4b4550}
+    html body .kids-theme-box small{font-size:10.5px;color:#8a818b;line-height:1.4}
+    html body .kids-theme-options{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}
+    html body .kids-theme-options button{
+      -webkit-appearance:none;appearance:none;border:1px solid rgba(126,115,132,.10);
+      border-radius:14px;min-height:54px;padding:8px 9px;text-align:left;
+      font-size:10.5px;font-weight:400;color:#56505c;position:relative
+    }
+    html body .kids-theme-options button:after{
+      content:'';display:block;width:20px;height:5px;border-radius:999px;margin-top:7px;background:rgba(255,255,255,.65)
+    }
+    html body .kids-theme-options button[data-theme="mist"]{background:linear-gradient(135deg,#f7e9f0,#e8f2fb)}
+    html body .kids-theme-options button[data-theme="ocean"]{background:linear-gradient(135deg,#e3f1fb,#c9e4f3)}
+    html body .kids-theme-options button[data-theme="space"]{background:linear-gradient(135deg,#e8e5fa,#c9d3f4)}
+    html body .kids-theme-options button[data-theme="forest"]{background:linear-gradient(135deg,#e5f1e7,#d8e8df)}
+    html body .kids-theme-options button[data-theme="solar"]{background:linear-gradient(135deg,#fff1cf,#f5dfad)}
+    html body .kids-theme-options button[data-theme="coral"]{background:linear-gradient(135deg,#fce4dc,#f2d3d3)}
+    html body .kids-theme-options button.active{border-color:rgba(93,104,135,.34);box-shadow:inset 0 0 0 1px rgba(93,104,135,.08)}
+
+    html body .rewards-kid[data-kid-theme="mist"] .reward-config-icon{background:linear-gradient(145deg,#f7e9f0,#e8f2fb)!important}
+    html body .rewards-kid[data-kid-theme="ocean"] .reward-config-icon{background:linear-gradient(145deg,#e3f1fb,#c9e4f3)!important;color:#597a91!important}
+    html body .rewards-kid[data-kid-theme="space"] .reward-config-icon{background:linear-gradient(145deg,#e8e5fa,#c9d3f4)!important;color:#636b96!important}
+    html body .rewards-kid[data-kid-theme="forest"] .reward-config-icon{background:linear-gradient(145deg,#e5f1e7,#d8e8df)!important;color:#647c6b!important}
+    html body .rewards-kid[data-kid-theme="solar"] .reward-config-icon{background:linear-gradient(145deg,#fff1cf,#f5dfad)!important;color:#8a7041!important}
+    html body .rewards-kid[data-kid-theme="coral"] .reward-config-icon{background:linear-gradient(145deg,#fce4dc,#f2d3d3)!important;color:#8d6868!important}
+
+    html body .rewards-pane[data-reward-pane="helpers"] .recognition-preview strong,
+    html body .rewards-pane[data-reward-pane="helpers"] .recognition-history strong{font-weight:420!important}
+    html body .rewards-pane[data-reward-pane="helpers"] .recognition-preview small,
+    html body .rewards-pane[data-reward-pane="helpers"] .recognition-history small{font-weight:400!important}
+
+    @media(max-width:480px){
+      html body .kids-theme-options{grid-template-columns:repeat(2,minmax(0,1fr))}
+    }
+  `;
+  document.head.appendChild(st);
+}
+
+function rc140InstallPicker(row,input,kind,display){
+  if(!row||!input||row.querySelector('.rc140-icon-picker'))return;
+  const sets={
+    owner:['✦','◇','○','△','☆','◈','☼','⌁'],
+    kids:['★','✦','◈','⬟','☼','◎','◇','♕'],
+    helper:['✦','☆','◈','⌁','☼','◇','○','♡']
+  };
+  const icons=sets[kind]||sets.owner;
+  const current=(input.value||icons[0]).trim();
+  input.classList.add('rc140-icon-input');
+  const wrap=document.createElement('div');
+  wrap.className='rc140-icon-wrap';
+  wrap.innerHTML=`<span class="rc140-icon-label">${kind==='helper'?'Símbolo':'Ícone'}</span><div class="rc140-icon-picker">${icons.map(i=>`<button type="button" data-rc140-icon="${i}" class="${i===current?'active':''}">${i}</button>`).join('')}</div>`;
+  input.parentElement.insertAdjacentElement('afterend',wrap);
+  wrap.querySelectorAll('[data-rc140-icon]').forEach(b=>b.onclick=()=>{
+    input.value=b.dataset.rc140Icon;
+    wrap.querySelectorAll('button').forEach(x=>x.classList.toggle('active',x===b));
+    if(display)display.textContent=b.dataset.rc140Icon;
+  });
+}
+
+function enhanceRewardsRC140(){
+  rewardsVisualRC140();
+  const hero=document.querySelector('.rewards-hero');
+  if(hero){
+    hero.querySelector('.sat-hero-icon')?.remove();
+    const h=hero.querySelector('h2'),p=hero.querySelector('p');
+    if(h)h.innerHTML='Você desempenha.<br>A BERTH.A reconhece.';
+    if(p)p.textContent='Conquistas para você. Gamificação para Kids. Reconhecimento para quem caminha junto.';
+  }
+
+  document.querySelectorAll('[data-owner-reward]').forEach(row=>{
+    rc140InstallPicker(row,row.querySelector('[data-or-icon]'),'owner',row.querySelector('.reward-config-icon'));
+  });
+  document.querySelectorAll('[data-rec-preset]').forEach(row=>{
+    rc140InstallPicker(row,row.querySelector('[data-rp-icon]'),'helper',row.querySelector('.reward-config-icon'));
+  });
+
+  const themes=loadKidsRewardThemes();
+  document.querySelectorAll('[data-rewards-kid]').forEach(section=>{
+    const mid=section.dataset.rewardsKid;
+    const selected=themes[mid]||'mist';
+    section.dataset.kidTheme=selected;
+
+    if(!section.querySelector('.kids-theme-box')){
+      const head=section.querySelector('.panel-head');
+      head?.insertAdjacentHTML('afterend',`
+        <div class="kids-theme-box">
+          <div><strong>Tema das premiações</strong><small>Personaliza as cores do universo de conquistas deste Kids.</small></div>
+          <div class="kids-theme-options">
+            <button type="button" data-theme="mist">Azul Neblina</button>
+            <button type="button" data-theme="ocean">Oceano</button>
+            <button type="button" data-theme="space">Espaço</button>
+            <button type="button" data-theme="forest">Floresta</button>
+            <button type="button" data-theme="solar">Solar</button>
+            <button type="button" data-theme="coral">Coral</button>
+          </div>
+        </div>
+      `);
+    }
+    const themeBox=section.querySelector('.kids-theme-box');
+    themeBox?.querySelectorAll('[data-theme]').forEach(b=>{
+      b.classList.toggle('active',b.dataset.theme===selected);
+      b.onclick=()=>{
+        const all=loadKidsRewardThemes();
+        all[mid]=b.dataset.theme;
+        saveKidsRewardThemes(all);
+        section.dataset.kidTheme=b.dataset.theme;
+        themeBox.querySelectorAll('[data-theme]').forEach(x=>x.classList.toggle('active',x===b));
+      };
+    });
+
+    section.querySelectorAll('[data-kid-reward]').forEach(row=>{
+      if(row.querySelector('.rc140-icon-picker'))return;
+      const key=row.dataset.kidReward;
+      const cfg=kidsRewardsFor(mid)[key]||{};
+      const display=row.querySelector('.reward-config-icon');
+      const fake=document.createElement('input');
+      fake.type='text';
+      fake.value=cfg.icon||display?.textContent?.trim()||'★';
+      fake.dataset.krIcon='1';
+      row.appendChild(fake);
+      rc140InstallPicker(row,fake,'kids',display);
+    });
+
+    const saveBtn=section.querySelector('.saveKidRewards');
+    if(saveBtn){
+      saveBtn.onclick=()=>{
+        const all=loadKidsRewards(),current=kidsRewardsFor(mid);
+        section.querySelectorAll('[data-kid-reward]').forEach(row=>{
+          const key=row.dataset.kidReward;
+          current[key]={
+            ...current[key],
+            name:row.querySelector('[data-kr-name]').value.trim()||current[key].name,
+            points:Math.max(1,+row.querySelector('[data-kr-points]').value||1),
+            type:row.querySelector('[data-kr-type]').value,
+            recurrence:row.querySelector('[data-kr-rec]').value,
+            visual:row.querySelector('[data-kr-visual]').value.trim(),
+            description:row.querySelector('[data-kr-desc]').value.trim(),
+            icon:row.querySelector('[data-kr-icon]')?.value||current[key].icon||'★',
+            active:row.querySelector('[data-kr-active]').checked
+          };
+        });
+        all[mid]=current;saveKidsRewards(all);
+        saveBtn.textContent='Salvo';
+        setTimeout(()=>saveBtn.textContent='Salvar premiações',900);
+      };
+    }
+  });
+}
+
+const _renderUniversalRewardsRC140=renderUniversalRewards;
+renderUniversalRewards=function(){
+  _renderUniversalRewardsRC140();
+  enhanceRewardsRC140();
+};
+renderKidsRewards=renderUniversalRewards;
+
+
+/* RC141 — Casa: manutenção alinhada ao Modal System + pontos Kids + satélites universais */
+;(function(){
+  if(document.getElementById('rc141-casa-maint-satellites'))return;
+  const st=document.createElement('style');st.id='rc141-casa-maint-satellites';st.textContent=`
+    html body dialog.casa-maint-dialog .study-v10-x{
+      color:#746d73!important;background:rgba(255,253,250,.72)!important;
+      border:1px solid rgba(126,115,132,.10)!important;box-shadow:none!important
+    }
+    html body dialog.casa-maint-dialog .study-v10-x:hover,
+    html body dialog.casa-maint-dialog .study-v10-x:focus,
+    html body dialog.casa-maint-dialog .study-v10-x:focus-visible{
+      color:#625b61!important;background:rgba(255,253,250,.92)!important;outline:none!important;box-shadow:none!important
+    }
+    html body .casa-maint-modal .maint-kids-points{display:grid;gap:10px;margin:2px 0 14px}
+    html body .casa-maint-modal .maint-kids-points[hidden]{display:none!important}
+    html body .casa-maint-modal .casa-points-toggle{
+      -webkit-appearance:none;appearance:none;width:100%;display:grid;grid-template-columns:24px minmax(0,1fr);align-items:center;
+      gap:12px;text-align:left;padding:13px 14px;border-radius:17px;border:1px solid rgba(126,115,132,.10);
+      background:#fffdfa;color:#4b4550;box-shadow:none
+    }
+    html body .casa-maint-modal .casa-points-toggle input[type=hidden]{display:none!important}
+    html body .casa-maint-modal .casa-points-toggle .sat-target-check{
+      width:24px;height:24px;border-radius:8px;border:1.5px solid rgba(126,115,132,.26);background:#fff;display:grid;place-items:center;box-sizing:border-box
+    }
+    html body .casa-maint-modal .casa-points-toggle.is-checked .sat-target-check{
+      background:linear-gradient(135deg,#DE9FB8 0%,#F0C9B4 54%,#BFD5ED 100%);border-color:transparent
+    }
+    html body .casa-maint-modal .casa-points-toggle.is-checked .sat-target-check:after{content:'✓';color:#fff;font-size:14px;font-weight:700;line-height:1}
+    html body .casa-maint-modal .casa-points-copy{font-weight:400!important;line-height:1.35!important}
+  `;document.head.appendChild(st)
+})();
