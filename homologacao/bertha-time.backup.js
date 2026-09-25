@@ -4144,7 +4144,7 @@
       tasks:'<path d="M8 6h10M8 12h10M8 18h10"/><path d="M4 6h.01M4 12h.01M4 18h.01"/>',
       ritual:'<path d="M12 3v3M12 18v3M3 12h3M18 12h3"/><path d="M16.2 7.8l2.1-2.1M5.7 18.3l2.1-2.1M16.2 16.2l2.1 2.1M5.7 5.7l2.1 2.1"/><circle cx="12" cy="12" r="3.2"/>',
       more:'<path d="M5 7h14M5 12h14M5 17h14"/>',
-      network:'<circle cx="12" cy="12" r="2.2"/><ellipse cx="12" cy="12" rx="8.5" ry="4.5" transform="rotate(-28 12 12)"/><circle cx="18.7" cy="7.7" r="1.4"/>',
+      network:'<circle cx="8" cy="9" r="2.4"/><circle cx="16" cy="9" r="2.4"/><path d="M3.8 19c.6-3.4 2.1-5 4.2-5s3.6 1.6 4.2 5M11.8 19c.6-3.4 2.1-5 4.2-5s3.6 1.6 4.2 5"/>',
       invite:'<path d="M4 8.5h16v10H4z"/><path d="m4 9 8 5 8-5"/><path d="M8 5.5h8"/>',
       heart:'<path d="M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.6l-1-1a5.5 5.5 0 0 0-7.8 7.8l1 1L12 21l7.8-7.6 1-1a5.5 5.5 0 0 0 0-7.8z"/>',
       briefcase:'<rect x="3" y="7" width="18" height="12" rx="2"/><path d="M8 7V5a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2M3 12h18"/>',
