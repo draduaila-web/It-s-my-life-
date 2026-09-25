@@ -3332,3 +3332,128 @@ html body dialog.fin-planned-dialog.fin-unified-dialog .fin-danger-soft{
     padding-inline:16px!important;
   }
 }
+
+/* RC103 — FINANCEIRO · sistema único de botões
+   Objetivo: reduzir variações visuais e manter somente 3 níveis:
+   primário (ação), secundário (neutro) e texto (terciário). */
+
+/* Ações principais do módulo — mesma régua em todos os blocos */
+html body #app:has(.finance-hero) :is(
+  #addPlannedBill,
+  #addFixed,
+  #addTransaction,
+  #wishNew,
+  #addSource196
+){
+  display:inline-flex!important;
+  align-items:center!important;
+  justify-content:center!important;
+  gap:7px!important;
+  min-height:44px!important;
+  height:44px!important;
+  width:auto!important;
+  min-width:132px!important;
+  padding:0 18px!important;
+  border-radius:16px!important;
+  border:1px solid rgba(135,112,158,.10)!important;
+  background:linear-gradient(135deg,#c7b2dc 0%,#b9c9df 48%,#a9d2c9 100%)!important;
+  color:#fff!important;
+  font-size:15px!important;
+  line-height:1!important;
+  font-weight:500!important;
+  letter-spacing:0!important;
+  box-shadow:none!important;
+  white-space:nowrap!important;
+}
+
+/* O botão de orçamento deixa de ser um terceiro formato full-width/lavanda */
+html body #app:has(.finance-hero) #addFixed{
+  margin:12px 0 0!important;
+  align-self:flex-start!important;
+}
+
+/* Ações secundárias de módulo */
+html body #app:has(.finance-hero) :is(
+  #wishGoal
+){
+  display:inline-flex!important;
+  align-items:center!important;
+  justify-content:center!important;
+  min-height:44px!important;
+  height:44px!important;
+  width:auto!important;
+  min-width:112px!important;
+  padding:0 18px!important;
+  border-radius:16px!important;
+  background:rgba(255,255,255,.72)!important;
+  color:#6f6674!important;
+  border:1px solid rgba(125,105,135,.14)!important;
+  font-size:15px!important;
+  font-weight:500!important;
+  line-height:1!important;
+  box-shadow:none!important;
+}
+
+/* Terciário: apenas texto, sem virar um novo estilo de botão */
+html body #app:has(.finance-hero) .text-btn{
+  min-height:auto!important;
+  height:auto!important;
+  min-width:0!important;
+  width:auto!important;
+  padding:0!important;
+  border:0!important;
+  border-radius:0!important;
+  background:transparent!important;
+  color:#745b88!important;
+  font-size:13px!important;
+  font-weight:500!important;
+  text-decoration:underline!important;
+  text-underline-offset:3px!important;
+  box-shadow:none!important;
+}
+
+/* Modais: mesma régua do módulo */
+html body dialog.fin-unified-dialog .modal-actions button,
+html body dialog.fin-planned-dialog.fin-unified-dialog .modal-actions button{
+  min-height:44px!important;
+  height:44px!important;
+  min-width:112px!important;
+  width:auto!important;
+  padding:0 18px!important;
+  border-radius:16px!important;
+  font-size:15px!important;
+  line-height:1!important;
+  font-weight:500!important;
+  letter-spacing:0!important;
+  box-shadow:none!important;
+}
+html body dialog.fin-unified-dialog .modal-actions .secondary,
+html body dialog.fin-planned-dialog.fin-unified-dialog .modal-actions .secondary{
+  background:rgba(255,255,255,.72)!important;
+  color:#6f6674!important;
+  border:1px solid rgba(125,105,135,.14)!important;
+}
+html body dialog.fin-unified-dialog .modal-actions .primary,
+html body dialog.fin-planned-dialog.fin-unified-dialog .modal-actions .primary{
+  background:linear-gradient(135deg,#c7b2dc 0%,#b9c9df 48%,#a9d2c9 100%)!important;
+  color:#fff!important;
+  border:1px solid rgba(135,112,158,.10)!important;
+}
+
+/* Edição e remoção: discretas, sem competir com ações principais */
+html body #app:has(.finance-hero) :is(.fg-edit,.mini-delete){
+  background:transparent!important;
+  border:0!important;
+  box-shadow:none!important;
+  font-weight:500!important;
+}
+
+@media(max-width:480px){
+  html body #app:has(.finance-hero) :is(#addPlannedBill,#addFixed,#addTransaction,#wishNew,#addSource196,#wishGoal){
+    min-height:42px!important;
+    height:42px!important;
+    min-width:0!important;
+    padding-inline:16px!important;
+    font-size:14px!important;
+  }
+}
