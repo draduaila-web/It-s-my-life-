@@ -244,6 +244,7 @@ function render() {
   const hash = (location.hash || "").replace("#", "").trim();
   const route = hash || state.route || "meu-dia";
   state.route = route;
+  document.body.dataset.berthaRoute = route;
 
   const pageTitle = document.querySelector("#pageTitle");
   if (pageTitle) {
@@ -4009,6 +4010,166 @@ html body dialog.exercise-dialog.exercise-plan-dialog .study-v10-actions{positio
 @media(max-width:480px){
  html body dialog.exercise-dialog[open] > :is(.bertha-modal,.study-v10-modal){width:calc(100vw - 32px)!important;max-width:390px!important;padding:18px!important;border-radius:26px!important}
  html body dialog.exercise-dialog.exercise-plan-dialog[open] > :is(.bertha-modal,.study-v10-modal),html body dialog.exercise-dialog.exercise-cycle-dialog[open] > :is(.bertha-modal,.study-v10-modal){height:min(78dvh,650px)!important;max-height:min(78dvh,650px)!important}
+}
+`;
+  document.head.appendChild(st);
+})();
+
+
+/* RC92 — RECEITAS · TIPOGRAFIA + BLUSH/BEGE + RESPIRO
+   Escopo exclusivo do módulo Receitas. Alimentação permanece intacta. */
+(()=>{
+  const id='bertha-rc92-recipes-refinement';
+  document.getElementById(id)?.remove();
+  const st=document.createElement('style');
+  st.id=id;
+  st.textContent=`
+/* Página Receitas — paleta exclusiva blush + bege/creme */
+html body[data-bertha-route="receitas"] #app{
+  --rc92-blush:#f7e5e4;
+  --rc92-blush-2:#f2d8d6;
+  --rc92-beige:#fbf5ec;
+  --rc92-cream:#fffaf4;
+  --rc92-ink:#49434b;
+  --rc92-muted:#8d858d;
+  --rc92-rose:#9a6674;
+  --rc92-border:rgba(153,111,121,.13);
+}
+html body[data-bertha-route="receitas"] .recipe-hero{
+  background:linear-gradient(145deg,rgba(255,250,244,.98) 0%,rgba(249,232,231,.82) 58%,rgba(250,239,232,.92) 100%)!important;
+  border:1px solid var(--rc92-border)!important;
+  box-shadow:0 10px 28px rgba(86,65,72,.035)!important;
+}
+html body[data-bertha-route="receitas"] .recipe-hero .eyebrow,
+html body[data-bertha-route="receitas"] .recipe-library-head .eyebrow,
+html body[data-bertha-route="receitas"] .recipe-card .eyebrow,
+html body[data-bertha-route="receitas"] .recipe-freezer .eyebrow{
+  font-weight:500!important;letter-spacing:.20em!important;color:#9a6875!important;
+}
+html body[data-bertha-route="receitas"] .recipe-hero h2{
+  font-size:32px!important;line-height:1.08!important;font-weight:420!important;letter-spacing:-.028em!important;color:#413c45!important;
+}
+html body[data-bertha-route="receitas"] .recipe-hero p{
+  font-size:15.5px!important;line-height:1.48!important;font-weight:400!important;color:#837b84!important;
+}
+html body[data-bertha-route="receitas"] .recipe-tools input{
+  background:rgba(255,252,247,.88)!important;border:1px solid var(--rc92-border)!important;color:var(--rc92-ink)!important;font-weight:400!important;
+}
+html body[data-bertha-route="receitas"] .recipe-tools button,
+html body[data-bertha-route="receitas"] #toggleAllRecipes{
+  background:linear-gradient(135deg,rgba(248,226,222,.95),rgba(247,236,226,.96))!important;
+  border:1px solid var(--rc92-border)!important;color:#955e70!important;font-weight:500!important;box-shadow:none!important;
+}
+html body[data-bertha-route="receitas"] .recipe-library-head h3{
+  margin:5px 0 0!important;font-size:23px!important;line-height:1.15!important;font-weight:420!important;color:#49434b!important;
+}
+html body[data-bertha-route="receitas"] .recipe-category-row button{
+  background:rgba(255,251,246,.82)!important;border:1px solid var(--rc92-border)!important;color:#827a82!important;font-weight:400!important;
+}
+html body[data-bertha-route="receitas"] .recipe-category-row button.active{
+  background:linear-gradient(135deg,#f8e2e1,#f7ece3)!important;color:#956273!important;border-color:rgba(153,102,117,.16)!important;
+}
+html body[data-bertha-route="receitas"] .recipe-card{
+  padding:18px!important;
+  background:linear-gradient(145deg,rgba(255,253,249,.96),rgba(252,242,238,.78))!important;
+  border:1px solid var(--rc92-border)!important;box-shadow:0 8px 24px rgba(74,55,62,.025)!important;
+}
+html body[data-bertha-route="receitas"] .recipe-card h3{
+  margin:6px 0 7px!important;font-size:18px!important;line-height:1.22!important;font-weight:440!important;color:#4a444c!important;
+}
+html body[data-bertha-route="receitas"] .recipe-card span{
+  font-size:12px!important;line-height:1.4!important;font-weight:400!important;color:#8e858d!important;
+}
+html body[data-bertha-route="receitas"] .recipe-card p{
+  margin:14px 0 0!important;font-size:12.5px!important;line-height:1.45!important;font-weight:400!important;color:#615a62!important;
+}
+html body[data-bertha-route="receitas"] .recipe-card p strong{font-weight:500!important}
+html body[data-bertha-route="receitas"] .recipe-card>div:last-child{
+  margin-top:18px!important;gap:10px!important;
+}
+html body[data-bertha-route="receitas"] .recipe-card .secondary{
+  min-height:42px!important;padding:10px 15px!important;border-radius:15px!important;
+  background:linear-gradient(135deg,rgba(250,230,228,.90),rgba(252,241,232,.90))!important;
+  color:#8f6070!important;border:1px solid var(--rc92-border)!important;font-weight:500!important;box-shadow:none!important;
+}
+html body[data-bertha-route="receitas"] .recipe-card .favorite{color:#a86d7e!important;font-weight:300!important}
+html body[data-bertha-route="receitas"] .recipe-freezer{
+  background:linear-gradient(145deg,rgba(255,250,244,.96),rgba(248,230,229,.62),rgba(251,241,232,.90))!important;
+  border:1px solid var(--rc92-border)!important;box-shadow:none!important;
+}
+html body[data-bertha-route="receitas"] .recipe-freezer p{font-weight:400!important;color:#837a82!important}
+
+/* Modal de detalhe em Receitas — sem azul/menta */
+html body dialog.recipe-dialog:not(.food-context-dialog)[open]>.study-v10-modal,
+html body #recipeFormDialog:not(.food-context-dialog)[open]>#recipeForm{
+  background:linear-gradient(145deg,#fffaf5 0%,#f9e7e6 58%,#faeee5 100%)!important;
+  background-image:linear-gradient(145deg,#fffaf5 0%,#f9e7e6 58%,#faeee5 100%)!important;
+  border:0!important;outline:0!important;border-radius:26px!important;
+  box-shadow:inset 0 0 0 1px rgba(154,103,117,.12),0 20px 52px rgba(50,39,45,.14)!important;
+  color:#49434b!important;
+}
+html body dialog.recipe-dialog:not(.food-context-dialog) .study-v10-head .eyebrow,
+html body #recipeFormDialog:not(.food-context-dialog) .study-v10-head .eyebrow{
+  font-weight:500!important;letter-spacing:.20em!important;color:#986777!important;
+}
+html body dialog.recipe-dialog:not(.food-context-dialog) .study-v10-head h2,
+html body #recipeFormDialog:not(.food-context-dialog) .study-v10-head h2{
+  font-weight:420!important;letter-spacing:-.02em!important;color:#443f47!important;
+}
+html body dialog.recipe-dialog:not(.food-context-dialog) .study-v10-head p,
+html body #recipeFormDialog:not(.food-context-dialog) .study-v10-head p{
+  font-weight:400!important;color:#8a8189!important;
+}
+html body dialog.recipe-dialog:not(.food-context-dialog) .study-v10-x,
+html body #recipeFormDialog:not(.food-context-dialog) .study-v10-x{
+  background:rgba(255,252,248,.66)!important;border:1px solid rgba(154,103,117,.12)!important;color:#7f777f!important;box-shadow:none!important;font-weight:300!important;
+}
+html body dialog.recipe-dialog:not(.food-context-dialog) .recipe-detail-card{
+  background:rgba(255,253,249,.88)!important;border:1px solid rgba(154,103,117,.10)!important;border-radius:22px!important;box-shadow:none!important;
+}
+html body dialog.recipe-dialog:not(.food-context-dialog) .recipe-detail-card h3{
+  font-size:18px!important;font-weight:500!important;color:#4c464e!important;
+}
+html body dialog.recipe-dialog:not(.food-context-dialog) .recipe-detail-card :is(li,p){
+  font-weight:400!important;color:#544e55!important;line-height:1.5!important;
+}
+html body dialog.recipe-dialog:not(.food-context-dialog) .recipe-detail-card strong{font-weight:500!important}
+html body dialog.recipe-dialog:not(.food-context-dialog) .recipe-modal-actions{
+  margin-top:18px!important;gap:10px!important;
+}
+html body dialog.recipe-dialog:not(.food-context-dialog) .recipe-modal-actions button{
+  min-height:44px!important;border-radius:15px!important;font-weight:500!important;border:1px solid rgba(154,103,117,.12)!important;box-shadow:none!important;
+}
+html body dialog.recipe-dialog:not(.food-context-dialog) .recipe-modal-actions .primary{
+  background:linear-gradient(135deg,#efc9c8,#e9b8ae)!important;color:#fff!important;
+}
+html body dialog.recipe-dialog:not(.food-context-dialog) .recipe-modal-actions .secondary{
+  background:linear-gradient(135deg,rgba(255,249,245,.94),rgba(248,232,229,.82))!important;color:#8c6170!important;
+}
+
+/* Nova/Editar receita — tipografia e fundo somente blush + bege */
+html body #recipeFormDialog:not(.food-context-dialog) #recipeForm>label,
+html body #recipeFormDialog:not(.food-context-dialog) #recipeForm .form-grid>label{
+  font-weight:430!important;color:#645d64!important;
+}
+html body #recipeFormDialog:not(.food-context-dialog) #recipeForm .muted{font-weight:400!important;color:#9a9198!important}
+html body #recipeFormDialog:not(.food-context-dialog) #recipeForm :is(input,select,textarea){
+  background:#fffdfa!important;border:1px solid rgba(154,103,117,.13)!important;color:#4b454c!important;font-weight:400!important;box-shadow:none!important;
+}
+html body #recipeFormDialog:not(.food-context-dialog) #recipeForm :is(input,textarea)::placeholder{color:#b3aaaf!important;font-weight:400!important}
+html body #recipeFormDialog:not(.food-context-dialog) .recipe-nutrition-box{
+  background:linear-gradient(145deg,rgba(255,249,245,.84),rgba(249,231,230,.58),rgba(251,241,233,.82))!important;
+  border:1px solid rgba(154,103,117,.11)!important;box-shadow:none!important;
+}
+html body #recipeFormDialog:not(.food-context-dialog) .recipe-nutrition-head strong{font-weight:500!important;color:#4f4850!important}
+html body #recipeFormDialog:not(.food-context-dialog) .recipe-nutrition-head small{font-weight:400!important;color:#91878e!important}
+html body #recipeFormDialog:not(.food-context-dialog) .recipe-line-icon{color:#a56f7f!important;background:rgba(248,228,227,.70)!important}
+html body #recipeFormDialog:not(.food-context-dialog) .modal-actions button{font-weight:500!important;box-shadow:none!important}
+html body #recipeFormDialog:not(.food-context-dialog) .modal-actions .primary{
+  background:linear-gradient(135deg,#efc7c5,#e8b5aa)!important;color:#fff!important;border:1px solid rgba(154,103,117,.10)!important;
+}
+html body #recipeFormDialog:not(.food-context-dialog) .modal-actions .secondary{
+  background:rgba(255,251,247,.84)!important;color:#86616d!important;border:1px solid rgba(154,103,117,.12)!important;
 }
 `;
   document.head.appendChild(st);
