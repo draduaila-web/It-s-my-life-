@@ -4427,12 +4427,16 @@ html body #recipeFormDialog:not(.food-context-dialog) .modal-actions .secondary{
     border-color:rgba(92,126,161,.18)!important;
   }
   html body #ideaDialog #ideaConditional .project-track-master>#projectTrack[type="checkbox"]:checked::after{
-    content:'✓'!important;
+    content:''!important;
     display:block!important;
-    color:#fff!important;
-    font-size:13px!important;
-    font-weight:500!important;
-    line-height:1!important;
+    box-sizing:border-box!important;
+    width:6px!important;
+    height:10px!important;
+    border:0!important;
+    border-right:2px solid #fff!important;
+    border-bottom:2px solid #fff!important;
+    transform:rotate(45deg) translate(-1px,-1px)!important;
+    transform-origin:center!important;
   }
   html body #ideaDialog #ideaConditional .project-track-copy{
     min-width:0!important;
