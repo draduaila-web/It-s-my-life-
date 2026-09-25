@@ -1,4 +1,4 @@
-const CACHE = "hml-bertha-v221-rc130-sat-modal-type-visible";
+const CACHE = "hml-bertha-v221-rc131-modal-exact-final";
 self.addEventListener("install", event => event.waitUntil(self.skipWaiting()));
 self.addEventListener("activate", event => event.waitUntil((async()=>{
   const keys=await caches.keys();
