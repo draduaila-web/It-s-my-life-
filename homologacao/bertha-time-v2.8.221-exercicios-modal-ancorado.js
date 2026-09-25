@@ -4935,3 +4935,118 @@ html body #app :is(.exercise-plan,.exercise-cycle,.exercise-session,.exercise-lo
   `;
   document.head.appendChild(s);
 })();
+
+/* RC93 — RECEITAS · modal master alinhado a Nova/Editar Receita
+   - Ver receita herda fundo, bordas, tipografia e botões de Nova/Editar Receita.
+   - Ações do formulário ficam alinhadas à direita.
+   Escopo estrito: Receitas. */
+(()=>{const s=document.createElement('style');s.id='bertha-rc93-receitas-modal-master';s.textContent=`
+html body dialog#foodRecipeDialog.recipe-dialog:not(.food-context-dialog)[open] > .study-v10-modal,
+html body dialog#recipeFormDialog.recipe-dialog:not(.food-context-dialog)[open] > #recipeForm{
+  background:linear-gradient(145deg,#fffaf5 0%,#f9e7e6 58%,#faeee5 100%)!important;
+  background-image:linear-gradient(145deg,#fffaf5 0%,#f9e7e6 58%,#faeee5 100%)!important;
+  border:0!important;
+  outline:0!important;
+  border-radius:26px!important;
+  box-shadow:inset 0 0 0 1px rgba(154,103,117,.12),0 20px 52px rgba(50,39,45,.14)!important;
+  color:#49434b!important;
+}
+html body dialog#foodRecipeDialog.recipe-dialog:not(.food-context-dialog) .study-v10-head .eyebrow,
+html body dialog#recipeFormDialog.recipe-dialog:not(.food-context-dialog) .study-v10-head .eyebrow{
+  font-weight:500!important;letter-spacing:.20em!important;color:#986777!important;
+}
+html body dialog#foodRecipeDialog.recipe-dialog:not(.food-context-dialog) .study-v10-head h2,
+html body dialog#recipeFormDialog.recipe-dialog:not(.food-context-dialog) .study-v10-head h2{
+  font-weight:420!important;letter-spacing:-.02em!important;color:#443f47!important;
+}
+html body dialog#foodRecipeDialog.recipe-dialog:not(.food-context-dialog) .study-v10-head p,
+html body dialog#recipeFormDialog.recipe-dialog:not(.food-context-dialog) .study-v10-head p{
+  font-weight:400!important;color:#8a8189!important;
+}
+html body dialog#foodRecipeDialog.recipe-dialog:not(.food-context-dialog) .study-v10-x,
+html body dialog#recipeFormDialog.recipe-dialog:not(.food-context-dialog) .study-v10-x{
+  background:rgba(255,252,248,.66)!important;
+  border:1px solid rgba(154,103,117,.12)!important;
+  color:#7f777f!important;
+  box-shadow:none!important;
+  font-weight:300!important;
+}
+html body dialog#foodRecipeDialog.recipe-dialog:not(.food-context-dialog) .recipe-detail-card{
+  margin-top:12px!important;
+  padding:18px!important;
+  background:rgba(255,253,249,.88)!important;
+  border:1px solid rgba(154,103,117,.10)!important;
+  border-radius:22px!important;
+  box-shadow:none!important;
+}
+html body dialog#foodRecipeDialog.recipe-dialog:not(.food-context-dialog) .recipe-detail-card h3{
+  font-size:18px!important;line-height:1.25!important;font-weight:500!important;color:#4c464e!important;
+}
+html body dialog#foodRecipeDialog.recipe-dialog:not(.food-context-dialog) .recipe-detail-card :is(li,p){
+  font-size:15.5px!important;line-height:1.5!important;font-weight:400!important;color:#544e55!important;
+}
+html body dialog#foodRecipeDialog.recipe-dialog:not(.food-context-dialog) .recipe-detail-card strong{font-weight:500!important;}
+html body dialog#foodRecipeDialog.recipe-dialog:not(.food-context-dialog) .recipe-modal-actions{
+  display:grid!important;
+  grid-template-columns:1fr 1fr!important;
+  gap:10px!important;
+  margin-top:18px!important;
+}
+html body dialog#foodRecipeDialog.recipe-dialog:not(.food-context-dialog) .recipe-modal-actions button{
+  min-height:44px!important;
+  border-radius:15px!important;
+  font-weight:500!important;
+  border:1px solid rgba(154,103,117,.12)!important;
+  box-shadow:none!important;
+}
+html body dialog#foodRecipeDialog.recipe-dialog:not(.food-context-dialog) #chooseThisFood{
+  background:linear-gradient(135deg,#efc7c5,#e8b5aa)!important;
+  color:#fff!important;
+}
+html body dialog#foodRecipeDialog.recipe-dialog:not(.food-context-dialog) :is(#chooseOtherFromRecipe,#recipeToShopping,#editThisRecipe){
+  background:rgba(255,251,247,.84)!important;
+  color:#86616d!important;
+}
+html body dialog#foodRecipeDialog.recipe-dialog:not(.food-context-dialog) #recipeToShopping{
+  grid-column:1/-1!important;
+}
+html body dialog#recipeFormDialog.recipe-dialog:not(.food-context-dialog) .modal-actions{
+  display:flex!important;
+  align-items:center!important;
+  justify-content:flex-end!important;
+  gap:10px!important;
+  margin-top:22px!important;
+  padding:0!important;
+  background:transparent!important;
+  border:0!important;
+  box-shadow:none!important;
+}
+html body dialog#recipeFormDialog.recipe-dialog:not(.food-context-dialog) .modal-actions .grow{
+  flex:1 1 auto!important;
+}
+html body dialog#recipeFormDialog.recipe-dialog:not(.food-context-dialog) .modal-actions button{
+  width:auto!important;
+  min-width:116px!important;
+  min-height:44px!important;
+  border-radius:15px!important;
+  font-weight:500!important;
+}
+html body dialog#recipeFormDialog.recipe-dialog:not(.food-context-dialog) .modal-actions .primary{
+  background:linear-gradient(135deg,#efc7c5,#e8b5aa)!important;
+  color:#fff!important;
+  border:1px solid rgba(154,103,117,.10)!important;
+}
+html body dialog#recipeFormDialog.recipe-dialog:not(.food-context-dialog) .modal-actions .secondary{
+  background:rgba(255,251,247,.84)!important;
+  color:#86616d!important;
+  border:1px solid rgba(154,103,117,.12)!important;
+}
+@media(max-width:480px){
+  html body dialog#recipeFormDialog.recipe-dialog:not(.food-context-dialog) .modal-actions{
+    justify-content:flex-end!important;
+  }
+  html body dialog#recipeFormDialog.recipe-dialog:not(.food-context-dialog) .modal-actions button{
+    min-width:112px!important;
+  }
+}
+`;document.head.appendChild(s)})();
