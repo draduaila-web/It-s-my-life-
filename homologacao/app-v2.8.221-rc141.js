@@ -2061,7 +2061,7 @@ function casaAreaIcon(title){
 }
 function casaTipIcon(label){const t=String(label||'').toLowerCase();if(t.includes('limpeza'))return casaAreaIcon('Limpeza');if(t.includes('roupa')||t.includes('lavanderia'))return casaAreaIcon('Roupas & Lavanderia');if(t.includes('jardim')||t.includes('extern'))return casaAreaIcon('Jardim');if(t.includes('gato'))return casaAreaIcon('Animais');const raw=t.includes('organização')?casaLineIcon('routines'):casaLineIcon('info');return `<span class="casa-inline-icon">${raw}</span>`}
 function casaSection(icon,title,meta,body,id){return `<details class="casa-section" id="${id||""}"><summary><span class="casa-section-left"><span class="casa-section-icon">${icon}</span><strong>${title}</strong></span><span class="casa-section-meta">${meta?`<span>${meta}</span>`:""}<span class="casa-chevron">⌄</span></span></summary><div class="casa-section-body">${body}</div></details>`}
-function maintenanceCard(m){const meta=[m.area,m.type,m.date?formatDate(m.date):"",`${maintenanceMinutes(m)} min`,m.priority,m.responsible].filter(Boolean),members=loadSatellites().members||[],targets=satelliteTargets(m).map(id=>members.find(x=>String(x.id)===String(id))).filter(Boolean),claimer=members.find(x=>String(x.id)===String(m.claimedById||m.assigneeId)),completer=members.find(x=>String(x.id)===String(m.completedById||m.assigneeId)),resp=m.responsibility||'owner',status=m.satelliteStatus||'open',chip=resp==='help'?`<span class="sat-task-chip help">${completer?`Concluída por ${escapeHtml(completer.name)}`:claimer?`Assumida · ${escapeHtml(claimer.name)}`:'Aceito ajuda'}</span>`:resp==='delegated'?`<span class="sat-task-chip delegated">${completer?`Concluída por ${escapeHtml(completer.name)}${status==='completed'?' · validar':''}`:claimer?`Assumida · ${escapeHtml(claimer.name)}`:`Delegada · ${escapeHtml(targets.map(x=>x.name).join(' + ')||'Satélites')}`}</span>`:'',validate=status==='completed'?`<button type="button" class="sat-validate" data-sat-validate="${m.id}">Validar conclusão</button>`:'';return `<div class="card casa-maint-card"><div><strong>${escapeHtml(m.name)}</strong>${m.note?`<p class="note">${escapeHtml(m.note)}</p>`:""}${chip}</div><div class="casa-maint-meta">${meta.map(x=>`<span>${escapeHtml(String(x))}</span>`).join("")}</div><div class="casa-maint-actions"><button type="button" class="start" data-maint-start="${m.id}">▶ Começar</button><button type="button" class="edit" data-maint-edit="${m.id}">Editar</button><button type="button" class="finish" data-maint-finish="${m.id}">✓ Concluir</button>${validate}</div></div>`}
+function maintenanceCard(m){const meta=[m.area,m.type,m.date?formatDate(m.date):"",`${maintenanceMinutes(m)} min`,m.priority,m.responsible].filter(Boolean);return `<div class="card casa-maint-card"><div><strong>${escapeHtml(m.name)}</strong>${m.note?`<p class="note">${escapeHtml(m.note)}</p>`:""}</div><div class="casa-maint-meta">${meta.map(x=>`<span>${escapeHtml(String(x))}</span>`).join("")}</div><div class="casa-maint-actions"><button type="button" class="start" data-maint-start="${m.id}">▶ Começar</button><button type="button" class="edit" data-maint-edit="${m.id}">Editar</button><button type="button" class="finish" data-maint-finish="${m.id}">✓ Concluir</button></div></div>`}
 function openCasaNewRoutine(areaId){
  const d=loadCasa();const area=(d.areas||[]).find(a=>String(a.id)===String(areaId));if(!area)return;
  const dlg=document.createElement('dialog');dlg.className='bertha-dialog casa-dialog';
@@ -2156,39 +2156,41 @@ async function requestSatelliteOwnerNotifications(){
 }
 function satelliteTaskList(memberId){
  const d=loadCasa(),out=[],mid=String(memberId);
- const pushIfEligible=(t,area,kind='routine')=>{
+ (d.areas||[]).forEach(a=>(a.tasks||[]).forEach(t=>{
    const r=t.responsibility||'owner',targets=satelliteTargets(t),declined=(t.declinedByIds||[]).map(String),eligible=(r==='help')||(r==='delegated'&&targets.includes(mid));
    if(!eligible||declined.includes(mid))return;
    const status=t.satelliteStatus||'open';
-   if(['available','assigned','accepted','in_progress','completed','validated'].includes(status)||t.done||t.status==='concluida')out.push({task:t,area,kind});
- };
- (d.areas||[]).forEach(a=>(a.tasks||[]).forEach(t=>pushIfEligible(t,a,'routine')));
- (d.maintenance||[]).forEach(m=>pushIfEligible(m,{id:'maintenance',title:m.area||'Manutenção'},'maintenance'));
+   if(['available','assigned','accepted','in_progress','completed','validated'].includes(status)||t.done)out.push({task:t,area:a});
+ }));
  return out
 }
 function setSatelliteTaskState(taskId,memberId,state){
- const d=loadCasa(),hit=casaTaskById(taskId,d),maint=(d.maintenance||[]).find(x=>String(x.id)===String(taskId));
- if(!hit&&!maint)return;const task=hit?.task||maint,kind=maint?'maintenance':'routine',mid=String(memberId),member=satelliteMember(mid),claimed=task.claimedById?String(task.claimedById):'';
+ const d=loadCasa(),hit=casaTaskById(taskId,d);if(!hit)return;const task=hit.task,mid=String(memberId),member=satelliteMember(mid),claimed=task.claimedById?String(task.claimedById):'';
  if(state==='accepted'){
-   if(claimed&&claimed!==mid)return;task.claimedById=mid;task.assigneeId=mid;task.satelliteStatus='accepted';
+   if(claimed&&claimed!==mid)return;
+   task.claimedById=mid;task.assigneeId=mid;task.satelliteStatus='accepted';
  }else if(state==='declined'){
    task.declinedByIds=Array.from(new Set([...(task.declinedByIds||[]).map(String),mid]));
    if(claimed===mid){task.claimedById=null;task.assigneeId=null;task.satelliteStatus=task.responsibility==='help'?'available':'assigned'}
  }else if(state==='in_progress'){
-   if(claimed&&claimed!==mid)return;task.claimedById=mid;task.assigneeId=mid;task.satelliteStatus='in_progress';
+   if(claimed&&claimed!==mid)return;
+   task.claimedById=mid;task.assigneeId=mid;task.satelliteStatus='in_progress';
  }else if(state==='completed'){
-   if(claimed&&claimed!==mid)return;const end=Date.now();task.claimedById=mid;task.assigneeId=mid;task.completedById=mid;task.completedAt=end;task.lastCompletedAt=end;
-   const needsValidation=member?.role==='kids'||!!member?.requiresValidation;task.requiresValidation=needsValidation;task.satelliteStatus=needsValidation?'completed':'validated';
-   if(kind==='routine'){task.done=true;task.nextDue=casaNextRoutineDate(task.freq,end);casaRecordProgress(hit,end,Math.max(5,+loadCasaDurations()[task.id]||15));}
-   else {task.status=needsValidation?'aguardando_validacao':((task.frequency&&!['Única','Conforme necessário'].includes(task.frequency))?'a_fazer':'concluida');if(!needsValidation&&task.status==='a_fazer')task.date=nextMaintenanceDate(task.date,task.frequency);try{const key='bertha.time-engine.v1',e=JSON.parse(window.berthaHmlStorage.getItem(key)||'{"active":null,"history":[],"snoozed":{}}');e.history=Array.isArray(e.history)?e.history:[];const itemId=`casa:maintenance:${task.id}`,mins=maintenanceMinutes(task);if(!e.history.some(h=>h.itemId===itemId&&h.status==='done'&&Math.abs((+h.endedAt||0)-end)<1500)){e.history.unshift({itemId,learningKey:itemId,title:task.name,source:'Casa · Manutenção',day:casaLocalDay(end),startedAt:end,endedAt:end,configuredMinutes:mins,plannedMinutes:mins,realMinutes:mins,status:'done',category:task.area||'Casa'});window.berthaHmlStorage.setItem(key,JSON.stringify(e))}}catch{}}
-   if(member?.role==='kids'&&task.pointsEnabled&&!needsValidation)awardKidsPoints(member.id,Math.max(1,+task.pointsValue||1),task.name);satelliteNotifyOwner(member,task,'completed');
+   if(claimed&&claimed!==mid)return;
+   const end=Date.now();task.claimedById=mid;task.assigneeId=mid;task.completedById=mid;task.completedAt=end;task.lastCompletedAt=end;task.done=true;task.nextDue=casaNextRoutineDate(task.freq,end);
+   const needsValidation=member?.role==='kids'||!!member?.requiresValidation;
+   task.requiresValidation=needsValidation;task.satelliteStatus=needsValidation?'completed':'validated';
+   casaRecordProgress(hit,end,Math.max(5,+loadCasaDurations()[task.id]||15));
+   if(member?.role==='kids'&&task.pointsEnabled&&!needsValidation)awardKidsPoints(member.id,Math.max(1,+task.pointsValue||1),task.name);
+   satelliteNotifyOwner(member,task,'completed');
  }
  saveCasa(d);renderSatelliteDay()
 }
 function validateSatelliteCasaTask(taskId){
- const d=loadCasa(),hit=casaTaskById(taskId,d),maint=(d.maintenance||[]).find(x=>String(x.id)===String(taskId));if(!hit&&!maint)return;const task=hit?.task||maint,member=satelliteMember(task.completedById||task.claimedById||task.assigneeId);
- task.satelliteStatus='validated';if(maint){if(task.frequency&&!['Única','Conforme necessário'].includes(task.frequency)){task.date=nextMaintenanceDate(task.date,task.frequency);task.status='a_fazer';task.claimedById=null;task.assigneeId=null;task.completedById=null;task.declinedByIds=[];task.satelliteStatus=task.responsibility==='help'?'available':task.responsibility==='delegated'?'assigned':'open'}else task.status='concluida'}else task.done=true;
- if(member?.role==='kids'&&task.pointsEnabled&&!task.pointsAwardedAt){awardKidsPoints(member.id,Math.max(1,+task.pointsValue||1),task.name);task.pointsAwardedAt=Date.now()}saveCasa(d);renderCasa()
+ const d=loadCasa(),hit=casaTaskById(taskId,d);if(!hit)return;const task=hit.task,member=satelliteMember(task.completedById||task.claimedById||task.assigneeId);
+ task.satelliteStatus='validated';task.done=true;
+ if(member?.role==='kids'&&task.pointsEnabled&&!task.pointsAwardedAt){awardKidsPoints(member.id,Math.max(1,+task.pointsValue||1),task.name);task.pointsAwardedAt=Date.now()}
+ saveCasa(d);renderCasa()
 }
 function ensureSatelliteStyles(){if(document.getElementById('bertha-sat-v3'))return;const s=document.createElement('style');s.id='bertha-sat-v3';s.textContent=`
 .sat-page{display:grid!important;gap:14px!important;padding:0 0 10px!important}
@@ -2293,13 +2295,13 @@ function renderSatellites(){
 function renderSatelliteDay(){
  ensureSatelliteStyles();ensureSatelliteIdentityV4();const data=loadSatellites(),id=window.berthaHmlStorage.getItem(SATELLITE_PREVIEW_KEY),m=data.members.find(x=>String(x.id)===String(id));if(!m){location.hash='#satelites';return}
  const tasks=m.permissions?.casa===false?[]:satelliteTaskList(m.id),kids=loadKidsProgress()[m.id]||{lifetime:0,season:0,awards:[]},next=50-(kids.season%50||0),pct=Math.min(100,(kids.season%50)/50*100);
- const missionHtml=({task,area,kind})=>{const claimed=satelliteMember(task.claimedById||task.assigneeId),completed=satelliteMember(task.completedById),mine=String(task.claimedById||task.assigneeId||'')===String(m.id),done=kind==='maintenance'?task.status==='concluida':!!task.done;let actions='';
+ const missionHtml=({task,area})=>{const claimed=satelliteMember(task.claimedById||task.assigneeId),completed=satelliteMember(task.completedById),mine=String(task.claimedById||task.assigneeId||'')===String(m.id),done=!!task.done;let actions='';
    if(done){actions=`<span class="sat-task-chip ${task.satelliteStatus==='completed'?'delegated':'help'}">${completed?`Concluída por ${escapeHtml(completed.name)}`:'Concluída'}${task.satelliteStatus==='completed'?' · aguardando validação':''}</span>`}
    else if(claimed&&!mine){actions=`<span class="sat-task-chip delegated">Assumida por ${escapeHtml(claimed.name)}</span>`}
    else if(task.satelliteStatus==='available'||task.satelliteStatus==='assigned'){actions=`<button data-sat-accept="${task.id}" class="go">${task.satelliteStatus==='available'?'Assumir':'Aceitar'}</button><button data-sat-decline="${task.id}">Agora não</button>`}
    else if(task.satelliteStatus==='accepted'&&mine){actions=`<button data-sat-start="${task.id}" class="go">Começar</button>`}
    else if(task.satelliteStatus==='in_progress'&&mine){actions=`<button data-sat-complete="${task.id}" class="go">Concluir</button>`}
-   const detail=kind==='maintenance'?`${escapeHtml(area.title)} · ${maintenanceMinutes(task)} min${task.date?` · ${formatDate(task.date)}`:''}`:`${escapeHtml(area.title)} · ${escapeHtml(casaDuration(task.id))} · ${escapeHtml(casaTime(task.id))}`;return `<div class="sat-mission ${done?'done':''}"><div><strong>${escapeHtml(task.name)}</strong><small>${detail}</small>${task.pointsEnabled&&m.role==='kids'?`<span class="sat-task-chip points">+${+task.pointsValue||0} pts</span>`:''}</div><div class="sat-mission-actions">${actions}</div></div>`};
+   return `<div class="sat-mission ${done?'done':''}"><div><strong>${escapeHtml(task.name)}</strong><small>${escapeHtml(area.title)} · ${escapeHtml(casaDuration(task.id))} · ${escapeHtml(casaTime(task.id))}</small>${task.pointsEnabled&&m.role==='kids'?`<span class="sat-task-chip points">+${+task.pointsValue||0} pts</span>`:''}</div><div class="sat-mission-actions">${actions}</div></div>`};
  app.innerHTML=`<div class="sat-page"><div class="sat-day-head"><button class="sat-day-back" id="satBack">← Owner</button><span class="sat-role">${m.role==='kids'?'KIDS':'SATÉLITE'}</span></div><section class="sat-hero sat-ideal-hero sat-member-hero"><div class="sat-hero-copy"><div class="eyebrow">${m.role==='kids'?'MINHA TEMPORADA':'SEU ESPAÇO NA REDE'}</div><h2>Your life, with somewhere to land.</h2><p>${m.role==='kids'?`Missões, convites e recortes compartilhados com você chegam aqui. ${kids.season||0} pontos nesta temporada.`:'Aqui chegam apenas tarefas, convites e planos que foram compartilhados com você.'}</p>${m.role==='kids'?`<div class="kids-progress"><span style="width:${pct}%"></span></div>`:''}</div><span class="sat-hero-icon sat-member-avatar">${satelliteAvatarIcon(m.avatarKey||'family')}</span></section>${m.role==='kids'&&kids.awards?.length?`<section class="card"><div class="eyebrow">CONQUISTAS</div><div class="kids-awards">${kids.awards.slice(-8).map(a=>`<span>${a.type==='egg'?'🥚':a.type==='trophy'?'🏆':a.type==='skin'?'✦':'●'} ${escapeHtml(a.name)}</span>`).join('')}</div></section>`:''}<section class="card"><div class="panel-head"><div><h3>${m.role==='kids'?'Missões':'Tarefas'}</h3><p class="note">${m.role==='kids'?'Conclua missões para ganhar pontos e desbloquear conquistas.':'Assuma ajuda ou execute o que foi delegado a você.'}</p></div><span class="pill">${tasks.filter(x=>!x.task.done).length}</span></div>${tasks.length?tasks.map(missionHtml).join(''):`<div class="sat-empty">Nada pendente por aqui.</div>`}</section></div>`;
  document.querySelector('#satBack').onclick=()=>{location.hash='#satelites'};
  document.querySelectorAll('[data-sat-accept]').forEach(b=>b.onclick=()=>setSatelliteTaskState(b.dataset.satAccept,m.id,'accepted'));
@@ -2363,7 +2365,7 @@ const casaV132=document.createElement('style');casaV132.id='casa-v132-horarios-f
 
 function openCasaMaintenance(id){
  const d=loadCasa();d.maintenance=d.maintenance||[];const current=id?d.maintenance.find(x=>String(x.id)===String(id)):null;
- const m={id:current?.id||uid(),name:"",area:"Casa geral",type:"Reparo / conserto",date:"",durationValue:30,durationUnit:"minutes",priority:"normal",frequency:"Única",responsible:"Eu",notify:false,notifyWhen:"No horário da tarefa",period:"flex",time:"",note:"",status:"a_fazer",responsibility:"owner",assigneeIds:[],pointsEnabled:false,pointsValue:2,satelliteStatus:"open",claimedById:null,assigneeId:null,completedById:null,declinedByIds:[],...current};
+ const m={id:current?.id||uid(),name:"",area:"Casa geral",type:"Reparo / conserto",date:"",durationValue:30,durationUnit:"minutes",priority:"normal",frequency:"Única",responsible:"Eu",notify:false,notifyWhen:"No horário da tarefa",period:"flex",time:"",note:"",status:"a_fazer",responsibility:"owner",assigneeIds:[],...current};
  const areas=["Casa geral",...(Array.isArray(d.areas)?d.areas:[]).map(a=>a.title),"Piscina","Jardim","Garagem","Edícula","Área externa"];
  const sat=loadSatellites(),members=(sat.members||[]).filter(x=>x.status!=="removed"&&x.permissions?.casa!==false);
  const selected=new Set((Array.isArray(m.assigneeIds)?m.assigneeIds:[]).map(String));
@@ -2391,13 +2393,6 @@ function openCasaMaintenance(id){
      <small class="sat-target-note">A manutenção será compartilhada apenas com os satélites selecionados.</small>
    </div>
  </div>
- <div class="maint-kids-points" hidden>
-   <button type="button" class="casa-points-toggle ${m.pointsEnabled?'is-checked':''}" data-maint-points-toggle aria-pressed="${m.pointsEnabled?'true':'false'}">
-     <input type="hidden" id="mPoints" value="${m.pointsEnabled?'1':'0'}">
-     <span class="sat-target-check" aria-hidden="true"></span><span class="casa-points-copy">Esta missão vale pontos se for concluída por um Kids</span>
-   </button>
-   ${field("Pontos",`<input id="mPointsValue" type="number" min="1" max="100" value="${Math.max(1,+m.pointsValue||2)}">`)}
- </div>
 
  ${field("Responsável externo / referência",`<select id="mResp">${["Eu","Henrique","Thiago","Prestador / profissional"].map(x=>`<option ${x===m.responsible?'selected':''}>${x}</option>`).join('')}</select>`)}
  <label class="study-v10-field" style="display:flex;align-items:center;gap:10px"><input id="mNotify" type="checkbox" ${m.notify?'checked':''} style="width:auto"><span style="margin:0">Me avisar?</span></label>
@@ -2413,10 +2408,8 @@ function openCasaMaintenance(id){
 
  const respInput=dlg.querySelector('#mResponsibility');
  const targetsWrap=dlg.querySelector('.maint-sat-targets');
- const pointsWrap=dlg.querySelector('.maint-kids-points');
  const satButtons=[...dlg.querySelectorAll('[data-maint-sat]')];
- const selectedMembers=()=>satButtons.filter(b=>b.getAttribute('aria-pressed')==='true').map(b=>members.find(m=>String(m.id)===String(b.dataset.maintSat))).filter(Boolean);
- const syncTargets=()=>{targetsWrap.hidden=respInput.value!=='delegated';pointsWrap.hidden=!(respInput.value==='delegated'&&selectedMembers().some(x=>x.role==='kids'))};
+ const syncTargets=()=>{targetsWrap.hidden=respInput.value!=='delegated'};
  dlg.querySelectorAll('[data-maint-resp] button').forEach(b=>b.onclick=()=>{
    dlg.querySelectorAll('[data-maint-resp] button').forEach(x=>x.classList.toggle('active',x===b));
    respInput.value=b.dataset.v;
@@ -2427,7 +2420,6 @@ function openCasaMaintenance(id){
    b.setAttribute('aria-pressed',String(on));
    b.classList.toggle('is-selected',on);
    b.querySelector('.maint-sat-check').textContent=on?'✓':'';
-   syncTargets();
  });
  dlg.querySelector('#mAllTargets')?.addEventListener('click',()=>{
    const allOn=satButtons.length&&satButtons.every(b=>b.getAttribute('aria-pressed')==='true');
@@ -2436,13 +2428,7 @@ function openCasaMaintenance(id){
      b.classList.toggle('is-selected',!allOn);
      b.querySelector('.maint-sat-check').textContent=!allOn?'✓':'';
    });
-   syncTargets();
  });
- const pointsToggle=dlg.querySelector('[data-maint-points-toggle]');
- if(pointsToggle){
-   const input=pointsToggle.querySelector('#mPoints');
-   pointsToggle.onclick=()=>{const on=input.value!=='1';input.value=on?'1':'0';pointsToggle.classList.toggle('is-checked',on);pointsToggle.setAttribute('aria-pressed',String(on))};
- }
  syncTargets();
 
  dlg.querySelector('#deleteMaint')?.addEventListener('click',()=>{if(!confirm(`Excluir “${m.name}”?`))return;d.maintenance=d.maintenance.filter(x=>String(x.id)!==String(m.id));saveCasa(d);close();renderCasa()});
@@ -2451,9 +2437,7 @@ function openCasaMaintenance(id){
    const responsibility=respInput.value||'owner';
    const assigneeIds=responsibility==='delegated'?satButtons.filter(b=>b.getAttribute('aria-pressed')==='true').map(b=>b.dataset.maintSat):[];
    if(responsibility==='delegated'&&!assigneeIds.length){targetsWrap.classList.add('sat-target-error');return}
-   const hasKids=assigneeIds.some(id=>members.find(x=>String(x.id)===String(id))?.role==='kids');
-   const pointsEnabled=!!(responsibility==='delegated'&&hasKids&&dlg.querySelector('#mPoints')?.value==='1');
-   const obj={...m,name:dlg.querySelector('#mName').value.trim(),area:dlg.querySelector('#mArea').value,type:dlg.querySelector('#mType').value,date:dlg.querySelector('#mDate').value,period:dlg.querySelector('#mPeriod').value,time:dlg.querySelector('#mTime').value,durationValue:Math.max(1,+dlg.querySelector('#mDur').value||30),durationUnit:dlg.querySelector('#mDurUnit').value,priority:dlg.querySelector('#mPriority').value,frequency:dlg.querySelector('#mFreq').value,responsible:dlg.querySelector('#mResp').value,notify:dlg.querySelector('#mNotify').checked,notifyWhen:dlg.querySelector('#mNotifyWhen').value,note:dlg.querySelector('#mNote').value.trim(),responsibility,assigneeIds,pointsEnabled,pointsValue:pointsEnabled?Math.max(1,+dlg.querySelector('#mPointsValue')?.value||2):0,claimedById:null,assigneeId:null,completedById:null,declinedByIds:[],satelliteStatus:responsibility==='help'?'available':responsibility==='delegated'?'assigned':'open',status:m.status||'a_fazer',updatedAt:Date.now()};
+   const obj={...m,name:dlg.querySelector('#mName').value.trim(),area:dlg.querySelector('#mArea').value,type:dlg.querySelector('#mType').value,date:dlg.querySelector('#mDate').value,period:dlg.querySelector('#mPeriod').value,time:dlg.querySelector('#mTime').value,durationValue:Math.max(1,+dlg.querySelector('#mDur').value||30),durationUnit:dlg.querySelector('#mDurUnit').value,priority:dlg.querySelector('#mPriority').value,frequency:dlg.querySelector('#mFreq').value,responsible:dlg.querySelector('#mResp').value,notify:dlg.querySelector('#mNotify').checked,notifyWhen:dlg.querySelector('#mNotifyWhen').value,note:dlg.querySelector('#mNote').value.trim(),responsibility,assigneeIds,status:m.status||'a_fazer',updatedAt:Date.now()};
    d.maintenance=current?d.maintenance.map(x=>String(x.id)===String(m.id)?obj:x):[...d.maintenance,{...obj,createdAt:Date.now()}];
    saveCasa(d);close();renderCasa()
  });
@@ -5945,34 +5929,340 @@ renderUniversalRewards=function(){
 renderKidsRewards=renderUniversalRewards;
 
 
-/* RC141 — Casa: manutenção alinhada ao Modal System + pontos Kids + satélites universais */
-;(function(){
-  if(document.getElementById('rc141-casa-maint-satellites'))return;
-  const st=document.createElement('style');st.id='rc141-casa-maint-satellites';st.textContent=`
-    html body dialog.casa-maint-dialog .study-v10-x{
-      color:#746d73!important;background:rgba(255,253,250,.72)!important;
-      border:1px solid rgba(126,115,132,.10)!important;box-shadow:none!important
-    }
-    html body dialog.casa-maint-dialog .study-v10-x:hover,
-    html body dialog.casa-maint-dialog .study-v10-x:focus,
-    html body dialog.casa-maint-dialog .study-v10-x:focus-visible{
-      color:#625b61!important;background:rgba(255,253,250,.92)!important;outline:none!important;box-shadow:none!important
-    }
-    html body .casa-maint-modal .maint-kids-points{display:grid;gap:10px;margin:2px 0 14px}
-    html body .casa-maint-modal .maint-kids-points[hidden]{display:none!important}
-    html body .casa-maint-modal .casa-points-toggle{
-      -webkit-appearance:none;appearance:none;width:100%;display:grid;grid-template-columns:24px minmax(0,1fr);align-items:center;
-      gap:12px;text-align:left;padding:13px 14px;border-radius:17px;border:1px solid rgba(126,115,132,.10);
-      background:#fffdfa;color:#4b4550;box-shadow:none
-    }
-    html body .casa-maint-modal .casa-points-toggle input[type=hidden]{display:none!important}
-    html body .casa-maint-modal .casa-points-toggle .sat-target-check{
-      width:24px;height:24px;border-radius:8px;border:1.5px solid rgba(126,115,132,.26);background:#fff;display:grid;place-items:center;box-sizing:border-box
-    }
-    html body .casa-maint-modal .casa-points-toggle.is-checked .sat-target-check{
-      background:linear-gradient(135deg,#DE9FB8 0%,#F0C9B4 54%,#BFD5ED 100%);border-color:transparent
-    }
-    html body .casa-maint-modal .casa-points-toggle.is-checked .sat-target-check:after{content:'✓';color:#fff;font-size:14px;font-weight:700;line-height:1}
-    html body .casa-maint-modal .casa-points-copy{font-weight:400!important;line-height:1.35!important}
-  `;document.head.appendChild(st)
-})();
+/* RC141 — Premiações redesenhadas para corresponder ao esboço aprovado */
+function rc141RewardBadge(kind='owner1',glyph='✦'){
+  return `<span class="rc141-badge rc141-${kind}"><span class="rc141-badge-glow"></span><span class="rc141-badge-glyph">${escapeHtml(glyph)}</span></span>`;
+}
+function rc141OwnerGlyph(i,r){return r?.icon||['★','⌁','✦','❖'][i%4]}
+function rc141KidGlyph(type){
+  return type==='trophy'?'♛':type==='egg'?'✦':type==='skin'?'◈':type==='companion'?'●':'★'
+}
+function rc141RewardLabel(type){
+  return type==='medal'?'Medalha':type==='egg'?'Cápsula':type==='trophy'?'Troféu':type==='skin'?'Skin':type==='companion'?'Companheiro':'Conquista'
+}
+function rc141RewardsCss(){
+  if(document.getElementById('rc141-rewards-design'))return;
+  const st=document.createElement('style');
+  st.id='rc141-rewards-design';
+  st.textContent=`
+  html body .rewards-page{gap:14px!important;padding-bottom:22px!important}
+  html body .rewards-hero{
+    min-height:176px!important;padding:22px!important;display:flex!important;align-items:center!important;
+    background:linear-gradient(135deg,rgba(249,215,226,.72) 0%,rgba(255,244,226,.80) 44%,rgba(219,235,252,.90) 100%)!important;
+    border:1px solid rgba(170,157,177,.13)!important;box-shadow:0 12px 28px rgba(74,57,69,.05)!important
+  }
+  html body .rewards-hero .sat-hero-icon{display:none!important}
+  html body .rewards-hero h2{font-size:29px!important;font-weight:400!important;line-height:1.05!important;letter-spacing:-.03em!important;max-width:460px!important}
+  html body .rewards-hero p{font-size:13.5px!important;line-height:1.48!important;max-width:510px!important;font-weight:400!important}
+  html body .rewards-tabs{gap:0!important;padding:4px!important;border-radius:20px!important;background:rgba(255,253,249,.76)!important}
+  html body .rewards-tabs button{min-height:44px!important;border-radius:16px!important;font-size:12px!important;font-weight:400!important}
+  html body .rewards-tabs button.active{background:#fffdfa!important;box-shadow:0 4px 15px rgba(74,57,69,.05)!important;color:#413b46!important}
+
+  html body .rc141-section{padding:16px!important;border-radius:26px!important;background:rgba(255,253,249,.82)!important;border:1px solid rgba(126,115,132,.08)!important;box-shadow:0 10px 24px rgba(74,57,69,.035)!important}
+  html body .rc141-section-head{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;margin-bottom:13px}
+  html body .rc141-section-head h3{margin:0!important;font-size:20px!important;font-weight:430!important;letter-spacing:-.02em!important;color:#3f3945!important}
+  html body .rc141-section-head p{margin:4px 0 0!important;font-size:11.5px!important;line-height:1.42!important;color:#8a818b!important;font-weight:400!important}
+  html body .rc141-more{border:1px solid rgba(126,115,132,.09)!important;background:#fffdfa!important;color:#79717d!important;border-radius:999px!important;min-height:34px!important;padding:0 12px!important;font-size:10.5px!important;font-weight:400!important}
+
+  html body .rc141-owner-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:9px}
+  html body .rc141-achievement{
+    min-height:148px;padding:12px 9px;border-radius:20px;background:linear-gradient(155deg,#fffdfa,#fbf8f5)!important;
+    border:1px solid rgba(126,115,132,.08)!important;text-align:center;display:grid;align-content:start;justify-items:center;gap:8px
+  }
+  html body .rc141-achievement strong{font-size:11px!important;line-height:1.22!important;font-weight:430!important;color:#47414b!important}
+  html body .rc141-achievement small{font-size:9.5px!important;line-height:1.25!important;color:#938a95!important;font-weight:400!important}
+
+  html body .rc141-badge{
+    position:relative;width:66px;height:66px;border-radius:22px;display:grid;place-items:center;overflow:hidden;
+    border:1px solid rgba(255,255,255,.75);box-shadow:inset 0 0 0 1px rgba(126,115,132,.06),0 8px 18px rgba(75,61,77,.08)
+  }
+  html body .rc141-badge:before{content:'';position:absolute;inset:7px;border-radius:17px;border:1px solid rgba(255,255,255,.64)}
+  html body .rc141-badge-glow{position:absolute;width:46px;height:46px;border-radius:50%;background:rgba(255,255,255,.46);filter:blur(5px)}
+  html body .rc141-badge-glyph{position:relative;z-index:2;font-size:29px;line-height:1;color:#fff;text-shadow:0 2px 8px rgba(74,57,69,.16)}
+  html body .rc141-owner1{background:linear-gradient(145deg,#f0c9b8,#dcabbf 48%,#c9daf0)}
+  html body .rc141-owner2{background:linear-gradient(145deg,#cbdff0,#cfd8ef 52%,#eadde9)}
+  html body .rc141-owner3{background:linear-gradient(145deg,#f3c4a9,#e9a883 52%,#f4d4c1)}
+  html body .rc141-owner4{background:linear-gradient(145deg,#d9eadf,#bcd8c7 52%,#e8eee7)}
+  html body .rc141-kid1{background:linear-gradient(145deg,#ffd86d,#f2b84f 52%,#f6d79e)}
+  html body .rc141-kid2{background:linear-gradient(145deg,#b9b8f4,#8e91e8 52%,#d0c9fb)}
+  html body .rc141-kid3{background:linear-gradient(145deg,#9ed6f2,#69b7df 52%,#cae9f8)}
+  html body .rc141-kid4{background:linear-gradient(145deg,#f5adbd,#de809a 52%,#f6cbd5)}
+  html body .rc141-helper1{background:linear-gradient(145deg,#f5c4c8,#e4a0ad 52%,#f2d2cb)}
+  html body .rc141-helper2{background:linear-gradient(145deg,#f4ddb0,#e9bf72 52%,#f8e9ca)}
+  html body .rc141-helper3{background:linear-gradient(145deg,#d9eadf,#a9ccb7 52%,#e8f1e9)}
+  html body .rc141-helper4{background:linear-gradient(145deg,#cbe0f4,#9fc3e6 52%,#e5eef9)}
+
+  html body .rc141-kid-profile{
+    display:grid;grid-template-columns:78px minmax(0,1fr) auto;gap:13px;align-items:center;padding:14px;
+    border-radius:22px;background:linear-gradient(135deg,rgba(250,244,249,.94),rgba(243,247,252,.95));border:1px solid rgba(126,115,132,.08)
+  }
+  html body .rc141-kid-avatar{width:72px;height:72px;border-radius:24px;display:grid;place-items:center;background:linear-gradient(145deg,#f1e8f3,#e2eff8);color:#65728b}
+  html body .rc141-kid-avatar svg{width:42px;height:42px}
+  html body .rc141-kid-profile h4{margin:0!important;font-size:20px!important;font-weight:440!important;color:#423c47!important}
+  html body .rc141-kid-profile p{margin:3px 0 9px!important;font-size:10.5px!important;color:#8a818b!important}
+  html body .rc141-points{padding:8px 11px;border-radius:999px;background:#fff6df;color:#6b5b39;font-size:11px;font-weight:430;white-space:nowrap}
+  html body .rc141-level{height:9px;border-radius:999px;background:#eee8ee;overflow:hidden}
+  html body .rc141-level span{display:block;height:100%;border-radius:inherit;background:linear-gradient(90deg,#a9cbe7,#d1b5e7,#e9b1bd)}
+
+  html body .rc141-kid-awards{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px;margin-top:10px}
+  html body .rc141-kid-award{padding:10px 8px;border-radius:18px;background:#fffdfa;border:1px solid rgba(126,115,132,.08);display:grid;gap:5px;justify-items:center;text-align:center}
+  html body .rc141-kid-award .rc141-badge{width:54px;height:54px;border-radius:18px}
+  html body .rc141-kid-award .rc141-badge-glyph{font-size:24px}
+  html body .rc141-kid-award strong{font-size:10.5px;font-weight:430;color:#4b4550}
+  html body .rc141-kid-award small{font-size:9.5px;color:#8a818b}
+
+  html body .kids-theme-box{margin-top:11px!important;background:#fffdfa!important}
+  html body .kids-theme-options button{min-height:60px!important;padding:10px!important;font-size:10.5px!important;border-radius:16px!important}
+  html body .kids-theme-options button.active{box-shadow:inset 0 0 0 1px rgba(95,108,142,.14),0 4px 12px rgba(74,57,69,.04)!important}
+
+  html body .rc141-helper-preview{display:grid;grid-template-columns:64px minmax(0,1fr);gap:12px;align-items:center;padding:13px;border-radius:20px;background:#fffdfa;border:1px solid rgba(126,115,132,.08)}
+  html body .rc141-helper-preview .rc141-badge{width:58px;height:58px;border-radius:19px}
+  html body .rc141-helper-preview strong{font-size:14px;font-weight:430;color:#47414b}
+  html body .rc141-helper-preview small{display:block;margin-top:4px;font-size:10.5px;line-height:1.35;color:#8a818b}
+  html body .rc141-helper-icons{display:flex;gap:8px;margin-top:10px;flex-wrap:wrap}
+  html body .rc141-helper-icons .rc141-badge{width:42px;height:42px;border-radius:14px}
+  html body .rc141-helper-icons .rc141-badge-glyph{font-size:18px}
+
+  html body .rc141-config-toggle{margin-top:12px;border-radius:18px;border:1px solid rgba(126,115,132,.08);overflow:hidden;background:#fffdfa}
+  html body .rc141-config-toggle summary{list-style:none;cursor:pointer;padding:13px 14px;font-size:11.5px;color:#625a66;font-weight:430}
+  html body .rc141-config-toggle summary::-webkit-details-marker{display:none}
+  html body .rc141-config-toggle summary:after{content:'⌄';float:right;color:#8c8490}
+  html body .rc141-config-toggle[open] summary:after{content:'⌃'}
+  html body .rc141-config-body{display:grid;gap:10px;padding:0 12px 12px}
+
+  html body .reward-config-card{border-radius:18px!important;background:#fff!important;padding:13px!important;box-shadow:none!important}
+  html body .reward-config-head strong{font-weight:430!important}
+  html body .reward-config-head small,.reward-config-card label{font-weight:400!important}
+  html body .reward-config-actions button{font-weight:400!important}
+  html body .recognition-history strong{font-weight:430!important}
+  html body .recognition-history small{font-weight:400!important}
+
+  @media(max-width:560px){
+    html body .rc141-owner-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
+    html body .rc141-kid-profile{grid-template-columns:64px minmax(0,1fr)}
+    html body .rc141-kid-avatar{width:60px;height:60px;border-radius:20px}
+    html body .rc141-kid-profile .rc141-points{grid-column:2;justify-self:start}
+    html body .rc141-kid-awards{grid-template-columns:repeat(2,minmax(0,1fr))}
+  }
+  `;
+  document.head.appendChild(st);
+}
+
+function renderRewardsRC141(){
+  ensureSatelliteStyles();ensureSatelliteIdentityV4();rewardsHubStyles();rewardsVisualRC140();rc141RewardsCss();
+  const data=loadSatellites();
+  const kids=(data.members||[]).filter(m=>m.status!=='removed'&&m.role==='kids');
+  const adults=(data.members||[]).filter(m=>m.status!=='removed'&&m.role!=='kids');
+  const owner=loadOwnerRewards(),presets=loadRecognitionPresets(),history=loadRecognitions();
+  const kidsProgress=loadKidsProgress(),themeMap=loadKidsRewardThemes();
+
+  const ownerConfig=owner.map((r,i)=>`
+    <div class="reward-config-card" data-owner-reward="${i}">
+      <div class="reward-config-head">
+        <span class="reward-config-icon">${escapeHtml(r.icon||rc141OwnerGlyph(i,r))}</span>
+        <div><strong>${escapeHtml(r.name)}</strong><small>${escapeHtml(r.description||'')}</small></div>
+        <label class="reward-active"><input type="checkbox" data-or-active ${r.active!==false?'checked':''}>Ativa</label>
+      </div>
+      <div class="reward-form-grid">
+        <label>Nome<input data-or-name value="${escapeHtml(r.name)}"></label>
+        <label>Ícone<input data-or-icon maxlength="2" value="${escapeHtml(r.icon||rc141OwnerGlyph(i,r))}"></label>
+        <label>Critério<select data-or-criterion>
+          <option value="progress100" ${r.criterion==='progress100'?'selected':''}>Progresso em 100%</option>
+          <option value="goal" ${r.criterion==='goal'?'selected':''}>Meta concluída</option>
+          <option value="streak" ${r.criterion==='streak'?'selected':''}>Sequência de dias</option>
+          <option value="cycle" ${r.criterion==='cycle'?'selected':''}>Ciclo concluído</option>
+        </select></label>
+        <label>Valor/meta<input type="number" min="1" data-or-value value="${Math.max(1,+r.value||1)}"></label>
+        <label>Recorrência<select data-or-rec>
+          <option value="once" ${r.recurrence==='once'?'selected':''}>Única</option>
+          <option value="each" ${r.recurrence==='each'?'selected':''}>A cada conquista</option>
+          <option value="weekly" ${r.recurrence==='weekly'?'selected':''}>Semanal</option>
+          <option value="monthly" ${r.recurrence==='monthly'?'selected':''}>Mensal</option>
+        </select></label>
+        <label>Visual<input data-or-visual value="${escapeHtml(r.visual||'Selo BERTH.A')}"></label>
+      </div>
+      <label>Descrição<input data-or-desc value="${escapeHtml(r.description||'')}"></label>
+    </div>
+  `).join('');
+
+  const ownerCards=owner.slice(0,4).map((r,i)=>`
+    <div class="rc141-achievement">
+      ${rc141RewardBadge('owner'+((i%4)+1),rc141OwnerGlyph(i,r))}
+      <strong>${escapeHtml(r.name)}</strong>
+      <small>${escapeHtml(r.description||'Conquista BERTH.A')}</small>
+    </div>
+  `).join('');
+
+  const kidsHtml=kids.length?kids.map(m=>{
+    const cfg=kidsRewardsFor(m.id),p=kidsProgress[m.id]||{season:0,lifetime:0,awards:[]},theme=themeMap[m.id]||'mist';
+    const entries=Object.entries(cfg);
+    const next=entries.filter(([,r])=>r.active!==false&&(+r.points||0)>(+p.season||0)).sort((a,b)=>(+a[1].points||0)-(+b[1].points||0))[0];
+    const nextPts=next?Math.max(1,(+next[1].points||0)-(+p.season||0)):0;
+    const max=Math.max(1,...entries.map(([,r])=>+r.points||1));
+    const pct=Math.min(100,((+p.season||0)/max)*100);
+    const awardTiles=entries.slice(0,4).map(([key,r],i)=>`
+      <div class="rc141-kid-award">
+        ${rc141RewardBadge('kid'+((i%4)+1),r.icon||rc141KidGlyph(r.type))}
+        <strong>${rc141RewardLabel(r.type)}</strong>
+        <small>${Math.max(1,+r.points||1)} pts</small>
+      </div>
+    `).join('');
+    const config=entries.map(([key,r],i)=>`
+      <div class="reward-config-card" data-kid-reward="${key}">
+        <div class="reward-config-head">
+          <span class="reward-config-icon">${escapeHtml(r.icon||rc141KidGlyph(r.type))}</span>
+          <div><strong>${escapeHtml(r.name||'Conquista')}</strong><small>${rc141RewardLabel(r.type)}</small></div>
+          <label class="reward-active"><input type="checkbox" data-kr-active ${r.active!==false?'checked':''}>Ativa</label>
+        </div>
+        <div class="reward-form-grid">
+          <label>Nome<input data-kr-name value="${escapeHtml(r.name||'')}"></label>
+          <label>Pontos<input type="number" min="1" max="9999" data-kr-points value="${Math.max(1,+r.points||1)}"></label>
+          <label>Tipo<select data-kr-type>
+            <option value="medal" ${r.type==='medal'?'selected':''}>Medalha</option>
+            <option value="egg" ${r.type==='egg'?'selected':''}>Cápsula</option>
+            <option value="trophy" ${r.type==='trophy'?'selected':''}>Troféu</option>
+            <option value="skin" ${r.type==='skin'?'selected':''}>Skin</option>
+            <option value="companion" ${r.type==='companion'?'selected':''}>Companheiro</option>
+          </select></label>
+          <label>Ícone<input data-kr-icon maxlength="2" value="${escapeHtml(r.icon||rc141KidGlyph(r.type))}"></label>
+          <label>Recorrência<select data-kr-rec>
+            <option value="once" ${r.recurrence==='once'?'selected':''}>Única</option>
+            <option value="season" ${r.recurrence==='season'?'selected':''}>Por temporada</option>
+            <option value="monthly" ${r.recurrence==='monthly'?'selected':''}>Mensal</option>
+          </select></label>
+          <label>Visual<input data-kr-visual value="${escapeHtml(r.visual||'Colecionável')}"></label>
+        </div>
+        <label>Descrição<input data-kr-desc value="${escapeHtml(r.description||'')}"></label>
+        <div class="kid-reward-extra">
+          <label>Ao desbloquear<select data-kr-unlock>
+            <option value="badge" ${(r.unlock||'badge')==='badge'?'selected':''}>Registrar conquista</option>
+            <option value="surprise" ${r.unlock==='surprise'?'selected':''}>Abrir surpresa</option>
+            <option value="skin" ${r.unlock==='skin'?'selected':''}>Liberar skin/tema</option>
+            <option value="accessory" ${r.unlock==='accessory'?'selected':''}>Liberar acessório</option>
+            <option value="companion" ${r.unlock==='companion'?'selected':''}>Liberar personagem</option>
+          </select></label>
+          <label>Item liberado<input data-kr-item value="${escapeHtml(r.item||'')}" placeholder="Ex.: Skin Oceano"></label>
+        </div>
+      </div>
+    `).join('');
+
+    return `<section class="rc141-section rewards-kid" data-rewards-kid="${m.id}" data-kid-theme="${theme}">
+      <div class="rc141-section-head"><div><h3>Conquistas de ${escapeHtml(m.name)}</h3><p>Acompanhe o progresso e personalize a coleção.</p></div></div>
+      <div class="rc141-kid-profile">
+        <span class="rc141-kid-avatar">${satelliteAvatarIcon(m.avatarKey||'son')}</span>
+        <div><h4>${escapeHtml(m.name)}</h4><p>${next?`${nextPts} pontos para ${escapeHtml(next[1].name||'a próxima conquista')}`:'Todas as metas atuais alcançadas.'}</p><div class="rc141-level"><span style="width:${pct}%"></span></div></div>
+        <span class="rc141-points">✦ ${+p.season||0} pontos</span>
+      </div>
+      <div class="rc141-kid-awards">${awardTiles}</div>
+      <div class="kids-theme-box">
+        <div><strong>Temas de recompensa</strong><small>Personalize as cores do universo de ${escapeHtml(m.name)}.</small></div>
+        <div class="kids-theme-options">
+          <button type="button" data-theme="mist" class="${theme==='mist'?'active':''}">Azul Neblina</button>
+          <button type="button" data-theme="ocean" class="${theme==='ocean'?'active':''}">Oceano</button>
+          <button type="button" data-theme="space" class="${theme==='space'?'active':''}">Espaço</button>
+          <button type="button" data-theme="forest" class="${theme==='forest'?'active':''}">Floresta</button>
+          <button type="button" data-theme="solar" class="${theme==='solar'?'active':''}">Solar</button>
+          <button type="button" data-theme="coral" class="${theme==='coral'?'active':''}">Coral</button>
+        </div>
+      </div>
+      <details class="rc141-config-toggle"><summary>Configurar regras e recompensas</summary><div class="rc141-config-body">${config}<div class="reward-config-actions"><button class="saveKidRewards">Salvar premiações</button></div></div></details>
+    </section>`;
+  }).join(''):`<section class="rc141-section"><div class="sat-empty">Cadastre um satélite como Kids para configurar premiações.</div></section>`;
+
+  const helperCards=presets.slice(0,4).map((r,i)=>rc141RewardBadge('helper'+((i%4)+1),r.icon||['♡','☆','✦','◈'][i%4])).join('');
+  const helperConfig=presets.map((r,i)=>`
+    <div class="reward-config-card" data-rec-preset="${i}">
+      <div class="reward-config-head"><span class="reward-config-icon">${escapeHtml(r.icon||'✦')}</span><div><strong>${escapeHtml(r.name||'Reconhecimento')}</strong><small>${escapeHtml(r.message||'')}</small></div><label class="reward-active"><input type="checkbox" data-rp-active ${r.active!==false?'checked':''}>Ativo</label></div>
+      <div class="reward-form-grid"><label>Símbolo<input data-rp-icon maxlength="2" value="${escapeHtml(r.icon||'✦')}"></label><label>Nome<input data-rp-name value="${escapeHtml(r.name||'')}"></label></div>
+      <label>Mensagem<input data-rp-message value="${escapeHtml(r.message||'')}"></label>
+    </div>
+  `).join('');
+
+  app.innerHTML=`<div class="sat-page rewards-page">
+    <section class="sat-hero sat-ideal-hero rewards-hero"><div class="sat-hero-copy"><div class="eyebrow">PREMIAÇÕES</div><h2>Você desempenha.<br>A BERTH.A reconhece.</h2><p>Conquistas para você. Gamificação para Kids. Reconhecimento para quem caminha junto.</p></div></section>
+    <div class="rewards-tabs"><button class="active" data-reward-tab="owner">Owner</button><button data-reward-tab="kids">Kids</button><button data-reward-tab="helpers">Reconhecimentos</button></div>
+
+    <section class="rewards-pane" data-reward-pane="owner">
+      <section class="rc141-section">
+        <div class="rc141-section-head"><div><h3>Minhas conquistas</h3><p>Pequenas vitórias, grandes movimentos.</p></div></div>
+        <div class="rc141-owner-grid">${ownerCards}</div>
+        <details class="rc141-config-toggle"><summary>Personalizar conquistas</summary><div class="rc141-config-body">${ownerConfig}<div class="reward-config-actions"><button id="saveOwnerRewards">Salvar conquistas</button></div></div></details>
+      </section>
+    </section>
+
+    <section class="rewards-pane" data-reward-pane="kids" hidden>${kidsHtml}</section>
+
+    <section class="rewards-pane" data-reward-pane="helpers" hidden>
+      <section class="rc141-section">
+        <div class="rc141-section-head"><div><h3>Reconhecimentos</h3><p>Valorize quem caminha com você.</p></div></div>
+        <div class="rc141-helper-preview">${rc141RewardBadge('helper1',presets[0]?.icon||'♡')}<div><strong>${escapeHtml(presets[0]?.name||'Ajuda incrível')}</strong><small>${escapeHtml(presets[0]?.message||'A BERTH.A registrou: essa ajuda fez tudo mais leve.')}</small><div class="rc141-helper-icons">${helperCards}</div></div></div>
+        <details class="rc141-config-toggle"><summary>Personalizar reconhecimentos</summary><div class="rc141-config-body">${helperConfig}<div class="reward-config-actions"><button id="saveRecognitionPresets">Salvar reconhecimentos</button></div></div></details>
+      </section>
+      ${adults.length?`<section class="rc141-section"><div class="rc141-section-head"><div><h3>Helpers da sua rede</h3><p>Reconhecimentos recebidos por cada satélite adulto.</p></div></div><div class="recognition-history">${adults.map(m=>{const count=history.filter(x=>String(x.toId)===String(m.id)).length;return `<div class="item"><strong>${escapeHtml(m.name)}</strong><small>${count} reconhecimento${count===1?'':'s'} recebido${count===1?'':'s'}</small></div>`}).join('')}</div></section>`:''}
+    </section>
+  </div>`;
+
+  document.querySelectorAll('[data-reward-tab]').forEach(btn=>btn.onclick=()=>{
+    const tab=btn.dataset.rewardTab;
+    document.querySelectorAll('[data-reward-tab]').forEach(x=>x.classList.toggle('active',x===btn));
+    document.querySelectorAll('[data-reward-pane]').forEach(p=>p.hidden=p.dataset.rewardPane!==tab);
+  });
+
+  document.querySelectorAll('[data-rewards-kid]').forEach(section=>{
+    const mid=section.dataset.rewardsKid;
+    section.querySelectorAll('[data-theme]').forEach(b=>b.onclick=()=>{
+      const all=loadKidsRewardThemes();all[mid]=b.dataset.theme;saveKidsRewardThemes(all);
+      section.dataset.kidTheme=b.dataset.theme;
+      section.querySelectorAll('[data-theme]').forEach(x=>x.classList.toggle('active',x===b));
+    });
+    section.querySelector('.saveKidRewards')?.addEventListener('click',e=>{
+      const all=loadKidsRewards(),current=kidsRewardsFor(mid);
+      section.querySelectorAll('[data-kid-reward]').forEach(row=>{
+        const key=row.dataset.kidReward;
+        current[key]={...current[key],
+          name:row.querySelector('[data-kr-name]').value.trim()||current[key].name,
+          points:Math.max(1,+row.querySelector('[data-kr-points]').value||1),
+          type:row.querySelector('[data-kr-type]').value,
+          icon:row.querySelector('[data-kr-icon]').value.trim()||rc141KidGlyph(row.querySelector('[data-kr-type]').value),
+          recurrence:row.querySelector('[data-kr-rec]').value,
+          visual:row.querySelector('[data-kr-visual]').value.trim(),
+          description:row.querySelector('[data-kr-desc]').value.trim(),
+          unlock:row.querySelector('[data-kr-unlock]')?.value||'badge',
+          item:row.querySelector('[data-kr-item]')?.value.trim()||'',
+          active:row.querySelector('[data-kr-active]').checked
+        };
+      });
+      all[mid]=current;saveKidsRewards(all);
+      const b=e.currentTarget;b.textContent='Salvo';setTimeout(()=>b.textContent='Salvar premiações',900);
+    });
+  });
+
+  document.querySelector('#saveOwnerRewards')?.addEventListener('click',e=>{
+    const current=loadOwnerRewards();
+    const vals=[...document.querySelectorAll('[data-owner-reward]')].map((row,i)=>({...current[i],
+      name:row.querySelector('[data-or-name]').value.trim()||current[i].name,
+      icon:row.querySelector('[data-or-icon]').value.trim()||current[i].icon||'✦',
+      criterion:row.querySelector('[data-or-criterion]').value,
+      value:Math.max(1,+row.querySelector('[data-or-value]').value||1),
+      recurrence:row.querySelector('[data-or-rec]').value,
+      visual:row.querySelector('[data-or-visual]').value.trim(),
+      description:row.querySelector('[data-or-desc]').value.trim(),
+      active:row.querySelector('[data-or-active]').checked
+    }));
+    saveOwnerRewards(vals);e.currentTarget.textContent='Salvo';setTimeout(()=>e.currentTarget.textContent='Salvar conquistas',900);
+  });
+
+  document.querySelector('#saveRecognitionPresets')?.addEventListener('click',e=>{
+    const base=loadRecognitionPresets();
+    const vals=[...document.querySelectorAll('[data-rec-preset]')].map((row,i)=>({...base[i],
+      icon:row.querySelector('[data-rp-icon]').value.trim()||base[i].icon||'✦',
+      name:row.querySelector('[data-rp-name]').value.trim()||base[i].name,
+      message:row.querySelector('[data-rp-message]').value.trim(),
+      active:row.querySelector('[data-rp-active]').checked
+    }));
+    saveRecognitionPresets(vals);e.currentTarget.textContent='Salvo';setTimeout(()=>e.currentTarget.textContent='Salvar reconhecimentos',900);
+  });
+}
+
+renderUniversalRewards=renderRewardsRC141;
+renderKidsRewards=renderRewardsRC141;
