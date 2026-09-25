@@ -3216,3 +3216,119 @@ dialog.fin-planned-dialog .note,
 dialog.fin-planned-dialog small{
   font-weight:400!important;
 }
+
+/* RC101 — FINANCEIRO · modais tipografia leve (autoridade final)
+   Vence os estilos antigos injetados em runtime sem alterar estrutura, cor ou lógica. */
+html body dialog.fin-planned-dialog.fin-unified-dialog .modal-head .eyebrow,
+html body dialog.fin-unified-dialog .modal-head .eyebrow{
+  font-weight:500!important;
+  letter-spacing:.18em!important;
+}
+html body dialog.fin-planned-dialog.fin-unified-dialog .modal-head h2,
+html body dialog.fin-unified-dialog .modal-head h2{
+  font-weight:400!important;
+  letter-spacing:-.02em!important;
+}
+html body dialog.fin-planned-dialog.fin-unified-dialog label,
+html body dialog.fin-unified-dialog label{
+  font-weight:400!important;
+}
+html body dialog.fin-planned-dialog.fin-unified-dialog label>strong,
+html body dialog.fin-unified-dialog label>strong,
+html body dialog.fin-planned-dialog.fin-unified-dialog .fin-reminder-head strong,
+html body dialog.fin-planned-dialog.fin-unified-dialog .fin-reminder-repeat strong,
+html body dialog.fin-unified-dialog .fin-reminder-head strong,
+html body dialog.fin-unified-dialog .fin-reminder-repeat strong{
+  font-weight:450!important;
+}
+html body dialog.fin-planned-dialog.fin-unified-dialog :is(input,select,textarea),
+html body dialog.fin-unified-dialog :is(input,select,textarea){
+  font-weight:400!important;
+}
+html body dialog.fin-planned-dialog.fin-unified-dialog :is(input,select,textarea)::placeholder,
+html body dialog.fin-unified-dialog :is(input,select,textarea)::placeholder{
+  font-weight:400!important;
+  opacity:.62!important;
+}
+html body dialog.fin-planned-dialog.fin-unified-dialog .modal-actions button,
+html body dialog.fin-unified-dialog .modal-actions button,
+html body dialog.fin-planned-dialog.fin-unified-dialog .fin-delete-bill,
+html body dialog.fin-unified-dialog .fin-delete-bill{
+  font-weight:500!important;
+}
+html body dialog.fin-planned-dialog.fin-unified-dialog :is(.note,small),
+html body dialog.fin-unified-dialog :is(.note,small){
+  font-weight:400!important;
+}
+
+/* RC102 — FINANCEIRO · botões dos modais no padrão BERTH.A
+   Apenas acabamento dos botões: preserva estrutura, cores-base e lógica. */
+html body dialog.fin-unified-dialog .modal-actions,
+html body dialog.fin-planned-dialog.fin-unified-dialog .modal-actions{
+  display:flex!important;
+  justify-content:flex-end!important;
+  align-items:center!important;
+  gap:10px!important;
+  margin-top:18px!important;
+  padding:0!important;
+  background:transparent!important;
+  border:0!important;
+  box-shadow:none!important;
+}
+html body dialog.fin-unified-dialog .modal-actions .grow,
+html body dialog.fin-planned-dialog.fin-unified-dialog .modal-actions .grow{
+  flex:1 1 auto!important;
+}
+html body dialog.fin-unified-dialog .modal-actions button,
+html body dialog.fin-planned-dialog.fin-unified-dialog .modal-actions button{
+  min-height:44px!important;
+  height:44px!important;
+  min-width:112px!important;
+  width:auto!important;
+  padding:0 18px!important;
+  border-radius:16px!important;
+  font-size:16px!important;
+  line-height:1!important;
+  font-weight:500!important;
+  letter-spacing:0!important;
+  box-shadow:none!important;
+  white-space:nowrap!important;
+}
+html body dialog.fin-unified-dialog .modal-actions .secondary,
+html body dialog.fin-planned-dialog.fin-unified-dialog .modal-actions .secondary{
+  background:rgba(255,255,255,.72)!important;
+  color:#6f6674!important;
+  border:1px solid rgba(125,105,135,.14)!important;
+}
+html body dialog.fin-unified-dialog .modal-actions .primary,
+html body dialog.fin-planned-dialog.fin-unified-dialog .modal-actions .primary{
+  background:linear-gradient(135deg,#c9b4dc 0%,#a8d3ca 100%)!important;
+  color:#fff!important;
+  border:1px solid transparent!important;
+}
+html body dialog.fin-unified-dialog .modal-actions button:active,
+html body dialog.fin-planned-dialog.fin-unified-dialog .modal-actions button:active{
+  transform:scale(.985)!important;
+}
+html body dialog.fin-unified-dialog .fin-delete-bill,
+html body dialog.fin-planned-dialog.fin-unified-dialog .fin-delete-bill,
+html body dialog.fin-unified-dialog .fin-danger-soft,
+html body dialog.fin-planned-dialog.fin-unified-dialog .fin-danger-soft{
+  min-height:40px!important;
+  width:auto!important;
+  padding:0 14px!important;
+  border-radius:14px!important;
+  font-size:14px!important;
+  font-weight:500!important;
+  background:rgba(249,233,235,.72)!important;
+  color:#a46f78!important;
+  border:1px solid rgba(164,111,120,.12)!important;
+  box-shadow:none!important;
+}
+@media(max-width:480px){
+  html body dialog.fin-unified-dialog .modal-actions button,
+  html body dialog.fin-planned-dialog.fin-unified-dialog .modal-actions button{
+    min-width:104px!important;
+    padding-inline:16px!important;
+  }
+}
