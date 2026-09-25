@@ -5221,3 +5221,26 @@ html body dialog.bertha-overrun-dialog[open]>.bertha-modal{
   border-color:rgba(148,123,128,.10)!important;
 }
 `;document.head.appendChild(st)})();
+
+;(function(){if(document.getElementById('rc115-meudia-modal-type'))return;const st=document.createElement('style');st.id='rc115-meudia-modal-type';st.textContent=`
+/* RC115 — Meu Dia: refinamento tipográfico final dos modais de concluir/ajustar tempo. */
+html body dialog.bertha-meudia-dialog.bertha-finish-dialog[open] .bertha-modal-head strong{
+  font-size:18px!important;line-height:1.22!important;font-weight:500!important;letter-spacing:-.008em!important;color:#3f3942!important;
+}
+html body dialog.bertha-meudia-dialog.bertha-finish-dialog[open] p,
+html body dialog.bertha-meudia-dialog.bertha-finish-dialog[open] .bertha-muted{
+  font-weight:400!important;color:#6f6972!important;
+}
+html body dialog.bertha-meudia-dialog.bertha-finish-dialog[open] p strong{
+  font-weight:500!important;color:#4d4650!important;
+}
+html body dialog.bertha-meudia-dialog.bertha-finish-dialog[open] .bertha-field{
+  font-weight:500!important;color:#5f5962!important;
+}
+html body dialog.bertha-meudia-dialog.bertha-finish-dialog[open] .bertha-field input{
+  font-weight:400!important;
+}
+html body dialog.bertha-meudia-dialog.bertha-finish-dialog[open] .bertha-actions button{
+  font-weight:500!important;
+}
+`;document.head.appendChild(st)})();
