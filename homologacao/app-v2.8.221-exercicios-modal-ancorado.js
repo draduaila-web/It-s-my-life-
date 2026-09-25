@@ -2259,7 +2259,7 @@ function renderSatelliteDay(){
    else if(task.satelliteStatus==='accepted'&&mine){actions=`<button data-sat-start="${task.id}" class="go">Começar</button>`}
    else if(task.satelliteStatus==='in_progress'&&mine){actions=`<button data-sat-complete="${task.id}" class="go">Concluir</button>`}
    return `<div class="sat-mission ${done?'done':''}"><div><strong>${escapeHtml(task.name)}</strong><small>${escapeHtml(area.title)} · ${escapeHtml(casaDuration(task.id))} · ${escapeHtml(casaTime(task.id))}</small>${task.pointsEnabled&&m.role==='kids'?`<span class="sat-task-chip points">+${+task.pointsValue||0} pts</span>`:''}</div><div class="sat-mission-actions">${actions}</div></div>`};
- app.innerHTML=`<div class="sat-page"><div class="sat-day-head"><button class="sat-day-back" id="satBack">← Owner</button><span class="sat-role">${m.role==='kids'?'KIDS':'SATÉLITE'}</span></div><section class="sat-hero ${m.role==='kids'?'kids-hero':''}"><div class="eyebrow">${m.role==='kids'?'MINHA TEMPORADA':'MEU DIA'}</div><h2>${m.role==='kids'?`Oi, ${escapeHtml(m.name)}!`:`${escapeHtml(m.name)}, o que precisa da sua atenção?`}</h2><p>${m.role==='kids'?`${kids.season||0} pontos nesta temporada · ${next||50} até o próximo desbloqueio.`:'Aqui aparecem apenas tarefas delegadas e oportunidades de ajudar.'}</p>${m.role==='kids'?`<div class="kids-progress"><span style="width:${pct}%"></span></div>`:''}</section>${m.role==='kids'&&kids.awards?.length?`<section class="card"><div class="eyebrow">CONQUISTAS</div><div class="kids-awards">${kids.awards.slice(-8).map(a=>`<span>${a.type==='egg'?'🥚':a.type==='trophy'?'🏆':a.type==='skin'?'✦':'●'} ${escapeHtml(a.name)}</span>`).join('')}</div></section>`:''}<section class="card"><div class="panel-head"><div><h3>${m.role==='kids'?'Missões':'Tarefas'}</h3><p class="note">${m.role==='kids'?'Conclua missões para ganhar pontos e desbloquear conquistas.':'Assuma ajuda ou execute o que foi delegado a você.'}</p></div><span class="pill">${tasks.filter(x=>!x.task.done).length}</span></div>${tasks.length?tasks.map(missionHtml).join(''):`<div class="sat-empty">Nada pendente por aqui.</div>`}</section></div>`;
+ app.innerHTML=`<div class="sat-page"><div class="sat-day-head"><button class="sat-day-back" id="satBack">← Owner</button><span class="sat-role">${m.role==='kids'?'KIDS':'SATÉLITE'}</span></div><section class="sat-hero sat-ideal-hero sat-member-hero"><div class="sat-hero-copy"><div class="eyebrow">${m.role==='kids'?'MINHA TEMPORADA':'SEU ESPAÇO NA REDE'}</div><h2>Your life, with somewhere to land.</h2><p>${m.role==='kids'?`Missões, convites e recortes compartilhados com você chegam aqui. ${kids.season||0} pontos nesta temporada.`:'Aqui chegam apenas tarefas, convites e planos que foram compartilhados com você.'}</p>${m.role==='kids'?`<div class="kids-progress"><span style="width:${pct}%"></span></div>`:''}</div><span class="sat-hero-icon sat-member-avatar">${satelliteAvatarIcon(m.avatarKey||(m.role==='kids'?'star':'person'))}</span></section>${m.role==='kids'&&kids.awards?.length?`<section class="card"><div class="eyebrow">CONQUISTAS</div><div class="kids-awards">${kids.awards.slice(-8).map(a=>`<span>${a.type==='egg'?'🥚':a.type==='trophy'?'🏆':a.type==='skin'?'✦':'●'} ${escapeHtml(a.name)}</span>`).join('')}</div></section>`:''}<section class="card"><div class="panel-head"><div><h3>${m.role==='kids'?'Missões':'Tarefas'}</h3><p class="note">${m.role==='kids'?'Conclua missões para ganhar pontos e desbloquear conquistas.':'Assuma ajuda ou execute o que foi delegado a você.'}</p></div><span class="pill">${tasks.filter(x=>!x.task.done).length}</span></div>${tasks.length?tasks.map(missionHtml).join(''):`<div class="sat-empty">Nada pendente por aqui.</div>`}</section></div>`;
  document.querySelector('#satBack').onclick=()=>{location.hash='#satelites'};
  document.querySelectorAll('[data-sat-accept]').forEach(b=>b.onclick=()=>setSatelliteTaskState(b.dataset.satAccept,m.id,'accepted'));
  document.querySelectorAll('[data-sat-decline]').forEach(b=>b.onclick=()=>setSatelliteTaskState(b.dataset.satDecline,m.id,'declined'));
@@ -2267,7 +2267,7 @@ function renderSatelliteDay(){
  document.querySelectorAll('[data-sat-complete]').forEach(b=>b.onclick=()=>setSatelliteTaskState(b.dataset.satComplete,m.id,'completed'))
 }
 const SAT_INVITES_KEY='bertha.satellites.invites.v1';
-function renderConvites(){ensureSatelliteStyles();ensureSatelliteIdentityV4();const members=loadSatellites().members.filter(m=>m.status!=='removed'&&m.permissions?.convites),items=berthaRead(SAT_INVITES_KEY,[]);app.innerHTML=`<div class="sat-page"><section class="sat-hero sat-ideal-hero"><div class="sat-hero-copy"><div class="eyebrow">CONVITES</div><h2>Space to think.<br>Space to live.</h2><p>Você planeja. A BERTH.A abre espaço para viver.</p></div><svg class="sat-hero-icon" viewBox="0 0 64 64" aria-hidden="true"><path d="M20 18v-6M44 18v-6M14 25h36M16 16h32a4 4 0 0 1 4 4v30H12V20a4 4 0 0 1 4-4z"/><path d="M24 36l6 6 11-13"/></svg></section><button class="primary sat-main-cta" id="newInvite">＋ Novo convite</button><section class="sat-card card"><div class="panel-head"><div><h3>Convites</h3><p class="note">Cada pessoa escolhe se vai, talvez ou não vai.</p></div><span class="pill">${items.length}</span></div>${items.length?items.map(x=>`<div class="sat-member"><span class="sat-avatar">○</span><span><strong>${escapeHtml(x.title)}</strong><small>${escapeHtml(x.when||'Sem horário')} · ${x.targets?.length||0} convidado(s)</small></span></div>`).join(''):`<div class="sat-empty">Nenhum convite criado ainda.</div>`}</section></div>`;document.querySelector('#newInvite').onclick=()=>openInviteEditor(members)}
+function renderConvites(){ensureSatelliteStyles();ensureSatelliteIdentityV4();const members=loadSatellites().members.filter(m=>m.status!=='removed'&&m.permissions?.convites),items=berthaRead(SAT_INVITES_KEY,[]);app.innerHTML=`<div class="sat-page"><section class="sat-hero sat-ideal-hero"><div class="sat-hero-copy"><div class="eyebrow">CONVITES</div><h2>Space to think.<br>Space to live.</h2><p>Você convida. A BERTH.A organiza o encontro.</p></div><svg class="sat-hero-icon" viewBox="0 0 64 64" aria-hidden="true"><path d="M20 18v-6M44 18v-6M14 25h36M16 16h32a4 4 0 0 1 4 4v30H12V20a4 4 0 0 1 4-4z"/><path d="M24 36l6 6 11-13"/></svg></section><button class="primary sat-main-cta" id="newInvite">＋ Novo convite</button><section class="sat-card card"><div class="panel-head"><div><h3>Convites</h3><p class="note">Cada pessoa escolhe se vai, talvez ou não vai.</p></div><span class="pill">${items.length}</span></div>${items.length?items.map(x=>`<div class="sat-member"><span class="sat-avatar">○</span><span><strong>${escapeHtml(x.title)}</strong><small>${escapeHtml(x.when||'Sem horário')} · ${x.targets?.length||0} convidado(s)</small></span></div>`).join(''):`<div class="sat-empty">Nenhum convite criado ainda.</div>`}</section></div>`;document.querySelector('#newInvite').onclick=()=>openInviteEditor(members)}
 function openInviteEditor(members){ensureSatelliteStyles();ensureSatelliteIdentityV4();const d=document.createElement('dialog');d.className='bertha-dialog casa-dialog sat-modal sat-ideal-modal';d.innerHTML=`<form class="modal-card casa-modal-card sat-editor-form" id="inviteForm"><div class="modal-head"><div><div class="eyebrow">CONVITES</div><h2>Novo convite</h2></div><button type="button" class="icon-btn casa-modal-x" data-close>×</button></div><div class="sat-editor-fields"><label>Convite<input id="inviteTitle" required placeholder="Ex.: Academia"></label><label>Quando?<input id="inviteWhen" placeholder="Ex.: Hoje · 18h"></label></div><div class="sat-permissions"><div class="eyebrow">CONVIDAR</div>${members.length?members.map(m=>satPermissionRow('invite_'+m.id,m.name,m.role==='kids'?'Kids':'Adulto',true)).join(''):'<div class="sat-empty">Nenhum satélite tem permissão para receber convites.</div>'}</div><div class="modal-actions"><div class="grow"></div><button type="button" class="secondary" data-close>Cancelar</button><button class="primary" type="submit" ${members.length?'':'disabled'}>Enviar convite</button></div></form>`;document.body.appendChild(d);d.querySelectorAll('[data-close]').forEach(b=>b.onclick=()=>d.close());d.onclose=()=>d.remove();d.querySelectorAll('.sat-permission').forEach(row=>row.onclick=e=>{e.preventDefault();const i=row.querySelector('input');i.checked=!i.checked;row.classList.toggle('is-checked',i.checked);row.setAttribute('aria-checked',String(i.checked))});d.querySelector('#inviteForm').onsubmit=e=>{e.preventDefault();const title=d.querySelector('#inviteTitle').value.trim();if(!title)return;const items=berthaRead(SAT_INVITES_KEY,[]);items.unshift({id:satId(),title,when:d.querySelector('#inviteWhen').value.trim(),targets:members.filter(m=>d.querySelector('#invite_'+m.id)?.checked).map(m=>m.id),createdAt:Date.now()});window.berthaHmlStorage.setItem(SAT_INVITES_KEY,JSON.stringify(items));d.close();renderConvites()};d.showModal()}
 
 window.renderSatellites=renderSatellites;window.renderSatelliteDay=renderSatelliteDay;window.validateSatelliteCasaTask=validateSatelliteCasaTask;window.renderConvites=renderConvites;
@@ -4794,3 +4794,50 @@ html body .sat-avatar-choice small{font-size:9px!important;font-weight:500!impor
 html body .sat-avatar-choice.active{background:linear-gradient(135deg,rgba(251,247,239,.98),rgba(248,237,240,.48) 42%,rgba(237,246,252,.38) 100%)!important;border-color:rgba(193,149,171,.24)!important;box-shadow:inset 0 0 0 1px rgba(193,149,171,.08)!important;color:#69758d!important}
 @media(max-width:480px){html body .sat-avatar-picker{grid-template-columns:repeat(3,minmax(0,1fr))!important}}
 `;document.head.appendChild(s)})();
+
+
+;(function(){if(document.getElementById('rc125-satellites-brand-final'))return;const s=document.createElement('style');s.id='rc125-satellites-brand-final';s.textContent=`
+/* RC125 — Satélites/Convites: família visual Meu Dia Ideal + checkboxes unificados */
+html body .sat-ideal-hero,
+html body .sat-member-hero{
+ background:linear-gradient(135deg,rgba(246,213,223,.80) 0%,rgba(252,246,239,.96) 27%,rgba(230,241,255,.96) 100%)!important;
+ border:1px solid rgba(152,165,189,.14)!important;
+ box-shadow:0 12px 34px rgba(87,87,111,.05)!important;
+ filter:saturate(1.05)!important;
+}
+html body .sat-member-hero{min-height:168px!important}
+html body .sat-member-hero .sat-hero-copy{max-width:calc(100% - 58px)!important}
+html body .sat-member-hero h2{max-width:330px!important;font-size:27px!important;font-weight:400!important;line-height:1.05!important;letter-spacing:-.03em!important}
+html body .sat-member-hero p{max-width:350px!important;font-size:13px!important;line-height:1.45!important}
+html body .sat-member-avatar{width:42px!important;height:42px!important;color:#98a2b7!important;opacity:.72!important;padding:3px!important}
+html body .sat-member-avatar svg{width:32px!important;height:32px!important;stroke-width:1.35!important}
+html body .kids-progress{height:8px!important;margin-top:13px!important;background:rgba(255,255,255,.68)!important}
+html body .kids-progress span{background:linear-gradient(90deg,rgba(223,160,183,.95),rgba(245,224,200,.95),rgba(210,227,244,.95))!important}
+
+/* Um único desenho de checkbox em toda a experiência Satélites/Convites */
+html body .sat-permission{background:rgba(255,253,249,.84)!important;border:1px solid rgba(122,108,128,.09)!important}
+html body .sat-permission.is-checked{background:rgba(255,253,249,.94)!important;border-color:rgba(201,170,176,.28)!important;box-shadow:inset 0 0 0 1px rgba(201,170,176,.05)!important}
+html body .sat-checkbox,
+html body .sat-check input[type=checkbox]{
+ width:21px!important;height:21px!important;min-width:21px!important;min-height:21px!important;max-width:21px!important;max-height:21px!important;
+ border-radius:6px!important;border:1.5px solid rgba(128,118,132,.28)!important;background:#fffdfa!important;box-shadow:none!important;
+}
+html body .sat-permission.is-checked .sat-checkbox,
+html body .sat-check input[type=checkbox]:checked{
+ background:#d9b1ba!important;border-color:#d9b1ba!important;
+}
+html body .sat-permission.is-checked .sat-checkbox:after{content:'✓'!important;color:#fff!important;font-size:13px!important;line-height:1!important;font-weight:700!important}
+html body .sat-check input[type=checkbox]:checked:after{content:'✓'!important;color:#fff!important;font-size:13px!important;line-height:1!important;font-weight:700!important}
+
+/* Botões e modais na mesma família do Meu Dia Ideal */
+html body .sat-main-cta,
+html body .sat-page>.sat-actions>.primary,
+html body .sat-modal .modal-actions .primary{
+ background:linear-gradient(100deg,rgba(231,143,177,.92),rgba(247,215,183,.92) 48%,rgba(195,219,244,.94))!important;
+ color:#fff!important;border:1px solid rgba(181,145,169,.15)!important;box-shadow:none!important;
+}
+html body .sat-modal .modal-card,
+html body .sat-modal .modal-head{background:#fbf7ef!important}
+html body .sat-modal .secondary{background:#fffdfa!important;color:#6d6673!important;border:1px solid rgba(122,108,128,.10)!important}
+`;
+document.head.appendChild(s)})();

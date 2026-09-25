@@ -1,4 +1,4 @@
-const CACHE = "hml-bertha-v221-rc124-satellites-visual-lock";
+const CACHE = "hml-bertha-v221-rc125-satellites-visual-lock";
 self.addEventListener("install", event => event.waitUntil(self.skipWaiting()));
 self.addEventListener("activate", event => event.waitUntil((async()=>{
   const keys=await caches.keys();
