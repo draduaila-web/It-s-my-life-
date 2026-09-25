@@ -707,10 +707,10 @@
     arr[i]=x;write(COMMITMENTS_KEY,arr);
   }
 
-  function finishActive(activeId=null){
+  function finishActive(activeId=null,realOverride=null){
     const e=engine(),list=Array.isArray(e.actives)?e.actives:[]; if(!list.length)return;
     const idx=activeId?list.findIndex(a=>String(a.id)===String(activeId)):0; if(idx<0)return;
-    const active=list[idx],end=Date.now(),real=Math.max(1,Math.round((end-active.startedAt)/60000));
+    const active=list[idx],end=Date.now(),measured=Math.max(1,Math.round((end-active.startedAt)/60000)),real=Math.max(1,Number.isFinite(+realOverride)&&+realOverride>0?Math.round(+realOverride):measured);
     e.history.unshift({itemId:active.id,learningKey:active.learningKey||durationLearningKey(active),
       title:active.title,source:active.source,day:iso(),startedAt:active.startedAt,endedAt:end,
       configuredMinutes:+active.configuredMinutes||+active.plannedMinutes||30,
@@ -725,6 +725,17 @@
   }
 
 
+  function finishActivePrompt(activeId=null,afterFinish=null){
+    const e=engine(),list=Array.isArray(e.actives)?e.actives:[];
+    const idx=activeId?list.findIndex(a=>String(a.id)===String(activeId)):0;if(idx<0)return;
+    const active=list[idx],measured=Math.max(1,Math.round((Date.now()-active.startedAt)/60000));
+    const d=dialogBase('Concluir atividade',`<p class="bertha-muted">Confira o tempo real antes de concluir <strong>${esc(active.title||'Atividade')}</strong>.</p><label class="bertha-field">Tempo real (min)<input type="number" min="1" inputmode="numeric" data-finish-real value="${measured}"></label><div class="bertha-actions"><button class="bertha-secondary" data-keep-going>Continuar atividade</button><button class="bertha-primary" data-confirm-finish>Concluir</button></div>`);
+    d.classList.add('bertha-meudia-dialog','bertha-finish-dialog');
+    d.querySelector('[data-keep-going]').onclick=()=>{d.close();d.remove();};
+    d.querySelector('[data-confirm-finish]').onclick=()=>{const real=Math.max(1,+d.querySelector('[data-finish-real]').value||measured);d.close();d.remove();finishActive(active.id,real);if(typeof afterFinish==='function')setTimeout(afterFinish,60);};
+  }
+
+
   const OVERRUN_PROMPT_KEY='bertha.time-overrun-prompt.v1';
   function timeOverrunPrompt(active){
     if(!active||active.overrunOpenEnded)return;
@@ -734,7 +745,7 @@
     if(prompted[active.id]===stamp)return;
     prompted[active.id]=stamp;write(OVERRUN_PROMPT_KEY,prompted);
     const d=dialogBase('O tempo planejado terminou',`<p class="bertha-muted"><strong>${esc(active.title||'Atividade')}</strong> estava prevista para ${durationText(planned)}.</p><p>Quer concluir ou continuar?</p><div class="bertha-stack bertha-overrun-actions"><button class="bertha-primary" data-overrun-finish>Concluir agora</button><button class="bertha-secondary" data-overrun-ten>Continuar +10 min</button><button class="bertha-secondary" data-overrun-open>Continuar sem limite</button></div>`);
-    d.querySelector('[data-overrun-finish]').onclick=()=>{d.close();d.remove();finishActive(active.id)};
+    d.querySelector('[data-overrun-finish]').onclick=()=>{d.close();d.remove();setTimeout(()=>finishActivePrompt(active.id),60)};
     d.querySelector('[data-overrun-ten]').onclick=()=>{const e=engine(),a=e.actives.find(x=>String(x.id)===String(active.id));if(a){a.plannedMinutes=Math.max(planned,elapsed)+10;a.overrunOpenEnded=false;saveEngine(e)};delete prompted[active.id];write(OVERRUN_PROMPT_KEY,prompted);d.close();d.remove();rerender()};
     d.querySelector('[data-overrun-open]').onclick=()=>{const e=engine(),a=e.actives.find(x=>String(x.id)===String(active.id));if(a){a.overrunOpenEnded=true;saveEngine(e)};d.close();d.remove();rerender()};
   }
@@ -809,7 +820,7 @@
 
   function dialogBase(title,body){ const d=document.createElement('dialog'); d.className='bertha-dialog'; d.innerHTML=`<div class="bertha-modal"><div class="bertha-modal-head"><strong>${esc(title)}</strong><button data-close>×</button></div>${body}</div>`; document.body.appendChild(d); d.querySelector('[data-close]').onclick=()=>{d.close();d.remove()}; d.addEventListener('cancel',e=>{e.preventDefault();d.close();d.remove()}); d.addEventListener('click',e=>{if(e.target===d){d.close();d.remove()}}); d.showModal(); return d; }
   function postponeDialog(item){ const d=dialogBase('Adiar esta tarefa',`<p class="bertha-muted">${esc(item.title)}</p><div class="bertha-choice-grid"><button data-min="15">15 min</button><button data-min="30">30 min</button><button data-min="60">1 hora</button><button data-later>Deixar para depois</button></div><label class="bertha-field">Escolher horário<input type="time" data-time></label>`); d.querySelectorAll('[data-min]').forEach(b=>b.onclick=()=>{snoozeItem(item,+b.dataset.min);d.close();d.remove()}); d.querySelector('[data-later]').onclick=()=>{snoozeItem(item,180);d.close();d.remove()}; d.querySelector('[data-time]').onchange=e=>{const [h,m]=e.target.value.split(':').map(Number),now=new Date(),t=new Date();t.setHours(h,m,0,0);if(t<now)t.setDate(t.getDate()+1);const en=engine();en.snoozed=en.snoozed||{};en.snoozed[item.id]=t.getTime();saveEngine(en);d.close();d.remove();rerender()}; }
-  function conflictDialog(item){ const a=engine().active; const d=dialogBase('Uma atividade já está em andamento',`<p><strong>${esc(a.title)}</strong> começou às ${hhmm(a.startedAt)}.</p><div class="bertha-stack"><button class="bertha-primary" data-finish>Concluir e começar esta</button><button class="bertha-secondary" data-pause>Pausar e começar esta</button></div>`); d.querySelector('[data-finish]').onclick=()=>{finishActive();d.close();d.remove();startItem(item)}; d.querySelector('[data-pause]').onclick=()=>{pauseActive(item);d.close();d.remove()}; }
+  function conflictDialog(item){ const a=engine().active; const d=dialogBase('Uma atividade já está em andamento',`<p><strong>${esc(a.title)}</strong> começou às ${hhmm(a.startedAt)}.</p><div class="bertha-stack"><button class="bertha-primary" data-finish>Concluir e começar esta</button><button class="bertha-secondary" data-pause>Pausar e começar esta</button></div>`); d.querySelector('[data-finish]').onclick=()=>{d.close();d.remove();setTimeout(()=>finishActivePrompt(a.id,()=>startItem(item)),60)}; d.querySelector('[data-pause]').onclick=()=>{pauseActive(item);d.close();d.remove()}; }
 
   function nowCard(){ const s=currentSuggestion(), actives=s.actives||[];
     const running=actives.map(a=>{const elapsed=Math.max(0,Math.floor((Date.now()-a.startedAt)/60000)),end=new Date(a.startedAt+a.plannedMinutes*60000);return `<section class="now-card bertha-now active"><div class="card-kicker">AGORA · EM ANDAMENTO</div><div class="now-title">${esc(a.title)}</div><div class="now-time">${esc(a.source)} · ${elapsed} min</div><p>Previsto: ${durationText(a.plannedMinutes)} · término estimado ${hhmm(end)}</p><div class="bertha-actions"><button class="bertha-primary" data-finish-active="${esc(a.id)}">Concluir</button></div></section>`}).join('');
@@ -931,13 +942,28 @@
   function editDayBlocksDialog(){
     const names=['Domingo','Segunda','Terça','Quarta','Quinta','Sexta','Sábado'];
     const current=new Date().getDay();
-    const d=dialogBase('Horários-base do Meu Dia',`<p class="bertha-muted">Edite os blocos que a BERTH.A usa para proteger horários e encontrar janelas livres.</p><label class="bertha-field">Dia da semana<select data-day>${names.map((n,i)=>`<option value="${i}" ${i===current?'selected':''}>${n}</option>`).join('')}</select></label><div data-block-list></div><div class="bertha-actions"><button class="bertha-secondary" data-reset>Restaurar padrão</button><button class="bertha-primary" data-save>Salvar horários</button></div>`);
-    const list=d.querySelector('[data-block-list]'),sel=d.querySelector('[data-day]');
-    const render=()=>{const day=+sel.value,blocks=dayBlocks(day);list.innerHTML=blocks.length?blocks.map((b,i)=>`<div class="bertha-fixed-edit" data-i="${i}"><label><input type="checkbox" data-enabled ${b.enabled===false?'':'checked'}><span>${esc(b.title)}</span></label><div><input type="time" data-start value="${esc(b.start)}"><span>–</span><input type="time" data-end value="${esc(b.end)}"></div></div>`).join(''):`<div class="bertha-empty">Sem blocos fixos neste dia.</div>`;};
-    sel.onchange=render;render();
-    d.querySelector('[data-reset]').onclick=()=>{saveDayBlocks(+sel.value,defaultDayBlocks(+sel.value));render();};
-    d.querySelector('[data-save]').onclick=()=>{const day=+sel.value,base=dayBlocks(day),rows=[...list.querySelectorAll('.bertha-fixed-edit')];const next=rows.map((r,i)=>({...base[i],enabled:r.querySelector('[data-enabled]').checked,start:r.querySelector('[data-start]').value||base[i].start,end:r.querySelector('[data-end]').value||base[i].end}));saveDayBlocks(day,next);d.close();d.remove();rerender();};
+    const d=dialogBase('Horários-base',`<div class="bertha-dayhours-intro"><div class="eyebrow">MEU DIA · HORÁRIOS</div><p>Defina apenas as referências que ajudam a BERTH.A a encontrar janelas livres. Você pode configurar um dia específico ou aplicar a mesma estrutura a todos os dias.</p></div><div class="bertha-dayhours-grid"><label class="bertha-field">Aplicar em<select data-scope><option value="day">Um dia específico</option><option value="all">Todos os dias</option></select></label><label class="bertha-field" data-day-wrap>Dia da semana<select data-day>${names.map((n,i)=>`<option value="${i}" ${i===current?'selected':''}>${n}</option>`).join('')}</select></label></div><div class="bertha-dayhours-periods" data-periods><button type="button" data-period="morning">Manhã</button><button type="button" data-period="afternoon">Tarde</button><button type="button" data-period="evening">Noite</button><button type="button" data-period="all">Dia inteiro</button></div><div data-block-list></div><button type="button" class="bertha-dayhours-add" data-add-block>+ Adicionar período</button><div class="bertha-actions"><button class="bertha-secondary" data-reset>Restaurar padrão</button><button class="bertha-primary" data-save>Salvar horários</button></div>`);
+    d.classList.add('bertha-meudia-dialog','bertha-dayhours-dialog');
+    const list=d.querySelector('[data-block-list]'),sel=d.querySelector('[data-day]'),scope=d.querySelector('[data-scope]'),dayWrap=d.querySelector('[data-day-wrap]');
+    let working=[];
+    const clone=x=>JSON.parse(JSON.stringify(x||[]));
+    const load=()=>{working=clone(dayBlocks(+sel.value));render();};
+    const periodFor=b=>{const a=timeToM(b.start)||0,z=timeToM(b.end)||1440;if(a<720&&z<=780)return'morning';if(a>=720&&z<=1140)return'afternoon';if(a>=1020)return'evening';return'custom'};
+    const render=()=>{list.innerHTML=working.length?working.map((b,i)=>`<div class="bertha-fixed-edit" data-i="${i}"><div class="bertha-fixed-edit-top"><label><input type="checkbox" data-enabled ${b.enabled===false?'':'checked'}><input class="bertha-fixed-title" type="text" data-title value="${esc(b.title||'Período')}"></label><button type="button" data-remove aria-label="Remover">×</button></div><label class="bertha-mini-field">Período<select data-period-select><option value="custom" ${periodFor(b)==='custom'?'selected':''}>Personalizado</option><option value="morning" ${periodFor(b)==='morning'?'selected':''}>Manhã</option><option value="afternoon" ${periodFor(b)==='afternoon'?'selected':''}>Tarde</option><option value="evening" ${periodFor(b)==='evening'?'selected':''}>Noite</option></select></label><div class="bertha-fixed-times"><input type="time" data-start value="${esc(b.start||'08:00')}"><span>–</span><input type="time" data-end value="${esc(b.end||'09:00')}"></div></div>`).join(''):`<div class="bertha-empty">Sem horários-base. A BERTH.A considera o dia livre, exceto pelos compromissos.</div>`;
+      [...list.querySelectorAll('.bertha-fixed-edit')].forEach((r,i)=>{
+        r.querySelector('[data-remove]').onclick=()=>{working.splice(i,1);render();};
+        r.querySelector('[data-period-select]').onchange=e=>{const v=e.target.value,p={morning:['06:00','12:00'],afternoon:['12:00','18:00'],evening:['18:00','23:59']}[v];if(p){working[i].start=p[0];working[i].end=p[1];render();}};
+      });
+    };
+    sel.onchange=load;
+    scope.onchange=()=>{dayWrap.hidden=scope.value==='all';if(scope.value==='all'){working=clone(dayBlocks(current));render();}else load();};
+    d.querySelectorAll('[data-period]').forEach(b=>b.onclick=()=>{const v=b.dataset.period,p={morning:['Manhã','06:00','12:00'],afternoon:['Tarde','12:00','18:00'],evening:['Noite','18:00','23:59'],all:['Dia inteiro','00:00','23:59']}[v];working.push({id:'custom-'+Date.now()+'-'+working.length,title:p[0],start:p[1],end:p[2],enabled:true});render();});
+    d.querySelector('[data-add-block]').onclick=()=>{working.push({id:'custom-'+Date.now(),title:'Novo período',start:'09:00',end:'10:00',enabled:true});render();};
+    d.querySelector('[data-reset]').onclick=()=>{working=clone(defaultDayBlocks(+sel.value));render();};
+    d.querySelector('[data-save]').onclick=()=>{const rows=[...list.querySelectorAll('.bertha-fixed-edit')],next=rows.map((r,i)=>({...working[i],title:r.querySelector('[data-title]').value.trim()||'Período',enabled:r.querySelector('[data-enabled]').checked,start:r.querySelector('[data-start]').value||working[i].start,end:r.querySelector('[data-end]').value||working[i].end}));if(scope.value==='all'){for(let day=0;day<7;day++)saveDayBlocks(day,clone(next));}else saveDayBlocks(+sel.value,next);d.close();d.remove();rerender();};
+    load();
   }
+
   function fixedCommitmentConflicts(){
     const today=iso(),blocks=dayBlocks().filter(b=>b.enabled!==false),comm=sourcesToday().filter(x=>x.kind==='commitment'&&x.time),out=[];
     for(const c of comm){const ca=timeToM(c.time),cb=ca+Math.max(1,+c.minutes||30);for(const b of blocks){const bm=blockToMinutes(b);if(ca<bm.b&&cb>bm.a)out.push({commitment:c,block:b,key:`${today}|${c.commitmentId||c.id}|${b.id}`});}}
@@ -2647,7 +2673,7 @@
   }
   function startFromHome(item){ if(isMovementReserve(item)) openMovementSelector(item); else startItem(item); }
 
-  function bindHome(){ document.querySelectorAll('[data-start]').forEach(b=>b.onclick=()=>{const x=sourcesToday().find(i=>i.id===b.dataset.start);if(x)startFromHome(x)}); document.querySelectorAll('[data-postpone]').forEach(b=>b.onclick=()=>{const x=sourcesToday().find(i=>i.id===b.dataset.postpone);if(x)postponeDialog(x)}); document.querySelectorAll('[data-finish-active]').forEach(f=>f.onclick=()=>finishActive(f.dataset.finishActive)); document.querySelectorAll('[data-edit-day-hours]').forEach(b=>b.onclick=editDayBlocksDialog); window.BerthaShopping?.bindHealthMini?.(); setTimeout(maybePromptFixedCommitmentConflict,180); }
+  function bindHome(){ document.querySelectorAll('[data-start]').forEach(b=>b.onclick=()=>{const x=sourcesToday().find(i=>i.id===b.dataset.start);if(x)startFromHome(x)}); document.querySelectorAll('[data-postpone]').forEach(b=>b.onclick=()=>{const x=sourcesToday().find(i=>i.id===b.dataset.postpone);if(x)postponeDialog(x)}); document.querySelectorAll('[data-finish-active]').forEach(f=>f.onclick=()=>finishActivePrompt(f.dataset.finishActive)); document.querySelectorAll('[data-edit-day-hours]').forEach(b=>b.onclick=editDayBlocksDialog); window.BerthaShopping?.bindHealthMini?.(); setTimeout(maybePromptFixedCommitmentConflict,180); }
 
   function enhanceIdealScreen(){
     const route=String(location.hash||'').toLowerCase();
@@ -5141,4 +5167,22 @@ html body dialog#recipeFormDialog.recipe-dialog:not(.food-context-dialog) .modal
   .bertha-fixed-edit>label input{width:19px;height:19px;accent-color:#9b86af}
   .bertha-fixed-edit>div{display:grid;grid-template-columns:minmax(0,1fr) auto minmax(0,1fr);align-items:center;gap:8px}
   .bertha-fixed-edit input[type="time"]{width:100%;min-height:42px;border:1px solid rgba(105,86,112,.13);border-radius:14px;background:#fffdfa;padding:7px 10px;font:400 16px/1.2 Inter,-apple-system,BlinkMacSystemFont,"SF Pro Text",sans-serif;color:#504750}
+`;document.head.appendChild(st)})();
+
+
+;(function(){if(document.getElementById('rc109-meu-dia-polish'))return;const st=document.createElement('style');st.id='rc109-meu-dia-polish';st.textContent=`
+/* RC109 — MEU DIA: modal flexível, tipografia leve, espaço livre compacto */
+html body dialog.bertha-meudia-dialog[open]{position:fixed!important;inset:0!important;width:100vw!important;height:100dvh!important;max-width:none!important;max-height:none!important;margin:0!important;padding:12px!important;border:0!important;background:transparent!important;display:grid!important;place-items:center!important;overflow:hidden!important;transform:none!important}
+html body dialog.bertha-meudia-dialog[open]>.bertha-modal{width:min(100%,520px)!important;max-width:520px!important;max-height:calc(100dvh - 24px)!important;overflow-y:auto!important;overflow-x:hidden!important;margin:0!important;padding:20px!important;border-radius:26px!important;background:linear-gradient(145deg,#fffaf4 0%,#f7eef7 55%,#eef7f5 100%)!important;border:1px solid rgba(120,101,124,.10)!important;box-shadow:0 20px 52px rgba(48,38,52,.14)!important;overscroll-behavior:contain!important;-webkit-overflow-scrolling:touch!important}
+html body dialog.bertha-meudia-dialog .bertha-modal-head strong{font-weight:430!important;font-size:20px!important;letter-spacing:-.015em!important}
+html body dialog.bertha-meudia-dialog .bertha-modal-head button{width:38px!important;height:38px!important;border-radius:50%!important;background:rgba(255,252,248,.66)!important;border:1px solid rgba(120,101,124,.10)!important;font-weight:300!important}
+html body dialog.bertha-meudia-dialog :is(label,.bertha-field,.bertha-mini-field){font-weight:430!important;color:#5f5662!important}
+html body dialog.bertha-meudia-dialog :is(input,select,textarea){font-weight:400!important;border:1px solid rgba(112,94,117,.12)!important;background:rgba(255,253,249,.90)!important;box-shadow:none!important}
+.bertha-dayhours-intro .eyebrow{font-size:10px!important;letter-spacing:.20em!important;font-weight:520!important;color:#9a7b8a!important;margin-bottom:6px}.bertha-dayhours-intro p{font-size:13px!important;line-height:1.45!important;color:#817782!important;margin:0 0 14px}
+.bertha-dayhours-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}.bertha-dayhours-periods{display:flex;gap:7px;overflow-x:auto;padding:2px 0 12px}.bertha-dayhours-periods button,.bertha-dayhours-add{min-height:36px;border:1px solid rgba(112,94,117,.10);border-radius:999px;background:rgba(255,251,247,.76);color:#746875;font:500 12px/1 Inter,-apple-system,BlinkMacSystemFont,"SF Pro Text",sans-serif;padding:8px 12px;white-space:nowrap}.bertha-dayhours-add{width:100%;margin:10px 0 4px}
+.bertha-fixed-edit{padding:12px!important;border:1px solid rgba(112,94,117,.08)!important;border-radius:18px!important;background:rgba(255,252,248,.56)!important;margin:8px 0!important}.bertha-fixed-edit-top{display:flex;align-items:center;justify-content:space-between;gap:8px}.bertha-fixed-edit-top>label{flex:1;display:flex;align-items:center;gap:8px}.bertha-fixed-title{min-height:34px!important;padding:6px 8px!important;border:0!important;background:transparent!important}.bertha-fixed-edit-top>[data-remove]{width:32px;height:32px;border-radius:50%;border:1px solid rgba(112,94,117,.10);background:rgba(255,255,255,.55);color:#817481;font-size:20px;font-weight:300}.bertha-mini-field{display:grid;grid-template-columns:auto 1fr;align-items:center;gap:8px;margin-top:6px;font-size:12px}.bertha-mini-field select{min-height:36px!important;padding:6px 34px 6px 10px!important}.bertha-fixed-times{display:grid!important;grid-template-columns:minmax(0,1fr) auto minmax(0,1fr)!important;gap:8px!important;margin-top:8px}.bertha-fixed-times input{min-height:42px!important}
+#app .day-section .section-head h2{font-weight:390!important;font-size:17px!important;letter-spacing:-.012em!important;color:#4b444f!important}
+#app .bertha-focus{min-height:58px!important;padding:10px 13px!important;border-radius:18px!important}#app .bertha-focus strong{font-weight:430!important;font-size:14.5px!important}#app .bertha-focus small{font-weight:380!important;font-size:12.5px!important}#app .bertha-focus button{font-weight:460!important;background:rgba(244,206,188,.46)!important;color:#6d5a61!important}
+#app .free-space{min-height:0!important;height:auto!important;padding:14px 16px!important;border-radius:20px!important;background:linear-gradient(120deg,rgba(255,248,242,.84),rgba(241,247,241,.74))!important;border:1px solid rgba(112,94,117,.08)!important;box-shadow:none!important;text-align:left!important;margin-top:12px!important}#app .free-space strong{font-size:14px!important;font-weight:430!important}#app .free-space p{font-size:12.5px!important;line-height:1.4!important;margin:4px 0 0!important;color:#817782!important}
+@media(max-width:390px){.bertha-dayhours-grid{grid-template-columns:1fr}}
 `;document.head.appendChild(st)})();
