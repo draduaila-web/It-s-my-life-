@@ -581,6 +581,35 @@ function ensureIdeasV297Styles(){
   #ideaDialog .idea-icon-choice span{font-size:10px;line-height:1.1;color:#72798b;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%}
   #ideaDialog .idea-icon-choice.active{background:linear-gradient(120deg,rgba(213,235,249,.94),rgba(231,228,250,.86));border-color:rgba(102,153,204,.34);color:#4f86b7;box-shadow:0 0 0 2px rgba(119,172,218,.08)}
   @media(max-width:480px){.idea-hero{padding:20px!important}.idea-hero h2{font-size:28px!important}.idea-hero p{max-width:100%}#ideaDialog #ideaForm{padding:18px 18px max(28px,env(safe-area-inset-bottom))!important}}
+
+  /* RC104 — Criação & Ideias: tipografia leve no módulo e em todos os modais.
+     Somente peso/hierarquia tipográfica; cores, estrutura e lógica preservadas. */
+  .idea-hero-kicker{font-weight:500!important}
+  .idea-hero h2{font-weight:400!important}
+  .idea-hero p{font-weight:400!important}
+  #addIdeaBtn.primary{font-weight:500!important}
+  .idea-tabs .idea-tab{font-weight:450!important}
+  .idea-card .pending-title{font-weight:450!important}
+  .idea-card .note{font-weight:400!important}
+  .idea-card .pill,.idea-card .idea-link{font-weight:450!important}
+  .idea-empty strong{font-weight:450!important}
+  .idea-empty span{font-weight:400!important}
+
+  #ideaDialog .eyebrow{font-weight:500!important}
+  #ideaDialog .bertha-modal-head h2{font-weight:400!important}
+  #ideaDialog .idea-modal-sub{font-weight:400!important}
+  #ideaDialog label,#ideaDialog .idea-icon-label{font-weight:450!important}
+  #ideaDialog input,#ideaDialog select,#ideaDialog textarea{font-weight:400!important}
+  #ideaDialog input::placeholder,#ideaDialog textarea::placeholder{font-weight:400!important}
+  #ideaDialog .idea-type-segments button{font-weight:450!important}
+  #ideaDialog .idea-type-segments button.active{font-weight:500!important}
+  #ideaDialog .idea-icon-choice span{font-weight:400!important}
+  #ideaDialog #projectTrackOptions label{font-weight:400!important}
+  #ideaDialog .project-shopping-row label{font-weight:400!important}
+  #ideaDialog :is(.card,strong,b){font-weight:500!important}
+  #ideaDialog :is(small,.note,.hint,.muted){font-weight:400!important}
+  #ideaDialog .modal-actions button,#ideaDialog :is(.primary,.secondary,[type=submit]){font-weight:500!important}
+  #ideaDialog [data-close]{font-weight:300!important}
   `; document.head.appendChild(st);
 }
 
