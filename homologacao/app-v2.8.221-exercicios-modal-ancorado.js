@@ -2564,8 +2564,8 @@ function ensureFoodArchitectureRC88(){
  .food-v115-consumption{display:grid!important;grid-template-columns:auto auto 1fr!important;gap:7px!important;margin-top:12px!important}
  .food-v115-consumption button{min-height:34px!important;font-weight:500!important}
  .food-v115-consumption .food-status-btn{background:rgba(255,251,247,.78)!important;color:#716873!important;border-color:rgba(113,101,116,.10)!important}
- .food-v115-consumption .food-eaten.selected{background:linear-gradient(135deg,rgba(207,230,235,.92),rgba(216,234,223,.92),rgba(238,226,184,.78))!important;color:#5f6f6b!important;border-color:rgba(102,137,133,.14)!important}
- .food-v115-consumption .food-skipped.selected{background:linear-gradient(135deg,rgba(250,248,239,.96),rgba(239,242,226,.92),rgba(233,240,237,.92))!important;color:#77756e!important;border-color:rgba(124,130,119,.12)!important}
+ .food-v115-consumption .food-eaten.selected{background:linear-gradient(135deg,rgba(203,229,244,.96),rgba(218,237,247,.94),rgba(232,241,244,.90))!important;color:#536f7d!important;border-color:rgba(92,137,158,.16)!important}
+ .food-v115-consumption .food-skipped.selected{background:linear-gradient(135deg,rgba(255,249,224,.98),rgba(250,238,191,.94),rgba(247,229,176,.90))!important;color:#7c7051!important;border-color:rgba(166,145,91,.15)!important}
  .food-v115-consumption .food-recipe-link{justify-self:end;background:transparent!important;border:0!important;color:#7d7580!important;text-decoration:underline;text-underline-offset:3px;padding-inline:6px!important}
  .food-week-carousel{padding:17px 18px!important;margin-top:10px!important}
  .food-week-carousel-head{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:12px}.food-week-carousel-head h3{margin:0;font-size:18px;font-weight:500;color:#4a454d}
