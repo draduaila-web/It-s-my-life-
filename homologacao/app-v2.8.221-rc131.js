@@ -1867,6 +1867,31 @@ function openCasaTaskEditor(id){
  const sync=()=>{const r=respInput.value;assField.hidden=r!=='delegated';points.hidden=!(r==='delegated'&&selectedMembers().some(m=>m.role==='kids'))};
  dlg.querySelectorAll('[data-resp] button').forEach(b=>b.onclick=()=>{dlg.querySelectorAll('[data-resp] button').forEach(x=>x.classList.toggle('active',x===b));respInput.value=b.dataset.v;sync()});
  targetChecks.forEach(c=>c.onchange=sync);
+
+ // RC133 — torna toda a linha realmente clicável no iPhone/Safari.
+ dlg.querySelectorAll('.sat-target-option').forEach(row=>{
+   const input=row.querySelector('input[type="checkbox"]');
+   if(!input)return;
+   row.style.cursor='pointer';
+   row.addEventListener('click',e=>{
+     if(e.target===input)return;
+     e.preventDefault();
+     input.checked=!input.checked;
+     input.dispatchEvent(new Event('change',{bubbles:true}));
+   });
+ });
+ dlg.querySelectorAll('.sat-kids-points .sat-check').forEach(row=>{
+   const input=row.querySelector('input[type="checkbox"]');
+   if(!input)return;
+   row.style.cursor='pointer';
+   row.addEventListener('click',e=>{
+     if(e.target===input)return;
+     e.preventDefault();
+     input.checked=!input.checked;
+     input.dispatchEvent(new Event('change',{bubbles:true}));
+   });
+ });
+
  dlg.querySelector('#ctAllTargets')?.addEventListener('click',()=>{const allSelected=targetChecks.length&&targetChecks.every(c=>c.checked);targetChecks.forEach(c=>c.checked=!allSelected);sync()});
  dlg.querySelector('#ctAddSatellite')?.addEventListener('click',()=>{close();location.hash='#satelites';setTimeout(()=>openSatelliteEditor(),80)});
  sync();
@@ -5237,6 +5262,180 @@ html body dialog.sat-modal .modal-actions{
     font-weight:400!important;
     box-shadow:none!important;
   }
+  `;
+  document.head.appendChild(st);
+})();
+
+/* RC132 — Refino final: tipografia mais leve + checkboxes corretos nos modais de Casa */
+;(function(){
+  if(document.getElementById('rc132-sat-casa-final')) return;
+  const st=document.createElement('style');
+  st.id='rc132-sat-casa-final';
+  st.textContent=`
+  /* Tipografia — Satélites / Convites */
+  html body .sat-page h3,
+  html body .sat-card h3,
+  html body .sat-card .panel-head h3{
+    font-weight:500!important;
+    letter-spacing:-.018em!important;
+    color:#3f3945!important;
+  }
+  html body .sat-member strong,
+  html body .sat-member small,
+  html body .sat-role,
+  html body .sat-actions button,
+  html body .sat-page .primary,
+  html body .sat-page .secondary,
+  html body .sat-cloud-note,
+  html body .sat-card .note{
+    font-weight:400!important;
+  }
+  html body .sat-member strong{font-size:18px!important;line-height:1.18!important}
+  html body .sat-role{letter-spacing:.04em!important}
+
+  /* Tipografia — modal de Satélites ainda mais leve */
+  html body dialog.sat-modal .modal-head h2{
+    font-weight:380!important;
+    letter-spacing:-.02em!important;
+  }
+  html body dialog.sat-modal .modal-head .eyebrow,
+  html body dialog.sat-modal .sat-permissions>.eyebrow,
+  html body dialog.sat-modal .sat-kids-settings>.eyebrow,
+  html body dialog.sat-modal .sat-editor-fields>label,
+  html body dialog.sat-modal .sat-avatar-field>span,
+  html body dialog.sat-modal label,
+  html body dialog.sat-modal .sat-avatar-choice small,
+  html body dialog.sat-modal .sat-permission-copy strong,
+  html body dialog.sat-modal .sat-permission strong,
+  html body dialog.sat-modal .sat-permission-copy small,
+  html body dialog.sat-modal .sat-permission small,
+  html body dialog.sat-modal .sat-section-note,
+  html body dialog.sat-modal .sat-kids-settings p,
+  html body dialog.sat-modal .modal-actions .primary,
+  html body dialog.sat-modal .modal-actions .secondary{
+    font-weight:400!important;
+  }
+
+  /* Checkboxes — modal de Casa */
+  html body dialog.casa-dialog.casa-responsibility-dialog .modal-card.casa-modal-card{
+    background:linear-gradient(135deg,#F9DDE6 0%,#FFF3DF 46%,#DCEBFA 100%)!important;
+    background-color:#FFF3E9!important;
+  }
+  html body dialog.casa-dialog.casa-responsibility-dialog .sat-target-grid{
+    background:rgba(255,253,249,.58)!important;
+    border:1px solid rgba(126,115,132,.09)!important;
+  }
+  html body dialog.casa-dialog.casa-responsibility-dialog .sat-target-option{
+    display:grid!important;
+    grid-template-columns:24px minmax(0,1fr)!important;
+    align-items:center!important;
+    gap:12px!important;
+    padding:14px!important;
+    border-radius:18px!important;
+    background:#FFFDFC!important;
+    border:1px solid rgba(126,115,132,.09)!important;
+    box-shadow:none!important;
+  }
+  html body dialog.casa-dialog.casa-responsibility-dialog .sat-target-option:has(input:checked){
+    border-color:rgba(216,157,183,.26)!important;
+    background:rgba(255,253,249,.97)!important;
+  }
+  html body dialog.casa-dialog.casa-responsibility-dialog .sat-target-option input[type=checkbox],
+  html body dialog.casa-dialog.casa-responsibility-dialog .sat-check input[type=checkbox]{
+    -webkit-appearance:none!important;
+    appearance:none!important;
+    width:24px!important;
+    height:24px!important;
+    min-width:24px!important;
+    min-height:24px!important;
+    max-width:24px!important;
+    max-height:24px!important;
+    margin:0!important;
+    padding:0!important;
+    border-radius:8px!important;
+    border:1.5px solid rgba(126,115,132,.26)!important;
+    background:#FFFDFC!important;
+    display:grid!important;
+    place-content:center!important;
+    box-shadow:none!important;
+    position:relative!important;
+    flex:0 0 24px!important;
+    accent-color:initial!important;
+    outline:none!important;
+  }
+  html body dialog.casa-dialog.casa-responsibility-dialog .sat-target-option input[type=checkbox]::after,
+  html body dialog.casa-dialog.casa-responsibility-dialog .sat-check input[type=checkbox]::after{
+    content:''!important;
+    width:0!important;
+    height:0!important;
+  }
+  html body dialog.casa-dialog.casa-responsibility-dialog .sat-target-option input[type=checkbox]:checked,
+  html body dialog.casa-dialog.casa-responsibility-dialog .sat-check input[type=checkbox]:checked{
+    background:linear-gradient(135deg,#DE9FB8 0%,#F0C9B4 54%,#BFD5ED 100%)!important;
+    border-color:transparent!important;
+  }
+  html body dialog.casa-dialog.casa-responsibility-dialog .sat-target-option input[type=checkbox]:checked::after,
+  html body dialog.casa-dialog.casa-responsibility-dialog .sat-check input[type=checkbox]:checked::after{
+    content:'✓'!important;
+    color:#fff!important;
+    font-size:14px!important;
+    line-height:1!important;
+    font-weight:700!important;
+  }
+  html body dialog.casa-dialog.casa-responsibility-dialog .sat-target-option strong,
+  html body dialog.casa-dialog.casa-responsibility-dialog .sat-check span strong,
+  html body dialog.casa-dialog.casa-responsibility-dialog .sat-label,
+  html body dialog.casa-dialog.casa-responsibility-dialog label,
+  html body dialog.casa-dialog.casa-responsibility-dialog .sat-target-head span,
+  html body dialog.casa-dialog.casa-responsibility-dialog .sat-target-all,
+  html body dialog.casa-dialog.casa-responsibility-dialog .sat-target-note,
+  html body dialog.casa-dialog.casa-responsibility-dialog .sat-resp-options button,
+  html body dialog.casa-dialog.casa-responsibility-dialog .modal-actions .primary,
+  html body dialog.casa-dialog.casa-responsibility-dialog .modal-actions .secondary{
+    font-weight:400!important;
+  }
+  html body dialog.casa-dialog.casa-responsibility-dialog .sat-target-option strong,
+  html body dialog.casa-dialog.casa-responsibility-dialog .sat-check span strong{
+    font-size:13.5px!important;
+    color:#4B4550!important;
+  }
+  html body dialog.casa-dialog.casa-responsibility-dialog .sat-target-option small,
+  html body dialog.casa-dialog.casa-responsibility-dialog .sat-check span small,
+  html body dialog.casa-dialog.casa-responsibility-dialog .sat-target-note{
+    color:#817A84!important;
+  }
+  html body dialog.casa-dialog.casa-responsibility-dialog .sat-resp-options{
+    background:rgba(255,253,249,.64)!important;
+    border:1px solid rgba(126,115,132,.08)!important;
+  }
+  html body dialog.casa-dialog.casa-responsibility-dialog .sat-resp-options button.active{
+    background:linear-gradient(135deg,rgba(222,159,184,.22),rgba(240,201,180,.22) 54%,rgba(191,213,237,.22) 100%)!important;
+    color:#4B4550!important;
+  }
+  `;
+  document.head.appendChild(st);
+})();
+
+;(function(){
+  if(document.getElementById('rc133-casa-check-click'))return;
+  const st=document.createElement('style');
+  st.id='rc133-casa-check-click';
+  st.textContent=`
+    html body dialog.casa-dialog.casa-responsibility-dialog .sat-target-option,
+    html body dialog.casa-dialog.casa-responsibility-dialog .sat-kids-points .sat-check{
+      cursor:pointer!important;
+      touch-action:manipulation!important;
+      -webkit-tap-highlight-color:transparent!important;
+      position:relative!important;
+      z-index:1!important;
+    }
+    html body dialog.casa-dialog.casa-responsibility-dialog .sat-target-option input[type=checkbox],
+    html body dialog.casa-dialog.casa-responsibility-dialog .sat-kids-points .sat-check input[type=checkbox]{
+      pointer-events:auto!important;
+      opacity:1!important;
+      position:relative!important;
+      z-index:2!important;
+    }
   `;
   document.head.appendChild(st);
 })();
