@@ -744,7 +744,7 @@
     const prompted=read(OVERRUN_PROMPT_KEY,{}),stamp=String(active.startedAt||'');
     if(prompted[active.id]===stamp)return;
     prompted[active.id]=stamp;write(OVERRUN_PROMPT_KEY,prompted);
-    const d=dialogBase('O tempo planejado terminou',`<p class="bertha-muted"><strong>${esc(active.title||'Atividade')}</strong> estava prevista para ${durationText(planned)}.</p><p>Quer concluir ou continuar?</p><div class="bertha-stack bertha-overrun-actions"><button class="bertha-primary" data-overrun-finish>Concluir agora</button><button class="bertha-secondary" data-overrun-ten>Continuar +10 min</button><button class="bertha-secondary" data-overrun-open>Continuar sem limite</button></div>`);
+    const d=dialogBase('O tempo planejado terminou',`<p class="bertha-muted"><strong>${esc(active.title||'Atividade')}</strong> estava prevista para ${durationText(planned)}.</p><p>Quer concluir ou continuar?</p><div class="bertha-stack bertha-overrun-actions"><button class="bertha-primary" data-overrun-finish>Concluir agora</button><button class="bertha-secondary" data-overrun-ten>Continuar +10 min</button><button class="bertha-secondary" data-overrun-open>Continuar sem limite</button></div>`); d.classList.add('bertha-overrun-dialog');
     d.querySelector('[data-overrun-finish]').onclick=()=>{d.close();d.remove();setTimeout(()=>finishActivePrompt(active.id),60)};
     d.querySelector('[data-overrun-ten]').onclick=()=>{const e=engine(),a=e.actives.find(x=>String(x.id)===String(active.id));if(a){a.plannedMinutes=Math.max(planned,elapsed)+10;a.overrunOpenEnded=false;saveEngine(e)};delete prompted[active.id];write(OVERRUN_PROMPT_KEY,prompted);d.close();d.remove();rerender()};
     d.querySelector('[data-overrun-open]').onclick=()=>{const e=engine(),a=e.actives.find(x=>String(x.id)===String(active.id));if(a){a.overrunOpenEnded=true;saveEngine(e)};d.close();d.remove();rerender()};
@@ -2785,6 +2785,18 @@
     .bertha-dialog .bertha-stack .bertha-primary,.bertha-dialog .bertha-stack .bertha-secondary{min-height:48px;border-radius:16px!important;font-size:15px!important}
     .bertha-dialog .bertha-stack .bertha-primary{background:linear-gradient(135deg,#9c79e9,#6bbce4)!important;color:#fff!important}
     .bertha-dialog .bertha-stack .bertha-secondary{background:#eee7f4!important;color:#6c5b76!important}
+    /* RC112 — Meu Dia: modal de tempo excedido com peso e cores no padrão do módulo. */
+    .bertha-dialog.bertha-overrun-dialog .bertha-modal{background:#fbf7ef!important;border-radius:28px!important;padding:22px!important}
+    .bertha-dialog.bertha-overrun-dialog .bertha-modal-head{margin-bottom:14px!important;align-items:flex-start!important}
+    .bertha-dialog.bertha-overrun-dialog .bertha-modal-head strong{font-size:18px!important;line-height:1.22!important;font-weight:600!important;color:#3f3545!important;letter-spacing:-.01em!important}
+    .bertha-dialog.bertha-overrun-dialog .bertha-modal-head button{color:#8c858e!important}
+    .bertha-dialog.bertha-overrun-dialog p{margin:0 0 10px!important;font-size:15px!important;line-height:1.48!important;color:#6d6673!important;font-weight:400!important}
+    .bertha-dialog.bertha-overrun-dialog p strong{color:#4a4250!important;font-weight:560!important}
+    .bertha-dialog.bertha-overrun-dialog .bertha-overrun-actions{gap:10px!important;margin-top:16px!important}
+    .bertha-dialog.bertha-overrun-dialog .bertha-stack .bertha-primary,
+    .bertha-dialog.bertha-overrun-dialog .bertha-stack .bertha-secondary{min-height:46px!important;border-radius:16px!important;font-size:15px!important;font-weight:560!important;box-shadow:none!important}
+    .bertha-dialog.bertha-overrun-dialog .bertha-stack .bertha-primary{background:linear-gradient(135deg, rgba(223,160,183,.99) 0%, rgba(245,224,200,.98) 44%, rgba(210,227,244,.99) 100%)!important;color:#fff!important;border:1px solid rgba(193,149,171,.22)!important}
+    .bertha-dialog.bertha-overrun-dialog .bertha-stack .bertha-secondary{background:rgba(255,255,255,.78)!important;color:#6d6673!important;border:1px solid rgba(140,126,145,.14)!important}
     .bertha-muted{color:#817783}
     .bertha-choice-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin:12px 0}
     .bertha-field{display:grid;gap:6px;margin:12px 0;font-weight:700}
