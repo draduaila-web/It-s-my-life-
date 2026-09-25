@@ -1,4 +1,4 @@
-const CACHE = "hml-bertha-v221-rc120-satellites-v3";
+const CACHE = "hml-bertha-v221-rc121-satellites-v4";
 self.addEventListener("install", event => event.waitUntil(self.skipWaiting()));
 self.addEventListener("activate", event => event.waitUntil((async()=>{
   const keys=await caches.keys();
