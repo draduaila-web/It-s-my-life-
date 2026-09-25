@@ -4920,3 +4920,75 @@ html body dialog.sat-modal .modal-actions{
   border-top:0!important;
 }
 `;document.head.appendChild(st)})();
+
+
+/* RC128 — Satélites/Convites: modal usa EXATAMENTE a paleta do módulo
+   blush + pêssego + azul névoa. Sem menta e sem lavanda. */
+;(function(){
+  if(document.getElementById('rc128-sat-modal-module-color')) return;
+  const st=document.createElement('style');
+  st.id='rc128-sat-modal-module-color';
+  st.textContent=`
+  html body dialog.sat-modal{
+    background:transparent!important;
+  }
+  html body dialog.sat-modal>.modal-card,
+  html body dialog.sat-modal .modal-card{
+    background:
+      linear-gradient(
+        135deg,
+        rgba(249,205,218,.68) 0%,
+        rgba(255,245,224,.78) 42%,
+        rgba(218,234,252,.86) 100%
+      )!important;
+    border:1px solid rgba(170,157,177,.13)!important;
+    box-shadow:0 18px 44px rgba(74,57,69,.10)!important;
+  }
+  html body dialog.sat-modal .modal-head{
+    background:transparent!important;
+    border-bottom:0!important;
+  }
+  html body dialog.sat-modal .modal-actions{
+    background:transparent!important;
+    border-top:0!important;
+  }
+  html body dialog.sat-modal :is(input:not([type=checkbox]),select,textarea){
+    background:rgba(255,253,249,.90)!important;
+    border:1px solid rgba(137,124,142,.15)!important;
+    color:#47424b!important;
+    box-shadow:none!important;
+  }
+  html body dialog.sat-modal .sat-permission,
+  html body dialog.sat-modal .sat-avatar-choice,
+  html body dialog.sat-modal .sat-kids-settings{
+    background:rgba(255,253,249,.68)!important;
+    border-color:rgba(137,124,142,.10)!important;
+  }
+  html body dialog.sat-modal .sat-permission.is-checked,
+  html body dialog.sat-modal .sat-permission.is-on,
+  html body dialog.sat-modal .sat-avatar-choice.active{
+    background:rgba(255,253,249,.88)!important;
+    border-color:rgba(207,159,179,.24)!important;
+  }
+  html body dialog.sat-modal .sat-permission.is-checked .sat-checkbox,
+  html body dialog.sat-modal .sat-permission.is-on .sat-checkbox,
+  html body dialog.sat-modal .sat-permission.is-checked .sat-perm-check,
+  html body dialog.sat-modal .sat-permission.is-on .sat-perm-check{
+    background:linear-gradient(135deg,#dda7b9 0%,#efc8b7 52%,#bdd2ea 100%)!important;
+    border-color:transparent!important;
+  }
+  html body dialog.sat-modal .modal-actions .primary{
+    background:linear-gradient(100deg,#e78fb1 0%,#f7d7b7 48%,#c3dbf4 100%)!important;
+    color:#fff!important;
+    border:1px solid rgba(181,145,169,.15)!important;
+    box-shadow:none!important;
+  }
+  html body dialog.sat-modal .modal-actions .secondary{
+    background:rgba(255,253,249,.86)!important;
+    color:#706875!important;
+    border:1px solid rgba(122,108,128,.09)!important;
+    box-shadow:none!important;
+  }
+  `;
+  document.head.appendChild(st);
+})();
