@@ -4385,3 +4385,59 @@ html body #recipeFormDialog:not(.food-context-dialog) .modal-actions .secondary{
 `;
   document.head.appendChild(st);
 })();
+
+/* RC105 — CRIAÇÃO & IDEIAS · checkbox mestre de acompanhamento
+   Correção isolada do checkbox "Quero que a BERTA acompanhe este projeto".
+   Replica exatamente o checkbox dos itens internos e impede estilos de toggle/segmento. */
+(()=>{
+  const id='idea-rc105-projecttrack-checkbox';
+  document.getElementById(id)?.remove();
+  const s=document.createElement('style');
+  s.id=id;
+  s.textContent=`
+  html body #ideaDialog #ideaConditional .project-track-master{
+    display:flex!important;
+    align-items:flex-start!important;
+    gap:10px!important;
+  }
+  html body #ideaDialog #ideaConditional .project-track-master>#projectTrack[type="checkbox"]{
+    -webkit-appearance:none!important;
+    appearance:none!important;
+    display:inline-grid!important;
+    place-content:center!important;
+    box-sizing:border-box!important;
+    width:20px!important;
+    min-width:20px!important;
+    max-width:20px!important;
+    height:20px!important;
+    min-height:20px!important;
+    max-height:20px!important;
+    flex:0 0 20px!important;
+    margin:2px 0 0!important;
+    padding:0!important;
+    border:1px solid rgba(92,126,161,.28)!important;
+    border-radius:6px!important;
+    background:rgba(255,255,255,.80)!important;
+    box-shadow:none!important;
+    outline:0!important;
+    transform:none!important;
+  }
+  html body #ideaDialog #ideaConditional .project-track-master>#projectTrack[type="checkbox"]:checked{
+    background:linear-gradient(135deg,#86b6df 0%,#9ba9e3 100%)!important;
+    border-color:rgba(92,126,161,.18)!important;
+  }
+  html body #ideaDialog #ideaConditional .project-track-master>#projectTrack[type="checkbox"]:checked::after{
+    content:'✓'!important;
+    display:block!important;
+    color:#fff!important;
+    font-size:13px!important;
+    font-weight:500!important;
+    line-height:1!important;
+  }
+  html body #ideaDialog #ideaConditional .project-track-copy{
+    min-width:0!important;
+    flex:1 1 auto!important;
+  }
+  `;
+  document.head.appendChild(s);
+})();
