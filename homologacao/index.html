@@ -9,7 +9,7 @@
 <meta name="apple-mobile-web-app-title" content="BERTH.A HML">
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="apple-touch-icon" sizes="512x512" href="../bertha-icon-512.png">
-<link rel="stylesheet" href="./style.css?v=rc156">
+<link rel="stylesheet" href="./style.css?v=rc157">
 <style id="bertha-v2857-idea-modal-radius">
 /* v2.8.57 — preserva o ajuste cirúrgico: contorno externo do modal Criação & Ideias.
    O JS injeta .study-v10-modal depois do CSS principal e, no iPhone, força 24px.
@@ -63,12 +63,7 @@
   window.berthaResolveBillReminder=async(info)=>({ok:true,homologacao:true,resolved:true,billId:info?.billId||''});
 })();
 </script>
-<title>BERTH.A · Homologação</title>
-
-<script id="bertha-rc156-sentinel">
-document.documentElement.dataset.berthaIndex='RC156';
-</script>
-
+<title>BERTH.A · Homologação RC157</title>
 
 <style id="bertha-v2897-release">
 /* v2.8.100 — Criação & Ideias: alinhamento definitivo do bloco BERTA; fundo luminoso preservado. */
@@ -474,6 +469,22 @@ body:has(.bertha-plans-task-dialog[open]){
 }
 </style>
 
+
+<script id="rc157-cache-clean">
+(async()=>{
+ try{
+   if('serviceWorker' in navigator){
+     const rs=await navigator.serviceWorker.getRegistrations();
+     await Promise.all(rs.map(r=>r.unregister()));
+   }
+   if('caches' in window){
+     const ks=await caches.keys();
+     await Promise.all(ks.map(k=>caches.delete(k)));
+   }
+ }catch(e){console.warn('RC157 cache cleanup',e)}
+})();
+</script>
+
 </head>
 
 <style id="bertha-hml-marker">
@@ -481,6 +492,16 @@ body.bertha-hml::before{content:"HOMOLOGAÇÃO";position:fixed;z-index:99999;top
 .bertha-more-data-actions [data-hml-reset]{grid-column:1/-1;background:#fffaf3!important;color:#8b7379!important;border:1px solid rgba(126,104,116,.12)!important}
 </style>
 <body class="bertha-hml">
+
+<style id="rc157-index-badge-style">
+#rc157IndexBadge{
+ position:fixed;left:10px;top:calc(env(safe-area-inset-top,0px) + 8px);z-index:1000000;
+ padding:5px 9px;border-radius:999px;background:#876e7e;color:#fff;
+ font:700 8px/1 system-ui,-apple-system,sans-serif;letter-spacing:.08em;pointer-events:none
+}
+</style>
+<div id="rc157IndexBadge">INDEX · RC157</div>
+
 <div class="app-shell">
 <header class="topbar">
 <button class="icon-btn" id="backBtn" aria-label="Voltar" hidden>‹</button>
@@ -569,45 +590,27 @@ body.bertha-hml::before{content:"HOMOLOGAÇÃO";position:fixed;z-index:99999;top
 </div>
 </dialog>
 
+
+<script src="app-v2.8.221-rc157.js?v=157a"></script>
+<script src="work-v12.js?v=157a"></script>
+<script src="bertha-time-v2.8.221-rc131.js?v=157a"></script>
+<script src="satellites-v157.js?v=157a"></script>
 <script>
-(async function RC156Boot(){
-  try{
-    if('serviceWorker' in navigator){
-      const regs=await navigator.serviceWorker.getRegistrations();
-      await Promise.all(regs.map(r=>r.unregister()));
+(function(){
+  document.documentElement.dataset.berthaIndex='RC157';
+  function paint(){
+    try{ window.__berthaCoreRender?.(); }
+    catch(e){
+      console.error('RC157 paint',e);
+      const box=document.getElementById('app');
+      if(box && !box.children.length){
+        box.innerHTML='<section class="card"><strong>RC157 carregou, mas o renderer falhou.</strong><p class="note">'+String(e?.message||e)+'</p></section>';
+      }
     }
-    if('caches' in window){
-      const keys=await caches.keys();
-      await Promise.all(keys.map(k=>caches.delete(k)));
-    }
-
-    const u=new URL(location.href);
-    if(u.searchParams.get('build')!=='156'){
-      u.searchParams.set('build','156');
-      location.replace(u.toString());
-      return;
-    }
-
-    const load=(src)=>new Promise((resolve,reject)=>{
-      const s=document.createElement('script');
-      s.src=src;
-      s.async=false;
-      s.onload=resolve;
-      s.onerror=()=>reject(new Error('Falha ao carregar '+src));
-      document.body.appendChild(s);
-    });
-
-    await load('app-v2.8.221-rc156.js?v=156a');
-    await load('work-v12.js?v=156a');
-    await load('bertha-time-v2.8.221-rc131.js?v=156a');
-    await load('satellites-v156.js?v=156a');
-
-    requestAnimationFrame(()=>window.__berthaCoreRender?.());
-  }catch(err){
-    console.error('RC156 boot',err);
-    document.body.insertAdjacentHTML('beforeend',
-      `<section class="card" style="margin:16px"><strong>RC156 não iniciou</strong><p class="note">${String(err?.message||err)}</p></section>`);
   }
+  if(document.readyState==='loading') document.addEventListener('DOMContentLoaded',paint,{once:true});
+  else paint();
+  window.addEventListener('pageshow',()=>requestAnimationFrame(paint));
 })();
 </script>
 

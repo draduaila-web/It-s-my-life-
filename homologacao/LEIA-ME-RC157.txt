@@ -1,0 +1,16 @@
+BERTH.A HOMOLOGAÇÃO — RC157
+
+OBJETIVO: eliminar o boot dinâmico e provar o carregamento real do core.
+
+O index mostra INDEX · RC157 independentemente do JavaScript do app.
+O app mostra HML · RC157 quando app-v2.8.221-rc157.js carregou.
+Scripts são carregados por tags <script> estáticas, sem Promise/loader/reload.
+
+Subir todos os arquivos deste pacote em homologacao.
+Abrir:
+https://draduaila-web.github.io/It-s-my-life-/homologacao/?build=157#satelites
+
+Leitura do teste:
+- Se INDEX · RC157 não aparecer: GitHub Pages ainda serve index antigo.
+- Se INDEX · RC157 aparece, mas HML · RC157 não: app-v2.8.221-rc157.js não carregou/executou.
+- Se ambos aparecem: o build correto está rodando.
