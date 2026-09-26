@@ -1,0 +1,16 @@
+BERTH.A HOMOLOGAÇÃO — RC154
+
+CORREÇÃO RAIZ:
+- removidos definitivamente os JPGs antigos embutidos em base64 dentro do JavaScript;
+- removidas camadas concorrentes de navegação de Satélites;
+- menu Mais usa uma única rota;
+- renderizadores antigos de Premiações são redirecionados para o renderizador final;
+- Service Worker/cache são apagados antes do boot.
+
+SUBIR PRIMEIRO RC154A.
+DEPOIS RC154B (assets atuais).
+
+Abrir:
+https://draduaila-web.github.io/It-s-my-life-/homologacao/?build=154#premiacoes
+
+Marcador obrigatório na tela: HML · RC154
