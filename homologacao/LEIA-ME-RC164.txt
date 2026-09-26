@@ -1,0 +1,25 @@
+BERTH.A HOMOLOGAÇÃO — RC164
+
+PREMIAÇÕES — acabamento visual por frente
+
+HERO
+- força a frase aprovada: “Progress worth celebrating.”
+- remove o ornamento orbital antigo;
+- usa medalha/roseta linear discreta.
+
+OWNER
+- cards em 2 colunas com proporção e tipografia corrigidas;
+- pesos, line-height e respiros unificados.
+
+KIDS
+- card de ciclo com a mesma família de contornos, tipografia e superfícies;
+- avatar/pet, stats e chips refinados.
+
+RECONHECIMENTOS
+- cards passam para 1 coluna, com ícones e textos na mesma linguagem;
+- remove azul de link/browser dos títulos;
+- corrige proporção do ícone/imagem em personalização;
+- textos e subtítulos recebem tipografia BERTH.A.
+
+Abrir:
+https://draduaila-web.github.io/It-s-my-life-/homologacao/?build=164#premiacoes
