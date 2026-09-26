@@ -1,0 +1,17 @@
+BERTH.A HOMOLOGAÇÃO — RC167
+
+HOTFIX DOS ASSETS DA RC166
+
+Causa do ? nos cards: o código da RC166 procurava as imagens em assets/rewards-v166/.
+Nesta RC167 todos os assets foram FLATTENADOS diretamente na pasta homologacao.
+Assim, não existe mais dependência de criar/subir uma subpasta no GitHub.
+
+Suba TODOS os arquivos deste pacote diretamente dentro de homologacao.
+Não crie pasta assets.
+
+Abrir:
+https://draduaila-web.github.io/It-s-my-life-/homologacao/?build=167#premiacoes
+
+Marcadores esperados:
+INDEX · RC167
+HML · RC167
