@@ -1,0 +1,17 @@
+BERTH.A HOMOLOGAÇÃO — RC166
+
+EXECUÇÃO FINAL DA FAMÍLIA VISUAL DE PREMIAÇÕES
+- 7 reconhecimentos soft-3D
+- 6 pins Owner soft-3D
+- 18 pets Kids (3 por tema)
+- 6 cápsulas temáticas
+- 36 acessórios (6 por tema)
+- medalhas/troféus do progresso
+- acessórios personalizáveis por cor no painel Kids
+- checkboxes nativos azuis removidos do módulo Premiações
+- correção de espaçamento do helper (nome + instrução)
+
+Acessórios: escolha de cor é salva por criança + ciclo + acessório.
+
+Abrir:
+https://draduaila-web.github.io/It-s-my-life-/homologacao/?build=166#premiacoes

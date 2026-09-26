@@ -1,23 +1,7 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 160 160">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256">
 <defs>
-  <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
-    <stop offset="0" stop-color="#fff0da"/><stop offset="1" stop-color="#f7dbb5"/>
-  </linearGradient>
-  <filter id="sh" x="-30%" y="-30%" width="160%" height="160%">
-    <feDropShadow dx="0" dy="5" stdDeviation="6" flood-color="#67576e" flood-opacity=".16"/>
-  </filter>
-  <filter id="soft" x="-30%" y="-30%" width="160%" height="160%">
-    <feGaussianBlur stdDeviation="2"/>
-  </filter>
+ <linearGradient id="g" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#f6c04e"/><stop offset=".55" stop-color="#ed8c62"/><stop offset="1" stop-color="#f6a6a6"/></linearGradient>
+ <linearGradient id="h" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#fff" stop-opacity=".78"/><stop offset=".45" stop-color="#fff" stop-opacity=".08"/><stop offset="1" stop-color="#000" stop-opacity=".08"/></linearGradient>
+ <filter id="s" x="-30%" y="-30%" width="160%" height="170%"><feDropShadow dx="0" dy="10" stdDeviation="9" flood-color="#776b78" flood-opacity=".22"/></filter>
 </defs>
-<rect width="160" height="160" rx="38" fill="url(#bg)"/>
-<g filter="url(#sh)">
-<ellipse cx="80" cy="118" rx="45" ry="10" fill="#d9c7a3" opacity=".22"/>
-<path d="M38 89c-4-30 13-52 42-52 29 0 46 22 42 52-3 26-18 42-42 42s-39-16-42-42z" fill="#e5a56a"/>
-<path d="M50 50l-7-24 22 15M110 50l7-24-22 15" fill="#cf8b55"/>
-<path d="M80 38l0-17M68 30l12-13 12 13" fill="none" stroke="#c47f4e" stroke-width="5" stroke-linecap="round"/>
-<ellipse cx="63" cy="82" rx="5" ry="7" fill="#433a35"/><ellipse cx="97" cy="82" rx="5" ry="7" fill="#433a35"/>
-<path d="M80 92l7 7-7 5-7-5z" fill="#c9785c"/><path d="M65 110c10 7 20 7 30 0" fill="none" stroke="#8f654f" stroke-width="3"/>
-<path d="M38 92L18 80l17-5M122 92l20-12-17-5" fill="#f0c27a"/>
-</g>
-</svg>
+<g filter="url(#s)"><path d="M128 42c48 0 75 38 75 86 0 55-30 83-75 83s-75-28-75-83c0-48 27-86 75-86z" fill="url(#g)"/><path d="M93 58L70 24l40 22M163 58l23-34-40 22" fill="url(#g)"/><path d="M71 127L31 102l17 43M185 127l40-25-17 43" fill="url(#g)"/><circle cx="106" cy="116" r="10" fill="#2e3450"/><circle cx="150" cy="116" r="10" fill="#2e3450"/><path d="M114 142q14 10 28 0" stroke="#6b5571" stroke-width="7" fill="none" stroke-linecap="round"/></g></svg>

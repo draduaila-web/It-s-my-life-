@@ -1,24 +1,7 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 160 160">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256">
 <defs>
-  <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
-    <stop offset="0" stop-color="#eef3f8"/><stop offset="1" stop-color="#e7e3f5"/>
-  </linearGradient>
-  <filter id="sh" x="-30%" y="-30%" width="160%" height="160%">
-    <feDropShadow dx="0" dy="5" stdDeviation="6" flood-color="#67576e" flood-opacity=".16"/>
-  </filter>
-  <filter id="soft" x="-30%" y="-30%" width="160%" height="160%">
-    <feGaussianBlur stdDeviation="2"/>
-  </filter>
+ <linearGradient id="g" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#a582e7"/><stop offset=".55" stop-color="#7694ef"/><stop offset="1" stop-color="#f2a6d0"/></linearGradient>
+ <linearGradient id="h" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#fff" stop-opacity=".78"/><stop offset=".45" stop-color="#fff" stop-opacity=".08"/><stop offset="1" stop-color="#000" stop-opacity=".08"/></linearGradient>
+ <filter id="s" x="-30%" y="-30%" width="160%" height="170%"><feDropShadow dx="0" dy="10" stdDeviation="9" flood-color="#776b78" flood-opacity=".22"/></filter>
 </defs>
-<rect width="160" height="160" rx="38" fill="url(#bg)"/>
-<g filter="url(#sh)">
-<ellipse cx="80" cy="118" rx="42" ry="9" fill="#c4c8d1" opacity=".22"/>
-<rect x="38" y="45" width="84" height="70" rx="25" fill="#d8e0ea"/>
-<rect x="48" y="56" width="64" height="40" rx="18" fill="#a7cdea"/>
-<circle cx="65" cy="76" r="7" fill="#415164"/><circle cx="95" cy="76" r="7" fill="#415164"/>
-<circle cx="63" cy="74" r="2" fill="#fff"/><circle cx="93" cy="74" r="2" fill="#fff"/>
-<path d="M67 91c8 5 18 5 26 0" fill="none" stroke="#617286" stroke-width="3"/>
-<path d="M80 45V28M71 28h18M37 74H22M123 74h15" stroke="#92a7bb" stroke-width="6" stroke-linecap="round"/>
-<circle cx="80" cy="26" r="6" fill="#f0b6c8"/>
-</g>
-</svg>
+<g filter="url(#s)"><rect x="58" y="58" width="140" height="142" rx="42" fill="url(#g)"/><rect x="78" y="91" width="100" height="68" rx="28" fill="#eef4ff"/><circle cx="105" cy="124" r="11" fill="#4452a8"/><circle cx="151" cy="124" r="11" fill="#4452a8"/><path d="M110 146h36" stroke="#d482aa" stroke-width="8" stroke-linecap="round"/><path d="M128 58V31" stroke="#8d79d4" stroke-width="8"/><circle cx="128" cy="25" r="11" fill="#f1a7c9"/></g></svg>

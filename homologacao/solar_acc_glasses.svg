@@ -1,15 +1,7 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 160 160">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256">
 <defs>
-  <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
-    <stop offset="0" stop-color="#d2a051"/><stop offset="1" stop-color="#f6d399"/>
-  </linearGradient>
-  <filter id="sh" x="-30%" y="-30%" width="160%" height="160%">
-    <feDropShadow dx="0" dy="5" stdDeviation="6" flood-color="#67576e" flood-opacity=".16"/>
-  </filter>
-  <filter id="soft" x="-30%" y="-30%" width="160%" height="160%">
-    <feGaussianBlur stdDeviation="2"/>
-  </filter>
+ <linearGradient id="g" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#f6c851"/><stop offset=".55" stop-color="#ed9366"/><stop offset="1" stop-color="#f0a2a2"/></linearGradient>
+ <linearGradient id="h" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#fff" stop-opacity=".78"/><stop offset=".45" stop-color="#fff" stop-opacity=".08"/><stop offset="1" stop-color="#000" stop-opacity=".08"/></linearGradient>
+ <filter id="s" x="-30%" y="-30%" width="160%" height="170%"><feDropShadow dx="0" dy="10" stdDeviation="9" flood-color="#776b78" flood-opacity=".22"/></filter>
 </defs>
-<rect width="160" height="160" rx="38" fill="url(#bg)"/>
-<g filter="url(#sh)"><circle cx="57" cy="77" r="23" fill="none" stroke="#d2a051" stroke-width="9"/><circle cx="103" cy="77" r="23" fill="none" stroke="#d2a051" stroke-width="9"/><path d="M80 77h1M31 68l-13-7M129 68l13-7" stroke="#f6d399" stroke-width="8" stroke-linecap="round"/></g>
-</svg>
+<g filter="url(#s)"><circle cx="83" cy="125" r="46" fill="none" stroke="url(#g)" stroke-width="20"/><circle cx="173" cy="125" r="46" fill="none" stroke="url(#g)" stroke-width="20"/><path d="M129 116h-2" stroke="url(#g)" stroke-width="20" stroke-linecap="round"/><path d="M48 106L28 91M208 106l20-15" stroke="url(#g)" stroke-width="17" stroke-linecap="round"/><circle cx="66" cy="91" r="11" fill="#fff" opacity=".45"/></g></svg>

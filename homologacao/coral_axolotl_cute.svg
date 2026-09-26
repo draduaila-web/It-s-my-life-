@@ -1,22 +1,7 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 160 160">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256">
 <defs>
-  <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
-    <stop offset="0" stop-color="#fde5ec"/><stop offset="1" stop-color="#f4d9e4"/>
-  </linearGradient>
-  <filter id="sh" x="-30%" y="-30%" width="160%" height="160%">
-    <feDropShadow dx="0" dy="5" stdDeviation="6" flood-color="#67576e" flood-opacity=".16"/>
-  </filter>
-  <filter id="soft" x="-30%" y="-30%" width="160%" height="160%">
-    <feGaussianBlur stdDeviation="2"/>
-  </filter>
+ <linearGradient id="g" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#f0a0b8"/><stop offset=".55" stop-color="#8fd8cf"/><stop offset="1" stop-color="#f3c76b"/></linearGradient>
+ <linearGradient id="h" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#fff" stop-opacity=".78"/><stop offset=".45" stop-color="#fff" stop-opacity=".08"/><stop offset="1" stop-color="#000" stop-opacity=".08"/></linearGradient>
+ <filter id="s" x="-30%" y="-30%" width="160%" height="170%"><feDropShadow dx="0" dy="10" stdDeviation="9" flood-color="#776b78" flood-opacity=".22"/></filter>
 </defs>
-<rect width="160" height="160" rx="38" fill="url(#bg)"/>
-<g filter="url(#sh)">
-<ellipse cx="80" cy="118" rx="45" ry="10" fill="#e4c5d1" opacity=".22"/>
-<path d="M38 65l-22-12 15 24-20 3 27 12M122 65l22-12-15 24 20 3-27 12" fill="#e58fae"/>
-<ellipse cx="80" cy="91" rx="45" ry="39" fill="#f2acc3"/>
-<ellipse cx="63" cy="86" rx="5" ry="7" fill="#3e3640"/><ellipse cx="97" cy="86" rx="5" ry="7" fill="#3e3640"/>
-<circle cx="61" cy="83" r="1.5" fill="#fff"/><circle cx="95" cy="83" r="1.5" fill="#fff"/>
-<path d="M68 108c8 6 16 6 24 0" fill="none" stroke="#bd6f88" stroke-width="3" stroke-linecap="round"/>
-</g>
-</svg>
+<g filter="url(#s)"><ellipse cx="128" cy="126" rx="64" ry="78" fill="url(#g)"/><path d="M75 87c-22-22-35-16-31 4 4 19 25 25 41 18M181 87c22-22 35-16 31 4-4 19-25 25-41 18" fill="url(#g)"/><circle cx="107" cy="115" r="9" fill="#2e3450"/><circle cx="149" cy="115" r="9" fill="#2e3450"/><path d="M116 136q12 10 24 0" stroke="#6b5571" stroke-width="6" fill="none" stroke-linecap="round"/></g></svg>

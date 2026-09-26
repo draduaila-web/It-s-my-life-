@@ -1,21 +1,7 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 160 160">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256">
 <defs>
-  <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
-    <stop offset="0" stop-color="#e6f4fa"/><stop offset="1" stop-color="#d9edf5"/>
-  </linearGradient>
-  <filter id="sh" x="-30%" y="-30%" width="160%" height="160%">
-    <feDropShadow dx="0" dy="5" stdDeviation="6" flood-color="#67576e" flood-opacity=".16"/>
-  </filter>
-  <filter id="soft" x="-30%" y="-30%" width="160%" height="160%">
-    <feGaussianBlur stdDeviation="2"/>
-  </filter>
+ <linearGradient id="g" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#6bcada"/><stop offset=".55" stop-color="#72aee5"/><stop offset="1" stop-color="#f3a7b8"/></linearGradient>
+ <linearGradient id="h" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#fff" stop-opacity=".78"/><stop offset=".45" stop-color="#fff" stop-opacity=".08"/><stop offset="1" stop-color="#000" stop-opacity=".08"/></linearGradient>
+ <filter id="s" x="-30%" y="-30%" width="160%" height="170%"><feDropShadow dx="0" dy="10" stdDeviation="9" flood-color="#776b78" flood-opacity=".22"/></filter>
 </defs>
-<rect width="160" height="160" rx="38" fill="url(#bg)"/>
-<g filter="url(#sh)">
-<ellipse cx="82" cy="116" rx="46" ry="9" fill="#bed6e3" opacity=".22"/>
-<path d="M28 92c21-35 63-38 91-18 12 9 14 24 4 31-10 7-21 0-18-8 3-7 11-4 13-1-4-13-17-21-32-18-20 4-31 18-40 31z" fill="#7db8d7"/>
-<path d="M92 70l15-23 7 25M51 102l-18 16 24-5" fill="#6ba5c3"/>
-<circle cx="70" cy="80" r="4" fill="#2e414f"/><circle cx="69" cy="79" r="1.2" fill="#fff"/>
-<path d="M68 92c8 5 17 5 24 0" fill="none" stroke="#e9f6fb" stroke-width="3" stroke-linecap="round"/>
-</g>
-</svg>
+<g filter="url(#s)"><ellipse cx="119" cy="132" rx="88" ry="62" fill="url(#g)"/><path d="M182 128l44-35-10 42 10 37-44-26z" fill="url(#g)"/><path d="M124 66l25-35 14 50" fill="url(#g)"/><circle cx="81" cy="121" r="11" fill="#2e3450"/><circle cx="78" cy="117" r="4" fill="#fff"/><path d="M86 149q14 10 30 0" stroke="#5b5571" stroke-width="7" fill="none" stroke-linecap="round"/></g></svg>
