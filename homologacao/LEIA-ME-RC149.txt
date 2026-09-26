@@ -1,0 +1,10 @@
+BERTH.A HOMOLOGAÇÃO — RC149
+
+IMPORTANTE:
+- Esta RC foi preparada para o fluxo de upload pelo GitHub no iPhone.
+- Os novos SVGs de Premiações ficam DIRETAMENTE dentro de homologacao/.
+- Não existe dependência de assets/rewards-v2/.
+- Substitua index.html, sw.js e app-v2.8.221-rc149.js.
+- Envie também todos os .svg novos desta RC para homologacao/.
+- Abra: https://draduaila-web.github.io/It-s-my-life-/homologacao/?build=149#premiacoes
+- O hero de Premiações deve mostrar: HML · RC149
