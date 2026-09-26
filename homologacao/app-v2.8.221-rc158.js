@@ -6921,7 +6921,7 @@ function renderRewardsRC147(forceTab=''){
  const recs=r147RecognitionPresets(),activeHelper=targetMember&&targetMember.role!=='kids'?targetMember:helpers[0];
 
  app.innerHTML=`<div class="r147-page">
- <section class="sat-hero sat-ideal-hero r147-hero"><div class="r148-build">HML · RC158</div><div class="sat-hero-copy"><div class="eyebrow">PREMIAÇÕES</div><h2>Você desempenha.<br>A BERTH.A reconhece.</h2><p>Conquistas para você. Um universo de progressão para Kids. Reconhecimento para quem caminha junto.</p></div><div class="r147-hero-orbit"><i></i></div></section>
+ <section class="sat-hero sat-ideal-hero r147-hero"><div class="r148-build">HML · RC159</div><div class="sat-hero-copy"><div class="eyebrow">PREMIAÇÕES</div><h2>Você desempenha.<br>A BERTH.A reconhece.</h2><p>Conquistas para você. Um universo de progressão para Kids. Reconhecimento para quem caminha junto.</p></div><div class="r147-hero-orbit"><i></i></div></section>
  <div class="r147-tabs"><button data-r147tab="owner">Owner</button><button data-r147tab="kids">Kids</button><button data-r147tab="helpers">Reconhecimentos</button></div>
  <section class="r147-pane" data-r147pane="owner">
    <section class="r147-card"><div class="r147-head"><div><h3>Minhas conquistas</h3><p>Marcos pessoais, sem pontos e sem linguagem infantil.</p></div><button class="r147-action" id="r147OwnerRoom">Sala de Troféus ›</button></div><div class="r147-ach-grid">${ownerTiles.map(x=>`<div class="r147-ach">${`<div class="art">${r147img(x[0])}</div>`}<strong>${x[1]}</strong><small>${x[2]}</small></div>`).join('')}</div></section>
@@ -7326,7 +7326,7 @@ renderRewardsRC147=renderRewardsRC152;renderUniversalRewards=renderRewardsRC152;
   document.head.appendChild(st);
   const badge=document.createElement('div');
   badge.className='rc154-build';
-  badge.textContent='HML · RC158';
+  badge.textContent='HML · RC159';
   document.body.appendChild(badge);
   document.documentElement.dataset.berthaBuild='RC157';
 

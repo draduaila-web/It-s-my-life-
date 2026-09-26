@@ -1,0 +1,15 @@
+BERTH.A HOMOLOGAÇÃO — RC159
+
+Correção pontual sobre a RC158:
+- Satélites só renderiza depois que o menu Mais fecha.
+- Convites só renderiza depois que o menu Mais fecha.
+- Convites recebe estilo SVG explícito no primeiro paint, evitando o quadrado preto.
+- Premiações preservada.
+- Nenhuma mudança nos assets 3D nesta RC.
+
+Abrir:
+https://draduaila-web.github.io/It-s-my-life-/homologacao/?build=159#satelites
+
+Marcadores:
+INDEX · RC159
+HML · RC159
