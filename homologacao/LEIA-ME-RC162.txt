@@ -1,0 +1,20 @@
+BERTH.A HOMOLOGAÇÃO — RC162
+
+CONVITES
+- ícone do hero reposicionado no canto superior direito;
+- novo ícone linear calendário + check;
+- fundo do ícone dos cards alinhado à paleta do módulo/Meu Dia Ideal.
+
+PREMIAÇÕES
+- hero: “Progress worth celebrating.”;
+- ícone do hero redesenhado como medalha/roseta linear e alinhado;
+- estrutura final de Premiações priorizada e protegida contra renderer legado;
+- Kids recebe bloco “Configuração Kids · Ciclo de Progressão”;
+- cards, campos, abas e CTA refinados no padrão BERTH.A.
+
+Abrir:
+https://draduaila-web.github.io/It-s-my-life-/homologacao/?build=162#premiacoes
+
+Marcadores esperados:
+INDEX · RC162
+HML · RC162
