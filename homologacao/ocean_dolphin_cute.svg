@@ -1,0 +1,21 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 160 160">
+<defs>
+  <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+    <stop offset="0" stop-color="#e6f4fa"/><stop offset="1" stop-color="#d9edf5"/>
+  </linearGradient>
+  <filter id="sh" x="-30%" y="-30%" width="160%" height="160%">
+    <feDropShadow dx="0" dy="5" stdDeviation="6" flood-color="#67576e" flood-opacity=".16"/>
+  </filter>
+  <filter id="soft" x="-30%" y="-30%" width="160%" height="160%">
+    <feGaussianBlur stdDeviation="2"/>
+  </filter>
+</defs>
+<rect width="160" height="160" rx="38" fill="url(#bg)"/>
+<g filter="url(#sh)">
+<ellipse cx="82" cy="116" rx="46" ry="9" fill="#bed6e3" opacity=".22"/>
+<path d="M28 92c21-35 63-38 91-18 12 9 14 24 4 31-10 7-21 0-18-8 3-7 11-4 13-1-4-13-17-21-32-18-20 4-31 18-40 31z" fill="#7db8d7"/>
+<path d="M92 70l15-23 7 25M51 102l-18 16 24-5" fill="#6ba5c3"/>
+<circle cx="70" cy="80" r="4" fill="#2e414f"/><circle cx="69" cy="79" r="1.2" fill="#fff"/>
+<path d="M68 92c8 5 17 5 24 0" fill="none" stroke="#e9f6fb" stroke-width="3" stroke-linecap="round"/>
+</g>
+</svg>

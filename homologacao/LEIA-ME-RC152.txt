@@ -1,0 +1,15 @@
+BERTH.A HOMOLOGAÇÃO — RC152
+
+- NÃO usa os JPGs antigos.
+- Nova biblioteca visual:
+  • 18 pets inéditos (3 por tema)
+  • 6 cápsulas temáticas
+  • 36 acessórios temáticos
+  • 6 pins de Owner
+- Premiações > Kids virou painel de Ciclo de Progressão do Owner.
+- Histórico registra tema/pet por ciclo para evitar repetição.
+- Satélites: clique no menu chama diretamente renderSatellites(), sem depender de hashchange.
+- Marcador esperado: HML · RC152
+
+Abrir:
+https://draduaila-web.github.io/It-s-my-life-/homologacao/?build=152#premiacoes
