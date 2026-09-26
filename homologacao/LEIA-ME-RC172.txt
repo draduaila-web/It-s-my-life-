@@ -1,0 +1,12 @@
+BERTH.A · HOMOLOGAÇÃO · RC172 CODE FOUNDATION
+
+- Não contém imagens.
+- Não sobrescreve os assets visuais ruins da RC171.
+- Adiciona manifest único para Premiações, com coleções/pets/acessórios aprovados.
+- Oceano: Golfinho removido; Água-viva prevista.
+- Acessórios marcados como vestíveis.
+- Mantém cápsulas, medalhas, troféus, Owner e Reconhecimentos no escopo.
+- Direção cromática: unissex, pastel equilibrado, sem predominância de rosa.
+- Próximo lote visual deve usar paths/nomes do manifest e imagens individuais, nunca recortes de pranchas.
+
+Arquivos nesta pasta: 6. Limite solicitado: <100 por pasta.
