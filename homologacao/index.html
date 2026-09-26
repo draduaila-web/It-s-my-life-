@@ -63,7 +63,7 @@
   window.berthaResolveBillReminder=async(info)=>({ok:true,homologacao:true,resolved:true,billId:info?.billId||''});
 })();
 </script>
-<title>BERTH.A · Homologação RC168</title>
+<title>BERTH.A · Homologação RC169</title>
 
 <style id="bertha-v2897-release">
 /* v2.8.100 — Criação & Ideias: alinhamento definitivo do bloco BERTA; fundo luminoso preservado. */
@@ -500,7 +500,7 @@ body.bertha-hml::before{content:"HOMOLOGAÇÃO";position:fixed;z-index:99999;top
  font:700 8px/1 system-ui,-apple-system,sans-serif;letter-spacing:.08em;pointer-events:none
 }
 </style>
-<div id="rc157IndexBadge">INDEX · RC168</div>
+<div id="rc157IndexBadge">INDEX · RC169</div>
 
 <div class="app-shell">
 <header class="topbar">
@@ -591,20 +591,20 @@ body.bertha-hml::before{content:"HOMOLOGAÇÃO";position:fixed;z-index:99999;top
 </dialog>
 
 
-<script src="app-v2.8.221-rc168.js?v=168a"></script>
+<script src="app-v2.8.221-rc169.js?v=169a"></script>
 <script src="work-v12.js?v=167a"></script>
 <script src="bertha-time-v2.8.221-rc131.js?v=167a"></script>
 <script src="satellites-v161.js?v=167a"></script>
 <script>
 (function(){
-  document.documentElement.dataset.berthaIndex='RC168';
+  document.documentElement.dataset.berthaIndex='RC169';
   function paint(){
     try{ window.__berthaCoreRender?.(); }
     catch(e){
-      console.error('RC168 paint',e);
+      console.error('RC169 paint',e);
       const box=document.getElementById('app');
       if(box && !box.children.length){
-        box.innerHTML='<section class="card"><strong>RC168 carregou, mas o renderer falhou.</strong><p class="note">'+String(e?.message||e)+'</p></section>';
+        box.innerHTML='<section class="card"><strong>RC169 carregou, mas o renderer falhou.</strong><p class="note">'+String(e?.message||e)+'</p></section>';
       }
     }
   }
@@ -614,8 +614,8 @@ body.bertha-hml::before{content:"HOMOLOGAÇÃO";position:fixed;z-index:99999;top
 })();
 </script>
 
-<script src="ui-polish-v164.js?v=168a"></script>
-<script src="ui-assets-v168.js?v=168a"></script>
-<script src="routing-fix-v168.js?v=168a"></script>
+<script src="ui-polish-v164.js?v=169a"></script>
+<script src="ui-assets-v169.js?v=169a"></script>
+<script src="routing-fix-v169.js?v=169a"></script>
 </body>
 </html>

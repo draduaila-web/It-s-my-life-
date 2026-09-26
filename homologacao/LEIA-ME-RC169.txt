@@ -1,0 +1,17 @@
+BERTH.A HOMOLOGAÇÃO — RC169
+
+CORREÇÃO DO CARREGAMENTO PARCIAL DA RC167
+
+O que aconteceu na RC167:
+- os PNGs novos apareceram;
+- os assets que ainda estavam em SVG continuaram com a família antiga.
+
+RC169:
+- Owner: 6 pins passam para PNG 3D da família aprovada;
+- Oceano: 6 pets 3D (tartaruga, tubarão, golfinho, polvo, baleia e peixe-palhaço);
+- 6 cápsulas temáticas passam para a nova família 3D;
+- acessórios personalizáveis da RC167 permanecem;
+- reconhecimentos e roteamento permanecem.
+
+Teste:
+https://draduaila-web.github.io/It-s-my-life-/homologacao/?build=169#premiacoes
