@@ -1,0 +1,6 @@
+BERTH.A HOMOLOGAÇÃO — RC150
+- Satélites: novo binding direto para clique e touch no menu Mais.
+- Owner: Sala de Troféus sem imagens Kids + paletas editáveis.
+- Kids: galeria visual de pets por tema + acessórios temáticos e cores.
+- Marcador esperado: HML · RC150
+Abrir: https://draduaila-web.github.io/It-s-my-life-/homologacao/?build=150#premiacoes

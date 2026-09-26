@@ -9,10 +9,10 @@
 <meta name="apple-mobile-web-app-title" content="BERTH.A HML">
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="apple-touch-icon" sizes="512x512" href="../bertha-icon-512.png">
-<link rel="stylesheet" href="./style.css?v=rc149">
+<link rel="stylesheet" href="./style.css?v=rc150">
 <script id="bertha-rollback-221-bootstrap">
 (function(){
-  const KEY='bertha.hml.rc149.force-refresh';
+  const KEY='bertha.hml.rc150.force-refresh';
   async function hardReset(){
     try{
       if('caches' in window){
@@ -25,8 +25,8 @@
       }
       sessionStorage.setItem(KEY,'1');
       const u=new URL(location.href);
-      if(u.searchParams.get('build')!=='149'){
-        u.searchParams.set('build','149');
+      if(u.searchParams.get('build')!=='150'){
+        u.searchParams.set('build','150');
         location.replace(u.toString());
       }
     }catch(e){ console.warn('[BERTH.A rollback 221]',e); }
@@ -564,7 +564,7 @@ body.bertha-hml::before{content:"HOMOLOGAÇÃO";position:fixed;z-index:99999;top
   });
 })();
 </script>
-<script src="app-v2.8.221-rc149.js?v=149a"></script>
+<script src="app-v2.8.221-rc150.js?v=150a"></script>
 
 <dialog id="moduleMenu">
 <div class="module-sheet">
@@ -590,7 +590,7 @@ body.bertha-hml::before{content:"HOMOLOGAÇÃO";position:fixed;z-index:99999;top
 </div>
 </dialog>
 
-<script src="work-v12.js?v=149a"></script>
-<script src="bertha-time-v2.8.221-rc131.js?v=149a"></script>
+<script src="work-v12.js?v=150a"></script>
+<script src="bertha-time-v2.8.221-rc131.js?v=150a"></script>
 </body>
 </html>
