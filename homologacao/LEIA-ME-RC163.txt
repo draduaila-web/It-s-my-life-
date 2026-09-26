@@ -1,0 +1,17 @@
+BERTH.A HOMOLOGAÇÃO — RC163
+
+PREMIAÇÕES
+- unificação visual de Owner, Kids e Reconhecimentos;
+- introduções curatoriais por frente, usando a mesma linguagem de card/hero;
+- tipografia ajustada (pesos, tamanhos, entrelinhas e respiros);
+- correção de espaçamentos entre palavras/blocos em contextos como helper, presets e reconhecimento;
+- cards de configuração alinhados ao padrão BERTH.A;
+- imagem gigante em “Personalizar reconhecimentos” corrigida;
+- Kids refinado com os mesmos contornos, campos e CTA do restante do módulo.
+
+Abrir:
+https://draduaila-web.github.io/It-s-my-life-/homologacao/?build=163#premiacoes
+
+Marcadores esperados:
+INDEX · RC163
+HML · RC163
