@@ -1,0 +1,10 @@
+BERTH.A HOMOLOGAÇÃO — RC176
+
+Correções cirúrgicas:
+- Owner: personalização com cabeçalho e texto alinhados.
+- Satélites: grade compacta; masculino cinza, feminino lilás empoeirado, coração rosa outline.
+- Convites: marcador clean no card.
+- Kids: assets preservados inteiros (contain), sem crop agressivo; acessórios e trilha mantidos.
+- Helper: presets v5 + nova família visual e novos textos.
+
+Não altera a arquitetura de rotas nem a integração Rede/Casa.
