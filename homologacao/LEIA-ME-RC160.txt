@@ -1,0 +1,18 @@
+BERTH.A HOMOLOGAÇÃO — RC160
+
+Correção dos pontos vistos no vídeo:
+- Satélites não renderiza mais por baixo do menu Mais.
+- O módulo satellites-v160 NÃO possui interceptador próprio de navegação.
+- routing-fix-v160 é a única autoridade para Satélites, Convites e Premiações.
+- O menu fecha primeiro; a tela só renderiza depois do evento close.
+- Satélites usa a mesma paleta do Meu Dia Ideal.
+- O desenho do hero de Satélites foi substituído por um ícone linear simples de pessoas.
+- Convites recebe a paleta correta já no primeiro paint.
+- Premiações recebe a mesma base cromática do sistema.
+
+Abrir:
+https://draduaila-web.github.io/It-s-my-life-/homologacao/?build=160#satelites
+
+Marcadores:
+INDEX · RC160
+HML · RC160
