@@ -1,0 +1,18 @@
+BERTH.A HOMOLOGAÇÃO — RC158
+
+Base: RC157 funcional e congelada.
+
+Esta RC:
+- preserva Satélites, Convites e Premiações funcionais;
+- mantém o boot estático que estabilizou a RC157;
+- remove referências JPG antigas ainda presentes no core;
+- consolida Premiações em um renderer final;
+- cria um registro único dos assets atuais;
+- prepara a próxima troca visual por assets 3D sem alterar a lógica.
+
+Abrir:
+https://draduaila-web.github.io/It-s-my-life-/homologacao/?build=158#premiacoes
+
+Marcadores esperados:
+INDEX · RC158
+HML · RC158
