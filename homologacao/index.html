@@ -9,7 +9,7 @@
 <meta name="apple-mobile-web-app-title" content="BERTH.A HML">
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="apple-touch-icon" sizes="512x512" href="../bertha-icon-512.png">
-<link rel="stylesheet" href="./style.css?v=rc152">
+<link rel="stylesheet" href="./style.css?v=rc153">
 <script id="bertha-rollback-221-bootstrap">
 (function(){
   const KEY='bertha.hml.rc152.force-refresh';
@@ -564,7 +564,6 @@ body.bertha-hml::before{content:"HOMOLOGAÇÃO";position:fixed;z-index:99999;top
   });
 })();
 </script>
-<script src="app-v2.8.221-rc152.js?v=152a"></script>
 
 <dialog id="moduleMenu">
 <div class="module-sheet">
@@ -590,7 +589,49 @@ body.bertha-hml::before{content:"HOMOLOGAÇÃO";position:fixed;z-index:99999;top
 </div>
 </dialog>
 
-<script src="work-v12.js?v=152a"></script>
-<script src="bertha-time-v2.8.221-rc131.js?v=152a"></script>
+<script>
+(async function RC153FreshBoot(){
+  const BOOT='bertha.rc153.boot';
+  try{
+    if('caches' in window){
+      const keys=await caches.keys();
+      await Promise.all(keys.map(k=>caches.delete(k)));
+    }
+    if('serviceWorker' in navigator){
+      const regs=await navigator.serviceWorker.getRegistrations();
+      await Promise.all(regs.map(r=>r.unregister()));
+    }
+
+    const u=new URL(location.href);
+    if(u.searchParams.get('build')!=='153' || u.searchParams.get('fresh')!=='1'){
+      u.searchParams.set('build','153');
+      u.searchParams.set('fresh','1');
+      sessionStorage.setItem(BOOT,'reloading');
+      location.replace(u.toString());
+      return;
+    }
+
+    const load=(src)=>new Promise((resolve,reject)=>{
+      const s=document.createElement('script');
+      s.src=src;
+      s.async=false;
+      s.onload=resolve;
+      s.onerror=()=>reject(new Error('Falha ao carregar '+src));
+      document.body.appendChild(s);
+    });
+
+    await load('app-v2.8.221-rc153.js?v=153a');
+    await load('work-v12.js?v=153a');
+    await load('bertha-time-v2.8.221-rc131.js?v=153a');
+
+    setTimeout(()=>window.__berthaRenderCurrentRoute?.(),80);
+    setTimeout(()=>window.__berthaRenderCurrentRoute?.(),280);
+  }catch(err){
+    console.error('RC153 fresh boot',err);
+    document.body.insertAdjacentHTML('beforeend',`<section class="card" style="margin:16px"><strong>Falha ao iniciar a homologação RC153</strong><p class="note">${String(err?.message||err)}</p></section>`);
+  }
+})();
+</script>
+
 </body>
 </html>

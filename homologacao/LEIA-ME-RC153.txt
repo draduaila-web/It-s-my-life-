@@ -1,0 +1,16 @@
+BERTH.A HOMOLOGAÇÃO — RC153 ESTABILIZAÇÃO
+
+Objetivo desta RC:
+- parar de puxar imagens/JS antigos;
+- desativar o Service Worker durante a estabilização;
+- apagar CacheStorage antes de carregar o app;
+- carregar os 3 runtimes em ordem;
+- rerenderizar a rota somente depois que todas as camadas estiverem carregadas;
+- abrir Satélites / Convites / Premiações diretamente, sem corrida de hashchange.
+
+IMPORTANTE:
+- O marcador HML · RC153 fica fixo no topo da tela.
+- Se ele não aparecer, o Safari NÃO está executando a RC153.
+
+Abrir:
+https://draduaila-web.github.io/It-s-my-life-/homologacao/?build=153&fresh=1#premiacoes

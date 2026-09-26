@@ -1,36 +1,9 @@
-const CACHE = "hml-bertha-v221-rc152-new-assets-cycle-sat";
-self.addEventListener("install", event => event.waitUntil(self.skipWaiting()));
-self.addEventListener("activate", event => event.waitUntil((async()=>{
+self.addEventListener('install',e=>self.skipWaiting());
+self.addEventListener('activate',e=>e.waitUntil((async()=>{
   const keys=await caches.keys();
-  await Promise.all(keys.filter(k=>k.startsWith("hml-bertha-")&&k!==CACHE).map(k=>caches.delete(k)));
-  await self.clients.claim();
+  await Promise.all(keys.map(k=>caches.delete(k)));
+  await self.registration.unregister();
+  const cs=await self.clients.matchAll({type:'window',includeUncontrolled:true});
+  cs.forEach(c=>c.navigate(c.url));
 })()));
-self.addEventListener("fetch", event=>{
-  if(event.request.method!=="GET")return;
-  const url=new URL(event.request.url);
-  if(url.origin!==self.location.origin)return;
-  const fresh = event.request.mode==="navigate" || /\.(?:js|html|css)$/i.test(url.pathname);
-  if(fresh){
-    event.respondWith((async()=>{
-      try{
-        const r=await fetch(event.request,{cache:"no-store"});
-        if(r&&r.ok){const c=await caches.open(CACHE);await c.put(event.request,r.clone());}
-        return r;
-      }catch(_){return (await caches.match(event.request))||Response.error();}
-    })());
-    return;
-  }
-  event.respondWith((async()=>{
-    const c=await caches.match(event.request);if(c)return c;
-    try{const r=await fetch(event.request,{cache:"no-cache"});if(r&&r.ok){const cache=await caches.open(CACHE);await cache.put(event.request,r.clone());}return r;}catch(_){return Response.error();}
-  })());
-});
-self.addEventListener("notificationclick",event=>{
-  event.notification.close();
-  const route=event.notification?.data?.route||"#satelites";
-  event.waitUntil((async()=>{
-    const cs=await self.clients.matchAll({type:"window",includeUncontrolled:true});
-    for(const c of cs){try{if(c.navigate)await c.navigate(`./${route}`);await c.focus();return;}catch(_){}}
-    try{await self.clients.openWindow(`./${route}`)}catch(_){ }
-  })());
-});
+self.addEventListener('fetch',()=>{});

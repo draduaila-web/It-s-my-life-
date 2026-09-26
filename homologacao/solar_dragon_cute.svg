@@ -1,0 +1,23 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 160 160">
+<defs>
+  <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+    <stop offset="0" stop-color="#fff0da"/><stop offset="1" stop-color="#f7dbb5"/>
+  </linearGradient>
+  <filter id="sh" x="-30%" y="-30%" width="160%" height="160%">
+    <feDropShadow dx="0" dy="5" stdDeviation="6" flood-color="#67576e" flood-opacity=".16"/>
+  </filter>
+  <filter id="soft" x="-30%" y="-30%" width="160%" height="160%">
+    <feGaussianBlur stdDeviation="2"/>
+  </filter>
+</defs>
+<rect width="160" height="160" rx="38" fill="url(#bg)"/>
+<g filter="url(#sh)">
+<ellipse cx="80" cy="118" rx="45" ry="10" fill="#d9c7a3" opacity=".22"/>
+<path d="M38 89c-4-30 13-52 42-52 29 0 46 22 42 52-3 26-18 42-42 42s-39-16-42-42z" fill="#e5a56a"/>
+<path d="M50 50l-7-24 22 15M110 50l7-24-22 15" fill="#cf8b55"/>
+<path d="M80 38l0-17M68 30l12-13 12 13" fill="none" stroke="#c47f4e" stroke-width="5" stroke-linecap="round"/>
+<ellipse cx="63" cy="82" rx="5" ry="7" fill="#433a35"/><ellipse cx="97" cy="82" rx="5" ry="7" fill="#433a35"/>
+<path d="M80 92l7 7-7 5-7-5z" fill="#c9785c"/><path d="M65 110c10 7 20 7 30 0" fill="none" stroke="#8f654f" stroke-width="3"/>
+<path d="M38 92L18 80l17-5M122 92l20-12-17-5" fill="#f0c27a"/>
+</g>
+</svg>
