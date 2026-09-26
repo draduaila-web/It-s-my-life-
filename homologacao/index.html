@@ -10,31 +10,6 @@
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="apple-touch-icon" sizes="512x512" href="../bertha-icon-512.png">
 <link rel="stylesheet" href="./style.css?v=rc156">
-<script id="bertha-rollback-221-bootstrap">
-(function(){
-  const KEY='bertha.hml.rc152.force-refresh';
-  async function hardReset(){
-    try{
-      if('caches' in window){
-        const keys=await caches.keys();
-        await Promise.all(keys.filter(k=>k.startsWith('hml-bertha-')).map(k=>caches.delete(k)));
-      }
-      if('serviceWorker' in navigator){
-        const regs=await navigator.serviceWorker.getRegistrations();
-        await Promise.all(regs.map(r=>r.unregister()));
-      }
-      sessionStorage.setItem(KEY,'1');
-      const u=new URL(location.href);
-      if(u.searchParams.get('build')!=='152'){
-        u.searchParams.set('build','152');
-        location.replace(u.toString());
-      }
-    }catch(e){ console.warn('[BERTH.A rollback 221]',e); }
-  }
-  if(sessionStorage.getItem(KEY)!=='1') hardReset();
-})();
-</script>
-
 <style id="bertha-v2857-idea-modal-radius">
 /* v2.8.57 — preserva o ajuste cirúrgico: contorno externo do modal Criação & Ideias.
    O JS injeta .study-v10-modal depois do CSS principal e, no iPhone, força 24px.
@@ -89,6 +64,11 @@
 })();
 </script>
 <title>BERTH.A · Homologação</title>
+
+<script id="bertha-rc156-sentinel">
+document.documentElement.dataset.berthaIndex='RC156';
+</script>
+
 
 <style id="bertha-v2897-release">
 /* v2.8.100 — Criação & Ideias: alinhamento definitivo do bloco BERTA; fundo luminoso preservado. */
@@ -603,7 +583,7 @@ body.bertha-hml::before{content:"HOMOLOGAÇÃO";position:fixed;z-index:99999;top
 
     const u=new URL(location.href);
     if(u.searchParams.get('build')!=='156'){
-      u.searchParams.set('build','156';
+      u.searchParams.set('build','156');
       location.replace(u.toString());
       return;
     }
@@ -624,9 +604,9 @@ body.bertha-hml::before{content:"HOMOLOGAÇÃO";position:fixed;z-index:99999;top
 
     requestAnimationFrame(()=>window.__berthaCoreRender?.());
   }catch(err){
-    console.error('RC154 boot',err);
+    console.error('RC156 boot',err);
     document.body.insertAdjacentHTML('beforeend',
-      `<section class="card" style="margin:16px"><strong>RC154 não iniciou</strong><p class="note">${String(err?.message||err)}</p></section>`);
+      `<section class="card" style="margin:16px"><strong>RC156 não iniciou</strong><p class="note">${String(err?.message||err)}</p></section>`);
   }
 })();
 </script>
