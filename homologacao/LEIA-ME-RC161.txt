@@ -1,0 +1,11 @@
+BERTH.A HOMOLOGAÇÃO — RC161
+
+Ajustes:
+- CTA de Satélites/Convites/Premiações usa o degradê oficial do Meu Dia Ideal:
+  blush -> pêssego/creme -> azul claro.
+- Premiações passa a priorizar explicitamente o renderer atual RC152,
+  evitando a tela antiga Kids/Premiações.
+- Satélites preserva o hero e a rota da RC160.
+
+Abrir:
+https://draduaila-web.github.io/It-s-my-life-/homologacao/?build=161#satelites
