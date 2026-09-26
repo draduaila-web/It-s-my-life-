@@ -1,0 +1,7 @@
+BERTH.A Homologação RC173
+- Corrige marcadores HML para RC173.
+- Integra o manifest de Premiações ao painel Kids.
+- Oceano usa Água-viva no lugar de Golfinho.
+- Novos pets/acessórios aparecem por coleção mesmo antes do lote visual.
+- Assets faltantes não exibem ícone quebrado.
+- Nenhuma imagem problemática da RC171 é incluída.
