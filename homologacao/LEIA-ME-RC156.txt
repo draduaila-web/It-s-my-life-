@@ -1,0 +1,18 @@
+BERTH.A HOMOLOGAÇÃO — RC156
+
+OBJETIVO:
+- não adicionar mais patches antigos de Satélites;
+- Satélites foi reconstruído como módulo separado: satellites-v156.js;
+- uma única tela Rede BERTH.A;
+- um único perfil de Satélite;
+- um único interceptador de navegação;
+- integra Casa, Helper/Reconhecer e resumo Kids usando os dados existentes.
+
+UPLOAD:
+1) RC156A_CORE_LIMPO
+2) RC156B_SATELITES_NOVO
+
+Abrir direto:
+https://draduaila-web.github.io/It-s-my-life-/homologacao/?build=156#satelites
+
+Marcador esperado: HML · RC156
