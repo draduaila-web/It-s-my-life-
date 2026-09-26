@@ -1,0 +1,12 @@
+BERTH.A HOMOLOGAÇÃO — RC155A
+
+Correção focada:
+- Convites e Premiações da RC154 foram preservados.
+- Satélites agora troca o hash antes de fechar o menu Mais.
+- Menu só fecha 140 ms depois, evitando click-through para B•A / Meu Dia no Safari.
+- Existe uma trava de 500 ms que mantém Satélites como rota ativa durante a transição.
+
+Abrir:
+https://draduaila-web.github.io/It-s-my-life-/homologacao/?build=155#satelites
+
+Marcador esperado: HML · RC155
