@@ -1,0 +1,14 @@
+BERTH.A · HOMOLOGAÇÃO RC174
+
+Mudanças:
+- Satélites: representação universal por tipo; Kids = Menino/Menina; Adulto = Homem/Mulher/Par romântico masculino/feminino.
+- Cores: masculino cinza; feminino lilás empoeirado; coração do par romântico rosa, apenas contorno.
+- Integração preservada: avatarKey continua sendo o campo usado pela Rede/Casa e há normalização automática dos valores antigos.
+- Owner: correção de layout da área Personalizar conquistas (texto não fica espremido à esquerda).
+- Kids: trilha explícita Bronze > Prata > Ouro > Troféu > Super Troféu > Cápsula; depois acessórios; sem perda de pontos e sem ranking.
+- Kids visual: primeiro lote aprovado de cápsulas, pets e acessórios Oceano. Água-viva permanece no manifesto; não se usa o antigo golfinho.
+- Helper: presets v4 com novos reconhecimentos e assets 3D em tile creme.
+- Assets incompletos de outras coleções ficam como placeholder discreto em vez de puxar SVG antigo inadequado.
+
+Upload: subir o conteúdo de homologacao/ sobre a pasta homologacao do GitHub.
+Teste: ?build=174#premiacoes (ou ?build=174b#premiacoes).
