@@ -1,0 +1,6 @@
+BERTH.A HOMOLOGAÇÃO RC181 — RECOVERY
+
+Objetivo único: restaurar a base que abria na RC178, sem continuar a cadeia RC179/180/180C.
+Inclui código da RC178 renomeado/cache-busted + 12 pins Owner.
+Não altera Kids/Helper/Satélites/Convites nesta rodada.
+Após abrir e validar, fazer a correção visual do card Owner em uma RC separada.
