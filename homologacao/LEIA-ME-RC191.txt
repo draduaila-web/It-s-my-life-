@@ -1,0 +1,7 @@
+BERTH.A — RC191
+
+- Avatares homologados congelados.
+- Estrutura do modal de Satélites refinada na área inferior de permissões.
+- Helper/Reconhecimentos corrigido com as novas imagens exibidas.
+- Personalização de cores preservada com 2 variações por reconhecimento.
+- Cache-busting aplicado com novos nomes de arquivos RC191 e storage key v14.
