@@ -1,0 +1,8 @@
+BERTH.A — RC194
+
+- Corrige o problema confirmado na gravação: o core repintava a tela após carregar a RC e apagava os refinamentos.
+- Reaplica Owner/Helper após render, pageshow, troca de aba e mutações do app.
+- Avatares de Satélites permanecem congelados.
+- Helper mantém checkboxes no padrão do Owner e controles de cor Rosé/Brisa visíveis.
+- Owner mantém a nova família glossy e variação cromática para pins repetidos.
+- Cache-busting RC194 e storage v17.

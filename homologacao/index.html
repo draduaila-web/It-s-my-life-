@@ -592,20 +592,20 @@ body.bertha-hml::before{content:"HOMOLOGAÇÃO";position:fixed;z-index:99999;top
 
 
 <script src="premiacoes-assets-manifest-v177.js?v=178a"></script>
-<script src="app-v2.8.221-rc193.js?v=193-owner-colors"></script>
+<script src="app-v2.8.221-rc194.js?v=194-post-render"></script>
 <script src="work-v12.js?v=167a"></script>
 <script src="bertha-time-v2.8.221-rc131.js?v=167a"></script>
 <script src="satellites-v161.js?v=167a"></script>
 <script>
 (function(){
-  document.documentElement.dataset.berthaIndex='RC189';
+  document.documentElement.dataset.berthaIndex='RC194';
   function paint(){
     try{ window.__berthaCoreRender?.(); }
     catch(e){
-      console.error('RC189 paint',e);
+      console.error('RC194 paint',e);
       const box=document.getElementById('app');
       if(box && !box.children.length){
-        box.innerHTML='<section class="card"><strong>RC189 carregou, mas o renderer falhou.</strong><p class="note">'+String(e?.message||e)+'</p></section>';
+        box.innerHTML='<section class="card"><strong>RC194 carregou, mas o renderer falhou.</strong><p class="note">'+String(e?.message||e)+'</p></section>';
       }
     }
   }
@@ -617,7 +617,7 @@ body.bertha-hml::before{content:"HOMOLOGAÇÃO";position:fixed;z-index:99999;top
 
 <script src="ui-polish-v164.js?v=169a"></script>
 <script src="ui-assets-v188.js?v=188-helper"></script>
-<script src="rc193-sat-owner-helper.js?v=193-owner-colors"></script>
+<script src="rc194-sat-owner-helper.js?v=194-post-render"></script>
 <script src="routing-fix-v188.js?v=188-helper"></script>
 </body>
 </html>
