@@ -544,7 +544,7 @@ body.bertha-hml::before{content:"HOMOLOGAÇÃO";position:fixed;z-index:99999;top
   const isAppKey=k=>APP_PREFIXES.some(p=>String(k).startsWith(p));
   function collect(){const all=window.berthaHmlStorage.entries(),data={};Object.keys(all).filter(isAppKey).forEach(k=>data[k]=all[k]);return data;}
   function exportBackup(){
-    const payload={format:'BERTHA_BACKUP',version:1,createdAt:new Date().toISOString(),environment:'HOMOLOGACAO',appVersion:'2.8.217-hml',data:collect()};
+    const payload={format:'BERTHA_BACKUP',version:1,createdAt:new Date().toISOString(),environment:'HOMOLOGACAO',appVersion:'2.8.221-rc189-hml',data:collect()};
     const blob=new Blob([JSON.stringify(payload,null,2)],{type:'application/json'}),url=URL.createObjectURL(blob),a=document.createElement('a');
     const d=new Date(),pad=n=>String(n).padStart(2,'0');a.href=url;a.download=`BERTHA_HOMOLOGACAO_${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}_${pad(d.getHours())}-${pad(d.getMinutes())}.json`;document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),1000);
   }
@@ -592,20 +592,20 @@ body.bertha-hml::before{content:"HOMOLOGAÇÃO";position:fixed;z-index:99999;top
 
 
 <script src="premiacoes-assets-manifest-v177.js?v=178a"></script>
-<script src="app-v2.8.221-rc188.js?v=188-helper"></script>
+<script src="app-v2.8.221-rc189.js?v=189-sat-helper"></script>
 <script src="work-v12.js?v=167a"></script>
 <script src="bertha-time-v2.8.221-rc131.js?v=167a"></script>
 <script src="satellites-v161.js?v=167a"></script>
 <script>
 (function(){
-  document.documentElement.dataset.berthaIndex='RC188';
+  document.documentElement.dataset.berthaIndex='RC189';
   function paint(){
     try{ window.__berthaCoreRender?.(); }
     catch(e){
-      console.error('RC188 paint',e);
+      console.error('RC189 paint',e);
       const box=document.getElementById('app');
       if(box && !box.children.length){
-        box.innerHTML='<section class="card"><strong>RC188 carregou, mas o renderer falhou.</strong><p class="note">'+String(e?.message||e)+'</p></section>';
+        box.innerHTML='<section class="card"><strong>RC189 carregou, mas o renderer falhou.</strong><p class="note">'+String(e?.message||e)+'</p></section>';
       }
     }
   }
@@ -617,6 +617,7 @@ body.bertha-hml::before{content:"HOMOLOGAÇÃO";position:fixed;z-index:99999;top
 
 <script src="ui-polish-v164.js?v=169a"></script>
 <script src="ui-assets-v188.js?v=188-helper"></script>
+<script src="rc189-sat-helper.js?v=189-sat-helper"></script>
 <script src="routing-fix-v188.js?v=188-helper"></script>
 </body>
 </html>
