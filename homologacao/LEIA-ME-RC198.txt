@@ -1,0 +1,10 @@
+BERTH.A — HML · RC198
+
+Ajustes desta RC:
+1. Helper: variantes Brisa dos reconhecimentos recalibradas para uma família mais suave e legível, reduzindo o excesso de verde e preservando a leitura das formas.
+2. Helper: checkbox/estado ativo harmonizado com o padrão suave do Owner.
+3. Assets dos reconhecimentos com cache-bust (?v=198) para evitar persistência de ícones antigos no GitHub Pages.
+
+Observações:
+- Esta RC mantém a estrutura da RC196 como base.
+- Os arquivos Brisa foram substituídos preservando os mesmos nomes físicos, com atualização forçada via querystring no carregamento.

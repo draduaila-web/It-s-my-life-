@@ -1,8 +1,8 @@
 /* BERTH.A RC196 — Owner 6 medalhas + Helper estrutural
    - mantém avatares aprovados
-   - checkboxes do Helper igual ao Owner
-   - personalização de cores dos reconhecimentos mais visível
-   - Sala de Troféus/Owner unificada na mesma família visual do Helper */
+   - brisas do Helper suavizadas (menos verde, mais legíveis)
+   - checkbox do Helper alinhado ao padrão suave do Owner
+   - cache-bust dos assets para refletir a troca imediata no GitHub Pages */
 (function(){
   const RECOG_KEY='bertha.recognition.presets.v19';
   const LEGACY_KEYS=['bertha.recognition.presets.v18','bertha.recognition.presets.v17','bertha.recognition.presets.v16','bertha.recognition.presets.v15','bertha.recognition.presets.v14','bertha.recognition.presets.v13','bertha.recognition.presets.v12','bertha.recognition.presets.v10'];
@@ -69,7 +69,7 @@
 
   function tryJSON(k){try{return JSON.parse(window.berthaHmlStorage.getItem(k)||'null')}catch(e){return null}}
   function stripExt(v){return String(v||'').replace(/\.(png|jpg|jpeg|svg)$/i,'')}
-  function assetFile(name){ return './'+stripExt(name)+'.png'; }
+  function assetFile(name){ return './'+stripExt(name)+'.png?v=198'; }
   function normalizeId(raw,i){
     const fallback=(DEFAULTS[i]||DEFAULTS[0]).id;
     const id=String(raw?.id||fallback);
@@ -310,7 +310,7 @@
     });
 
     const bubble=document.querySelector('.r148-build');
-    if(bubble) bubble.textContent='HML · RC196';
+    if(bubble) bubble.textContent='HML · RC198';
   }
 
   function enhanceSatModal(){
@@ -377,7 +377,7 @@
     .r147-pane[data-r147pane="helpers"] [data-r147-preset] .r147-config-grid{display:grid!important;grid-template-columns:1fr 1.6fr!important;gap:10px!important}
     .r147-pane[data-r147pane="helpers"] [data-r147-preset] .r147-config-grid label{display:grid!important;gap:5px!important}
     .r147-pane[data-r147pane="helpers"] [data-r147-preset] .r147-config-grid label[style*="span 2"]{grid-column:span 1!important}
-    .rc192-helper-active{width:56px!important}.rc192-helper-active .rc178-check{width:36px!important;height:36px!important;border-radius:12px!important}.rc192-helper-active input:checked + .rc178-check:after{left:12px!important;top:7px!important;width:8px!important;height:15px!important}.rc192-helper-active em{font-size:10.5px!important}
+    .rc192-helper-active{width:56px!important}.rc192-helper-active .rc178-check{width:36px!important;height:36px!important;border-radius:12px!important}.rc192-helper-active input:checked + .rc178-check{border-color:transparent!important;background:linear-gradient(145deg,#f1d3de,#e2cfe7 58%,#d9e7f2)!important;box-shadow:inset 0 1px 0 rgba(255,255,255,.65),0 6px 14px rgba(177,153,175,.16)!important}.rc192-helper-active input:checked + .rc178-check:after{left:12px!important;top:7px!important;width:8px!important;height:15px!important}.rc192-helper-active em{font-size:10.5px!important}
 
     .rc192-variant-picker{display:grid;gap:8px;padding:12px 13px;border-radius:18px;background:linear-gradient(145deg,rgba(255,251,246,.90),rgba(247,245,249,.88));border:1px solid rgba(128,111,132,.08)}
     .rc192-variant-head{display:grid;gap:2px}
