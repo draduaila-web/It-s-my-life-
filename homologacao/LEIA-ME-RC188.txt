@@ -1,0 +1,8 @@
+BERTH.A · RC188 · Helper only
+- Owner congelado, sem alterações.
+- Assets de reconhecimento com nomes novos _v188 para evitar cache.
+- Apresentação sem fundo/tile por CSS.
+- Arrasou ampliado.
+- Cabeçalho do Helper corrigido.
+- Checkboxes nativos iOS substituídos pelo padrão BERTH.A.
+- Presets migrados para v10.

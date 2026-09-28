@@ -63,7 +63,7 @@
   window.berthaResolveBillReminder=async(info)=>({ok:true,homologacao:true,resolved:true,billId:info?.billId||''});
 })();
 </script>
-<title>BERTH.A · Homologação RC187B</title>
+<title>BERTH.A · Homologação RC188</title>
 
 <style id="bertha-v2897-release">
 /* v2.8.100 — Criação & Ideias: alinhamento definitivo do bloco BERTA; fundo luminoso preservado. */
@@ -500,7 +500,7 @@ body.bertha-hml::before{content:"HOMOLOGAÇÃO";position:fixed;z-index:99999;top
  font:700 8px/1 system-ui,-apple-system,sans-serif;letter-spacing:.08em;pointer-events:none
 }
 </style>
-<div id="rc157IndexBadge">INDEX · RC187B</div>
+<div id="rc157IndexBadge">INDEX · RC188</div>
 
 <div class="app-shell">
 <header class="topbar">
@@ -592,20 +592,20 @@ body.bertha-hml::before{content:"HOMOLOGAÇÃO";position:fixed;z-index:99999;top
 
 
 <script src="premiacoes-assets-manifest-v177.js?v=178a"></script>
-<script src="app-v2.8.221-rc187b.js?v=187b-helper"></script>
+<script src="app-v2.8.221-rc188.js?v=188-helper"></script>
 <script src="work-v12.js?v=167a"></script>
 <script src="bertha-time-v2.8.221-rc131.js?v=167a"></script>
 <script src="satellites-v161.js?v=167a"></script>
 <script>
 (function(){
-  document.documentElement.dataset.berthaIndex='RC187B';
+  document.documentElement.dataset.berthaIndex='RC188';
   function paint(){
     try{ window.__berthaCoreRender?.(); }
     catch(e){
-      console.error('RC187B paint',e);
+      console.error('RC188 paint',e);
       const box=document.getElementById('app');
       if(box && !box.children.length){
-        box.innerHTML='<section class="card"><strong>RC187B carregou, mas o renderer falhou.</strong><p class="note">'+String(e?.message||e)+'</p></section>';
+        box.innerHTML='<section class="card"><strong>RC188 carregou, mas o renderer falhou.</strong><p class="note">'+String(e?.message||e)+'</p></section>';
       }
     }
   }
@@ -616,7 +616,7 @@ body.bertha-hml::before{content:"HOMOLOGAÇÃO";position:fixed;z-index:99999;top
 </script>
 
 <script src="ui-polish-v164.js?v=169a"></script>
-<script src="ui-assets-v187b.js?v=187b-helper"></script>
-<script src="routing-fix-v187b.js?v=187b-helper"></script>
+<script src="ui-assets-v188.js?v=188-helper"></script>
+<script src="routing-fix-v188.js?v=188-helper"></script>
 </body>
 </html>
