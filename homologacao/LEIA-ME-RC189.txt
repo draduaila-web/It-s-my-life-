@@ -1,26 +1,8 @@
-BERTH.A — HOMOLOGAÇÃO RC189
+BERTH.A — RC189 (Satélites + Helper)
 
-ESCOPO CIRÚRGICO
-- Satélites: nova família visual para Homem, Mulher, Par romântico masculino, Par romântico feminino, Menino e Menina.
-- Helper/Reconhecimentos: 9 assets revisados, flor refeita, Arrasou com estrela maior e maior diferenciação interna.
-- Personalização do Helper: duas variantes cromáticas reais por reconhecimento, com preview do próprio asset e persistência em bertha.recognition.presets.v11.
-- Owner: NÃO ALTERADO. Mantido congelado.
-
-ARQUIVOS PRINCIPAIS
-- index.html
-- app-v2.8.221-rc189.js
-- rc189-sat-helper.js
-- satellite_avatar_*_v189.svg (6)
-- recognition_*_v189_a.svg + recognition_*_v189_b.svg (18)
-
-PALETAS
-- distribuídas entre lilás, pêssego, menta, creme, azul suave e dourado claro; rosa não domina a coleção.
-
-UPLOAD
-- Subir o conteúdo da pasta homologacao/ para a mesma pasta homologacao/ do repositório.
-- Esta RC é incremental: arquivos antigos referenciados pelo app permanecem no repositório.
-
-VALIDAÇÕES EXECUTADAS
-- sintaxe JavaScript (node --check)
-- existência de todos os assets referenciados pela RC189
-- index apontando para app-v2.8.221-rc189.js e rc189-sat-helper.js
+- Satélites com avatares glossy aprovados
+- Reconhecimentos revisados
+- Flor corrigida
+- Arrasou ajustado
+- Personalização com 2 variações reais por reconhecimento (Rosé / Brisa)
+- Owner preservado

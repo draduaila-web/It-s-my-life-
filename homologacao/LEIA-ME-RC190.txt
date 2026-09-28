@@ -1,0 +1,8 @@
+BERTH.A — RC190 (Satélites + Helper)
+
+- RC incremental para publicar as novas imagens homologadas.
+- Satélites com avatares glossy aprovados integrados.
+- Reconhecimentos com os novos assets aprovados.
+- Personalização de cores preservada com 2 variações reais por reconhecimento.
+- Cache-busting aplicado: arquivos RC190 + storage key v13.
+- Owner preservado.
