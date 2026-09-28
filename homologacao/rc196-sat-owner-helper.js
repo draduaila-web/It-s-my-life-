@@ -310,7 +310,7 @@
     });
 
     const bubble=document.querySelector('.r148-build');
-    if(bubble) bubble.textContent='HML · RC198';
+    if(bubble) bubble.textContent='HML · RC199';
   }
 
   function enhanceSatModal(){
@@ -378,6 +378,7 @@
     .r147-pane[data-r147pane="helpers"] [data-r147-preset] .r147-config-grid label{display:grid!important;gap:5px!important}
     .r147-pane[data-r147pane="helpers"] [data-r147-preset] .r147-config-grid label[style*="span 2"]{grid-column:span 1!important}
     .rc192-helper-active{width:56px!important}.rc192-helper-active .rc178-check{width:36px!important;height:36px!important;border-radius:12px!important}.rc192-helper-active input:checked + .rc178-check{border-color:transparent!important;background:linear-gradient(145deg,#f1d3de,#e2cfe7 58%,#d9e7f2)!important;box-shadow:inset 0 1px 0 rgba(255,255,255,.65),0 6px 14px rgba(177,153,175,.16)!important}.rc192-helper-active input:checked + .rc178-check:after{left:12px!important;top:7px!important;width:8px!important;height:15px!important}.rc192-helper-active em{font-size:10.5px!important}
+    .r147-pane[data-r147pane="helpers"] .r147-helper-context>div{display:grid!important;align-content:center!important;gap:9px!important;min-width:0!important}.r147-pane[data-r147pane="helpers"] .r147-helper-context>div>strong,.r147-pane[data-r147pane="helpers"] .r147-helper-context>div>small{display:block!important;margin:0!important;white-space:normal!important}.r147-pane[data-r147pane="helpers"] .r147-helper-context>div>small{line-height:1.35!important}
 
     .rc192-variant-picker{display:grid;gap:8px;padding:12px 13px;border-radius:18px;background:linear-gradient(145deg,rgba(255,251,246,.90),rgba(247,245,249,.88));border:1px solid rgba(128,111,132,.08)}
     .rc192-variant-head{display:grid;gap:2px}
@@ -446,7 +447,7 @@
   `;
   document.head.appendChild(style);
 
-  document.documentElement.dataset.berthaBuild='RC196';
+  document.documentElement.dataset.berthaBuild='RC199';
 
   /* RC194: o core da BERTH.A repinta a tela em DOMContentLoaded/pageshow.
      Mantemos os refinamentos vivos após qualquer repaint sem tocar no Owner core. */
