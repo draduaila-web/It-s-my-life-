@@ -1,0 +1,9 @@
+BERTH.A — RC202 · Kids Neblina visual vivo
+
+- Corrige o problema de imagem dos pets sobre o nome/status.
+- Cards de pets reorganizados: imagem em área própria + nome e status separados.
+- Coleção Neblina ganha mais contraste, cor e presença visual.
+- Gato Neblina atualizado para uma direção mais neutra para meninos e meninas.
+- Trilha, cápsula, cards e acessórios recebem cores mais vivas, sombras suaves e melhor leitura.
+- Paleta continua pastel/candy, sem neon e sem estereótipo de gênero.
+- Mantém 6 pets × 5 acessórios por pet e toda a lógica funcional anterior.

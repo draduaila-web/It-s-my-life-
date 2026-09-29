@@ -1,4 +1,4 @@
-/* BERTH.A RC201 — Helper cold assets aligned to flower family
+/* BERTH.A RC196 — Owner 6 medalhas + Helper estrutural
    - mantém avatares aprovados
    - brisas do Helper suavizadas (menos verde, mais legíveis)
    - checkbox do Helper alinhado ao padrão suave do Owner
@@ -69,7 +69,7 @@
 
   function tryJSON(k){try{return JSON.parse(window.berthaHmlStorage.getItem(k)||'null')}catch(e){return null}}
   function stripExt(v){return String(v||'').replace(/\.(png|jpg|jpeg|svg)$/i,'')}
-  function assetFile(name){ return './'+stripExt(name)+'.png?v=201'; }
+  function assetFile(name){ return './'+stripExt(name)+'.png?v=198'; }
   function normalizeId(raw,i){
     const fallback=(DEFAULTS[i]||DEFAULTS[0]).id;
     const id=String(raw?.id||fallback);
@@ -118,7 +118,7 @@
   }
   function ownerImg(file,cls='rc192-owner-art',tone=null){
     const style=tone?` style="--owner-filter:${tone.filter};--owner-bg:${tone.bg}"`:'';
-    return `<span class="rc193-owner-art-shell ${tone?`rc193-tone rc193-tone-${tone.id}`:''}"${style}><img class="${cls}" src="./${file}?v=200" alt="" aria-hidden="true"></span>`;
+    return `<span class="rc193-owner-art-shell ${tone?`rc193-tone rc193-tone-${tone.id}`:''}"${style}><img class="${cls}" src="./${file}?v=196" alt="" aria-hidden="true"></span>`;
   }
   function helperStateFromRow(row,i){
     const current=loadPresets();
@@ -238,25 +238,6 @@
     if(!pane) return;
     const presets=loadPresets();
 
-    const helperIntro=pane.querySelector(".r147-helper-context > div");
-    if(helperIntro){
-      const nameEl=helperIntro.querySelector("strong");
-      const textEl=helperIntro.querySelector("small");
-      helperIntro.style.display="block";
-      helperIntro.style.minWidth="0";
-      if(nameEl){
-        nameEl.style.display="inline-block";
-        nameEl.style.margin="0 14px 0 0";
-        nameEl.style.verticalAlign="baseline";
-      }
-      if(textEl){
-        textEl.style.display="inline";
-        textEl.style.margin="0";
-        textEl.style.lineHeight="1.42";
-        textEl.style.verticalAlign="baseline";
-      }
-    }
-
     pane.querySelectorAll('[data-r147-rec]').forEach((btn,i)=>{
       const p=presets.filter(x=>x.active!==false)[i];
       if(!p) return;
@@ -329,7 +310,7 @@
     });
 
     const bubble=document.querySelector('.r148-build');
-    if(bubble) bubble.textContent='HML · RC201';
+    if(bubble) bubble.textContent='HML · RC199';
   }
 
   function enhanceSatModal(){
@@ -371,7 +352,7 @@
     html body dialog.sat-modal .sat-permissions, html body dialog.sat-modal .sat-kids-settings{gap:12px!important}
     html body dialog.sat-modal .sat-permission{display:grid!important;grid-template-columns:28px minmax(0,1fr)!important;align-items:center!important;gap:14px!important;padding:16px!important;min-height:0!important;border-radius:22px!important;background:rgba(255,253,249,.90)!important;border:1px solid rgba(122,108,128,.10)!important;box-shadow:none!important}
     html body dialog.sat-modal .sat-permission.is-checked{background:linear-gradient(135deg,rgba(251,247,239,.98),rgba(248,237,240,.55) 42%,rgba(237,246,252,.42) 100%)!important;border-color:rgba(201,170,176,.24)!important}
-    html body dialog.sat-modal .sat-checkbox,.sat-member .sat-checkbox{appearance:none!important;-webkit-appearance:none!important;width:26px!important;height:26px!important;margin:0!important;border-radius:10px!important;border:1.5px solid rgba(183,167,191,.92)!important;background:linear-gradient(145deg,rgba(255,251,248,.98),rgba(247,243,250,.98))!important;box-shadow:inset 0 1px 0 rgba(255,255,255,.82),0 4px 12px rgba(166,147,172,.10)!important;position:relative!important;display:inline-block!important;vertical-align:middle!important;cursor:pointer!important}html body dialog.sat-modal .sat-checkbox:checked,.sat-member .sat-checkbox:checked{border-color:transparent!important;background:linear-gradient(145deg,#f1d3de,#e2cfe7 58%,#d9e7f2)!important;box-shadow:inset 0 1px 0 rgba(255,255,255,.70),0 6px 14px rgba(177,153,175,.16)!important}html body dialog.sat-modal .sat-checkbox:checked::after,.sat-member .sat-checkbox:checked::after{content:"";position:absolute;left:9px;top:5px;width:6px;height:12px;border:solid #fff;border-width:0 2.5px 2.5px 0;transform:rotate(45deg)}
+    html body dialog.sat-modal .sat-checkbox{width:24px!important;height:24px!important;margin:0!important}
     html body dialog.sat-modal .sat-permission-copy{display:grid!important;gap:4px!important;min-width:0!important;width:100%!important}
     html body dialog.sat-modal .sat-permission-copy strong, html body dialog.sat-modal .sat-permission strong{display:block!important;font-size:14px!important;line-height:1.25!important;font-weight:520!important;color:#4d4550!important;white-space:normal!important}
     html body dialog.sat-modal .sat-permission-copy small, html body dialog.sat-modal .sat-permission small{display:block!important;font-size:11.5px!important;line-height:1.45!important;color:#867e89!important;white-space:normal!important;overflow-wrap:anywhere!important}
@@ -396,8 +377,8 @@
     .r147-pane[data-r147pane="helpers"] [data-r147-preset] .r147-config-grid{display:grid!important;grid-template-columns:1fr 1.6fr!important;gap:10px!important}
     .r147-pane[data-r147pane="helpers"] [data-r147-preset] .r147-config-grid label{display:grid!important;gap:5px!important}
     .r147-pane[data-r147pane="helpers"] [data-r147-preset] .r147-config-grid label[style*="span 2"]{grid-column:span 1!important}
-    .rc178-owner-active .rc178-check,.rc192-helper-active .rc178-check{width:36px!important;height:36px!important;border-radius:12px!important;border:1px solid rgba(183,167,191,.92)!important;background:linear-gradient(145deg,rgba(255,251,248,.98),rgba(247,243,250,.98))!important;box-shadow:inset 0 1px 0 rgba(255,255,255,.82),0 4px 12px rgba(166,147,172,.10)!important}.rc192-helper-active,.rc178-owner-active{width:56px!important}.rc178-owner-active input:checked + .rc178-check,.rc192-helper-active input:checked + .rc178-check{border-color:transparent!important;background:linear-gradient(145deg,#f1d3de,#e2cfe7 58%,#d9e7f2)!important;box-shadow:inset 0 1px 0 rgba(255,255,255,.65),0 6px 14px rgba(177,153,175,.16)!important}.rc178-owner-active input:checked + .rc178-check:after,.rc192-helper-active input:checked + .rc178-check:after{left:12px!important;top:7px!important;width:8px!important;height:15px!important}.rc192-helper-active em,.rc178-owner-active em{font-size:10.5px!important}
-    .r147-pane[data-r147pane="helpers"] .r147-helper-context>div{display:block!important;min-width:0!important}.r147-pane[data-r147pane="helpers"] .r147-helper-context>div>strong{display:inline-block!important;margin:0 14px 0 0!important;white-space:normal!important;vertical-align:baseline!important}.r147-pane[data-r147pane="helpers"] .r147-helper-context>div>small{display:inline!important;margin:0!important;white-space:normal!important;line-height:1.42!important;vertical-align:baseline!important}
+    .rc192-helper-active{width:56px!important}.rc192-helper-active .rc178-check{width:36px!important;height:36px!important;border-radius:12px!important}.rc192-helper-active input:checked + .rc178-check{border-color:transparent!important;background:linear-gradient(145deg,#f1d3de,#e2cfe7 58%,#d9e7f2)!important;box-shadow:inset 0 1px 0 rgba(255,255,255,.65),0 6px 14px rgba(177,153,175,.16)!important}.rc192-helper-active input:checked + .rc178-check:after{left:12px!important;top:7px!important;width:8px!important;height:15px!important}.rc192-helper-active em{font-size:10.5px!important}
+    .r147-pane[data-r147pane="helpers"] .r147-helper-context>div{display:grid!important;align-content:center!important;gap:9px!important;min-width:0!important}.r147-pane[data-r147pane="helpers"] .r147-helper-context>div>strong,.r147-pane[data-r147pane="helpers"] .r147-helper-context>div>small{display:block!important;margin:0!important;white-space:normal!important}.r147-pane[data-r147pane="helpers"] .r147-helper-context>div>small{line-height:1.35!important}
 
     .rc192-variant-picker{display:grid;gap:8px;padding:12px 13px;border-radius:18px;background:linear-gradient(145deg,rgba(255,251,246,.90),rgba(247,245,249,.88));border:1px solid rgba(128,111,132,.08)}
     .rc192-variant-head{display:grid;gap:2px}
@@ -466,7 +447,7 @@
   `;
   document.head.appendChild(style);
 
-  document.documentElement.dataset.berthaBuild='RC201';
+  document.documentElement.dataset.berthaBuild='RC199';
 
   /* RC194: o core da BERTH.A repinta a tela em DOMContentLoaded/pageshow.
      Mantemos os refinamentos vivos após qualquer repaint sem tocar no Owner core. */
