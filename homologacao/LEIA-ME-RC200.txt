@@ -1,0 +1,7 @@
+BERTH.A — RC200
+Patch incremental para /homologacao.
+
+- Helper: corrige o respiro entre o nome do Helper e “Selecione um reconhecimento e envie.”
+- Helper + Owner: unifica o visual dos checkboxes ativos no mesmo padrão suave.
+- Satélites/convites: suaviza e reforça os checkboxes do modal para melhor leitura e consistência visual.
+- Cache-bust dos assets do Owner + Helper para refletir a troca imediatamente no GitHub Pages.
