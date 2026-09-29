@@ -63,7 +63,7 @@
   window.berthaResolveBillReminder=async(info)=>({ok:true,homologacao:true,resolved:true,billId:info?.billId||''});
 })();
 </script>
-<title>BERTH.A · Homologação RC207</title>
+<title>BERTH.A · Homologação RC213</title>
 
 <style id="bertha-v2897-release">
 /* v2.8.100 — Criação & Ideias: alinhamento definitivo do bloco BERTA; fundo luminoso preservado. */
@@ -500,7 +500,7 @@ body.bertha-hml::before{content:"HOMOLOGAÇÃO";position:fixed;z-index:99999;top
  font:700 8px/1 system-ui,-apple-system,sans-serif;letter-spacing:.08em;pointer-events:none
 }
 </style>
-<div id="rc157IndexBadge">INDEX · RC207</div>
+<div id="rc157IndexBadge">INDEX · RC213</div>
 
 <div class="app-shell">
 <header class="topbar">
@@ -598,14 +598,14 @@ body.bertha-hml::before{content:"HOMOLOGAÇÃO";position:fixed;z-index:99999;top
 <script src="satellites-v161.js?v=167a"></script>
 <script>
 (function(){
-  document.documentElement.dataset.berthaIndex='RC211';
+  document.documentElement.dataset.berthaIndex='RC213';
   function paint(){
     try{ window.__berthaCoreRender?.(); }
     catch(e){
       console.error('RC209 paint',e);
       const box=document.getElementById('app');
       if(box && !box.children.length){
-        box.innerHTML='<section class="card"><strong>RC211 carregou, mas o renderer falhou.</strong><p class="note">'+String(e?.message||e)+'</p></section>';
+        box.innerHTML='<section class="card"><strong>RC213 carregou, mas o renderer falhou.</strong><p class="note">'+String(e?.message||e)+'</p></section>';
       }
     }
   }
@@ -621,5 +621,6 @@ body.bertha-hml::before{content:"HOMOLOGAÇÃO";position:fixed;z-index:99999;top
 <script src="rc207-kids-neblina.js?v=207-clean-family"></script>
 <script src="rc209-kids-neblina.js?v=211-safe-rollback"></script>
 <script src="routing-fix-v188.js?v=188-helper"></script>
+<script src="rc213-kids-neblina-item01.js?v=213-item01-force"></script>
 </body>
 </html>

@@ -1,0 +1,6 @@
+BERTH.A · RC213
+Correção da cadeia de carregamento do Kids sem mexer na base estável.
+- INDEX/HML fixados em RC213 após todos os scripts legados.
+- Cache-bust novo para o patch.
+- Item 01: Boné de Bruma 3D integrado por override mínimo de r147img.
+- Nenhuma alteração em storage, trilha, Owner, Helper ou demais acessórios.
