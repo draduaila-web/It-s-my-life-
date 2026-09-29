@@ -1,0 +1,12 @@
+BERTH.A — RC206 · Kids Neblina · carga forçada + referências limpas
+
+Esta RC corrige o motivo de a RC205 parecer não ter mudado: agora o index.html é entregue junto e força a carga do Kids com ?v=206.
+
+Entram nesta RC:
+- INDEX visível atualizado para RC206.
+- HML carimbado como RC206 após o carregamento.
+- Assets do kit do Gato Neblina substituídos pela linha limpa das referências enviadas: boné, coleira, medalha, mochila e boia.
+- Fundo branco removido e bordas/rebarbas limpas.
+- Paleta automática por Kids mantida (neutra / menino / menina) por filtro não destrutivo.
+- Pets mantidos nesta etapa, mas com encaixe reduzido para exibir os pés completos sem cortar.
+- Helper não alterado.

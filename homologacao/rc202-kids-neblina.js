@@ -1,4 +1,4 @@
-/* BERTH.A RC205 — Kids · Coleção Neblina · linguagem visual limpa + paleta por Kids
+/* BERTH.A RC206 — Kids · Neblina · referência limpa + carga forçada
    Primeira coleção fechada: 6 pets × 5 acessórios por pet.
    Sem ranking, sem perda de pontos, paleta neutra e suave.
    Este patch depende da RC196 já publicada. */
@@ -35,16 +35,16 @@
   };
   function petArt(id){
     const file=PET_ASSETS[id];
-    return file?`<span class="r197-art r199-pet-art"><img src="./${file}?v=205" alt="" aria-hidden="true"></span>`:'';
+    return file?`<span class="r197-art r199-pet-art"><img src="./${file}?v=206" alt="" aria-hidden="true"></span>`:'';
   }
 
 
   const ACC_ASSETS={
-    mist_v1_cat_head:'kids_neblina_ref_head',
-    mist_v1_cat_neck:'kids_neblina_ref_neck',
-    mist_v1_cat_eyes:'kids_neblina_ref_chest',
-    mist_v1_cat_back:'kids_neblina_ref_back',
-    mist_v1_cat_special:'kids_neblina_ref_special'
+    mist_v1_cat_head:'kids_neblina_ref_head_rc206.png',
+    mist_v1_cat_neck:'kids_neblina_ref_neck_rc206.png',
+    mist_v1_cat_eyes:'kids_neblina_ref_chest_rc206.png',
+    mist_v1_cat_back:'kids_neblina_ref_back_rc206.png',
+    mist_v1_cat_special:'kids_neblina_ref_special_rc206.png'
   };
   function kidsPaletteFor(member){
     const saved=window.berthaHmlStorage?.getItem('bertha.kids.palette.'+member?.id)||'auto';
@@ -56,9 +56,9 @@
   }
   let ACTIVE_KID_PALETTE='neutral';
   function accArt(id){
-    const base=ACC_ASSETS[id];
-    if(!base)return '';
-    return `<span class="r197-art r204-acc-art"><img src="./${base}_${ACTIVE_KID_PALETTE}_rc205.png?v=205" alt="" aria-hidden="true"></span>`;
+    const file=ACC_ASSETS[id];
+    if(!file)return '';
+    return `<span class="r197-art r204-acc-art rc206-palette-${ACTIVE_KID_PALETTE}"><img src="./${file}?v=206" alt="" aria-hidden="true"></span>`;
   }
 
   const PET_MAP=Object.fromEntries(COLLECTION.pets.map(p=>[p.id,p]));
@@ -189,12 +189,37 @@
     .r197-settings{grid-template-columns:repeat(3,minmax(0,1fr))!important}
     @media(max-width:560px){.r197-settings{grid-template-columns:1fr!important}}
 
+    /* RC206 — linha limpa das referências + pés inteiros */
+    .r197-pet-art{height:150px!important;padding:15px!important;overflow:hidden!important;background:linear-gradient(145deg,#fffdf8,#f4f6fb 55%,#f7fbf8)!important}
+    .r197-pet-art .r199-pet-art{width:100%!important;height:100%!important;padding:0!important;display:grid!important;place-items:center!important}
+    .r197-pet-art .r199-pet-art img{width:auto!important;height:auto!important;max-width:88%!important;max-height:88%!important;object-fit:contain!important;object-position:center!important;transform:none!important;filter:drop-shadow(0 6px 12px rgba(71,63,82,.10)) saturate(.96)!important}
+    .r197-current-art{overflow:hidden!important;padding:12px!important}
+    .r197-current-art .r199-pet-art img{width:auto!important;height:auto!important;max-width:86%!important;max-height:86%!important;transform:none!important}
+    .r197-acc{background:linear-gradient(160deg,#fffdfa,#f7f8fb)!important;border:1px solid rgba(89,84,96,.10)!important;box-shadow:0 7px 18px rgba(69,61,77,.045)!important}
+    .r197-acc-art{width:116px!important;height:116px!important;overflow:visible!important}
+    .r204-acc-art{width:100%!important;height:100%!important;display:grid!important;place-items:center!important}
+    .r204-acc-art img{width:auto!important;height:auto!important;max-width:91%!important;max-height:91%!important;object-fit:contain!important;filter:drop-shadow(0 6px 12px rgba(69,61,77,.12)) saturate(1.08) contrast(1.04)!important}
+    .rc206-palette-neutral img{filter:drop-shadow(0 6px 12px rgba(69,61,77,.12)) saturate(.98) hue-rotate(18deg) contrast(1.05)!important}
+    .rc206-palette-boy img{filter:drop-shadow(0 6px 12px rgba(69,61,77,.12)) saturate(1.05) hue-rotate(135deg) contrast(1.06)!important}
+    .rc206-palette-girl img{filter:drop-shadow(0 6px 12px rgba(69,61,77,.12)) saturate(1.04) hue-rotate(-8deg) contrast(1.04)!important}
+    @media(max-width:560px){.r197-pet-art{height:146px!important;padding:16px!important}.r197-pets button{min-height:204px!important}}
+
   `;document.head.appendChild(style);
 
   // Atualiza a build e reaplica após repaints do core.
-  document.documentElement.dataset.berthaBuild='RC205';
-  const badge=document.querySelector('.hml-build-pill');if(badge)badge.textContent='HML · RC205';
-  window.addEventListener('pageshow',()=>setTimeout(refresh,120));
+  document.documentElement.dataset.berthaBuild='RC206';
+  const badge=document.querySelector('.hml-build-pill');if(badge)badge.textContent='HML · RC206';
+
+  function rc206Stamp(){
+    document.documentElement.dataset.berthaBuild='RC206';
+    const idx=document.getElementById('rc157IndexBadge'); if(idx) idx.textContent='INDEX · RC206';
+    document.querySelectorAll('body *').forEach(el=>{
+      if(el.children.length===0 && /^HML\s*·\s*RC\d+/i.test((el.textContent||'').trim())) el.textContent='HML · RC206';
+    });
+  }
+  rc206Stamp(); setTimeout(rc206Stamp,250); setTimeout(rc206Stamp,900);
+
+  window.addEventListener('pageshow',()=>{setTimeout(refresh,120);setTimeout(rc206Stamp,180)});
   document.addEventListener('click',e=>{if(e.target.closest('[data-r147tab="kids"]'))setTimeout(refresh,40)});
   setTimeout(refresh,160);setTimeout(refresh,520);
 })();
