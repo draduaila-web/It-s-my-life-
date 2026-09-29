@@ -35,7 +35,20 @@
   };
   function petArt(id){
     const file=PET_ASSETS[id];
-    return file?`<span class="r197-art r199-pet-art"><img src="./${file}?v=202" alt="" aria-hidden="true"></span>`:'';
+    return file?`<span class="r197-art r199-pet-art"><img src="./${file}?v=204" alt="" aria-hidden="true"></span>`:'';
+  }
+
+
+  const ACC_ASSETS={
+    mist_v1_cat_head:'kids_neblina_mist_v1_cat_head_rc204.png',
+    mist_v1_cat_neck:'kids_neblina_mist_v1_cat_neck_rc204.png',
+    mist_v1_cat_eyes:'kids_neblina_mist_v1_cat_eyes_rc204.png',
+    mist_v1_cat_back:'kids_neblina_mist_v1_cat_back_rc204.png',
+    mist_v1_cat_special:'kids_neblina_mist_v1_cat_special_rc204.png'
+  };
+  function accArt(id){
+    const file=ACC_ASSETS[id];
+    return file?`<span class="r197-art r204-acc-art"><img src="./${file}?v=204" alt="" aria-hidden="true"></span>`:'';
   }
 
   const PET_MAP=Object.fromEntries(COLLECTION.pets.map(p=>[p.id,p]));
@@ -74,6 +87,7 @@
   const oldImg=window.r147img;
   window.r147img=r147img=function(name,cls=''){
     if(PET_MAP[name]) return petArt(name);
+    if(ACC_ASSETS[name]) return accArt(name);
     if(name===COLLECTION.capsule||ACC_MAP[name]) return `<span class="r197-art ${cls}" data-kids-art="${esc(name)}">${svg(ACC_MAP[name]?.type||'capsule',name)}</span>`;
     return oldImg?oldImg(name,cls):'';
   };
@@ -149,11 +163,21 @@
     .r197-acc-grid{gap:12px!important}.r197-acc{min-height:188px!important;padding:12px 10px 11px!important;background:linear-gradient(155deg,#fff8fb,#f5f4ff 52%,#fff9ea)!important;border-color:rgba(132,112,147,.10)!important;box-shadow:0 7px 18px rgba(84,67,95,.045)!important;opacity:1!important}.r197-acc:not(.unlocked){opacity:.58!important;filter:saturate(.9)}.r197-acc.unlocked{box-shadow:0 0 0 1px rgba(183,158,207,.16),0 8px 20px rgba(84,67,95,.06)!important}.r197-acc-art{width:104px!important;height:104px!important;filter:saturate(1.35) contrast(1.03)!important}.r197-acc strong{font-size:11px!important;font-weight:600!important;color:#514857!important}.r197-acc small{font-size:9px!important}.r197-swatches i{width:17px!important;height:17px!important;box-shadow:0 0 0 1px rgba(113,96,130,.12),0 2px 5px rgba(90,72,99,.08)!important}
     .r197-count{background:linear-gradient(135deg,#efe4fb,#fff1c9)!important;color:#67596f!important;font-weight:600!important}
     @media(max-width:560px){.r197-current{grid-template-columns:118px 1fr;gap:12px}.r197-current-art{height:118px}.r197-current-art .r197-art{width:108px;height:108px}.r197-current h3{font-size:20px}.r197-stats{grid-template-columns:1fr 1fr}.r197-stats span:first-child{grid-column:1/-1}.r197-trail{display:flex;overflow-x:auto;scrollbar-width:none}.r197-step{min-width:62px}.r197-pets{grid-template-columns:repeat(2,minmax(0,1fr))}.r197-pets button{min-height:190px!important}.r197-pet-art{height:132px!important}.r197-acc-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.r197-top{align-items:center}.r197-top h2{font-size:22px}}
+
+    /* RC204 — pés completos + acessórios ricos */
+    .r197-pet-art{overflow:hidden!important;padding:8px!important;box-sizing:border-box!important}
+    .r197-pet-art .r199-pet-art,.r197-pet-art .r197-art{width:100%!important;height:100%!important;padding:0!important}
+    .r197-pet-art img{width:100%!important;height:100%!important;object-fit:contain!important;object-position:center center!important;transform:scale(.94)!important}
+    .r197-current-art img{object-fit:contain!important;object-position:center center!important;transform:scale(.92)!important}
+    .r204-acc-art{width:100%!important;height:100%!important;display:grid!important;place-items:center!important}
+    .r204-acc-art img{width:100%!important;height:100%!important;object-fit:contain!important;display:block!important;filter:drop-shadow(0 7px 14px rgba(92,73,106,.12)) saturate(1.12)!important}
+    .r197-acc-art{width:112px!important;height:112px!important;overflow:visible!important}
+
   `;document.head.appendChild(style);
 
   // Atualiza a build e reaplica após repaints do core.
-  document.documentElement.dataset.berthaBuild='RC202';
-  const badge=document.querySelector('.hml-build-pill');if(badge)badge.textContent='HML · RC202';
+  document.documentElement.dataset.berthaBuild='RC204';
+  const badge=document.querySelector('.hml-build-pill');if(badge)badge.textContent='HML · RC204';
   window.addEventListener('pageshow',()=>setTimeout(refresh,120));
   document.addEventListener('click',e=>{if(e.target.closest('[data-r147tab="kids"]'))setTimeout(refresh,40)});
   setTimeout(refresh,160);setTimeout(refresh,520);
