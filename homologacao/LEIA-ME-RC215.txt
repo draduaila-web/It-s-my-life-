@@ -1,0 +1,10 @@
+BERTH.A HOMOLOGAÇÃO — RC215
+
+Correção da RC214:
+- Os 15 assets agora estão fisicamente dentro do ZIP.
+- O patch não depende mais de window.r147img, porque o painel Kids RC209 usa renderer local.
+- O RC215 substitui diretamente os 5 cards renderizados do Gato Neblina.
+- 5 acessórios x 3 variações: Névoa / Coral / Misto.
+- Preserva trilha, storage, Owner, Helper e demais pets.
+
+Após subir, INDEX e HML devem permanecer em RC215.
