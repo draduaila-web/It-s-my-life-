@@ -1,0 +1,12 @@
+BERTH.A · HOMOLOGAÇÃO RC214
+
+Escopo desta RC:
+- bloco completo de acessórios do Gato Neblina;
+- 5 acessórios reais: Boné de Bruma, Coleira Lunar, Óculos Neblina, Mochila Etérea, Amuleto Lunar;
+- 3 variações reais por acessório: Névoa, Coral e Misto;
+- coral corrigido para coral (não verde);
+- assets 3D vivos e colecionáveis, seguindo a família visual aprovada;
+- mantém a lógica/trilha/storage da RC209/RC213;
+- INDEX e HML fixados em RC214.
+
+Total de assets novos: 15 PNGs.
