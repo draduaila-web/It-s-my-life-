@@ -1,0 +1,13 @@
+BERTH.A HOMOLOGAÇÃO RC217
+
+Correção direta da RC216:
+- mantém a lógica Kids/ciclo de 30 dias da RC216;
+- inclui fisicamente os 15 assets do Gato Neblina no ZIP;
+- corrige o ASSET_BASE para assets/rc217/kids/neblina/gato/;
+- cache-bust novo ?v=217a;
+- 5 acessórios x 3 variantes: Névoa, Coral, Misto.
+
+Teste esperado:
+- INDEX · RC217
+- HML · RC217
+- imagens dos cards do Gato Neblina carregadas sem ícone de imagem quebrada.
