@@ -1,0 +1,13 @@
+BERTH.A — RC205 · Kids Neblina · linha visual limpa
+
+Patch incremental para /homologacao.
+
+Mudanças:
+- Acessórios do Gato Neblina redesenhados a partir da linha visual de referência aprovada: mais simples, mais nítidos, menos claros/femininos e sem rococó.
+- Assets limpos em PNG com transparência para remover rebarbas/fragmentos de fundo.
+- 3 famílias cromáticas reais por asset: Neutra, Menino e Menina.
+- Paleta automática usa o avatar Kids: boy/son -> Menino; girl/daughter -> Menina; demais -> Neutra.
+- Owner pode substituir manualmente em Configuração do Owner > Paleta dos Kids.
+- HML atualizado para RC205. O INDEX pode continuar mostrando a base antiga porque este é um patch incremental.
+
+O Helper não foi alterado nesta RC.
