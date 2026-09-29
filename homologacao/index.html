@@ -598,14 +598,14 @@ body.bertha-hml::before{content:"HOMOLOGAÇÃO";position:fixed;z-index:99999;top
 <script src="satellites-v161.js?v=167a"></script>
 <script>
 (function(){
-  document.documentElement.dataset.berthaIndex='RC209';
+  document.documentElement.dataset.berthaIndex='RC210';
   function paint(){
     try{ window.__berthaCoreRender?.(); }
     catch(e){
       console.error('RC209 paint',e);
       const box=document.getElementById('app');
       if(box && !box.children.length){
-        box.innerHTML='<section class="card"><strong>RC209 carregou, mas o renderer falhou.</strong><p class="note">'+String(e?.message||e)+'</p></section>';
+        box.innerHTML='<section class="card"><strong>RC210 carregou, mas o renderer falhou.</strong><p class="note">'+String(e?.message||e)+'</p></section>';
       }
     }
   }
@@ -620,6 +620,7 @@ body.bertha-hml::before{content:"HOMOLOGAÇÃO";position:fixed;z-index:99999;top
 <script src="rc196-sat-owner-helper.js?v=201-helper-assets"></script>
 <script src="rc207-kids-neblina.js?v=207-clean-family"></script>
 <script src="rc209-kids-neblina.js?v=209-neblina-variants"></script>
+<script src="rc210-kids-neblina-assets.js?v=210-final-assets"></script>
 <script src="routing-fix-v188.js?v=188-helper"></script>
 </body>
 </html>

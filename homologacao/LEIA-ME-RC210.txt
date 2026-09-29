@@ -1,0 +1,10 @@
+BERTH.A — HOMOLOGAÇÃO RC210
+
+Escopo desta RC:
+- Mantém toda a lógica/trilha Kids da RC209.
+- Substitui os acessórios do Gato Neblina por assets 3D finais: Boné de Bruma, Coleira Lunar, Óculos Neblina, Mochila Etérea e Amuleto Lunar.
+- Mantém as 3 variações: Névoa, Coral e Misto.
+- Coral corrigido para coral verdadeiro (não verde).
+- Substitui Bronze, Prata, Ouro, Troféu, Super Troféu e Cápsula Neblina por assets 3D.
+- Nenhuma alteração no Owner/Helper fora da trilha Kids.
+- INDEX/HML: RC210.
