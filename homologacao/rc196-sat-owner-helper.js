@@ -1,4 +1,4 @@
-/* BERTH.A RC200 — Helper spacing + checkbox polish
+/* BERTH.A RC201 — Helper cold assets aligned to flower family
    - mantém avatares aprovados
    - brisas do Helper suavizadas (menos verde, mais legíveis)
    - checkbox do Helper alinhado ao padrão suave do Owner
@@ -69,7 +69,7 @@
 
   function tryJSON(k){try{return JSON.parse(window.berthaHmlStorage.getItem(k)||'null')}catch(e){return null}}
   function stripExt(v){return String(v||'').replace(/\.(png|jpg|jpeg|svg)$/i,'')}
-  function assetFile(name){ return './'+stripExt(name)+'.png?v=200'; }
+  function assetFile(name){ return './'+stripExt(name)+'.png?v=201'; }
   function normalizeId(raw,i){
     const fallback=(DEFAULTS[i]||DEFAULTS[0]).id;
     const id=String(raw?.id||fallback);
@@ -329,7 +329,7 @@
     });
 
     const bubble=document.querySelector('.r148-build');
-    if(bubble) bubble.textContent='HML · RC200';
+    if(bubble) bubble.textContent='HML · RC201';
   }
 
   function enhanceSatModal(){
@@ -466,7 +466,7 @@
   `;
   document.head.appendChild(style);
 
-  document.documentElement.dataset.berthaBuild='RC200';
+  document.documentElement.dataset.berthaBuild='RC201';
 
   /* RC194: o core da BERTH.A repinta a tela em DOMContentLoaded/pageshow.
      Mantemos os refinamentos vivos após qualquer repaint sem tocar no Owner core. */
