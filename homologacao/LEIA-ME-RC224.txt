@@ -1,0 +1,17 @@
+BERTH.A — RC224
+
+Escopo: Pack de acessórios da Raposa de Nuvem.
+
+- 5 acessórios diferentes
+- 3 variações por item: Névoa, Coral e Misto
+- Misto prioriza verde/mint em vez de rosa
+- imagens embutidas no JS para evitar 404/cache
+- recorte individual e margem interna para evitar rebarbas/cortes
+- preserva RC220 + RC223 e toda a trilha Kids já implementada
+
+Acessórios:
+1. Gorro Aurora
+2. Lenço Estelar
+3. Óculos da Raposa
+4. Mochila Cauda Estelar
+5. Amuleto Raposa Celeste
