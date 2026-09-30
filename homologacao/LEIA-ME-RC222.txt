@@ -1,0 +1,13 @@
+BERTH.A — RC222
+
+Pacote incremental sobre a RC220/RC221.
+Objetivo: corrigir o pack de acessórios do Coelho de Nuvem, removendo rebarbas visuais e evitando corte aparente dos assets nos cards.
+
+Conteúdo:
+- index.html
+- rc220-kids-cycle-assets.js
+- rc222-kids-rabbit-assets.js
+
+Escopo:
+- Coelho de Nuvem: 5 acessórios x 3 cores (Névoa, Coral, Misto)
+- Mantida a trilha kids de 30 dias e o Gato Neblina
