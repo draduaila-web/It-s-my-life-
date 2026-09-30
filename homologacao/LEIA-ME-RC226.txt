@@ -1,0 +1,11 @@
+BERTH.A — RC226
+
+Correção visual incremental sobre RC225.
+
+Escopo:
+- normaliza a presença visual dos acessórios da Raposa, que estavam proporcionalmente menores;
+- aumenta a presença visual dos acessórios da Corujinha Lunar para aproximar do padrão Gato/Coelho;
+- mantém object-fit contain, margem de segurança e overflow controlado para evitar cortes;
+- não altera lógica Kids, variantes, pontuação, trilha ou nomes dos itens.
+
+Após publicar: INDEX · RC226 e HML · RC226.
