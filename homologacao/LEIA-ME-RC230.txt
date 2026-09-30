@@ -1,0 +1,12 @@
+BERTH.A — RC230
+
+Escopo desta release:
+- Raposa Neblina: corrige cortes e rebarbas nos 5 acessórios, em 3 cores.
+- Corujinha Lunar: pack carregado de forma efetiva, 5 acessórios × 3 cores.
+- Assets de Raposa e Coruja ficam embutidos no JS para evitar 404/cache do GitHub Pages.
+- RC230 passa a ser a única camada final de Raposa/Coruja; patches RC224, RC225 e RC229 deixam de ser carregados no index.
+- Mantidos Gato Neblina, Coelho de Nuvem e lógica Kids existente.
+
+Esperado no Safari após publicação:
+INDEX · RC230
+HML · RC230
