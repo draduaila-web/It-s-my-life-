@@ -1,0 +1,7 @@
+BERTH.A HOMOLOGAÇÃO — RC220
+
+Correção pontual sobre a RC219:
+- Coleira Lunar > Misto agora usa composição realmente mista (coral + névoa/azul + lilás), distinta da Névoa.
+- Remove o fragmento/rebarba visual abaixo da coleira.
+- Mantém a lógica Kids de 30 dias e os demais assets inalterados.
+- Assets continuam embutidos no JavaScript para evitar cache/404 do GitHub Pages.
