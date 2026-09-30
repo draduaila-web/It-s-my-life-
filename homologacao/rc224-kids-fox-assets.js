@@ -50,13 +50,7 @@ function variantFor(aid){
   return Number.isFinite(n)?Math.max(0,Math.min(2,n)):0;
 }
 function srcFor(aid){const kind=IDS[aid]; return kind?ASSETS[kind+'-'+PALS[variantFor(aid)]]:'';}
-function stamp(){
-  document.documentElement.dataset.berthaBuild=BUILD;
-  document.documentElement.dataset.berthaIndex=BUILD;
-  document.title='BERTH.A · Homologação '+BUILD;
-  const idx=document.getElementById('rc157IndexBadge'); if(idx)idx.textContent='INDEX · '+BUILD;
-  document.querySelectorAll('body *').forEach(el=>{if(el.children.length===0&&/^HML\s*·\s*RC\d+/i.test((el.textContent||'').trim()))el.textContent='HML · '+BUILD;});
-}
+function stamp(){ /* RC227: build badge owned only by final patch */ }
 function patch(root=document){
   root.querySelectorAll('.rc209-acc-proxy[data-acc]').forEach(proxy=>{
     const aid=proxy.getAttribute('data-acc'); if(!IDS[aid])return;
@@ -84,5 +78,5 @@ if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',
 window.addEventListener('pageshow',schedule);
 window.addEventListener('hashchange',()=>setTimeout(schedule,30));
 document.addEventListener('click',e=>{if(e.target.closest('[data-r147tab="kids"],[data-rc209variant],#r152KidSel,[data-rc208collection],[data-r152pet]'))setTimeout(schedule,40);},true);
-new MutationObserver(schedule).observe(document.documentElement,{childList:true,subtree:true});
+/* RC227: global MutationObserver removed to prevent cross-patch render loop */
 })();

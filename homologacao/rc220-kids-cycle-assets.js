@@ -53,16 +53,7 @@
   ];
 
   const store=()=>window.berthaHmlStorage||window.localStorage;
-  function stamp(){
-    document.documentElement.dataset.berthaBuild=BUILD;
-    document.documentElement.dataset.berthaIndex=BUILD;
-    document.title='BERTH.A · Homologação '+BUILD;
-    const idx=document.getElementById('rc157IndexBadge');
-    if(idx) idx.textContent='INDEX · '+BUILD;
-    document.querySelectorAll('body *').forEach(el=>{
-      if(el.children.length===0 && /^HML\s*·\s*RC\d+/i.test((el.textContent||'').trim())) el.textContent='HML · '+BUILD;
-    });
-  }
+  function stamp(){ /* RC227: build badge owned only by final patch */ }
 
   function selectedKid(){
     const sel=document.querySelector('#r152KidSel');
@@ -288,9 +279,7 @@
   function schedule(){if(queued)return;queued=true;requestAnimationFrame(run);}
 
   preloadAssets();
-  observer=new MutationObserver(schedule);
-  const t=document.querySelector('[data-r147pane="kids"]')||document.body;
-  observer.observe(t,{childList:true,subtree:true});
+  /* RC227: global observer disabled to prevent cross-patch DOM loop */
   schedule();[80,220,550,1100,2200].forEach(ms=>setTimeout(schedule,ms));
   window.addEventListener('pageshow',()=>setTimeout(schedule,50));
   document.addEventListener('visibilitychange',()=>{if(!document.hidden)setTimeout(schedule,50)});

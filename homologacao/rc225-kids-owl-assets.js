@@ -42,7 +42,7 @@ const store=()=>window.berthaHmlStorage||window.localStorage;
 function selectedKid(){const s=document.querySelector('#r152KidSel');if(s&&s.value)return String(s.value);if(window.__rc209Member!=null)return String(window.__rc209Member);return 'default';}
 function variantFor(aid){const n=Number(store().getItem(PREFIX+selectedKid()+'.'+aid));return Number.isFinite(n)?Math.max(0,Math.min(2,n)):0;}
 function srcFor(aid){const kind=IDS[aid];return kind?ASSETS[kind+'-'+PALS[variantFor(aid)]]:'';}
-function stamp(){document.documentElement.dataset.berthaBuild=BUILD;document.documentElement.dataset.berthaIndex=BUILD;document.title='BERTH.A · Homologação '+BUILD;const idx=document.getElementById('rc157IndexBadge');if(idx)idx.textContent='INDEX · '+BUILD;document.querySelectorAll('body *').forEach(el=>{if(el.children.length===0&&/^HML\s*·\s*RC\d+/i.test((el.textContent||'').trim()))el.textContent='HML · '+BUILD;});}
+function stamp(){ /* RC227: build badge owned only by final patch */ }
 function patch(root=document){
   root.querySelectorAll('.rc209-acc-proxy[data-acc]').forEach(proxy=>{
     const aid=proxy.getAttribute('data-acc');if(!IDS[aid])return;
@@ -64,5 +64,5 @@ const style=document.createElement('style');style.id='rc225-owl-assets-style';st
 Object.values(ASSETS).forEach(src=>{const i=new Image();i.decoding='async';i.src=src;});
 let raf=0;const schedule=()=>{if(raf)return;raf=requestAnimationFrame(()=>{raf=0;patch(document);});};
 if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',schedule,{once:true});else schedule();
-window.addEventListener('pageshow',schedule);window.addEventListener('hashchange',()=>setTimeout(schedule,30));document.addEventListener('click',e=>{if(e.target.closest('[data-rc209variant],[data-r152pet],#rc208PetSel,#rc208CollectionSel'))setTimeout(schedule,30);},true);new MutationObserver(schedule).observe(document.documentElement,{childList:true,subtree:true});
+window.addEventListener('pageshow',schedule);window.addEventListener('hashchange',()=>setTimeout(schedule,30));document.addEventListener('click',e=>{if(e.target.closest('[data-rc209variant],[data-r152pet],#rc208PetSel,#rc208CollectionSel'))setTimeout(schedule,30);},true);/* RC227: global MutationObserver removed to prevent cross-patch render loop */
 })();
