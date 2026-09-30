@@ -1,0 +1,9 @@
+BERTH.A — HOMOLOGAÇÃO RC221
+
+Escopo desta RC:
+- Coelho de Nuvem: pack completo de 5 acessórios.
+- 3 variações reais por acessório: Névoa, Coral e Misto.
+- Óculos alterado para Óculos de Grau Nuvem.
+- Itens variados em relação ao Gato Neblina: Boné de Nuvem, Bandana de Bruma, Óculos de Grau Nuvem, Mochila Saltinho e Pingente Coelho de Nuvem.
+- Assets embutidos no JS para evitar falhas de caminho/cache no GitHub Pages.
+- Preserva integralmente RC220, trilha Kids de 30 dias e pack do Gato Neblina.
