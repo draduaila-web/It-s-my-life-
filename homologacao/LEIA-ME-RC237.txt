@@ -1,0 +1,15 @@
+BERTH.A — RC237 — RECOVERY CODE-ONLY
+
+Objetivo:
+- corrigir a publicação fragmentada da RC236;
+- voltar ao renderer estável de pets/acessórios da RC235;
+- atualizar INDEX e HML para RC237;
+- NÃO duplicar nenhum asset pesado.
+
+Esta RC contém somente:
+- index.html
+- rc235-kids-restore-pets-scale.js
+- rc237-recovery.js
+
+Suba estes arquivos diretamente dentro de /homologacao, substituindo os existentes quando solicitado.
+NÃO precisa reenviar pastas de assets nesta RC.
