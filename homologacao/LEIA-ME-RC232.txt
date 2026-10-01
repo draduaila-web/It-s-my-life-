@@ -1,0 +1,12 @@
+BERTH.A — HOMOLOGAÇÃO RC232
+
+Escopo desta RC:
+- preserva a RC231 e toda a lógica Kids já validada;
+- adiciona o pack do Ursinho de Bruma;
+- 5 acessórios exclusivos × 3 variações: Névoa, Coral e Misto;
+- Misto usa menta/verde como presença principal, sem pink dominante;
+- itens: Gorro Soninho de Bruma, Lenço de Bruma, Óculos Redondos de Bruma, Mochilinha de Bruma e Pingente Sonho de Bruma;
+- assets recortados individualmente, normalizados em canvas transparente e com margem de segurança para evitar cortes/rebarbas;
+- RC231 foi incorporada ao patch RC232 para evitar disputa de versionamento.
+
+Esperado no Safari: INDEX · RC232 e HML · RC232.
