@@ -27,17 +27,13 @@ function patchScale(){
   if(img.getAttribute('src')!==src)img.setAttribute('src',src);
  });
 }
-function stamp(){
- document.documentElement.dataset.berthaBuild=BUILD; document.documentElement.dataset.berthaIndex=BUILD; document.title='BERTH.A · Homologação '+BUILD;
- const idx=document.getElementById('rc157IndexBadge'); if(idx)idx.textContent='INDEX · '+BUILD;
- document.querySelectorAll('body *').forEach(el=>{if(el.children.length)return;const t=(el.textContent||'').trim();if(/^HML\s*·\s*RC\d+/i.test(t))el.textContent='HML · '+BUILD;});
-}
+
 const style=document.createElement('style');style.id='rc235-safe-scale-style';style.textContent=`
 .r197-acc:has(.rc235-tight) .r197-acc-art{height:186px!important;min-height:186px!important;overflow:visible!important;display:flex!important;align-items:center!important;justify-content:center!important}
 .r197-acc-art .rc235-tight{width:100%!important;height:100%!important;display:flex!important;align-items:center!important;justify-content:center!important;overflow:visible!important;background:transparent!important}
 .r197-acc-art .rc235-tight img{display:block!important;width:auto!important;height:174px!important;max-width:94%!important;max-height:174px!important;object-fit:contain!important;object-position:center!important;transform:none!important;filter:none!important}
 `;document.head.appendChild(style);
-function patch(){patchScale();stamp();}
+function patch(){patchScale();}
 let raf=0;function schedule(){if(raf)return;raf=requestAnimationFrame(()=>{raf=0;patch();});}
 if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',schedule,{once:true});else schedule();
 window.addEventListener('pageshow',schedule);window.addEventListener('hashchange',()=>setTimeout(schedule,40));
