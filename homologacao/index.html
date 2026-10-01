@@ -9,7 +9,32 @@
 <meta name="apple-mobile-web-app-title" content="BERTH.A HML">
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="apple-touch-icon" sizes="512x512" href="../bertha-icon-512.png">
-<link rel="stylesheet" href="./style.css?v=239">
+<link rel="stylesheet" href="./style.css?v=rc119">
+<script id="bertha-rollback-221-bootstrap">
+(function(){
+  const KEY='bertha.hml.rc13.modalcolors.refresh';
+  async function hardReset(){
+    try{
+      if('caches' in window){
+        const keys=await caches.keys();
+        await Promise.all(keys.filter(k=>k.startsWith('hml-bertha-')).map(k=>caches.delete(k)));
+      }
+      if('serviceWorker' in navigator){
+        const regs=await navigator.serviceWorker.getRegistrations();
+        await Promise.all(regs.map(r=>r.unregister()));
+      }
+      sessionStorage.setItem(KEY,'1');
+      const u=new URL(location.href);
+      if(u.searchParams.get('rollback')!=='221'){
+        u.searchParams.set('rollback','221');
+        location.replace(u.toString());
+      }
+    }catch(e){ console.warn('[BERTH.A rollback 221]',e); }
+  }
+  if(sessionStorage.getItem(KEY)!=='1') hardReset();
+})();
+</script>
+
 <style id="bertha-v2857-idea-modal-radius">
 /* v2.8.57 — preserva o ajuste cirúrgico: contorno externo do modal Criação & Ideias.
    O JS injeta .study-v10-modal depois do CSS principal e, no iPhone, força 24px.
@@ -63,7 +88,7 @@
   window.berthaResolveBillReminder=async(info)=>({ok:true,homologacao:true,resolved:true,billId:info?.billId||''});
 })();
 </script>
-<title>BERTH.A · Homologação RC239 FINAL</title>
+<title>BERTH.A · Homologação</title>
 
 <style id="bertha-v2897-release">
 /* v2.8.100 — Criação & Ideias: alinhamento definitivo do bloco BERTA; fundo luminoso preservado. */
@@ -469,22 +494,6 @@ body:has(.bertha-plans-task-dialog[open]){
 }
 </style>
 
-
-<script id="rc157-cache-clean">
-(async()=>{
- try{
-   if('serviceWorker' in navigator){
-     const rs=await navigator.serviceWorker.getRegistrations();
-     await Promise.all(rs.map(r=>r.unregister()));
-   }
-   if('caches' in window){
-     const ks=await caches.keys();
-     await Promise.all(ks.map(k=>caches.delete(k)));
-   }
- }catch(e){console.warn('RC160 cache cleanup',e)}
-})();
-</script>
-
 </head>
 
 <style id="bertha-hml-marker">
@@ -492,16 +501,6 @@ body.bertha-hml::before{content:"HOMOLOGAÇÃO";position:fixed;z-index:99999;top
 .bertha-more-data-actions [data-hml-reset]{grid-column:1/-1;background:#fffaf3!important;color:#8b7379!important;border:1px solid rgba(126,104,116,.12)!important}
 </style>
 <body class="bertha-hml">
-
-<style id="rc157-index-badge-style">
-#rc157IndexBadge{
- position:fixed;left:10px;top:calc(env(safe-area-inset-top,0px) + 8px);z-index:1000000;
- padding:5px 9px;border-radius:999px;background:#876e7e;color:#fff;
- font:700 8px/1 system-ui,-apple-system,sans-serif;letter-spacing:.08em;pointer-events:none
-}
-</style>
-<div id="rc157IndexBadge">INDEX · RC239</div>
-
 <div class="app-shell">
 <header class="topbar">
 <button class="icon-btn" id="backBtn" aria-label="Voltar" hidden>‹</button>
@@ -535,7 +534,7 @@ body.bertha-hml::before{content:"HOMOLOGAÇÃO";position:fixed;z-index:99999;top
 
 
 <style id="bertha-task-modal-v153-final">
-/* RC52: Nova/Editar tarefa passa a obedecer ao Modal System atual. Regras finais em style.css?v=rc119. */
+/* RC52: Nova/Editar tarefa passa a obedecer ao Modal System atual. Regras finais em style.css?v=rc119" data-bertha-v28176-backup">
 .bertha-data-tools{margin-top:14px;padding-top:14px;border-top:1px solid rgba(112,96,104,.10);display:grid;grid-template-columns:1fr 1fr;gap:8px}.bertha-data-title{grid-column:1/-1;font-size:10px;letter-spacing:.16em;font-weight:800;color:#9b8d95;margin:0 2px 2px}.bertha-data-tools button{appearance:none;border:1px solid rgba(126,104,116,.10);border-radius:15px;background:#fffaf3;color:#625862;padding:11px 10px;font:inherit;font-size:12px;font-weight:750}.bertha-data-tools button:first-of-type{background:linear-gradient(135deg,rgba(250,218,203,.72),rgba(245,197,180,.66));color:#7d5448}
 </style>
 <script>
@@ -544,7 +543,7 @@ body.bertha-hml::before{content:"HOMOLOGAÇÃO";position:fixed;z-index:99999;top
   const isAppKey=k=>APP_PREFIXES.some(p=>String(k).startsWith(p));
   function collect(){const all=window.berthaHmlStorage.entries(),data={};Object.keys(all).filter(isAppKey).forEach(k=>data[k]=all[k]);return data;}
   function exportBackup(){
-    const payload={format:'BERTHA_BACKUP',version:1,createdAt:new Date().toISOString(),environment:'HOMOLOGACAO',appVersion:'2.8.221-rc189-hml',data:collect()};
+    const payload={format:'BERTHA_BACKUP',version:1,createdAt:new Date().toISOString(),environment:'HOMOLOGACAO',appVersion:'2.8.217-hml',data:collect()};
     const blob=new Blob([JSON.stringify(payload,null,2)],{type:'application/json'}),url=URL.createObjectURL(blob),a=document.createElement('a');
     const d=new Date(),pad=n=>String(n).padStart(2,'0');a.href=url;a.download=`BERTHA_HOMOLOGACAO_${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}_${pad(d.getHours())}-${pad(d.getMinutes())}.json`;document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),1000);
   }
@@ -565,6 +564,7 @@ body.bertha-hml::before{content:"HOMOLOGAÇÃO";position:fixed;z-index:99999;top
   });
 })();
 </script>
+<script src="app-v2.8.221-rc140.js?v=140a"></script>
 
 <dialog id="moduleMenu">
 <div class="module-sheet">
@@ -590,45 +590,7 @@ body.bertha-hml::before{content:"HOMOLOGAÇÃO";position:fixed;z-index:99999;top
 </div>
 </dialog>
 
-
-<script src="premiacoes-assets-manifest-v177.js?v=239"></script>
-<script src="app-v2.8.221-rc196.js?v=239"></script>
-<script src="work-v12.js?v=239"></script>
-<script src="bertha-time-v2.8.221-rc131.js?v=239"></script>
-<script src="satellites-v161.js?v=239"></script>
-<script>
-(function(){
-  document.documentElement.dataset.berthaIndex='RC239';
-  function paint(){
-    try{ window.__berthaCoreRender?.(); }
-    catch(e){
-      console.error('RC209 paint',e);
-      const box=document.getElementById('app');
-      if(box && !box.children.length){
-        box.innerHTML='<section class="card"><strong>RC213 carregou, mas o renderer falhou.</strong><p class="note">'+String(e?.message||e)+'</p></section>';
-      }
-    }
-  }
-  if(document.readyState==='loading') document.addEventListener('DOMContentLoaded',paint,{once:true});
-  else paint();
-  window.addEventListener('pageshow',()=>requestAnimationFrame(paint));
-})();
-</script>
-
-<script src="ui-polish-v164.js?v=239"></script>
-<script src="ui-assets-v188.js?v=239"></script>
-<script src="rc196-sat-owner-helper.js?v=239"></script>
-<script src="rc207-kids-neblina.js?v=239"></script>
-<script src="rc209-kids-neblina.js?v=239"></script>
-<script src="routing-fix-v188.js?v=239"></script>
-<script src="rc220-kids-cycle-assets.js?v=239"></script>
-<script src="rc223-kids-rabbit-assets.js?v=239"></script>
-<script src="rc224-kids-fox-assets.js?v=239"></script>
-<script src="rc225-kids-owl-assets.js?v=239"></script>
-<script src="rc229-kids-scale-hardfix.js?v=239"></script>
-<script src="rc232-kids-bear-assets.js?v=239"></script>
-<script src="rc235-kids-restore-pets-scale.js?v=239"></script>
-
-<script src="rc239-runtime-clean.js?v=239"></script>
+<script src="work-v12.js?v=140a"></script>
+<script src="bertha-time-v2.8.221-rc131.js?v=140a"></script>
 </body>
 </html>
