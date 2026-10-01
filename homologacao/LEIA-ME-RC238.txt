@@ -1,0 +1,9 @@
+BERTH.A — RC238 · PREMIAÇÕES VERSION CLEANUP
+
+Release leve, somente código.
+- Remove visualmente badges legados de RC196/RC199/etc. que reapareciam em Premiações.
+- Mantém apenas INDEX · RC238 e HML · RC238 como marcadores canônicos.
+- Não altera assets, regras Kids, Owner ou Helper.
+- Preserva a recuperação estável da RC237/RC235.
+
+Subir o conteúdo desta pasta dentro de homologacao, substituindo os arquivos existentes de mesmo nome.
