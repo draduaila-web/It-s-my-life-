@@ -1,0 +1,17 @@
+BERTH.A HOMOLOGAÇÃO — RC239 CLEAN
+
+O que esta RC faz:
+- substitui apenas index.html
+- adiciona rc239-runtime-clean.js
+- remove da cadeia ativa rc237-recovery.js e rc238-premiacoes-version-clean.js
+- unifica INDEX/HML em RC239 sem MutationObserver
+- aplica cache-bust ?v=239 nos scripts/CSS ativos
+- NÃO apaga assets nem altera lógica Kids/Owner/Helper
+
+Como subir:
+1. Dentro de /homologacao, substituir index.html
+2. Adicionar rc239-runtime-clean.js
+3. Não apagar os demais arquivos ainda
+4. Esperar GitHub Pages concluir o deploy e testar no Safari
+
+Se RC239 ficar estável, a limpeza física dos arquivos órfãos pode ser feita numa segunda etapa.
