@@ -1,0 +1,25 @@
+BERTH.A RC242 — Kids: Cervo/Ursinho/Coelho + Biblioteca
+
+Esta RC parte do index RC241 já recuperado e reinsere os scripts que ficaram fora:
+- rc231-kids-deer-assets.js
+- rc233-kids-scale-library-sync.js
+- rc234-kids-library-embedded.js
+- rc236-kids-normalize-library.js
+
+Mantidos:
+- rc232-kids-bear-assets.js
+- rc235-kids-restore-pets-scale.js
+- rc240-kids-accessories-normalize.js
+- rc239-runtime-clean.js por último
+
+Objetivo:
+1) restaurar imagens do Cervo;
+2) restaurar/normalizar Ursinho;
+3) aproximar escala do Coelho;
+4) atualizar a Biblioteca dos companheiros;
+5) preservar Gato, Coruja e Raposa como já estão.
+
+Uso:
+Substitua homologacao/index.html por index_RC242_KIDS_BIBLIOTECA.html
+e renomeie o arquivo para index.html antes do upload, ou substitua o conteúdo do index atual.
+Aguarde o Pages ficar verde e teste no Safari.
