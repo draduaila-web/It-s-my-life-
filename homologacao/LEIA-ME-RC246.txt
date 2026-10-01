@@ -1,0 +1,26 @@
+BERTH.A RC246 — recuperação após RC245
+
+A RC245 ocultou um container amplo demais e fez a biblioteca desaparecer.
+A RC246 volta deliberadamente à base RC243, onde:
+- o conjunto correto de acessórios aparecia;
+- havia apenas o conjunto duplicado quebrado logo abaixo.
+
+Depois aplica uma deduplicação muito mais restrita:
+- só considera os cinco nomes exatos do Gato Neblina;
+- só esconde um ancestral que contenha exatamente UMA imagem;
+- só esconde se essa imagem estiver quebrada;
+- só esconde se já existir outro card válido com o mesmo nome.
+
+Arquivos:
+- index.html
+- rc246-kids-library-dedup-safe.js
+
+Upload:
+1. Extraia o ZIP.
+2. Suba os dois arquivos em /homologacao/.
+3. Substitua o index.html atual.
+4. Commit changes.
+5. Aguarde o Pages ficar verde.
+
+IMPORTANTE:
+Esta RC NÃO usa rc244 nem rc245.
