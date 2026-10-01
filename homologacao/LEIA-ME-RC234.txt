@@ -1,0 +1,10 @@
+BERTH.A — RC234
+
+Correção: Biblioteca do Companheiro com imagens embutidas diretamente no patch, eliminando dependência de caminhos/arquivos externos que estavam quebrando no GitHub Pages.
+
+Preservado:
+- escala corrigida de Cervo de Nuvem e Ursinho de Bruma da RC233;
+- packs e lógica Kids já homologados;
+- nomes atuais dos cinco acessórios de cada companheiro.
+
+Esperado no Safari: INDEX · RC234 / HML · RC234.
