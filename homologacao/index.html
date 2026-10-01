@@ -501,6 +501,23 @@ body.bertha-hml::before{content:"HOMOLOGAÇÃO";position:fixed;z-index:99999;top
 .bertha-more-data-actions [data-hml-reset]{grid-column:1/-1;background:#fffaf3!important;color:#8b7379!important;border:1px solid rgba(126,104,116,.12)!important}
 </style>
 <body class="bertha-hml">
+<style id="rc157-index-badge-style">
+#rc157IndexBadge{
+ position:fixed;
+ left:10px;
+ top:calc(env(safe-area-inset-top,0px) + 8px);
+ z-index:1000000;
+ padding:5px 9px;
+ border-radius:999px;
+ background:#876e7e;
+ color:#fff;
+ font:700 8px/1 system-ui,-apple-system,sans-serif;
+ letter-spacing:.08em;
+ pointer-events:none
+}
+</style>
+
+<div id="rc157IndexBadge">INDEX · RC239</div>
 <div class="app-shell">
 <header class="topbar">
 <button class="icon-btn" id="backBtn" aria-label="Voltar" hidden>‹</button>
