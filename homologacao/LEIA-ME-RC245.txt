@@ -1,0 +1,16 @@
+BERTH.A RC245 — Biblioteca Kids sem duplicata quebrada
+
+O print da RC244 mostrou:
+- o primeiro conjunto de acessórios está correto;
+- o conjunto antigo quebrado continua abaixo.
+
+A RC245 faz a remoção por equivalência de rótulo:
+se existe um card com imagem válida e outro card com o mesmo nome + imagem quebrada,
+somente o quebrado é ocultado.
+
+Arquivos:
+- index.html
+- rc245-kids-library-dedup-hardfix.js
+
+Suba os dois em /homologacao/, substitua o index.html e faça Commit.
+rc239-runtime-clean.js continua por último.
