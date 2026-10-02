@@ -1,0 +1,9 @@
+BERTH.A RC262
+Base: RC261.
+Somente:
+- centraliza Troféu;
+- reduz/centraliza Super Troféu para caber integralmente;
+- move a cápsula poucos pixels à esquerda;
+- medalhas Bronze/Prata/Ouro intactas.
+Sem alterações de estrutura, lógica, assets, pets, Kits, Owner/Helper ou badges RC239.
+Subir todos os arquivos em /homologacao/, substituindo index.html e rc209-kids-neblina.js.

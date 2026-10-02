@@ -447,3 +447,48 @@
   `;
   document.head.appendChild(s);
 })();
+
+/* RC262 — corrige especificamente Troféu, Super Troféu e posição da cápsula */
+(function(){
+ if(document.getElementById('rc262-final-align'))return;
+ const s=document.createElement('style'); s.id='rc262-final-align';
+ s.textContent=`
+ /* Medalhas 1–3 permanecem intactas. */
+ .rc258-trail .r197-step:nth-child(4),
+ .rc258-trail .r197-step:nth-child(5){
+   min-width:0!important; overflow:visible!important;
+   display:flex!important; flex-direction:column!important;
+   align-items:center!important; justify-content:flex-start!important;
+ }
+ .rc258-trail .r197-step:nth-child(4) .rc258-reward-art,
+ .rc258-trail .r197-step:nth-child(5) .rc258-reward-art{
+   transform:none!important; position:relative!important;
+   left:auto!important; right:auto!important;
+   margin-left:auto!important; margin-right:auto!important;
+   overflow:hidden!important; box-sizing:border-box!important;
+   justify-self:center!important;
+ }
+ /* Troféu */
+ .rc258-trail .r197-step:nth-child(4) .rc258-reward-art{
+   width:84%!important; max-width:68px!important;
+ }
+ /* Super Troféu: menor porque a arte é mais larga. */
+ .rc258-trail .r197-step:nth-child(5) .rc258-reward-art{
+   width:74%!important; max-width:60px!important;
+ }
+ .rc258-trail .r197-step:nth-child(4) .rc258-reward-art img,
+ .rc258-trail .r197-step:nth-child(5) .rc258-reward-art img{
+   display:block!important; width:100%!important; height:100%!important;
+   max-width:100%!important; max-height:100%!important;
+   object-fit:contain!important; object-position:center!important;
+   margin:0 auto!important; position:static!important; transform:none!important;
+ }
+ /* Cápsula: mantém escala da RC261; só recentraliza para a esquerda. */
+ .rc260-capsule-art{position:relative!important;left:-9px!important}
+ @media(max-width:390px){
+   .rc258-trail .r197-step:nth-child(4) .rc258-reward-art{width:80%!important;max-width:61px!important}
+   .rc258-trail .r197-step:nth-child(5) .rc258-reward-art{width:70%!important;max-width:54px!important}
+   .rc260-capsule-art{left:-8px!important}
+ }`;
+ document.head.appendChild(s);
+})();
