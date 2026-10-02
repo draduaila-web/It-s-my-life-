@@ -1,0 +1,12 @@
+BERTH.A RC257 — ÂNCORA EXATA DA TRILHA KIDS
+Base: RC256 estabilizada.
+
+Corrige somente:
+• encontra o card “KIDS · TRILHA POR COLEÇÃO”;
+• encontra o bloco dos seis universos;
+• coloca a nova trilha imediatamente abaixo dos seis botões;
+• depois oculta a antiga TRILHA KIDS duplicada.
+
+Preserva pets, Ursinho, Kits, pontos, Owner/Helper e RC239.
+O ZIP inclui novamente os 30 assets.
+Suba TODOS os arquivos diretamente em /homologacao/.
