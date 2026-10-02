@@ -1,0 +1,18 @@
+BERTH.A RC252 — KIT FIX ISOLADO
+
+IMPORTANTE:
+Esta RC volta à RC250 como base. NÃO herda a RC251.
+
+CORRIGE:
+- protege totalmente a grade dos 6 companheiros;
+- localiza o Kit exclusivamente pelo título "KIT DO PET";
+- Cervo e Ursinho recebem os assets deer_* / bear_* somente dentro do Kit;
+- Coelho permanece normal na grade; somente os acessórios dentro do Kit aumentam;
+- Biblioteca do Companheiro permanece fora;
+- rc239-runtime-clean.js continua por último.
+
+SUBIR EM /homologacao/:
+1. index.html
+2. rc252-kids-kit-isolated-fix.js
+
+Não é necessário apagar os arquivos antigos do repositório.
