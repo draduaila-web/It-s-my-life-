@@ -1,0 +1,37 @@
+BERTH.A RC259 — CORREÇÃO DE CAMINHOS DOS ASSETS
+
+Base: RC258, cuja estrutura/renderer já foi validada no iPhone.
+
+CAUSA IDENTIFICADA:
+O renderer usa chaves internas:
+mist / ocean / space / forest / solar / coral
+
+Os arquivos gráficos usam:
+neblina / oceano / espaco / floresta / solar / coral
+
+Por isso o navegador procurava, por exemplo:
+rc258_reward_mist_bronze.jpg
+quando o arquivo existente era:
+rc258_reward_neblina_bronze.jpg
+
+CORREÇÃO RC259:
+Somente o mapeamento:
+mist -> neblina
+ocean -> oceano
+space -> espaco
+forest -> floresta
+solar -> solar
+coral -> coral
+
+NÃO ALTERADO:
+- posição da trilha;
+- renderer/estrutura aprovada;
+- Medalha Bronze > Prata > Ouro > Troféu > Super Troféu;
+- cápsula como prêmio do Super Troféu;
+- pets, Ursinho, Kits, Owner, Helper;
+- os 30 assets gráficos;
+- INDEX RC239 / HML RC239.
+
+SUBIR TODOS OS ARQUIVOS DIRETAMENTE EM /homologacao/.
+Substituir index.html e rc209-kids-neblina.js.
+Os 30 JPGs podem ser enviados novamente para garantir que estejam presentes.
