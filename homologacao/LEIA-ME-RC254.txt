@@ -1,0 +1,24 @@
+BERTH.A RC254 — TRILHA DOS UNIVERSOS
+Base integral: RC253.
+
+Progressão:
+Medalha Bronze → Medalha Prata → Medalha Ouro → Troféu → Super Troféu.
+A cápsula é o prêmio do Super Troféu.
+
+Universos:
+Neblina, Oceano, Espaço, Floresta, Solar e Coral.
+
+Neblina mantém linguagem mais ornamental.
+Os demais universos têm identidade própria, mais limpa e unissex, preservando acabamento soft/brilhante.
+
+Preservado:
+- RC253 e ajuste dos Kits;
+- pets;
+- lógica Kids;
+- Owner/Helper;
+- INDEX · RC239 / HML · RC239;
+- rc239-runtime-clean.js permanece por último.
+
+Subir em /homologacao/:
+1. index.html
+2. rc254-kids-universe-rewards.js
