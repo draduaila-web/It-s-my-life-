@@ -1,0 +1,11 @@
+BERTH.A RC251 — KIT RENDERER FIX
+
+- Cervo e Ursinho: recria somente a imagem de cada acessório e usa diretamente os assets reais deer_* e bear_*.
+- Coelho: mantém o pet normal e aumenta somente a arte dos acessórios do Kit.
+- Biblioteca continua fora.
+- Gato, Raposa, Coruja, Owner e Helper não são alterados.
+- rc239-runtime-clean.js permanece por último.
+
+SUBIR EM /homologacao/:
+index.html
+rc251-kids-kit-renderer-fix.js
