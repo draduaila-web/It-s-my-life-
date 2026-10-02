@@ -1,0 +1,18 @@
+BERTH.A RC250 — FECHAMENTO UNIVERSO NEBLINA
+
+Base segura: RC247.
+
+Arquivos reais confirmados no repositório:
+Cervo: deer_head/neck/eyes/back/special × nevoa/coral/misto.
+Ursinho: bear_head/neck/eyes/back/special × nevoa/coral/misto.
+Coelho: mantém o pet no tamanho original e aumenta somente as imagens do Kit.
+
+Também:
+- remove visualmente Biblioteca do Companheiro;
+- mantém Gato, Raposa e Coruja intactos;
+- mantém rc239-runtime-clean.js por último.
+
+SUBIR EM /homologacao/:
+1. index.html
+2. rc250-kids-neblina-close.js
+O arquivo rc231-kids-deer-assets.js já existe no repositório e é apenas referenciado pelo index.
