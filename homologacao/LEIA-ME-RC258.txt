@@ -1,0 +1,21 @@
+BERTH.A RC258 — CORREÇÃO NA ORIGEM DO RENDERER KIDS
+
+Esta versão foi feita a partir do repositório completo enviado pela usuária.
+
+Diferente das RC256/257, NÃO procura, move ou esconde a trilha depois da renderização.
+A alteração foi feita diretamente em rc209-kids-neblina.js, na função r152KidsPanel(), que gera a tela Kids.
+
+ALTERAÇÕES:
+- renderer original agora gera 5 conquistas: Medalha Bronze, Medalha Prata, Medalha Ouro, Troféu e Super Troféu;
+- Cápsula não é sexta etapa: é o prêmio liberado junto com o Super Troféu;
+- a trilha usa o universo ativo e os assets correspondentes;
+- progressão pré-cápsula passa de 6 para 5 marcos;
+- RC256 e RC257 foram removidas da cadeia do index;
+- não há MutationObserver nem reposicionamento DOM;
+- pets, Kits, Owner/Helper e demais estruturas permanecem no renderer existente;
+- INDEX · RC239 / HML · RC239 preservados.
+
+SUBIR TODOS OS ARQUIVOS DIRETAMENTE EM /homologacao/:
+1. index.html
+2. rc209-kids-neblina.js (substituir o existente)
+3. 30 arquivos rc258_reward_*.jpg

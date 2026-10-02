@@ -274,7 +274,7 @@
   function stageData(mid,c){
     const life=currentLifetime(mid), cycle=Math.max(0,life-(+c.startLifetime||0));
     const units=Math.floor(cycle/Math.max(1,+c.pointsPerStep||20));
-    const idx=Math.min(5,units); const capsuleReached=units>=6; const post=Math.max(0,units-6);
+    const idx=Math.min(4,units); const capsuleReached=units>=5; const post=Math.max(0,units-5);
     const accessoryMedals=post; const unlocked=Math.min(5,Math.floor(accessoryMedals/3));
     const nextMedals=unlocked>=5?0:3-(accessoryMedals%3||0);
     return {life,cycle,units,idx,capsuleReached,accessoryMedals,unlocked,nextMedals,complete:unlocked>=5};
@@ -290,15 +290,15 @@
     if(!member)return '<section class="r147-card"><div class="sat-empty">Cadastre um satélite como Kids para configurar a trilha.</div></section>';
     const mode=paletteMode(member); window.__rc208Palette=mode; window.__rc209Member=member.id;
     const c=window.r152EnsureCycle(member.id), col=COLLECTIONS[c.theme], box=window.r152Box(member.id).box, hist=box.history||[], sd=stageData(member.id,c), pet=PET_MAP[c.pet];
-    const trail=[['medal_bronze','Bronze'],['medal_silver','Prata'],['medal_gold','Ouro'],['trophy','Troféu'],['super_trophy','Super Troféu'],['capsule_'+c.theme,'Cápsula']];
+    const trail=[['bronze','Medalha Bronze'],['prata','Medalha Prata'],['ouro','Medalha Ouro'],['trofeu','Troféu'],['super','Super Troféu']];
     const used=new Set(hist.filter(h=>h.theme===c.theme).map(h=>h.pet));
-    const phaseLabel=sd.capsuleReached?(sd.complete?'Pet completo':'Acessórios'):trail[sd.idx][1];
+    const phaseLabel=sd.capsuleReached?(sd.complete?'Pet completo':'Acessórios'):trail[Math.min(sd.idx,trail.length-1)][1];
     return `<section class="r197-kids-shell rc209-kids-shell">
       <section class="r197-hero"><div class="r197-top"><div><span class="r197-kicker">KIDS · TRILHA POR COLEÇÃO</span><h2>${esc(member.name)}</h2><p>${esc(col.name)} · Ciclo ${c.number} · sem ranking, sem perda de pontos</p></div><select id="r152KidSel">${kids.map(k=>`<option value="${esc(k.id)}" ${String(k.id)===String(member.id)?'selected':''}>${esc(k.name)}</option>`).join('')}</select></div>
       ${collectionSelector(c.theme)}
       <div class="r197-current"><div class="r197-current-art">${img(c.pet)}</div><div><span class="r197-label">COMPANHEIRO-ALVO</span><h3>${esc(pet.name)}</h3><p>${esc(pet.desc)}</p><div class="r197-stats"><span><small>Fase</small><b>${esc(phaseLabel)}</b></span><span><small>Pontos do ciclo</small><b>${sd.cycle}</b></span><span><small>Acessórios</small><b>${sd.unlocked}/5</b></span></div></div></div></section>
 
-      <section class="r197-card"><div class="r197-head"><div><span class="r197-kicker">TRILHA KIDS</span><h3>Bronze → Prata → Ouro → Troféu → Super Troféu → Cápsula</h3><p>Depois da cápsula, o pet é revelado. A cada 3 medalhas, 1 acessório.</p></div></div><div class="r197-trail">${trail.map(([a,l],i)=>`<div class="r197-step ${i<sd.idx||sd.capsuleReached?'done':''} ${i===sd.idx&&!sd.capsuleReached?'current':''}"><span>${img(a)}</span><b>${l}</b></div>`).join('')}</div><div class="r197-after"><b>${sd.capsuleReached?'Pet revelado · acessórios em andamento':'Cápsula ainda fechada'}</b><span>${sd.capsuleReached?(sd.complete?'5/5 acessórios · pet completo':'Medalhas pós-cápsula: '+sd.accessoryMedals+' · '+sd.unlocked+'/5 acessórios liberados'):'Complete os 6 marcos sem perda de pontos.'}</span></div></section>
+      <section class="r197-card rc258-trail-card"><div class="r197-head"><div><span class="r197-kicker">TRILHA DO UNIVERSO</span><h3>${esc(col.name)}</h3><p>Medalha Bronze → Medalha Prata → Medalha Ouro → Troféu → Super Troféu</p></div></div><div class="r197-trail rc258-trail">${trail.map(([a,l],i)=>`<div class="r197-step ${i<sd.idx||sd.capsuleReached?'done':''} ${i===sd.idx&&!sd.capsuleReached?'current':''}"><span class="rc258-reward-art"><img src="rc258_reward_${c.theme}_${a}.jpg" alt="${esc(col.name)} — ${esc(l)}"></span><b>${l}</b></div>`).join('')}</div><div class="r197-after rc258-capsule"><b>${sd.capsuleReached?'Super Troféu conquistado · cápsula liberada':'Prêmio do Super Troféu: cápsula'}</b><span>${sd.capsuleReached?(sd.complete?'5/5 acessórios · pet completo':'Cápsula aberta · '+sd.unlocked+'/5 acessórios liberados'):'A cápsula é liberada junto com o Super Troféu.'}</span></div></section>
 
       <section class="r197-card"><div class="r197-head row"><div><span class="r197-kicker">COLEÇÃO ${String(col.order).padStart(2,'0')}</span><h3>${esc(col.name)}</h3><p>6 pets · biblioteca temática · 5 acessórios completam cada pet</p></div><span class="r197-count">6 pets</span></div><div class="r197-pets">${col.pets.map(pp=>`<button type="button" data-r152pet="${pp.id}" class="${pp.id===c.pet?'active':''} ${used.has(pp.id)?'used':''}"><span class="r197-pet-art">${img(pp.id)}</span><strong>${esc(pp.name)}</strong><small>${used.has(pp.id)?'conquistado':'disponível'}</small></button>`).join('')}</div></section>
 
@@ -345,11 +345,12 @@
     .rc208-library{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:7px;margin-top:13px}.rc208-library span{display:grid;gap:5px;text-align:center;align-content:start}.rc208-library i{width:58px;height:58px;border-radius:16px;background:#fffaf5;border:1px solid rgba(83,77,88,.08);display:grid;place-items:center;margin:auto;overflow:hidden}.rc208-library i svg{width:100%;height:100%}.rc208-library b{font-size:8px;font-weight:500;color:#746b76;line-height:1.2}.rc208-lock{font-size:8px;color:#8d8490;background:#f5f1ee;border-radius:999px;padding:4px 7px;margin-top:3px}.r197-acc.unlocked .rc208-lock{background:#edf6f1;color:#678071}.rc208-settings{grid-template-columns:repeat(4,minmax(0,1fr))!important}.r197-acc:not(.unlocked){opacity:.48!important}.r197-acc.unlocked{opacity:1!important}.r197-step.done>span{box-shadow:0 0 0 1px rgba(131,166,154,.25),0 7px 16px rgba(74,68,80,.06)}#r152FinishCycle:disabled{opacity:.45;pointer-events:none}.rc208-pet-proxy svg,.rc208-acc-proxy svg{width:100%;height:100%}
     @media(max-width:700px){.rc208-collections{grid-template-columns:repeat(3,minmax(0,1fr))}.rc208-library{grid-template-columns:repeat(4,minmax(0,1fr))}.rc208-settings{grid-template-columns:1fr 1fr!important}}
     @media(max-width:480px){.rc208-library{grid-template-columns:repeat(3,minmax(0,1fr))}.rc208-settings{grid-template-columns:1fr!important}.r197-head h3{line-height:1.25}}
+    .rc258-trail-card{margin-top:16px}.rc258-trail{overflow-x:auto;scrollbar-width:none}.rc258-trail::-webkit-scrollbar{display:none}.rc258-trail .r197-step{min-width:92px}.rc258-reward-art{display:block!important;width:84px!important;height:84px!important;border-radius:18px!important;overflow:hidden!important;background:#fffaf5!important}.rc258-reward-art img{display:block!important;width:100%!important;height:100%!important;object-fit:cover!important}.rc258-capsule{background:linear-gradient(110deg,rgba(231,216,255,.58),rgba(255,236,199,.55),rgba(214,241,230,.58))!important}
   `;document.head.appendChild(style);
 
   function stamp(){
-    document.documentElement.dataset.berthaBuild='RC209';document.documentElement.dataset.berthaIndex='RC209';
-    const idx=document.getElementById('rc157IndexBadge');if(idx)idx.textContent='INDEX · RC209';
+    document.documentElement.dataset.berthaBuild='RC239';document.documentElement.dataset.berthaIndex='RC239';
+    const idx=document.getElementById('rc157IndexBadge');if(idx)idx.textContent='INDEX · RC239';
     document.querySelectorAll('body *').forEach(el=>{if(el.children.length===0&&/^HML\s*·\s*RC\d+/i.test((el.textContent||'').trim()))el.textContent='HML · RC209'});
   }
   stamp();setTimeout(stamp,200);setTimeout(stamp,850);
