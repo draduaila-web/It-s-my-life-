@@ -1,0 +1,24 @@
+BERTH.A RC249 — correção do fechamento Neblina
+
+CORRIGE:
+- Coelho volta ao tamanho normal como pet.
+- Somente o KIT / acessórios do Coelho aumenta (18%).
+- Reinsere o asset pack do Cervo (rc231).
+- Recarrega o asset pack do Ursinho (rc232).
+- Força os kits Cervo/Ursinho a permanecerem visíveis.
+- "Biblioteca do Companheiro" continua fora da interface.
+
+NÃO RELIGA:
+- rc233
+- rc234
+- rc236
+- scripts de deduplicação rc244/245/246
+
+COMO SUBIR:
+1. Extraia o ZIP.
+2. Em /homologacao/, envie:
+   - index.html
+   - rc249-kids-neblina-fix.js
+3. Substitua o index.html atual.
+4. Commit changes.
+5. Aguarde Pages verde e teste.
