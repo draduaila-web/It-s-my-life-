@@ -1,0 +1,25 @@
+BERTH.A RC253 — AJUSTE DE TAMANHO DOS ACESSÓRIOS
+
+Base: RC252 validada no iPhone.
+
+ÚNICA ALTERAÇÃO:
+• +35% na arte dos acessórios dentro do Kit do Pet de:
+  - Coelho de Nuvem
+  - Cervo de Nuvem
+  - Ursinho de Bruma
+
+Preservado integralmente:
+• os seis pets/companheiros;
+• caminhos e renderização da RC252;
+• cards e espaçamentos;
+• textos;
+• botões Névoa / Coral / Misto;
+• progressão e pontuação;
+• Owner / Helper;
+• Gato, Raposa e Corujinha;
+• Biblioteca do Companheiro continua fora;
+• INDEX · RC239 / HML · RC239.
+
+SUBIR EM /homologacao/:
+1. index.html
+2. rc253-kids-accessories-scale.js
