@@ -395,3 +395,55 @@
  `;
  document.head.appendChild(s);
 })();
+
+/* RC261 — microajuste final: Troféu/Super Troféu e cápsula */
+(function(){
+  if(document.getElementById('rc261-micro-style')) return;
+  const s=document.createElement('style');
+  s.id='rc261-micro-style';
+  s.textContent=`
+    /* Medalhas permanecem exatamente como na RC260.
+       Reduz apenas os dois últimos itens: Troféu e Super Troféu. */
+    .rc258-trail .r197-step:nth-child(4) .rc258-reward-art,
+    .rc258-trail .r197-step:nth-child(5) .rc258-reward-art{
+      transform:scale(.92)!important;
+      transform-origin:center center!important;
+    }
+
+    /* Cápsula: 10% menor e centralizada no espaço da direita. */
+    .rc260-capsule{
+      display:grid!important;
+      grid-template-columns:minmax(0,1fr) 78px!important;
+      align-items:center!important;
+      column-gap:14px!important;
+      padding-right:18px!important;
+    }
+    .rc260-capsule>div{
+      min-width:0!important;
+      align-self:center!important;
+    }
+    .rc260-capsule-art{
+      width:74px!important;
+      height:74px!important;
+      flex:none!important;
+      justify-self:center!important;
+      align-self:center!important;
+      margin:0!important;
+      object-fit:cover!important;
+      object-position:center!important;
+    }
+
+    @media(max-width:390px){
+      .rc260-capsule{
+        grid-template-columns:minmax(0,1fr) 68px!important;
+        column-gap:10px!important;
+        padding-right:14px!important;
+      }
+      .rc260-capsule-art{
+        width:65px!important;
+        height:65px!important;
+      }
+    }
+  `;
+  document.head.appendChild(s);
+})();

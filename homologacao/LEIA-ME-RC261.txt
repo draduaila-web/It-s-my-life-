@@ -1,0 +1,15 @@
+BERTH.A RC261 — MICROAJUSTE VISUAL
+
+Base: RC260 FINAL validada no iPhone.
+
+Alterações SOMENTE de escala/alinhamento:
+- Medalhas Bronze/Prata/Ouro: NÃO alteradas.
+- Troféu e Super Troféu: aproximadamente 8% menores dentro dos quadradinhos.
+- Cápsula: aproximadamente 10% menor.
+- Cápsula centralizada verticalmente e com respiro correto à direita.
+
+Não altera estrutura, textos, progressão, assets, pets, Kits, Owner/Helper
+nem INDEX RC239 / HML RC239.
+
+Subir TODOS os arquivos diretamente em /homologacao/.
+Substituir index.html e rc209-kids-neblina.js.
