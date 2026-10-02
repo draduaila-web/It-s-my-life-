@@ -1,0 +1,12 @@
+BERTH.A RC264 — CORREÇÃO REAL DOS ASSETS
+Base: RC261.
+
+Corrigido:
+- quadrado dos Troféus e Super Troféus volta ao mesmo tamanho dos demais slots;
+- removida a margem/borda interna embutida nos JPGs dos troféus;
+- troféus não são reduzidos por CSS;
+- cápsulas convertidas para PNG transparente, removendo o quadrado branco;
+- cápsula centralizada na área direita do card.
+
+Medalhas 1–3, estrutura, lógica, pets, Kits, Owner/Helper e badges RC239 preservados.
+Subir TODOS os arquivos diretamente em /homologacao/.

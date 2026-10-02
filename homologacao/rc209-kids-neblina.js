@@ -298,7 +298,7 @@
       ${collectionSelector(c.theme)}
       <div class="r197-current"><div class="r197-current-art">${img(c.pet)}</div><div><span class="r197-label">COMPANHEIRO-ALVO</span><h3>${esc(pet.name)}</h3><p>${esc(pet.desc)}</p><div class="r197-stats"><span><small>Fase</small><b>${esc(phaseLabel)}</b></span><span><small>Pontos do ciclo</small><b>${sd.cycle}</b></span><span><small>Acessórios</small><b>${sd.unlocked}/5</b></span></div></div></div></section>
 
-      <section class="r197-card rc258-trail-card"><div class="r197-head"><div><span class="r197-kicker">TRILHA DO UNIVERSO</span><h3>${esc(col.name)}</h3><p>Medalha Bronze → Medalha Prata → Medalha Ouro → Troféu → Super Troféu</p></div></div><div class="r197-trail rc258-trail">${trail.map(([a,l],i)=>`<div class="r197-step ${i<sd.idx||sd.capsuleReached?'done':''} ${i===sd.idx&&!sd.capsuleReached?'current':''}"><span class="rc258-reward-art"><img src="rc258_reward_${({mist:'neblina',ocean:'oceano',space:'espaco',forest:'floresta',solar:'solar',coral:'coral'}[c.theme]||c.theme)}_${a}.jpg" alt="${esc(col.name)} — ${esc(l)}"></span><b>${l}</b></div>`).join('')}</div><div class="r197-after rc258-capsule rc260-capsule"><div><b>${sd.capsuleReached?'Super Troféu conquistado · cápsula liberada':'Prêmio do Super Troféu: cápsula'}</b><span>${sd.capsuleReached?(sd.complete?'5/5 acessórios · pet completo':'Cápsula aberta · '+sd.unlocked+'/5 acessórios liberados'):'A cápsula é liberada junto com o Super Troféu.'}</span></div><img class="rc260-capsule-art" src="rc260_capsule_${({mist:'neblina',ocean:'oceano',space:'espaco',forest:'floresta',solar:'solar',coral:'coral'}[c.theme]||c.theme)}.jpg" alt="Cápsula do Universo ${esc(col.name)}"></div></section>
+      <section class="r197-card rc258-trail-card"><div class="r197-head"><div><span class="r197-kicker">TRILHA DO UNIVERSO</span><h3>${esc(col.name)}</h3><p>Medalha Bronze → Medalha Prata → Medalha Ouro → Troféu → Super Troféu</p></div></div><div class="r197-trail rc258-trail">${trail.map(([a,l],i)=>`<div class="r197-step ${i<sd.idx||sd.capsuleReached?'done':''} ${i===sd.idx&&!sd.capsuleReached?'current':''}"><span class="rc258-reward-art"><img src="rc258_reward_${({mist:'neblina',ocean:'oceano',space:'espaco',forest:'floresta',solar:'solar',coral:'coral'}[c.theme]||c.theme)}_${a}.jpg" alt="${esc(col.name)} — ${esc(l)}"></span><b>${l}</b></div>`).join('')}</div><div class="r197-after rc258-capsule rc260-capsule"><div><b>${sd.capsuleReached?'Super Troféu conquistado · cápsula liberada':'Prêmio do Super Troféu: cápsula'}</b><span>${sd.capsuleReached?(sd.complete?'5/5 acessórios · pet completo':'Cápsula aberta · '+sd.unlocked+'/5 acessórios liberados'):'A cápsula é liberada junto com o Super Troféu.'}</span></div><img class="rc260-capsule-art" src="rc260_capsule_${({mist:'neblina',ocean:'oceano',space:'espaco',forest:'floresta',solar:'solar',coral:'coral'}[c.theme]||c.theme)}.png" alt="Cápsula do Universo ${esc(col.name)}"></div></section>
 
       <section class="r197-card"><div class="r197-head row"><div><span class="r197-kicker">COLEÇÃO ${String(col.order).padStart(2,'0')}</span><h3>${esc(col.name)}</h3><p>6 pets · biblioteca temática · 5 acessórios completam cada pet</p></div><span class="r197-count">6 pets</span></div><div class="r197-pets">${col.pets.map(pp=>`<button type="button" data-r152pet="${pp.id}" class="${pp.id===c.pet?'active':''} ${used.has(pp.id)?'used':''}"><span class="r197-pet-art">${img(pp.id)}</span><strong>${esc(pp.name)}</strong><small>${used.has(pp.id)?'conquistado':'disponível'}</small></button>`).join('')}</div></section>
 
@@ -448,67 +448,54 @@
   document.head.appendChild(s);
 })();
 
-/* RC263 — tamanho RC261 + centralização sem encolher os troféus */
+/* RC264 — correção do asset, sem quadrado menor */
 (function(){
- if(document.getElementById('rc263-trophy-align'))return;
- const s=document.createElement('style'); s.id='rc263-trophy-align';
+ if(document.getElementById('rc264-clean-assets'))return;
+ const s=document.createElement('style');s.id='rc264-clean-assets';
  s.textContent=`
-   /* Os dois últimos slots ocupam normalmente suas colunas. */
    .rc258-trail .r197-step:nth-child(4),
    .rc258-trail .r197-step:nth-child(5){
-     min-width:0!important;
-     width:auto!important;
-     overflow:visible!important;
-     display:flex!important;
-     flex-direction:column!important;
-     align-items:center!important;
+     min-width:0!important;width:auto!important;
+     display:block!important;overflow:visible!important;
    }
-
-   /* Recupera exatamente a escala visual da RC261,
-      mas centraliza a caixa em vez de deixá-la ancorada lateralmente. */
    .rc258-trail .r197-step:nth-child(4) .rc258-reward-art,
    .rc258-trail .r197-step:nth-child(5) .rc258-reward-art{
      width:100%!important;
      max-width:88px!important;
-     margin-left:auto!important;
-     margin-right:auto!important;
-     position:relative!important;
-     left:50%!important;
-     right:auto!important;
-     transform:translateX(-50%) scale(.92)!important;
-     transform-origin:center center!important;
+     aspect-ratio:1/1!important;
+     margin:0 auto 6px!important;
+     transform:none!important;
+     position:static!important;
      overflow:visible!important;
-     box-sizing:border-box!important;
+     border-radius:15px!important;
    }
-
-   /* O JPG continua inteiro: nada de crop. */
    .rc258-trail .r197-step:nth-child(4) .rc258-reward-art img,
    .rc258-trail .r197-step:nth-child(5) .rc258-reward-art img{
-     display:block!important;
-     width:100%!important;
-     height:100%!important;
-     max-width:100%!important;
-     max-height:100%!important;
-     object-fit:contain!important;
-     object-position:center center!important;
-     margin:0!important;
-     transform:none!important;
+     display:block!important;width:100%!important;height:100%!important;
+     object-fit:cover!important;object-position:center!important;
+     margin:0!important;transform:none!important;border-radius:15px!important;
    }
 
-   /* Mantém a cápsula no posicionamento que funcionou visualmente na RC262. */
+   /* Cápsula sem quadrado branco, centralizada de verdade na área direita. */
+   .rc260-capsule{
+     display:grid!important;
+     grid-template-columns:minmax(0,1fr) 92px!important;
+     align-items:center!important;
+     column-gap:12px!important;
+     padding-right:14px!important;
+   }
    .rc260-capsule-art{
-     position:relative!important;
-     left:-9px!important;
+     width:78px!important;height:78px!important;
+     object-fit:contain!important;
+     justify-self:center!important;align-self:center!important;
+     position:static!important;left:auto!important;
+     margin:0!important;border-radius:0!important;
    }
-
    @media(max-width:390px){
      .rc258-trail .r197-step:nth-child(4) .rc258-reward-art,
-     .rc258-trail .r197-step:nth-child(5) .rc258-reward-art{
-       max-width:76px!important;
-       left:50%!important;
-       transform:translateX(-50%) scale(.92)!important;
-     }
-     .rc260-capsule-art{left:-8px!important}
+     .rc258-trail .r197-step:nth-child(5) .rc258-reward-art{max-width:76px!important}
+     .rc260-capsule{grid-template-columns:minmax(0,1fr) 80px!important;padding-right:10px!important}
+     .rc260-capsule-art{width:70px!important;height:70px!important}
    }
  `;
  document.head.appendChild(s);
