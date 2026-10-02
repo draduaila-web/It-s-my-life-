@@ -1,0 +1,12 @@
+BERTH.A RC263
+Base real: RC261 (RC262 descartada).
+
+Alterações:
+- Medalhas Bronze, Prata e Ouro: intactas.
+- Troféu e Super Troféu: recuperam o tamanho da RC261.
+- Corrige somente o enquadramento/centralização horizontal dos dois troféus.
+- Sem crop do JPG: object-fit contain.
+- Cápsula mantém tamanho da RC261 e usa apenas o posicionamento à esquerda que ficou bom na RC262.
+
+Não altera estrutura, lógica, assets, pets, Kits, Owner/Helper ou badges RC239.
+Subir todos os arquivos diretamente em /homologacao/.
