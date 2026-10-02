@@ -1,0 +1,7 @@
+BERTH.A RC260 FINAL
+Base: RC259 validada.
+- Ajusta apenas o tamanho das 5 conquistas para caberem na mesma linha.
+- Adiciona as 6 cápsulas modelo OVO do mockup aprovado “menos rococó”.
+- Cápsula continua prêmio do Super Troféu, fora da sequência.
+- Preserva pets, Kits, Owner/Helper, progressão e INDEX/HML RC239.
+Subir todos os arquivos diretamente em /homologacao/.

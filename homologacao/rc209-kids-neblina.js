@@ -298,7 +298,7 @@
       ${collectionSelector(c.theme)}
       <div class="r197-current"><div class="r197-current-art">${img(c.pet)}</div><div><span class="r197-label">COMPANHEIRO-ALVO</span><h3>${esc(pet.name)}</h3><p>${esc(pet.desc)}</p><div class="r197-stats"><span><small>Fase</small><b>${esc(phaseLabel)}</b></span><span><small>Pontos do ciclo</small><b>${sd.cycle}</b></span><span><small>Acessórios</small><b>${sd.unlocked}/5</b></span></div></div></div></section>
 
-      <section class="r197-card rc258-trail-card"><div class="r197-head"><div><span class="r197-kicker">TRILHA DO UNIVERSO</span><h3>${esc(col.name)}</h3><p>Medalha Bronze → Medalha Prata → Medalha Ouro → Troféu → Super Troféu</p></div></div><div class="r197-trail rc258-trail">${trail.map(([a,l],i)=>`<div class="r197-step ${i<sd.idx||sd.capsuleReached?'done':''} ${i===sd.idx&&!sd.capsuleReached?'current':''}"><span class="rc258-reward-art"><img src="rc258_reward_${({mist:'neblina',ocean:'oceano',space:'espaco',forest:'floresta',solar:'solar',coral:'coral'}[c.theme]||c.theme)}_${a}.jpg" alt="${esc(col.name)} — ${esc(l)}"></span><b>${l}</b></div>`).join('')}</div><div class="r197-after rc258-capsule"><b>${sd.capsuleReached?'Super Troféu conquistado · cápsula liberada':'Prêmio do Super Troféu: cápsula'}</b><span>${sd.capsuleReached?(sd.complete?'5/5 acessórios · pet completo':'Cápsula aberta · '+sd.unlocked+'/5 acessórios liberados'):'A cápsula é liberada junto com o Super Troféu.'}</span></div></section>
+      <section class="r197-card rc258-trail-card"><div class="r197-head"><div><span class="r197-kicker">TRILHA DO UNIVERSO</span><h3>${esc(col.name)}</h3><p>Medalha Bronze → Medalha Prata → Medalha Ouro → Troféu → Super Troféu</p></div></div><div class="r197-trail rc258-trail">${trail.map(([a,l],i)=>`<div class="r197-step ${i<sd.idx||sd.capsuleReached?'done':''} ${i===sd.idx&&!sd.capsuleReached?'current':''}"><span class="rc258-reward-art"><img src="rc258_reward_${({mist:'neblina',ocean:'oceano',space:'espaco',forest:'floresta',solar:'solar',coral:'coral'}[c.theme]||c.theme)}_${a}.jpg" alt="${esc(col.name)} — ${esc(l)}"></span><b>${l}</b></div>`).join('')}</div><div class="r197-after rc258-capsule rc260-capsule"><div><b>${sd.capsuleReached?'Super Troféu conquistado · cápsula liberada':'Prêmio do Super Troféu: cápsula'}</b><span>${sd.capsuleReached?(sd.complete?'5/5 acessórios · pet completo':'Cápsula aberta · '+sd.unlocked+'/5 acessórios liberados'):'A cápsula é liberada junto com o Super Troféu.'}</span></div><img class="rc260-capsule-art" src="rc260_capsule_${({mist:'neblina',ocean:'oceano',space:'espaco',forest:'floresta',solar:'solar',coral:'coral'}[c.theme]||c.theme)}.jpg" alt="Cápsula do Universo ${esc(col.name)}"></div></section>
 
       <section class="r197-card"><div class="r197-head row"><div><span class="r197-kicker">COLEÇÃO ${String(col.order).padStart(2,'0')}</span><h3>${esc(col.name)}</h3><p>6 pets · biblioteca temática · 5 acessórios completam cada pet</p></div><span class="r197-count">6 pets</span></div><div class="r197-pets">${col.pets.map(pp=>`<button type="button" data-r152pet="${pp.id}" class="${pp.id===c.pet?'active':''} ${used.has(pp.id)?'used':''}"><span class="r197-pet-art">${img(pp.id)}</span><strong>${esc(pp.name)}</strong><small>${used.has(pp.id)?'conquistado':'disponível'}</small></button>`).join('')}</div></section>
 
@@ -376,4 +376,22 @@
       .rc209-kids-shell .rc208-library i svg{width:84px;height:84px}
     `;document.head.appendChild(st);
   })();
+})();
+
+/* RC260 FINAL — escala + cápsulas ovo aprovadas */
+(function(){
+ if(document.getElementById('rc260-final-style'))return;
+ const s=document.createElement('style');s.id='rc260-final-style';
+ s.textContent=`
+ .rc258-trail{display:grid!important;grid-template-columns:repeat(5,minmax(0,1fr))!important;gap:5px!important;overflow:visible!important}
+ .rc258-trail .r197-step{min-width:0!important;width:auto!important}
+ .rc258-trail .rc258-reward-art{width:100%!important;height:auto!important;max-width:88px!important;aspect-ratio:1/1!important;margin:0 auto 6px!important;border-radius:15px!important}
+ .rc258-trail .r197-step b{display:block!important;font-size:9px!important;line-height:1.12!important;text-align:center!important;font-weight:400!important}
+ .rc260-capsule{display:flex!important;align-items:center!important;justify-content:space-between!important;gap:12px!important;overflow:hidden!important}
+ .rc260-capsule>div{min-width:0!important;flex:1 1 auto!important}
+ .rc260-capsule b,.rc260-capsule span{display:block!important}
+ .rc260-capsule-art{width:82px!important;height:82px!important;flex:0 0 82px!important;object-fit:cover!important;border-radius:18px!important}
+ @media(max-width:390px){.rc258-trail{gap:3px!important}.rc258-trail .rc258-reward-art{max-width:76px!important}.rc258-trail .r197-step b{font-size:8.5px!important}.rc260-capsule-art{width:72px!important;height:72px!important;flex-basis:72px!important}}
+ `;
+ document.head.appendChild(s);
 })();
