@@ -1,0 +1,12 @@
+BERTH.A — RC271
+
+Correção solicitada:
+- medalhas com assets PNG transparentes (fundo removido de verdade);
+- medalhas menores;
+- Troféu e Super Troféu com hierarquia maior;
+- ordem visual de Troféu/Super Troféu invertida conforme solicitado;
+- todos os cinco prêmios no mesmo card branco linear;
+- cápsulas NÃO incluídas/não alteradas nesta RC;
+- INDEX/HML permanecem RC239; runtime clean permanece por último.
+
+Subir todos os arquivos desta pasta para homologacao/.
