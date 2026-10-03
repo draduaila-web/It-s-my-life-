@@ -1,0 +1,20 @@
+BERTH.A RC270 — TRILHA FINAL
+
+Base: RC269.
+
+ALTERADO SOMENTE NA TRILHA:
+- medalhas pequenas, sem fundo/quadradinho individual;
+- ordem preservada: Bronze > Prata > Ouro > Troféu > Super Troféu;
+- Troféu maior que as medalhas;
+- Super Troféu maior que o Troféu;
+- todos permanecem dentro do mesmo card branco;
+- resolução do universo preservada/corrigida.
+
+CONGELADO:
+- cápsula aprovada;
+- lógica de progressão;
+- pets e kits;
+- demais módulos;
+- INDEX RC239 / HML RC239.
+
+Subir todos os arquivos em /homologacao/.
