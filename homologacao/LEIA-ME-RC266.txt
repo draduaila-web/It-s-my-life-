@@ -1,7 +1,0 @@
-BERTH.A RC266
-Base: RC265.
-Troféu e Super Troféu: restaurados os assets originais, anteriores ao crop da RC264.
-Renderização: contain, centralizada, sem zoom/corte.
-Cápsula aprovada: preservada integralmente.
-Medalhas, estrutura, pets, Kits e badges RC239: intactos.
-O patch RC266 entra imediatamente antes de rc239-runtime-clean.js.

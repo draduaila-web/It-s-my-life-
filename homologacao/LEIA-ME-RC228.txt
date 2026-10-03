@@ -1,8 +1,0 @@
-BERTH.A — RC228
-
-Correção de escala real dos acessórios da Raposa de Nuvem e Corujinha Lunar.
-- Assets foram recortados pelo conteúdo alfa antes de serem reembutidos.
-- Mantém as 3 variantes de cor e todos os nomes/lógica anteriores.
-- Não altera Gato Neblina, Coelho de Nuvem nem progressão Kids.
-- Evita miniaturização, cortes e rebarbas.
-- Build final: INDEX/HML RC228.

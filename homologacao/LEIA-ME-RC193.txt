@@ -1,7 +1,0 @@
-BERTH.A — RC193
-
-- Owner: mais cores aplicadas à linha de pins.
-- Owner: cada pin repetido recebe uma nova cor automaticamente.
-- Owner: Sala de Troféus ganhou nota explicativa da lógica cromática.
-- Owner: cards principais e miniaturas seguem a mesma família visual colorida.
-- Helper e Satélites: ajustes da RC192 preservados.

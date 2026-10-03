@@ -1,9 +1,0 @@
-BERTH.A HOMOLOGAÇÃO — RC219
-
-Correção pontual sobre a RC218:
-- Coleira Lunar · variação Misto corrigida para ficar visualmente distinta de Névoa.
-- Mantidos os demais 14 assets do Gato Neblina sem alteração.
-- Mantida a lógica Kids de 30 dias e o renderer da RC218.
-- Assets continuam embutidos no JavaScript para evitar 404/cache de caminhos no GitHub Pages.
-
-Teste esperado: INDEX · RC219 e HML · RC219.

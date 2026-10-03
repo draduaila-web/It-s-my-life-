@@ -1,9 +1,0 @@
-BERTH.A — RC229
-
-Correção efetiva da escala visual dos acessórios da Raposa e Corujinha Lunar.
-
-Mudança principal:
-- os PNGs embutidos foram recortados ao conteúdo alfa real;
-- removido o excesso de canvas transparente que fazia os acessórios parecerem pequenos;
-- CSS final controla presença visual no card sem cortar nem gerar rebarbas;
-- preservados Gato, Coelho, trilha Kids e lógica existente.

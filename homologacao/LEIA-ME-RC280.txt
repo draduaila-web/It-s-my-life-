@@ -1,6 +1,0 @@
-BERTH.A RC280 — Universo Oceano · acessórios
-Base: RC279.
-- Mantém Neblina congelado.
-- Mantém os 6 pets do Oceano da RC279.
-- Adiciona 5 acessórios exclusivos para cada um dos 6 pets (30 assets).
-- Assets com fundo transparente e aplicação no mesmo fluxo de Kit/Biblioteca já usado em Neblina.

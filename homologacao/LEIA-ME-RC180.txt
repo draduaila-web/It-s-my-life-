@@ -1,5 +1,0 @@
-BERTH.A RC180 — OWNER ONLY
-
-Contém apenas o código necessário para a RC180 e os 12 pins do Owner.
-Não adiciona assets Kids nem Helper.
-Marcadores esperados: INDEX · RC180 e HML · RC180.

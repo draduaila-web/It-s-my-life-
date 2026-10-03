@@ -1,2 +1,0 @@
-BERTH.A Homologação RC179 — OWNER ONLY
-Corrige apenas o layout de Personalizar conquistas do Owner e restaura os 12 pins exclusivos do Owner. Kids, Helper, Satélites e Convites não foram alterados.

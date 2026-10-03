@@ -1,9 +1,0 @@
-BERTH.A HOMOLOGAÇÃO — RC231
-
-Escopo:
-- Preserva os assets corrigidos da RC230 para Raposa e Corujinha.
-- Adiciona pack Cervo de Nuvem com 5 acessórios x 3 cores (Névoa, Coral, Misto).
-- Óculos substituído por Monóculo Encantado com correntinha.
-- Item especial substituído por Varinha Mágica Celeste.
-- Assets recortados individualmente, centralizados e com margem para evitar cortes/rebarbas.
-- Build esperado: INDEX · RC231 / HML · RC231.

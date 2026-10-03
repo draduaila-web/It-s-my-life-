@@ -1,8 +1,0 @@
-BERTH.A — RC189 (Satélites + Helper)
-
-- Satélites com avatares glossy aprovados
-- Reconhecimentos revisados
-- Flor corrigida
-- Arrasou ajustado
-- Personalização com 2 variações reais por reconhecimento (Rosé / Brisa)
-- Owner preservado

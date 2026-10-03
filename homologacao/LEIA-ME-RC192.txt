@@ -1,7 +1,0 @@
-BERTH.A — RC192
-
-- Helper: checkboxes de ativo alinhados ao padrão do Owner.
-- Helper: personalização de cores dos reconhecimentos ficou explícita e visível em cada card.
-- Owner: nova família de imagens glossy pastel, alinhada à linha visual do Helper.
-- Owner: Minhas conquistas e Sala de Troféus usam a mesma linguagem de assets.
-- Satélites: avatares aprovados preservados.

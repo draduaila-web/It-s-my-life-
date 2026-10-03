@@ -1,7 +1,0 @@
-BERTH.A RC279 — OCEANO SEM FUNDOS
-Base: RC278.
-Alterações exclusivas:
-- removido o fundo creme retangular dos 6 pets do Universo Oceano;
-- assets agora usam transparência e object-fit contain;
-- Tartaruga reduzida discretamente (94%) no app;
-- Neblina e demais áreas preservadas.

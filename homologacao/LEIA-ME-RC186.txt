@@ -1,6 +1,0 @@
-BERTH.A HML — RC186 · HELPER ONLY
-Base: RC185 (Owner congelado).
-Escopo: somente Reconhecimentos do Helper.
-Assets novos: 9 reconhecimentos, família soft 3D pastel, distribuição cromática equilibrada.
-Presets migrados para bertha.recognition.presets.v7.
-Não altera Owner, Kids, Satélites ou Convites.

@@ -1,9 +1,0 @@
-BERTH.A HML — RC180C OWNER BOOT FIX
-
-Correção cirúrgica: o index da RC180 carregava premiacoes-assets-manifest-v177.js, mas o app procurava BERTHA_PREMIACOES_ASSETS_V174/V175. Isso deixava r152Themes() vazio e podia interromper a renderização de Premiações.
-
-Esta versão:
-- mantém somente os 12 assets do Owner;
-- adiciona um manifest autocontido compatível com V174/V175/V177/V180C;
-- usa nomes novos de JS para evitar cache;
-- não adiciona assets Kids nem Helper.

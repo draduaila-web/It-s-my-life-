@@ -1,8 +1,0 @@
-BERTH.A HOMOLOGAÇÃO · RC233
-
-Correções desta RC:
-- Cervo de Nuvem e Ursinho de Bruma: assets recortados pelo conteúdo real para ganhar presença visual no card sem cortes/rebarbas.
-- Preserva as 3 cores Névoa / Coral / Misto.
-- Biblioteca do companheiro sincronizada com os packs atuais para Gato, Coelho, Raposa, Corujinha, Cervo e Ursinho.
-- Biblioteca deixa de exibir nomes/ícones antigos e passa a usar imagens atuais representativas de cada pack.
-- INDEX/HML atualizados para RC233.

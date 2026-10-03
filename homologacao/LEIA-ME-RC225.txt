@@ -1,6 +1,0 @@
-BERTH.A — RC225
-
-Corujinha Lunar: 5 acessórios × 3 cores (Névoa, Coral, Misto).
-Itens variados: chapéu com pena, gravata/colar lua, óculos de leitura, bolsa-livro e medalhão pena.
-Assets embutidos para evitar 404/cache.
-Escala visual da Raposa levemente normalizada para ficar mais próxima dos packs anteriores.

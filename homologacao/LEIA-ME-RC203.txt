@@ -1,8 +1,0 @@
-BERTH.A — RC203 · Kids · Coleção 02 Oceano
-
-- Preserva a Coleção 01 Neblina.
-- Adiciona seletor entre Neblina e Oceano.
-- Coleção Oceano: 6 pets.
-- 5 acessórios por pet, com paleta Oceano própria.
-- Assets da coleção mantidos em arquivos enxutos; pacote permanece muito abaixo do limite de 100 itens.
-- Mantém as demais frentes do app sem alteração funcional.

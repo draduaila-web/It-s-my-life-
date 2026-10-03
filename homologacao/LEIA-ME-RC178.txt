@@ -1,8 +1,0 @@
-BERTH.A HOMOLOGAÇÃO RC178 — OWNER ONLY
-
-Escopo cirúrgico:
-- Apenas o bloco "Personalizar conquistas do Owner" foi reorganizado.
-- Header do card com título/descrição em largura útil e toggle custom à direita.
-- Campos Nome, Critério e Recorrência em coluna única no iPhone.
-- Nenhuma alteração intencional em Kids, Helper, Satélites ou Convites.
-- Build/cache atualizado para RC178.

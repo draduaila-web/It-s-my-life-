@@ -1,7 +1,0 @@
-BERTH.A — RC195
-
-- Owner: cores suavizadas para evitar visual estourado.
-- Owner: ciclo cromático de 6 medalhas.
-- Owner: a 1ª medalha de qualquer pin usa a mesma paleta; a 2ª usa a segunda paleta; e assim por diante.
-- Owner: legenda visual adicionada à Sala de Troféus.
-- Helper e Satélites: preservados conforme RC194.

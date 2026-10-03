@@ -1,8 +1,0 @@
-BERTH.A HOMOLOGAÇÃO RC177
-
-Integração limpa sobre a RC176.
-- Build markers coerentes RC177
-- Helper migrado para presets v6, sem jantar/almoço antigos
-- Owner: personalização corrigida com flex robusto para Safari
-- Kids: assets preservados integralmente com object-fit contain
-- Mantém estrutura, coleções, trilha, cápsulas e acessórios da base homologada

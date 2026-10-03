@@ -1,6 +1,0 @@
-BERTH.A — RC204
-Patch incremental da Coleção 01 · Neblina.
-- 6 pets substituídos por versões com corpo inteiro e margem interna para não cortar os pés.
-- Kit do Gato Neblina substituído por 5 assets 3D mais ricos e coloridos.
-- CSS reforçado com object-fit contain e escala de segurança nos cards.
-- Cache-bust v=204.

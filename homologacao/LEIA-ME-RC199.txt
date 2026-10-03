@@ -1,8 +1,0 @@
-BERTH.A — RC199
-Patch incremental para /homologacao.
-
-- Helper: aumenta o respiro entre o nome do Helper e “Selecione um reconhecimento e envie.”
-- Helper: preserva a correção RC198 das variantes Brisa e checkbox.
-- Kids · Coleção Neblina: substitui os 6 pets por assets finais 3D glossy/pastel na família Owner + Helper.
-- Direção cromática neutra para meninos e meninas.
-- Os assets foram otimizados para 640×640 para reduzir o tempo de carregamento.
