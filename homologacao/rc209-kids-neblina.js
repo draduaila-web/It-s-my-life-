@@ -500,3 +500,29 @@
  `;
  document.head.appendChild(s);
 })();
+/* RC265 — somente troféus inteiros; cápsula RC264 preservada */
+(function(){
+ if(document.getElementById('rc265-trophy-contain'))return;
+ const s=document.createElement('style');s.id='rc265-trophy-contain';
+ s.textContent=`
+ .rc258-trail .r197-step:nth-child(4),
+ .rc258-trail .r197-step:nth-child(5){min-width:0!important;width:auto!important;overflow:visible!important}
+ .rc258-trail .r197-step:nth-child(4) .rc258-reward-art,
+ .rc258-trail .r197-step:nth-child(5) .rc258-reward-art{
+   width:100%!important;max-width:88px!important;aspect-ratio:1/1!important;
+   margin:0 auto 6px!important;transform:none!important;position:static!important;
+   overflow:hidden!important;border-radius:15px!important;box-sizing:border-box!important
+ }
+ .rc258-trail .r197-step:nth-child(4) .rc258-reward-art img,
+ .rc258-trail .r197-step:nth-child(5) .rc258-reward-art img{
+   display:block!important;width:100%!important;height:100%!important;
+   max-width:100%!important;max-height:100%!important;
+   object-fit:contain!important;object-position:center!important;
+   margin:0!important;padding:0!important;transform:none!important;position:static!important
+ }
+ @media(max-width:390px){
+  .rc258-trail .r197-step:nth-child(4) .rc258-reward-art,
+  .rc258-trail .r197-step:nth-child(5) .rc258-reward-art{max-width:76px!important}
+ }`;
+ document.head.appendChild(s);
+})();
