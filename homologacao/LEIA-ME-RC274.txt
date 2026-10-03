@@ -1,0 +1,5 @@
+BERTH.A RC274
+Base integral: RC273 funcional.
+Única alteração: Super Troféu aumentado aproximadamente 11%.
+Nenhuma alteração em Premiações, navegação, card, medalhas, Troféu, cápsula ou assets.
+rc239-runtime-clean.js permanece como último script.
