@@ -64,8 +64,16 @@
         ['ocean_clownfish','Peixe-palhaço','Alegre, sociável e cheio de personalidade.','◆']
       ],
       accessories:[
-        ['head','Boné náutico','Cabeça','cap'],['neck','Coleira/concha','Pescoço','shell'],['eyes','Óculos de mergulho','Olhos','goggles'],['back','Mochila oceano','Corpo / costas','backpack'],['snorkel','Snorkel','Equipamento','snorkel'],['medal','Concha especial / medalha oceano','Colecionável','medal'],['bubble','Bolha de ar','Especial','bubble']
-      ]
+        ['head','Boné náutico','Cabeça','oceanasset'],['neck','Coleira concha','Pescoço','oceanasset'],['eyes','Óculos de mergulho','Olhos','oceanasset'],['back','Mochila oceano','Corpo / costas','oceanasset'],['special','Concha especial','Especial','oceanasset']
+      ],
+      petAccessories:{
+        ocean_turtle:[['head','Boné náutico','Cabeça','oceanasset'],['neck','Coleira concha','Pescoço','oceanasset'],['eyes','Óculos de mergulho','Olhos','oceanasset'],['back','Mochila oceano','Corpo / costas','oceanasset'],['special','Concha especial','Especial','oceanasset']],
+        ocean_shark:[['head','Boné aventureiro','Cabeça','oceanasset'],['neck','Coleira oceano','Pescoço','oceanasset'],['eyes','Óculos futuristas','Olhos','oceanasset'],['back','Mochila tubarão','Corpo / costas','oceanasset'],['special','Pingente onda','Especial','oceanasset']],
+        ocean_jelly:[['head','Tiara marinha','Cabeça','oceanasset'],['neck','Coleira pérola','Pescoço','oceanasset'],['eyes','Óculos redondos','Olhos','oceanasset'],['back','Mochila água-viva','Corpo / costas','oceanasset'],['special','Bolha especial','Especial','oceanasset']],
+        ocean_octopus:[['head','Bandana náutica','Cabeça','oceanasset'],['neck','Coleira tentáculo','Pescoço','oceanasset'],['eyes','Óculos de mergulho','Olhos','oceanasset'],['back','Mochila polvo','Corpo / costas','oceanasset'],['special','Estrela do mar','Especial','oceanasset']],
+        ocean_whale:[['head','Boné baleia','Cabeça','oceanasset'],['neck','Coleira cauda','Pescoço','oceanasset'],['eyes','Óculos redondos','Olhos','oceanasset'],['back','Mochila baleia','Corpo / costas','oceanasset'],['special','Pérola especial','Especial','oceanasset']],
+        ocean_clownfish:[['head','Boné peixinho','Cabeça','oceanasset'],['neck','Coleira coral','Pescoço','oceanasset'],['eyes','Óculos de mergulho','Olhos','oceanasset'],['back','Mochila peixe','Corpo / costas','oceanasset'],['special','Pingente coral','Especial','oceanasset']]
+      }
     },
     space:{
       order:3,name:'Espaço',accent:'#88a9c8',accent2:'#b8afd4',
@@ -227,6 +235,11 @@
   }
 
   function accessoryArt(a,col,mode){
+    if(a.collection==='ocean'){
+      const pet=String(a.pet||'').replace(/^ocean_/,'');
+      const slot=(a.slot==='special'||a.slot==='head'||a.slot==='neck'||a.slot==='eyes'||a.slot==='back')?a.slot:'special';
+      return `<span class="r197-art rc209-acc-proxy rc280-ocean-acc" data-acc="${esc(a.id)}"><img src="rc280_ocean_${pet}_${slot}.png" alt="${esc(a.name)}" loading="lazy"></span>`;
+    }
     const sym={catcap:'☾',catcollar:'✦',catglasses:'◉',catbackpack:'◆',catcharm:'★',rabbitbeanie:'☁',rabbitbandana:'☾',rabbitglasses:'◉',rabbitbag:'◆',rabbitmoon:'☾',foxhat:'☄',foxscarf:'☁',foxvisor:'◉',foxsatchel:'◆',foxcharm:'☄',owlhat:'☾',owlscarf:'☁',owlreading:'◉',owlsatchel:'◆',owlfeather:'◜',deercrown:'✦',deercollar:'☁',deerscope:'◉',deersaddle:'◆',deermedallion:'✦',bearbeanie:'☁',bearscarf:'☁',bearglasses:'◉',bearpouch:'◆',bearpaw:'●',cap:'☾',helmet:'◉',leaf:'⌁',crown:'☀',algae:'≈',scarf:'☁',shell:'◔',star:'★',nature:'♧',sun:'☀',pearl:'●',glasses:'◉',goggles:'◉',visor:'▣',backpack:'◆',amulet:'✦',medal:'✦',bubble:'○',snorkel:'⌁',badge:'★',cosmic:'✧',ship:'➤',forest:'♧',binocular:'◉',radiant:'☀',umbrella:'☂',reef:'≈',beach:'◇'}[a.kind]||'✦';
     const v=variantFor(window.__rc209Member,a.id);
     return `<span class="r197-art rc209-acc-proxy" data-acc="${esc(a.id)}" data-v="${v}">${iconSvg(a.kind,col,mode,sym,v)}</span>`;
