@@ -1,4 +1,0 @@
-12cd276b834b89ff94f92c4ea8aa5854595bfa2ee74b1abe9507d9d8f3ace99b  index.html
-151f7829402bdc47e387c90f69c21f2695fd37edefdd22f7fcba02c74cc4e52e  rc220-kids-cycle-assets.js
-b081ab3c91a7df68dd5264b1c2cded65cd5fb2ec081b8b0cf2977088556cba41  rc222-kids-rabbit-assets.js
-57349cbd447cae116404f19db1cd97a72669af3c255669efa7d805ab8186c4ff  LEIA-ME-RC222.txt
