@@ -219,6 +219,9 @@
       const legacy=oldImg(p.id);
       if(legacy) return legacy;
     }
+    if(p.collection==='ocean'){
+      return `<span class="r197-art rc208-pet-proxy rc278-ocean-pet"><img src="rc278_${p.id}.png" alt="${esc(p.name)}" loading="lazy"></span>`;
+    }
     const c1=colorFor(col,p.index,mode), c2=colorFor(col,p.index+2,mode), c3=colorFor(col,p.index+4,mode);
     return `<span class="r197-art rc208-pet-proxy"><svg viewBox="0 0 120 120" aria-hidden="true"><defs><linearGradient id="pg${p.id}" x1="0" y1="0" x2="1" y2="1"><stop stop-color="${c1}"/><stop offset=".55" stop-color="${c2}"/><stop offset="1" stop-color="${c3}"/></linearGradient></defs><ellipse cx="60" cy="102" rx="30" ry="6" fill="#665d6d" opacity=".06"/><circle cx="60" cy="60" r="38" fill="url(#pg${p.id})"/><circle cx="46" cy="54" r="5" fill="#4c4a53"/><circle cx="74" cy="54" r="5" fill="#4c4a53"/><path d="M53 70c5 5 9 5 14 0" fill="none" stroke="#665d6d" stroke-width="3" stroke-linecap="round"/><text x="60" y="42" text-anchor="middle" font-size="24" fill="#fff" opacity=".9" font-family="system-ui">${esc(p.symbol)}</text></svg></span>`;
   }
@@ -298,7 +301,7 @@
       ${collectionSelector(c.theme)}
       <div class="r197-current"><div class="r197-current-art">${img(c.pet)}</div><div><span class="r197-label">COMPANHEIRO-ALVO</span><h3>${esc(pet.name)}</h3><p>${esc(pet.desc)}</p><div class="r197-stats"><span><small>Fase</small><b>${esc(phaseLabel)}</b></span><span><small>Pontos do ciclo</small><b>${sd.cycle}</b></span><span><small>Acessórios</small><b>${sd.unlocked}/5</b></span></div></div></div></section>
 
-      <section class="r197-card rc258-trail-card"><div class="r197-head"><div><span class="r197-kicker">TRILHA DO UNIVERSO</span><h3>${esc(col.name)}</h3><p>Medalha Bronze → Medalha Prata → Medalha Ouro → Troféu → Super Troféu</p></div></div><div class="r197-trail rc258-trail">${trail.map(([a,l],i)=>`<div class="r197-step ${i<sd.idx||sd.capsuleReached?'done':''} ${i===sd.idx&&!sd.capsuleReached?'current':''}"><span class="rc258-reward-art"><img src="rc258_reward_${({mist:'neblina',ocean:'oceano',space:'espaco',forest:'floresta',solar:'solar',coral:'coral'}[c.theme]||c.theme)}_${a}.jpg" alt="${esc(col.name)} — ${esc(l)}"></span><b>${l}</b></div>`).join('')}</div><div class="r197-after rc258-capsule rc260-capsule"><div><b>${sd.capsuleReached?'Super Troféu conquistado · cápsula liberada':'Prêmio do Super Troféu: cápsula'}</b><span>${sd.capsuleReached?(sd.complete?'5/5 acessórios · pet completo':'Cápsula aberta · '+sd.unlocked+'/5 acessórios liberados'):'A cápsula é liberada junto com o Super Troféu.'}</span></div><img class="rc260-capsule-art" src="rc260_capsule_${({mist:'neblina',ocean:'oceano',space:'espaco',forest:'floresta',solar:'solar',coral:'coral'}[c.theme]||c.theme)}.png" alt="Cápsula do Universo ${esc(col.name)}"></div></section>
+      <section class="r197-card rc258-trail-card"><div class="r197-head"><div><span class="r197-kicker">TRILHA DO UNIVERSO</span><h3>${esc(col.name)}</h3><p>Medalha Bronze → Medalha Prata → Medalha Ouro → Troféu → Super Troféu</p></div></div><div class="r197-trail rc258-trail">${trail.map(([a,l],i)=>`<div class="r197-step ${i<sd.idx||sd.capsuleReached?'done':''} ${i===sd.idx&&!sd.capsuleReached?'current':''}"><span class="rc258-reward-art"><img src="rc258_reward_${({mist:'neblina',ocean:'oceano',space:'espaco',forest:'floresta',solar:'solar',coral:'coral'}[c.theme]||c.theme)}_${a}.jpg" alt="${esc(col.name)} — ${esc(l)}"></span><b>${l}</b></div>`).join('')}</div><div class="r197-after rc258-capsule rc260-capsule"><div><b>${sd.capsuleReached?'Super Troféu conquistado · cápsula liberada':'Prêmio do Super Troféu: cápsula'}</b><span>${sd.capsuleReached?(sd.complete?'5/5 acessórios · pet completo':'Cápsula aberta · '+sd.unlocked+'/5 acessórios liberados'):'A cápsula é liberada junto com o Super Troféu.'}</span></div><img class="rc260-capsule-art" src="rc260_capsule_${({mist:'neblina',ocean:'oceano',space:'espaco',forest:'floresta',solar:'solar',coral:'coral'}[c.theme]||c.theme)}.jpg" alt="Cápsula do Universo ${esc(col.name)}"></div></section>
 
       <section class="r197-card"><div class="r197-head row"><div><span class="r197-kicker">COLEÇÃO ${String(col.order).padStart(2,'0')}</span><h3>${esc(col.name)}</h3><p>6 pets · biblioteca temática · 5 acessórios completam cada pet</p></div><span class="r197-count">6 pets</span></div><div class="r197-pets">${col.pets.map(pp=>`<button type="button" data-r152pet="${pp.id}" class="${pp.id===c.pet?'active':''} ${used.has(pp.id)?'used':''}"><span class="r197-pet-art">${img(pp.id)}</span><strong>${esc(pp.name)}</strong><small>${used.has(pp.id)?'conquistado':'disponível'}</small></button>`).join('')}</div></section>
 
@@ -343,6 +346,7 @@
   const style=document.createElement('style');style.id='rc208-kids-collections';style.textContent=`
     .rc208-collections{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:7px;margin-top:14px}.rc208-collections button{border:1px solid rgba(83,77,88,.10);border-radius:16px;background:#fffaf5;padding:9px 5px;display:grid;gap:2px;color:#625b66}.rc208-collections button b{font-size:8px;letter-spacing:.08em;color:#9a919b}.rc208-collections button span{font-size:9.5px}.rc208-collections button.active{background:linear-gradient(135deg,color-mix(in srgb,var(--c1) 25%,#fff),color-mix(in srgb,var(--c2) 22%,#fff));box-shadow:0 0 0 2px color-mix(in srgb,var(--c1) 32%,transparent)}
     .rc208-library{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:7px;margin-top:13px}.rc208-library span{display:grid;gap:5px;text-align:center;align-content:start}.rc208-library i{width:58px;height:58px;border-radius:16px;background:#fffaf5;border:1px solid rgba(83,77,88,.08);display:grid;place-items:center;margin:auto;overflow:hidden}.rc208-library i svg{width:100%;height:100%}.rc208-library b{font-size:8px;font-weight:500;color:#746b76;line-height:1.2}.rc208-lock{font-size:8px;color:#8d8490;background:#f5f1ee;border-radius:999px;padding:4px 7px;margin-top:3px}.r197-acc.unlocked .rc208-lock{background:#edf6f1;color:#678071}.rc208-settings{grid-template-columns:repeat(4,minmax(0,1fr))!important}.r197-acc:not(.unlocked){opacity:.48!important}.r197-acc.unlocked{opacity:1!important}.r197-step.done>span{box-shadow:0 0 0 1px rgba(131,166,154,.25),0 7px 16px rgba(74,68,80,.06)}#r152FinishCycle:disabled{opacity:.45;pointer-events:none}.rc208-pet-proxy svg,.rc208-acc-proxy svg{width:100%;height:100%}
+    .rc278-ocean-pet{display:block;width:100%;height:100%;overflow:hidden!important;border-radius:18px;background:#fffaf5}.rc278-ocean-pet img{width:100%!important;height:100%!important;object-fit:cover!important;transform:none!important;border-radius:18px}
     @media(max-width:700px){.rc208-collections{grid-template-columns:repeat(3,minmax(0,1fr))}.rc208-library{grid-template-columns:repeat(4,minmax(0,1fr))}.rc208-settings{grid-template-columns:1fr 1fr!important}}
     @media(max-width:480px){.rc208-library{grid-template-columns:repeat(3,minmax(0,1fr))}.rc208-settings{grid-template-columns:1fr!important}.r197-head h3{line-height:1.25}}
     .rc258-trail-card{margin-top:16px}.rc258-trail{overflow-x:auto;scrollbar-width:none}.rc258-trail::-webkit-scrollbar{display:none}.rc258-trail .r197-step{min-width:92px}.rc258-reward-art{display:block!important;width:84px!important;height:84px!important;border-radius:18px!important;overflow:hidden!important;background:#fffaf5!important}.rc258-reward-art img{display:block!important;width:100%!important;height:100%!important;object-fit:cover!important}.rc258-capsule{background:linear-gradient(110deg,rgba(231,216,255,.58),rgba(255,236,199,.55),rgba(214,241,230,.58))!important}
@@ -448,81 +452,68 @@
   document.head.appendChild(s);
 })();
 
-/* RC264 — correção do asset, sem quadrado menor */
+/* RC263 — tamanho RC261 + centralização sem encolher os troféus */
 (function(){
- if(document.getElementById('rc264-clean-assets'))return;
- const s=document.createElement('style');s.id='rc264-clean-assets';
+ if(document.getElementById('rc263-trophy-align'))return;
+ const s=document.createElement('style'); s.id='rc263-trophy-align';
  s.textContent=`
+   /* Os dois últimos slots ocupam normalmente suas colunas. */
    .rc258-trail .r197-step:nth-child(4),
    .rc258-trail .r197-step:nth-child(5){
-     min-width:0!important;width:auto!important;
-     display:block!important;overflow:visible!important;
+     min-width:0!important;
+     width:auto!important;
+     overflow:visible!important;
+     display:flex!important;
+     flex-direction:column!important;
+     align-items:center!important;
    }
+
+   /* Recupera exatamente a escala visual da RC261,
+      mas centraliza a caixa em vez de deixá-la ancorada lateralmente. */
    .rc258-trail .r197-step:nth-child(4) .rc258-reward-art,
    .rc258-trail .r197-step:nth-child(5) .rc258-reward-art{
      width:100%!important;
      max-width:88px!important;
-     aspect-ratio:1/1!important;
-     margin:0 auto 6px!important;
-     transform:none!important;
-     position:static!important;
+     margin-left:auto!important;
+     margin-right:auto!important;
+     position:relative!important;
+     left:50%!important;
+     right:auto!important;
+     transform:translateX(-50%) scale(.92)!important;
+     transform-origin:center center!important;
      overflow:visible!important;
-     border-radius:15px!important;
-   }
-   .rc258-trail .r197-step:nth-child(4) .rc258-reward-art img,
-   .rc258-trail .r197-step:nth-child(5) .rc258-reward-art img{
-     display:block!important;width:100%!important;height:100%!important;
-     object-fit:cover!important;object-position:center!important;
-     margin:0!important;transform:none!important;border-radius:15px!important;
+     box-sizing:border-box!important;
    }
 
-   /* Cápsula sem quadrado branco, centralizada de verdade na área direita. */
-   .rc260-capsule{
-     display:grid!important;
-     grid-template-columns:minmax(0,1fr) 92px!important;
-     align-items:center!important;
-     column-gap:12px!important;
-     padding-right:14px!important;
-   }
-   .rc260-capsule-art{
-     width:78px!important;height:78px!important;
+   /* O JPG continua inteiro: nada de crop. */
+   .rc258-trail .r197-step:nth-child(4) .rc258-reward-art img,
+   .rc258-trail .r197-step:nth-child(5) .rc258-reward-art img{
+     display:block!important;
+     width:100%!important;
+     height:100%!important;
+     max-width:100%!important;
+     max-height:100%!important;
      object-fit:contain!important;
-     justify-self:center!important;align-self:center!important;
-     position:static!important;left:auto!important;
-     margin:0!important;border-radius:0!important;
+     object-position:center center!important;
+     margin:0!important;
+     transform:none!important;
    }
+
+   /* Mantém a cápsula no posicionamento que funcionou visualmente na RC262. */
+   .rc260-capsule-art{
+     position:relative!important;
+     left:-9px!important;
+   }
+
    @media(max-width:390px){
      .rc258-trail .r197-step:nth-child(4) .rc258-reward-art,
-     .rc258-trail .r197-step:nth-child(5) .rc258-reward-art{max-width:76px!important}
-     .rc260-capsule{grid-template-columns:minmax(0,1fr) 80px!important;padding-right:10px!important}
-     .rc260-capsule-art{width:70px!important;height:70px!important}
+     .rc258-trail .r197-step:nth-child(5) .rc258-reward-art{
+       max-width:76px!important;
+       left:50%!important;
+       transform:translateX(-50%) scale(.92)!important;
+     }
+     .rc260-capsule-art{left:-8px!important}
    }
  `;
- document.head.appendChild(s);
-})();
-/* RC265 — somente troféus inteiros; cápsula RC264 preservada */
-(function(){
- if(document.getElementById('rc265-trophy-contain'))return;
- const s=document.createElement('style');s.id='rc265-trophy-contain';
- s.textContent=`
- .rc258-trail .r197-step:nth-child(4),
- .rc258-trail .r197-step:nth-child(5){min-width:0!important;width:auto!important;overflow:visible!important}
- .rc258-trail .r197-step:nth-child(4) .rc258-reward-art,
- .rc258-trail .r197-step:nth-child(5) .rc258-reward-art{
-   width:100%!important;max-width:88px!important;aspect-ratio:1/1!important;
-   margin:0 auto 6px!important;transform:none!important;position:static!important;
-   overflow:hidden!important;border-radius:15px!important;box-sizing:border-box!important
- }
- .rc258-trail .r197-step:nth-child(4) .rc258-reward-art img,
- .rc258-trail .r197-step:nth-child(5) .rc258-reward-art img{
-   display:block!important;width:100%!important;height:100%!important;
-   max-width:100%!important;max-height:100%!important;
-   object-fit:contain!important;object-position:center!important;
-   margin:0!important;padding:0!important;transform:none!important;position:static!important
- }
- @media(max-width:390px){
-  .rc258-trail .r197-step:nth-child(4) .rc258-reward-art,
-  .rc258-trail .r197-step:nth-child(5) .rc258-reward-art{max-width:76px!important}
- }`;
  document.head.appendChild(s);
 })();
