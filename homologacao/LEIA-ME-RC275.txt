@@ -1,0 +1,11 @@
+BERTH.A RC275
+Base: RC274 funcional.
+
+Alteração somente visual na Trilha do Universo:
+- 45% da largura para Medalhas e 55% para Troféus;
+- Bronze/Prata/Ouro mais próximos;
+- Troféu normal levemente reduzido;
+- Super Troféu consideravelmente ampliado;
+- títulos MEDALHAS/TROFÉUS acompanham os grupos;
+- card, cápsula, assets, navegação e lógica de Premiações preservados.
+- rc239-runtime-clean.js permanece por último.
