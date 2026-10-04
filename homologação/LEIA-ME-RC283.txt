@@ -1,0 +1,6 @@
+BERTH.A RC283 — Normalização Kids
+Base: RC282 sobre RC281 validada.
+Neblina: presença visual apenas.
+Oceano: pets sem cenário + acessórios ampliados/normalizados.
+Espaço: pets e acessórios individualizados, transparentes e object-fit contain.
+Sem alterações de lógica, premiações, progressão ou demais módulos.
