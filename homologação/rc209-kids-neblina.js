@@ -250,12 +250,14 @@
     if(a.collection==='ocean'){
       const pet=String(a.pet||'').replace(/^ocean_/,'');
       const slot=(a.slot==='special'||a.slot==='head'||a.slot==='neck'||a.slot==='eyes'||a.slot==='back')?a.slot:'special';
-      return `<span class="r197-art rc209-acc-proxy rc280-ocean-acc" data-acc="${esc(a.id)}"><img src="rc280_ocean_${pet}_${slot}.png" alt="${esc(a.name)}" loading="lazy"></span>`;
+      const v=variantFor(window.__rc209Member,a.id);
+      return `<span class="r197-art rc209-acc-proxy rc280-ocean-acc" data-acc="${esc(a.id)}" data-v="${v}"><img src="rc280_ocean_${pet}_${slot}.png" alt="${esc(a.name)}" loading="lazy"></span>`;
     }
     if(a.collection==='space'){
       const pet=String(a.pet||'').replace(/^space_/,'');
       const slot=(a.slot==='special'||a.slot==='head'||a.slot==='neck'||a.slot==='eyes'||a.slot==='back')?a.slot:'special';
-      return `<span class="r197-art rc209-acc-proxy rc282-space-acc" data-acc="${esc(a.id)}"><img src="rc282_space_${pet}_${slot}.png" alt="${esc(a.name)}" loading="lazy"></span>`;
+      const v=variantFor(window.__rc209Member,a.id);
+      return `<span class="r197-art rc209-acc-proxy rc282-space-acc" data-acc="${esc(a.id)}" data-v="${v}"><img src="rc282_space_${pet}_${slot}.png" alt="${esc(a.name)}" loading="lazy"></span>`;
     }
     const sym={catcap:'☾',catcollar:'✦',catglasses:'◉',catbackpack:'◆',catcharm:'★',rabbitbeanie:'☁',rabbitbandana:'☾',rabbitglasses:'◉',rabbitbag:'◆',rabbitmoon:'☾',foxhat:'☄',foxscarf:'☁',foxvisor:'◉',foxsatchel:'◆',foxcharm:'☄',owlhat:'☾',owlscarf:'☁',owlreading:'◉',owlsatchel:'◆',owlfeather:'◜',deercrown:'✦',deercollar:'☁',deerscope:'◉',deersaddle:'◆',deermedallion:'✦',bearbeanie:'☁',bearscarf:'☁',bearglasses:'◉',bearpouch:'◆',bearpaw:'●',cap:'☾',helmet:'◉',leaf:'⌁',crown:'☀',algae:'≈',scarf:'☁',shell:'◔',star:'★',nature:'♧',sun:'☀',pearl:'●',glasses:'◉',goggles:'◉',visor:'▣',backpack:'◆',amulet:'✦',medal:'✦',bubble:'○',snorkel:'⌁',badge:'★',cosmic:'✧',ship:'➤',forest:'♧',binocular:'◉',radiant:'☀',umbrella:'☂',reef:'≈',beach:'◇'}[a.kind]||'✦';
     const v=variantFor(window.__rc209Member,a.id);
