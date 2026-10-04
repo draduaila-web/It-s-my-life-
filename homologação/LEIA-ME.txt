@@ -1,0 +1,15 @@
+BERTH.A — HOMOLOGAÇÃO v2.8.221 — RECUPERAÇÃO COM CSS REAL
+
+Conteúdo:
+- arquivos funcionais originais da homologação v2.8.221;
+- style.css fornecido pela usuária, copiado integralmente e sem reconstrução;
+- index.html alterado somente para carregar ./style.css local;
+- sw.js de rollback/cache-clean da v226 mantido;
+- isolamento de dados da homologação preservado.
+
+INSTALAÇÃO:
+Substitua SOMENTE o conteúdo da pasta /homologacao/ pelos arquivos desta pasta.
+NÃO altere a raiz/produção.
+NÃO use “Limpar homologação”.
+
+Objetivo: testar a v221 com a folha de estilo real, eliminando a dependência de ../style.css.
