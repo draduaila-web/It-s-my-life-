@@ -1,0 +1,11 @@
+BERTH.A HOMOLOGAÇÃO — ROLLBACK SEGURO PARA v2.8.221
+
+Base funcional: v2.8.221 Exercícios Modal Ancorado.
+Nenhuma lógica funcional ou estética da v2.8.221 foi alterada.
+A v2.8.226 existe apenas para:
+- forçar descarte dos caches HML das versões posteriores;
+- desregistrar service workers antigos na primeira abertura;
+- recarregar o CSS raiz sem cache;
+- registrar novamente o service worker usando os arquivos exatos da 221.
+
+Depois de subir, abra a homologação no Safari. Na primeira abertura ela pode recarregar uma vez automaticamente.
