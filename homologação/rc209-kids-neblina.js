@@ -87,8 +87,16 @@
         ['space_comet','Estrela cadente','Rápida, luminosa e cheia de movimento.','★']
       ],
       accessories:[
-        ['head','Capacete/visor','Cabeça','helmet'],['neck','Coleira estelar','Pescoço','star'],['eyes','Óculos futuristas','Olhos','visor'],['back','Mochila espacial','Corpo / costas','backpack'],['badge','Insígnia galáctica','Colecionável','badge'],['special','Item especial cósmico','Especial','cosmic'],['ship','Espaçonave','Equipamento','ship']
-      ]
+        ['head','Capacete/visor','Cabeça','spaceasset'],['neck','Coleira estelar','Pescoço','spaceasset'],['eyes','Óculos futuristas','Olhos','spaceasset'],['back','Mochila espacial','Corpo / costas','spaceasset'],['special','Insígnia galáctica','Especial','spaceasset']
+      ],
+      petAccessories:{
+        space_cat:[['head','Capacete felino','Cabeça','spaceasset'],['neck','Coleira estelar','Pescoço','spaceasset'],['eyes','Óculos futuristas','Olhos','spaceasset'],['back','Mochila espacial','Corpo / costas','spaceasset'],['special','Insígnia galáctica','Especial','spaceasset']],
+        space_alien:[['head','Antenas custom','Cabeça','spaceasset'],['neck','Coleira galáctica','Pescoço','spaceasset'],['eyes','Óculos alien','Olhos','spaceasset'],['back','Mochila OVNI','Corpo / costas','spaceasset'],['special','Mini OVNI','Especial','spaceasset']],
+        space_robot:[['head','Antena robô','Cabeça','spaceasset'],['neck','Coleira energia','Pescoço','spaceasset'],['eyes','Óculos de tela','Olhos','spaceasset'],['back','Mochila foguete','Corpo / costas','spaceasset'],['special','Chave de estrela','Especial','spaceasset']],
+        space_astronaut:[['head','Capacete astronauta','Cabeça','spaceasset'],['neck','Coleira missão','Pescoço','spaceasset'],['eyes','Óculos de missão','Olhos','spaceasset'],['back','Mochila espacial','Corpo / costas','spaceasset'],['special','Bandeira estelar','Especial','spaceasset']],
+        space_planet:[['head','Anel de Saturno','Cabeça','spaceasset'],['neck','Coleira cósmica','Pescoço','spaceasset'],['eyes','Óculos orbitais','Olhos','spaceasset'],['back','Mochila órbita','Corpo / costas','spaceasset'],['special','Lua companheira','Especial','spaceasset']],
+        space_comet:[['head','Coroa estelar','Cabeça','spaceasset'],['neck','Coleira de luz','Pescoço','spaceasset'],['eyes','Óculos estelares','Olhos','spaceasset'],['back','Mochila cometa','Corpo / costas','spaceasset'],['special','Varinha de estrelas','Especial','spaceasset']]
+      }
     },
     forest:{
       order:4,name:'Floresta',accent:'#8fb9a4',accent2:'#c7b57f',
@@ -230,6 +238,10 @@
     if(p.collection==='ocean'){
       return `<span class="r197-art rc208-pet-proxy rc278-ocean-pet"><img src="rc278_${p.id}.png" alt="${esc(p.name)}" loading="lazy"></span>`;
     }
+    if(p.collection==='space'){
+      const pet=String(p.id||'').replace(/^space_/,'');
+      return `<span class="r197-art rc208-pet-proxy rc282-space-pet"><img src="rc282_space_${pet}.png" alt="${esc(p.name)}" loading="lazy"></span>`;
+    }
     const c1=colorFor(col,p.index,mode), c2=colorFor(col,p.index+2,mode), c3=colorFor(col,p.index+4,mode);
     return `<span class="r197-art rc208-pet-proxy"><svg viewBox="0 0 120 120" aria-hidden="true"><defs><linearGradient id="pg${p.id}" x1="0" y1="0" x2="1" y2="1"><stop stop-color="${c1}"/><stop offset=".55" stop-color="${c2}"/><stop offset="1" stop-color="${c3}"/></linearGradient></defs><ellipse cx="60" cy="102" rx="30" ry="6" fill="#665d6d" opacity=".06"/><circle cx="60" cy="60" r="38" fill="url(#pg${p.id})"/><circle cx="46" cy="54" r="5" fill="#4c4a53"/><circle cx="74" cy="54" r="5" fill="#4c4a53"/><path d="M53 70c5 5 9 5 14 0" fill="none" stroke="#665d6d" stroke-width="3" stroke-linecap="round"/><text x="60" y="42" text-anchor="middle" font-size="24" fill="#fff" opacity=".9" font-family="system-ui">${esc(p.symbol)}</text></svg></span>`;
   }
@@ -239,6 +251,11 @@
       const pet=String(a.pet||'').replace(/^ocean_/,'');
       const slot=(a.slot==='special'||a.slot==='head'||a.slot==='neck'||a.slot==='eyes'||a.slot==='back')?a.slot:'special';
       return `<span class="r197-art rc209-acc-proxy rc280-ocean-acc" data-acc="${esc(a.id)}"><img src="rc280_ocean_${pet}_${slot}.png" alt="${esc(a.name)}" loading="lazy"></span>`;
+    }
+    if(a.collection==='space'){
+      const pet=String(a.pet||'').replace(/^space_/,'');
+      const slot=(a.slot==='special'||a.slot==='head'||a.slot==='neck'||a.slot==='eyes'||a.slot==='back')?a.slot:'special';
+      return `<span class="r197-art rc209-acc-proxy rc282-space-acc" data-acc="${esc(a.id)}"><img src="rc282_space_${pet}_${slot}.png" alt="${esc(a.name)}" loading="lazy"></span>`;
     }
     const sym={catcap:'☾',catcollar:'✦',catglasses:'◉',catbackpack:'◆',catcharm:'★',rabbitbeanie:'☁',rabbitbandana:'☾',rabbitglasses:'◉',rabbitbag:'◆',rabbitmoon:'☾',foxhat:'☄',foxscarf:'☁',foxvisor:'◉',foxsatchel:'◆',foxcharm:'☄',owlhat:'☾',owlscarf:'☁',owlreading:'◉',owlsatchel:'◆',owlfeather:'◜',deercrown:'✦',deercollar:'☁',deerscope:'◉',deersaddle:'◆',deermedallion:'✦',bearbeanie:'☁',bearscarf:'☁',bearglasses:'◉',bearpouch:'◆',bearpaw:'●',cap:'☾',helmet:'◉',leaf:'⌁',crown:'☀',algae:'≈',scarf:'☁',shell:'◔',star:'★',nature:'♧',sun:'☀',pearl:'●',glasses:'◉',goggles:'◉',visor:'▣',backpack:'◆',amulet:'✦',medal:'✦',bubble:'○',snorkel:'⌁',badge:'★',cosmic:'✧',ship:'➤',forest:'♧',binocular:'◉',radiant:'☀',umbrella:'☂',reef:'≈',beach:'◇'}[a.kind]||'✦';
     const v=variantFor(window.__rc209Member,a.id);

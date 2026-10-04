@@ -1,0 +1,5 @@
+BERTH.A RC282 — UNIVERSO ESPAÇO
+Base: RC281 validada.
+Conteúdo: 6 personagens + 5 acessórios exclusivos por personagem (30) + integração Kids.
+Upload: enviar TODOS os arquivos deste pacote diretamente para a pasta homologação (com acentos), substituindo index.html e rc209-kids-neblina.js quando solicitado.
+Não apagar os demais arquivos da RC281.
