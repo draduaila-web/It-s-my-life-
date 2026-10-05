@@ -470,19 +470,12 @@ body:has(.bertha-plans-task-dialog[open]){
 </style>
 
 
-<style id="rc295-final-kids-fixes">
-/* RC295: preservar o asset inteiro do gato e alinhar cápsulas sem alterar as demais coleções */
-img[src*="rc282_space_cat.png"]{object-fit:contain!important;object-position:center center!important;box-sizing:border-box!important;padding:5%!important;}
-img[src*="rc260_capsule_neblina.png"],img[src*="rc260_capsule_oceano.png"]{object-fit:contain!important;object-position:center center!important;}
+<style id="rc298-asset-fix">
+img[src*="rc260_capsule_neblina.png"],img[src*="rc260_capsule_oceano.png"]{object-fit:contain!important;object-position:50% 50%!important;padding:0!important;background:transparent!important;}
+img[src*="rc260_capsule_neblina.png"]:where(img),img[src*="rc260_capsule_oceano.png"]:where(img){border-radius:0!important;box-shadow:none!important;}
+img[src*="rc282_space_cat.png"]{object-fit:contain!important;object-position:50% 50%!important;padding:4%!important;transform:none!important;background:transparent!important;}
 </style>
-
-<style id="rc297-final-assets">
-img[src*="rc260_capsule_neblina.png"],img[src*="rc260_capsule_oceano.png"]{object-fit:contain!important;object-position:50% 50%!important;padding:0!important;}
-img[src*="rc282_space_cat.png"]{object-fit:contain!important;object-position:50% 50%!important;padding:10%!important;transform:scale(.88)!important;}
-</style>
-<script id="rc297-cache-bust">
-(()=>{const names=['rc260_capsule_neblina.png','rc260_capsule_oceano.png','rc282_space_cat.png'];const fix=()=>document.querySelectorAll('img').forEach(im=>{const n=names.find(n=>im.src.includes(n));if(n&&!im.src.includes('v=297')){const u=new URL(im.src,location.href);u.searchParams.set('v','297');im.src=u.href;}});new MutationObserver(fix).observe(document.documentElement,{subtree:true,childList:true,attributes:true,attributeFilter:['src']});addEventListener('DOMContentLoaded',fix);setTimeout(fix,500);})();
-</script>
+<script id="rc298-cache-bust">(()=>{const names=['rc260_capsule_neblina.png','rc260_capsule_oceano.png','rc282_space_cat.png'];const fix=()=>document.querySelectorAll('img').forEach(im=>{const n=names.find(n=>im.src.includes(n));if(n){const u=new URL(im.src,location.href);if(u.searchParams.get('v')!=='298'){u.searchParams.set('v','298');im.src=u.href;} if(n.includes('capsule')){im.style.background='transparent'; if(im.parentElement){im.parentElement.style.background='transparent';im.parentElement.style.boxShadow='none';}}}});new MutationObserver(fix).observe(document.documentElement,{subtree:true,childList:true});addEventListener('DOMContentLoaded',fix);setTimeout(fix,300);})();</script>
 </head>
 
 <style id="bertha-hml-marker">
