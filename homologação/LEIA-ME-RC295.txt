@@ -1,0 +1,5 @@
+RC295 — correções pontuais Kids
+- Cápsula Neblina: transparência real e centralização.
+- Cápsula Oceano: transparência real e centralização.
+- Gato Espaço: asset completo preservado e enquadramento contain com margem de segurança.
+- Demais elementos preservados.
