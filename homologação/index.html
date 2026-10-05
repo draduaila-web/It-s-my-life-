@@ -471,8 +471,8 @@ body:has(.bertha-plans-task-dialog[open]){
 
 
 <style id="rc298-asset-fix">
-img[src*="rc260_capsule_neblina.png"],img[src*="rc260_capsule_oceano.png"]{object-fit:contain!important;object-position:50% 50%!important;padding:0!important;background:transparent!important;}
-img[src*="rc260_capsule_neblina.png"]:where(img),img[src*="rc260_capsule_oceano.png"]:where(img){border-radius:0!important;box-shadow:none!important;}
+img[src*="rc260_capsule_neblina.png"],img[src*="rc260_capsule_oceano.png"],img[src*="rc260_capsule_floresta.png"]{object-fit:contain!important;object-position:50% 50%!important;padding:0!important;background:transparent!important;}
+img[src*="rc260_capsule_neblina.png"]:where(img),img[src*="rc260_capsule_oceano.png"]:where(img),img[src*="rc260_capsule_floresta.png"]:where(img){border-radius:0!important;box-shadow:none!important;}
 img[src*="rc282_space_cat.png"]{object-fit:contain!important;object-position:50% 50%!important;padding:4%!important;transform:none!important;background:transparent!important;}
 </style>
 </head>
@@ -616,7 +616,7 @@ body.bertha-hml::before{content:"HOMOLOGAÇÃO";position:fixed;z-index:99999;top
 <script src="ui-assets-v188.js?v=239"></script>
 <script src="rc196-sat-owner-helper.js?v=239"></script>
 <script src="rc207-kids-neblina.js?v=239"></script>
-<script src="rc209-kids-neblina.js?v=289"></script>
+<script src="rc209-kids-neblina.js?v=300"></script>
 <script src="routing-fix-v188.js?v=239"></script>
 <script src="rc220-kids-cycle-assets.js?v=239"></script>
 <script src="rc223-kids-rabbit-assets.js?v=239"></script>
@@ -640,6 +640,8 @@ body.bertha-hml::before{content:"HOMOLOGAÇÃO";position:fixed;z-index:99999;top
   <script src="rc280-oceano-acessorios.js?v=281"></script>
   <script src="rc282-space-assets.js?v=289"></script>
 <script src="rc290-kids-variants.js?v=291"></script>
+<script src="rc300-forest-assets.js?v=300"></script>
+
   <script src="rc239-runtime-clean.js?v=239"></script>
 
 <style id="rc299-capsules-render-fix">
@@ -649,8 +651,8 @@ img[data-rc299-capsule="1"]{background:transparent!important;border-radius:0!imp
 <script id="rc299-capsules-render-fix-script">
 (()=>{
  const VERSION='299';
- const map={neblina:'rc260_capsule_neblina.png',oceano:'rc260_capsule_oceano.png',ocean:'rc260_capsule_oceano.png'};
- const capsuleKind=(s='')=>{s=String(s).toLowerCase();if(!s.includes('capsul'))return null;if(s.includes('neblina'))return 'neblina';if(s.includes('oceano')||s.includes('ocean'))return 'oceano';return null};
+ const map={neblina:'rc260_capsule_neblina.png',oceano:'rc260_capsule_oceano.png',ocean:'rc260_capsule_oceano.png',floresta:'rc260_capsule_floresta.png',forest:'rc260_capsule_floresta.png'};
+ const capsuleKind=(s='')=>{s=String(s).toLowerCase();if(!s.includes('capsul'))return null;if(s.includes('neblina'))return 'neblina';if(s.includes('oceano')||s.includes('ocean'))return 'oceano';if(s.includes('floresta')||s.includes('forest'))return 'floresta';return null};
  const cleanParent=(el)=>{let p=el.parentElement;for(let i=0;p&&i<2;i++,p=p.parentElement){const cs=getComputedStyle(p);if(cs.backgroundImage==='none' && (cs.backgroundColor==='rgba(0, 0, 0, 0)'||cs.backgroundColor==='transparent')) continue; /* do not erase reward-card gradient */ if(i===0){p.style.setProperty('box-shadow','none','important');}}};
  const fix=()=>{
    document.querySelectorAll('img').forEach(im=>{

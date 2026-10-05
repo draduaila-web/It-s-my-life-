@@ -102,11 +102,22 @@
       order:4,name:'Floresta',accent:'#8fb9a4',accent2:'#c7b57f',
       palette:['#9fbec0','#9fcbb1','#ede5d5','#ead58d','#d99b80','#beb6d0','#a9ce9e'],
       pets:[
-        ['forest_fox','Raposa','Esperta e atenta aos detalhes.','◆'],['forest_wolf','Lobo','Leal, firme e companheiro.','▲'],['forest_tiger','Tigre','Corajoso e cheio de presença.','≋'],['forest_faun','Fauno','Curioso e conectado à natureza.','♧'],['forest_bird','Ave','Livre, observadora e leve.','⌁'],['forest_capybara','Capivara','Tranquila, sociável e constante.','●']
+        ['forest_fox','Raposa','Esperta e atenta aos detalhes.','◆'],
+        ['forest_wolf','Lobo','Leal, firme e companheiro.','▲'],
+        ['forest_tiger','Tigre','Corajoso e cheio de presença.','≋'],
+        ['forest_bird','Arara','Livre, observadora e cheia de cor.','⌁'],
+        ['forest_hedgehog','Porco-espinho','Curioso, delicado e cheio de personalidade.','✦'],
+        ['forest_capybara','Capivara','Tranquila, sociável e constante.','●']
       ],
-      accessories:[
-        ['head','Chapéu/folha','Cabeça','leaf'],['neck','Coleira natureza','Pescoço','nature'],['eyes','Óculos camp','Olhos','glasses'],['back','Mochila floresta','Corpo / costas','backpack'],['medal','Medalha botânica','Colecionável','medal'],['special','Item especial floresta','Especial','forest'],['binocular','Binóculo','Equipamento','binocular']
-      ]
+      accessories:[['head','Adorno da floresta','Cabeça','forestasset'],['neck','Lenço/colar','Pescoço','forestasset'],['eyes','Óculos/visor','Olhos','forestasset'],['back','Bolsa/mochila','Corpo / costas','forestasset'],['special','Item especial','Especial','forestasset']],
+      petAccessories:{
+        forest_fox:[['head','Coroa de folhas','Cabeça','forestasset'],['neck','Lenço botânico','Pescoço','forestasset'],['eyes','Óculos de trilha','Olhos','forestasset'],['back','Mochila de exploração','Corpo / costas','forestasset'],['special','Bússola','Especial','forestasset']],
+        forest_wolf:[['head','Capuz da mata','Cabeça','forestasset'],['neck','Lenço de trilha','Pescoço','forestasset'],['eyes','Visor de exploração','Olhos','forestasset'],['back','Mochila com mapa','Corpo / costas','forestasset'],['special','Lanterna','Especial','forestasset']],
+        forest_tiger:[['head','Coroa tropical','Cabeça','forestasset'],['neck','Lenço guardião','Pescoço','forestasset'],['eyes','Óculos de explorador','Olhos','forestasset'],['back','Mochila botânica','Corpo / costas','forestasset'],['special','Mapa enrolado','Especial','forestasset']],
+        forest_bird:[['head','Adorno de penas','Cabeça','forestasset'],['neck','Colar de penas','Pescoço','forestasset'],['eyes','Visor tropical','Olhos','forestasset'],['back','Bolsa de penas','Corpo / costas','forestasset'],['special','Apito de trilha','Especial','forestasset']],
+        forest_hedgehog:[['head','Touca cogumelo','Cabeça','forestasset'],['neck','Colar de galhos','Pescoço','forestasset'],['eyes','Monóculo botânico','Olhos','forestasset'],['back','Cestinha de cogumelos','Corpo / costas','forestasset'],['special','Potinho de vagalumes','Especial','forestasset']],
+        forest_capybara:[['head','Chapéu de folhas','Cabeça','forestasset'],['neck','Colar gota','Pescoço','forestasset'],['eyes','Óculos camp','Olhos','forestasset'],['back','Mochila de coleta','Corpo / costas','forestasset'],['special','Rede de borboleta','Especial','forestasset']]
+      }
     },
     solar:{
       order:5,name:'Solar',accent:'#ddb873',accent2:'#e1a08c',
@@ -238,6 +249,10 @@
     if(p.collection==='ocean'){
       return `<span class="r197-art rc208-pet-proxy rc278-ocean-pet"><img src="rc278_${p.id}.png" alt="${esc(p.name)}" loading="lazy"></span>`;
     }
+    if(p.collection==='forest'){
+      const pet=String(p.id||'').replace(/^forest_/,'');
+      return `<span class="r197-art rc208-pet-proxy rc300-forest-pet"><img src="rc300_forest_${pet}.png?v=300" alt="${esc(p.name)}" loading="lazy"></span>`;
+    }
     if(p.collection==='space'){
       const pet=String(p.id||'').replace(/^space_/,'');
       return `<span class="r197-art rc208-pet-proxy rc282-space-pet"><img src="rc282_space_${pet}.png" alt="${esc(p.name)}" loading="lazy"></span>`;
@@ -250,14 +265,17 @@
     if(a.collection==='ocean'){
       const pet=String(a.pet||'').replace(/^ocean_/,'');
       const slot=(a.slot==='special'||a.slot==='head'||a.slot==='neck'||a.slot==='eyes'||a.slot==='back')?a.slot:'special';
-      const v=variantFor(window.__rc209Member,a.id);
-      return `<span class="r197-art rc209-acc-proxy rc280-ocean-acc" data-acc="${esc(a.id)}" data-v="${v}"><img src="rc280_ocean_${pet}_${slot}.png" alt="${esc(a.name)}" loading="lazy"></span>`;
+      return `<span class="r197-art rc209-acc-proxy rc280-ocean-acc" data-acc="${esc(a.id)}"><img src="rc280_ocean_${pet}_${slot}.png" alt="${esc(a.name)}" loading="lazy"></span>`;
+    }
+    if(a.collection==='forest'){
+      const pet=String(a.pet||'').replace(/^forest_/,'');
+      const slot=String(a.id||'').split('_').pop();
+      return `<span class="r197-art rc209-acc-proxy rc300-forest-acc" data-acc="${esc(a.id)}"><img src="rc300_forest_${pet}_${slot}.png?v=300" alt="${esc(a.name)}" loading="lazy"></span>`;
     }
     if(a.collection==='space'){
       const pet=String(a.pet||'').replace(/^space_/,'');
       const slot=(a.slot==='special'||a.slot==='head'||a.slot==='neck'||a.slot==='eyes'||a.slot==='back')?a.slot:'special';
-      const v=variantFor(window.__rc209Member,a.id);
-      return `<span class="r197-art rc209-acc-proxy rc282-space-acc" data-acc="${esc(a.id)}" data-v="${v}"><img src="rc282_space_${pet}_${slot}.png" alt="${esc(a.name)}" loading="lazy"></span>`;
+      return `<span class="r197-art rc209-acc-proxy rc282-space-acc" data-acc="${esc(a.id)}"><img src="rc282_space_${pet}_${slot}.png" alt="${esc(a.name)}" loading="lazy"></span>`;
     }
     const sym={catcap:'☾',catcollar:'✦',catglasses:'◉',catbackpack:'◆',catcharm:'★',rabbitbeanie:'☁',rabbitbandana:'☾',rabbitglasses:'◉',rabbitbag:'◆',rabbitmoon:'☾',foxhat:'☄',foxscarf:'☁',foxvisor:'◉',foxsatchel:'◆',foxcharm:'☄',owlhat:'☾',owlscarf:'☁',owlreading:'◉',owlsatchel:'◆',owlfeather:'◜',deercrown:'✦',deercollar:'☁',deerscope:'◉',deersaddle:'◆',deermedallion:'✦',bearbeanie:'☁',bearscarf:'☁',bearglasses:'◉',bearpouch:'◆',bearpaw:'●',cap:'☾',helmet:'◉',leaf:'⌁',crown:'☀',algae:'≈',scarf:'☁',shell:'◔',star:'★',nature:'♧',sun:'☀',pearl:'●',glasses:'◉',goggles:'◉',visor:'▣',backpack:'◆',amulet:'✦',medal:'✦',bubble:'○',snorkel:'⌁',badge:'★',cosmic:'✧',ship:'➤',forest:'♧',binocular:'◉',radiant:'☀',umbrella:'☂',reef:'≈',beach:'◇'}[a.kind]||'✦';
     const v=variantFor(window.__rc209Member,a.id);
@@ -333,7 +351,7 @@
       ${collectionSelector(c.theme)}
       <div class="r197-current"><div class="r197-current-art">${img(c.pet)}</div><div><span class="r197-label">COMPANHEIRO-ALVO</span><h3>${esc(pet.name)}</h3><p>${esc(pet.desc)}</p><div class="r197-stats"><span><small>Fase</small><b>${esc(phaseLabel)}</b></span><span><small>Pontos do ciclo</small><b>${sd.cycle}</b></span><span><small>Acessórios</small><b>${sd.unlocked}/5</b></span></div></div></div></section>
 
-      <section class="r197-card rc258-trail-card"><div class="r197-head"><div><span class="r197-kicker">TRILHA DO UNIVERSO</span><h3>${esc(col.name)}</h3><p>Medalha Bronze → Medalha Prata → Medalha Ouro → Troféu → Super Troféu</p></div></div><div class="r197-trail rc258-trail">${trail.map(([a,l],i)=>`<div class="r197-step ${i<sd.idx||sd.capsuleReached?'done':''} ${i===sd.idx&&!sd.capsuleReached?'current':''}"><span class="rc258-reward-art"><img src="rc258_reward_${({mist:'neblina',ocean:'oceano',space:'espaco',forest:'floresta',solar:'solar',coral:'coral'}[c.theme]||c.theme)}_${a}.jpg" alt="${esc(col.name)} — ${esc(l)}"></span><b>${l}</b></div>`).join('')}</div><div class="r197-after rc258-capsule rc260-capsule"><div><b>${sd.capsuleReached?'Super Troféu conquistado · cápsula liberada':'Prêmio do Super Troféu: cápsula'}</b><span>${sd.capsuleReached?(sd.complete?'5/5 acessórios · pet completo':'Cápsula aberta · '+sd.unlocked+'/5 acessórios liberados'):'A cápsula é liberada junto com o Super Troféu.'}</span></div><img class="rc260-capsule-art" src="rc260_capsule_${({mist:'neblina',ocean:'oceano',space:'espaco',forest:'floresta',solar:'solar',coral:'coral'}[c.theme]||c.theme)}${c.theme==='space'?'.png':'.jpg'}" alt="Cápsula do Universo ${esc(col.name)}"></div></section>
+      <section class="r197-card rc258-trail-card"><div class="r197-head"><div><span class="r197-kicker">TRILHA DO UNIVERSO</span><h3>${esc(col.name)}</h3><p>Medalha Bronze → Medalha Prata → Medalha Ouro → Troféu → Super Troféu</p></div></div><div class="r197-trail rc258-trail">${trail.map(([a,l],i)=>`<div class="r197-step ${i<sd.idx||sd.capsuleReached?'done':''} ${i===sd.idx&&!sd.capsuleReached?'current':''}"><span class="rc258-reward-art"><img src="rc258_reward_${({mist:'neblina',ocean:'oceano',space:'espaco',forest:'floresta',solar:'solar',coral:'coral'}[c.theme]||c.theme)}_${a}.jpg" alt="${esc(col.name)} — ${esc(l)}"></span><b>${l}</b></div>`).join('')}</div><div class="r197-after rc258-capsule rc260-capsule"><div><b>${sd.capsuleReached?'Super Troféu conquistado · cápsula liberada':'Prêmio do Super Troféu: cápsula'}</b><span>${sd.capsuleReached?(sd.complete?'5/5 acessórios · pet completo':'Cápsula aberta · '+sd.unlocked+'/5 acessórios liberados'):'A cápsula é liberada junto com o Super Troféu.'}</span></div><img class="rc260-capsule-art" src="rc260_capsule_${({mist:'neblina',ocean:'oceano',space:'espaco',forest:'floresta',solar:'solar',coral:'coral'}[c.theme]||c.theme)}.jpg" alt="Cápsula do Universo ${esc(col.name)}"></div></section>
 
       <section class="r197-card"><div class="r197-head row"><div><span class="r197-kicker">COLEÇÃO ${String(col.order).padStart(2,'0')}</span><h3>${esc(col.name)}</h3><p>6 pets · biblioteca temática · 5 acessórios completam cada pet</p></div><span class="r197-count">6 pets</span></div><div class="r197-pets">${col.pets.map(pp=>`<button type="button" data-r152pet="${pp.id}" class="${pp.id===c.pet?'active':''} ${used.has(pp.id)?'used':''}"><span class="r197-pet-art">${img(pp.id)}</span><strong>${esc(pp.name)}</strong><small>${used.has(pp.id)?'conquistado':'disponível'}</small></button>`).join('')}</div></section>
 
