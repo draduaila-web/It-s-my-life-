@@ -475,7 +475,6 @@ img[src*="rc260_capsule_neblina.png"],img[src*="rc260_capsule_oceano.png"]{objec
 img[src*="rc260_capsule_neblina.png"]:where(img),img[src*="rc260_capsule_oceano.png"]:where(img){border-radius:0!important;box-shadow:none!important;}
 img[src*="rc282_space_cat.png"]{object-fit:contain!important;object-position:50% 50%!important;padding:4%!important;transform:none!important;background:transparent!important;}
 </style>
-<script id="rc298-cache-bust">(()=>{const names=['rc260_capsule_neblina.png','rc260_capsule_oceano.png','rc282_space_cat.png'];const fix=()=>document.querySelectorAll('img').forEach(im=>{const n=names.find(n=>im.src.includes(n));if(n){const u=new URL(im.src,location.href);if(u.searchParams.get('v')!=='298'){u.searchParams.set('v','298');im.src=u.href;} if(n.includes('capsule')){im.style.background='transparent'; if(im.parentElement){im.parentElement.style.background='transparent';im.parentElement.style.boxShadow='none';}}}});new MutationObserver(fix).observe(document.documentElement,{subtree:true,childList:true});addEventListener('DOMContentLoaded',fix);setTimeout(fix,300);})();</script>
 </head>
 
 <style id="bertha-hml-marker">
@@ -642,6 +641,36 @@ body.bertha-hml::before{content:"HOMOLOGAÇÃO";position:fixed;z-index:99999;top
   <script src="rc282-space-assets.js?v=289"></script>
 <script src="rc290-kids-variants.js?v=291"></script>
   <script src="rc239-runtime-clean.js?v=239"></script>
+
+<style id="rc299-capsules-render-fix">
+/* RC299 — only Neblina/Oceano capsule rendering. Space is the visual reference and is untouched. */
+img[data-rc299-capsule="1"]{background:transparent!important;border-radius:0!important;box-shadow:none!important;object-fit:contain!important;object-position:center center!important;padding:0!important;margin:0!important;transform:none!important;}
+</style>
+<script id="rc299-capsules-render-fix-script">
+(()=>{
+ const VERSION='299';
+ const map={neblina:'rc260_capsule_neblina.png',oceano:'rc260_capsule_oceano.png',ocean:'rc260_capsule_oceano.png'};
+ const capsuleKind=(s='')=>{s=String(s).toLowerCase();if(!s.includes('capsul'))return null;if(s.includes('neblina'))return 'neblina';if(s.includes('oceano')||s.includes('ocean'))return 'oceano';return null};
+ const cleanParent=(el)=>{let p=el.parentElement;for(let i=0;p&&i<2;i++,p=p.parentElement){const cs=getComputedStyle(p);if(cs.backgroundImage==='none' && (cs.backgroundColor==='rgba(0, 0, 0, 0)'||cs.backgroundColor==='transparent')) continue; /* do not erase reward-card gradient */ if(i===0){p.style.setProperty('box-shadow','none','important');}}};
+ const fix=()=>{
+   document.querySelectorAll('img').forEach(im=>{
+     const key=capsuleKind([im.getAttribute('src'),im.getAttribute('alt'),im.className,im.id].join(' '));
+     if(!key)return;
+     const file=map[key]; const wanted=file+'?v='+VERSION;
+     if(!im.getAttribute('src')?.includes(file) || !im.getAttribute('src')?.includes('v='+VERSION)) im.src=wanted;
+     im.dataset.rc299Capsule='1'; cleanParent(im);
+   });
+   document.querySelectorAll('*').forEach(el=>{
+     const bg=getComputedStyle(el).backgroundImage||''; const key=capsuleKind(bg); if(!key)return;
+     el.style.setProperty('background-image',`url("${map[key]}?v=${VERSION}")`,'important');
+     el.style.setProperty('background-size','contain','important');el.style.setProperty('background-position','center center','important');el.style.setProperty('background-repeat','no-repeat','important');
+   });
+ };
+ new MutationObserver(fix).observe(document.documentElement,{subtree:true,childList:true,attributes:true,attributeFilter:['src','style','class']});
+ if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',fix,{once:true});else fix();
+ addEventListener('pageshow',fix); setTimeout(fix,250);setTimeout(fix,900);
+})();
+</script>
 
 </body>
 </html>
