@@ -475,6 +475,14 @@ body:has(.bertha-plans-task-dialog[open]){
 img[src*="rc282_space_cat.png"]{object-fit:contain!important;object-position:center center!important;box-sizing:border-box!important;padding:5%!important;}
 img[src*="rc260_capsule_neblina.png"],img[src*="rc260_capsule_oceano.png"]{object-fit:contain!important;object-position:center center!important;}
 </style>
+
+<style id="rc297-final-assets">
+img[src*="rc260_capsule_neblina.png"],img[src*="rc260_capsule_oceano.png"]{object-fit:contain!important;object-position:50% 50%!important;padding:0!important;}
+img[src*="rc282_space_cat.png"]{object-fit:contain!important;object-position:50% 50%!important;padding:10%!important;transform:scale(.88)!important;}
+</style>
+<script id="rc297-cache-bust">
+(()=>{const names=['rc260_capsule_neblina.png','rc260_capsule_oceano.png','rc282_space_cat.png'];const fix=()=>document.querySelectorAll('img').forEach(im=>{const n=names.find(n=>im.src.includes(n));if(n&&!im.src.includes('v=297')){const u=new URL(im.src,location.href);u.searchParams.set('v','297');im.src=u.href;}});new MutationObserver(fix).observe(document.documentElement,{subtree:true,childList:true,attributes:true,attributeFilter:['src']});addEventListener('DOMContentLoaded',fix);setTimeout(fix,500);})();
+</script>
 </head>
 
 <style id="bertha-hml-marker">

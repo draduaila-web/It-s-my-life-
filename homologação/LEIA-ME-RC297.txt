@@ -1,0 +1,1 @@
+RC297 — cápsulas Neblina/Oceano sem fundo e centralizadas; gato espacial com enquadramento contain e cache-bust.
