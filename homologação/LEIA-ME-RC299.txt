@@ -1,4 +1,0 @@
-RC299 — corrige somente a renderização das cápsulas Neblina e Oceano.
-Mantém os PNGs aprovados da RC298 e força o renderer a usar esses assets transparentes.
-Inclui alias capsule_ocean.png para compatibilidade com renderização antiga.
-Gato espacial e cápsula Espaço não foram alterados.
