@@ -1,1 +1,0 @@
-RC298: substitui fisicamente as cápsulas Neblina/Oceano por PNGs transparentes centralizados e o Gato Espacial por asset completo. Sem outras alterações.
