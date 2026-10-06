@@ -1,2 +1,0 @@
-BERTH.A RC287 — Espaço limpo e centralizado.
-Correção pontual sobre RC286: remove fragmentos residuais, centraliza pets/acessórios e isola/centraliza a cápsula. Mantém nomes e lógica existentes.
