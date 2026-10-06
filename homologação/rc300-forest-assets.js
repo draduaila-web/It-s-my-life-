@@ -1,4 +1,4 @@
-/* BERTH.A RC306 — Floresta saneamento visual */
+/* BERTH.A RC307 — Floresta saneamento visual */
 (function(){
  const s=document.createElement('style'); s.id='rc303-forest-style'; s.textContent=`
  .rc300-forest-pet,.rc300-forest-acc{display:flex!important;align-items:center!important;justify-content:center!important;overflow:visible!important;background:transparent!important}
@@ -13,7 +13,7 @@
    const img=el.querySelector('img'); if(!img)return;
    const v=String(el.dataset.v||'0'); let b=base(img.getAttribute('src')||'');
    if(!/rc300_forest_/.test(b))return;
-   const q='?v=306'; img.src=v==='1'?b.replace(/\.png$/, '_coral.png')+q:v==='2'?b.replace(/\.png$/, '_misto.png')+q:b+q;
+   const q='?v=307'; img.src=v==='1'?b.replace(/\.png$/, '_coral.png')+q:v==='2'?b.replace(/\.png$/, '_misto.png')+q:b+q;
  }
  function all(){document.querySelectorAll('.rc300-forest-acc').forEach(sync)}
  new MutationObserver(ms=>{for(const m of ms){if(m.type==='attributes')sync(m.target);m.addedNodes&&m.addedNodes.forEach(n=>{if(n.nodeType===1){if(n.matches?.('.rc300-forest-acc'))sync(n);n.querySelectorAll?.('.rc300-forest-acc').forEach(sync)}})}}).observe(document.documentElement,{subtree:true,childList:true,attributes:true,attributeFilter:['data-v']});
