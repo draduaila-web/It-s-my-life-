@@ -13,10 +13,10 @@
    const img=el.querySelector('img'); if(!img)return;
    const v=String(el.dataset.v||'0'); let b=base(img.getAttribute('src')||'');
    if(!/rc300_forest_/.test(b))return;
-   const q='?v=310'; img.src=v==='1'?b.replace(/\.png$/, '_coral.png')+q:v==='2'?b.replace(/\.png$/, '_misto.png')+q:b+q;
+   const q='?v=312'; img.src=v==='1'?b.replace(/\.png$/, '_coral.png')+q:v==='2'?b.replace(/\.png$/, '_misto.png')+q:b+q;
  }
  function all(){document.querySelectorAll('.rc300-forest-acc').forEach(sync)}
  new MutationObserver(ms=>{for(const m of ms){if(m.type==='attributes')sync(m.target);m.addedNodes&&m.addedNodes.forEach(n=>{if(n.nodeType===1){if(n.matches?.('.rc300-forest-acc'))sync(n);n.querySelectorAll?.('.rc300-forest-acc').forEach(sync)}})}}).observe(document.documentElement,{subtree:true,childList:true,attributes:true,attributeFilter:['data-v']});
  document.addEventListener('click',()=>setTimeout(all,0),true); setTimeout(all,100); setTimeout(all,700);
- document.documentElement.dataset.berthaForestAssets='RC310';
+ document.documentElement.dataset.berthaForestAssets='RC312';
 })();
