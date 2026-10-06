@@ -1,0 +1,4 @@
+BERTH.A RC302 — FLORESTA
+Pets completos extraídos da prancha final aprovada, sem cortes.
+Acessórios: caminho corrigido por slot e cache v302.
+Demais universos, troféus e lógica preservados.

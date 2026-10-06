@@ -251,7 +251,7 @@
     }
     if(p.collection==='forest'){
       const pet=String(p.id||'').replace(/^forest_/,'');
-      return `<span class="r197-art rc208-pet-proxy rc300-forest-pet"><img src="rc300_forest_${pet}.png?v=300" alt="${esc(p.name)}" loading="lazy"></span>`;
+      return `<span class="r197-art rc208-pet-proxy rc300-forest-pet"><img src="rc300_forest_${pet}.png?v=302" alt="${esc(p.name)}" loading="lazy"></span>`;
     }
     if(p.collection==='space'){
       const pet=String(p.id||'').replace(/^space_/,'');
@@ -269,8 +269,9 @@
     }
     if(a.collection==='forest'){
       const pet=String(a.pet||'').replace(/^forest_/,'');
-      const slot=String(a.id||'').split('_').pop();
-      return `<span class="r197-art rc209-acc-proxy rc300-forest-acc" data-acc="${esc(a.id)}"><img src="rc300_forest_${pet}_${slot}.png?v=300" alt="${esc(a.name)}" loading="lazy"></span>`;
+      const slot=(a.slot==='special'||a.slot==='head'||a.slot==='neck'||a.slot==='eyes'||a.slot==='back')?a.slot:'special';
+      const v=variantFor(window.__rc209Member,a.id);
+      return `<span class="r197-art rc209-acc-proxy rc300-forest-acc" data-acc="${esc(a.id)}" data-v="${v}"><img src="rc300_forest_${pet}_${slot}.png?v=302" alt="${esc(a.name)}" loading="lazy"></span>`;
     }
     if(a.collection==='space'){
       const pet=String(a.pet||'').replace(/^space_/,'');
