@@ -1,5 +1,0 @@
-BERTH.A RC304 — FLORESTA FINAL ASSETS
-- Acessórios Floresta saneados em canvas 640x640, transparência real, margem uniforme e centralização.
-- Sem ampliação via CSS e sem recorte do objeto no limite.
-- Cápsula Floresta normalizada usando Neblina/RC299 como gabarito de canvas/centro.
-- Pets e troféus preservados.
