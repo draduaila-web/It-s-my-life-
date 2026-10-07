@@ -1,8 +1,8 @@
-/* BERTH.A RC326 — Solar: aplica os assets existentes após todo o runtime legado.
+/* BERTH.A RC328 — Solar: aplica os assets existentes após todo o runtime legado.
    Escopo: somente pets, acessórios e cápsula Solar. Não toca medalhas/troféus. */
 (()=>{
   'use strict';
-  const V='326';
+  const V='328';
   const PETS=[
     ['Leão','lion'],
     ['Fênix','phoenix'],
