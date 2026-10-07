@@ -1,194 +1,233 @@
-/* BERTH.A RC325 — Solar: assets no padrão validado, sem alterar trilha/troféus */
+/* BERTH.A RC326 — Solar: aplica os assets existentes após todo o runtime legado.
+   Escopo: somente pets, acessórios e cápsula Solar. Não toca medalhas/troféus. */
 (()=>{
   'use strict';
-  const V='325';
-  const PETS={
-    'Leão':'lion',
-    'Fênix':'phoenix',
-    'Dragão solar':'dragon',
-    'Lagarto':'lizard',
-    'Criatura mística brilhante':'mystic',
-    'Abelha':'bee'
-  };
+  const V='326';
+  const PETS=[
+    ['Leão','lion'],
+    ['Fênix','phoenix'],
+    ['Dragão solar','dragon'],
+    ['Lagarto','lizard'],
+    ['Criatura mística brilhante','mystic'],
+    ['Abelha','bee']
+  ];
+  const variantSuffix={nevoa:'', 'névoa':'', coral:'_coral', misto:'_misto'};
 
-  const petSrc=(key)=>`rc316_solar_${key}.png?v=${V}`;
-  const accSrc=(key,i,variant)=>{
-    const suffix=variant===1?'_coral':variant===2?'_misto':'';
-    return `rc316_solar_${key}_acc${i}${suffix}.png?v=${V}`;
-  };
+  const norm=s=>(s||'').replace(/\s+/g,' ').trim();
+  const leafs=(root=document)=>[...root.querySelectorAll('*')].filter(e=>e.children.length===0);
 
-  const leaves=(root=document)=>[...root.querySelectorAll('*')].filter(e=>e.children.length===0);
-  const exact=(root,text)=>leaves(root).filter(e=>e.textContent.trim()===text);
+  function exactLeaves(root,text){
+    return leafs(root).filter(e=>norm(e.textContent)===text);
+  }
 
-  function smallestAncestor(start,predicate,max=12){
-    let p=start;
+  function ancestor(el,pred,max=14){
+    let p=el;
     for(let i=0;p&&i<max;i++,p=p.parentElement){
-      if(predicate(p)) return p;
+      try{ if(pred(p)) return p; }catch{}
     }
     return null;
   }
 
-  function solarCollection(){
-    const solarLabels=exact(document,'Solar');
-    for(const el of solarLabels){
-      const sec=smallestAncestor(el,p=>{
-        const t=p.textContent||'';
-        return t.includes('COLEÇÃO 05') && t.includes('Leão') && t.includes('Fênix') && t.includes('Abelha');
-      });
-      if(sec) return sec;
-    }
-    return null;
-  }
-
-  function petCard(section,label){
-    if(!section) return null;
-    for(const el of exact(section,label)){
-      const c=smallestAncestor(el,p=>{
-        if(!p.querySelector?.('img')) return false;
-        const r=p.getBoundingClientRect?.();
-        return !!r && r.width>=120 && r.width<=430 && r.height>=160 && r.height<=650;
-      },10);
-      if(c) return c;
-    }
-    return null;
-  }
-
-  function setImage(card,src,kind){
-    if(!card) return null;
-    let img=card.querySelector('img');
-    if(!img){
-      img=document.createElement('img');
-      card.prepend(img);
-    }
-    img.src=src;
-    img.dataset.berthaSolar=kind;
+  function styleAsset(img,kind){
+    if(!img) return;
+    img.dataset.berthaSolar326=kind;
     img.style.setProperty('object-fit','contain','important');
     img.style.setProperty('object-position','center center','important');
     img.style.setProperty('background','transparent','important');
-    img.style.setProperty('border-radius','0','important');
     img.style.setProperty('box-shadow','none','important');
+    img.style.setProperty('border-radius','0','important');
     img.style.setProperty('padding','0','important');
-    img.style.setProperty('margin','0 auto','important');
-    return img;
+    img.style.setProperty('transform','none','important');
   }
 
-  function fixPets(){
-    const section=solarCollection();
-    if(!section) return;
-    for(const [label,key] of Object.entries(PETS)){
-      const c=petCard(section,label);
-      const img=setImage(c,petSrc(key),'pet');
+  function setPetCard(label,key){
+    const hits=exactLeaves(document,label);
+    for(const hit of hits){
+      const card=ancestor(hit,p=>{
+        const t=norm(p.textContent);
+        if(t.includes('KIT DO PET')) return false;
+        if(!p.querySelector?.('img')) return false;
+        // A pet card should not contain names of several Solar pets.
+        let n=0;
+        for(const [lab] of PETS) if(t.includes(lab)) n++;
+        return n===1;
+      },10);
+      if(!card) continue;
+      const img=card.querySelector('img');
       if(!img) continue;
+      img.src=`rc316_solar_${key}.png?v=${V}`;
       img.alt=label;
-      img.style.setProperty('width','82%','important');
-      img.style.setProperty('height','72%','important');
-      img.style.setProperty('max-width','230px','important');
-      img.style.setProperty('max-height','230px','important');
+      styleAsset(img,'pet');
+      img.style.setProperty('width','88%','important');
+      img.style.setProperty('height','78%','important');
+      img.style.setProperty('max-width','235px','important');
+      img.style.setProperty('max-height','235px','important');
+      return true;
     }
+    return false;
   }
 
-  function kitSection(label){
-    for(const h of exact(document,label)){
-      const sec=smallestAncestor(h,p=>{
-        const t=p.textContent||'';
-        return t.includes('KIT DO PET') && t.includes(label) && t.includes('5 acessórios');
-      },12);
-      if(sec) return sec;
+  function findKit(label){
+    const hits=exactLeaves(document,label);
+    for(const hit of hits){
+      const kit=ancestor(hit,p=>{
+        const t=norm(p.textContent);
+        return t.includes('KIT DO PET') &&
+               t.includes(label) &&
+               t.includes('Névoa') &&
+               t.includes('Coral') &&
+               t.includes('Misto') &&
+               p.querySelectorAll?.('img').length>=5;
+      },14);
+      if(kit) return kit;
     }
-    return null;
+    // fallback: any smallest element whose text identifies this pet's kit
+    const all=[...document.querySelectorAll('*')].filter(p=>{
+      const t=norm(p.textContent);
+      return t.includes('KIT DO PET') && t.includes(label) &&
+             t.includes('Névoa') && t.includes('Coral') && t.includes('Misto') &&
+             p.querySelectorAll?.('img').length>=5;
+    });
+    all.sort((a,b)=>(a.textContent||'').length-(b.textContent||'').length);
+    return all[0]||null;
   }
 
-  function cardFromImage(img,section){
-    let p=img;
-    for(let i=0;p&&p!==section&&i<10;i++,p=p.parentElement){
-      const r=p.getBoundingClientRect?.();
-      if(r&&r.width>=120&&r.width<=430&&r.height>=180&&r.height<=700) return p;
+  function cardForImage(img,kit){
+    return ancestor(img,p=>{
+      if(p===kit) return false;
+      const t=norm(p.textContent);
+      return t.includes('Névoa') && t.includes('Coral') && t.includes('Misto');
+    },8);
+  }
+
+  function accessoryCards(kit){
+    if(!kit) return [];
+    const cards=[];
+    for(const img of kit.querySelectorAll('img')){
+      const c=cardForImage(img,kit);
+      if(c && !cards.includes(c)) cards.push(c);
     }
-    return null;
+    return cards.slice(0,5);
   }
 
-  function accessoryCards(section){
-    if(!section) return [];
-    const seen=[];
-    for(const img of section.querySelectorAll('img')){
-      const c=cardFromImage(img,section);
-      if(!c || seen.includes(c)) continue;
-      const t=c.textContent||'';
-      if(/Medalha|Troféu|Prêmio do Super/.test(t)) continue;
-      seen.push(c);
+  function activeVariant(card){
+    const v=card.dataset.berthaSolarVariant;
+    if(v) return v;
+    // Read existing app selection when present.
+    for(const el of card.querySelectorAll('*')){
+      const txt=norm(el.textContent).toLowerCase();
+      if(!(txt in variantSuffix)) continue;
+      const cs=getComputedStyle(el);
+      const selected=el.getAttribute('aria-selected')==='true' ||
+                     el.classList.contains('active') ||
+                     el.classList.contains('selected') ||
+                     parseFloat(cs.borderWidth||'0')>=2;
+      if(selected) return txt;
     }
-    return seen.slice(0,5);
+    return 'névoa';
   }
 
-  function selectedVariant(card){
-    const raw=Number(card?.dataset?.v||0);
-    return (raw===1 || raw===2) ? raw : 0;
+  function setKit(label,key){
+    const kit=findKit(label);
+    if(!kit) return false;
+    const cards=accessoryCards(kit);
+    if(cards.length<5) return false;
+    cards.forEach((card,i)=>{
+      const variant=activeVariant(card);
+      const suffix=variantSuffix[variant] ?? '';
+      const img=card.querySelector('img');
+      if(!img) return;
+      img.src=`rc316_solar_${key}_acc${i+1}${suffix}.png?v=${V}`;
+      styleAsset(img,'accessory');
+      img.style.setProperty('width','84%','important');
+      img.style.setProperty('height','84%','important');
+      img.style.setProperty('max-width','220px','important');
+      img.style.setProperty('max-height','220px','important');
+      card.dataset.berthaSolarPet=key;
+      card.dataset.berthaSolarSlot=String(i+1);
+    });
+    return true;
   }
 
-  function fixKits(){
-    for(const [label,key] of Object.entries(PETS)){
-      const sec=kitSection(label);
-      if(!sec) continue;
-      accessoryCards(sec).forEach((card,index)=>{
-        const img=setImage(card,accSrc(key,index+1,selectedVariant(card)),'accessory');
-        if(!img) return;
-        img.style.setProperty('width','86%','important');
-        img.style.setProperty('height','86%','important');
-        img.style.setProperty('max-width','220px','important');
-        img.style.setProperty('max-height','220px','important');
-      });
-    }
-  }
-
-  function fixSolarCapsule(){
-    for(const el of leaves(document)){
-      if(el.textContent.trim()!=='Prêmio do Super Troféu: cápsula') continue;
-      const reward=smallestAncestor(el,p=>{
-        const t=p.textContent||'';
-        return t.includes('Prêmio do Super Troféu: cápsula') && !!p.querySelector?.('img');
+  function setSolarCapsule(){
+    // Do not touch reward/trophy images. Target only the capsule reward card.
+    for(const el of exactLeaves(document,'Prêmio do Super Troféu: cápsula')){
+      const reward=ancestor(el,p=>{
+        const t=norm(p.textContent);
+        return t.includes('Prêmio do Super Troféu: cápsula') &&
+               t.includes('A cápsula é liberada junto com o Super Troféu.') &&
+               p.querySelector?.('img');
       },8);
       if(!reward) continue;
 
-      // Only act on the Solar reward block.
-      const parent=smallestAncestor(reward,p=>{
-        const t=p.textContent||'';
-        return t.includes('Solar') && t.includes('Medalha Bronze') && t.includes('Super Troféu');
+      // Ensure this reward block belongs to Solar by checking a nearby ancestor.
+      const solarBlock=ancestor(reward,p=>{
+        const t=norm(p.textContent);
+        return t.includes('Solar') &&
+               t.includes('Bronze') &&
+               t.includes('Prata') &&
+               t.includes('Ouro') &&
+               t.includes('Troféu');
       },8);
-      if(!parent) continue;
+      if(!solarBlock) continue;
 
-      const img=reward.querySelector('img');
-      if(!img) continue;
+      const imgs=[...reward.querySelectorAll('img')];
+      if(!imgs.length) continue;
+      const img=imgs[imgs.length-1];
       img.src=`rc316_capsule_solar.png?v=${V}`;
-      img.dataset.berthaSolar='capsule';
-      img.style.setProperty('object-fit','contain','important');
-      img.style.setProperty('object-position','center center','important');
-      img.style.setProperty('background','transparent','important');
-      img.style.setProperty('border-radius','0','important');
-      img.style.setProperty('box-shadow','none','important');
-      img.style.setProperty('padding','0','important');
-      img.style.setProperty('transform','none','important');
+      styleAsset(img,'capsule');
+      img.style.setProperty('width','112px','important');
+      img.style.setProperty('height','112px','important');
+      img.style.setProperty('max-width','112px','important');
+      img.style.setProperty('max-height','112px','important');
+      return true;
     }
+    return false;
   }
 
   function apply(){
-    fixPets();
-    fixKits();
-    fixSolarCapsule();
+    for(const [label,key] of PETS){
+      setPetCard(label,key);
+      setKit(label,key);
+    }
+    setSolarCapsule();
+    document.documentElement.dataset.berthaSolarAssets='RC326';
   }
 
-  let queued=false;
-  const queue=()=>{
-    if(queued) return;
-    queued=true;
-    requestAnimationFrame(()=>{queued=false;apply();});
-  };
+  // Capture variation clicks and immediately swap only that accessory.
+  document.addEventListener('click',ev=>{
+    const target=ev.target?.closest?.('*');
+    if(!target) return;
+    const txt=norm(target.textContent).toLowerCase();
+    if(!(txt in variantSuffix)) return;
 
-  const mo=new MutationObserver(queue);
-  mo.observe(document.documentElement,{subtree:true,childList:true,attributes:true,attributeFilter:['data-v']});
-  document.addEventListener('click',()=>setTimeout(apply,20),true);
+    const card=ancestor(target,p=>p.dataset?.berthaSolarPet && p.dataset?.berthaSolarSlot,8);
+    if(!card) return;
+    card.dataset.berthaSolarVariant=txt;
+    const key=card.dataset.berthaSolarPet;
+    const slot=card.dataset.berthaSolarSlot;
+    const img=card.querySelector('img');
+    if(img){
+      img.src=`rc316_solar_${key}_acc${slot}${variantSuffix[txt]}.png?v=${V}`;
+      styleAsset(img,'accessory');
+    }
+    setTimeout(apply,30);
+  },true);
+
+  // Reapply after the older renderer finishes or redraws the page.
+  let timer=null;
+  const schedule=()=>{
+    clearTimeout(timer);
+    timer=setTimeout(apply,40);
+  };
+  new MutationObserver(schedule).observe(document.documentElement,{
+    subtree:true, childList:true
+  });
+
+  if(document.readyState==='loading'){
+    document.addEventListener('DOMContentLoaded',apply,{once:true});
+  }else apply();
+
   addEventListener('pageshow',apply);
-  if(document.readyState==='loading') document.addEventListener('DOMContentLoaded',apply,{once:true}); else apply();
-  setTimeout(apply,250);
-  setTimeout(apply,900);
-  document.documentElement.dataset.berthaSolarAssets='RC325';
+  [120,350,700,1200,2000,3200,5000].forEach(ms=>setTimeout(apply,ms));
 })();
