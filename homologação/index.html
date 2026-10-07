@@ -641,7 +641,7 @@ body.bertha-hml::before{content:"HOMOLOGAÇÃO";position:fixed;z-index:99999;top
   <script src="rc282-space-assets.js?v=289"></script>
 <script src="rc290-kids-variants.js?v=291"></script>
 <script src="rc300-forest-assets.js?v=314"></script>
-<script src="rc316-solar-assets.js?v=318"></script>
+<script src="rc316-solar-assets.js?v=321"></script>
 
   <script src="rc239-runtime-clean.js?v=239"></script>
 
@@ -652,7 +652,7 @@ img[data-rc299-capsule="1"]{background:transparent!important;border-radius:0!imp
 <script id="rc299-capsules-render-fix-script">
 (()=>{
  const VERSION='317';
- const map={neblina:'rc260_capsule_neblina.png?v=312',oceano:'rc260_capsule_oceano.png?v=312',ocean:'rc260_capsule_oceano.png?v=312',floresta:'rc260_capsule_floresta.png?v=312',forest:'rc260_capsule_floresta.png?v=312',solar:'rc316_capsule_solar.png?v=319'};
+ const map={neblina:'rc260_capsule_neblina.png?v=312',oceano:'rc260_capsule_oceano.png?v=312',ocean:'rc260_capsule_oceano.png?v=312',floresta:'rc260_capsule_floresta.png?v=312',forest:'rc260_capsule_floresta.png?v=312',solar:'rc316_capsule_solar.png?v=321'};
  const capsuleKind=(s='')=>{s=String(s).toLowerCase();if(!s.includes('capsul'))return null;if(s.includes('neblina'))return 'neblina';if(s.includes('oceano')||s.includes('ocean'))return 'oceano';if(s.includes('floresta')||s.includes('forest'))return 'floresta';if(s.includes('solar'))return 'solar';return null};
  const cleanParent=(el)=>{let p=el.parentElement;for(let i=0;p&&i<2;i++,p=p.parentElement){const cs=getComputedStyle(p);if(cs.backgroundImage==='none' && (cs.backgroundColor==='rgba(0, 0, 0, 0)'||cs.backgroundColor==='transparent')) continue; /* do not erase reward-card gradient */ if(i===0){p.style.setProperty('box-shadow','none','important');}}};
  const fix=()=>{
