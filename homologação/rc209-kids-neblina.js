@@ -88,7 +88,15 @@
       ],
       accessories:[
         ['head','Capacete/visor','Cabeça','helmet'],['neck','Coleira estelar','Pescoço','star'],['eyes','Óculos futuristas','Olhos','visor'],['back','Mochila espacial','Corpo / costas','backpack'],['badge','Insígnia galáctica','Colecionável','badge'],['special','Item especial cósmico','Especial','cosmic'],['ship','Espaçonave','Equipamento','ship']
-      ]
+      ],
+      petAccessories:{
+        space_cat:[['head','Capacete estelar','Cabeça','helmet'],['neck','Coleira galáctica','Pescoço','star'],['eyes','Óculos futuristas','Olhos','visor'],['back','Mochila espacial','Corpo / costas','backpack'],['special','Nave companheira','Companheiro','ship']],
+        space_alien:[['head','Antenas luminosas','Cabeça','helmet'],['neck','Coleira estelar','Pescoço','star'],['eyes','Óculos geek','Olhos','visor'],['back','Mochila planeta','Corpo / costas','backpack'],['special','Planeta companheiro','Companheiro','cosmic']],
+        space_robot:[['head','Antena tech','Cabeça','helmet'],['neck','Coleira circuito','Pescoço','star'],['eyes','Óculos digital','Olhos','visor'],['back','Mochila robô','Corpo / costas','backpack'],['special','Drone companheiro','Companheiro','ship']],
+        space_astronaut:[['head','Capacete explorador','Cabeça','helmet'],['neck','Coleira da missão','Pescoço','star'],['eyes','Óculos de missão','Olhos','visor'],['back','Mochila de exploração','Corpo / costas','backpack'],['special','Foguete companheiro','Companheiro','ship']],
+        space_planet:[['head','Coroa planetária','Cabeça','crown'],['neck','Coleira órbita','Pescoço','star'],['eyes','Óculos cósmicos','Olhos','visor'],['back','Mochila de órbita','Corpo / costas','backpack'],['special','Satélite companheiro','Companheiro','cosmic']],
+        space_comet:[['head','Tiara estelar','Cabeça','crown'],['neck','Coleira de luz','Pescoço','star'],['eyes','Óculos de estrela','Olhos','visor'],['back','Mochila cometa','Corpo / costas','backpack'],['special','Nuvem companheira','Companheiro','cosmic']]
+      }
     },
     forest:{
       order:4,name:'Floresta',accent:'#8fb9a4',accent2:'#c7b57f',
@@ -104,11 +112,64 @@
       order:5,name:'Solar',accent:'#ddb873',accent2:'#e1a08c',
       palette:['#aac1cb','#a6cfbc','#efe4d2','#edce82','#df9a83','#c1b4d0','#b5d5a8'],
       pets:[
-        ['solar_lion','Leão','Forte, generoso e confiante.','☀'],['solar_phoenix','Fênix','Resiliente e sempre pronta para recomeçar.','✦'],['solar_dragon','Dragão solar','Protetor e cheio de energia.','◆'],['solar_lizard','Lagarto','Ágil, atento e adaptável.','≈'],['solar_mystic','Criatura mística brilhante','Luminosa, curiosa e única.','✧'],['solar_bee','Abelha','Organizada, ativa e colaborativa.','⬡']
+        ['solar_lion','Leão','Forte, generoso e confiante.','☀'],
+        ['solar_phoenix','Fênix','Resiliente e sempre pronta para recomeçar.','✦'],
+        ['solar_dragon','Dragão solar','Protetor e cheio de energia.','◆'],
+        ['solar_lizard','Lagarto','Ágil, atento e adaptável.','≈'],
+        ['solar_mystic','Criatura mística brilhante','Luminosa, curiosa e única.','✧'],
+        ['solar_bee','Abelha','Organizada, ativa e colaborativa.','⬡']
       ],
       accessories:[
-        ['head','Coroa/tiara solar','Cabeça','crown'],['neck','Coleira brilho','Pescoço','sun'],['eyes','Óculos solares','Olhos','glasses'],['back','Mochila solar','Corpo / costas','backpack'],['medal','Medalha sol','Colecionável','medal'],['special','Item especial radiante','Especial','radiant'],['umbrella','Guarda-sol','Equipamento','umbrella']
-      ]
+        ['head','Acessório de cabeça','Cabeça','crown'],
+        ['neck','Acessório de pescoço','Pescoço','sun'],
+        ['eyes','Acessório para olhos','Olhos','glasses'],
+        ['back','Acessório de costas','Corpo / costas','backpack'],
+        ['special','Item especial','Especial','radiant']
+      ],
+      petAccessories:{
+        solar_lion:[
+          ['head','Tiara solar','Cabeça','crown'],
+          ['neck','Coleira brilho','Pescoço','sun'],
+          ['eyes','Óculos solares','Olhos','glasses'],
+          ['back','Mochila solar','Corpo / costas','backpack'],
+          ['special','Amuleto solar','Especial','radiant']
+        ],
+        solar_phoenix:[
+          ['head','Coroa da Fênix','Cabeça','crown'],
+          ['neck','Manto de asas solares','Corpo / ombros','radiant'],
+          ['eyes','Óculos aurora','Olhos','glasses'],
+          ['back','Mochila renascer','Corpo / costas','backpack'],
+          ['special','Medalhão da Fênix','Especial','medal']
+        ],
+        solar_dragon:[
+          ['head','Chapéu do dragão solar','Cabeça','crown'],
+          ['neck','Coleira solar','Pescoço','sun'],
+          ['eyes','Óculos de luz','Olhos','glasses'],
+          ['back','Mochila do dragão','Corpo / costas','backpack'],
+          ['special','Capa celeste','Especial','radiant']
+        ],
+        solar_lizard:[
+          ['head','Boné solar','Cabeça','crown'],
+          ['neck','Coleira raio de sol','Pescoço','sun'],
+          ['eyes','Óculos explorador','Olhos','glasses'],
+          ['back','Mochila explorador','Corpo / costas','backpack'],
+          ['special','Cristal solar','Especial','radiant']
+        ],
+        solar_mystic:[
+          ['head','Coroa luminosa','Cabeça','crown'],
+          ['neck','Manto luminoso','Corpo / ombros','radiant'],
+          ['eyes','Óculos cósmicos','Olhos','glasses'],
+          ['back','Mochila mística','Corpo / costas','backpack'],
+          ['special','Amuleto estelar','Especial','radiant']
+        ],
+        solar_bee:[
+          ['head','Chapéu solar','Cabeça','crown'],
+          ['neck','Coleira mel de sol','Pescoço','sun'],
+          ['eyes','Óculos da abelha','Olhos','glasses'],
+          ['back','Mochila colmeia solar','Corpo / costas','backpack'],
+          ['special','Medalhão de luz','Especial','medal']
+        ]
+      }
     },
     coral:{
       order:6,name:'Coral',accent:'#7fbfc0',accent2:'#dc9a88',
@@ -234,7 +295,12 @@
        Não cai mais no SVG/bolinha de fallback. */
     if(p.collection==='solar'){
       const pet=String(p.id||'').replace(/^solar_/,'');
-      return `<span class="r197-art rc208-pet-proxy rc334-solar-pet"><img src="rc316_solar_${pet}.png?v=334" alt="${esc(p.name)}" loading="eager" decoding="async"></span>`;
+      return `<span class="r197-art rc208-pet-proxy rc334-solar-pet"><img src="rc316_solar_${pet}.png?v=335" alt="${esc(p.name)}" loading="eager" decoding="async"></span>`;
+    }
+    /* RC336 — Espaço recuperado em PNG BERTH.A; elimina o fallback SVG/bolinha. */
+    if(p.collection==='space'){
+      const pet=String(p.id||'').replace(/^space_/,'');
+      return `<span class="r197-art rc208-pet-proxy rc336-space-pet"><img src="rc336_space_${pet}.png?v=336" alt="${esc(p.name)}" loading="eager" decoding="async"></span>`;
     }
     const c1=colorFor(col,p.index,mode), c2=colorFor(col,p.index+2,mode), c3=colorFor(col,p.index+4,mode);
     return `<span class="r197-art rc208-pet-proxy"><svg viewBox="0 0 120 120" aria-hidden="true"><defs><linearGradient id="pg${p.id}" x1="0" y1="0" x2="1" y2="1"><stop stop-color="${c1}"/><stop offset=".55" stop-color="${c2}"/><stop offset="1" stop-color="${c3}"/></linearGradient></defs><ellipse cx="60" cy="102" rx="30" ry="6" fill="#665d6d" opacity=".06"/><circle cx="60" cy="60" r="38" fill="url(#pg${p.id})"/><circle cx="46" cy="54" r="5" fill="#4c4a53"/><circle cx="74" cy="54" r="5" fill="#4c4a53"/><path d="M53 70c5 5 9 5 14 0" fill="none" stroke="#665d6d" stroke-width="3" stroke-linecap="round"/><text x="60" y="42" text-anchor="middle" font-size="24" fill="#fff" opacity=".9" font-family="system-ui">${esc(p.symbol)}</text></svg></span>`;
@@ -255,7 +321,16 @@
       const slot=Math.max(1,Math.min(5,(m?Number(m[1]):0)+1));
       const v=variantFor(window.__rc209Member,a.id);
       const suffix=v===1?'_coral':(v===2?'_misto':'');
-      return `<span class="r197-art rc209-acc-proxy rc334-solar-acc" data-acc="${esc(a.id)}" data-v="${v}"><img src="rc316_solar_${pet}_acc${slot}${suffix}.png?v=334" alt="${esc(a.name)}" loading="eager" decoding="async"></span>`;
+      return `<span class="r197-art rc209-acc-proxy rc334-solar-acc" data-acc="${esc(a.id)}" data-v="${v}"><img src="rc316_solar_${pet}_acc${slot}${suffix}.png?v=335" alt="${esc(a.name)}" loading="eager" decoding="async"></span>`;
+    }
+    /* RC336 — 5 acessórios próprios por pet do Espaço, com Névoa/Coral/Misto. */
+    if(a.collection==='space'){
+      const pet=String(a.pet||'').replace(/^space_/,'');
+      const m=String(a.id||'').match(/_(\d+)$/);
+      const slot=Math.max(1,Math.min(5,(m?Number(m[1]):0)+1));
+      const v=variantFor(window.__rc209Member,a.id);
+      const suffix=v===1?'_coral':(v===2?'_misto':'');
+      return `<span class="r197-art rc209-acc-proxy rc336-space-acc" data-acc="${esc(a.id)}" data-v="${v}"><img src="rc336_space_${pet}_acc${slot}${suffix}.png?v=336" alt="${esc(a.name)}" loading="eager" decoding="async"></span>`;
     }
     const sym={catcap:'☾',catcollar:'✦',catglasses:'◉',catbackpack:'◆',catcharm:'★',rabbitbeanie:'☁',rabbitbandana:'☾',rabbitglasses:'◉',rabbitbag:'◆',rabbitmoon:'☾',foxhat:'☄',foxscarf:'☁',foxvisor:'◉',foxsatchel:'◆',foxcharm:'☄',owlhat:'☾',owlscarf:'☁',owlreading:'◉',owlsatchel:'◆',owlfeather:'◜',deercrown:'✦',deercollar:'☁',deerscope:'◉',deersaddle:'◆',deermedallion:'✦',bearbeanie:'☁',bearscarf:'☁',bearglasses:'◉',bearpouch:'◆',bearpaw:'●',cap:'☾',helmet:'◉',leaf:'⌁',crown:'☀',algae:'≈',scarf:'☁',shell:'◔',star:'★',nature:'♧',sun:'☀',pearl:'●',glasses:'◉',goggles:'◉',visor:'▣',backpack:'◆',amulet:'✦',medal:'✦',bubble:'○',snorkel:'⌁',badge:'★',cosmic:'✧',ship:'➤',forest:'♧',binocular:'◉',radiant:'☀',umbrella:'☂',reef:'≈',beach:'◇'}[a.kind]||'✦';
     const v=variantFor(window.__rc209Member,a.id);
@@ -331,7 +406,7 @@
       ${collectionSelector(c.theme)}
       <div class="r197-current"><div class="r197-current-art">${img(c.pet)}</div><div><span class="r197-label">COMPANHEIRO-ALVO</span><h3>${esc(pet.name)}</h3><p>${esc(pet.desc)}</p><div class="r197-stats"><span><small>Fase</small><b>${esc(phaseLabel)}</b></span><span><small>Pontos do ciclo</small><b>${sd.cycle}</b></span><span><small>Acessórios</small><b>${sd.unlocked}/5</b></span></div></div></div></section>
 
-      <section class="r197-card rc258-trail-card"><div class="r197-head"><div><span class="r197-kicker">TRILHA DO UNIVERSO</span><h3>${esc(col.name)}</h3><p>Medalha Bronze → Medalha Prata → Medalha Ouro → Troféu → Super Troféu</p></div></div><div class="r197-trail rc258-trail">${trail.map(([a,l],i)=>`<div class="r197-step ${i<sd.idx||sd.capsuleReached?'done':''} ${i===sd.idx&&!sd.capsuleReached?'current':''}"><span class="rc258-reward-art"><img src="rc258_reward_${({mist:'neblina',ocean:'oceano',space:'espaco',forest:'floresta',solar:'solar',coral:'coral'}[c.theme]||c.theme)}_${a}.jpg" alt="${esc(col.name)} — ${esc(l)}"></span><b>${l}</b></div>`).join('')}</div><div class="r197-after rc258-capsule rc260-capsule"><div><b>${sd.capsuleReached?'Super Troféu conquistado · cápsula liberada':'Prêmio do Super Troféu: cápsula'}</b><span>${sd.capsuleReached?(sd.complete?'5/5 acessórios · pet completo':'Cápsula aberta · '+sd.unlocked+'/5 acessórios liberados'):'A cápsula é liberada junto com o Super Troféu.'}</span></div><img class="rc260-capsule-art" src="rc260_capsule_${({mist:'neblina',ocean:'oceano',space:'espaco',forest:'floresta',solar:'solar',coral:'coral'}[c.theme]||c.theme)}.jpg" alt="Cápsula do Universo ${esc(col.name)}"></div></section>
+      <section class="r197-card rc258-trail-card"><div class="r197-head"><div><span class="r197-kicker">TRILHA DO UNIVERSO</span><h3>${esc(col.name)}</h3><p>Medalha Bronze → Medalha Prata → Medalha Ouro → Troféu → Super Troféu</p></div></div><div class="r197-trail rc258-trail">${trail.map(([a,l],i)=>`<div class="r197-step ${i<sd.idx||sd.capsuleReached?'done':''} ${i===sd.idx&&!sd.capsuleReached?'current':''}"><span class="rc258-reward-art"><img src="rc258_reward_${({mist:'neblina',ocean:'oceano',space:'espaco',forest:'floresta',solar:'solar',coral:'coral'}[c.theme]||c.theme)}_${a}.jpg" alt="${esc(col.name)} — ${esc(l)}"></span><b>${l}</b></div>`).join('')}</div><div class="r197-after rc258-capsule rc260-capsule"><div><b>${sd.capsuleReached?'Super Troféu conquistado · cápsula liberada':'Prêmio do Super Troféu: cápsula'}</b><span>${sd.capsuleReached?(sd.complete?'5/5 acessórios · pet completo':'Cápsula aberta · '+sd.unlocked+'/5 acessórios liberados'):'A cápsula é liberada junto com o Super Troféu.'}</span></div><img class="rc260-capsule-art" src="${c.theme==='solar'?'rc316_capsule_solar.png?v=335':(c.theme==='space'?'rc336_capsule_espaco.png?v=336':`rc260_capsule_${({mist:'neblina',ocean:'oceano',space:'espaco',forest:'floresta',coral:'coral'}[c.theme]||c.theme)}.jpg`)}" alt="Cápsula do Universo ${esc(col.name)}"></div></section>
 
       <section class="r197-card"><div class="r197-head row"><div><span class="r197-kicker">COLEÇÃO ${String(col.order).padStart(2,'0')}</span><h3>${esc(col.name)}</h3><p>6 pets · biblioteca temática · 5 acessórios completam cada pet</p></div><span class="r197-count">6 pets</span></div><div class="r197-pets">${col.pets.map(pp=>`<button type="button" data-r152pet="${pp.id}" class="${pp.id===c.pet?'active':''} ${used.has(pp.id)?'used':''}"><span class="r197-pet-art">${img(pp.id)}</span><strong>${esc(pp.name)}</strong><small>${used.has(pp.id)?'conquistado':'disponível'}</small></button>`).join('')}</div></section>
 
