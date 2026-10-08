@@ -68,7 +68,7 @@
       ],
       petAccessories:{
         ocean_turtle:[['head','Boné náutico','Cabeça','oceanasset'],['neck','Coleira concha','Pescoço','oceanasset'],['eyes','Óculos de mergulho','Olhos','oceanasset'],['back','Mochila oceano','Corpo / costas','oceanasset'],['special','Concha especial','Especial','oceanasset']],
-        ocean_shark:[['head','Boné aventureiro','Cabeça','oceanasset'],['neck','Coleira oceano','Pescoço','oceanasset'],['snorkel','Snorkel','Olhos','oceanasset'],['back','Mochila tubarão','Corpo / costas','oceanasset'],['special','Pingente onda','Especial','oceanasset']],
+        ocean_shark:[['head','Boné aventureiro','Cabeça','oceanasset'],['neck','Coleira oceano','Pescoço','oceanasset'],['eyes','Óculos futuristas','Olhos','oceanasset'],['back','Mochila tubarão','Corpo / costas','oceanasset'],['special','Pingente onda','Especial','oceanasset']],
         ocean_jelly:[['head','Tiara marinha','Cabeça','oceanasset'],['neck','Coleira pérola','Pescoço','oceanasset'],['eyes','Óculos redondos','Olhos','oceanasset'],['back','Mochila água-viva','Corpo / costas','oceanasset'],['special','Bolha especial','Especial','oceanasset']],
         ocean_octopus:[['head','Bandana náutica','Cabeça','oceanasset'],['neck','Coleira tentáculo','Pescoço','oceanasset'],['eyes','Óculos de mergulho','Olhos','oceanasset'],['back','Mochila polvo','Corpo / costas','oceanasset'],['special','Estrela do mar','Especial','oceanasset']],
         ocean_whale:[['head','Boné baleia','Cabeça','oceanasset'],['neck','Coleira cauda','Pescoço','oceanasset'],['eyes','Óculos redondos','Olhos','oceanasset'],['back','Mochila baleia','Corpo / costas','oceanasset'],['special','Pérola especial','Especial','oceanasset']],
@@ -87,37 +87,18 @@
         ['space_comet','Estrela cadente','Rápida, luminosa e cheia de movimento.','★']
       ],
       accessories:[
-        ['head','Capacete/visor','Cabeça','spaceasset'],['neck','Coleira estelar','Pescoço','spaceasset'],['eyes','Óculos futuristas','Olhos','spaceasset'],['back','Mochila espacial','Corpo / costas','spaceasset'],['special','Insígnia galáctica','Especial','spaceasset']
-      ],
-      petAccessories:{
-        space_cat:[['head','Capacete felino','Cabeça','spaceasset'],['neck','Coleira estelar','Pescoço','spaceasset'],['eyes','Óculos futuristas','Olhos','spaceasset'],['back','Mochila espacial','Corpo / costas','spaceasset'],['special','Insígnia galáctica','Especial','spaceasset']],
-        space_alien:[['head','Antenas custom','Cabeça','spaceasset'],['neck','Coleira galáctica','Pescoço','spaceasset'],['eyes','Óculos alien','Olhos','spaceasset'],['back','Mochila OVNI','Corpo / costas','spaceasset'],['special','Mini OVNI','Especial','spaceasset']],
-        space_robot:[['head','Antena robô','Cabeça','spaceasset'],['neck','Coleira energia','Pescoço','spaceasset'],['eyes','Óculos de tela','Olhos','spaceasset'],['back','Mochila foguete','Corpo / costas','spaceasset'],['special','Chave de estrela','Especial','spaceasset']],
-        space_astronaut:[['head','Capacete astronauta','Cabeça','spaceasset'],['neck','Coleira missão','Pescoço','spaceasset'],['eyes','Óculos de missão','Olhos','spaceasset'],['back','Mochila espacial','Corpo / costas','spaceasset'],['special','Bandeira estelar','Especial','spaceasset']],
-        space_planet:[['head','Anel de Saturno','Cabeça','spaceasset'],['neck','Coleira cósmica','Pescoço','spaceasset'],['eyes','Óculos orbitais','Olhos','spaceasset'],['back','Mochila órbita','Corpo / costas','spaceasset'],['special','Lua companheira','Especial','spaceasset']],
-        space_comet:[['head','Coroa estelar','Cabeça','spaceasset'],['neck','Coleira de luz','Pescoço','spaceasset'],['eyes','Óculos estelares','Olhos','spaceasset'],['back','Mochila cometa','Corpo / costas','spaceasset'],['special','Varinha de estrelas','Especial','spaceasset']]
-      }
+        ['head','Capacete/visor','Cabeça','helmet'],['neck','Coleira estelar','Pescoço','star'],['eyes','Óculos futuristas','Olhos','visor'],['back','Mochila espacial','Corpo / costas','backpack'],['badge','Insígnia galáctica','Colecionável','badge'],['special','Item especial cósmico','Especial','cosmic'],['ship','Espaçonave','Equipamento','ship']
+      ]
     },
     forest:{
       order:4,name:'Floresta',accent:'#8fb9a4',accent2:'#c7b57f',
       palette:['#9fbec0','#9fcbb1','#ede5d5','#ead58d','#d99b80','#beb6d0','#a9ce9e'],
       pets:[
-        ['forest_fox','Raposa','Esperta e atenta aos detalhes.','◆'],
-        ['forest_wolf','Lobo','Leal, firme e companheiro.','▲'],
-        ['forest_tiger','Tigre','Corajoso e cheio de presença.','≋'],
-        ['forest_bird','Arara','Livre, observadora e cheia de cor.','⌁'],
-        ['forest_hedgehog','Porco-espinho','Curioso, delicado e cheio de personalidade.','✦'],
-        ['forest_capybara','Capivara','Tranquila, sociável e constante.','●']
+        ['forest_fox','Raposa','Esperta e atenta aos detalhes.','◆'],['forest_wolf','Lobo','Leal, firme e companheiro.','▲'],['forest_tiger','Tigre','Corajoso e cheio de presença.','≋'],['forest_faun','Fauno','Curioso e conectado à natureza.','♧'],['forest_bird','Ave','Livre, observadora e leve.','⌁'],['forest_capybara','Capivara','Tranquila, sociável e constante.','●']
       ],
-      accessories:[['head','Adorno da floresta','Cabeça','forestasset'],['neck','Lenço/colar','Pescoço','forestasset'],['eyes','Óculos/visor','Olhos','forestasset'],['back','Bolsa/mochila','Corpo / costas','forestasset'],['special','Item especial','Especial','forestasset']],
-      petAccessories:{
-        forest_fox:[['head','Coroa de folhas','Cabeça','forestasset'],['neck','Lenço botânico','Pescoço','forestasset'],['eyes','Óculos de trilha','Olhos','forestasset'],['back','Mochila de exploração','Corpo / costas','forestasset'],['special','Bússola','Especial','forestasset']],
-        forest_wolf:[['head','Capuz da mata','Cabeça','forestasset'],['neck','Lenço de trilha','Pescoço','forestasset'],['eyes','Visor de exploração','Olhos','forestasset'],['back','Mochila com mapa','Corpo / costas','forestasset'],['special','Lanterna','Especial','forestasset']],
-        forest_tiger:[['head','Coroa tropical','Cabeça','forestasset'],['neck','Lenço guardião','Pescoço','forestasset'],['eyes','Óculos de explorador','Olhos','forestasset'],['back','Mochila botânica','Corpo / costas','forestasset'],['special','Mapa enrolado','Especial','forestasset']],
-        forest_bird:[['head','Adorno de penas','Cabeça','forestasset'],['neck','Colar de penas','Pescoço','forestasset'],['eyes','Visor tropical','Olhos','forestasset'],['back','Bolsa de penas','Corpo / costas','forestasset'],['special','Apito de trilha','Especial','forestasset']],
-        forest_hedgehog:[['head','Touca cogumelo','Cabeça','forestasset'],['neck','Colar de galhos','Pescoço','forestasset'],['eyes','Monóculo botânico','Olhos','forestasset'],['back','Cestinha de cogumelos','Corpo / costas','forestasset'],['special','Potinho de vagalumes','Especial','forestasset']],
-        forest_capybara:[['head','Chapéu de folhas','Cabeça','forestasset'],['neck','Colar gota','Pescoço','forestasset'],['eyes','Óculos camp','Olhos','forestasset'],['back','Mochila de coleta','Corpo / costas','forestasset'],['special','Rede de borboleta','Especial','forestasset']]
-      }
+      accessories:[
+        ['head','Chapéu/folha','Cabeça','leaf'],['neck','Coleira natureza','Pescoço','nature'],['eyes','Óculos camp','Olhos','glasses'],['back','Mochila floresta','Corpo / costas','backpack'],['medal','Medalha botânica','Colecionável','medal'],['special','Item especial floresta','Especial','forest'],['binocular','Binóculo','Equipamento','binocular']
+      ]
     },
     solar:{
       order:5,name:'Solar',accent:'#ddb873',accent2:'#e1a08c',
@@ -249,13 +230,11 @@
     if(p.collection==='ocean'){
       return `<span class="r197-art rc208-pet-proxy rc278-ocean-pet"><img src="rc278_${p.id}.png" alt="${esc(p.name)}" loading="lazy"></span>`;
     }
-    if(p.collection==='forest'){
-      const pet=String(p.id||'').replace(/^forest_/,'');
-      return `<span class="r197-art rc208-pet-proxy rc300-forest-pet"><img src="rc300_forest_${pet}.png?v=302" alt="${esc(p.name)}" loading="lazy"></span>`;
-    }
-    if(p.collection==='space'){
-      const pet=String(p.id||'').replace(/^space_/,'');
-      return `<span class="r197-art rc208-pet-proxy rc282-space-pet"><img src="rc282_space_${pet}.png" alt="${esc(p.name)}" loading="lazy"></span>`;
+    /* RC334 — Solar usa PNG final diretamente na fonte do Kids.
+       Não cai mais no SVG/bolinha de fallback. */
+    if(p.collection==='solar'){
+      const pet=String(p.id||'').replace(/^solar_/,'');
+      return `<span class="r197-art rc208-pet-proxy rc334-solar-pet"><img src="rc316_solar_${pet}.png?v=334" alt="${esc(p.name)}" loading="eager" decoding="async"></span>`;
     }
     const c1=colorFor(col,p.index,mode), c2=colorFor(col,p.index+2,mode), c3=colorFor(col,p.index+4,mode);
     return `<span class="r197-art rc208-pet-proxy"><svg viewBox="0 0 120 120" aria-hidden="true"><defs><linearGradient id="pg${p.id}" x1="0" y1="0" x2="1" y2="1"><stop stop-color="${c1}"/><stop offset=".55" stop-color="${c2}"/><stop offset="1" stop-color="${c3}"/></linearGradient></defs><ellipse cx="60" cy="102" rx="30" ry="6" fill="#665d6d" opacity=".06"/><circle cx="60" cy="60" r="38" fill="url(#pg${p.id})"/><circle cx="46" cy="54" r="5" fill="#4c4a53"/><circle cx="74" cy="54" r="5" fill="#4c4a53"/><path d="M53 70c5 5 9 5 14 0" fill="none" stroke="#665d6d" stroke-width="3" stroke-linecap="round"/><text x="60" y="42" text-anchor="middle" font-size="24" fill="#fff" opacity=".9" font-family="system-ui">${esc(p.symbol)}</text></svg></span>`;
@@ -267,16 +246,16 @@
       const slot=(a.slot==='special'||a.slot==='head'||a.slot==='neck'||a.slot==='eyes'||a.slot==='back')?a.slot:'special';
       return `<span class="r197-art rc209-acc-proxy rc280-ocean-acc" data-acc="${esc(a.id)}"><img src="rc280_ocean_${pet}_${slot}.png" alt="${esc(a.name)}" loading="lazy"></span>`;
     }
-    if(a.collection==='forest'){
-      const pet=String(a.pet||'').replace(/^forest_/,'');
-      const slot=(a.slot==='special'||a.slot==='head'||a.slot==='neck'||a.slot==='eyes'||a.slot==='back')?a.slot:'special';
+    /* RC334 — acessórios Solar saem diretamente dos PNGs finais.
+       O último número do id (0..4) define acc1..acc5.
+       Variante 0=Névoa, 1=Coral, 2=Misto. */
+    if(a.collection==='solar'){
+      const pet=String(a.pet||'').replace(/^solar_/,'');
+      const m=String(a.id||'').match(/_(\d+)$/);
+      const slot=Math.max(1,Math.min(5,(m?Number(m[1]):0)+1));
       const v=variantFor(window.__rc209Member,a.id);
-      return `<span class="r197-art rc209-acc-proxy rc300-forest-acc" data-acc="${esc(a.id)}" data-v="${v}"><img src="rc300_forest_${pet}_${slot}.png?v=302" alt="${esc(a.name)}" loading="lazy"></span>`;
-    }
-    if(a.collection==='space'){
-      const pet=String(a.pet||'').replace(/^space_/,'');
-      const slot=(a.slot==='special'||a.slot==='head'||a.slot==='neck'||a.slot==='eyes'||a.slot==='back')?a.slot:'special';
-      return `<span class="r197-art rc209-acc-proxy rc282-space-acc" data-acc="${esc(a.id)}"><img src="rc282_space_${pet}_${slot}.png" alt="${esc(a.name)}" loading="lazy"></span>`;
+      const suffix=v===1?'_coral':(v===2?'_misto':'');
+      return `<span class="r197-art rc209-acc-proxy rc334-solar-acc" data-acc="${esc(a.id)}" data-v="${v}"><img src="rc316_solar_${pet}_acc${slot}${suffix}.png?v=334" alt="${esc(a.name)}" loading="eager" decoding="async"></span>`;
     }
     const sym={catcap:'☾',catcollar:'✦',catglasses:'◉',catbackpack:'◆',catcharm:'★',rabbitbeanie:'☁',rabbitbandana:'☾',rabbitglasses:'◉',rabbitbag:'◆',rabbitmoon:'☾',foxhat:'☄',foxscarf:'☁',foxvisor:'◉',foxsatchel:'◆',foxcharm:'☄',owlhat:'☾',owlscarf:'☁',owlreading:'◉',owlsatchel:'◆',owlfeather:'◜',deercrown:'✦',deercollar:'☁',deerscope:'◉',deersaddle:'◆',deermedallion:'✦',bearbeanie:'☁',bearscarf:'☁',bearglasses:'◉',bearpouch:'◆',bearpaw:'●',cap:'☾',helmet:'◉',leaf:'⌁',crown:'☀',algae:'≈',scarf:'☁',shell:'◔',star:'★',nature:'♧',sun:'☀',pearl:'●',glasses:'◉',goggles:'◉',visor:'▣',backpack:'◆',amulet:'✦',medal:'✦',bubble:'○',snorkel:'⌁',badge:'★',cosmic:'✧',ship:'➤',forest:'♧',binocular:'◉',radiant:'☀',umbrella:'☂',reef:'≈',beach:'◇'}[a.kind]||'✦';
     const v=variantFor(window.__rc209Member,a.id);
@@ -358,7 +337,7 @@
 
       <section class="r197-card"><div class="r197-head"><div><span class="r197-kicker">KIT DO PET</span><h3>${esc(pet.name)}</h3><p>5 acessórios exclusivos deste companheiro · cada 3 medalhas libera 1.</p></div></div><div class="r197-acc-grid">${pet.accessories.map((a,i)=>{const vv=variantFor(member.id,a.id);return `<label class="r197-acc ${i<sd.unlocked?'unlocked':''}"><input type="checkbox" disabled ${i<sd.unlocked?'checked':''}><span class="r197-acc-art">${img(a.id)}</span><strong>${esc(a.name)}</strong><small>${esc(a.slotLabel)}</small><div class="rc209-variants" role="group" aria-label="Variações de cor"><button type="button" data-rc209variant="0" data-aid="${a.id}" class="${vv===0?'active':''}"><i class="cool"></i><span>Névoa</span></button><button type="button" data-rc209variant="1" data-aid="${a.id}" class="${vv===1?'active':''}"><i class="warm"></i><span>Coral</span></button><button type="button" data-rc209variant="2" data-aid="${a.id}" class="${vv===2?'active':''}"><i class="mix"></i><span>Misto</span></button></div><div class="rc208-lock">${i<sd.unlocked?'Liberado':`Faltam ${Math.max(0,(i+1)*3-sd.accessoryMedals)} medalhas`}</div></label>`}).join('')}</div></section>
 
-      <section class="r197-card"><div class="r197-head"><div><span class="r197-kicker">BIBLIOTECA DO COMPANHEIRO</span><h3>${esc(pet.name)}</h3><p>Os cinco acessórios são próprios deste pet. Os próximos companheiros mudam formatos e funções para manter a coleção divertida.</p></div></div><div class="rc208-library">${pet.accessories.map(a=>`<span><i>${iconSvg(a.kind,col,mode,'✦',variantFor(member.id,a.id))}</i><b>${esc(a.name)}</b></span>`).join('')}</div></section>
+      <section class="r197-card"><div class="r197-head"><div><span class="r197-kicker">BIBLIOTECA DO COMPANHEIRO</span><h3>${esc(pet.name)}</h3><p>Os cinco acessórios são próprios deste pet. Os próximos companheiros mudam formatos e funções para manter a coleção divertida.</p></div></div><div class="rc208-library">${pet.accessories.map(a=>`<span><i>${a.collection==='solar'?accessoryArt(a,col,mode):iconSvg(a.kind,col,mode,'✦',variantFor(member.id,a.id))}</i><b>${esc(a.name)}</b></span>`).join('')}</div></section>
 
       <section class="r197-card"><div class="r197-head"><div><span class="r197-kicker">CONFIGURAÇÃO DO OWNER</span><h3>Coleção, pet e ritmo</h3><p>O Owner escolhe o próximo alvo. A criança vê somente a própria jornada.</p></div></div><div class="r197-settings rc208-settings"><label>Coleção<select id="rc208CollectionSel">${COLLECTION_ORDER.map(k=>`<option value="${k}" ${k===c.theme?'selected':''}>${esc(COLLECTIONS[k].name)}</option>`).join('')}</select></label><label>Pet<select id="rc208PetSel">${col.pets.map(p=>`<option value="${p.id}" ${p.id===c.pet?'selected':''}>${esc(p.name)}</option>`).join('')}</select></label><label>Pontos por marco<input id="r152Pts" type="number" min="1" value="${c.pointsPerStep}"></label><label>Paleta<select id="r152Palette"><option value="auto">Automática pelo avatar</option><option value="neutral" ${mode==='neutral'?'selected':''}>Neutra</option><option value="boy" ${mode==='boy'?'selected':''}>Masculina</option><option value="girl" ${mode==='girl'?'selected':''}>Feminina</option></select></label></div><button class="primary r197-save" id="r152SaveCycle">Salvar ciclo</button></section>
 
@@ -569,3 +548,10 @@
  document.head.appendChild(s);
 })();
 /* RC279 — Oceano: assets sem fundo + tartaruga discretamente menor. */
+
+/* RC334 Solar PNG sizing — scoped only to Solar */
+(()=>{const st=document.createElement('style');st.id='rc334-solar-direct-style';st.textContent=`
+.rc334-solar-pet img,.rc334-solar-acc img{width:100%!important;height:100%!important;max-width:100%!important;max-height:100%!important;object-fit:contain!important;object-position:center!important;display:block!important;background:transparent!important}
+.r197-current-art .rc334-solar-pet,.r197-pet-art .rc334-solar-pet{width:100%!important;height:100%!important}
+.r197-acc-art .rc334-solar-acc{width:100%!important;height:100%!important}
+`;document.head.appendChild(st)})();
