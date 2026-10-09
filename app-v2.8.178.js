@@ -2173,7 +2173,7 @@ function shopDateLabel(ts){if(!ts)return'';const d=new Date(ts);return Number.is
 function shopCategoryLabel(v){return v||'Outros'}
 function shopSvg(name){const p={bag:'<path d="M6 8h12l1 13H5L6 8z"/><path d="M9 9V6a3 3 0 0 1 6 0v3"/>',edit:'<path d="M4 20h4l11-11-4-4L4 16v4z"/><path d="M13.5 6.5l4 4"/>',trash:'<path d="M4 7h16M9 7V4h6v3M7 7l1 13h8l1-13"/>',plus:'<path d="M12 5v14M5 12h14"/>',trend:'<path d="M4 17l5-5 4 4 7-8"/><path d="M15 8h5v5"/>',heart:'<path d="M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.6l-1-1a5.5 5.5 0 0 0-7.8 7.8l1 1L12 21l7.8-7.6 1-1a5.5 5.5 0 0 0 0-7.8z"/>',check:'<path d="M5 12l4 4L19 6"/>'};return `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${p[name]||p.bag}</svg>`}
 function ensureShoppingStyles(){if(document.getElementById('bertha-shopping-styles-v170'))return;const st=document.createElement('style');st.id='bertha-shopping-styles-v170';st.textContent=`
-/* v2.8.170 — Lista de Compras · linguagem BERTH.A */
+/* v2.8.178 — Lista de Compras · hero organizado na homologação */
 .shop-page{padding-bottom:18px}
 .shop-hero{
   position:relative;overflow:hidden;
@@ -2190,14 +2190,15 @@ function ensureShoppingStyles(){if(document.getElementById('bertha-shopping-styl
   border:1px solid rgba(112,94,121,.10);transform:rotate(28deg);pointer-events:none;
 }
 .shop-hero>div,.shop-hero>button{position:relative;z-index:1}
+.shop-hero>div{min-width:0;max-width:calc(100% - 46px);padding-right:4px}
 .shop-hero .eyebrow{color:#9a7088!important}
 .shop-hero h2{
-  margin:5px 0 6px;font-family:"Montserrat","Avenir Next",Inter,sans-serif;
-  font-size:26px;font-weight:550;line-height:1.08;letter-spacing:-.035em;color:#443a49
+  margin:7px 0 8px;font-family:"Montserrat","Avenir Next",Inter,sans-serif;
+  max-width:285px;font-size:25px;font-weight:550;line-height:1.10;letter-spacing:-.032em;color:#443a49
 }
-.shop-hero p{margin:0;max-width:300px;color:#7d727f;font-size:14px;line-height:1.42}
-.shop-hero-mark{position:absolute;right:22px;top:22px;width:42px;height:42px;display:grid;place-items:center;color:rgba(91,87,96,.34);z-index:1}
-.shop-hero-mark svg{width:31px;height:31px;fill:none;stroke:currentColor;stroke-width:1.15;stroke-linecap:round;stroke-linejoin:round}
+.shop-hero p{margin:0;max-width:270px;color:#7d727f;font-size:14px;line-height:1.42}
+.shop-hero-mark{position:absolute;right:20px;top:24px;width:38px;height:38px;display:grid;place-items:center;color:rgba(91,87,96,.24);z-index:1}
+.shop-hero-mark svg{width:28px;height:28px;fill:none;stroke:currentColor;stroke-width:1.05;stroke-linecap:round;stroke-linejoin:round}
 .shop-icon-btn{
   width:44px;height:44px;border:0;border-radius:15px;
   background:rgba(255,250,246,.68);color:#8a6a7b;
