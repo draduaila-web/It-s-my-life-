@@ -7342,7 +7342,7 @@ renderRewardsRC147=renderRewardsRC152;renderUniversalRewards=renderRewardsRC152;
 
   // On page restore (Safari back/forward cache), repaint only the active route.
   window.addEventListener('pageshow',()=>{
-    requestAnimationFrame(()=>window.__berthaCoreRender?.());
+    requestAnimationFrame(()=>(window.render || window.__berthaCoreRender)?.());
   });
 })();
 
