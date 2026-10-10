@@ -227,8 +227,15 @@
     return [p[0],p[4]||'#df9c8f',p[2],p[3],p[1]];
   }
 
+  function accessoryPalette(col,variant){
+    const p=col.palette;
+    if(variant===0)return [p[0],p[1],p[2],p[3],p[5]];
+    if(variant===1)return [p[4],p[3],p[2],p[6],p[1]];
+    return [p[5],p[4],p[2],p[3],p[1]];
+  }
+
   function iconSvg(kind,col,mode,symbol,variant=2){
-    const p=variantPalette(col,mode,variant), c1=p[0],c2=p[1],c3=p[2],c4=p[3],c5=p[4];
+    const p=kind.startsWith('reward-')?variantPalette(col,mode,variant):accessoryPalette(col,variant), c1=p[0],c2=p[1],c3=p[2],c4=p[3],c5=p[4];
     const uid='i'+Math.random().toString(36).slice(2,8);
     const defs=`<defs><linearGradient id="${uid}g" x1="0" y1="0" x2="1" y2="1"><stop stop-color="${c3}"/><stop offset=".48" stop-color="${c1}"/><stop offset="1" stop-color="${c2}"/></linearGradient><linearGradient id="${uid}h" x1="0" y1="0" x2="0" y2="1"><stop stop-color="#fff" stop-opacity=".88"/><stop offset="1" stop-color="${c4}" stop-opacity=".75"/></linearGradient></defs>`;
     const glyph=symbol||'✦'; let body='';
@@ -418,7 +425,7 @@
 
       <section class="r197-card"><div class="r197-head"><div><span class="r197-kicker">KIT DO PET</span><h3>${esc(pet.name)}</h3><p>5 acessórios exclusivos deste companheiro · cada 3 medalhas libera 1.</p></div></div><div class="r197-acc-grid">${pet.accessories.map((a,i)=>{const vv=variantFor(member.id,a.id);return `<label class="r197-acc ${i<sd.unlocked?'unlocked':''}"><input type="checkbox" disabled ${i<sd.unlocked?'checked':''}><span class="r197-acc-art">${img(a.id)}</span><strong>${esc(a.name)}</strong><small>${esc(a.slotLabel)}</small><div class="rc209-variants" role="group" aria-label="Variações de cor"><button type="button" data-rc209variant="0" data-aid="${a.id}" class="${vv===0?'active':''}"><i class="cool"></i><span>Névoa</span></button><button type="button" data-rc209variant="1" data-aid="${a.id}" class="${vv===1?'active':''}"><i class="warm"></i><span>Coral</span></button><button type="button" data-rc209variant="2" data-aid="${a.id}" class="${vv===2?'active':''}"><i class="mix"></i><span>Misto</span></button></div><div class="rc208-lock">${i<sd.unlocked?'Liberado':`Faltam ${Math.max(0,(i+1)*3-sd.accessoryMedals)} medalhas`}</div></label>`}).join('')}</div></section>
 
-      <section class="r197-card"><div class="r197-head"><div><span class="r197-kicker">BIBLIOTECA DO COMPANHEIRO</span><h3>${esc(pet.name)}</h3><p>Os cinco acessórios são próprios deste pet. Os próximos companheiros mudam formatos e funções para manter a coleção divertida.</p></div></div><div class="rc208-library">${pet.accessories.map(a=>`<span><i>${(a.collection==='solar'||a.collection==='ocean'||a.collection==='space')?accessoryArt(a,col,mode):iconSvg(a.kind,col,mode,'✦',variantFor(member.id,a.id))}</i><b>${esc(a.name)}</b></span>`).join('')}</div></section>
+      <section class="r197-card"><div class="r197-head"><div><span class="r197-kicker">BIBLIOTECA DO COMPANHEIRO</span><h3>${esc(pet.name)}</h3><p>Os cinco acessórios são próprios deste pet. Os próximos companheiros mudam formatos e funções para manter a coleção divertida.</p></div></div><div class="rc208-library">${pet.accessories.map(a=>`<span><i>${accessoryArt(a,col,mode)}</i><b>${esc(a.name)}</b></span>`).join('')}</div></section>
 
       <section class="r197-card"><div class="r197-head"><div><span class="r197-kicker">CONFIGURAÇÃO DO OWNER</span><h3>Coleção, pet e ritmo</h3><p>O Owner escolhe o próximo alvo. A criança vê somente a própria jornada.</p></div></div><div class="r197-settings rc208-settings"><label>Coleção<select id="rc208CollectionSel">${COLLECTION_ORDER.map(k=>`<option value="${k}" ${k===c.theme?'selected':''}>${esc(COLLECTIONS[k].name)}</option>`).join('')}</select></label><label>Pet<select id="rc208PetSel">${col.pets.map(p=>`<option value="${p.id}" ${p.id===c.pet?'selected':''}>${esc(p.name)}</option>`).join('')}</select></label><label>Pontos por marco<input id="r152Pts" type="number" min="1" value="${c.pointsPerStep}"></label><label>Paleta<select id="r152Palette"><option value="auto">Automática pelo avatar</option><option value="neutral" ${mode==='neutral'?'selected':''}>Neutra</option><option value="boy" ${mode==='boy'?'selected':''}>Masculina</option><option value="girl" ${mode==='girl'?'selected':''}>Feminina</option></select></label></div><button class="primary r197-save" id="r152SaveCycle">Salvar ciclo</button></section>
 
