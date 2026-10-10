@@ -331,14 +331,12 @@
       const suffix=v===1?'_coral':(v===2?'_misto':'');
       return `<span class="r197-art rc209-acc-proxy rc334-solar-acc" data-acc="${esc(a.id)}" data-v="${v}"><img src="rc336_solar_${pet}_acc${slot}${suffix}.png?v=338" alt="${esc(a.name)}" loading="eager" decoding="async"></span>`;
     }
-    /* RC336 — 5 acessórios próprios por pet do Espaço, com Névoa/Coral/Misto. */
+    /* Espaço: originais definidos + cores suaves, com Neblina como referência. */
     if(a.collection==='space'){
       const pet=String(a.pet||'').replace(/^space_/,'');
-      const m=String(a.id||'').match(/_(\d+)$/);
-      const slot=Math.max(1,Math.min(5,(m?Number(m[1]):0)+1));
+      const slot=['head','neck','eyes','back','special'].includes(a.slot)?a.slot:'special';
       const v=variantFor(window.__rc209Member,a.id);
-      const suffix=v===1?'_coral':(v===2?'_misto':'');
-      return `<span class="r197-art rc209-acc-proxy rc336-space-acc" data-acc="${esc(a.id)}" data-v="${v}"><img src="rc336_space_${pet}_acc${slot}${suffix}.png?v=338" alt="${esc(a.name)}" loading="eager" decoding="async"></span>`;
+      return `<span class="r197-art rc209-acc-proxy rc336-space-acc" data-acc="${esc(a.id)}" data-v="${v}"><img src="rc282_space_${pet}_${slot}.png?v=20261010-neblina" alt="${esc(a.name)}" loading="eager" decoding="async"></span>`;
     }
     const sym={catcap:'☾',catcollar:'✦',catglasses:'◉',catbackpack:'◆',catcharm:'★',rabbitbeanie:'☁',rabbitbandana:'☾',rabbitglasses:'◉',rabbitbag:'◆',rabbitmoon:'☾',foxhat:'☄',foxscarf:'☁',foxvisor:'◉',foxsatchel:'◆',foxcharm:'☄',owlhat:'☾',owlscarf:'☁',owlreading:'◉',owlsatchel:'◆',owlfeather:'◜',deercrown:'✦',deercollar:'☁',deerscope:'◉',deersaddle:'◆',deermedallion:'✦',bearbeanie:'☁',bearscarf:'☁',bearglasses:'◉',bearpouch:'◆',bearpaw:'●',cap:'☾',helmet:'◉',leaf:'⌁',crown:'☀',algae:'≈',scarf:'☁',shell:'◔',star:'★',nature:'♧',sun:'☀',pearl:'●',glasses:'◉',goggles:'◉',visor:'▣',backpack:'◆',amulet:'✦',medal:'✦',bubble:'○',snorkel:'⌁',badge:'★',cosmic:'✧',ship:'➤',forest:'♧',binocular:'◉',radiant:'☀',umbrella:'☂',reef:'≈',beach:'◇'}[a.kind]||'✦';
     const v=variantFor(window.__rc209Member,a.id);
