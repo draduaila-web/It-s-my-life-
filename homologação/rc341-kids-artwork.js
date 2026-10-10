@@ -44,7 +44,8 @@
   try{
    ctx.drawImage(img,0,0);const pixels=ctx.getImageData(0,0,w,h).data;
    let left=w,top=h,right=0,bottom=0;
-   for(let y=0;y<h;y++)for(let x=0;x<w;x++)if(pixels[(y*w+x)*4+3]>0){left=Math.min(left,x);top=Math.min(top,y);right=Math.max(right,x+1);bottom=Math.max(bottom,y+1);}
+   // Ignore apenas pixels quase invisíveis na medição; preserva o PNG e seu alfa.
+   for(let y=0;y<h;y++)for(let x=0;x<w;x++)if(pixels[(y*w+x)*4+3]>8){left=Math.min(left,x);top=Math.min(top,y);right=Math.max(right,x+1);bottom=Math.max(bottom,y+1);}
    const bounds=right>left&&bottom>top?{left,top,right,bottom}:null;
    cache.set(key,bounds);return bounds;
   }catch(_){cache.set(key,null);return null;}

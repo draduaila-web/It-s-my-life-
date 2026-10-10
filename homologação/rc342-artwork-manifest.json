@@ -1,0 +1,99 @@
+{
+  "version": "RC342",
+  "generator": "built-in image_gen",
+  "rollback": "backup/bertha-pre-kids-fontes-2026-10-10-56f0a12",
+  "assets": [
+    {
+      "file": "homologação/rc342_forest_wolf.png",
+      "prompt": "Repair this exact approved baby wolf game sprite. Preserve its identity, face, lavender gray fluffy fur, pose and rendering style. The right side was cut off vertically: reconstruct ONLY the missing right side of its head, chest and paws so the whole seated wolf is complete. Remove stray tiny detached artifacts at far left. No redesign, no new accessories. One complete character centered with generous transparent margin. Genuine transparent PNG alpha, no backdrop, no text, no floor."
+    },
+    {
+      "file": "homologação/rc342_forest_tiger.png",
+      "prompt": "Repair this exact approved baby tiger game sprite. Preserve identity, large eyes, orange striped fur, seated pose and rendering style. Its right side has been cut off vertically and front paw clipped: reconstruct ONLY the missing right side of head, chest, legs and paws to make the complete seated tiger. No redesign, no new accessories. One whole character centered with generous transparent margin, genuine transparent PNG alpha, no background, no text, no floor."
+    },
+    {
+      "file": "homologação/rc342_capsule_coral.png",
+      "prompt": "Repair this exact coral-universe collectible egg capsule. Preserve pink pearlescent egg identity, coral motifs, golden belt and purple star clasp. Restore missing bottom and right edge so whole egg is visible, centered with at least 15% clear margin. Remove ALL cream and peach square background. Genuine transparent PNG alpha, no rectangular panel, no floor, no text. Keep soft colors and detailed existing toy rendering; only complete boundaries and transparent backdrop."
+    },
+    {
+      "file": "homologação/rc342_coral_axolotl.png",
+      "prompt": "Use case: stylized-concept. Final individual game pet asset for BERTH.A Kids Coral collection, replacing generic placeholder. Subject: a baby axolotl, pale peach pink skin, six feathery external gills, four little legs and curled tail. Entire character, cute unisex collectible toy style, large expressive glossy dark eyes, subtle pearlescent materials, fine crisp detail and soft studio light consistent with Neblina pet reference in conversation. One character only, centered in square with 15% transparent clear margin, all limbs and appendages inside. No scene, no pedestal, no text, no outline badge, no floor. True transparent PNG alpha from generation. Soft colors, no overexposure."
+    },
+    {
+      "file": "homologação/rc342_coral_octopus.png",
+      "prompt": "Use case: stylized-concept. Final individual game pet asset for BERTH.A Kids Coral collection, replacing generic placeholder. Subject: a baby coral octopus, eight complete curled tentacles, soft peach lavender. Entire character, cute unisex collectible toy style, large expressive glossy dark eyes, subtle pearlescent materials, fine crisp detail and soft studio light consistent with Neblina pet reference in conversation. One character only, centered in square with 15% transparent clear margin, all limbs and appendages inside. No scene, no pedestal, no text, no outline badge, no floor. True transparent PNG alpha from generation. Soft colors, no overexposure."
+    },
+    {
+      "file": "homologação/rc342_coral_seahorse.png",
+      "prompt": "Use case: stylized-concept. Final individual game pet asset for BERTH.A Kids Coral collection, replacing generic placeholder. Subject: a baby seahorse, curved neck, small fins and curled tail, seafoam cream and coral details. Entire character, cute unisex collectible toy style, large expressive glossy dark eyes, subtle pearlescent materials, fine crisp detail and soft studio light consistent with Neblina pet reference in conversation. One character only, centered in square with 15% transparent clear margin, all limbs and appendages inside. No scene, no pedestal, no text, no outline badge, no floor. True transparent PNG alpha from generation. Soft colors, no overexposure."
+    },
+    {
+      "file": "homologação/rc342_coral_star.png",
+      "prompt": "Use case: stylized-concept. Final individual game pet asset for BERTH.A Kids Coral collection, replacing generic placeholder. Subject: a baby five armed starfish, peach coral dotted skin. Entire character, cute unisex collectible toy style, large expressive glossy dark eyes, subtle pearlescent materials, fine crisp detail and soft studio light consistent with Neblina pet reference in conversation. One character only, centered in square with 15% transparent clear margin, all limbs and appendages inside. No scene, no pedestal, no text, no outline badge, no floor. True transparent PNG alpha from generation. Soft colors, no overexposure."
+    },
+    {
+      "file": "homologação/rc342_coral_shrimp.png",
+      "prompt": "Use case: stylized-concept. Final individual game pet asset for BERTH.A Kids Coral collection, replacing generic placeholder. Subject: a baby shrimp, gentle curved segmented body, tiny legs, two long complete antennae, peach coral. Entire character, cute unisex collectible toy style, large expressive glossy dark eyes, subtle pearlescent materials, fine crisp detail and soft studio light consistent with Neblina pet reference in conversation. One character only, centered in square with 15% transparent clear margin, all limbs and appendages inside. No scene, no pedestal, no text, no outline badge, no floor. True transparent PNG alpha from generation. Soft colors, no overexposure."
+    },
+    {
+      "file": "homologação/rc342_coral_ray.png",
+      "prompt": "Use case: stylized-concept. Final individual game pet asset for BERTH.A Kids Coral collection, replacing generic placeholder. Subject: a baby stingray with complete wide rounded wings, small friendly face and long gracefully curled tail, soft seafoam lavender. Entire character, cute unisex collectible toy style, large expressive glossy dark eyes, subtle pearlescent materials, fine crisp detail and soft studio light consistent with Neblina pet reference in conversation. One character only, centered in square with 15% transparent clear margin, all limbs and appendages inside. No scene, no pedestal, no text, no outline badge, no floor. True transparent PNG alpha from generation. Soft colors, no overexposure."
+    },
+    {
+      "file": "homologação/rc342_forest_acc_leaf.png",
+      "prompt": "Use case: stylized-concept. Final individual wearable accessory asset for BERTH.A Kids forest universe. Subject: a leaf shaped brimmed woodland hat with delicate small flower details. Cute polished miniature collectible toy render consistent with detailed Neblina reference. soft forest mint, lavender, peach and warm gold. Fine definition, soft light, restrained saturation, rounded forms. Show complete object in three-quarter front view centered with 15% clear margin on all sides. One accessory only, no pet, no scene, no text, no panel, no pedestal, no glow or floor. Genuine transparent PNG alpha. All straps, handles and extremities entirely visible; crisp clean edges."
+    },
+    {
+      "file": "homologação/rc342_forest_acc_nature.png",
+      "prompt": "Use case: stylized-concept. Final individual wearable accessory asset for BERTH.A Kids forest universe. Subject: a woodland pet collar with little leaf clasp. Cute polished miniature collectible toy render consistent with detailed Neblina reference. soft forest mint, lavender, peach and warm gold. Fine definition, soft light, restrained saturation, rounded forms. Show complete object in three-quarter front view centered with 15% clear margin on all sides. One accessory only, no pet, no scene, no text, no panel, no pedestal, no glow or floor. Genuine transparent PNG alpha. All straps, handles and extremities entirely visible; crisp clean edges."
+    },
+    {
+      "file": "homologação/rc342_forest_acc_glasses.png",
+      "prompt": "Use case: stylized-concept. Final individual wearable accessory asset for BERTH.A Kids forest universe. Subject: round woodland camping glasses with leaf details, clear lenses and both temples. Cute polished miniature collectible toy render consistent with detailed Neblina reference. soft forest mint, lavender, peach and warm gold. Fine definition, soft light, restrained saturation, rounded forms. Show complete object in three-quarter front view centered with 15% clear margin on all sides. One accessory only, no pet, no scene, no text, no panel, no pedestal, no glow or floor. Genuine transparent PNG alpha. All straps, handles and extremities entirely visible; crisp clean edges."
+    },
+    {
+      "file": "homologação/rc342_forest_acc_backpack.png",
+      "prompt": "Use case: stylized-concept. Final individual wearable accessory asset for BERTH.A Kids forest universe. Subject: a woodland camping backpack with leaf clasp, straps and front pocket. Cute polished miniature collectible toy render consistent with detailed Neblina reference. soft forest mint, lavender, peach and warm gold. Fine definition, soft light, restrained saturation, rounded forms. Show complete object in three-quarter front view centered with 15% clear margin on all sides. One accessory only, no pet, no scene, no text, no panel, no pedestal, no glow or floor. Genuine transparent PNG alpha. All straps, handles and extremities entirely visible; crisp clean edges."
+    },
+    {
+      "file": "homologação/rc342_forest_acc_medal.png",
+      "prompt": "Use case: stylized-concept. Final individual wearable accessory asset for BERTH.A Kids forest universe. Subject: a wearable botanical medal with ribbon and embossed leaf. Cute polished miniature collectible toy render consistent with detailed Neblina reference. soft forest mint, lavender, peach and warm gold. Fine definition, soft light, restrained saturation, rounded forms. Show complete object in three-quarter front view centered with 15% clear margin on all sides. One accessory only, no pet, no scene, no text, no panel, no pedestal, no glow or floor. Genuine transparent PNG alpha. All straps, handles and extremities entirely visible; crisp clean edges."
+    },
+    {
+      "file": "homologação/rc342_forest_acc_forest.png",
+      "prompt": "Use case: stylized-concept. Final individual wearable accessory asset for BERTH.A Kids forest universe. Subject: a wearable acorn charm with leaf and short cord. Cute polished miniature collectible toy render consistent with detailed Neblina reference. soft forest mint, lavender, peach and warm gold. Fine definition, soft light, restrained saturation, rounded forms. Show complete object in three-quarter front view centered with 15% clear margin on all sides. One accessory only, no pet, no scene, no text, no panel, no pedestal, no glow or floor. Genuine transparent PNG alpha. All straps, handles and extremities entirely visible; crisp clean edges."
+    },
+    {
+      "file": "homologação/rc342_forest_acc_binocular.png",
+      "prompt": "Use case: stylized-concept. Final individual wearable accessory asset for BERTH.A Kids forest universe. Subject: small woodland binoculars with two complete lenses and a strap. Cute polished miniature collectible toy render consistent with detailed Neblina reference. soft forest mint, lavender, peach and warm gold. Fine definition, soft light, restrained saturation, rounded forms. Show complete object in three-quarter front view centered with 15% clear margin on all sides. One accessory only, no pet, no scene, no text, no panel, no pedestal, no glow or floor. Genuine transparent PNG alpha. All straps, handles and extremities entirely visible; crisp clean edges."
+    },
+    {
+      "file": "homologação/rc342_coral_acc_algae.png",
+      "prompt": "Use case: stylized-concept. Final individual wearable accessory asset for BERTH.A Kids coral universe. Subject: a pet tiara with delicate branching algae and small pearls. Cute polished miniature collectible toy render consistent with detailed Neblina reference. soft coral pink, seafoam mint, lavender and warm gold. Fine definition, soft light, restrained saturation, rounded forms. Show complete object in three-quarter front view centered with 15% clear margin on all sides. One accessory only, no pet, no scene, no text, no panel, no pedestal, no glow or floor. Genuine transparent PNG alpha. All straps, handles and extremities entirely visible; crisp clean edges."
+    },
+    {
+      "file": "homologação/rc342_coral_acc_pearl.png",
+      "prompt": "Use case: stylized-concept. Final individual wearable accessory asset for BERTH.A Kids coral universe. Subject: a pet collar of round pearls with shell clasp. Cute polished miniature collectible toy render consistent with detailed Neblina reference. soft coral pink, seafoam mint, lavender and warm gold. Fine definition, soft light, restrained saturation, rounded forms. Show complete object in three-quarter front view centered with 15% clear margin on all sides. One accessory only, no pet, no scene, no text, no panel, no pedestal, no glow or floor. Genuine transparent PNG alpha. All straps, handles and extremities entirely visible; crisp clean edges."
+    },
+    {
+      "file": "homologação/rc342_coral_acc_glasses.png",
+      "prompt": "Use case: stylized-concept. Final individual wearable accessory asset for BERTH.A Kids coral universe. Subject: round coral reef glasses with branching coral details, clear lenses and both temples. Cute polished miniature collectible toy render consistent with detailed Neblina reference. soft coral pink, seafoam mint, lavender and warm gold. Fine definition, soft light, restrained saturation, rounded forms. Show complete object in three-quarter front view centered with 15% clear margin on all sides. One accessory only, no pet, no scene, no text, no panel, no pedestal, no glow or floor. Genuine transparent PNG alpha. All straps, handles and extremities entirely visible; crisp clean edges."
+    },
+    {
+      "file": "homologação/rc342_coral_acc_backpack.png",
+      "prompt": "Use case: stylized-concept. Final individual wearable accessory asset for BERTH.A Kids coral universe. Subject: a coral reef pet backpack with shell pocket, straps and pearly details. Cute polished miniature collectible toy render consistent with detailed Neblina reference. soft coral pink, seafoam mint, lavender and warm gold. Fine definition, soft light, restrained saturation, rounded forms. Show complete object in three-quarter front view centered with 15% clear margin on all sides. One accessory only, no pet, no scene, no text, no panel, no pedestal, no glow or floor. Genuine transparent PNG alpha. All straps, handles and extremities entirely visible; crisp clean edges."
+    },
+    {
+      "file": "homologação/rc342_coral_acc_medal.png",
+      "prompt": "Use case: stylized-concept. Final individual wearable accessory asset for BERTH.A Kids coral universe. Subject: a wearable scallop shell medal with ribbon. Cute polished miniature collectible toy render consistent with detailed Neblina reference. soft coral pink, seafoam mint, lavender and warm gold. Fine definition, soft light, restrained saturation, rounded forms. Show complete object in three-quarter front view centered with 15% clear margin on all sides. One accessory only, no pet, no scene, no text, no panel, no pedestal, no glow or floor. Genuine transparent PNG alpha. All straps, handles and extremities entirely visible; crisp clean edges."
+    },
+    {
+      "file": "homologação/rc342_coral_acc_reef.png",
+      "prompt": "Use case: stylized-concept. Final individual wearable accessory asset for BERTH.A Kids coral universe. Subject: a wearable branching coral charm with pearl and short cord. Cute polished miniature collectible toy render consistent with detailed Neblina reference. soft coral pink, seafoam mint, lavender and warm gold. Fine definition, soft light, restrained saturation, rounded forms. Show complete object in three-quarter front view centered with 15% clear margin on all sides. One accessory only, no pet, no scene, no text, no panel, no pedestal, no glow or floor. Genuine transparent PNG alpha. All straps, handles and extremities entirely visible; crisp clean edges."
+    },
+    {
+      "file": "homologação/rc342_coral_acc_beach.png",
+      "prompt": "Use case: stylized-concept. Final individual wearable accessory asset for BERTH.A Kids coral universe. Subject: one small seashell shaped beach toy bucket with little spade attached. Cute polished miniature collectible toy render consistent with detailed Neblina reference. soft coral pink, seafoam mint, lavender and warm gold. Fine definition, soft light, restrained saturation, rounded forms. Show complete object in three-quarter front view centered with 15% clear margin on all sides. One accessory only, no pet, no scene, no text, no panel, no pedestal, no glow or floor. Genuine transparent PNG alpha. All straps, handles and extremities entirely visible; crisp clean edges."
+    }
+  ]
+}
