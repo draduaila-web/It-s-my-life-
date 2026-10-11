@@ -7,6 +7,8 @@
     solar:'solar',coral:'coral'};
 
   function currentTheme(){
+    const exact=document.querySelector('.rc258-trail[data-rc344-award-theme]')?.dataset.rc344AwardTheme;
+    if(exact)return exact;
     const a=document.querySelector('[data-theme].active,[data-theme][aria-selected="true"],[data-collection].active,[data-collection][aria-selected="true"]');
     let t=a&&(a.dataset.theme||a.dataset.collection);
     if(t) return map[t]||'neblina';
@@ -30,7 +32,9 @@
       const art=steps[i].querySelector('.rc258-reward-art');
       const img=art&&art.querySelector('img');
       if(!art||!img) return;
-      img.src=`rc268_reward_${t}_${k}.png`;
+      const aliases={neblina:"mist",oceano:"ocean",espaco:"space",floresta:"forest"};
+      const file=window.BerthaKidsAwardsRC344.rewards[(aliases[t]||t)+"_"+k]+"?v=344-premios";
+      if(img.getAttribute("src")!==file)img.setAttribute("src",file);
 
       art.style.setProperty('background','transparent','important');
       art.style.setProperty('overflow','visible','important');

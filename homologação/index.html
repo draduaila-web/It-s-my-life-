@@ -616,7 +616,8 @@ body.bertha-hml::before{content:"HOMOLOGAÇÃO";position:fixed;z-index:99999;top
 <script src="ui-assets-v188.js?v=239"></script>
 <script src="rc196-sat-owner-helper.js?v=239"></script>
 <script src="rc207-kids-neblina.js?v=239"></script>
-<script src="rc209-kids-neblina.js?v=20261010-fontes-kids"></script>
+<script src="rc344-premiacoes-manifest.js?v=344-premios"></script>
+<script src="rc209-kids-neblina.js?v=344-premios"></script>
 <script src="routing-fix-v188.js?v=239"></script>
 <script src="rc220-kids-cycle-assets.js?v=239"></script>
 <script src="rc223-kids-rabbit-assets.js?v=239"></script>
@@ -630,8 +631,8 @@ body.bertha-hml::before{content:"HOMOLOGAÇÃO";position:fixed;z-index:99999;top
 
 <script src="rc253-kids-accessories-scale.js?v=253"></script>
 <script src="rc266-trofeus-sem-crop.js?v=266"></script>
-  <script src="rc268-trofeus-reforcados.js?v=268"></script>
-  <script src="rc271-trilha-corrigida.js?v=271"></script>
+  <script src="rc268-trofeus-reforcados.js?v=344-premios"></script>
+  <script src="rc271-trilha-corrigida.js?v=344-premios"></script>
   <script src="rc273-hierarquia-visual-segura.js?v=273"></script>
   <script src="rc274-super-trofeu-ajuste.js?v=274"></script>
   <script src="rc275-hierarquia-compacta.js?v=275"></script>
@@ -647,31 +648,10 @@ body.bertha-hml::before{content:"HOMOLOGAÇÃO";position:fixed;z-index:99999;top
 img[data-rc299-capsule="1"]{background:transparent!important;border-radius:0!important;box-shadow:none!important;object-fit:contain!important;object-position:center center!important;padding:0!important;margin:0!important;transform:none!important;}
 </style>
 <script id="rc299-capsules-render-fix-script">
-(()=>{
- const VERSION='317';
- const map={neblina:'rc260_capsule_neblina.png?v=312',oceano:'rc260_capsule_oceano.png?v=312',ocean:'rc260_capsule_oceano.png?v=312',floresta:'rc260_capsule_floresta.png?v=312',forest:'rc260_capsule_floresta.png?v=312',solar:'rc316_capsule_solar.png?v=319'};
- const capsuleKind=(s='')=>{s=String(s).toLowerCase();if(!s.includes('capsul'))return null;if(s.includes('neblina'))return 'neblina';if(s.includes('oceano')||s.includes('ocean'))return 'oceano';if(s.includes('floresta')||s.includes('forest'))return 'floresta';if(s.includes('solar'))return 'solar';return null};
- const cleanParent=(el)=>{let p=el.parentElement;for(let i=0;p&&i<2;i++,p=p.parentElement){const cs=getComputedStyle(p);if(cs.backgroundImage==='none' && (cs.backgroundColor==='rgba(0, 0, 0, 0)'||cs.backgroundColor==='transparent')) continue; /* do not erase reward-card gradient */ if(i===0){p.style.setProperty('box-shadow','none','important');}}};
- const fix=()=>{
-   document.querySelectorAll('img').forEach(im=>{
-     const key=capsuleKind([im.getAttribute('src'),im.getAttribute('alt'),im.className,im.id].join(' '));
-     if(!key)return;
-     const file=map[key]; const wanted=file+'?v='+VERSION;
-     if(!im.getAttribute('src')?.includes(file) || !im.getAttribute('src')?.includes('v='+VERSION)) im.src=wanted;
-     im.dataset.rc299Capsule='1'; cleanParent(im);
-   });
-   document.querySelectorAll('*').forEach(el=>{
-     const bg=getComputedStyle(el).backgroundImage||''; const key=capsuleKind(bg); if(!key)return;
-     el.style.setProperty('background-image',`url("${map[key]}?v=${VERSION}")`,'important');
-     el.style.setProperty('background-size','contain','important');el.style.setProperty('background-position','center center','important');el.style.setProperty('background-repeat','no-repeat','important');
-   });
- };
- new MutationObserver(fix).observe(document.documentElement,{subtree:true,childList:true,attributes:true,attributeFilter:['src','style','class']});
- if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',fix,{once:true});else fix();
- addEventListener('pageshow',fix); setTimeout(fix,250);setTimeout(fix,900);
-})();
+(()=>{const mark=root=>{if(root.nodeType!==1&&root.nodeType!==9)return;root.querySelectorAll('.rc209-kids-shell .rc260-capsule-art').forEach(im=>{im.dataset.rc299Capsule='1'});};const start=()=>{mark(document);new MutationObserver(rs=>rs.forEach(r=>r.addedNodes.forEach(mark))).observe(document.body,{childList:true,subtree:true});};if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',start,{once:true});else start();})();
 </script>
 <!-- Kids: apresentação comum após os estilos legados, sem alterar os dados. -->
 <script src="rc341-kids-artwork.js?v=20261010-fontes-kids"></script>
+<script src="rc344-premiacoes.js?v=344-premios"></script>
 </body>
 </html>
