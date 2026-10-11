@@ -30,16 +30,16 @@
     {id:'rocked',name:'Arrasou',message:'Você mandou muito bem. Arrasou!',variant:0,active:true}
   ];
   const AVATARS={
-    man:'satellite_avatar_man_v189.png',
-    woman:'satellite_avatar_woman_v189.png',
-    romantic_m:'satellite_avatar_romantic_m_v189.png',
-    romantic_f:'satellite_avatar_romantic_f_v189.png',
-    boy:'satellite_avatar_boy_v189.png',
-    girl:'satellite_avatar_girl_v189.png',
-    person:'satellite_avatar_man_v189.png',
-    family:'satellite_avatar_woman_v189.png',
-    son:'satellite_avatar_boy_v189.png',
-    daughter:'satellite_avatar_girl_v189.png'
+    man:'rc353_avatar_man.webp',
+    woman:'rc353_avatar_woman.webp',
+    romantic_m:'rc353_avatar_romantic_m.webp',
+    romantic_f:'rc353_avatar_romantic_f.webp',
+    boy:'rc353_avatar_boy.webp',
+    girl:'rc353_avatar_girl.webp',
+    person:'rc353_avatar_man.webp',
+    family:'rc353_avatar_woman.webp',
+    son:'rc353_avatar_boy.webp',
+    daughter:'rc353_avatar_girl.webp'
   };
   const OWNER_ART={
     progress100:'rc351_owner_balance.webp',
