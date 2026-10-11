@@ -291,6 +291,10 @@
   }
 
   function petArt(p,col,mode){
+    const upgraded=window.BerthaKidsPetsRC346?.[p.id];
+    if(upgraded){
+      return `<span class="r197-art rc208-pet-proxy rc346-pet"><img src="${upgraded}?v=346-pets" data-rc346-pet="${esc(p.id)}" data-rc346-palette="${esc(mode||'neutral')}" alt="${esc(p.name)}" loading="eager" decoding="async"></span>`;
+    }
     if(p.collection==='mist' && oldImg){
       const legacy=oldImg(p.id);
       if(legacy) return legacy;
