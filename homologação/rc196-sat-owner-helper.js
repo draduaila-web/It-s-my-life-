@@ -42,19 +42,20 @@
     daughter:'satellite_avatar_girl_v189.png'
   };
   const OWNER_ART={
-    progress100:'owner_align_v192.png',
-    goal:'owner_goal_v192.png',
-    streak:'owner_sequence_v192.png',
-    cycle:'owner_cycle_v192.png',
-    focus:'owner_focus_v192.png',
-    presence:'owner_presence_v192.png',
-    balance:'owner_align_v192.png',
-    sequence:'owner_sequence_v192.png',
-    continuity:'owner_cycle_v192.png',
-    selfcare:'owner_presence_v192.png',
-    depth:'owner_focus_v192.png',
-    evolution:'owner_presence_v192.png',
-    delivery:'owner_goal_v192.png'
+    progress100:'rc351_owner_balance.webp',
+    goal:'rc351_owner_goal.webp',
+    streak:'rc351_owner_sequence.webp',
+    cycle:'rc351_owner_cycle.webp',
+    focus:'rc351_owner_focus.webp',
+    presence:'rc351_owner_presence.webp',
+    balance:'rc351_owner_balance.webp',
+    sequence:'rc351_owner_sequence.webp',
+    continuity:'rc351_owner_continuity.webp',
+    selfcare:'rc351_owner_selfcare.webp',
+    depth:'rc351_owner_depth.webp',
+    evolution:'rc351_owner_evolution.webp',
+    delivery:'rc351_owner_delivery.webp',
+    constancy:'rc351_owner_constancy.webp'
   };
 
   const OWNER_TONES=[
@@ -152,7 +153,7 @@
   }
   function roomItems(){
     const base=[
-      {key:'sequence',name:'Constância',sub:'7 dias'},
+      {key:'sequence',artKey:'constancy',name:'Constância',sub:'7 dias'},
       {key:'cycle',name:'Ciclo concluído',sub:'rotina ou projeto'},
       {key:'focus',name:'Foco',sub:'30 dias'},
       {key:'balance',name:'Equilíbrio',sub:'semana alinhada'},
@@ -177,7 +178,7 @@
     if(typeof r147Dialog!=='function') return;
     const items=roomItems();
     const legend=OWNER_TONES.map((tone,i)=>`<span class="rc195-medal-chip rc195-${tone.id}"><i></i><b>${i+1}ª medalha</b><small>${tone.name}</small></span>`).join('');
-    const html=`<div class="rc193-owner-room-note"><strong>Ciclo de medalhas</strong><p>A 1ª medalha de cada conquista usa a mesma paleta. Quando aquela mesma conquista se repetir, ela avança para a 2ª cor, depois 3ª, até completar um ciclo de 6 medalhas.</p></div><div class="rc195-medal-legend">${legend}</div><div class="r147-collection rc192-owner-room rc193-owner-room">${items.map((x)=>`<div class="r147-col-item rc192-owner-col rc193-owner-col">${ownerImg(ownerRewardFileByCriterion(x.key),'rc192-owner-col-art',x.tone)}<strong>${x.name}</strong><small>${x.sub}</small><em class="rc193-owner-repeat">${x.medal}ª medalha</em></div>`).join('')}</div>`;
+    const html=`<div class="rc193-owner-room-note"><strong>Ciclo de medalhas</strong><p>A 1ª medalha de cada conquista usa a mesma paleta. Quando aquela mesma conquista se repetir, ela avança para a 2ª cor, depois 3ª, até completar um ciclo de 6 medalhas.</p></div><div class="rc195-medal-legend">${legend}</div><div class="r147-collection rc192-owner-room rc193-owner-room">${items.map((x)=>`<div class="r147-col-item rc192-owner-col rc193-owner-col">${ownerImg(ownerRewardFileByCriterion(x.artKey||x.key),'rc192-owner-col-art',x.tone)}<strong>${x.name}</strong><small>${x.sub}</small><em class="rc193-owner-repeat">${x.medal}ª medalha</em></div>`).join('')}</div>`;
     const dlg=r147Dialog('Sala de Troféus',html);
     return dlg;
   }
@@ -198,7 +199,7 @@
     }
 
     const cards=[...pane.querySelectorAll('.r147-ach')];
-    const files=['progress100','cycle','focus','presence'];
+    const files=['constancy','cycle','focus','evolution'];
     cards.forEach((card,i)=>{
       const art=card.querySelector('.art');
       const key=files[i];
