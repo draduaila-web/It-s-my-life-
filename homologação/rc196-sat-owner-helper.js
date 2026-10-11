@@ -70,7 +70,13 @@
 
   function tryJSON(k){try{return JSON.parse(window.berthaHmlStorage.getItem(k)||'null')}catch(e){return null}}
   function stripExt(v){return String(v||'').replace(/\.(png|jpg|jpeg|svg)$/i,'')}
-  function assetFile(name){ return './'+stripExt(name)+'.png?v=198'; }
+  // RC352: final Helper artwork; persisted preset ids and variants are unchanged.
+  function assetFile(name){
+    const raw=stripExt(name);
+    const match=raw.match(/^recognition_(thanks|flower|coffee|pause|reward|saved|hug|care|arrasou)_v189_([ab])$/);
+    if(match)return './rc352_rec_'+match[1]+'.webp?v=352&palette='+(match[2]==='a'?'rose':'brisa');
+    return './'+raw+'.png?v=198';
+  }
   function normalizeId(raw,i){
     const fallback=(DEFAULTS[i]||DEFAULTS[0]).id;
     const id=String(raw?.id||fallback);
