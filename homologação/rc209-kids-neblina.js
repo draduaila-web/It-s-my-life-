@@ -330,6 +330,11 @@
   }
 
   function accessoryArt(a,col,mode){
+    const upgraded=window.BerthaKidsAccessoriesRC347?.[a.id];
+    if(upgraded){
+      const v=variantFor(window.__rc209Member,a.id);
+      return `<span class="r197-art rc347-acc" data-acc="${esc(a.id)}" data-v="${v}"><img src="${upgraded}?v=347-accessories" data-rc347-accessory="${esc(a.id)}" alt="${esc(a.name)}" loading="lazy" decoding="async"></span>`;
+    }
     if(a.collection==='ocean'){
       const pet=String(a.pet||'').replace(/^ocean_/,'');
       const slot=(a.slot==='special'||a.slot==='head'||a.slot==='neck'||a.slot==='eyes'||a.slot==='back')?a.slot:'special';

@@ -480,6 +480,11 @@ img[src*="rc282_space_cat.png?v=312"]{object-fit:contain!important;object-positi
 .rc209-kids-shell :is(.r197-current-art,.r197-pet-art,.r197-history) .r197-art.rc346-pet img[data-rc346-palette="girl"]{filter:url("#rc344-awards-warm")!important}
 .rc209-kids-shell :is(.r197-current-art,.r197-pet-art,.r197-history) .r197-art.rc346-pet img[data-rc346-palette="neutral"]{filter:saturate(.9)!important}
 </style>
+<style id="rc347-accessories-palettes">
+.rc209-kids-shell :is(.r197-acc-art,.rc208-library i) .r197-art.rc347-acc[data-acc][data-v="0"] img{filter:url("#rc347-accessory-cool")!important}
+.rc209-kids-shell :is(.r197-acc-art,.rc208-library i) .r197-art.rc347-acc[data-acc][data-v="1"] img{filter:url("#rc347-accessory-warm")!important}
+.rc209-kids-shell :is(.r197-acc-art,.rc208-library i) .r197-art.rc347-acc[data-acc][data-v="2"] img{filter:saturate(.9)!important}
+</style>
 </head>
 
 <style id="bertha-hml-marker">
@@ -487,6 +492,11 @@ body.bertha-hml::before{content:"HOMOLOGAÇÃO";position:fixed;z-index:99999;top
 .bertha-more-data-actions [data-hml-reset]{grid-column:1/-1;background:#fffaf3!important;color:#8b7379!important;border:1px solid rgba(126,104,116,.12)!important}
 </style>
 <body class="bertha-hml">
+<svg aria-hidden="true" width="0" height="0" style="position:absolute;pointer-events:none;overflow:hidden"><defs>
+<filter id="rc347-accessory-cool" x="-50%" y="-50%" width="200%" height="200%" color-interpolation-filters="sRGB"><feColorMatrix type="matrix" values=".10 .80 .10 0 0 .75 .15 .10 0 0 .10 .05 .85 0 0 0 0 0 1 0"/></filter>
+<filter id="rc347-accessory-warm" x="-50%" y="-50%" width="200%" height="200%" color-interpolation-filters="sRGB"><feColorMatrix type="matrix" values=".08 .10 .82 0 0 .05 .80 .15 0 0 .85 .10 .05 0 0 0 0 0 1 0"/></filter>
+</defs></svg>
+
 <style id="rc157-index-badge-style">
 #rc157IndexBadge{
  position:fixed;
@@ -623,7 +633,8 @@ body.bertha-hml::before{content:"HOMOLOGAÇÃO";position:fixed;z-index:99999;top
 <script src="rc207-kids-neblina.js?v=239"></script>
 <script src="rc344-premiacoes-manifest.js?v=345-premios"></script>
 <script src="rc346-pets-manifest.js?v=346-pets"></script>
-<script src="rc209-kids-neblina.js?v=346-pets"></script>
+<script src="rc347-accessories-manifest.js?v=347-accessories"></script>
+<script src="rc209-kids-neblina.js?v=347-accessories"></script>
 <script src="routing-fix-v188.js?v=239"></script>
 <script src="rc220-kids-cycle-assets.js?v=239"></script>
 <script src="rc223-kids-rabbit-assets.js?v=239"></script>
