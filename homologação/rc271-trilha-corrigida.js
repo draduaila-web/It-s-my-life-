@@ -13,10 +13,10 @@
     const s=[...trail.querySelectorAll('.r197-step')]; if(s.length<5) return;
     trail.classList.add('rc271-linear'); const u=universe(trail);
     // Medal assets are real transparent PNGs in RC271.
-    ['bronze','prata','ouro'].forEach((m,i)=>{const im=s[i].querySelector('img'); if(im) im.src=`rc271_reward_${u}_${m}.png`;});
+    ['bronze','prata','ouro'].forEach((m,i)=>{const im=s[i].querySelector('img'); if(im&&!im.hasAttribute('data-rc344-award-palette')) im.src=`rc271_reward_${u}_${m}.png`;});
     // Trophy assets remain the approved transparent set.
     const t=s[3].querySelector('img'), st=s[4].querySelector('img');
-    if(t)t.src=`rc268_reward_${u}_trofeu.png`; if(st)st.src=`rc268_reward_${u}_super.png`;
+    if(t&&!t.hasAttribute('data-rc344-award-palette'))t.src=`rc268_reward_${u}_trofeu.png`; if(st&&!st.hasAttribute('data-rc344-award-palette'))st.src=`rc268_reward_${u}_super.png`;
   }
   const st=document.createElement('style'); st.id='rc271-style'; st.textContent=`
   .rc258-trail.rc271-linear{display:flex!important;align-items:flex-end!important;justify-content:space-between!important;gap:4px!important;width:100%!important;box-sizing:border-box!important;padding:15px 10px 12px!important;background:rgba(255,255,255,.9)!important;border:1px solid rgba(112,90,119,.07)!important;border-radius:22px!important;overflow:hidden!important;box-shadow:0 8px 24px rgba(75,58,69,.03)!important}
