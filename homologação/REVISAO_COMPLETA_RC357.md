@@ -1,4 +1,4 @@
-# BERTH.A — matriz da revisão RC357–RC361
+# BERTH.A — matriz da revisão RC357–RC362
 
 Revisão executada em 12/10/2026. Escopo: beta em **homologação**, com acentos. A revisão não garante ausência absoluta de falhas. Resultado por fluxo abaixo; abrir uma tela não equivale a validar o módulo inteiro.
 
@@ -252,3 +252,32 @@ Auditoria isolada: PR42, merge `3d3dce67e96146e743187a6b9810e8710c44f1d7`, deplo
 - Sala Owner publicada: desktop720px de conteúdo; largura390→366px e320→296px, scrollWidth=clientWidth,12imagens carregadas. Ao rolar até o histórico em320, X continuou visível(top88px); click fecha, reabrir e Escape fecham. Evidência: bertha-owner-rc361-historico-320-publicado.jpg, **QA isolado/Chrome**, não Safari/iPhone.
 - Console: nenhum erro do aplicativo observado nos logs consultados; mensagens da extensão do navegador excluídas. Não houve limpeza de cache/localStorage/bancos; cache-bust por query nas referências dos scripts.
 - A correção de cabeçalho Owner e comparação de dados reais anteriormente pendentes nesta seção estão **revalidadas**. As dependências nativas, remotas e mapeamentos adicionais listados acima continuam abertas; não representam falhas visuais resolvidas nem funcionalidades GPS/mensagens implementadas.
+
+
+## RC362 — ciclos de treino e projetos do Owner
+
+Base confirmada: `805a7d3a2c69820545648a476b144148cc9bc544`, RC361. Rollback criado: `backup/bertha-pre-owner-cycles-rc362-805a7d3`, mesmo hash. Branch: `work/bertha-owner-cycles-rc362`. PR47 publica somente o módulo inicialmente inativo, testes, auditoria e visor QA; merge `1a1eb84f3448724305f12b3fa086bb8ff28e166e`. Pages1346/run38312880925 Success. Arquivos RC361 preservados.
+
+| Módulo / fluxo | Causa / lacuna | Correção | Testes e resultado | Pendência |
+|---|---|---|---|---|
+| Exercícios / conquista de ciclo Owner | Fonte de ciclo só cobria rituais | Usa frequência semanal já configurada, cycleId, sessões e eventos concluídos exatos do Meu Dia. Cada sessão exige prova distinta; período semanal separado. Não altera gravador, programação ou integração aprovada | QA: ciclo existente1/2; iniciar/concluir pela UI registra1min e2/2; uma conquista de ciclo; reabrir/recarregar conserva somente uma. Testes rejeitam ausência de prova, IDs parecidos, duplicações, ciclo inativo, alvo ausente/zero/fracionário e provas futuras | É a frequência existente do app; não exige completar duração planejada nem impõe punição. Semana real longa ainda não foi aguardada |
+| Criação & Ideias / conquista de ciclo e meta | Projeto comprovado já entrava como meta; faltava fonte para critério de ciclo | Projeto concluído com evento de execução pode atender aos dois critérios configurados, cada qual com ocorrência própria | QA: projeto1min criado/planejado0%; cadastrado sem conquista. Execução começou pelo card do Meu Dia; conclusão confirmou1min e chegou100%; ciclo2ªcor e meta3ªcor. Reabrir/recarregar mantém cinco conquistas no total | Uma execução é um único evento de progresso; receber dois tipos de conquista configurados não duplica o evento |
+| Atualização / histórico cumulativo | Acrescentar fonte poderia premiar retrospectivamente projetos antigos | sourcesVersion2 no ledger, com baseline das novas fontes. Guarda todas as conquistas/evidências anteriores. Mudança da frequência/ativação dos ciclos gera baseline; normalização de campos neutros não muda a regra | Upgrade QA68/68: única chave alterada é ledger; duas medalhas antigas exatamente iguais, nenhuma nova no upgrade.65 assertivas em São Paulo/Nova York, incluindo fonte desconhecida preservada e idempotência | Não reescreve configurações, cadastros, históricos, permissões ou pontuações antigas |
+| Dados / regressão | Novos reconhecimentos não podem alterar rede/integrações | Leitura de provas e uma chave de histórico; módulos de execução congelados | QA final68/68: alterados somente aprendizagem de duração, exercícios, motor, ideias e ledger conforme sessões/projeto testados.24eventos anteriores integralmente preservados;24→26 eventos; duas medalhas anteriores intactas; novas três têm provas rastreáveis | Testes persistentes somente namespace QA isolado; comparação real pós-deploy ainda será registrada |
+| Sala Owner / responsivo | Histórico maior precisa continuar legível | Layout/arte/cabeçalho da RC361 mantidos | Desktop720px,390→366px,320→296px, scrollWidth=clientWidth;12 imagens carregadas, X visível ao rolar e Escape fecha. Evidência bertha-owner-rc362-ciclos-390.jpg, QA/Chrome | Safari/iPhone físico não disponível |
+
+Verificações: `owner-progress-rc362.test.cjs`,65 assertivas por execução em dois fusos; sintaxe válida do módulo e todos os scripts inline da auditoria.4arquivos novos do PR47 comparados integralmente com fontes preparados; nenhuma remoção. Index principal durante a candidata permaneceu RC361.
+
+### Backend existente — inspeção e retomada, sem modificação de regras
+
+O conector Supabase identificou projeto **BERTH.A**, ref `ouxellokvigbdeeyvvfv`, região sa-east-1, criado16/09/2026. Inicialmente INACTIVE; consulta de estrutura falhou com timeout. Organização existente no plano free. A retomada foi executada pela operação restore_project; status passou COMING_UP e depois **ACTIVE_HEALTHY**, confirmado por get_project. Nenhum projeto/branch/plano novo criado.
+
+Inspeção em leitura após retomada:8tabelas public.bertha_* com RLS ativo, todas com0registros;0contas auth.users; nenhuma tabela em supabase_realtime. Há estruturas de households, members, invitations, shared_tasks, task_events, kids_wallets, kids_awards e task_targets. Não há tabela de mensagens/localização nessa estrutura inspecionada. As políticas e funções foram lidas, sem alteração, sem cadastro de pessoas, convites, contas ou envio de mensagens/localização.
+
+RLS ativo não equivale a validação de permissões individuais: tasks_read atualmente exige apenas private.bertha_is_household_member, sem recorte por destinatário/permissão naquela expressão. Isso deve ser revisado/testado antes de integrar apps satélites. Não foi alterada arquitetura ou política aprovada por iniciativa desta revisão local.
+
+Dependências ainda abertas para mensagens/GPS: vincular identidades reais Owner/satélite em ambiente isolado, escolher/configurar fluxo de entrada, garantir recortes individuais e isolamento de ambiente no backend, implementar transporte protegido e testar entre aparelhos. O pedido de tempo real continua registrado; nenhuma posição foi coletada/transmitida e nenhuma notificação externa enviada. GPS contínuo em segundo plano e Saúde/Watch exigem ambiente nativo e teste físico; estes acessos não estão disponíveis no ambiente atual.
+
+A raiz não foi promovida nesta RC. Seu index auditado usa namespace HML e versão antiga. Não copiar index/dados HML para produção; preparar isolamento explícito e revisar recursos/cache antes da promoção. A retomada do backend não prova que o frontend já está conectado a ele.
+
+Checagem automática Supabase get_advisors(type=security): lints=[] após retomada. Isso não avalia a semântica dos recortes individuais citada acima. Não houve alteração de Auth/RLS, nem inserção/remoção de linhas no backend.
