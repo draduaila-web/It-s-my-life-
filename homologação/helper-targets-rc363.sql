@@ -25,7 +25,7 @@ begin
   update public.bertha_hml_links set accepted_by=u,accepted_at=coalesce(accepted_at,now()) where id=l.id;
   return to_jsonb(m);
  end if;
- if op in ('member','link','share','validate','pause') then
+ if op in ('member','link','share','validate','pause','resume') then
   select * into n from public.bertha_hml_networks where id=(arg->>'network_id')::uuid and owner_id=u;
   if n.id is null then raise exception 'Somente o Owner desta rede pode fazer isso.' using errcode='42501'; end if;
  end if;
@@ -33,6 +33,11 @@ begin
   update public.bertha_hml_members set active=false where id=(arg->>'member_id')::uuid and network_id=n.id returning * into m;
   if m.id is null then raise exception 'Cadastro indisponível.'; end if;
   update public.bertha_hml_links set revoked_at=now() where member_id=m.id and revoked_at is null;
+  return to_jsonb(m);
+ end if;
+ if op='resume' then
+  update public.bertha_hml_members set active=true where id=(arg->>'member_id')::uuid and network_id=n.id returning * into m;
+  if m.id is null then raise exception 'Cadastro indisponível.'; end if;
   return to_jsonb(m);
  end if;
  if op='member' then

@@ -71,6 +71,10 @@ begin
   perform set_config('request.jwt.claim.sub',a::text,true);
   select count(*) into cnt from public.bertha_hml_tasks;if cnt<>0 then raise exception 'FAIL revoke read';end if;
   begin perform public.bertha_hml_action('claim',jsonb_build_object('task_id',ta));raise exception 'FAIL revoke write';exception when insufficient_privilege then null;end;
+  perform set_config('request.jwt.claim.sub',o::text,true);
+  perform public.bertha_hml_action('resume',jsonb_build_object('network_id',n,'member_id',ma));
+  perform set_config('request.jwt.claim.sub',a::text,true);
+  select count(*) into cnt from public.bertha_hml_tasks;if cnt<>1 then raise exception 'FAIL Owner authorized resume';end if;
   perform set_config('role','postgres',true);
   raise exception using errcode='PZ001',message='Tests passed; rollback fixtures';
  exception when sqlstate 'PZ001' then

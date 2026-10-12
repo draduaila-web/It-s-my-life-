@@ -18,6 +18,7 @@ action:async function(op,arg){var d=read(),t=d.tasks.find(function(x){return x.i
  if(op==='network')return d.network;
  if(op==='member'){m=d.members.find(function(x){return x.local_id===arg.local_id;});if(!m)throw new Error('QA member unavailable');m.permissions=arg.permissions;save(d);return m;}
  if(op==='pause'){m.active=false;save(d);return m;}
+ if(op==='resume'){m.active=true;save(d);return m;}
  if(op==='share'){t=d.tasks.find(function(x){return x.source_ref===arg.source_ref;});if(!t){t=Object.assign({id:'qa-shared-'+d.tasks.length,state:'available'},arg);d.tasks.push(t);}else t.targets=Array.from(new Set(t.targets.concat(arg.targets)));save(d);return t;}
  if(!t)throw new Error('QA task unavailable');
  if(op==='claim'){if(!t.actor_id){t.actor_id='qa-a';t.state='accepted';d.events.push(op);}else if(t.actor_id!=='qa-a')throw new Error('Outra pessoa assumiu.');}

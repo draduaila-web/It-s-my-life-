@@ -38,7 +38,7 @@ Helper é o adulto colaborador, não uma categoria separada de Adulto. Família 
 
 Duas tentativas multicomando interrompidas pelo MCP com Invalid or expired requestState; contagens0 confirmadas. Teste final reproduzível helper-rls-rc363.test.sql usa um único DO com subtransação e rollback deliberado apenas após todos os assertions. Executado sem erro após correção de alvos múltiplos; contagens0 confirmadas separadamente. Fixtures Auth temporários apenas dentro da transação, sem Auth API/email enviados.
 
-Migrations aplicadas: bertha_hml_helper_rc363 e bertha_hml_helper_targets_rc363. Security advisors inicial: lints=[]; repetir ao concluir. Changelog HTML corrente consultado (índice.md indisponível); RLS/Password-based Auth via search_docs; endpoints Auth em documentação/OpenAPI oficial. Teste de banco não valida SMTP ou login real.
+Migrations aplicadas: bertha_hml_helper_rc363 e bertha_hml_helper_targets_rc363 e bertha_hml_helper_resume_rc363. Security advisors inicial: lints=[]; repetir ao concluir. Changelog HTML corrente consultado (índice.md indisponível); RLS/Password-based Auth via search_docs; endpoints Auth em documentação/OpenAPI oficial. Teste de banco não valida SMTP ou login real.
 
 ## Limites e próxima etapa
 
@@ -62,3 +62,5 @@ QA publicado: recortes Hoje/Ontem/anteriores/próximas/Todas, busca positiva/vaz
 Owner e Helper em390/320: áreas úteis375/305px, scrollWidth=clientWidth; imagens carregadas, barra inferior77px e padding100px. Não equivale a Safari/teclado virtual.
 Ajustes finais preparados após esse teste: label Colaboração no modal, cancelar seleção, data obrigatória só para itens selecionados, login não impõe tamanho mínimo de criação de senha, “Todos os adultos autorizados” com elegibilidade por tarefa; regra de validação permanece por pessoa (não copiada globalmente para os demais alvos). PNG192/512 exportados do SVG novo e apple-touch-icon configurado. Teste SQL ampliado confirmou conclusão sem validação para o adulto com essa permissão individual; fixtures revertidos.
 Revalidação desta etapa final registrada após seu deploy.
+
+Ajuste adicional: Pausar agora tem Retomar acesso, pelo Owner, para a mesma conta e com nova conferência da permissão do cadastro local. Links revogados não são reativados. Retomada testada na mesma subtransação após revogação;0fixtures persistidos.
