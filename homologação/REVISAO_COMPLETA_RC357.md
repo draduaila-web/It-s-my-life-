@@ -31,7 +31,7 @@ Revisão executada em 12/10/2026. Escopo: beta em **homologação**, com acentos
 
 | Módulo / fluxo | Problema e causa / correção | Testes executados e resultado | Pendências e limites |
 |---|---|---|---|
-| 1. Meu Dia — execução | Preservado motor de tempo e histórico | Adiar 30; começar; recarregar sessão ativa; concluir/continuar; editar 12 minutos; retomar +3. Um único evento de 15 minutos. Passou | Compromisso QA13:41–14:11 conflita com Trabalho oficial: modal de conflito e escolha Priorizar o compromisso confirmados; atividade longa iniciada manualmente sobrepõe compromisso, comportamento temporal em observação |
+| 1. Meu Dia — execução | Preservado motor de tempo e histórico | Adiar 30; começar; recarregar sessão ativa; concluir/continuar; editar 12 minutos; retomar +3. Um único evento de 15 minutos. Passou | Compromisso QA13:41–14:11 conflita com Trabalho oficial: modal de conflito e escolha Priorizar o compromisso confirmados; atividade longa iniciada manualmente sobrepõe compromisso, no horário previsto o compromisso apareceu em Agora; sessões paralelas mantidas, concluir cada uma preservou a outra; recarga final sem sessões ativas |
 | Meu Dia — projeto | Integração preservada | Começar bloco de 10; recarregar; concluir; projeto com 17%, 50 minutos restantes e um evento. Passou | Projeto curto isolado10/10 concluído100%, faltam0, persistido após recarga; card recebeu estado Concluído |
 | 2. Meu Dia Ideal — referência/preferência | Sem mudança de lógica | Obrigatórios; preferência Tarde/15; salvar/reabrir/recarregar; referência Autocuidado 80 e Financeiro 100. Passou | Preferências não expõem edição; exclusão não testada |
 | Horários-base | Preservados dias e janelas | Criar/cancelar; selecionar Seg–Sex; renomear; salvar/recarregar; backup contém dias 1–5. Passou | Calendário após passagem real da semana não testado |
@@ -70,7 +70,7 @@ Revisão executada em 12/10/2026. Escopo: beta em **homologação**, com acentos
 
 - Exportações da homologação antes/depois dos testes isolados: **os cinco conjuntos existentes exatamente iguais**, sem registros QA na HML.
 - Exportação e restauração isoladas: **60 conjuntos exatamente iguais**, nenhuma chave alterada entre checkpoint e restauração.
-- Histórico QA: **16 eventos, 16 pares únicos**, dois registros de exercício e dois de projeto; pontos individuais menino11/menina13.
+- Histórico QA: **18 eventos, 18 pares únicos**, dois registros de exercício e dois de projeto; pontos individuais menino11/menina13.
 - Assets grandes comparados ao original: alteração de contador é apenas código/texto (573 caracteres); conteúdo de imagens preservado. Avatares recebem apenas marcador de versão.
 - Chrome real em desktop e viewport320/390. Não foi testado Safari/iPhone físico. Não se declara funcionamento de teclado virtual, Watch/push, passagem real de dias/meses ou fluxos não exercitados.
 - Incompletude inicial de imagens lazy não foi tratada como recurso quebrado; após carga os conjuntos inspecionados não tinham imagens com falha.
@@ -91,8 +91,16 @@ Revisão executada em 12/10/2026. Escopo: beta em **homologação**, com acentos
 - Casa receita doméstica enviou apenas o material selecionado à categoriaCasa de Compras. Nova dica: cancelamento não cria; salvamento de título, íconeOrganização e link preservado após recarga.
 - Plano: criarEstaSemana; edição cancelada preserva título; salvarEsteMês e recarregar confirmou.
 - Desejo: cancelar conversão; nova meta100 com vínculo preservado após recarga; meta anterior25/100 intacta. Meu Progresso agrega25% e0% em13%, conforme arredondamento existente.
-- Projeto curto: criar10min; Meu Dia oferece bloco; começar/recarregar mantém sessão; concluir10; encerrar; recarregar projeto100%, faltam0min. Card ainda mostrava próximo passo/sugestão apesar do estado concluído: corrigido apenas texto do card, sem alterar motor, dados ou arquitetura. Verificação do novo card após deploy registrada no PR de acompanhamento.
+- Projeto curto: criar10min; Meu Dia oferece bloco; começar/recarregar mantém sessão; concluir10; encerrar; recarregar projeto100%, faltam0min. Card ainda mostrava próximo passo/sugestão apesar do estado concluído: corrigido apenas texto do card, sem alterar motor, dados ou arquitetura. PR26/a3e9dec1af08a59a834e170d5a2224d2fddca04e, run1325/38279250378 Success. Auditoria externa após deploy: projeto100% exibe Concluído sem sugestão/próximo; projeto ativo17% mantém sugestão/próximo. Desktop e320px sem overflow, busca16px. Passou.
 - Compromisso hoje13:41/30min: conflito com Trabalho oficial exibido; priorização confirmou faixa13:41–14:11 e sugestões deslocadas após14:11. Início manual de ritual45min permanece possível; não se reivindica bloqueio de execução manual.
 - Nenhuma operação desses cenários finais foi feita no prefixo HML.
 
-- Backup final QA:16 eventos/16 pares únicos, exercícios2, projetos2; cicloAutocuidado número3/status ended/endedAt confirma persistência de Encerrar. A atividade Capilar usada no teste de compromisso ainda estava ativa nesse checkpoint; seu comportamento no horário protegido será registrado após a observação.
+- Backup final QA:18 eventos/18 pares únicos, exercícios2, projetos2; cicloAutocuidado número3/status ended/endedAt confirma persistência de Encerrar. Ritual Capilar e compromisso foram iniciados separadamente (actives é a lógica existente), concluídos8min/1min, produzindo eventos distintos. Backup final: active:null, actives:[],18 eventos/18 pares únicos. Passou.
+
+## Encerramento da revisão executada
+
+RC357 publicada e verificada após PR24, PR25 e PR26. Último deploy funcional: **run1325/38279250378 Success**, commit **a3e9dec1af08a59a834e170d5a2224d2fddca04e**. Os testes dos20 módulos e fluxos estão na matriz; as pendências de acesso/dispositivo/tempo e semântica do checklist permanecem explicitamente abertas, não são apresentadas como concluídas.
+
+Última exportação HML depois dos três deploys funcionais: **cinco conjuntos exatamente iguais ao backup inicial**, nenhuma chave nova, alterada ou removida. Nenhum cadastro fictício criado na HML, nenhum arquivo removido ou arte regenerada, nenhuma integração externa alterada.
+
+O PR documental que inclui este encerramento altera somente esta matriz; seu deploy também deve ser conferido.
