@@ -280,7 +280,7 @@ function render() {
       route === "satelites" ? "Satélites" :
       route === "convites" ? "Convites" :
       route === "premiacoes" ? "Premiações" :
-      route === "satelite" ? "Meu Dia" :
+      route === "satelite" ? "Satélites" :
       route === "compras" ? "Lista de Compras" :
       route === "progresso" ? "Meu Progresso" :
       "Minha Vida";
@@ -556,6 +556,7 @@ function ensureIdeasV297Styles(){
   .idea-hero h2{position:relative;margin:0 0 8px!important;font-size:30px!important;line-height:1.06!important;font-weight:520!important;color:var(--idea-ink)!important;letter-spacing:-.025em}
   .idea-hero p{position:relative;margin:0!important;max-width:88%;font-size:15px!important;line-height:1.45!important;color:#6f7587!important}
   .idea-hero + .add-row{margin-top:15px!important}
+  .idea-hero + .add-row .search{min-width:0}
   .idea-card{position:relative;overflow:hidden;background:linear-gradient(130deg,rgba(251,249,244,.96),rgba(239,246,253,.80) 52%,rgba(238,233,250,.64))!important;border:1px solid rgba(122,157,196,.12)!important;box-shadow:0 10px 28px rgba(73,89,119,.045)!important}
   .idea-card:before{content:"";position:absolute;inset:-30% auto auto -18%;width:210px;height:210px;border-radius:50%;background:radial-gradient(circle,rgba(171,208,236,.16),transparent 62%);pointer-events:none}
   .idea-card:after{content:"";position:absolute;right:-52px;bottom:-68px;width:210px;height:210px;border-radius:50%;background:radial-gradient(circle,rgba(204,196,241,.16),transparent 60%);pointer-events:none}
@@ -1230,10 +1231,10 @@ function applyFinPrivacyNative(){
  const hidden=finPrivacyHidden();
  const btn=root.querySelector("#toggleFinPrivacy");
  if(btn) btn.innerHTML=finEyeIcon(!hidden)+(hidden?"Mostrar valores":"Ocultar valores");
- [...root.querySelectorAll("*")].filter(el=>!el.children.length&&/R\$\s*[\d.]+(?:,\d{2})?/.test(el.textContent||"")).forEach(el=>{
+ [...root.querySelectorAll("*")].filter(el=>!el.children.length&&/R\$\s*-?[\d.]+(?:,\d{2})?/.test(el.textContent||"")).forEach(el=>{
    if(hidden){
      if(!el.dataset.finOriginal) el.dataset.finOriginal=el.textContent;
-     el.textContent=(el.dataset.finOriginal||el.textContent).replace(/R\$\s*[\d.]+(?:,\d{2})?/g,"R$ ••••••");
+     el.textContent=(el.dataset.finOriginal||el.textContent).replace(/R\$\s*-?[\d.]+(?:,\d{2})?/g,"R$ ••••••");
    }else if(el.dataset.finOriginal){ el.textContent=el.dataset.finOriginal; delete el.dataset.finOriginal; }
  });
 }
@@ -1876,7 +1877,7 @@ function openCasaTaskEditor(id){
  const legacy=task.assigneeId?[String(task.assigneeId)]:[],selected=new Set((Array.isArray(task.assigneeIds)?task.assigneeIds:legacy).map(String));
  const targetHtml=members.map(m=>`<button type="button" class="sat-target-option ${selected.has(String(m.id))?'is-checked':''}" data-target-toggle data-member-id="${escapeHtml(m.id)}" aria-pressed="${selected.has(String(m.id))?'true':'false'}"><input type="checkbox" data-sat-target value="${escapeHtml(m.id)}" ${selected.has(String(m.id))?'checked':''} tabindex="-1" aria-hidden="true"><span class="sat-target-check" aria-hidden="true"></span><span class="sat-target-copy"><strong>${escapeHtml(m.name)}</strong><small>${m.role==='kids'?'Kids':'Adulto'}</small></span></button>`).join('');
  const emptyTargets=`<div class="sat-empty-mini"><span>Nenhum satélite com acesso à Casa.</span><button type="button" class="sat-inline-add" id="ctAddSatellite">＋ Adicionar satélite</button></div>`;
- dlg.innerHTML=`<form method="dialog" class="modal-card casa-modal-card" id="casaTaskEdit"><div class="modal-head"><div><div class="eyebrow">CASA · RESPONSABILIDADE</div><h2>Editar rotina</h2></div><button type="button" class="icon-btn casa-modal-x" data-close aria-label="Fechar">×</button></div><label>Atividade<input id="ctName" value="${escapeHtml(task.name)}"></label><label>Duração real estimada (min)<input id="ctMin" type="number" min="5" max="480" step="5" value="${ds[id]||15}"></label><label>Horário / janela preferencial<input id="ctTime" value="${escapeHtml(casaTime(id))}"></label><label>Frequência<input id="ctFreq" value="${escapeHtml(task.freq)}"></label><div class="sat-resp-block"><span class="sat-label">Responsabilidade</span><div class="sat-resp-options" data-resp><button type="button" data-v="owner" class="${responsibility==='owner'?'active':''}">Eu faço</button><button type="button" data-v="help" class="${responsibility==='help'?'active':''}">Aceito ajuda</button><button type="button" data-v="delegated" class="${responsibility==='delegated'?'active':''}">Delegar</button></div><input type="hidden" id="ctResp" value="${escapeHtml(responsibility)}"></div><div class="sat-assignee-field" ${responsibility==='delegated'?'':'hidden'}><div class="sat-target-head"><span>Delegar para</span><button type="button" class="sat-target-all" id="ctAllTargets">Todos</button></div><div class="sat-target-grid">${targetHtml||emptyTargets}</div><small class="sat-target-note">A tarefa aparece para todos os selecionados. Quando alguém assumir ou concluir, os demais verão quem foi.</small></div><div class="sat-kids-points" hidden><button type="button" class="casa-points-toggle ${task.pointsEnabled?'is-checked':''}" data-points-toggle aria-pressed="${task.pointsEnabled?'true':'false'}"><input type="hidden" id="ctPoints" value="${task.pointsEnabled?'1':'0'}"><span class="sat-target-check" aria-hidden="true"></span><span class="casa-points-copy">Esta missão vale pontos se for concluída por um Kids</span></button><label>Pontos<input id="ctPointsValue" type="number" min="1" max="100" value="${Math.max(1,+task.pointsValue||2)}"></label></div><div class="modal-actions"><div class="grow"></div><button type="button" class="secondary" id="cancelCt">Cancelar</button><button class="primary" value="default">Salvar</button></div></form>`;
+ dlg.innerHTML=`<form method="dialog" class="modal-card casa-modal-card" id="casaTaskEdit"><div class="modal-head"><div><div class="eyebrow">CASA · RESPONSABILIDADE</div><h2>Editar rotina</h2></div><button type="button" class="icon-btn casa-modal-x" data-close aria-label="Fechar">×</button></div><label>Atividade<input id="ctName" value="${escapeHtml(task.name)}"></label><label>Duração real estimada (min)<input id="ctMin" type="number" min="1" max="480" step="1" value="${ds[id]||15}"></label><label>Horário / janela preferencial<input id="ctTime" value="${escapeHtml(casaTime(id))}"></label><label>Frequência<input id="ctFreq" value="${escapeHtml(task.freq)}"></label><div class="sat-resp-block"><span class="sat-label">Responsabilidade</span><div class="sat-resp-options" data-resp><button type="button" data-v="owner" class="${responsibility==='owner'?'active':''}">Eu faço</button><button type="button" data-v="help" class="${responsibility==='help'?'active':''}">Aceito ajuda</button><button type="button" data-v="delegated" class="${responsibility==='delegated'?'active':''}">Delegar</button></div><input type="hidden" id="ctResp" value="${escapeHtml(responsibility)}"></div><div class="sat-assignee-field" ${responsibility==='delegated'?'':'hidden'}><div class="sat-target-head"><span>Delegar para</span><button type="button" class="sat-target-all" id="ctAllTargets">Todos</button></div><div class="sat-target-grid">${targetHtml||emptyTargets}</div><small class="sat-target-note">A tarefa aparece para todos os selecionados. Quando alguém assumir ou concluir, os demais verão quem foi.</small></div><div class="sat-kids-points" hidden><button type="button" class="casa-points-toggle ${task.pointsEnabled?'is-checked':''}" data-points-toggle aria-pressed="${task.pointsEnabled?'true':'false'}"><input type="hidden" id="ctPoints" value="${task.pointsEnabled?'1':'0'}"><span class="sat-target-check" aria-hidden="true"></span><span class="casa-points-copy">Esta missão vale pontos se for concluída por um Kids</span></button><label>Pontos<input id="ctPointsValue" type="number" min="1" max="100" value="${Math.max(1,+task.pointsValue||2)}"></label></div><div class="modal-actions"><div class="grow"></div><button type="button" class="secondary" id="cancelCt">Cancelar</button><button class="primary" value="default">Salvar</button></div></form>`;
  document.body.appendChild(dlg);dlg.showModal();const close=()=>{dlg.close();dlg.remove()};dlg.querySelectorAll('[data-close],#cancelCt').forEach(b=>b.onclick=close);
  const respInput=dlg.querySelector('#ctResp'),assField=dlg.querySelector('.sat-assignee-field'),points=dlg.querySelector('.sat-kids-points'),targetChecks=[...dlg.querySelectorAll('[data-sat-target]')];
  const selectedMembers=()=>targetChecks.filter(c=>c.checked).map(c=>members.find(m=>String(m.id)===String(c.value))).filter(Boolean);
@@ -1909,7 +1910,7 @@ function openCasaTaskEditor(id){
  dlg.querySelector('#ctAddSatellite')?.addEventListener('click',()=>{close();location.hash='#satelites';setTimeout(()=>openSatelliteEditor(),80)});
  sync();
  dlg.querySelector('#casaTaskEdit').addEventListener('submit',e=>{
-   e.preventDefault();task.name=dlg.querySelector('#ctName').value.trim()||task.name;task.freq=dlg.querySelector('#ctFreq').value.trim()||task.freq;ds[id]=Math.max(5,+dlg.querySelector('#ctMin').value||ds[id]||15);const times=loadCasaTimes();times[id]=dlg.querySelector('#ctTime').value.trim()||times[id];
+   e.preventDefault();task.name=dlg.querySelector('#ctName').value.trim()||task.name;task.freq=dlg.querySelector('#ctFreq').value.trim()||task.freq;ds[id]=Math.max(1,+dlg.querySelector('#ctMin').value||ds[id]||15);const times=loadCasaTimes();times[id]=dlg.querySelector('#ctTime').value.trim()||times[id];
    task.responsibility=respInput.value;
    const ids=task.responsibility==='delegated'?targetChecks.filter(c=>c.checked).map(c=>c.value):[];
    if(task.responsibility==='delegated'&&!ids.length){assField.classList.add('sat-target-error');return}
@@ -2074,11 +2075,11 @@ function casaAreaIcon(title){
 }
 function casaTipIcon(label){const t=String(label||'').toLowerCase();if(t.includes('limpeza'))return casaAreaIcon('Limpeza');if(t.includes('roupa')||t.includes('lavanderia'))return casaAreaIcon('Roupas & Lavanderia');if(t.includes('jardim')||t.includes('extern'))return casaAreaIcon('Jardim');if(t.includes('gato'))return casaAreaIcon('Animais');const raw=t.includes('organização')?casaLineIcon('routines'):casaLineIcon('info');return `<span class="casa-inline-icon">${raw}</span>`}
 function casaSection(icon,title,meta,body,id){return `<details class="casa-section" id="${id||""}"><summary><span class="casa-section-left"><span class="casa-section-icon">${icon}</span><strong>${title}</strong></span><span class="casa-section-meta">${meta?`<span>${meta}</span>`:""}<span class="casa-chevron">⌄</span></span></summary><div class="casa-section-body">${body}</div></details>`}
-function maintenanceCard(m){const meta=[m.area,m.type,m.date?formatDate(m.date):"",`${maintenanceMinutes(m)} min`,m.priority,m.responsible].filter(Boolean);return `<div class="card casa-maint-card"><div><strong>${escapeHtml(m.name)}</strong>${m.note?`<p class="note">${escapeHtml(m.note)}</p>`:""}</div><div class="casa-maint-meta">${meta.map(x=>`<span>${escapeHtml(String(x))}</span>`).join("")}</div><div class="casa-maint-actions"><button type="button" class="start" data-maint-start="${m.id}">▶ Começar</button><button type="button" class="edit" data-maint-edit="${m.id}">Editar</button><button type="button" class="finish" data-maint-finish="${m.id}">✓ Concluir</button></div></div>`}
+function maintenanceCard(m){const meta=[m.area,m.type,m.date?formatDate(m.date):"",`${maintenanceMinutes(m)} min`,m.priority,m.responsible].filter(Boolean),members=loadSatellites().members||[],targets=satelliteTargets(m).map(id=>members.find(x=>String(x.id)===String(id))).filter(Boolean),claimer=members.find(x=>String(x.id)===String(m.claimedById||m.assigneeId)),completer=members.find(x=>String(x.id)===String(m.completedById||m.assigneeId)),resp=m.responsibility||'owner',status=m.satelliteStatus||'open',chip=resp==='help'?`<span class="sat-task-chip help">${completer?`Concluída por ${escapeHtml(completer.name)}`:claimer?`Assumida · ${escapeHtml(claimer.name)}`:'Aceito ajuda'}</span>`:resp==='delegated'?`<span class="sat-task-chip delegated">${completer?`Concluída por ${escapeHtml(completer.name)}${status==='completed'?' · validar':''}`:claimer?`Assumida · ${escapeHtml(claimer.name)}`:`Delegada · ${escapeHtml(targets.map(x=>x.name).join(' + ')||'Satélites')}`}</span>`:'',validate=status==='completed'?`<button type="button" class="sat-validate" data-sat-validate="${m.id}">Validar conclusão</button>`:'';return `<div class="card casa-maint-card"><div><strong>${escapeHtml(m.name)}</strong>${m.note?`<p class="note">${escapeHtml(m.note)}</p>`:""}${chip}</div><div class="casa-maint-meta">${meta.map(x=>`<span>${escapeHtml(String(x))}</span>`).join("")}</div><div class="casa-maint-actions"><button type="button" class="start" data-maint-start="${m.id}">▶ Começar</button><button type="button" class="edit" data-maint-edit="${m.id}">Editar</button><button type="button" class="finish" data-maint-finish="${m.id}">✓ Concluir</button>${validate}</div></div>`}
 function openCasaNewRoutine(areaId){
  const d=loadCasa();const area=(d.areas||[]).find(a=>String(a.id)===String(areaId));if(!area)return;
  const dlg=document.createElement('dialog');dlg.className='bertha-dialog casa-dialog';
- dlg.innerHTML=`<form method="dialog" class="modal-card casa-modal-card" id="casaNewRoutineForm"><div class="modal-head"><div><div class="eyebrow">CASA · ROTINAS</div><h2>Nova rotina</h2><p class="note">${escapeHtml(area.title)}</p></div><button type="button" class="icon-btn casa-modal-x" data-close-cnr aria-label="Fechar">×</button></div><label>Atividade<input id="cnrName" required placeholder="Ex.: Limpar a varanda"></label><label>Duração estimada (min)<input id="cnrMin" type="number" min="1" max="480" step="5" value="10"></label><label>Horário / janela preferencial<input id="cnrTime" placeholder="Ex.: manhã, 18:30, janela doméstica"></label><label>Frequência<input id="cnrFreq" placeholder="Ex.: semanal, a cada 2 dias" value="conforme necessário"></label><div class="modal-actions"><div class="grow"></div><button type="button" class="secondary" id="cancelCnr">Cancelar</button><button class="primary" value="default">Salvar</button></div></form>`;
+ dlg.innerHTML=`<form method="dialog" class="modal-card casa-modal-card" id="casaNewRoutineForm"><div class="modal-head"><div><div class="eyebrow">CASA · ROTINAS</div><h2>Nova rotina</h2><p class="note">${escapeHtml(area.title)}</p></div><button type="button" class="icon-btn casa-modal-x" data-close-cnr aria-label="Fechar">×</button></div><label>Atividade<input id="cnrName" required placeholder="Ex.: Limpar a varanda"></label><label>Duração estimada (min)<input id="cnrMin" type="number" min="1" max="480" step="1" value="10"></label><label>Horário / janela preferencial<input id="cnrTime" placeholder="Ex.: manhã, 18:30, janela doméstica"></label><label>Frequência<input id="cnrFreq" placeholder="Ex.: semanal, a cada 2 dias" value="conforme necessário"></label><div class="modal-actions"><div class="grow"></div><button type="button" class="secondary" id="cancelCnr">Cancelar</button><button class="primary" value="default">Salvar</button></div></form>`;
  document.body.appendChild(dlg);dlg.showModal();const closeCnr=()=>dlg.close();dlg.querySelector('#cancelCnr').onclick=closeCnr;dlg.querySelector('[data-close-cnr]')?.addEventListener('click',closeCnr);dlg.addEventListener('close',()=>dlg.remove());
  dlg.querySelector('#casaNewRoutineForm').addEventListener('submit',e=>{e.preventDefault();const name=dlg.querySelector('#cnrName').value.trim();if(!name)return;const id=`casa-${String(area.id).replace(/[^a-z0-9]+/gi,'-').toLowerCase()}-${Date.now()}`;area.tasks=Array.isArray(area.tasks)?area.tasks:[];area.tasks.push({id,name,freq:dlg.querySelector('#cnrFreq').value.trim()||'conforme necessário',when:dlg.querySelector('#cnrTime').value.trim()||'horário a definir',done:false});const ds=loadCasaDurations();ds[id]=Math.max(1,+dlg.querySelector('#cnrMin').value||10);saveCasaDurations(ds);const ts=loadCasaTimes();ts[id]=dlg.querySelector('#cnrTime').value.trim()||'flexível';saveCasaTimes(ts);saveCasa(d);dlg.close();renderCasa();requestAnimationFrame(()=>{const target=document.querySelector(`.casa-routine-group[data-routine-id="${CSS.escape(String(areaId))}"]`);if(target){target.open=true;target.scrollIntoView({behavior:'smooth',block:'start'})}})});
 }
@@ -2150,6 +2151,8 @@ function loadKidsRewards(){try{const x=JSON.parse(window.berthaHmlStorage.getIte
 function saveKidsRewards(x){window.berthaHmlStorage.setItem(KIDS_REWARDS_KEY,JSON.stringify(x||{}))}
 function kidsRewardsFor(memberId){const all=loadKidsRewards(),raw=all[memberId]||{},d=kidsRewardDefaults();return Object.fromEntries(Object.entries(d).map(([k,v])=>[k,{...v,...(raw[k]||{})}]))}
 function awardKidsPoints(memberId,points,title){const all=loadKidsProgress(),month=new Date().toISOString().slice(0,7),k=all[memberId]||{lifetime:0,season:0,seasonKey:month,awards:[]};if(k.seasonKey!==month){k.season=0;k.seasonKey=month}k.lifetime=(+k.lifetime||0)+points;k.season=(+k.season||0)+points;k.log=Array.isArray(k.log)?k.log:[];k.log.unshift({id:satId(),title,points,at:Date.now()});const cfg=kidsRewardsFor(memberId);const unlocks=Object.values(cfg).filter(r=>r.active!==false).map(r=>[Math.max(1,+r.points||1),r.name||'Conquista',r.type||'medal']);k.awards=Array.isArray(k.awards)?k.awards:[];unlocks.forEach(([n,name,type])=>{const key=`${month}:${type}:${n}`;if(k.season>=n&&!k.awards.some(a=>a.key===key))k.awards.push({key,name,type,at:Date.now()})});all[memberId]=k;saveKidsProgress(all)}
+const SAT_OWNER_EVENTS_KEY='bertha.satellites.owner-events.v1';
+function loadSatelliteOwnerEvents(){try{const x=JSON.parse(window.berthaHmlStorage.getItem(SAT_OWNER_EVENTS_KEY)||'[]');return Array.isArray(x)?x:[]}catch{return[]}}
 function saveSatelliteOwnerEvents(x){window.berthaHmlStorage.setItem(SAT_OWNER_EVENTS_KEY,JSON.stringify((x||[]).slice(0,100)))}
 function satelliteMember(id){return loadSatellites().members.find(m=>String(m.id)===String(id))}
 function satelliteTargets(task){const legacy=task?.assigneeId?[task.assigneeId]:[];return (Array.isArray(task?.assigneeIds)&&task.assigneeIds.length?task.assigneeIds:legacy).map(String)}
@@ -2169,41 +2172,41 @@ async function requestSatelliteOwnerNotifications(){
 }
 function satelliteTaskList(memberId){
  const d=loadCasa(),out=[],mid=String(memberId);
- (d.areas||[]).forEach(a=>(a.tasks||[]).forEach(t=>{
+ const pushIfEligible=(t,area,kind='routine')=>{
    const r=t.responsibility||'owner',targets=satelliteTargets(t),declined=(t.declinedByIds||[]).map(String),eligible=(r==='help')||(r==='delegated'&&targets.includes(mid));
    if(!eligible||declined.includes(mid))return;
    const status=t.satelliteStatus||'open';
-   if(['available','assigned','accepted','in_progress','completed','validated'].includes(status)||t.done)out.push({task:t,area:a});
- }));
+   if(['available','assigned','accepted','in_progress','completed','validated'].includes(status)||t.done||t.status==='concluida')out.push({task:t,area,kind});
+ };
+ (d.areas||[]).forEach(a=>(a.tasks||[]).forEach(t=>pushIfEligible(t,a,'routine')));
+ (d.maintenance||[]).forEach(m=>pushIfEligible(m,{id:'maintenance',title:m.area||'Manutenção'},'maintenance'));
  return out
 }
 function setSatelliteTaskState(taskId,memberId,state){
- const d=loadCasa(),hit=casaTaskById(taskId,d);if(!hit)return;const task=hit.task,mid=String(memberId),member=satelliteMember(mid),claimed=task.claimedById?String(task.claimedById):'';
+ const d=loadCasa(),hit=casaTaskById(taskId,d),maint=(d.maintenance||[]).find(x=>String(x.id)===String(taskId));
+ if(!hit&&!maint)return;const task=hit?.task||maint,kind=maint?'maintenance':'routine',mid=String(memberId),member=satelliteMember(mid),claimed=task.claimedById?String(task.claimedById):'';
+ if(task.done||task.status==='concluida'||task.satelliteStatus==='completed')return;
  if(state==='accepted'){
-   if(claimed&&claimed!==mid)return;
-   task.claimedById=mid;task.assigneeId=mid;task.satelliteStatus='accepted';
+   if(claimed&&claimed!==mid)return;task.claimedById=mid;task.assigneeId=mid;task.satelliteStatus='accepted';
  }else if(state==='declined'){
    task.declinedByIds=Array.from(new Set([...(task.declinedByIds||[]).map(String),mid]));
    if(claimed===mid){task.claimedById=null;task.assigneeId=null;task.satelliteStatus=task.responsibility==='help'?'available':'assigned'}
  }else if(state==='in_progress'){
-   if(claimed&&claimed!==mid)return;
-   task.claimedById=mid;task.assigneeId=mid;task.satelliteStatus='in_progress';
+   if(claimed&&claimed!==mid)return;task.claimedById=mid;task.assigneeId=mid;task.satelliteStatus='in_progress';
  }else if(state==='completed'){
-   if(claimed&&claimed!==mid)return;
-   const end=Date.now();task.claimedById=mid;task.assigneeId=mid;task.completedById=mid;task.completedAt=end;task.lastCompletedAt=end;task.done=true;task.nextDue=casaNextRoutineDate(task.freq,end);
-   const needsValidation=member?.role==='kids'||!!member?.requiresValidation;
-   task.requiresValidation=needsValidation;task.satelliteStatus=needsValidation?'completed':'validated';
-   casaRecordProgress(hit,end,Math.max(5,+loadCasaDurations()[task.id]||15));
-   if(member?.role==='kids'&&task.pointsEnabled&&!needsValidation)awardKidsPoints(member.id,Math.max(1,+task.pointsValue||1),task.name);
-   satelliteNotifyOwner(member,task,'completed');
+   if(claimed&&claimed!==mid)return;delete task.pointsAwardedAt;const end=Date.now();task.claimedById=mid;task.assigneeId=mid;task.completedById=mid;task.completedAt=end;task.lastCompletedAt=end;
+   const needsValidation=member?.role==='kids'||!!member?.requiresValidation;task.requiresValidation=needsValidation;task.satelliteStatus=needsValidation?'completed':'validated';
+   if(kind==='routine'){task.done=true;task.nextDue=casaNextRoutineDate(task.freq,end);casaRecordProgress(hit,end,Math.max(5,+loadCasaDurations()[task.id]||15));}
+   else {task.status=needsValidation?'aguardando_validacao':((task.frequency&&!['Única','Conforme necessário'].includes(task.frequency))?'a_fazer':'concluida');if(!needsValidation&&task.status==='a_fazer')task.date=nextMaintenanceDate(task.date,task.frequency);try{const key='bertha.time-engine.v1',e=JSON.parse(window.berthaHmlStorage.getItem(key)||'{"active":null,"history":[],"snoozed":{}}');e.history=Array.isArray(e.history)?e.history:[];const itemId=`casa:maintenance:${task.id}`,mins=maintenanceMinutes(task);if(!e.history.some(h=>h.itemId===itemId&&h.status==='done'&&Math.abs((+h.endedAt||0)-end)<1500)){e.history.unshift({itemId,learningKey:itemId,title:task.name,source:'Casa · Manutenção',day:casaLocalDay(end),startedAt:end,endedAt:end,configuredMinutes:mins,plannedMinutes:mins,realMinutes:mins,status:'done',category:task.area||'Casa'});window.berthaHmlStorage.setItem(key,JSON.stringify(e))}}catch{}}
+   if(member?.role==='kids'&&task.pointsEnabled&&!needsValidation)awardKidsPoints(member.id,Math.max(1,+task.pointsValue||1),task.name);satelliteNotifyOwner(member,task,'completed');
  }
  saveCasa(d);renderSatelliteDay()
 }
 function validateSatelliteCasaTask(taskId){
- const d=loadCasa(),hit=casaTaskById(taskId,d);if(!hit)return;const task=hit.task,member=satelliteMember(task.completedById||task.claimedById||task.assigneeId);
- task.satelliteStatus='validated';task.done=true;
- if(member?.role==='kids'&&task.pointsEnabled&&!task.pointsAwardedAt){awardKidsPoints(member.id,Math.max(1,+task.pointsValue||1),task.name);task.pointsAwardedAt=Date.now()}
- saveCasa(d);renderCasa()
+ const d=loadCasa(),hit=casaTaskById(taskId,d),maint=(d.maintenance||[]).find(x=>String(x.id)===String(taskId));if(!hit&&!maint)return;const task=hit?.task||maint,member=satelliteMember(task.completedById||task.claimedById||task.assigneeId);
+ if(task.satelliteStatus!=='completed')return;
+ task.satelliteStatus='validated';if(maint){if(task.frequency&&!['Única','Conforme necessário'].includes(task.frequency)){task.date=nextMaintenanceDate(task.date,task.frequency);task.status='a_fazer';task.claimedById=null;task.assigneeId=null;task.completedById=null;task.declinedByIds=[];task.satelliteStatus=task.responsibility==='help'?'available':task.responsibility==='delegated'?'assigned':'open'}else task.status='concluida'}else task.done=true;
+ if(member?.role==='kids'&&task.pointsEnabled&&!task.pointsAwardedAt){awardKidsPoints(member.id,Math.max(1,+task.pointsValue||1),task.name);task.pointsAwardedAt=Date.now()}saveCasa(d);renderCasa()
 }
 function ensureSatelliteStyles(){if(document.getElementById('bertha-sat-v3'))return;const s=document.createElement('style');s.id='bertha-sat-v3';s.textContent=`
 .sat-page{display:grid!important;gap:14px!important;padding:0 0 10px!important}
@@ -2379,7 +2382,7 @@ const casaV132=document.createElement('style');casaV132.id='casa-v132-horarios-f
 
 function openCasaMaintenance(id){
  const d=loadCasa();d.maintenance=d.maintenance||[];const current=id?d.maintenance.find(x=>String(x.id)===String(id)):null;
- const m={id:current?.id||uid(),name:"",area:"Casa geral",type:"Reparo / conserto",date:"",durationValue:30,durationUnit:"minutes",priority:"normal",frequency:"Única",responsible:"Eu",notify:false,notifyWhen:"No horário da tarefa",period:"flex",time:"",note:"",status:"a_fazer",responsibility:"owner",assigneeIds:[],...current};
+ const m={id:current?.id||uid(),name:"",area:"Casa geral",type:"Reparo / conserto",date:"",durationValue:30,durationUnit:"minutes",priority:"normal",frequency:"Única",responsible:"Eu",notify:false,notifyWhen:"No horário da tarefa",period:"flex",time:"",note:"",status:"a_fazer",responsibility:"owner",assigneeIds:[],pointsEnabled:false,pointsValue:2,satelliteStatus:"open",claimedById:null,assigneeId:null,completedById:null,declinedByIds:[],...current};
  const areas=["Casa geral",...(Array.isArray(d.areas)?d.areas:[]).map(a=>a.title),"Piscina","Jardim","Garagem","Edícula","Área externa"];
  const sat=loadSatellites(),members=(sat.members||[]).filter(x=>x.status!=="removed"&&x.permissions?.casa!==false);
  const selected=new Set((Array.isArray(m.assigneeIds)?m.assigneeIds:[]).map(String));
@@ -2407,6 +2410,13 @@ function openCasaMaintenance(id){
      <small class="sat-target-note">A manutenção será compartilhada apenas com os satélites selecionados.</small>
    </div>
  </div>
+ <div class="maint-kids-points" hidden>
+   <button type="button" class="casa-points-toggle ${m.pointsEnabled?'is-checked':''}" data-maint-points-toggle aria-pressed="${m.pointsEnabled?'true':'false'}">
+     <input type="hidden" id="mPoints" value="${m.pointsEnabled?'1':'0'}">
+     <span class="sat-target-check" aria-hidden="true"></span><span class="casa-points-copy">Esta missão vale pontos se for concluída por um Kids</span>
+   </button>
+   ${field("Pontos",`<input id="mPointsValue" type="number" min="1" max="100" value="${Math.max(1,+m.pointsValue||2)}">`)}
+ </div>
 
  ${field("Responsável externo / referência",`<select id="mResp">${["Eu","Henrique","Thiago","Prestador / profissional"].map(x=>`<option ${x===m.responsible?'selected':''}>${x}</option>`).join('')}</select>`)}
  <label class="study-v10-field" style="display:flex;align-items:center;gap:10px"><input id="mNotify" type="checkbox" ${m.notify?'checked':''} style="width:auto"><span style="margin:0">Me avisar?</span></label>
@@ -2422,8 +2432,10 @@ function openCasaMaintenance(id){
 
  const respInput=dlg.querySelector('#mResponsibility');
  const targetsWrap=dlg.querySelector('.maint-sat-targets');
+ const pointsWrap=dlg.querySelector('.maint-kids-points');
  const satButtons=[...dlg.querySelectorAll('[data-maint-sat]')];
- const syncTargets=()=>{targetsWrap.hidden=respInput.value!=='delegated'};
+ const selectedMembers=()=>satButtons.filter(b=>b.getAttribute('aria-pressed')==='true').map(b=>members.find(m=>String(m.id)===String(b.dataset.maintSat))).filter(Boolean);
+ const syncTargets=()=>{targetsWrap.hidden=respInput.value!=='delegated';pointsWrap.hidden=!(respInput.value==='delegated'&&selectedMembers().some(x=>x.role==='kids'))};
  dlg.querySelectorAll('[data-maint-resp] button').forEach(b=>b.onclick=()=>{
    dlg.querySelectorAll('[data-maint-resp] button').forEach(x=>x.classList.toggle('active',x===b));
    respInput.value=b.dataset.v;
@@ -2434,6 +2446,7 @@ function openCasaMaintenance(id){
    b.setAttribute('aria-pressed',String(on));
    b.classList.toggle('is-selected',on);
    b.querySelector('.maint-sat-check').textContent=on?'✓':'';
+   syncTargets();
  });
  dlg.querySelector('#mAllTargets')?.addEventListener('click',()=>{
    const allOn=satButtons.length&&satButtons.every(b=>b.getAttribute('aria-pressed')==='true');
@@ -2442,7 +2455,13 @@ function openCasaMaintenance(id){
      b.classList.toggle('is-selected',!allOn);
      b.querySelector('.maint-sat-check').textContent=!allOn?'✓':'';
    });
+   syncTargets();
  });
+ const pointsToggle=dlg.querySelector('[data-maint-points-toggle]');
+ if(pointsToggle){
+   const input=pointsToggle.querySelector('#mPoints');
+   pointsToggle.onclick=()=>{const on=input.value!=='1';input.value=on?'1':'0';pointsToggle.classList.toggle('is-checked',on);pointsToggle.setAttribute('aria-pressed',String(on))};
+ }
  syncTargets();
 
  dlg.querySelector('#deleteMaint')?.addEventListener('click',()=>{if(!confirm(`Excluir “${m.name}”?`))return;d.maintenance=d.maintenance.filter(x=>String(x.id)!==String(m.id));saveCasa(d);close();renderCasa()});
@@ -2451,7 +2470,9 @@ function openCasaMaintenance(id){
    const responsibility=respInput.value||'owner';
    const assigneeIds=responsibility==='delegated'?satButtons.filter(b=>b.getAttribute('aria-pressed')==='true').map(b=>b.dataset.maintSat):[];
    if(responsibility==='delegated'&&!assigneeIds.length){targetsWrap.classList.add('sat-target-error');return}
-   const obj={...m,name:dlg.querySelector('#mName').value.trim(),area:dlg.querySelector('#mArea').value,type:dlg.querySelector('#mType').value,date:dlg.querySelector('#mDate').value,period:dlg.querySelector('#mPeriod').value,time:dlg.querySelector('#mTime').value,durationValue:Math.max(1,+dlg.querySelector('#mDur').value||30),durationUnit:dlg.querySelector('#mDurUnit').value,priority:dlg.querySelector('#mPriority').value,frequency:dlg.querySelector('#mFreq').value,responsible:dlg.querySelector('#mResp').value,notify:dlg.querySelector('#mNotify').checked,notifyWhen:dlg.querySelector('#mNotifyWhen').value,note:dlg.querySelector('#mNote').value.trim(),responsibility,assigneeIds,status:m.status||'a_fazer',updatedAt:Date.now()};
+   const hasKids=assigneeIds.some(id=>members.find(x=>String(x.id)===String(id))?.role==='kids');
+   const pointsEnabled=!!(responsibility==='delegated'&&hasKids&&dlg.querySelector('#mPoints')?.value==='1');
+   const obj={...m,name:dlg.querySelector('#mName').value.trim(),area:dlg.querySelector('#mArea').value,type:dlg.querySelector('#mType').value,date:dlg.querySelector('#mDate').value,period:dlg.querySelector('#mPeriod').value,time:dlg.querySelector('#mTime').value,durationValue:Math.max(1,+dlg.querySelector('#mDur').value||30),durationUnit:dlg.querySelector('#mDurUnit').value,priority:dlg.querySelector('#mPriority').value,frequency:dlg.querySelector('#mFreq').value,responsible:dlg.querySelector('#mResp').value,notify:dlg.querySelector('#mNotify').checked,notifyWhen:dlg.querySelector('#mNotifyWhen').value,note:dlg.querySelector('#mNote').value.trim(),responsibility,assigneeIds,pointsEnabled,pointsValue:pointsEnabled?Math.max(1,+dlg.querySelector('#mPointsValue')?.value||2):0,claimedById:null,assigneeId:null,completedById:null,declinedByIds:[],satelliteStatus:responsibility==='help'?'available':responsibility==='delegated'?'assigned':'open',status:m.status||'a_fazer',updatedAt:Date.now()};
    d.maintenance=current?d.maintenance.map(x=>String(x.id)===String(m.id)?obj:x):[...d.maintenance,{...obj,createdAt:Date.now()}];
    saveCasa(d);close();renderCasa()
  });
@@ -3832,6 +3853,7 @@ document.querySelector("#backBtn").onclick = () => {
     const discount=pays.reduce((s,x)=>s+Number(x.payment.discount||0),0);
     return {pays,late,ontime,interest,fine,other,discount,loss:interest+fine};
   }
+  window.__berthaFinancePaymentStats=finPaymentStats;
   function finNextMonthKey(month=finCurrentMonth()){
     const [y,m]=month.split('-').map(Number),d=new Date(y,m,1);return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}`;
   }
@@ -3989,6 +4011,13 @@ window.renderShoppingUniversal=renderShoppingUniversal;window.renderProgressOver
   function fgPeriodTotal(p){return (p.contributions||[]).reduce((s,c)=>s+Number(c.value||0),0);}
   function fgGoalTotal(g){return (g.periods||[]).reduce((s,p)=>s+fgPeriodTotal(p),0);}
   function fgPlanRange(g){return (g.periods||[]).reduce((a,p)=>({min:a.min+Number(p.min||0),max:a.max+Number(p.max||0)}),{min:0,max:0});}
+  window.__berthaFinanceGoalMetrics=()=>{
+    try{const raw=JSON.parse(window.berthaHmlStorage.getItem(FIN_GOALS_PATCH)||'null');
+      const legacy=Array.isArray(loadFin().goals)?loadFin().goals:[];
+      const gs=Array.isArray(raw)?raw:(legacy.length?[{periods:legacy}]:[]);
+      return gs.map(fgNormalizeGoal).map(g=>({plan:fgPlanRange(g),real:fgGoalTotal(g)}));
+    }catch{return []}
+  };
 
   toggleFinPrivacyNative=function(){
     const next=finPrivacyHidden()?'visible':'hidden';
@@ -4274,7 +4303,7 @@ window.renderShoppingUniversal=renderShoppingUniversal;window.renderProgressOver
     root.querySelectorAll('.fin-flow-v195,.fin-flow-v196,.fin-sources-v196').forEach(n=>n.remove());
     root.querySelectorAll('.fin-flow-shell').forEach(n=>{const p=n.previousElementSibling;if(p?.classList.contains('section-title')&&p.textContent.trim()==='FLUXO DO DINHEIRO')p.remove();n.remove();});
     const summary=root.querySelector('.finance-summary');
-    if(summary){summary.insertAdjacentHTML('afterend',financeSourcesHtml196());const main=summary.querySelector('.finance-main');if(main){const eye=main.querySelector('.eyebrow');if(eye)eye.textContent=sources196().length?'RECEITAS CONHECIDAS':'RENDA MENSAL';const btn=main.querySelector('#editIncome');if(btn){btn.textContent=sources196().length?'fontes':'cadastrar fontes';btn.onclick=()=>sourceModal196();}}}
+    if(summary){summary.insertAdjacentHTML('afterend',financeSourcesHtml196());const main=summary.querySelector('.finance-main');if(main){const eye=main.querySelector('.eyebrow');if(eye)eye.textContent='RENDA MENSAL';const btn=main.querySelector('#editIncome');if(btn){btn.textContent='editar renda';btn.onclick=()=>openFinModal('income');}}}
     const metaTitle=[...root.querySelectorAll('.section-title')].find(x=>x.textContent.trim()==='METAS FINANCEIRAS');if(metaTitle)metaTitle.insertAdjacentHTML('beforebegin',financeFlowCompact196());else root.insertAdjacentHTML('beforeend',financeFlowCompact196());
     root.querySelector('#addSource196')?.addEventListener('click',()=>sourceModal196());
     root.querySelectorAll('[data-fin-source-edit196]').forEach(b=>b.onclick=()=>sourceModal196(b.dataset.finSourceEdit196));
@@ -4544,7 +4573,7 @@ window.renderShoppingUniversal=renderShoppingUniversal;window.renderProgressOver
   function modulesRC46(h){const t=`${h.source||''} ${h.category||''} ${h.title||''} ${h.itemId||''} ${h.plannedItemId||''} ${h.learningKey||''} ${refsRC46(h)}`.toLowerCase(),out=[];if(/exerc|exercise|moviment|treino|esteira/.test(t))out.push('exercicios');if(/ritual|autocuidado|capilar/.test(t))out.push('rituais');if(/alimenta|refei|comida|food/.test(t))out.push('alimentacao');if(/estud/.test(t))out.push('estudos');if(/crefito|trabalho|work|bec|tiktok/.test(t))out.push('trabalho');if(/projeto|criaç|ideia/.test(t))out.push('projetos');if(/casa/.test(t))out.push('casa');return [...new Set(out)]}
   function dimsRC46(h){const mods=modulesRC46(h),r=refsRC46(h),out=[];if(mods.some(x=>['exercicios','rituais','alimentacao'].includes(x))||/autocuidado|cuidado/.test(r))out.push('autocuidado');if(mods.some(x=>['estudos','trabalho','projetos'].includes(x))||/intelect/.test(r))out.push('intelectual');if(mods.length||/disciplina|consist/.test(r))out.push('disciplina');if(mods.includes('casa')||/casa|organiza/.test(r))out.push('casa');return [...new Set(out)]}
   function oldGoalScoreRC46(mod,arr,goals,days){const factor=days/7,g=goals||{};if(mod==='exercicios'){const x=g.movimento||{},target=(+x.sessionsPerWeek||0)*factor;return target?Math.min(100,arr.length/target*100):null}if(mod==='rituais'){const x=g.rituais||{},target=(+x.sessionsPerWeek||0)*factor;return target?Math.min(100,arr.length/target*100):null}if(mod==='estudos'){const x=g.estudos||{},target=(+x.hoursPerWeek||0)*60*factor,mins=arr.reduce((s,h)=>s+(+h.realMinutes||0),0);return target?Math.min(100,mins/target*100):null}if(mod==='trabalho'){const x=g.trabalho||{},target=(+x.prioritiesPerWeek||0)*factor;return target?Math.min(100,arr.length/target*100):null}if(mod==='casa'){const x=g.casa||{},target=(+x.routinesPerWeek||0)*factor;return target?Math.min(100,arr.length/target*100):null}if(mod==='alimentacao'){const meals=arr.filter(h=>h.activityType!=='foodPrep');if(!meals.length)return null;return meals.filter(h=>h.mealSource==='planned').length/meals.length*100}if(mod==='projetos')return arr.length?100:null;return null}
-  function financeRC46(){try{const d=loadFin(),month=finCurrentMonth(),bills=finPlannedMonth(d,month),stats=finPaymentStats?finPaymentStats(d,month):{ontime:bills.filter(x=>x.paid),late:[]};const paid=(stats.ontime||[]).length+(stats.late||[]).length,onTime=paid?Math.round((stats.ontime||[]).length/paid*100):null;let goalPct=null;try{const gs=typeof fgLoad==='function'?fgLoad():[];const vals=gs.map(g=>{const plan=fgPlanRange(g),real=fgGoalTotal(g);return plan.min>0?Math.min(100,real/plan.min*100):null}).filter(x=>x!=null);if(vals.length)goalPct=Math.round(vals.reduce((a,b)=>a+b,0)/vals.length)}catch{}return {onTime,goalPct,paid,total:bills.length}}catch{return {onTime:null,goalPct:null,paid:0,total:0}}}
+  function financeRC46(){try{const d=loadFin(),month=finCurrentMonth(),bills=finPlannedMonth(d,month),stats=window.__berthaFinancePaymentStats?window.__berthaFinancePaymentStats(d,month):{ontime:bills.filter(x=>x.paid),late:[]};const paid=(stats.ontime||[]).length+(stats.late||[]).length,onTime=paid?Math.round((stats.ontime||[]).length/paid*100):null;let goalPct=null;try{const metrics=window.__berthaFinanceGoalMetrics?.()||[];const vals=metrics.map(({plan,real})=>plan.min>0?Math.min(100,real/plan.min*100):null).filter(x=>x!=null);if(vals.length)goalPct=Math.round(vals.reduce((a,b)=>a+b,0)/vals.length)}catch{}return {onTime,goalPct,paid,total:bills.length}}catch{return {onTime:null,goalPct:null,paid:0,total:0}}}
   function scoreRC46(dim,hist,goals,days){const vals=[];const add=mod=>{const a=hist.filter(h=>modulesRC46(h).includes(mod)),v=oldGoalScoreRC46(mod,a,goals,days);if(v!=null)vals.push(v)};if(dim==='autocuidado'){add('exercicios');add('rituais');add('alimentacao')}if(dim==='intelectual'){add('estudos');add('trabalho');add('projetos')}if(dim==='disciplina'){['exercicios','rituais','alimentacao','estudos','trabalho','projetos','casa'].forEach(add)}if(dim==='casa')add('casa');if(dim==='financeiro'){const f=financeRC46();if(f.onTime!=null)vals.push(f.onTime);if(f.goalPct!=null)vals.push(f.goalPct)}return vals.length?Math.round(vals.reduce((a,b)=>a+b,0)/vals.length):null}
   function renderRC46(mode='week'){
     ensureShoppingStyles();ensureProgressStyles();const [a,b]=rangeRC46(mode),hist=progressEngineHistory().filter(h=>h.status==='done'&&stampRC46(h)>=a&&stampRC46(h)<=b),goals=progressGoalsStore(),days=Math.max(1,(b-a)/86400000),scores=DIMENSIONS_RC46.map(([id,label])=>[id,label,scoreRC46(id,hist,goals,days)]),known=scores.filter(x=>x[2]!=null),overall=known.length?Math.round(known.reduce((s,x)=>s+x[2],0)/known.length):null,f=financeRC46(),projects=hist.filter(h=>modulesRC46(h).includes('projetos')).length;
@@ -7541,7 +7570,7 @@ window.__berthaCoreRender = function(){
 
   /* Satélites — grade realmente compacta; longos rótulos não deformam os cards */
   dialog.sat-modal .rc176-avatar-picker{display:grid!important;grid-template-columns:repeat(2,minmax(0,1fr))!important;gap:10px!important;width:100%!important;min-width:0!important}
-  dialog.sat-modal .rc176-avatar-picker .sat-avatar-choice{box-sizing:border-box!important;width:100%!important;min-width:0!important;max-width:100%!important;height:86px!important;min-height:86px!important;padding:10px 6px!important;margin:0!important;display:flex!important;flex-direction:column!important;align-items:center!important;justify-content:center!important;gap:6px!important;border-radius:18px!important;overflow:hidden!important;background:rgba(255,255,255,.72)!important;border:1px solid rgba(116,101,125,.10)!important}
+  dialog.sat-modal .rc176-avatar-picker .sat-avatar-choice:not(:has(.sat-avatar-art)){box-sizing:border-box!important;width:100%!important;min-width:0!important;max-width:100%!important;height:86px!important;min-height:86px!important;padding:10px 6px!important;margin:0!important;display:flex!important;flex-direction:column!important;align-items:center!important;justify-content:center!important;gap:6px!important;border-radius:18px!important;overflow:hidden!important;background:rgba(255,255,255,.72)!important;border:1px solid rgba(116,101,125,.10)!important}
   dialog.sat-modal .rc176-avatar-picker .sat-avatar-choice svg{display:block!important;width:28px!important;height:28px!important;min-width:28px!important;min-height:28px!important;max-width:28px!important;max-height:28px!important;flex:0 0 28px!important;stroke-width:1.35!important}
   dialog.sat-modal .rc176-avatar-picker .sat-avatar-choice small{display:grid!important;gap:0!important;justify-items:center!important;width:100%!important;min-width:0!important;font-size:10px!important;line-height:1.12!important;text-align:center!important;color:#77707a!important;white-space:normal!important;overflow-wrap:anywhere!important}
   dialog.sat-modal .rc176-avatar-picker .sat-avatar-choice.sat-gender-m,dialog.sat-modal .rc176-avatar-picker .sat-avatar-choice.sat-gender-m svg{color:#777981!important;stroke:#777981!important}
@@ -7906,7 +7935,7 @@ window.__berthaCoreRender = function(){
 /* RC188 — Helper recognition assets: transparent, normalized and larger */
 (function(){
  const st=document.createElement('style');
- st.id='rc188-helper-assets';
+ st.id='rc188-recognition-assets';
  st.textContent=`
  .rewards-page [data-reward-pane="recognitions"] .r147-rec img,
  .rewards-page [data-reward-pane="recognitions"] .recognition-card img,
