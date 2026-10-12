@@ -280,7 +280,7 @@ function render() {
       route === "satelites" ? "Satélites" :
       route === "convites" ? "Convites" :
       route === "premiacoes" ? "Premiações" :
-      route === "satelite" ? "Meu Dia" :
+      route === "satelite" ? "Satélites" :
       route === "compras" ? "Lista de Compras" :
       route === "progresso" ? "Meu Progresso" :
       "Minha Vida";
@@ -2074,7 +2074,7 @@ function casaAreaIcon(title){
 }
 function casaTipIcon(label){const t=String(label||'').toLowerCase();if(t.includes('limpeza'))return casaAreaIcon('Limpeza');if(t.includes('roupa')||t.includes('lavanderia'))return casaAreaIcon('Roupas & Lavanderia');if(t.includes('jardim')||t.includes('extern'))return casaAreaIcon('Jardim');if(t.includes('gato'))return casaAreaIcon('Animais');const raw=t.includes('organização')?casaLineIcon('routines'):casaLineIcon('info');return `<span class="casa-inline-icon">${raw}</span>`}
 function casaSection(icon,title,meta,body,id){return `<details class="casa-section" id="${id||""}"><summary><span class="casa-section-left"><span class="casa-section-icon">${icon}</span><strong>${title}</strong></span><span class="casa-section-meta">${meta?`<span>${meta}</span>`:""}<span class="casa-chevron">⌄</span></span></summary><div class="casa-section-body">${body}</div></details>`}
-function maintenanceCard(m){const meta=[m.area,m.type,m.date?formatDate(m.date):"",`${maintenanceMinutes(m)} min`,m.priority,m.responsible].filter(Boolean);return `<div class="card casa-maint-card"><div><strong>${escapeHtml(m.name)}</strong>${m.note?`<p class="note">${escapeHtml(m.note)}</p>`:""}</div><div class="casa-maint-meta">${meta.map(x=>`<span>${escapeHtml(String(x))}</span>`).join("")}</div><div class="casa-maint-actions"><button type="button" class="start" data-maint-start="${m.id}">▶ Começar</button><button type="button" class="edit" data-maint-edit="${m.id}">Editar</button><button type="button" class="finish" data-maint-finish="${m.id}">✓ Concluir</button></div></div>`}
+function maintenanceCard(m){const meta=[m.area,m.type,m.date?formatDate(m.date):"",`${maintenanceMinutes(m)} min`,m.priority,m.responsible].filter(Boolean),members=loadSatellites().members||[],targets=satelliteTargets(m).map(id=>members.find(x=>String(x.id)===String(id))).filter(Boolean),claimer=members.find(x=>String(x.id)===String(m.claimedById||m.assigneeId)),completer=members.find(x=>String(x.id)===String(m.completedById||m.assigneeId)),resp=m.responsibility||'owner',status=m.satelliteStatus||'open',chip=resp==='help'?`<span class="sat-task-chip help">${completer?`Concluída por ${escapeHtml(completer.name)}`:claimer?`Assumida · ${escapeHtml(claimer.name)}`:'Aceito ajuda'}</span>`:resp==='delegated'?`<span class="sat-task-chip delegated">${completer?`Concluída por ${escapeHtml(completer.name)}${status==='completed'?' · validar':''}`:claimer?`Assumida · ${escapeHtml(claimer.name)}`:`Delegada · ${escapeHtml(targets.map(x=>x.name).join(' + ')||'Satélites')}`}</span>`:'',validate=status==='completed'?`<button type="button" class="sat-validate" data-sat-validate="${m.id}">Validar conclusão</button>`:'';return `<div class="card casa-maint-card"><div><strong>${escapeHtml(m.name)}</strong>${m.note?`<p class="note">${escapeHtml(m.note)}</p>`:""}${chip}</div><div class="casa-maint-meta">${meta.map(x=>`<span>${escapeHtml(String(x))}</span>`).join("")}</div><div class="casa-maint-actions"><button type="button" class="start" data-maint-start="${m.id}">▶ Começar</button><button type="button" class="edit" data-maint-edit="${m.id}">Editar</button><button type="button" class="finish" data-maint-finish="${m.id}">✓ Concluir</button>${validate}</div></div>`}
 function openCasaNewRoutine(areaId){
  const d=loadCasa();const area=(d.areas||[]).find(a=>String(a.id)===String(areaId));if(!area)return;
  const dlg=document.createElement('dialog');dlg.className='bertha-dialog casa-dialog';
@@ -2171,41 +2171,41 @@ async function requestSatelliteOwnerNotifications(){
 }
 function satelliteTaskList(memberId){
  const d=loadCasa(),out=[],mid=String(memberId);
- (d.areas||[]).forEach(a=>(a.tasks||[]).forEach(t=>{
+ const pushIfEligible=(t,area,kind='routine')=>{
    const r=t.responsibility||'owner',targets=satelliteTargets(t),declined=(t.declinedByIds||[]).map(String),eligible=(r==='help')||(r==='delegated'&&targets.includes(mid));
    if(!eligible||declined.includes(mid))return;
    const status=t.satelliteStatus||'open';
-   if(['available','assigned','accepted','in_progress','completed','validated'].includes(status)||t.done)out.push({task:t,area:a});
- }));
+   if(['available','assigned','accepted','in_progress','completed','validated'].includes(status)||t.done||t.status==='concluida')out.push({task:t,area,kind});
+ };
+ (d.areas||[]).forEach(a=>(a.tasks||[]).forEach(t=>pushIfEligible(t,a,'routine')));
+ (d.maintenance||[]).forEach(m=>pushIfEligible(m,{id:'maintenance',title:m.area||'Manutenção'},'maintenance'));
  return out
 }
 function setSatelliteTaskState(taskId,memberId,state){
- const d=loadCasa(),hit=casaTaskById(taskId,d);if(!hit)return;const task=hit.task,mid=String(memberId),member=satelliteMember(mid),claimed=task.claimedById?String(task.claimedById):'';
+ const d=loadCasa(),hit=casaTaskById(taskId,d),maint=(d.maintenance||[]).find(x=>String(x.id)===String(taskId));
+ if(!hit&&!maint)return;const task=hit?.task||maint,kind=maint?'maintenance':'routine',mid=String(memberId),member=satelliteMember(mid),claimed=task.claimedById?String(task.claimedById):'';
+ if(task.done||task.status==='concluida'||task.satelliteStatus==='completed')return;
  if(state==='accepted'){
-   if(claimed&&claimed!==mid)return;
-   task.claimedById=mid;task.assigneeId=mid;task.satelliteStatus='accepted';
+   if(claimed&&claimed!==mid)return;task.claimedById=mid;task.assigneeId=mid;task.satelliteStatus='accepted';
  }else if(state==='declined'){
    task.declinedByIds=Array.from(new Set([...(task.declinedByIds||[]).map(String),mid]));
    if(claimed===mid){task.claimedById=null;task.assigneeId=null;task.satelliteStatus=task.responsibility==='help'?'available':'assigned'}
  }else if(state==='in_progress'){
-   if(claimed&&claimed!==mid)return;
-   task.claimedById=mid;task.assigneeId=mid;task.satelliteStatus='in_progress';
+   if(claimed&&claimed!==mid)return;task.claimedById=mid;task.assigneeId=mid;task.satelliteStatus='in_progress';
  }else if(state==='completed'){
-   if(claimed&&claimed!==mid)return;
-   const end=Date.now();task.claimedById=mid;task.assigneeId=mid;task.completedById=mid;task.completedAt=end;task.lastCompletedAt=end;task.done=true;task.nextDue=casaNextRoutineDate(task.freq,end);
-   const needsValidation=member?.role==='kids'||!!member?.requiresValidation;
-   task.requiresValidation=needsValidation;task.satelliteStatus=needsValidation?'completed':'validated';
-   casaRecordProgress(hit,end,Math.max(5,+loadCasaDurations()[task.id]||15));
-   if(member?.role==='kids'&&task.pointsEnabled&&!needsValidation)awardKidsPoints(member.id,Math.max(1,+task.pointsValue||1),task.name);
-   satelliteNotifyOwner(member,task,'completed');
+   if(claimed&&claimed!==mid)return;const end=Date.now();task.claimedById=mid;task.assigneeId=mid;task.completedById=mid;task.completedAt=end;task.lastCompletedAt=end;
+   const needsValidation=member?.role==='kids'||!!member?.requiresValidation;task.requiresValidation=needsValidation;task.satelliteStatus=needsValidation?'completed':'validated';
+   if(kind==='routine'){task.done=true;task.nextDue=casaNextRoutineDate(task.freq,end);casaRecordProgress(hit,end,Math.max(5,+loadCasaDurations()[task.id]||15));}
+   else {task.status=needsValidation?'aguardando_validacao':((task.frequency&&!['Única','Conforme necessário'].includes(task.frequency))?'a_fazer':'concluida');if(!needsValidation&&task.status==='a_fazer')task.date=nextMaintenanceDate(task.date,task.frequency);try{const key='bertha.time-engine.v1',e=JSON.parse(window.berthaHmlStorage.getItem(key)||'{"active":null,"history":[],"snoozed":{}}');e.history=Array.isArray(e.history)?e.history:[];const itemId=`casa:maintenance:${task.id}`,mins=maintenanceMinutes(task);if(!e.history.some(h=>h.itemId===itemId&&h.status==='done'&&Math.abs((+h.endedAt||0)-end)<1500)){e.history.unshift({itemId,learningKey:itemId,title:task.name,source:'Casa · Manutenção',day:casaLocalDay(end),startedAt:end,endedAt:end,configuredMinutes:mins,plannedMinutes:mins,realMinutes:mins,status:'done',category:task.area||'Casa'});window.berthaHmlStorage.setItem(key,JSON.stringify(e))}}catch{}}
+   if(member?.role==='kids'&&task.pointsEnabled&&!needsValidation)awardKidsPoints(member.id,Math.max(1,+task.pointsValue||1),task.name);satelliteNotifyOwner(member,task,'completed');
  }
  saveCasa(d);renderSatelliteDay()
 }
 function validateSatelliteCasaTask(taskId){
- const d=loadCasa(),hit=casaTaskById(taskId,d);if(!hit)return;const task=hit.task,member=satelliteMember(task.completedById||task.claimedById||task.assigneeId);
- task.satelliteStatus='validated';task.done=true;
- if(member?.role==='kids'&&task.pointsEnabled&&!task.pointsAwardedAt){awardKidsPoints(member.id,Math.max(1,+task.pointsValue||1),task.name);task.pointsAwardedAt=Date.now()}
- saveCasa(d);renderCasa()
+ const d=loadCasa(),hit=casaTaskById(taskId,d),maint=(d.maintenance||[]).find(x=>String(x.id)===String(taskId));if(!hit&&!maint)return;const task=hit?.task||maint,member=satelliteMember(task.completedById||task.claimedById||task.assigneeId);
+ if(task.satelliteStatus!=='completed')return;
+ task.satelliteStatus='validated';if(maint){if(task.frequency&&!['Única','Conforme necessário'].includes(task.frequency)){task.date=nextMaintenanceDate(task.date,task.frequency);task.status='a_fazer';task.claimedById=null;task.assigneeId=null;task.completedById=null;task.declinedByIds=[];task.satelliteStatus=task.responsibility==='help'?'available':task.responsibility==='delegated'?'assigned':'open'}else task.status='concluida'}else task.done=true;
+ if(member?.role==='kids'&&task.pointsEnabled&&!task.pointsAwardedAt){awardKidsPoints(member.id,Math.max(1,+task.pointsValue||1),task.name);task.pointsAwardedAt=Date.now()}saveCasa(d);renderCasa()
 }
 function ensureSatelliteStyles(){if(document.getElementById('bertha-sat-v3'))return;const s=document.createElement('style');s.id='bertha-sat-v3';s.textContent=`
 .sat-page{display:grid!important;gap:14px!important;padding:0 0 10px!important}
@@ -2381,7 +2381,7 @@ const casaV132=document.createElement('style');casaV132.id='casa-v132-horarios-f
 
 function openCasaMaintenance(id){
  const d=loadCasa();d.maintenance=d.maintenance||[];const current=id?d.maintenance.find(x=>String(x.id)===String(id)):null;
- const m={id:current?.id||uid(),name:"",area:"Casa geral",type:"Reparo / conserto",date:"",durationValue:30,durationUnit:"minutes",priority:"normal",frequency:"Única",responsible:"Eu",notify:false,notifyWhen:"No horário da tarefa",period:"flex",time:"",note:"",status:"a_fazer",responsibility:"owner",assigneeIds:[],...current};
+ const m={id:current?.id||uid(),name:"",area:"Casa geral",type:"Reparo / conserto",date:"",durationValue:30,durationUnit:"minutes",priority:"normal",frequency:"Única",responsible:"Eu",notify:false,notifyWhen:"No horário da tarefa",period:"flex",time:"",note:"",status:"a_fazer",responsibility:"owner",assigneeIds:[],pointsEnabled:false,pointsValue:2,satelliteStatus:"open",claimedById:null,assigneeId:null,completedById:null,declinedByIds:[],...current};
  const areas=["Casa geral",...(Array.isArray(d.areas)?d.areas:[]).map(a=>a.title),"Piscina","Jardim","Garagem","Edícula","Área externa"];
  const sat=loadSatellites(),members=(sat.members||[]).filter(x=>x.status!=="removed"&&x.permissions?.casa!==false);
  const selected=new Set((Array.isArray(m.assigneeIds)?m.assigneeIds:[]).map(String));
@@ -2409,6 +2409,13 @@ function openCasaMaintenance(id){
      <small class="sat-target-note">A manutenção será compartilhada apenas com os satélites selecionados.</small>
    </div>
  </div>
+ <div class="maint-kids-points" hidden>
+   <button type="button" class="casa-points-toggle ${m.pointsEnabled?'is-checked':''}" data-maint-points-toggle aria-pressed="${m.pointsEnabled?'true':'false'}">
+     <input type="hidden" id="mPoints" value="${m.pointsEnabled?'1':'0'}">
+     <span class="sat-target-check" aria-hidden="true"></span><span class="casa-points-copy">Esta missão vale pontos se for concluída por um Kids</span>
+   </button>
+   ${field("Pontos",`<input id="mPointsValue" type="number" min="1" max="100" value="${Math.max(1,+m.pointsValue||2)}">`)}
+ </div>
 
  ${field("Responsável externo / referência",`<select id="mResp">${["Eu","Henrique","Thiago","Prestador / profissional"].map(x=>`<option ${x===m.responsible?'selected':''}>${x}</option>`).join('')}</select>`)}
  <label class="study-v10-field" style="display:flex;align-items:center;gap:10px"><input id="mNotify" type="checkbox" ${m.notify?'checked':''} style="width:auto"><span style="margin:0">Me avisar?</span></label>
@@ -2424,8 +2431,10 @@ function openCasaMaintenance(id){
 
  const respInput=dlg.querySelector('#mResponsibility');
  const targetsWrap=dlg.querySelector('.maint-sat-targets');
+ const pointsWrap=dlg.querySelector('.maint-kids-points');
  const satButtons=[...dlg.querySelectorAll('[data-maint-sat]')];
- const syncTargets=()=>{targetsWrap.hidden=respInput.value!=='delegated'};
+ const selectedMembers=()=>satButtons.filter(b=>b.getAttribute('aria-pressed')==='true').map(b=>members.find(m=>String(m.id)===String(b.dataset.maintSat))).filter(Boolean);
+ const syncTargets=()=>{targetsWrap.hidden=respInput.value!=='delegated';pointsWrap.hidden=!(respInput.value==='delegated'&&selectedMembers().some(x=>x.role==='kids'))};
  dlg.querySelectorAll('[data-maint-resp] button').forEach(b=>b.onclick=()=>{
    dlg.querySelectorAll('[data-maint-resp] button').forEach(x=>x.classList.toggle('active',x===b));
    respInput.value=b.dataset.v;
@@ -2436,6 +2445,7 @@ function openCasaMaintenance(id){
    b.setAttribute('aria-pressed',String(on));
    b.classList.toggle('is-selected',on);
    b.querySelector('.maint-sat-check').textContent=on?'✓':'';
+   syncTargets();
  });
  dlg.querySelector('#mAllTargets')?.addEventListener('click',()=>{
    const allOn=satButtons.length&&satButtons.every(b=>b.getAttribute('aria-pressed')==='true');
@@ -2444,7 +2454,13 @@ function openCasaMaintenance(id){
      b.classList.toggle('is-selected',!allOn);
      b.querySelector('.maint-sat-check').textContent=!allOn?'✓':'';
    });
+   syncTargets();
  });
+ const pointsToggle=dlg.querySelector('[data-maint-points-toggle]');
+ if(pointsToggle){
+   const input=pointsToggle.querySelector('#mPoints');
+   pointsToggle.onclick=()=>{const on=input.value!=='1';input.value=on?'1':'0';pointsToggle.classList.toggle('is-checked',on);pointsToggle.setAttribute('aria-pressed',String(on))};
+ }
  syncTargets();
 
  dlg.querySelector('#deleteMaint')?.addEventListener('click',()=>{if(!confirm(`Excluir “${m.name}”?`))return;d.maintenance=d.maintenance.filter(x=>String(x.id)!==String(m.id));saveCasa(d);close();renderCasa()});
@@ -2453,7 +2469,9 @@ function openCasaMaintenance(id){
    const responsibility=respInput.value||'owner';
    const assigneeIds=responsibility==='delegated'?satButtons.filter(b=>b.getAttribute('aria-pressed')==='true').map(b=>b.dataset.maintSat):[];
    if(responsibility==='delegated'&&!assigneeIds.length){targetsWrap.classList.add('sat-target-error');return}
-   const obj={...m,name:dlg.querySelector('#mName').value.trim(),area:dlg.querySelector('#mArea').value,type:dlg.querySelector('#mType').value,date:dlg.querySelector('#mDate').value,period:dlg.querySelector('#mPeriod').value,time:dlg.querySelector('#mTime').value,durationValue:Math.max(1,+dlg.querySelector('#mDur').value||30),durationUnit:dlg.querySelector('#mDurUnit').value,priority:dlg.querySelector('#mPriority').value,frequency:dlg.querySelector('#mFreq').value,responsible:dlg.querySelector('#mResp').value,notify:dlg.querySelector('#mNotify').checked,notifyWhen:dlg.querySelector('#mNotifyWhen').value,note:dlg.querySelector('#mNote').value.trim(),responsibility,assigneeIds,status:m.status||'a_fazer',updatedAt:Date.now()};
+   const hasKids=assigneeIds.some(id=>members.find(x=>String(x.id)===String(id))?.role==='kids');
+   const pointsEnabled=!!(responsibility==='delegated'&&hasKids&&dlg.querySelector('#mPoints')?.value==='1');
+   const obj={...m,name:dlg.querySelector('#mName').value.trim(),area:dlg.querySelector('#mArea').value,type:dlg.querySelector('#mType').value,date:dlg.querySelector('#mDate').value,period:dlg.querySelector('#mPeriod').value,time:dlg.querySelector('#mTime').value,durationValue:Math.max(1,+dlg.querySelector('#mDur').value||30),durationUnit:dlg.querySelector('#mDurUnit').value,priority:dlg.querySelector('#mPriority').value,frequency:dlg.querySelector('#mFreq').value,responsible:dlg.querySelector('#mResp').value,notify:dlg.querySelector('#mNotify').checked,notifyWhen:dlg.querySelector('#mNotifyWhen').value,note:dlg.querySelector('#mNote').value.trim(),responsibility,assigneeIds,pointsEnabled,pointsValue:pointsEnabled?Math.max(1,+dlg.querySelector('#mPointsValue')?.value||2):0,claimedById:null,assigneeId:null,completedById:null,declinedByIds:[],satelliteStatus:responsibility==='help'?'available':responsibility==='delegated'?'assigned':'open',status:m.status||'a_fazer',updatedAt:Date.now()};
    d.maintenance=current?d.maintenance.map(x=>String(x.id)===String(m.id)?obj:x):[...d.maintenance,{...obj,createdAt:Date.now()}];
    saveCasa(d);close();renderCasa()
  });
