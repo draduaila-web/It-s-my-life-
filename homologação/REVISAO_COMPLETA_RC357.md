@@ -190,3 +190,11 @@ Teste reproduzível: **tests/owner-tempo-rc360.cjs** lê as funções do timer a
 | Kids30dias e progressões futuras, hábitos/Estudos/Exercícios em semanas reais | Histórico de testes locais da matriz mantido; fontes congeladas não reescritas | **Validação temporal/dispositivo incompleta** | Testes longos/relógio isolado e regressão em ambiente adequado; não criar conquistas na rede real |
 
 **O Owner ainda não está declarado pronto para os apps satélites.** RC360 fecha as correções locais verificáveis desta rodada; as dependências acima não foram substituídas por telas fictícias ou declarações de sucesso. Sem mudança de autenticação, credenciais, notificações externas, permissões ou arquitetura de integração. Sem artes regeneradas, exclusões em massa ou limpeza de dados.
+
+### RC360 — resultados finais da candidata isolada
+
+- Candidata final aberta com query **v=360-final**, fonte DOM confirmado contendo o guard de evento ausente. O iframe anterior v=360 ainda carregava a versão anterior em cache; nenhuma limpeza de caches/dados foi feita. Wrapper atualizado para a query final.
+- Autocuidado: após mover o último dia pela UI em QA, Encerrar foi confirmado; mensagem correta persistiu após recarga, zero sugestões futuras, sem undefined. Meu Dia deixou de sugerir esse cuidado nativo encerrado e manteve o resumo da rede.
+- Backups QA:65→67 conjuntos; nenhuma chave removida. Alterados apenas preferência/ciclos e cadastro explícito de templates/produtos durante o teste de mover datas. Entradas de templates/produtos anteriores integralmente preservadas; ID da preferência antiga preservado; janela livre manteve sourceZone=free após editar. Motor/histórico de execuções e permissões/redes satélites exatamente iguais ao backup RC359 anterior.
+-33 assertivas do fonte final passaram em cada fuso (São Paulo/Nova York); Node --check passou. Deslocamento/reinício/encerramento de ciclos testados em QA, sem esperar33dias físicos.
+- Backup real desta rodada exportado antes de publicação:5conjuntos. Comparação posterior à RC funcional ainda será registrada após deploy.
