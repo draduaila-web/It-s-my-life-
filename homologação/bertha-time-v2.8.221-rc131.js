@@ -2330,6 +2330,7 @@
   function selfcareProcedure(ev){const x=selfcareProcedureStore()[selfcareProcedureKey(ev)]||{};return {...ev,tasks:Array.isArray(x.steps)?x.steps:(ev?.tasks||[])}}
   function saveSelfcareProcedure(ev,steps,products){const all=selfcareProcedureStore();all[selfcareProcedureKey(ev)]={steps};write(SELFCARE_PROCEDURES_KEY,all);const st=ritualProductsStore();st[ritualProductKey('autocuidado',ev)]=products;saveRitualProductsStore(st)}
   function renderRituals(){
+    const ritualHeader=document.querySelector('#pageTitle');if(ritualHeader)ritualHeader.textContent='Rituais';
     const cards=ritualCatalog().map((r,i)=>`
       <button class="bertha-ritual-card tone-${i%3}" type="button" data-open-ritual="${r.id}">
         <span class="bertha-line-icon">${ritualIcon(r.icon)}</span>
