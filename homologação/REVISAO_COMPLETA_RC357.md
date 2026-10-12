@@ -50,7 +50,7 @@ Revisão executada em 12/10/2026. Escopo: beta em **homologação**, com acentos
 | 9. Alimentação — próprio/outro | Guarda existente preservada | Cardápio próprio com receita; Não comi/Comi; evento único 100 kcal/10g; cardápio de outra pessoa com trackProgress:false; editar/cancelar/próxima cozinha/recarregar. Passou | Lancheira real do Henrique não alterada; testado cenário isolado equivalente, não dados reais |
 | 10. Receitas — cadastro/consulta | Fluxos preservados | Busca sem resultado; filtro; criar porções/ingredientes/etapas/nutrição; obrigatório; editar/cancelar/salvar/recarregar/favorito; consulta. Passou | Campos nutricionais não receberam nova regra de cálculo |
 | Receitas — compras | Seleção individual preservada | Modal filho cancelar/reabrir; desmarcar arroz; adicionar só banana. Passou | Quantidade textual ficou no nome do ingrediente, comportamento existente; não reivindicada como quantidade estruturada |
-| 11. Compras — item/compra | Integração estoque preservada | Obrigatório; criar 2kg; filtrar; editar 3/cancelar preserva 2; salvar 3; marcar comprado/cancelar; confirmar 3kg/12,50; encerrar compra. Passou | Modal estreito específico de novo item não medido nesta etapa |
+| 11. Compras — item/compra | Integração estoque preservada | Obrigatório; criar 2kg; filtrar; editar 3/cancelar preserva 2; salvar 3; marcar comprado/cancelar; confirmar 3kg/12,50; encerrar compra. Passou | Novo item em320px: modal320/scroll320; seis campos16px; cancelar sem gravar, passou |
 | Estoque — ajuste/base | Sem nova arquitetura | Estoque 3kg; ajuste cancelar mantém 3/salvar 2; base gera pendência 1kg; repetir não duplica; recarregar. Passou | Exclusão não testada |
 | 12. Financeiro — renda/fontes | Editor e privacidade negativa corrigidos | Fonte 1000→1100 com cancelamento; renda 500 independente das fontes; recarregar; mascarar negativos/mostrar; restaurar backup retorna renda 600→500. Passou | Transações bancárias externas não existem nesse teste |
 | Financeiro — contas | Estatísticas existentes mantidas | Conta 65; lembrete desligado por clique/Space; pagamento com desconto 2 =63/Pix/fonte; desfazer restaura pendente, saldo1100 e remove despesa/pontualidade. Passou | Entrega externa de lembrete pendente |
@@ -76,3 +76,12 @@ Revisão executada em 12/10/2026. Escopo: beta em **homologação**, com acentos
 - Incompletude inicial de imagens lazy não foi tratada como recurso quebrado; após carga os conjuntos inspecionados não tinham imagens com falha.
 - Checklist de instruções de ritual não persiste ao reabrir; confirmar expectativa do produto antes de alterar sua semântica. Não é apresentado como persistência validada.
 - Limitações e pendências da tabela são reais. Não se declara validação integral de todas as combinações de fluxo.
+
+## Publicação e regressão posterior
+
+- PR24 publicado: merge3f1c853f446784928d8defa9c1b42e1fb562991d. GitHub Pages run1323/38275869056, **Success**, build/deploy concluídos.
+- URL aberta: https://draduaila-web.github.io/It-s-my-life-/homologa%C3%A7%C3%A3o/?v=357#satelites. Título, INDEX e HML RC357 confirmados, inclusive após navegação.
+- Repetidos no index ativo: Novo satélite sem salvar; clique/Space sincronizam checked/aria; input nativo display:none; Adulto/Kids; controle Medalhas; quatro avatares adultos carregados; cancelar; tarefa nova, aviso oculto; ícones16 nomeados/seleção Lua; cancelar.
+- Auditoria externa após publicação (arquivos reais do index, prefixo QA): Financeiro25%, alcance25%, projeto1/histórico14 semanal; satélites Kids em320px sem overflow, nome/tipo16px, nove inputs nativos ocultos.
+- Três exportações HML (inicial, pré-publicação, pós-testes): **cinco conjuntos exatamente iguais**, nenhuma chave nova ou alterada. Nova leitura Progresso: quatro chaves financeiras QA exatamente iguais ao backup anterior.
+- A recarga direta de Rituais revelou cabeçalho antigo “Meu Dia”. Correção restrita adicionada ao renderizador da lista, com query357-title para esse único script. A verificação dessa correção após deploy está registrada no PR de acompanhamento; não se presume sucesso antes dela.
