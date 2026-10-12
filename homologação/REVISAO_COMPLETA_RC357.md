@@ -1,73 +1,78 @@
-# BERTH.A — revisão completa RC357
+# BERTH.A — matriz da revisão RC357
 
-**Estado: EM ANDAMENTO. A beta não está declarada integralmente homologada.**
+Revisão executada em 12/10/2026. Escopo: beta em **homologação**, com acentos. A revisão não garante ausência absoluta de falhas. Resultado por fluxo abaixo; abrir uma tela não equivale a validar o módulo inteiro.
 
-Data: 12/10/2026, America/Sao_Paulo. Navegador real: Chrome. Safari/iPhone e teclado virtual não disponíveis.
+## Ambiente, segurança e rastreabilidade
 
-## Base e segurança
+- Referência informada: RC353, 1d7e0d853b4a6d81c89228b19940407c7ef2f533. Ao retomar, a versão ativa era RC356, merge 1c81df8c4573ef6ce84f21a8ecee287d1afe60e7; histórico mais recente preservado.
+- Rollback criado antes da revisão completa: **backup/bertha-pre-full-review-13b9262**, hash **13b9262cb4af5747b7df1169b8d0deb4f8926562**. Rollback anterior: backup/bertha-pre-review-1d7e0d8.
+- Correções pequenas na branch **work/bertha-full-review-rc357**. A publicação da RC de revisão e os testes posteriores são registrados no PR dessa branch; os resultados abaixo distinguem testes da candidata e limitações.
+- Testes persistentes feitos exclusivamente nas páginas auditoria-rc357.html / auditoria-candidata-rc357.html, prefixo **bertha-qa-rc357::**. O index ativo mantém **bertha-hml::**. Dados fictícios não foram salvos na rede real.
+- GitHub Pages main/root confirmado; somente arquivos de homologação e esta matriz alterados. Pasta histórica homologacao usada apenas como referência do código RC141, sem edição.
+- Sem exclusões em massa, limpeza de histórico, limpeza de localStorage/bancos, migração entre ambientes, mudanças de autenticação, credenciais ou permissões externas.
+- Artes Kids RC349, Owner RC351, Helper RC352 e seis avatares RC353 preservadas; nenhuma imagem gerada. Avatares e identificadores continuam associados aos mesmos cadastros.
 
-- Base confirmada: 13b9262cb4af5747b7df1169b8d0deb4f8926562 (RC356), sem alterações posteriores na abertura.
-- Rollback: backup/bertha-pre-full-review-13b9262, no mesmo hash. Branch: work/bertha-full-review-rc357.
-- Caminho ativo: homologação, com acentos. Somente arquivos desta pasta foram alterados.
-- auditoria-rc357.html usa namespace bertha-qa-rc357:: e os mesmos scripts e assets. Namespace bertha-hml:: do index ativo permanece intacto.
-- auditoria-viewport-rc357.html permite desktop, 390 px e 320 px no Chrome; não equivale a Safari/iPhone.
-- Preparação QA: PR #14, merge 7dd80bae0c43875a2a573db30e66c1203b521e7b, deploy 38250427950 Success.
-- Isolamento comprovado: tarefa somente no backup QA; ausente no backup HML. Dados HML idênticos antes/depois, com cinco conjuntos.
-- Nenhuma pessoa, convite ou reconhecimento fictício na rede real. Registros QA357 exclusivamente no namespace isolado. Sem limpeza, restauração ou exclusão.
-- Origem do leitor Owner: BERTHA_HOMOLOGACAO_v2_8_221_RC141_CASA_MANUTENCAO_PONTOS_SATELITES.zip, arquivo homologacao/app-v2.8.221-exercicios-modal-ancorado.js. Caminho histórico sem acentos usado somente como referência.
-- Sintaxe dos candidatos core/runtime: node --check passou sem executar o aplicativo. Edições feitas no GitHub pelo navegador. Regressão pós-deploy pendente nesta edição.
+## Correções e causas verificadas
 
-## Matriz dos 20 módulos
+1. Permissões: input nativo não deve participar da grade de duas colunas. A correção inicial de permissões das RC354–356 foi revisada contra estilos globais e injetados, cards de Convites e gamificação. Clique/Space, checked, aria-checked e estado visual sincronizados. Nenhum campo de salvamento removido.
+2. Campos hidden: CSS de tarefa forçava display:block e cards display:grid mesmo com hidden. Regra responsável passou a excluir [hidden]; componente respeita hidden. Busca e alternância de notificação validadas.
+3. Satélites: constante e leitor de eventos Owner ausentes causavam erro; restaurados da implementação aprovada, mesma chave. ID de estilo duplicado corrigido. Regra antiga de 86 px excluída dos novos avatares, preservando escala aprovada de 118 px.
+4. Casa: step/min conflitantes bloqueavam durações válidas. Campos aceitam minutos inteiros positivos. Funções de manutenção, delegação e pontuação restauradas literalmente da RC141 aprovada, com proteção contra dupla conclusão/validação e liberação de nova pontuação em cada execução recorrente.
+5. Perfil delegado: runtime externo omitia kind de manutenção e responsável compartilhado. Passa a exibir manutenção e identificação de quem assumiu/concluiu, mantendo os handlers existentes.
+6. Financeiro: renda mensal voltou a abrir seu editor, sem somar fontes automaticamente; privacidade agora cobre valores negativos. Meu Progresso acessa leitores de metas e estatísticas de pagamentos no escopo correto, preservando cálculos existentes e sem migração ou gravação.
+7. Rituais: nomes acessíveis/aria-pressed dos ícones; cabeçalhos corretos; título da tarefa principal acompanha renomeação do ritual quando seguia o título anterior. Cronograma Capilar mostra quantidade real de dias, sem alterar composição/datas.
+8. Responsividade: campos de busca de tarefa e seletor Kids com 16 px. Busca de Criação & Ideias tinha min-width automático causando rolagem horizontal; corrigido no próprio componente com min-width:0.
+9. Kids: texto do contador de cápsulas usa o mesmo estado da progressão vigente; antes o contador legado divergia. Espécies, acessórios, cores, imagens e regras individuais mantidos.
+10. Index e runtime com marcadores RC357 e cache bust somente nos arquivos corrigidos; dados/cache pessoal não foram apagados.
 
-| Módulo | Problema e causa | Correção | Testes executados nesta rodada | Resultado | Pendências |
-|---|---|---|---|---|---|
-| 1. Meu Dia | Nenhuma correção definida nesta edição | Nenhuma | Adiar 30 min; começar tarefa; sessão após recarga; continuar; concluir; ajustar tempo; retomar. Histórico único de 15 min. | Parcial; resultados dirigidos abaixo | Completar fluxos disponíveis, regressão e 390/320 px. |
-| 2. Meu Dia Ideal e Horários-base | Nenhuma correção definida nesta edição | Nenhuma | Preferência de Tarde, 15 min, salva e recarregada; obrigatório vazio bloqueado. Horários: cancelar por X, salvar nome e dias, recarregar. | Parcial; resultados dirigidos abaixo | Completar fluxos disponíveis, regressão e 390/320 px. |
-| 3. Planos — Tarefas e Compromissos | Busca: card.hidden correto, mas display:grid anulava ocultação. Fonte de busca com 15 px. | Regra restrita .bertha-task-card[hidden]; busca com fonte de 16 px. | Tarefa: criar, editar, cancelar, concluir, reabrir e recarregar. Busca falhou por CSS. Compromisso: amanhã, 15:30, 30 min; edição semanal persistida. | Parcial; resultados dirigidos abaixo | Completar fluxos disponíveis, regressão e 390/320 px. |
-| 4. Rituais | Campo de intervalo hidden aparecia; 16 ícones sem nome acessível; header inconsistente e descrição duplicada. | Campos hidden ocultados no componente; aria-label e aria-pressed; título e header dos Rituais personalizados. | Ritual: criar, editar, cancelar, recarregar; produtos deduplicados enviados à lista; cuidado extra editado e presente no Meu Dia. Falhas de hidden, ícones e títulos. | Parcial; resultados dirigidos abaixo | Completar fluxos disponíveis, regressão e 390/320 px. |
-| 5. Trabalho | Nenhuma correção definida nesta edição | Nenhuma | Inspeção anterior RC356; testes desta rodada ainda não executados | Pendente nesta rodada | Completar fluxos disponíveis, regressão e 390/320 px. |
-| 6. Estudos | Nenhuma correção definida nesta edição | Nenhuma | Inspeção anterior RC356; testes desta rodada ainda não executados | Pendente nesta rodada | Completar fluxos disponíveis, regressão e 390/320 px. |
-| 7. Casa — manutenção, jardim, utensílios e equipamentos | Nenhuma correção definida nesta edição | Nenhuma | Inspeção anterior RC356; testes desta rodada ainda não executados | Pendente nesta rodada | Completar fluxos disponíveis, regressão e 390/320 px. |
-| 8. Exercícios e ciclos de treino | Nenhuma correção definida nesta edição | Nenhuma | Inspeção anterior RC356; testes desta rodada ainda não executados | Pendente nesta rodada | Completar fluxos disponíveis, regressão e 390/320 px. |
-| 9. Alimentação | Nenhuma correção definida nesta edição | Nenhuma | Cardápio próprio com receita associada: 100 kcal e 10 g. Comi/Não comi; Outra pessoa sem progresso; cancelamento; próxima cozinha persistida. | Parcial; resultados dirigidos abaixo | Completar fluxos disponíveis, regressão e 390/320 px. |
-| 10. Receitas | Nenhuma correção definida nesta edição | Nenhuma | Busca vazia e por ingrediente; categorias; criar, editar, cancelar, favorito e recarga. Modal empilhado de ingredientes: cancelar, reabrir, selecionar e adicionar. | Parcial; resultados dirigidos abaixo | Completar fluxos disponíveis, regressão e 390/320 px. |
-| 11. Lista de Compras e estoque doméstico | Nenhuma correção definida nesta edição | Nenhuma | Item: criar, editar, cancelar, filtrar; compra cancelada e confirmada; estoque, encerramento, histórico e Lista base. Saldo 2 kg gerou falta de 1 kg sem duplicar. | Parcial; resultados dirigidos abaixo | Completar fluxos disponíveis, regressão e 390/320 px. |
-| 12. Financeiro | Nenhuma correção definida nesta edição | Nenhuma | Inspeção anterior RC356; testes desta rodada ainda não executados | Pendente nesta rodada | Completar fluxos disponíveis, regressão e 390/320 px. |
-| 13. Criação & Ideias | Nenhuma correção definida nesta edição | Nenhuma | Inspeção anterior RC356; testes desta rodada ainda não executados | Pendente nesta rodada | Completar fluxos disponíveis, regressão e 390/320 px. |
-| 14. Meu Progresso | Nenhuma correção definida nesta edição | Nenhuma | Semanal, Mensal e Anual. Dois eventos: uma tarefa e uma alimentação. Tarefa retomada permaneceu em um histórico de 15 min. | Parcial; resultados dirigidos abaixo | Completar fluxos disponíveis, regressão e 390/320 px. |
-| 15. Satélites — Adulto, Helper e Kids | Regra RC176 de 86 px vencia regra RC192 de 118 px, cortando rótulos dos avatares. | Regra antiga de SVG exclui cards com .sat-avatar-art; regra posterior aprovada opera sem alterar imagens. | Inspeção anterior RC356; testes desta rodada ainda não executados | Pendente nesta rodada | Completar fluxos disponíveis, regressão e 390/320 px. |
-| 16. Delegação e conclusões compartilhadas | Leitor e chave de eventos Owner ausentes no core atual; originais recuperados da RC141. | Restauração literal do leitor e da chave bertha.satellites.owner-events.v1; nenhuma migração. | Inspeção anterior RC356; testes desta rodada ainda não executados | Pendente nesta rodada | Completar fluxos disponíveis, regressão e 390/320 px. |
-| 17. Convites | Nenhuma correção definida nesta edição | Nenhuma | Inspeção anterior RC356; testes desta rodada ainda não executados | Pendente nesta rodada | Completar fluxos disponíveis, regressão e 390/320 px. |
-| 18. Premiações — Owner, Kids e Helper | Nenhuma correção definida nesta edição | Nenhuma | Inspeção anterior RC356; testes desta rodada ainda não executados | Pendente nesta rodada | Completar fluxos disponíveis, regressão e 390/320 px. |
-| 19. Menu Mais e ferramentas de homologação | Nenhuma correção definida nesta edição | Nenhuma | Menu e exportação real. Backup HML idêntico após tarefa QA; tarefa presente somente no backup QA. Exportação pelo iframe não gerou download; acesso direto funcionou. | Parcial; resultados dirigidos abaixo | Completar fluxos disponíveis, regressão e 390/320 px. |
-| 20. Navegação global, modais, versão, cache e carregamento | Duas regras distintas injetavam estilos com o mesmo ID rc188-helper-assets. | Segundo ID renomeado para rc188-recognition-assets; conteúdo CSS preservado. | Inspeção anterior RC356; testes desta rodada ainda não executados | Pendente nesta rodada | Completar fluxos disponíveis, regressão e 390/320 px. |
+## Matriz por módulo e fluxo
 
-## Fluxos e evidências
+“Passou” significa o cenário descrito na candidata isolada, não todos os casos possíveis. Cancelar incluiu conferir que o valor anterior foi preservado. Recarregar incluiu conferir o registro salvo. Funções sem controle na interface são registradas, não presumidas.
 
-| Módulo | Fluxo | Resultado |
-|---|---|---|
-| Planos/Tarefas | Obrigatório/criar/salvar/reabrir | Passou: vazio bloqueado, tarefa QA salva e reaberta em nova aba; backup QA contém tarefa; backup HML idêntico antes/depois |
-| Navegação/estilos | IDs duplicados | Falha: rc188-helper-assets duplicado |
-| Planos/Tarefas | 390px campo busca | Falha: font-size15px; sem overflow horizontal |
-| Planos/Tarefas | Editar/cancelar/salvar/concluir/reabrir/recarregar | Passou: cancelamento preservou original, edição persistiu, concluídas1, reabriu abertas1, recarga manteve tarefa editada |
-| Planos/Tarefas | Busca sem resultado | Falha reproduzida: searchbox semresultadoQA357 deixa tarefa editada visível |
-| Planos/Tarefas | Causa busca | Causa confirmada: o filtro define hidden=true, mas CSS mantém o card em grid. Correção candidata no seletor do componente; busca 15→16 px. |
-| Planos/Compromissos | Criar/editar/cancelar/recorrência/recarregar | Amanhã 13/10, 15:30, 30 min, salvo. Cancelamento preservou título. Edição para recorrência semanal persistiu. Notificações não ativadas. |
-| Meu Dia Ideal | Obrigatório/criar/período/duração/salvar/recarregar | Vazio bloqueado. Preferência de Tarde com 15 min persistiu. Card não oferece edição, somente remoção; nenhuma exclusão acionada. |
-| Meu Dia/Horários-base | Editar/cancelar/dias/salvar/recarregar | Cancelar por X preservou nome. Horário renomeado persistiu. Backup confirmou estrutura nos dias 1–5 após selecionar Seg–Sex; acessibilidade da seleção a conferir. |
-| Meu Dia | Adiar/começar/em andamento/recarregar/continuar/concluir | Adiar Ritual por 30 min retirou destaque. Tarefa iniciou e sobreviveu à recarga. Continuar fechou modal; conclusão permitiu informar tempo real. |
-| Meu Dia | Editar tempo/retomar/concluir novamente | Ajuste de 10 para 12 min visível; retomar e concluir mais 3 min totalizou 15 min no mesmo histórico, sem duplicação. |
-| Rituais | Novo ritual campos condicionais/ícones | Falhas: campo de intervalo hidden visível; 16 botões de ícone sem nome. Ritual salvo com intervalo de 2 dias. |
-| Rituais | Criar/editar/cancelar/reabrir/produtos/cuidados/Meu Dia | Ritual editado persistiu; cancelar preservou nome. Produtos deduplicados e enviados à lista. Cuidado extra 5→7 min persistiu e apareceu no Meu Dia. Header e descrição apresentam falhas; nome da atividade inicial permaneceu antigo após renomear ritual, ainda sob investigação. |
-| Compras/Estoque | Obrigatório/criar/editar/cancelar/filtrar/marcar/cancelar compra/estoque/encerrar/base/reload | Obrigatório, criar, editar e cancelar passaram. Filtro mostra somente Alimentação. Cancelar compra desmarca. Compra de 3 kg por R$12,50 criou estoque e histórico. Encerrar manteve histórico e Lista base. Cancelar ajuste preservou 3 kg; estoque 2 kg salvo; base calculou falta de 1 kg; nova aplicação não duplicou pendentes. Recarga conferida. |
-| Receitas | Busca/ingrediente/categoria/vazio/obrigatório/criar/editar/cancelar/favorito/reload/ingredientes | Busca vazia informa nenhum resultado; cottage encontra receita; filtro Sobremesas mostra quatro. Receita criada e editada, cancelamento preservou nome, favorito persistiu. Seleção de ingredientes cancelada/reaberta; somente banana adicionada, arroz desmarcado. |
-| Alimentação | Criar/cardápio/receita/Comi/NãoComi/Outra pessoa/cancelar/cozinha/reload/receita modal | Receita própria associada e consumida. Outra pessoa oculta Progresso e não entra em Hoje. Cancelamento preservou nome; próxima cozinha 27/10 persistiu. Receita abriu/fechou a partir do cardápio. |
-| Meu Progresso | Semanal/Mensal/Anual/com registros | Controles Semanal/Mensal/Anual responderam. Semana mostra dois eventos; fontes e agregação confirmadas no backup. Exercícios ainda pendente. |
-| Delegação/Owner | Causa recuperada | Definição original recuperada no pacote RC141, arquivo homologacao/app-v2.8.221-exercicios-modal-ancorado.js. Restauração literal candidata, sem nova chave ou migração. |
-| Alimentação/Meu Progresso | Evidência de dados QA | Backup QA: um evento Alimentação com 100 kcal e 10 g; cardápio owner=other e trackProgress=false sem evento. Histórico de tarefa único com 15 min. Compras contém apenas ingrediente selecionado da receita. |
+| Módulo / fluxo | Problema e causa / correção | Testes executados e resultado | Pendências e limites |
+|---|---|---|---|
+| 1. Meu Dia — execução | Preservado motor de tempo e histórico | Adiar 30; começar; recarregar sessão ativa; concluir/continuar; editar 12 minutos; retomar +3. Um único evento de 15 minutos. Passou | Conflito com compromisso protegido durante sessão não exercitado |
+| Meu Dia — projeto | Integração preservada | Começar bloco de 10; recarregar; concluir; projeto com 17%, 50 minutos restantes e um evento. Passou | Conclusão integral de projeto não testada |
+| 2. Meu Dia Ideal — referência/preferência | Sem mudança de lógica | Obrigatórios; preferência Tarde/15; salvar/reabrir/recarregar; referência Autocuidado 80 e Financeiro 100. Passou | Preferências não expõem edição; exclusão não testada |
+| Horários-base | Preservados dias e janelas | Criar/cancelar; selecionar Seg–Sex; renomear; salvar/recarregar; backup contém dias 1–5. Passou | Calendário após passagem real da semana não testado |
+| 3. Planos — tarefas | Hidden e busca corrigidos | Obrigatório; texto longo; criar 30; editar/cancelar; salvar; concluir/reabrir; busca sem resultado oculta cards; modal estreito; notificação oculta/visível/oculta. Passou | Entrega externa da notificação não testada |
+| Planos — compromissos | Lógica aprovada preservada | Criar 13/10 15:30/30 min; editar/cancelar; salvar recorrência semanal; recarregar e conferir próxima data. Passou | Execução da recorrência com passagem real da semana pendente |
+| 4. Rituais — personalizados | Título principal e acessibilidade corrigidos | Criar 20 min, intervalo 2 dias, etapas/produtos; editar/cancelar/salvar/recarregar; evento extra 7 min; renomear pai mantém extra e atualiza principal; ícone Lua aria-pressed. Passou | Checkboxes das instruções são temporários e resetam ao reabrir; persistência desse checklist não validada |
+| Rituais — produtos | Deduplicação existente preservada | Duas linhas repetidas enviadas a Compras produzem um item. Passou | Não foi ampliado parser de quantidade |
+| Ritual Capilar | Cabeçalho/cronograma real | 33 dias efetivos, configuração Tarde cancelar/salvar/recarregar; cronograma-base e duração preservados. Passou | Ciclo completo com passagem dos dias não testado |
+| Autocuidado | Cabeçalho sem descrição duplicada | 14 dias; editar/cancelar/salvar/recarregar; Revisar e repetir cria ciclo 2; Repetir igual cria ciclo 3. Passou | Encerrar foi confirmado, mas efeito temporal futuro não considerado validado |
+| 5. Trabalho — frente/tarefa/nota | Sem troca de arquitetura | Criar frente/áreas; editar/cancelar/salvar; nota longa; tarefa 20; começar/concluir 1; repetir preserva histórico; transformar nota em tarefa preserva nota; recarregar. Passou | Sem busca disponível na interface dessa frente; exclusões não testadas |
+| 6. Estudos — conteúdo/sessão/mapa | Sem mudança de lógica | Criar/editar/cancelar/recarregar; sessão ativa recarregada e concluída 1; registro passado 15; mapa 261; busca vazia/positiva; filtros/revisão/domínio. Passou | Progressão por passagem real de dias pendente |
+| 7. Casa — rotina/jardim | Min/step e delegação | Criar duração válida 6; cancelar edição; salvar 10; dois destinatários/“todos”; aceitar/concluir; histórico 10; recarregar. Passou | Exclusão de registros reais não exercitada |
+| Casa — manutenção | Funções RC141 restauradas | Obrigatório; criar/editar/cancelar/salvar; delegar Kids; aceitar/começar/recarregar/concluir; validação Owner; recorrência mensal duas execuções. Próximas datas 12/11 e 12/12; +5 por rodada, sem duplicação. Passou | Passagem real do mês não aguardada |
+| Casa — procedimentos/equipamentos/receitas | Dados preservados | Procedimento editar/cancelar/salvar/recarregar; detalhes/produtos; criar utensílio/equipamento; receita doméstica com materiais e etapas. Passou | Utensílios não expõem edição; Casa receita→Compras e criação de dica não exercitadas |
+| 8. Exercícios — ciclo/treino/registro | Integração Progresso preservada | Ciclo 10+5=15; obrigatório; editar/cancelar/salvar; planejamento semanal; começar/recarregar/concluir; editar registro 12; “Fiz outro” 10; dois registros distintos, substituição preserva planejado. Passou | Ciclo semanal completo em tempo real pendente |
+| 9. Alimentação — próprio/outro | Guarda existente preservada | Cardápio próprio com receita; Não comi/Comi; evento único 100 kcal/10g; cardápio de outra pessoa com trackProgress:false; editar/cancelar/próxima cozinha/recarregar. Passou | Lancheira real do Henrique não alterada; testado cenário isolado equivalente, não dados reais |
+| 10. Receitas — cadastro/consulta | Fluxos preservados | Busca sem resultado; filtro; criar porções/ingredientes/etapas/nutrição; obrigatório; editar/cancelar/salvar/recarregar/favorito; consulta. Passou | Campos nutricionais não receberam nova regra de cálculo |
+| Receitas — compras | Seleção individual preservada | Modal filho cancelar/reabrir; desmarcar arroz; adicionar só banana. Passou | Quantidade textual ficou no nome do ingrediente, comportamento existente; não reivindicada como quantidade estruturada |
+| 11. Compras — item/compra | Integração estoque preservada | Obrigatório; criar 2kg; filtrar; editar 3/cancelar preserva 2; salvar 3; marcar comprado/cancelar; confirmar 3kg/12,50; encerrar compra. Passou | Modal estreito específico de novo item não medido nesta etapa |
+| Estoque — ajuste/base | Sem nova arquitetura | Estoque 3kg; ajuste cancelar mantém 3/salvar 2; base gera pendência 1kg; repetir não duplica; recarregar. Passou | Exclusão não testada |
+| 12. Financeiro — renda/fontes | Editor e privacidade negativa corrigidos | Fonte 1000→1100 com cancelamento; renda 500 independente das fontes; recarregar; mascarar negativos/mostrar; restaurar backup retorna renda 600→500. Passou | Transações bancárias externas não existem nesse teste |
+| Financeiro — contas | Estatísticas existentes mantidas | Conta 65; lembrete desligado por clique/Space; pagamento com desconto 2 =63/Pix/fonte; desfazer restaura pendente, saldo1100 e remove despesa/pontualidade. Passou | Entrega externa de lembrete pendente |
+| Financeiro — orçamento/desejo/meta/coberto | Leitura Progresso corrigida | Orçamento 50→55; desejo100/Alta; meta100/aporte25; coberto30/benefício; editar/cancelar/salvar/recarregar; fluxo Pix expande. Passou | Desejo→Criar meta não exercitado; Leitura confirmada na candidata: aporte25/meta100 → alcance25% e dimensão Financeiro25%; pontualidade permanece sem dado após desfazer pagamento |
+| 13. Criação & Ideias | Busca min-width corrigida | Ideia/texto longo/obrigatório; busca vazia; filtro; editar/cancelar; converter projeto60/blocos10/20; materiais→Compras; prioridade/prazo; recarregar; progresso17%. 320px sem rolagem horizontal, campo16px. Passou | Tipo Plano e conclusão integral do projeto pendentes |
+| 14. Meu Progresso | Funções financeiras em IIFEs inacessíveis corrigidas por leitores | Semanal14 eventos vs15 histórico total (um estudo fora da semana); mensal/anual respondem; projeto1/exercícios2 únicos; dimensões configuradas100%. Passou nos cenários descritos | Meta financeira25% confirmada na candidata; dimensões sem referência permanecem sem dados; não são falhas presumidas |
+| 15. Satélites — Adulto/Helper/Kids | Leitor Owner, IDs e escala corrigidos | Quatro registros somente QA; Adulto editar nome/avatar mantém ID; Helper e dois Kids; seis opções/identificadores/imagens; permissões click/Space/checked/aria/visual; papel Adulto→Kids; cancelar; recarregar. Passou | Sem contatos fictícios na rede real |
+| 16. Delegação/conclusão compartilhada | Manutenção e responsável no perfil; dupla pontuação protegida | Múltiplos/“todos”; responsável protegido; conclusão aguardando Owner; notificações locais7; validação Kids antes/depois; histórico15 pares únicos(itemId,endedAt); mensal duas rodadas distintas. Passou | Push/Watch e entrega externa não testados |
+| 17. Convites | Componente de permissão verificado | Vazio/obrigatório; cards ocultam input nativo; Space sincroniza; cancelar; encontro localQA com um destinatário; recarregar. Passou | Interface não expõe editar/RSVP/resposta; entrega externa não validada |
+| 18. Owner | Artes e critérios preservados | 12 cores carregadas; Sálvia persistida; critério semanal personalizado; sala6 troféus/12 paletas/preview. Passou | Premiações automáticas após7/30dias reais pendentes |
+| Helper — reconhecimento | Artes RC352 e mensagens mantidas | Mensagem personalizada e Brisa salvas; reconhecimento localQA e variações existentes carregadas; recarregar. Passou | Entrega externa e histórico por destinatário não plenamente exercitados |
+| Kids — progressão/pets | Contador cápsula sincronizado | Seis universos e espécies/IDs; biblioteca/imagens carregadas; menino11 pontos conclui Gato e passa Coelho; menina0→3→8→13 independente; aos8 pontos contador2/5 igual resumo; Misto por acessório persistido. Passou | Virada real de30dias e todos os estágios futuros não testados; nenhum ranking/recompensa material introduzido |
+| 19. Mais/ferramentas | Isolamento mantido | Links dos módulos; exportar60 conjuntos; alterar rendaQA; restaurar backup; exportar novamente: dados exatamente iguais nos60 conjuntos. Passou | Limpar homologação não acionado; restauração realHML não feita |
+| 20. Navegação/modais/versão | Marcadores e cache bust restritos | Todos20 módulos acessados com fluxos acima; voltar/menu/reabrir/recarregar; X/Cancelar; desktop/390/320; IDs duplicados nenhum na candidata; console sem erro de aplicação nos trechos inspecionados. Passou | Safari/iPhone, teclado virtual e áreas seguras físicas não disponíveis; pós-publicação acompanhar PR |
 
-## Preservação e próximas etapas
+## Evidências de preservação e limites
 
-Artes RC349/RC351/RC352/RC353, identificadores e associações preservados. Sem mudanças em credenciais, autenticação, permissões de acesso, push real, integrações externas ou isolamento HML/produção. Sem exclusão de arquivos ou histórico.
-
-Faltam nesta rodada: Trabalho, Estudos, Casa, Exercícios/Progresso, Financeiro, Ideias, Satélites/Convites/Delegação/Premiações e regressão após deploy. Restauração de backup será testada somente na auditoria isolada. Nenhum módulo será marcado concluído apenas porque abriu.
+- Exportações da homologação antes/depois dos testes isolados: **os cinco conjuntos existentes exatamente iguais**, sem registros QA na HML.
+- Exportação e restauração isoladas: **60 conjuntos exatamente iguais**, nenhuma chave alterada entre checkpoint e restauração.
+- Histórico QA: **15 eventos, 15 pares únicos**, dois registros de exercício e um de projeto; pontos individuais menino11/menina13.
+- Assets grandes comparados ao original: alteração de contador é apenas código/texto (573 caracteres); conteúdo de imagens preservado. Avatares recebem apenas marcador de versão.
+- Chrome real em desktop e viewport320/390. Não foi testado Safari/iPhone físico. Não se declara funcionamento de teclado virtual, Watch/push, passagem real de dias/meses ou fluxos não exercitados.
+- Incompletude inicial de imagens lazy não foi tratada como recurso quebrado; após carga os conjuntos inspecionados não tinham imagens com falha.
+- Checklist de instruções de ritual não persiste ao reabrir; confirmar expectativa do produto antes de alterar sua semântica. Não é apresentado como persistência validada.
+- Limitações e pendências da tabela são reais. Não se declara validação integral de todas as combinações de fluxo.
