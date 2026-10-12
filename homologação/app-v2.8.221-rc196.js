@@ -3950,7 +3950,9 @@ document.querySelector("#backBtn").onclick = () => {
 })();
 
 
-render();
+// RC356: initialize the complete core and later satellite runtime before first paint.
+if(document.readyState==='loading') document.addEventListener('DOMContentLoaded',()=>render(),{once:true});
+else requestAnimationFrame(()=>render());
 
 window.renderShoppingUniversal=renderShoppingUniversal;window.renderProgressOverview=renderProgressOverview;
 
