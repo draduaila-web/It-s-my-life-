@@ -151,4 +151,15 @@ As linhas abaixo complementam a matriz dos 20 módulos e prevalecem sobre as pen
 - Artes RC349, RC351, RC352 e seis avatares RC353 preservados. No arquivo de avatares, somente os marcadores RC359 mudaram. Nenhuma geração de imagens, exclusão em massa, mudança de credenciais, autenticação, permissões reais ou integração externa.
 - Integrações existentes têm a evidência persistente da revisão RC357 e a regressão pontual acima. Não se afirma validação absoluta, teste em Safari/iPhone/Watch nem envio real de notificações na homologação, que permanece neutralizado pelo isolamento já existente.
 
-**Publicação funcional e testes essenciais na versão publicada: pendentes nesta entrada; serão registrados após o deploy.**
+**Publicação funcional concluída:** RC359, PR **35**, commit **c42d837ba6f908830b49dfc23743d7f3cb268f9d**. Deploy **1334 / 38294421196**, **Success**, duração **1m48s**. Link aberto e verificado: https://draduaila-web.github.io/It-s-my-life-/homologa%C3%A7%C3%A3o/?v=359#satelites
+
+### Verificação pós-publicação RC359
+
+- Index, título, badge HML e marcador INDEX confirmados como RC359. Arquivos carregados: core v359-improvements, time v359-checklists, satélites v359-queue e marcador de avatares RC359. Marcadores novamente conferidos após navegar entre Satélites, Casa, Rituais, Convites e Meu Dia.
+- Fila vazia real exibida corretamente. Novo satélite aberto sem salvar: inputs nativos das permissões ocultos; checked/aria sincronizados por teclado; Adulto→Kids; gamificação e exigência de validação; marcação única; campos de 16 px; seis imagens RC353 carregadas.
+- Casa: Editar Aspirador abre o editor correto, valores e fontes conferidos, cancelado sem gravação. Rituais: Capilar abre checklist 0/6 com controles de 20 px na HML real, sem marcações gravadas. Convites: estado vazio, novo convite sem destinatários e cancelamento, sem criar convites reais.
+- Auditoria externa publicada carregando os mesmos módulos: checklist de retomada mantém 1/2; respostas Owner mantêm Não vai/Vai nos destinatários corretos.
+- Backups comparados após os testes publicados: **HML 5/5 conjuntos exatamente iguais ao backup anterior**; **QA 65/65 conjuntos exatamente iguais ao fim dos testes isolados**. Nenhum erro do aplicativo nos registros de console capturados (mensagens da extensão do navegador foram separadas).
+- Persistem os limites de dispositivo real e integrações externas já registrados. A revisão e os testes não garantem ausência absoluta de falhas.
+
+Esta atualização documental altera somente a matriz; seu deploy também deve ser confirmado antes da entrega final.
