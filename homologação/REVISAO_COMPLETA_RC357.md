@@ -104,3 +104,22 @@ RC357 publicada e verificada após PR24, PR25 e PR26. Último deploy funcional: 
 Última exportação HML depois dos três deploys funcionais: **cinco conjuntos exatamente iguais ao backup inicial**, nenhuma chave nova, alterada ou removida. Nenhum cadastro fictício criado na HML, nenhum arquivo removido ou arte regenerada, nenhuma integração externa alterada.
 
 O PR documental que inclui este encerramento altera somente esta matriz; seu deploy também deve ser conferido.
+
+## Correção complementar RC358 — check único
+
+A usuária identificou a marca sobreposta nos prints de iPhone após a revisão RC357. Essa falha visual passou pela inspeção anterior; não se confunde com os testes funcionais que haviam passado.
+
+- Causa confirmada no CSSOM publicado: regra rc125 mantém content:"✓" com !important; regra rc192 cria o check por bordas e tenta content vazio sem !important. O mesmo pseudoelemento renderizava glifo e bordas.
+- Correção: uma propriedade da regra existente rc192 em rc196-sat-owner-helper.js, content vazio com prioridade adequada. Nenhum handler, input, checked/aria, salvamento, permissão, integração ou imagem alterado.
+- Publicação RC358: PR28, merge **72c7a070bcc0f1035063502f70cfc2a266859244**; GitHub Pages **run1327/38281673563 Success**, build e deploy confirmados.
+- URL aberta e verificada: https://draduaila-web.github.io/It-s-my-life-/homologa%C3%A7%C3%A3o/?v=358#satelites.
+- Pós-deploy: content do check selecionado é vazio, ::before:none, apenas as duas bordas2px desenham a marca; desmarcado content:none. Input nativo continua display:none. Screenshot da versão publicada confirma marca única.
+- Cinco cards Adulto: clique alterna; Space restaura; checked, aria-checked e classe visual sincronizados em cada card. Quatro cards gamificação Kids repetiram o teste; troca Adulto→Kids manteve validação Owner. Cancelado sem salvar.
+- Desktop,320px e390px: modal sem overflow, nome/tipo16px, nove inputs nativos ocultos.
+- Convites isolados: seleção de destinatário por clique/Space, estado nativo/aria e marca única; cancelar, nenhum convite enviado.
+- Backups antes/depois: **HML5/5 conjuntos exatamente iguais**, **QA62/62 conjuntos exatamente iguais**, nenhuma chave criada, removida ou alterada.
+- Integrações preservadas: diff não contém lógica funcional; reabertos registros de exercícios10/12min, Progresso com projetos2, metas13% e17 conclusões semanais (18 totais; uma fora da semana), e painel Owner com conclusões compartilhadas existentes. Os testes persistentes de integração da matriz RC357 continuam sendo a evidência dos fluxos de Exercícios→Progresso, Receitas→Compras→estoque, delegação/validação/pontos Kids e metas financeiras. Não se afirma teste integral dessas integrações em iPhone físico.
+- Rollback desta correção: **backup/bertha-pre-checkbox-rc358-380117f**, hash **380117ff8418d112cfa1ffb93e56b6e7fb057f55**. Branch **work/bertha-checkbox-rc358**.
+- Mantidas as limitações de Safari/iPhone, teclado virtual, Push/Watch e passagem real de ciclos. Sem exclusões em massa, alterações indevidas de dados, credenciais, integrações externas ou artes.
+
+O PR documental desta seção altera apenas a matriz; a conclusão exige verificar seu deploy também.
