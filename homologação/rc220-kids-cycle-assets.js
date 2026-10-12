@@ -201,6 +201,13 @@
       }
     }
 
+    const capsule=shell.querySelector('.rc260-capsule');
+    if(capsule){const b=capsule.querySelector('b'),span=capsule.querySelector('span');
+      const title=st.capsuleReached?'Super Troféu conquistado · cápsula liberada':'Prêmio do Super Troféu: cápsula';
+      const detail=st.capsuleReached?(st.complete?'5/5 acessórios · pet completo':'Cápsula aberta · '+st.unlocked+'/5 acessórios liberados'):'A cápsula é liberada junto com o Super Troféu.';
+      if(b&&b.textContent!==title)b.textContent=title;if(span&&span.textContent!==detail)span.textContent=detail;
+    }
+
     const kitCard=[...shell.querySelectorAll('.r197-card')].find(x=>(x.querySelector('.r197-kicker')?.textContent||'').includes('KIT DO PET'));
     if(kitCard){
       const p=kitCard.querySelector('.r197-head p'); if(p)p.textContent='5 acessórios exclusivos deste companheiro · cada item é liberado por uma nova meta de pontos após a cápsula.';
