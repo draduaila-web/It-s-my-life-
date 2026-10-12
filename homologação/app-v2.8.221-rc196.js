@@ -2847,7 +2847,7 @@ function openFoodPrepCompleteDialog(preselected=[]){
  const cancel=()=>{dlg.close();renderAlimentacao()};dlg.querySelectorAll('[data-close]').forEach(b=>b.onclick=cancel);dlg.addEventListener('cancel',e=>{e.preventDefault();cancel()});dlg.onclose=()=>dlg.remove();dlg.querySelector('#foodPrepRecipeSearch').oninput=draw;dlg.querySelector('#foodPrepCompleteForm').onsubmit=e=>{e.preventDefault();recordFoodPrepProgress([...chosen]);dlg.close();renderAlimentacao()};draw();dlg.showModal();
 }
 function openFoodNextPrepDialog(){
- const d=loadFood(),dlg=document.createElement('dialog');dlg.className='study-v10-dialog food-next-prep-dialog';const base=new Date();base.setDate(base.getDate()+14);const suggested=d.nextCookingDate||base.toISOString().slice(0,10);dlg.innerHTML=`<form class="study-v10-modal" id="foodNextPrepForm"><div class="study-v10-head"><div><div class="eyebrow">ALIMENTAÇÃO · ROTINA DE PREPARO</div><h2>Programar próxima</h2><p>Defina quando pretende fazer a próxima cozinha quinzenal.</p></div><button type="button" class="study-v10-x" data-close>×</button></div><label>Data<input type="date" id="foodNextPrepDate" value="${escapeHtml(suggested)}" required></label><div class="study-v10-actions"><button type="button" class="secondary" data-close>Cancelar</button><button type="submit" class="primary">Salvar</button></div></form>`;document.body.appendChild(dlg);const close=()=>dlg.close();dlg.querySelectorAll('[data-close]').forEach(b=>b.onclick=close);dlg.onclose=()=>dlg.remove();dlg.querySelector('#foodNextPrepForm').onsubmit=e=>{e.preventDefault();d.nextCookingDate=dlg.querySelector('#foodNextPrepDate').value;saveFood(d);close();renderAlimentacao()};dlg.showModal();
+ const d=loadFood(),dlg=document.createElement('dialog');dlg.className='study-v10-dialog food-next-prep-dialog';const base=new Date();base.setDate(base.getDate()+14);const suggested=d.nextCookingDate||todayISO(base);dlg.innerHTML=`<form class="study-v10-modal" id="foodNextPrepForm"><div class="study-v10-head"><div><div class="eyebrow">ALIMENTAÇÃO · ROTINA DE PREPARO</div><h2>Programar próxima</h2><p>Defina quando pretende fazer a próxima cozinha quinzenal.</p></div><button type="button" class="study-v10-x" data-close>×</button></div><label>Data<input type="date" id="foodNextPrepDate" value="${escapeHtml(suggested)}" required></label><div class="study-v10-actions"><button type="button" class="secondary" data-close>Cancelar</button><button type="submit" class="primary">Salvar</button></div></form>`;document.body.appendChild(dlg);const close=()=>dlg.close();dlg.querySelectorAll('[data-close]').forEach(b=>b.onclick=close);dlg.onclose=()=>dlg.remove();dlg.querySelector('#foodNextPrepForm').onsubmit=e=>{e.preventDefault();d.nextCookingDate=dlg.querySelector('#foodNextPrepDate').value;saveFood(d);close();renderAlimentacao()};dlg.showModal();
 }
 
 function ensureFoodPolishStylesRC87(){
@@ -3950,7 +3950,9 @@ document.querySelector("#backBtn").onclick = () => {
 })();
 
 
-render();
+// RC356: initialize the complete core and later satellite runtime before first paint.
+if(document.readyState==='loading') document.addEventListener('DOMContentLoaded',()=>render(),{once:true});
+else requestAnimationFrame(()=>render());
 
 window.renderShoppingUniversal=renderShoppingUniversal;window.renderProgressOverview=renderProgressOverview;
 
