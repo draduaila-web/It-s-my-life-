@@ -50,6 +50,10 @@ eq(api.completedTrainingCycles({...training,sessions:training.sessions.slice(0,1
 eq(api.completedTrainingCycles({...training,sessions:[training.sessions[0],training.sessions[0]]},proofs).length,0);
 eq(api.completedTrainingCycles(training,[proofs[0],proofs[0]]).length,0);
 eq(api.completedTrainingCycles(training,proofs.map(x=>({...x,itemId:'cycle:ab'}))).length,0);
+eq(api.completedTrainingCycles({...training,sessions:training.sessions.map(s=>({...s,progressItemId:'cycle:b'}))},proofs.map(x=>({...x,itemId:'cycle:b'}))).length,0);
+eq(api.completedTrainingCycles({...training,plans:[{id:'p',cycleId:'a'}],sessions:training.sessions.map(s=>({...s,planId:'p',progressItemId:'exercise:p'}))},proofs.map(x=>({...x,itemId:'exercise:p'}))).length,1);
+eq(api.completedTrainingCycles({...training,sessions:training.sessions.map(s=>({...s,planId:'p',progressItemId:'exercise:p'}))},proofs.map(x=>({...x,itemId:'exercise:p'}))).length,0);
+eq(api.completedTrainingCycles({...training,weeklyPlan:{cycles:[{cycleId:'a',times:1}]},sessions:[{...training.sessions[0],date:'2026-02-31'}]},[h('invalid','2026-02-31',{itemId:'cycle:a'})]).length,0);
 eq(api.completedTrainingCycles({...training,cycles:[{id:'a',active:false}]},proofs).length,0);
 eq(api.completedTrainingCycles({...training,weeklyPlan:{cycles:[]}},proofs).length,0);
 eq(api.completedTrainingCycles({...training,weeklyPlan:{cycles:[{cycleId:'a',times:0}]}},proofs).length,0);
