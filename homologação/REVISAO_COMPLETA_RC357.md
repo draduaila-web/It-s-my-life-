@@ -40,7 +40,7 @@ Revisão executada em 12/10/2026. Escopo: beta em **homologação**, com acentos
 | 4. Rituais — personalizados | Título principal e acessibilidade corrigidos | Criar 20 min, intervalo 2 dias, etapas/produtos; editar/cancelar/salvar/recarregar; evento extra 7 min; renomear pai mantém extra e atualiza principal; ícone Lua aria-pressed. Passou | Checkboxes das instruções são temporários e resetam ao reabrir; persistência desse checklist não validada |
 | Rituais — produtos | Deduplicação existente preservada | Duas linhas repetidas enviadas a Compras produzem um item. Passou | Não foi ampliado parser de quantidade |
 | Ritual Capilar | Cabeçalho/cronograma real | 33 dias efetivos, configuração Tarde cancelar/salvar/recarregar; cronograma-base e duração preservados. Passou | Ciclo completo com passagem dos dias não testado |
-| Autocuidado | Cabeçalho sem descrição duplicada | 14 dias; editar/cancelar/salvar/recarregar; Revisar e repetir cria ciclo 2; Repetir igual cria ciclo 3. Passou | Encerrar foi confirmado, mas efeito temporal futuro não considerado validado |
+| Autocuidado | Cabeçalho sem descrição duplicada | 14 dias; editar/cancelar/salvar/recarregar; Revisar e repetir cria ciclo 2; Repetir igual cria ciclo 3. Passou | Encerrar confirmado e backup/recarrega preserva ciclo3/status ended/endedAt; efeito de passagem futura dos dias não testado |
 | 5. Trabalho — frente/tarefa/nota | Sem troca de arquitetura | Criar frente/áreas; editar/cancelar/salvar; nota longa; tarefa 20; começar/concluir 1; repetir preserva histórico; transformar nota em tarefa preserva nota; recarregar. Passou | Sem busca disponível na interface dessa frente; exclusões não testadas |
 | 6. Estudos — conteúdo/sessão/mapa | Sem mudança de lógica | Criar/editar/cancelar/recarregar; sessão ativa recarregada e concluída 1; registro passado 15; mapa 261; busca vazia/positiva; filtros/revisão/domínio. Passou | Progressão por passagem real de dias pendente |
 | 7. Casa — rotina/jardim | Min/step e delegação | Criar duração válida 6; cancelar edição; salvar 10; dois destinatários/“todos”; aceitar/concluir; histórico 10; recarregar. Passou | Exclusão de registros reais não exercitada |
@@ -70,7 +70,7 @@ Revisão executada em 12/10/2026. Escopo: beta em **homologação**, com acentos
 
 - Exportações da homologação antes/depois dos testes isolados: **os cinco conjuntos existentes exatamente iguais**, sem registros QA na HML.
 - Exportação e restauração isoladas: **60 conjuntos exatamente iguais**, nenhuma chave alterada entre checkpoint e restauração.
-- Histórico QA: **15 eventos, 15 pares únicos**, dois registros de exercício e um de projeto; pontos individuais menino11/menina13.
+- Histórico QA: **16 eventos, 16 pares únicos**, dois registros de exercício e dois de projeto; pontos individuais menino11/menina13.
 - Assets grandes comparados ao original: alteração de contador é apenas código/texto (573 caracteres); conteúdo de imagens preservado. Avatares recebem apenas marcador de versão.
 - Chrome real em desktop e viewport320/390. Não foi testado Safari/iPhone físico. Não se declara funcionamento de teclado virtual, Watch/push, passagem real de dias/meses ou fluxos não exercitados.
 - Incompletude inicial de imagens lazy não foi tratada como recurso quebrado; após carga os conjuntos inspecionados não tinham imagens com falha.
@@ -94,3 +94,5 @@ Revisão executada em 12/10/2026. Escopo: beta em **homologação**, com acentos
 - Projeto curto: criar10min; Meu Dia oferece bloco; começar/recarregar mantém sessão; concluir10; encerrar; recarregar projeto100%, faltam0min. Card ainda mostrava próximo passo/sugestão apesar do estado concluído: corrigido apenas texto do card, sem alterar motor, dados ou arquitetura. Verificação do novo card após deploy registrada no PR de acompanhamento.
 - Compromisso hoje13:41/30min: conflito com Trabalho oficial exibido; priorização confirmou faixa13:41–14:11 e sugestões deslocadas após14:11. Início manual de ritual45min permanece possível; não se reivindica bloqueio de execução manual.
 - Nenhuma operação desses cenários finais foi feita no prefixo HML.
+
+- Backup final QA:16 eventos/16 pares únicos, exercícios2, projetos2; cicloAutocuidado número3/status ended/endedAt confirma persistência de Encerrar. A atividade Capilar usada no teste de compromisso ainda estava ativa nesse checkpoint; seu comportamento no horário protegido será registrado após a observação.
