@@ -2,7 +2,7 @@
 
 **Estado: revisão parcial. Os 20 módulos foram inspecionados, mas nenhum foi declarado integralmente homologado.**
 
-As correções dirigidas foram publicadas nas RC354/RC355; a RC356 corrige inicialização e a sugestão local da cozinha quinzenal. Validação pós-deploy RC356 pendente nesta edição.
+As correções dirigidas foram publicadas nas RC354/RC355/RC356. A RC356 passou nos testes pós-deploy descritos abaixo. A revisão integral continua parcial, com impedimentos e fluxos não validados explicitados.
 
 ## Base, caminho e rollback
 
@@ -10,6 +10,7 @@ As correções dirigidas foram publicadas nas RC354/RC355; a RC356 corrige inici
 - Base anterior à revisão: 1d7e0d853b4a6d81c89228b19940407c7ef2f533. Rollback: backup/bertha-pre-review-1d7e0d8.
 - RC354: PR #10, c030e712ee22ce41fe62ee5870e216eeb0638400, deploy 38191058472 Success.
 - RC355: PR #11, 66f997d4db9db89702f0158150cdb5bf0758af5b, deploy 38191764986 Success.
+- RC356: PR #12, 1c81df8c4573ef6ce84f21a8ecee287d1afe60e7, deploy 38195157286 Success.
 - Branch RC356: work/bertha-beta-review-rc356, baseada em 66f997d4db9db89702f0158150cdb5bf0758af5b. Rollback adicional: backup/bertha-pre-rc356-66f997d.
 - Backup intermediário também preservado: backup/bertha-pre-rc355-c030e71.
 - Browser efetivo: Chrome desktop 1363×936. Safari/iPhone/teclado virtual/viewport estreito não testados.
@@ -76,16 +77,16 @@ As correções dirigidas foram publicadas nas RC354/RC355; a RC356 corrige inici
 | Financeiro | Nova conta prevista / cancelar | Vencimento, lembretes e campos 16px inspecionados | Parcial; salvar/pagar/repetir/privacidade/metas pendentes |
 | Criação & Ideias | Nova entrada / trocar Projeto / cancelar | Campos 16px; sem autofocus/IDs duplicados/overflow | Parcial; salvar/editar/material para compras pendentes |
 | Meu Progresso | Referências e resumos de finanças/compras | Visão sem referências e resumos vazios | Parcial; agregações e integrações pendentes |
-| Satélites / permissões | Cards Adulto e Kids, teclado e sincronização | RC355: nove opções passaram por clique/Space; Enter/Tab/foco e input oculto confirmados | Passou nos testes direcionados desktop; cadastrar/editar não testados |
+| Satélites / permissões | Cards Adulto e Kids, teclado e sincronização | RC355 e RC356: nove opções passaram por clique/Space; Enter/Tab/foco e input oculto confirmados | Passou nos testes direcionados desktop; cadastrar/editar não testados |
 | Satélites / cadastro | Obrigatório Nome / cancelar / reabrir | Salvar vazio bloqueado; rede continua zero; defaults retornam ao reabrir | Direcionado passou; nenhum cadastro salvo |
 | Delegação | Múltiplos / todos / conclusão / validação Owner | Sem destinatários; APIs de eventos do Owner precisam de origem verificada | Bloqueado, sem pessoas fictícias |
 | Convites | Novo / obrigatório / cancelar | Enviar desabilitado sem pessoas; campos 16px | Parcial; cards dos destinatários apenas cobertos por seletor #inviteForm na fonte |
-| Owner | Sala de Troféus / coleção | RC353 após reload: sala abre, 12 imagens RC351 carregadas | Parcial; critérios, histórico, repetição e cores não testados |
-| Helper | Personalizar reconhecimentos | RC353 após reload: 9 imagens, 18 opções Rosé/Brisa, campos 16px | Parcial; alteração de cor pode salvar automaticamente e não foi acionada; envio pendente |
+| Owner | Sala de Troféus / coleção | RC356 após abertura inicial por Satélites: sala abriu, 12 imagens RC351 carregadas | Parcial; critérios, histórico, repetição e cores não testados |
+| Helper | Personalizar reconhecimentos | RC356: 9 imagens RC352 carregadas; opções Rosé/Brisa e campos 16px conferidos | Parcial; alteração de cor pode salvar automaticamente e não foi acionada; envio pendente |
 | Kids | Ciclo / progressão / cápsulas / acessórios | UI sem Kids cadastrados | Bloqueado; nenhuma espécie/asset/identificador alterado |
 | Mais | Abrir / fechar / exportar backup | JSON baixado e validado | Exportação passou; restauração/limpeza não testadas |
-| Bootstrap | Abrir por Satélites → Premiações | RC355: loadSatelliteOwnerEvents ausente aborta render() no meio do core; R147_RECOG_TARGET fica não inicializado | RC356 adia render inicial; regressão publicada pendente |
-| Versão / navegação | Title / HML / INDEX / arquivos carregados | RC354 e RC355 conferidos; RC356 na branch | Pós-deploy e navegação RC356 pendentes |
+| Bootstrap | Abrir por Satélites → Premiações | RC355: loadSatelliteOwnerEvents ausente aborta render() no meio do core; R147_RECOG_TARGET fica não inicializado | RC356: abertura fria em Satélites → Premiações exibiu conteúdo correto, sem TDZ; chamada antecipada de bertha-time ao leitor ausente ainda registrada como bloqueio |
+| Versão / navegação | Title / HML / INDEX / arquivos carregados | RC356: title/HML/INDEX, core ?v=356-init, CSS Sat ?v=355-permissions e avatar ?v=356-version conferidos | Passou após navegação e recarga em Trabalho; cache no aparelho pendente |
 
 ## Impedimentos reais e achados que não foram escondidos
 
@@ -101,3 +102,15 @@ As correções dirigidas foram publicadas nas RC354/RC355; a RC356 corrige inici
 ## Dados e escopo preservados
 
 Nenhuma exclusão de arquivo ou de histórico Git; matrizes anteriores mantidas. Sem limpeza de localStorage, caches de dados, bancos ou cadastros; sem importação de backup ou migração HML → produção. Sem alterações de credenciais, autenticação, permissões de pessoas, notificações ou integrações externas. Nenhuma arte regenerada. Identificadores, normalização e arquivos Kids/Owner/Helper/avatares mantidos. Não foram salvos cadastros ou conteúdos de teste. Exportação de backup foi testada; restauração e limpeza não foram acionadas. Preservação dos dados pessoais no iPhone não foi verificada por acesso ao aparelho.
+
+## Validação pós-deploy RC356 — 12/10/2026 UTC (11/10 no browser)
+
+- Deploy 38195157286: Success, commit 1c81df8c4573ef6ce84f21a8ecee287d1afe60e7. Caminho publicado homologação, com acentos, ?v=356.
+- Abertura fria #satelites → Mais → Premiações mostrou conteúdo Premiações; Sala de Troféus abriu/fechou e 12 imagens RC351 carregaram. Reconhecimentos abriu e as nove imagens RC352 carregaram; nenhum envio ou ajuste de cor salvo. Não houve novo erro R147_RECOG_TARGET nos testes registrados.
+- Persistiu um ReferenceError loadSatelliteOwnerEvents em chamada antecipada de bertha-time-v2.8.221-rc131.js (rerender). O core agora termina de inicializar, mas essa falha de eventos não foi resolvida nem escondida. Recuperar a origem do leitor/chave permanece bloqueio real.
+- Nove opções Satélites: clique e Space alternaram/restauraram checked, aria-checked e is-checked. Enter alternou/restaurou Compras; Tab de Casa foi para Compras; foco sólido 2px. Inputs nativos display:none. Na RC356 controle visual 21px e texto 539px no desktop observado, sem overflow horizontal.
+- Casa desmarcada permaneceu desmarcada ao mudar Adulto → Kids; validação Owner tornou-se true conforme regra existente. Salvar com Nome vazio bloqueou por required; cancelar/reabrir restaurou Adulto, Casa true e validação false; rede permaneceu zero. Os quatro avatares Adulto e os dois Kids carregaram.
+- Próxima cozinha sugeriu 2026-10-25 (local 11/10 +14 dias); Novo compromisso sugeriu 2026-10-11. Ambos cancelados. Cardápio Outra pessoa ocultou Progresso e mostrou Pessoa; Meu cardápio reverteu. Cancelado sem salvar.
+- Trabalho e CREFITO mostraram título Trabalho. Após recarga, title e INDEX continuaram RC356. Arquivos carregados conferidos no DOM.
+- Backup exportado novamente: conteúdo data idêntico ao backup anterior desta sessão, cinco conjuntos antes/depois. Comparação restrita a esta sessão Chrome; não certifica dados do aparelho pessoal. Nenhuma restauração acionada.
+- Screenshot real do modal Novo satélite capturado após testes; não é imagem gerada.
