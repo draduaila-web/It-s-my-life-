@@ -4279,6 +4279,14 @@
     if(route==='financeiro' && typeof originalRender==='function'){ originalRender(); nav(); return; }
     if(typeof originalRender==='function') originalRender(); nav();
   }
+
+  window.BerthaTimeEngine.ownerCyclePlans=()=>{
+    const result=[],current=selfcareCurrentCycleStartIndex();
+    [['capilar',0,capillaryCycleTotal()],['autocuidado',current,14],...(current>=14?[['autocuidado',current-14,14]]:[])].forEach(([id,start,total])=>{
+      const required=[];for(let i=start;i<start+total;i++){const e=id==='capilar'?capillaryEventForIndex(i):selfcareEventForIndex(i);if(!e||e.optional)continue;const date=iso(e.date);required.push({day:date,itemId:id==='capilar'?'ritual:capilar:'+date+':'+e.type+':'+i:'ritual:autocuidado:'+date+':'+i});}
+      if(required.length)result.push({key:id+':'+required[0].day+':'+required[required.length-1].day,label:id==='capilar'?'Ciclo Capilar':'Ciclo de Autocuidado',required});
+    });return result;
+  };
   window.__BERTHA_FINAL_RITUAL_ROUTER__ = true;
   window.render = rerender;
   window.renderMeuDia = renderHome;
