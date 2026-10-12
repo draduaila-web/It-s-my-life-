@@ -303,7 +303,7 @@
     if(!x.date||x.date>date)return false;
     if(x.repeatUntil&&date>x.repeatUntil)return false;
     const start=new Date(x.date+'T12:00:00'),d=new Date(date+'T12:00:00');
-    const days=Math.floor((d-start)/86400000);
+    const days=calendarDayDistance(start,d);
     if(days<0)return false;
     if(x.repeat==='daily')return true;
     if(x.repeat==='weekly')return days%7===0;
@@ -1614,7 +1614,7 @@
       return `<section class="bertha-ideal-zone ${key}">
         <div class="bertha-ideal-zone-head"><div class="bertha-ideal-zone-icon">${idealZoneIcon(key)}</div><div><span>${title.toUpperCase()}</span><small>${sub}</small></div></div>
         <div class="bertha-ideal-zone-items">
-          ${arr.length?arr.map(x=>`<div class="bertha-ideal-map-card"><div class="bertha-ideal-map-copy"><strong>${esc(x.title||x.name||'Preferência')}</strong><small>${esc(idealMeta(x))}</small></div><button type="button" class="bertha-ideal-remove" data-remove-ideal-map="${x.id}" aria-label="Remover">×</button></div>`).join(''):`<div class="bertha-ideal-zone-empty">${key==='free'?'Você também pode proteger espaço sem colocar nada nele.':'Nenhuma preferência aqui ainda.'}</div>`}
+          ${arr.length?arr.map(x=>`<div class="bertha-ideal-map-card"><div class="bertha-ideal-map-copy"><strong>${esc(x.title||x.name||'Preferência')}</strong><small>${esc(idealMeta(x))}</small></div><div class="bertha-ideal-map-actions"><button type="button" class="secondary bertha-ideal-edit" data-edit-ideal-map="${esc(x.id)}" aria-label="Editar ${esc(x.title||x.name||'preferência')}">Editar</button><button type="button" class="bertha-ideal-remove" data-remove-ideal-map="${esc(x.id)}" aria-label="Remover">×</button></div></div>`).join(''):`<div class="bertha-ideal-zone-empty">${key==='free'?'Você também pode proteger espaço sem colocar nada nele.':'Nenhuma preferência aqui ainda.'}</div>`}
         </div>
         <button type="button" class="bertha-ideal-add-zone" data-add-ideal-zone="${key}">+ Adicionar aqui</button>
       </section>`;
@@ -1672,12 +1672,14 @@
   }
   function bindProgressGoals(){document.querySelectorAll('[data-progress-goal]').forEach(b=>b.onclick=()=>openProgressGoalDialog(b.dataset.progressGoal));}
   function renderIdeal(){ const items=read(IDEAL_KEY,[]); return `<section class="hero bertha-ideal-hero"><div class="bertha-ideal-hero-copy"><div class="eyebrow">MEU DIA IDEAL</div><h2>A life predictable enough to live freely.</h2><p>Você idealiza. A BERTH.A concretiza com você.</p></div><div class="bertha-ideal-hero-mark" aria-hidden="true"><svg viewBox="0 0 64 64"><path d="M15 40c5-7 10-11 17-11 6 0 11 3 17 10"/><path d="M21 30c3-3 7-5 11-5 5 0 9 2 12 5"/><path d="M32 18v7"/><path d="M26.5 22.5l3 2.5"/><path d="M37.5 22.5l-3 2.5"/></svg></div></section><button class="primary add-full bertha-ideal-add-main" data-add-ideal>＋ Adicionar ao meu dia ideal</button><div class="list bertha-ideal-list">${items.map(x=>`<article class="card"><div><strong>${esc(x.title)}</strong><span>${({morning:'Manhã',afternoon:'Tarde',night:'Noite',flex:'Quando houver espaço'})[x.period]||'Flexível'} · ${durationText(+x.minutes||30)}${x.notify?' · <svg class="bertha-inline-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9M10 21h4" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>':''}</span></div><button class="more" data-del-ideal="${x.id}">×</button></article>`).join('')||'<div class="bertha-empty">Ainda não há preferências. Comece com algo que você gostaria de viver com mais frequência.</div>'}</div>${renderProgressGoals()}`; }
-  function addIdealDialog(){
+  function addIdealDialog(id=''){
+    const existing=typeof id==='string'&&id?read(IDEAL_KEY,[]).find(x=>String(x.id)===String(id)):null;
+    if(id&&typeof id==='string'&&!existing)return;
     const requested=window.__berthaIdealRequestedZone||'';
     const zoneToPeriod={morning:'morning',afternoon:'afternoon',evening:'night',flex:'flex',free:'flex'};
-    const initialPeriod=zoneToPeriod[requested]||'morning';
+    const initialPeriod=existing?.period||zoneToPeriod[requested]||'morning';
 
-    const d=dialogBase('Adicionar ao Meu Dia Ideal',`
+    const d=dialogBase(existing?'Editar preferência':'Adicionar ao Meu Dia Ideal',`
       <div class="bertha-ideal-modal-form">
         <label class="bertha-field"><span>Período</span>
           <select data-period>
@@ -1737,6 +1739,20 @@
       </div>
     `);
 
+
+    if(existing){
+      const duration=idealDurationParts(existing);
+      d.querySelector('[data-title]').value=existing.title||existing.name||'';
+      d.querySelector('[data-ideal-duration-value]').value=duration.value;
+      d.querySelector('[data-ideal-duration-unit]').value=duration.unit;
+      d.querySelector('[data-ideal-until-mode]').value=existing.untilMode||'ongoing';
+      d.querySelector('[data-ideal-until-date]').value=existing.untilDate||'';
+      d.querySelector('[data-notify]').checked=!!existing.notify;
+      d.querySelector('[data-notify-value]').value=existing.notifyValue||10;
+      d.querySelector('[data-notify-unit]').value=existing.notifyUnit||'minutes';
+    }
+    const idealTitle=d.querySelector('[data-title]');idealTitle.required=true;idealTitle.addEventListener('input',()=>idealTitle.setCustomValidity(''));
+
     const mode=d.querySelector('[data-ideal-until-mode]'),dateWrap=d.querySelector('[data-ideal-until-date-wrap]');
     const syncUntil=()=>{if(dateWrap)dateWrap.hidden=mode?.value!=='date';}; mode?.addEventListener('change',syncUntil);syncUntil();
     const notify=d.querySelector('[data-notify]'),notifyWhen=d.querySelector('[data-notify-when]');
@@ -1744,11 +1760,16 @@
     d.querySelector('[data-cancel]')?.addEventListener('click',()=>{d.close();d.remove();});
 
     d.querySelector('[data-save]').onclick=()=>{
-      const title=d.querySelector('[data-title]')?.value.trim(); if(!title)return;
+      const title=idealTitle.value.trim();idealTitle.setCustomValidity(title?'':'Informe o que seria ideal para você.');if(!idealTitle.reportValidity())return;
+      const durationInput=d.querySelector('[data-ideal-duration-value]'),finalDate=d.querySelector('[data-ideal-until-date]');durationInput.required=true;if(!durationInput.reportValidity())return;finalDate.required=mode.value==='date';if(finalDate.required&&!finalDate.reportValidity())return;
+      if(notify.checked){const notifyInput=d.querySelector('[data-notify-value]');notifyInput.required=true;if(!notifyInput.reportValidity())return;}
       const durationValue=Math.max(1,+d.querySelector('[data-ideal-duration-value]')?.value||30),durationUnit=d.querySelector('[data-ideal-duration-unit]')?.value||'minutes';
       const period=d.querySelector('[data-period]')?.value||initialPeriod,untilMode=mode?.value||'ongoing',untilDate=untilMode==='date'?(d.querySelector('[data-ideal-until-date]')?.value||''):'';
       const notifyEnabled=!!notify?.checked,notifyValue=Math.max(1,+d.querySelector('[data-notify-value]')?.value||10),notifyUnit=d.querySelector('[data-notify-unit]')?.value||'minutes';
-      const arr=read(IDEAL_KEY,[]);arr.push({id:`ideal-${Date.now()}`,title,period,sourceZone:requested||(period==='night'?'evening':period),durationValue,durationUnit,minutes:idealDurationMinutes(durationValue,durationUnit),untilMode,untilDate,notify:notifyEnabled,notifyValue:notifyEnabled?notifyValue:null,notifyUnit:notifyEnabled?notifyUnit:null,active:true});
+      const arr=read(IDEAL_KEY,[]),i=existing?arr.findIndex(x=>String(x.id)===String(existing.id)):-1;if(existing&&i<0)return;
+      const sourceZone=existing&&period===existing.period?(existing.sourceZone||(period==='night'?'evening':period)):existing?(period==='night'?'evening':period):requested||(period==='night'?'evening':period);
+      const patch={title,period,sourceZone,durationValue,durationUnit,minutes:idealDurationMinutes(durationValue,durationUnit),untilMode,untilDate,notify:notifyEnabled,notifyValue:notifyEnabled?notifyValue:null,notifyUnit:notifyEnabled?notifyUnit:null};
+      if(existing)arr[i]={...arr[i],...patch};else arr.push({id:`ideal-${Date.now()}`,...patch,active:true});
       write(IDEAL_KEY,arr);window.__berthaIdealRequestedZone=null;try{d.close?.();}catch(_){}d.remove();rerender();setTimeout(enhanceIdealScreen,0);
     };
   }
@@ -2239,6 +2260,8 @@
   }
   function capillaryCycleTotal(){ return Math.floor((CAPILLARY_END-CAPILLARY_START)/86400000)+1; }
   function dayStart(d){ return new Date(d.getFullYear(),d.getMonth(),d.getDate()); }
+  function calendarDayDistance(from,to){return Math.round((Date.UTC(to.getFullYear(),to.getMonth(),to.getDate())-Date.UTC(from.getFullYear(),from.getMonth(),from.getDate()))/86400000);}
+  function ritualCycleEndedForDate(id,date){const state=currentCycleState(id);if(state.status!=='ended')return false;const ended=new Date(state.endedAt||'');return Number.isNaN(ended.getTime())||dayStart(date)>=dayStart(ended);}
   function capillaryDay(d){
     const target=iso(dayStart(d)),hits=[];for(let i=0;i<capillaryCycleTotal();i++)if(iso(ritualOccurrenceDate('capilar',i))===target)hits.push(i+1);
     if(hits.length)return hits[0];
@@ -2261,7 +2284,7 @@
     const n=i+1,saved=capillaryTemplateStore()[String(n)]||{};
     return {...base,...saved,date:ritualOccurrenceDate('capilar',i),type:base.type,cycleDay:n,_occurrence:i,tasks:Array.isArray(saved.tasks)?saved.tasks:(base.tasks||[]),products:Array.isArray(saved.products)?saved.products:undefined,includeInMyDay:saved.includeInMyDay!==false};
   }
-  function capillaryEventsOn(d){const target=iso(dayStart(d)),out=[];for(let i=0;i<capillaryCycleTotal();i++){const ev=capillaryEventForIndex(i);if(ev&&iso(ev.date)===target)out.push(ev)}return out}
+  function capillaryEventsOn(d){if(ritualCycleEndedForDate('capilar',d))return[];const target=iso(dayStart(d)),out=[];for(let i=0;i<capillaryCycleTotal();i++){const ev=capillaryEventForIndex(i);if(ev&&iso(ev.date)===target)out.push(ev)}return out}
   function capillaryEvent(d){return capillaryEventsOn(d)[0]||null}
   const SELFCARE_TEMPLATE_KEY='bertha.ritual.autocuidado.template.v1';
   function selfcareTemplateStore(){ return read(SELFCARE_TEMPLATE_KEY,{}); }
@@ -2275,12 +2298,13 @@
     return {...base,date:ritualOccurrenceDate('autocuidado',i),cycleDay:day,_occurrence:i,type:'selfcare',period:base.period||'night',subtitle:`Dia ${day} / 14`};
   }
   function selfcareEventsOn(d){
+    if(ritualCycleEndedForDate('autocuidado',d))return[];
     const target=iso(dayStart(d)),st=ritualScheduleState('autocuidado'),estimate=Math.floor((dayStart(d)-addRitualDays(SELFCARE_START,st.shift))/86400000),keys=new Set();
     for(let i=Math.max(0,estimate-3);i<=estimate+3;i++)keys.add(i);Object.keys(st.overrides).forEach(k=>keys.add(Number(k)));
     return [...keys].filter(i=>i>=0).map(selfcareEventForIndex).filter(ev=>iso(ev.date)===target).sort((a,b)=>a._occurrence-b._occurrence);
   }
   function selfcareEvent(d){return selfcareEventsOn(d)[0]||null}
-  function selfcareCurrentCycleStartIndex(){const st=ritualScheduleState('autocuidado'),n=Math.max(0,Math.floor((dayStart(new Date())-addRitualDays(SELFCARE_START,st.shift))/86400000));return Math.floor(n/14)*14}
+  function selfcareCurrentCycleStartIndex(){const st=ritualScheduleState('autocuidado'),n=Math.max(0,calendarDayDistance(addRitualDays(SELFCARE_START,st.shift),dayStart(new Date())));return Math.floor(n/14)*14}
   function ritualDefaultSettings(ritualId,type){
     if(ritualId==='capilar'){
       if(type==='color') return {period:'night',time:'',priority:'Importante',notify:false,notifyOffset:'at-time',notifyTime:''};
@@ -2348,7 +2372,7 @@
   function ritualDetailData(id,d=new Date()){
     if(read('bertha.ritual.hidden.v1',[]).includes(id)) return null;
     if(id==='capilar') return capillaryEvent(d);
-    if(id==='autocuidado') return selfcareProcedure(selfcareEvent(d));
+    if(id==='autocuidado'){const event=selfcareEvent(d);return event?selfcareProcedure(event):null;}
     return null;
   }
 
@@ -2367,6 +2391,7 @@
     return `<section class="bertha-ritual-page">
       <a class="bertha-back-link" href="#rituais" data-back-rituals>‹ Rituais</a>
       <section class="bertha-ritual-detail-hero tone-${Math.abs(String(id).length)%3}"><span class="bertha-line-icon large">${ritualIcon(r.icon)}</span><div><div class="bertha-task-kicker">${isCustom?'RITUAIS':esc(r.title).toUpperCase()}</div><h1>${id==='capilar'?'Seu cronograma, no lugar certo.':(isCustom||id==='autocuidado')?esc(r.title):esc(phrase)}</h1>${r.subtitle?`<p>${esc(r.subtitle)}</p>`:''}</div></section>
+      ${!ev&&!isCustom?`<div class="bertha-empty-soft">${currentCycleState(id).status==='ended'?'Ciclo encerrado. Seu cronograma e histórico foram preservados.':'Nenhum cuidado programado para hoje.'}</div>`:''}
       ${isCustom?`<div class="bertha-section-row"><span>COMO FAZER</span><button type="button" data-edit-custom-ritual="${id}">Editar ritual</button></div><section class="bertha-ritual-today custom-how">${customSteps.length?`${ritualChecklistHtml(id,checklistContext,customSteps)}`:`<div class="bertha-free-note">Nenhuma etapa cadastrada. Toque em Editar ritual para adicionar.</div>`}</section>`:''}
       ${ev?`<section class="bertha-ritual-today"><div class="bertha-ritual-head"><div><span>HOJE · ${dateLabelLong(new Date())}</span><h2>${esc(ev.title)}</h2><p>${esc(ev.subtitle||'')}</p><small class="bertha-cycle-position">${id==='capilar'?`Dia ${capillaryDay(new Date())} de ${capillaryCycleTotal()}`:`Dia ${ev.cycleDay} de 14`}</small></div><button type="button" ${id==='autocuidado'?'data-edit-selfcare-procedure':'data-config-ritual="'+id+'"'}>${id==='autocuidado'?'Editar cuidado':'Editar'}</button></div>
         ${ev.optional?`<div class="bertha-free-note">Hoje é um espaço livre. A BERTH.A não transforma descanso em pendência.</div>`:`<div class="bertha-ritual-time">${durationText(ev.minutes)} · ${taskLabelPeriod(ritualSetting(id,ev.type).period||ev.period)}</div>`}
@@ -2485,9 +2510,17 @@
     return all[id]||{number:1,status:'active',mode:'template',revisions:[]};
   }
   function cloneCycle(id,review=false){
-    const all=ritualCycles(), prev=currentCycleState(id);
-    all[id]={...prev,number:(prev.number||1)+1,status:'active',mode:review?'review':'same',
-      revisions:[...(prev.revisions||[]),{from:prev.number||1,at:new Date().toISOString(),review}]};
+    const all=ritualCycles(), prev=currentCycleState(id),schedule=ritualScheduleState(id),today=dayStart(new Date());
+    const first=id==='autocuidado'?selfcareCurrentCycleStartIndex():0,total=id==='capilar'?capillaryCycleTotal():14;
+    const dates=Array.from({length:total},(_,i)=>ritualOccurrenceDate(id,first+i));
+    const last=new Date(Math.max(...dates.map(d=>d.getTime()))),next=addRitualDays(last,1);
+    if(next<today)next.setTime(today.getTime());
+    const origin=ritualOccurrenceDate(id,0),delta=calendarDayDistance(origin,next),snapshot={shift:schedule.shift,overrides:{...schedule.overrides}};
+    schedule.shift+=delta;
+    Object.keys(schedule.overrides).forEach(k=>{schedule.overrides[k]=iso(addRitualDays(new Date(schedule.overrides[k]+'T00:00:00'),delta));});
+    const schedules=ritualScheduleStore();schedules[id]=schedule;saveRitualScheduleStore(schedules);
+    all[id]={...prev,number:(prev.number||1)+1,status:'active',mode:review?'review':'same',startedAt:iso(next),endedAt:null,
+      revisions:[...(prev.revisions||[]),{from:prev.number||1,at:new Date().toISOString(),review,schedule:snapshot}]};
     saveRitualCycles(all);
     if(review){
       alert('Novo ciclo criado como cópia do anterior. Você pode alterar apenas o que quiser em Cuidados & Extras e nas configurações do ritual.');
@@ -2502,12 +2535,10 @@
     saveRitualCycles(all); rerender();
   }
   function shouldShowCycleActions(id){
+    if(currentCycleState(id).status==='ended')return true;
     const today=dayStart(new Date());
-    if(id==='autocuidado'){
-      const diff=Math.floor((today-SELFCARE_START)/86400000);
-      return diff>=13; // only on/after final day of the 14-day cycle
-    }
-    if(id==='capilar') return today>=dayStart(CAPILLARY_END);
+    if(id==='autocuidado')return today>=ritualOccurrenceDate(id,selfcareCurrentCycleStartIndex()+13);
+    if(id==='capilar'){const last=Math.max(...Array.from({length:capillaryCycleTotal()},(_,i)=>ritualOccurrenceDate(id,i).getTime()));return today.getTime()>=last;}
     return false;
   }
   function cycleActionsHtml(id){
@@ -2716,6 +2747,7 @@
     let host=addBtn.nextElementSibling;
     if(!host)return;
     host.outerHTML=`<div data-ideal-map-host>${buildIdealMap(items)}</div>`;
+    document.querySelectorAll('[data-edit-ideal-map]').forEach(b=>b.onclick=()=>addIdealDialog(b.dataset.editIdealMap));
     document.querySelectorAll('[data-remove-ideal-map]').forEach(b=>b.onclick=()=>{
       const id=b.dataset.removeIdealMap;
       write(IDEAL_KEY,read(IDEAL_KEY,[]).filter(x=>String(x.id)!==String(id)));
@@ -2757,12 +2789,13 @@
   function bindIdeal(){
     bindIdealModalEnhancements();
     bindProgressGoals();
-    setTimeout(enhanceIdealScreen,0); const a=document.querySelector('[data-add-ideal]');if(a)a.onclick=addIdealDialog;document.querySelectorAll('[data-del-ideal]').forEach(b=>b.onclick=()=>{write(IDEAL_KEY,read(IDEAL_KEY,[]).filter(x=>x.id!==b.dataset.delIdeal));rerender()}) }
+    setTimeout(enhanceIdealScreen,0); const a=document.querySelector('[data-add-ideal]');if(a)a.onclick=()=>addIdealDialog();document.querySelectorAll('[data-del-ideal]').forEach(b=>b.onclick=()=>{write(IDEAL_KEY,read(IDEAL_KEY,[]).filter(x=>x.id!==b.dataset.delIdeal));rerender()}) }
 
   function ensureStyles(){
     let s=document.getElementById('bertha-time-v1-style');
     if(!s){s=document.createElement('style');s.id='bertha-time-v1-style';document.head.appendChild(s)}
     s.textContent=`
+    .bertha-ideal-map-actions{display:flex;align-items:center;gap:6px}.bertha-ideal-map-actions .bertha-ideal-edit{min-height:34px;padding:6px 10px;font:inherit;font-size:12px}.bertha-ideal-map-copy{min-width:0;overflow-wrap:anywhere}@media(max-width:440px){.bertha-ideal-map-card{grid-template-columns:minmax(0,1fr)!important}.bertha-ideal-map-actions{justify-content:flex-end}.bertha-ideal-map-actions .bertha-ideal-edit{min-height:40px}}
     /* BERTH.A — identidade funcional v1.3 */
     .topbar>div{min-width:0}
     .topbar .eyebrow{
@@ -4000,7 +4033,7 @@
     .bertha-ideal-zone-head span{font-size:10px;letter-spacing:.14em;font-weight:800;color:#766b77}
     .bertha-ideal-zone-head small{display:block;margin-top:2px;font-size:10px;color:#998e98;letter-spacing:0;font-weight:500}
     .bertha-ideal-zone-items{display:grid;gap:8px}
-    .bertha-ideal-map-card{display:grid;grid-template-columns:minmax(0,1fr) 34px;align-items:center;gap:10px;padding:12px 10px 12px 14px;border-radius:16px;background:rgba(255,255,255,.66);border:1px solid rgba(86,73,89,.07)}
+    .bertha-ideal-map-card{display:grid;grid-template-columns:minmax(0,1fr) auto;align-items:center;gap:10px;padding:12px 10px 12px 14px;border-radius:16px;background:rgba(255,255,255,.66);border:1px solid rgba(86,73,89,.07)}
     .bertha-ideal-map-copy{min-width:0}
     .bertha-ideal-map-copy strong{display:block;font-size:13px;color:#403742;margin:0 0 3px}
     .bertha-ideal-map-copy small{display:block;font-size:10px;color:#857a85;line-height:1.35}
@@ -4053,7 +4086,7 @@
     .bertha-ideal-zone-icon svg{width:18px;height:18px;fill:none;stroke:currentColor;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round}
     .bertha-ideal-zone-head span{font-size:10px;letter-spacing:.14em;font-weight:800;color:#6f6978}
     .bertha-ideal-zone-head small{display:block;margin-top:2px;font-size:10px;color:#8f8893;letter-spacing:0;font-weight:500}
-    .bertha-ideal-map-card{display:grid;grid-template-columns:minmax(0,1fr) 34px;align-items:center;gap:10px;padding:12px 10px 12px 14px;border-radius:16px;background:rgba(252,250,245,.82);border:1px solid rgba(86,73,89,.05)}
+    .bertha-ideal-map-card{display:grid;grid-template-columns:minmax(0,1fr) auto;align-items:center;gap:10px;padding:12px 10px 12px 14px;border-radius:16px;background:rgba(252,250,245,.82);border:1px solid rgba(86,73,89,.05)}
     .bertha-ideal-remove{width:32px;height:32px;border:0;border-radius:50%;background:rgba(255,255,255,.76);display:grid;place-items:center;color:#a8a0aa;font-size:20px;line-height:1;padding:0;margin:0}
     .bertha-ideal-add-zone{width:100%;border:0;border-radius:13px;background:linear-gradient(135deg,rgba(253,249,244,.92),rgba(248,245,239,.86));padding:9px;margin-top:9px;color:#746f7e;font-size:10px;font-weight:750;box-shadow:inset 0 0 0 1px rgba(86,73,89,.045)}
     .bertha-goals-head span{color:#8f8390}
