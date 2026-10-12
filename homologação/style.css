@@ -1873,7 +1873,7 @@ html body dialog.bertha-plans-task-dialog[open] .bertha-task-modal-head>div>span
 html body dialog.bertha-plans-task-dialog[open] .bertha-task-modal-head h2{margin:5px 0 0!important;font-size:22px!important;line-height:1.15!important;color:#373440!important;font-weight:500!important;letter-spacing:-.02em!important}
 html body dialog.bertha-plans-task-dialog[open] .bertha-task-modal-head button[data-close]{border:0!important;outline:0!important;box-shadow:none!important;background:rgba(247,243,237,.82)!important;color:#8e8792!important;font-size:23px!important;line-height:1!important;width:36px!important;height:36px!important;min-width:36px!important;border-radius:50%!important;display:grid!important;place-items:center!important;padding:0!important}
 html body dialog.bertha-plans-task-dialog[open] .bertha-task-modal-body{display:block!important;overflow:visible!important;padding:0!important;max-height:none!important}
-html body dialog.bertha-plans-task-dialog[open] .bertha-task-field{display:block!important;margin:11px 0!important;min-width:0!important}
+html body dialog.bertha-plans-task-dialog[open] .bertha-task-field:not([hidden]){display:block!important;margin:11px 0!important;min-width:0!important}
 html body dialog.bertha-plans-task-dialog[open] .bertha-task-field>span{display:block!important;font-size:11.5px!important;font-weight:600!important;color:#655f67!important;margin-bottom:6px!important}
 html body dialog.bertha-plans-task-dialog[open] .bertha-task-field>span small{font-weight:400!important;color:#9b9298!important}
 html body dialog.bertha-plans-task-dialog[open] :is(.bertha-task-field input,.bertha-task-field select,.bertha-task-field textarea,.bertha-duration-input input,.bertha-duration-input select,.bertha-notify-custom input){box-sizing:border-box!important;width:100%!important;min-width:0!important;max-width:100%!important;min-height:46px!important;border:1px solid rgba(140,126,145,.14)!important;border-radius:15px!important;background:#fffdfa!important;padding:11px 12px!important;color:#3e3d4b!important;font:inherit!important;font-size:16px!important;font-weight:400!important;box-shadow:none!important}
@@ -3567,4 +3567,3 @@ html body .bertha-dayhours-dialog .bertha-actions button{height:44px!important;b
   html body .bertha-recent-done{align-items:flex-start!important}
   html body .bertha-recent-actions{flex-direction:column!important}
 }
-
