@@ -198,3 +198,14 @@ Teste reproduzível: **tests/owner-tempo-rc360.cjs** lê as funções do timer a
 - Backups QA:65→67 conjuntos; nenhuma chave removida. Alterados apenas preferência/ciclos e cadastro explícito de templates/produtos durante o teste de mover datas. Entradas de templates/produtos anteriores integralmente preservadas; ID da preferência antiga preservado; janela livre manteve sourceZone=free após editar. Motor/histórico de execuções e permissões/redes satélites exatamente iguais ao backup RC359 anterior.
 -33 assertivas do fonte final passaram em cada fuso (São Paulo/Nova York); Node --check passou. Deslocamento/reinício/encerramento de ciclos testados em QA, sem esperar33dias físicos.
 - Backup real desta rodada exportado antes de publicação:5conjuntos. Comparação posterior à RC funcional ainda será registrada após deploy.
+
+### RC360 — publicação e verificação externa
+
+- PR40 integrado: **231447be3390a90c1ba808291354703b3b3617e7**. Deploy Pages1339, run38302079622: **Success**,1m49s.
+- Homologação aberta em **https://draduaila-web.github.io/It-s-my-life-/homologa%C3%A7%C3%A3o/?v=360#dia-ideal**. HML/INDEX/title RC360; timer?v=360-owner e avatar?v=360-version carregados. Marcadores mantidos ao navegar Meu Dia Ideal/Satélites/Rituais.
+- Real: Novo Meu Dia Ideal abrir/cancelar, foco no X e campos16px; Novo satélite abrir/cancelar, clique/Espaço/Enter sincronizam checked/aria-checked/is-checked; input nativo continua display:none e disponível no formulário. Adulto→Kids mantém as regras existentes; teste de Medalhas por teclado; seis avatares carregados (quatro adultos e dois Kids). Nenhum cadastro ou convite salvo.
+- Auditoria externa com arquivos publicados: edição reabriu Noite/2h/data31-01-2027/aviso2dias; cancelamento; ciclo encerrado sem undefined/sugestões; backups67/67 conjuntos **exatamente iguais** ao término da candidata isolada.
+- Responsivo final: wrapper queryv=360-final; viewport útil373px em largura390 e303px em largura320, modais sem overflow horizontal e campos16px. Tab alcança Salvar, Cancelar acessível; Escape fecha. Evidência visual: bertha-owner-rc360-edicao-validada-390.jpg (QA isolado, Chrome).
+- Backup real antes/depois: **5/5 conjuntos exatamente iguais**, nenhum campo/chave alterado. Console: nenhum erro do aplicativo observado; mensagens da extensão de automação desconsideradas como externas ao app.
+- Diff pré-publicação: os7arquivos,131acréscimos/36remoções de linhas, comparados integralmente ao fonte preparado; arquivos antigos preservados. Core, Satélites, Helper, Kids e artes não alterados (arquivo de avatar só teve2linhas de marcador de versão).
+- Dependências de premiação automática, sincronização/autenticação remota, notificações e dispositivos físicos continuam **abertas**. Não declarar fechamento completo do Owner nem criação de apps satélites independentes a partir desta RC.
