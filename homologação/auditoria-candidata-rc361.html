@@ -14924,7 +14924,7 @@ img[data-rc299-capsule="1"]{background:transparent!important;border-radius:0!imp
       rs.filter(r=>r.active!==false).forEach(r=>{
         if(r.criterion==='progress100'){
           const mode=r.recurrence==='monthly'?'month':'week',s=win.BerthaLifeEvidence.snapshot(mode),refs=s.scores.filter(x=>s.goals[x[0]]);
-          if(refs.length&&refs.every(x=>x[2]!=null)&&s.overall>=Math.max(1,Number(r.value)||100)&&s.hist.length)out.push({rewardId:r.id,key:'alignment:'+mode+':'+s.period,at:Math.max(...s.hist.map(stamp)),label:s.overall+'% das referências · '+s.period,records:s.hist.map(eventKey)});
+          refs.filter(x=>x[2]!=null&&x[2]>=Math.max(1,Number(r.value)||100)).forEach(x=>{const proof=s.hist.filter(h=>x[0]==='financeiro'||win.BerthaLifeEvidence.dimensions(h).includes(x[0]));if(proof.length)out.push({rewardId:r.id,key:'alignment:'+x[0]+':'+mode+':'+s.period,at:Math.max(...proof.map(stamp)),label:x[1]+' · '+x[2]+'% das referências · '+s.period,records:proof.map(eventKey)});});
         }
         if(r.criterion==='streak')out.push(...streakCandidates(r,hist,list=>{const refs=Object.keys(snap.goals).filter(k=>k!=='financeiro'&&snap.goals[k].targetPercent);return refs.length>0&&refs.every(k=>referenceScore(k,list,snap.goals[k],1,{},win.BerthaLifeEvidence.dimensions).value>=100);}));
         if(r.criterion==='goal')out.push(...win.BerthaLifeEvidence.completedGoals().map(c=>({...c,rewardId:r.id})));
