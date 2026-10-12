@@ -1,4 +1,4 @@
-# BERTH.A — matriz da revisão RC357
+# BERTH.A — matriz da revisão RC357–RC359
 
 Revisão executada em 12/10/2026. Escopo: beta em **homologação**, com acentos. A revisão não garante ausência absoluta de falhas. Resultado por fluxo abaixo; abrir uma tela não equivale a validar o módulo inteiro.
 
@@ -123,3 +123,32 @@ A usuária identificou a marca sobreposta nos prints de iPhone após a revisão 
 - Mantidas as limitações de Safari/iPhone, teclado virtual, Push/Watch e passagem real de ciclos. Sem exclusões em massa, alterações indevidas de dados, credenciais, integrações externas ou artes.
 
 O PR documental desta seção altera apenas a matriz; a conclusão exige verificar seu deploy também.
+
+
+## RC359 — melhorias autorizadas e testes antes da publicação
+
+Base confirmada: RC358, main **805b17df7d6be33db8d440026804dc11b9a180e7**. Rollback criado antes das alterações: **backup/bertha-pre-improvements-rc359-805b17d**, no mesmo hash. Branch funcional: **work/bertha-improvements-rc359**. Ambiente ativo permanece a pasta **homologação**, com acentos; produção e a pasta histórica sem acentos não foram alteradas.
+
+As linhas abaixo complementam a matriz dos 20 módulos e prevalecem sobre as pendências anteriores relativas a checklists, edição de utensílios e respostas locais aos convites. Os demais limites registrados na revisão RC357/RC358 continuam válidos.
+
+| Módulo / fluxo | Problema e causa | Correção aplicada | Testes efetivos | Resultado e pendências |
+|---|---|---|---|---|
+| Satélites / Owner / Meu Dia | Conclusões compartilhadas dispersas, sem fila central de ações | Fila lê os estados já existentes em Casa; validação tem prioridade; resumo no Meu Dia; Ver atividade abre o editor existente | Aceitar, começar, concluir missão Kids; pendência em rede e Meu Dia; validar pela fila; permanecer em Satélites; botão validar desaparece; manutenção avança para próxima ocorrência | Passou em QA. Nesta execução pontuada, 18→23 pontos, uma concessão de 5 pontos. Não substitui arquitetura nem handler aprovado |
+| Casa / Satélites / estados compartilhados | Rótulos diferentes, duplicidade e ações esticadas pela grade | Apresentação comum: disponível para ajuda, delegada, assumida, em andamento, aguardando validação e concluída; inicialização do estilo aprovado; ações empilhadas em tela estreita | Estados delegada→assumida→em andamento→aguardando validação; concluída já existente; retorno recorrente a delegada; inspeção de texto e controles | Passou. Grade de uma coluna em quadros estreitos; botões de 40 px; sem overflow horizontal |
+| Rituais / checklist por execução | Marcação efêmera ao reabrir e sem identidade de execução | Armazenamento separado por ritual, ocorrência/dia e execução; repetir cria sessão nova; retomar reutiliza a sessão; catálogo não recebe as marcações | Personalizado 2/3 após recarga; início conserva marcas; checklist completo não conclui atividade; repetir inicia 0/3; novo ritual 1/2 retoma 1/2; Capilar 1/6, Autocuidado 1/4 e extra 1/2 conservados após recarga | Passou. Etapas principal/extra independentes. Execuções antigas sem metadados não são migradas |
+| Casa / utensílios e equipamentos | Cadastros personalizados e itens do catálogo sem edição completa | Editor único; personalizados conservam ID/createdAt e campos adicionais; catálogo recebe ajustes em mapa separado por nome original | Editar nome, quantidade 2→3, localização, observação longa; cancelar não grava; salvar/reabrir; item do catálogo renomeado e reaberto; nome vazio e quantidade 0 bloqueados; criação cancelada | Passou. Catálogo original e associações antigas preservados; nenhuma exclusão testada |
+| Convites / Owner e destinatários | Sem editar evento, responder e consultar retorno | Edição conserva ID/createdAt/respostas; Vai/Talvez/Não vai por destinatário; resumo de respostas; checagem de destino e permissão antes de salvar | Editar/cancelar; múltiplos destinatários via teclado; cancelar resposta mantém Sem resposta; três opções salvas; segundo destinatário independente; reabrir/recarga; Owner mostra Não vai/Vai; obrigatório e zero destinatários bloqueados | Passou. Registro local no ambiente existente; não cria envio externo, autenticação nova ou sincronização entre aparelhos |
+| Meu Dia / retomar | Última conclusão ficava oculta quando havia nova sugestão | Retomar aparece também junto à próxima sugestão, sem alterar planejamento | Concluir, encerrar, retomar, conferir checklist da mesma sessão e concluir retomada | Passou. Retomada soma tempo ao mesmo registro; não duplica o histórico |
+| Modais / componentes compartilhados | X do utensílio excedia borda estreita; checkbox/grade exigiam regressão | X dentro do cabeçalho; ajustes restritos aos componentes novos | Quadros Chrome desktop 1100, 390 e 320 px (áreas úteis 1083/373/303 por bordas e scrollbar); campos 16 px; X dentro de 320; permissões Adulto/Kids e Convites por clique/Espaço; checked/aria sincronizados; input nativo oculto e marcação única | Passou no Chrome. Safari/iPhone físico, teclado virtual, safe areas reais e Watch não disponíveis |
+| Dados / integrações congeladas | Risco de regressão ao acrescentar fluxos | Sem alterações em delegação, validação, pontuação, progresso ou notificações existentes | Seis funções comparadas exatamente; node --check dos três módulos; diff integral dos seis arquivos comparado às alterações preparadas; backups antes/depois | Passou: QA 62→65 conjuntos, nenhuma chave removida, 18/18 eventos antigos preservados, 23 eventos únicos, nenhum ativo. Exercícios, financeiro, compras e rede/permissões existentes permaneceram iguais |
+
+### Evidências e limites desta etapa
+
+- Os testes persistentes ocorreram somente em **bertha-qa-rc357::**. A homologação real usa **bertha-hml::**; nenhuma migração entre ambientes.
+- Os três conjuntos novos em QA foram fila de repetição já prevista pelo motor, checklists e ajustes do catálogo. As alterações nos demais conjuntos correspondem aos testes descritos; IDs anteriores de rituais, eventos, utensílios e convite foram preservados.
+- A primeira candidata revelou estado duplicado, retorno incorreto à Casa após validar pela fila e layout comprimido. Foram corrigidos e retestados. Uma divergência da compilação isolada com os módulos finais foi identificada por comparação do conteúdo e resolvida antes da validação final; não houve limpeza de cache ou dados.
+- Candidata final conferida integralmente: **1.810.154 caracteres**, igualdade exata com o conteúdo preparado. Deploy isolado **1333 / 38292613639** confirmado **Success**, commit **3e6e736ac17fdf1a0fcb2e2b139b5b7fd6be87c0**. O HTML carregado foi conferido como contendo o CSS e a inicialização finais.
+- Artes RC349, RC351, RC352 e seis avatares RC353 preservados. No arquivo de avatares, somente os marcadores RC359 mudaram. Nenhuma geração de imagens, exclusão em massa, mudança de credenciais, autenticação, permissões reais ou integração externa.
+- Integrações existentes têm a evidência persistente da revisão RC357 e a regressão pontual acima. Não se afirma validação absoluta, teste em Safari/iPhone/Watch nem envio real de notificações na homologação, que permanece neutralizado pelo isolamento já existente.
+
+**Publicação funcional e testes essenciais na versão publicada: pendentes nesta entrada; serão registrados após o deploy.**
