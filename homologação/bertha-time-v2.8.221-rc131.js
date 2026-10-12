@@ -598,6 +598,7 @@
       configuredMinutes:+prepared.configuredMinutes||+item.minutes||30,
       learningKey:prepared.learningKey
     };
+    if(active.kind==='ritual'&&active.ritualId){const prior=(e.history||[]).some(h=>h.day===iso()&&String(h.ritualId)===String(active.ritualId)&&String(h.ritualChecklistContext)===String(active.ritualChecklistContext));active.checklistSessionKey=JSON.stringify([active.ritualId,active.ritualChecklistContext,iso(),prior?active.startedAt:'draft']);}
     e.actives.push(active); e.active=e.actives[0]||active;
     saveEngine(e);
     rerender();
@@ -725,7 +726,7 @@
       configuredMinutes:+active.configuredMinutes||+active.plannedMinutes||30,
       plannedMinutes:active.plannedMinutes,plannedItemId:active.plannedItemId||null,
       plannedName:active.plannedName||null,selectedPlanId:active.selectedPlanId||null,category:active.category||null,
-      kind:active.kind||null,learnedMinutes:active.learnedMinutes||null,realMinutes:real,status:'done'});
+      kind:active.kind||null,ritualId:active.ritualId||null,ritualChecklistContext:active.ritualChecklistContext||null,checklistSessionKey:active.checklistSessionKey||null,learnedMinutes:active.learnedMinutes||null,realMinutes:real,status:'done'});
     recordDurationLearning(active,real); syncTaskCompletion(active,real,end); syncCasaCompletion(active,end); syncExerciseCompletion(active,real,end);
     syncStudyCompletion(active,real,end); syncWorkCompletion(active,real,end); syncProjectCompletion(active,real,end);
     syncCommitmentCompletion(active,real,end); markRepeatConsumed(active);
@@ -779,7 +780,7 @@
     const e=engine(),h=(e.history||[]).find(x=>String(x.endedAt)===String(endedAt));if(!h)return;
     e.actives=Array.isArray(e.actives)?e.actives:[];
     if(e.actives.some(a=>String(a.resumeHistoryEndedAt)===String(endedAt)))return;
-    const active={id:`resume:${h.itemId}:${Date.now()}`,title:h.title||'Atividade',source:h.source||'Meu Dia',kind:h.kind||null,startedAt:Date.now(),plannedMinutes:10,configuredMinutes:+h.configuredMinutes||+h.plannedMinutes||30,learningKey:h.learningKey||durationLearningKey(h),resumeHistoryEndedAt:h.endedAt,overrunOpenEnded:false};
+    const active={id:`resume:${h.itemId}:${Date.now()}`,title:h.title||'Atividade',source:h.source||'Meu Dia',kind:h.kind||null,ritualId:h.ritualId||null,ritualChecklistContext:h.ritualChecklistContext||null,checklistSessionKey:h.checklistSessionKey||null,startedAt:Date.now(),plannedMinutes:10,configuredMinutes:+h.configuredMinutes||+h.plannedMinutes||30,learningKey:h.learningKey||durationLearningKey(h),resumeHistoryEndedAt:h.endedAt,overrunOpenEnded:false};
     e.actives.push(active);e.active=e.actives[0]||active;saveEngine(e);rerender();
   }
   function repeatAfterFinishDialog(item,realMinutes){
@@ -847,7 +848,7 @@
     const recent=recentCompleted();
     const recentHtml=recent&&!actives.length?`<section class="bertha-recent-done"><div class="bertha-recent-copy"><div class="card-kicker">CONCLUÍDO AGORA</div><strong>${esc(recent.title||'Atividade')}</strong><small>${esc(recent.source||'Meu Dia')} · ${durationText(+recent.realMinutes||1)} reais</small></div><div class="bertha-recent-actions"><button type="button" data-edit-completed="${esc(String(recent.endedAt))}">Editar tempo</button><button type="button" class="primary" data-resume-completed="${esc(String(recent.endedAt))}">Retomar</button></div></section>`:'';
     const running=actives.map(a=>{const elapsed=Math.max(0,Math.floor((Date.now()-a.startedAt)/60000)),end=new Date(a.startedAt+a.plannedMinutes*60000);return `<section class="now-card bertha-now active bertha-now-compact"><div class="bertha-now-main"><div><div class="card-kicker">AGORA · EM ANDAMENTO</div><div class="now-title">${esc(a.title)}</div><div class="now-time">${esc(a.source)} · ${elapsed} min · previsto ${durationText(a.plannedMinutes)} · até ${hhmm(end)}</div></div><button class="bertha-primary bertha-finish-side" data-finish-active="${esc(a.id)}">Concluir</button></div></section>`}).join('');
-    if(s.item){const x=s.item;return `${running}<section class="now-card bertha-now bertha-now-suggestion"><div class="bertha-now-main"><div><div class="card-kicker">AGORA · ${esc(x.source).toUpperCase()}</div><div class="now-title">${esc(x.title)}</div><div class="now-time">${x.time?`previsto ${esc(x.time)} · `:''}${durationText(+x.minutes||30)}</div></div><button class="bertha-primary" data-start="${esc(x.id)}">Começar</button></div><div class="bertha-now-foot"><span>${x.windowStart?`Entre ${x.windowStart} e ${x.windowEnd}.`:x.kind==='ideal'?'Sugestão do seu Dia Ideal.':'Disponível para o seu dia.'}</span><button class="bertha-link-button" data-postpone="${esc(x.id)}">Adiar</button></div></section>`;}
+    if(s.item){const x=s.item;return `${running}${recentHtml}<section class="now-card bertha-now bertha-now-suggestion"><div class="bertha-now-main"><div><div class="card-kicker">AGORA · ${esc(x.source).toUpperCase()}</div><div class="now-title">${esc(x.title)}</div><div class="now-time">${x.time?`previsto ${esc(x.time)} · `:''}${durationText(+x.minutes||30)}</div></div><button class="bertha-primary" data-start="${esc(x.id)}">Começar</button></div><div class="bertha-now-foot"><span>${x.windowStart?`Entre ${x.windowStart} e ${x.windowEnd}.`:x.kind==='ideal'?'Sugestão do seu Dia Ideal.':'Disponível para o seu dia.'}</span><button class="bertha-link-button" data-postpone="${esc(x.id)}">Adiar</button></div></section>`;}
     if(running)return running;
     return `${recentHtml}<section class="now-card bertha-now free bertha-free-compact"><div><div class="card-kicker">AGORA</div><div class="now-title">Espaço livre</div><small>Sem urgências neste momento. A BERTH.A preserva esta janela.</small></div></section>`;
   }
@@ -1549,7 +1550,7 @@
     const financeReminders = renderFinanceRemindersHome();
     const shopCount=window.BerthaShopping?.pendingCount?.()||0; const healthRaw=window.BerthaShopping?.renderHealthMini?.()||''; const health=/Nenhum item cadastrado/i.test(healthRaw)?'':healthRaw;
     const utility=`<section class="home-utility-grid"><a class="home-utility-card" href="#compras"><span class="home-utility-icon">${homeUtilityIcon('bag')}</span><span class="home-utility-copy"><strong>Lista de Compras</strong><small>O que preciso adquirir?</small></span><span class="home-utility-count">${shopCount}</span></a><a class="home-utility-card" href="#progresso"><span class="home-utility-icon">${homeUtilityIcon('trend')}</span><span class="home-utility-copy"><strong>Meu Progresso</strong><small>Como estou caminhando?</small></span><span aria-hidden="true">›</span></a></section>`;
-    return `<section class="day-hero"><div class="eyebrow">MEU DIA</div><h1>${greet}, Duaila.</h1><p class="day-date">${today}</p></section>${nowCard()}<section class="day-section home-day-structure"><div class="section-head"><div><h2>Seu dia</h2><small class="home-day-helper">Compromissos e sugestões nas janelas livres.</small></div><button type="button" class="home-edit-hours" data-edit-day-hours>Editar horários</button></div><div class="timeline bertha-timeline">${renderHomeTimeline()}</div></section><section class="day-section"><div class="section-head"><h2>O que importa hoje</h2><span class="soft-count">${tasks.length}</span></div>${tasks.length?tasks.map(x=>`<div class="focus-row bertha-focus"><div><strong>${esc(x.title)}</strong><small>${esc(x.source)} · ${durationText(+x.minutes||30)}</small></div><button data-start="${esc(x.id)}">Começar</button></div>`).join(''):`<div class="bertha-empty">Seu essencial está em dia.</div>`}</section>${renderFoodHomeMini()}${financeReminders}${health}${free?`<section class="free-space"><strong>Espaço livre também faz parte do dia.</strong><p>Se nada precisa ser resolvido agora, não resolva.</p></section>`:''}${utility}`;
+    return `<section class="day-hero"><div class="eyebrow">MEU DIA</div><h1>${greet}, Duaila.</h1><p class="day-date">${today}</p></section>${nowCard()}${typeof ownerQueueHtml==='function'?ownerQueueHtml(true):''}<section class="day-section home-day-structure"><div class="section-head"><div><h2>Seu dia</h2><small class="home-day-helper">Compromissos e sugestões nas janelas livres.</small></div><button type="button" class="home-edit-hours" data-edit-day-hours>Editar horários</button></div><div class="timeline bertha-timeline">${renderHomeTimeline()}</div></section><section class="day-section"><div class="section-head"><h2>O que importa hoje</h2><span class="soft-count">${tasks.length}</span></div>${tasks.length?tasks.map(x=>`<div class="focus-row bertha-focus"><div><strong>${esc(x.title)}</strong><small>${esc(x.source)} · ${durationText(+x.minutes||30)}</small></div><button data-start="${esc(x.id)}">Começar</button></div>`).join(''):`<div class="bertha-empty">Seu essencial está em dia.</div>`}</section>${renderFoodHomeMini()}${financeReminders}${health}${free?`<section class="free-space"><strong>Espaço livre também faz parte do dia.</strong><p>Se nada precisa ser resolvido agora, não resolva.</p></section>`:''}${utility}`;
   }
 
   function idealZoneIcon(zone){
@@ -2314,10 +2315,10 @@
   }
   function ritualSourcesForToday(){
     const d=new Date(), out=[];
-    capillaryEventsOn(d).forEach(cap=>{if(cap&&cap.includeInMyDay!==false){const s=ritualSetting('capilar',cap.type);out.push({id:`ritual:capilar:${iso(d)}:${cap.type}:${cap._occurrence}`,source:'Ritual Capilar',title:`Ritual Capilar · ${cap.title}`,date:iso(d),minutes:cap.minutes,time:s.time||'',period:cap.period||s.period||'morning',priority:s.priority||'Normal',notify:!!s.notify,notifyOffset:s.notifyOffset||'at-time',kind:'ritual'})}});
+    capillaryEventsOn(d).forEach(cap=>{if(cap&&cap.includeInMyDay!==false){const s=ritualSetting('capilar',cap.type);out.push({id:`ritual:capilar:${iso(d)}:${cap.type}:${cap._occurrence}`,source:'Ritual Capilar',title:`Ritual Capilar · ${cap.title}`,date:iso(d),minutes:cap.minutes,time:s.time||'',period:cap.period||s.period||'morning',priority:s.priority||'Normal',notify:!!s.notify,notifyOffset:s.notifyOffset||'at-time',kind:'ritual',ritualId:'capilar',ritualChecklistContext:cap._occurrence||cap.type||'capilar'})}});
     const ss=ritualSetting('autocuidado','selfcare');
-    selfcareEventsOn(d).forEach(sc=>{if(!sc.optional&&sc.includeInMyDay!==false)out.push({id:`ritual:autocuidado:${iso(d)}:${sc._occurrence}`,source:'Autocuidado',title:`Autocuidado · ${sc.title}`,date:iso(d),minutes:sc.minutes,time:ss.time||'',period:sc.period||ss.period||'night',priority:ss.priority||'Normal',notify:!!ss.notify,notifyOffset:ss.notifyOffset||'at-time',kind:'ritual'})});
-    customEventsOn(d).forEach(e=>out.push({id:`ritual-extra:${e.id}:${iso(d)}`,source:e.ritualTitle||'Ritual',title:e.title,date:iso(d),minutes:+e.minutes||15,time:e.time||'',period:e.period||'flex',priority:e.priority||'Normal',notify:!!e.notify,notifyOffset:e.notifyOffset||'at-time',kind:'ritual'}));
+    selfcareEventsOn(d).forEach(sc=>{if(!sc.optional&&sc.includeInMyDay!==false)out.push({id:`ritual:autocuidado:${iso(d)}:${sc._occurrence}`,source:'Autocuidado',title:`Autocuidado · ${sc.title}`,date:iso(d),minutes:sc.minutes,time:ss.time||'',period:sc.period||ss.period||'night',priority:ss.priority||'Normal',notify:!!ss.notify,notifyOffset:ss.notifyOffset||'at-time',kind:'ritual',ritualId:'autocuidado',ritualChecklistContext:sc._occurrence||sc.type||'autocuidado'})});
+    customEventsOn(d).forEach(e=>out.push({id:`ritual-extra:${e.id}:${iso(d)}`,source:e.ritualTitle||'Ritual',title:e.title,date:iso(d),minutes:+e.minutes||15,time:e.time||'',period:e.period||'flex',priority:e.priority||'Normal',notify:!!e.notify,notifyOffset:e.notifyOffset||'at-time',kind:'ritual',ritualId:e.ritualId,ritualChecklistContext:e.id}));
     return out;
   }
 
@@ -2350,25 +2351,31 @@
     if(id==='autocuidado') return selfcareProcedure(selfcareEvent(d));
     return null;
   }
+
+  const RITUAL_CHECKLISTS_KEY='bertha.ritual.checklists.v1';
+  function ritualChecklistKey(ritualId,context){const e=engine(),matches=x=>String(x.ritualId)===String(ritualId)&&String(x.ritualChecklistContext)===String(context);const active=(e.actives||[]).filter(matches).sort((a,b)=>b.startedAt-a.startedAt)[0];if(active?.checklistSessionKey)return active.checklistSessionKey;const last=(e.history||[]).find(x=>x.day===iso()&&matches(x)&&x.checklistSessionKey);return last?.checklistSessionKey||JSON.stringify([ritualId,context,iso(),'draft'])}
+  function ritualChecklistHtml(ritualId,context,steps){if(!steps.length)return '';const key=ritualChecklistKey(ritualId,context),all=read(RITUAL_CHECKLISTS_KEY,{}),marks=all[key]?.marks||{},stepKeys=steps.map((t,i)=>JSON.stringify([String(t),steps.slice(0,i).filter(s=>String(s)===String(t)).length])),count=stepKeys.filter(k=>marks[k]).length;return '<div class="ritual-execution-checklist"><p class="note" data-checklist-count="'+esc(key)+'" aria-live="polite">Etapas desta execução · '+count+'/'+steps.length+'</p><div class="bertha-check-steps">'+steps.map((t,i)=>'<label><input type="checkbox" data-checklist-session="'+esc(key)+'" data-checklist-step="'+esc(stepKeys[i])+'" '+(marks[stepKeys[i]]?'checked':'')+'><span>'+esc(t)+'</span></label>').join('')+'</div></div>'}
+  function bindRitualChecklists(){document.querySelectorAll('[data-checklist-session]').forEach(input=>input.onchange=()=>{const key=input.dataset.checklistSession,all=read(RITUAL_CHECKLISTS_KEY,{}),previous=all[key]||{};all[key]={...previous,marks:{...previous.marks,[input.dataset.checklistStep]:input.checked},updatedAt:Date.now()};write(RITUAL_CHECKLISTS_KEY,all);const box=input.closest('.ritual-execution-checklist'),inputs=[...box.querySelectorAll('input')];box.querySelector('[data-checklist-count]').textContent='Etapas desta execução · '+inputs.filter(i=>i.checked).length+'/'+inputs.length})}
+
   function renderRitualDetail(id){
     const r=ritualCatalog().find(x=>x.id===id)||defaultRituals()[0], ev=ritualDetailData(id,new Date());
     const extras=ritualEvents().filter(x=>x.ritualId===id&&!x.primary), isCustom=id!=='capilar'&&id!=='autocuidado';
     const ritualHeader=document.querySelector('#pageTitle');if(ritualHeader)ritualHeader.textContent='Rituais';
     let upcoming='';
     if(!isCustom){for(let i=1;i<=8;i++){const d=new Date();d.setDate(d.getDate()+i);const xs=id==='capilar'?capillaryEventsOn(d):id==='autocuidado'?selfcareEventsOn(d):[];xs.forEach(x=>{const attr=id==='autocuidado'?` type="button" data-edit-selfcare-occurrence="${x._occurrence}"`:id==='capilar'?` type="button" data-edit-capillary-occurrence="${x._occurrence}"`:'';upcoming+=`<button class="bertha-ritual-upcoming"${attr}><span>${d.toLocaleDateString('pt-BR',{day:'2-digit',month:'short'}).replace('.','')}</span><div><strong>${esc(x.title)}</strong><small>${esc(x.subtitle||'')}</small></div><b>›</b></button>`})}}
-    const phrase=r.subtitle||ritualBrandPhrase(id), customSteps=ritualLines(r.steps);
+    const phrase=r.subtitle||ritualBrandPhrase(id), customSteps=ritualLines(r.steps), primary=ritualEvents().find(x=>x.ritualId===id&&x.primary), checklistContext=isCustom?(primary?.id||id):(ev?._occurrence||ev?.type||id);
     return `<section class="bertha-ritual-page">
       <a class="bertha-back-link" href="#rituais" data-back-rituals>‹ Rituais</a>
       <section class="bertha-ritual-detail-hero tone-${Math.abs(String(id).length)%3}"><span class="bertha-line-icon large">${ritualIcon(r.icon)}</span><div><div class="bertha-task-kicker">${isCustom?'RITUAIS':esc(r.title).toUpperCase()}</div><h1>${id==='capilar'?'Seu cronograma, no lugar certo.':(isCustom||id==='autocuidado')?esc(r.title):esc(phrase)}</h1>${r.subtitle?`<p>${esc(r.subtitle)}</p>`:''}</div></section>
-      ${isCustom?`<div class="bertha-section-row"><span>COMO FAZER</span><button type="button" data-edit-custom-ritual="${id}">Editar ritual</button></div><section class="bertha-ritual-today custom-how">${customSteps.length?`<div class="bertha-check-steps">${customSteps.map(t=>`<label><input type="checkbox"><span>${esc(t)}</span></label>`).join('')}</div>`:`<div class="bertha-free-note">Nenhuma etapa cadastrada. Toque em Editar ritual para adicionar.</div>`}</section>`:''}
+      ${isCustom?`<div class="bertha-section-row"><span>COMO FAZER</span><button type="button" data-edit-custom-ritual="${id}">Editar ritual</button></div><section class="bertha-ritual-today custom-how">${customSteps.length?`${ritualChecklistHtml(id,checklistContext,customSteps)}`:`<div class="bertha-free-note">Nenhuma etapa cadastrada. Toque em Editar ritual para adicionar.</div>`}</section>`:''}
       ${ev?`<section class="bertha-ritual-today"><div class="bertha-ritual-head"><div><span>HOJE · ${dateLabelLong(new Date())}</span><h2>${esc(ev.title)}</h2><p>${esc(ev.subtitle||'')}</p><small class="bertha-cycle-position">${id==='capilar'?`Dia ${capillaryDay(new Date())} de ${capillaryCycleTotal()}`:`Dia ${ev.cycleDay} de 14`}</small></div><button type="button" ${id==='autocuidado'?'data-edit-selfcare-procedure':'data-config-ritual="'+id+'"'}>${id==='autocuidado'?'Editar cuidado':'Editar'}</button></div>
         ${ev.optional?`<div class="bertha-free-note">Hoje é um espaço livre. A BERTH.A não transforma descanso em pendência.</div>`:`<div class="bertha-ritual-time">${durationText(ev.minutes)} · ${taskLabelPeriod(ritualSetting(id,ev.type).period||ev.period)}</div>`}
-        <div class="bertha-check-steps">${(ev.tasks||[]).map(t=>`<label><input type="checkbox"><span>${esc(t)}</span></label>`).join('')}</div>
+        ${ritualChecklistHtml(id,checklistContext,ev.tasks||[])}
       </section>`:''}
       ${ritualProductsHtml(id,ev,r)}
       ${!isCustom?`<div class="bertha-section-row"><span>PRÓXIMOS DIAS</span>${id==='capilar'?'<button type="button" data-full-capillary>Ver cronograma</button>':id==='autocuidado'?'<button type="button" data-full-selfcare>Ver 14 dias</button>':''}</div><div class="bertha-upcoming-list">${upcoming}</div>`:''}
       <div class="bertha-section-row"><span>CUIDADOS & EXTRAS</span><button type="button" data-add-ritual-event="${id}">＋ Adicionar</button></div>
-      <div class="bertha-extra-list">${extras.length?extras.map(e=>`<button class="bertha-extra-card" data-edit-ritual-event="${e.id}"><span class="bertha-line-icon">${ritualIcon(e.icon||'sparkle')}</span><span><strong>${esc(e.title)}</strong><small>${esc(ritualRepeatLabel(e))} · ${durationText(e.minutes)}</small></span><b>›</b></button>`).join(''):`<div class="bertha-empty-soft">Você pode adicionar outros cuidados quando fizer sentido.</div>`}</div>
+      <div class="bertha-extra-list">${extras.length?extras.map(e=>`<button class="bertha-extra-card" data-edit-ritual-event="${e.id}"><span class="bertha-line-icon">${ritualIcon(e.icon||'sparkle')}</span><span><strong>${esc(e.title)}</strong><small>${esc(ritualRepeatLabel(e))} · ${durationText(e.minutes)}</small></span><b>›</b></button>${ritualChecklistHtml(id,e.id,ritualLines(e.steps))}`).join(''):`<div class="bertha-empty-soft">Você pode adicionar outros cuidados quando fizer sentido.</div>`}</div>
       ${shouldShowCycleActions(id)?cycleActionsHtml(id):''}
       <button type="button" class="bertha-delete-ritual" data-delete-ritual="${id}">Excluir ritual</button>
     </section>`;
@@ -2644,6 +2651,7 @@
   }
 
   function bindRitualDetail(id){
+    bindRitualChecklists();
     document.querySelector('[data-back-rituals]')?.addEventListener('click',(e)=>{e.preventDefault(); history.pushState(null,'','#rituais'); rerender(); window.scrollTo(0,0);});
     document.querySelector('[data-edit-selfcare-procedure]')?.addEventListener('click',selfcareProcedureDialog);
     document.querySelector('[data-edit-custom-ritual]')?.addEventListener('click',()=>customRitualDialog(id));
@@ -2697,7 +2705,7 @@
   }
   function startFromHome(item){ if(isMovementReserve(item)) openMovementSelector(item); else startItem(item); }
 
-  function bindHome(){ document.querySelectorAll('[data-start]').forEach(b=>b.onclick=()=>{const x=sourcesToday().find(i=>i.id===b.dataset.start);if(x)startFromHome(x)}); document.querySelectorAll('[data-postpone]').forEach(b=>b.onclick=()=>{const x=sourcesToday().find(i=>i.id===b.dataset.postpone);if(x)postponeDialog(x)}); document.querySelectorAll('[data-finish-active]').forEach(f=>f.onclick=()=>finishActivePrompt(f.dataset.finishActive)); document.querySelectorAll('[data-edit-completed]').forEach(b=>b.onclick=()=>{const h=(engine().history||[]).find(x=>String(x.endedAt)===String(b.dataset.editCompleted));if(h)editCompletedTimeDialog({...h,id:h.itemId,historyEndedAt:h.endedAt},h.realMinutes)}); document.querySelectorAll('[data-resume-completed]').forEach(b=>b.onclick=()=>resumeCompleted(b.dataset.resumeCompleted)); document.querySelectorAll('[data-edit-day-hours]').forEach(b=>b.onclick=editDayBlocksDialog); window.BerthaShopping?.bindHealthMini?.(); setTimeout(maybePromptFixedCommitmentConflict,180); }
+  function bindHome(){ if(typeof bindOwnerQueue==='function')bindOwnerQueue(); document.querySelectorAll('[data-start]').forEach(b=>b.onclick=()=>{const x=sourcesToday().find(i=>i.id===b.dataset.start);if(x)startFromHome(x)}); document.querySelectorAll('[data-postpone]').forEach(b=>b.onclick=()=>{const x=sourcesToday().find(i=>i.id===b.dataset.postpone);if(x)postponeDialog(x)}); document.querySelectorAll('[data-finish-active]').forEach(f=>f.onclick=()=>finishActivePrompt(f.dataset.finishActive)); document.querySelectorAll('[data-edit-completed]').forEach(b=>b.onclick=()=>{const h=(engine().history||[]).find(x=>String(x.endedAt)===String(b.dataset.editCompleted));if(h)editCompletedTimeDialog({...h,id:h.itemId,historyEndedAt:h.endedAt},h.realMinutes)}); document.querySelectorAll('[data-resume-completed]').forEach(b=>b.onclick=()=>resumeCompleted(b.dataset.resumeCompleted)); document.querySelectorAll('[data-edit-day-hours]').forEach(b=>b.onclick=editDayBlocksDialog); window.BerthaShopping?.bindHealthMini?.(); setTimeout(maybePromptFixedCommitmentConflict,180); }
 
   function enhanceIdealScreen(){
     const route=String(location.hash||'').toLowerCase();
