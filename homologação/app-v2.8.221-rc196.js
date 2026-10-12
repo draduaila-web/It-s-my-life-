@@ -2150,6 +2150,8 @@ function loadKidsRewards(){try{const x=JSON.parse(window.berthaHmlStorage.getIte
 function saveKidsRewards(x){window.berthaHmlStorage.setItem(KIDS_REWARDS_KEY,JSON.stringify(x||{}))}
 function kidsRewardsFor(memberId){const all=loadKidsRewards(),raw=all[memberId]||{},d=kidsRewardDefaults();return Object.fromEntries(Object.entries(d).map(([k,v])=>[k,{...v,...(raw[k]||{})}]))}
 function awardKidsPoints(memberId,points,title){const all=loadKidsProgress(),month=new Date().toISOString().slice(0,7),k=all[memberId]||{lifetime:0,season:0,seasonKey:month,awards:[]};if(k.seasonKey!==month){k.season=0;k.seasonKey=month}k.lifetime=(+k.lifetime||0)+points;k.season=(+k.season||0)+points;k.log=Array.isArray(k.log)?k.log:[];k.log.unshift({id:satId(),title,points,at:Date.now()});const cfg=kidsRewardsFor(memberId);const unlocks=Object.values(cfg).filter(r=>r.active!==false).map(r=>[Math.max(1,+r.points||1),r.name||'Conquista',r.type||'medal']);k.awards=Array.isArray(k.awards)?k.awards:[];unlocks.forEach(([n,name,type])=>{const key=`${month}:${type}:${n}`;if(k.season>=n&&!k.awards.some(a=>a.key===key))k.awards.push({key,name,type,at:Date.now()})});all[memberId]=k;saveKidsProgress(all)}
+const SAT_OWNER_EVENTS_KEY='bertha.satellites.owner-events.v1';
+function loadSatelliteOwnerEvents(){try{const x=JSON.parse(window.berthaHmlStorage.getItem(SAT_OWNER_EVENTS_KEY)||'[]');return Array.isArray(x)?x:[]}catch{return[]}}
 function saveSatelliteOwnerEvents(x){window.berthaHmlStorage.setItem(SAT_OWNER_EVENTS_KEY,JSON.stringify((x||[]).slice(0,100)))}
 function satelliteMember(id){return loadSatellites().members.find(m=>String(m.id)===String(id))}
 function satelliteTargets(task){const legacy=task?.assigneeId?[task.assigneeId]:[];return (Array.isArray(task?.assigneeIds)&&task.assigneeIds.length?task.assigneeIds:legacy).map(String)}
@@ -7541,7 +7543,7 @@ window.__berthaCoreRender = function(){
 
   /* Satélites — grade realmente compacta; longos rótulos não deformam os cards */
   dialog.sat-modal .rc176-avatar-picker{display:grid!important;grid-template-columns:repeat(2,minmax(0,1fr))!important;gap:10px!important;width:100%!important;min-width:0!important}
-  dialog.sat-modal .rc176-avatar-picker .sat-avatar-choice{box-sizing:border-box!important;width:100%!important;min-width:0!important;max-width:100%!important;height:86px!important;min-height:86px!important;padding:10px 6px!important;margin:0!important;display:flex!important;flex-direction:column!important;align-items:center!important;justify-content:center!important;gap:6px!important;border-radius:18px!important;overflow:hidden!important;background:rgba(255,255,255,.72)!important;border:1px solid rgba(116,101,125,.10)!important}
+  dialog.sat-modal .rc176-avatar-picker .sat-avatar-choice:not(:has(.sat-avatar-art)){box-sizing:border-box!important;width:100%!important;min-width:0!important;max-width:100%!important;height:86px!important;min-height:86px!important;padding:10px 6px!important;margin:0!important;display:flex!important;flex-direction:column!important;align-items:center!important;justify-content:center!important;gap:6px!important;border-radius:18px!important;overflow:hidden!important;background:rgba(255,255,255,.72)!important;border:1px solid rgba(116,101,125,.10)!important}
   dialog.sat-modal .rc176-avatar-picker .sat-avatar-choice svg{display:block!important;width:28px!important;height:28px!important;min-width:28px!important;min-height:28px!important;max-width:28px!important;max-height:28px!important;flex:0 0 28px!important;stroke-width:1.35!important}
   dialog.sat-modal .rc176-avatar-picker .sat-avatar-choice small{display:grid!important;gap:0!important;justify-items:center!important;width:100%!important;min-width:0!important;font-size:10px!important;line-height:1.12!important;text-align:center!important;color:#77707a!important;white-space:normal!important;overflow-wrap:anywhere!important}
   dialog.sat-modal .rc176-avatar-picker .sat-avatar-choice.sat-gender-m,dialog.sat-modal .rc176-avatar-picker .sat-avatar-choice.sat-gender-m svg{color:#777981!important;stroke:#777981!important}
@@ -7906,7 +7908,7 @@ window.__berthaCoreRender = function(){
 /* RC188 — Helper recognition assets: transparent, normalized and larger */
 (function(){
  const st=document.createElement('style');
- st.id='rc188-helper-assets';
+ st.id='rc188-recognition-assets';
  st.textContent=`
  .rewards-page [data-reward-pane="recognitions"] .r147-rec img,
  .rewards-page [data-reward-pane="recognitions"] .recognition-card img,
