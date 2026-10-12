@@ -172,20 +172,20 @@
       {key:'depth',name:'Profundidade',sub:'foco sustentado'},
       {key:'evolution',name:'Evolução',sub:'histórico pessoal'}
     ];
-    return base.map(item=>({
-      ...item,
-      occurrence:0,
-      tone:ownerToneFor(0),
-      medal:1
-    }));
+    const history=window.BerthaOwnerAchievements?.history?.()||[];
+    return base.map(item=>{const hits=history.filter(a=>a.artKey===(item.artKey||item.key)),latest=hits[hits.length-1],occurrence=hits.length;return {...item,occurrence,tone:ownerToneFor(latest?.toneIndex||0),medal:latest?.occurrence||0};});
   }
 
   function openOwnerCollection(){
     if(typeof r147Dialog!=='function') return;
+    window.BerthaOwnerAchievements?.refresh?.();
     const items=roomItems();
     const legend=OWNER_TONES.map((tone,i)=>`<span class="rc195-medal-chip rc195-${tone.id}"><i></i><b>${i+1}ª medalha</b><small>${tone.name}</small></span>`).join('');
-    const html=`<div class="rc193-owner-room-note"><strong>Ciclo de medalhas</strong><p>A 1ª medalha de cada conquista usa a mesma paleta. Quando aquela mesma conquista se repetir, ela avança para a 2ª cor, depois 3ª, até completar um ciclo de 6 medalhas.</p></div><div class="rc195-medal-legend">${legend}</div><div class="r147-collection rc192-owner-room rc193-owner-room">${items.map((x)=>`<div class="r147-col-item rc192-owner-col rc193-owner-col">${ownerImg(ownerRewardFileByCriterion(x.artKey||x.key),'rc192-owner-col-art',x.tone)}<strong>${x.name}</strong><small>${x.sub}</small><em class="rc193-owner-repeat">${x.medal}ª medalha</em></div>`).join('')}</div>`;
-    const dlg=r147Dialog('Sala de Troféus',html);
+    const html=`<div class="rc193-owner-room-note"><strong>Ciclo de medalhas</strong><p>A 1ª medalha de cada conquista usa a mesma paleta. Quando aquela mesma conquista se repetir, ela avança para a 2ª cor, depois 3ª, até completar um ciclo de 6 medalhas.</p></div><div class="rc195-medal-legend">${legend}</div><div class="r147-collection rc192-owner-room rc193-owner-room">${items.map((x)=>`<div class="r147-col-item rc192-owner-col rc193-owner-col">${ownerImg(ownerRewardFileByCriterion(x.artKey||x.key),'rc192-owner-col-art',x.tone)}<strong>${x.name}</strong><small>${x.sub}</small><em class="rc193-owner-repeat">${x.occurrence?x.medal+'ª medalha · '+x.occurrence+' conquista(s)':'Ainda não conquistada'}</em></div>`).join('')}</div>`;
+
+    const earned=window.BerthaOwnerAchievements?.history?.()||[];
+    const historyHtml='<section class="rc193-owner-room-note"><strong>Histórico de conquistas</strong>'+(earned.length?earned.slice().reverse().map(a=>'<p>'+String(a.name||'Conquista').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))+' · '+new Date(a.at).toLocaleDateString('pt-BR')+' · '+a.occurrence+'ª medalha</p>').join(''):'<p>As novas conquistas serão registradas a partir das ações concluídas e dos critérios configurados. Seu histórico de atividades permanece preservado.</p>')+'</section>';
+    const dlg=r147Dialog('Sala de Troféus',html+historyHtml);
     return dlg;
   }
 
@@ -210,7 +210,8 @@
       const art=card.querySelector('.art');
       const key=files[i];
       if(!art||!key) return;
-      art.innerHTML=ownerImg(ownerRewardFileByCriterion(key),'rc192-owner-art',ownerToneFor(0));
+      const hits=window.BerthaOwnerAchievements?.history?.().filter(a=>a.artKey===key)||[],latest=hits[hits.length-1];
+      art.innerHTML=ownerImg(ownerRewardFileByCriterion(key),'rc192-owner-art',ownerToneFor(latest?.toneIndex||0));
       art.classList.add('rc192-owner-art-wrap');
       card.classList.add('rc193-owner-card');
     });
