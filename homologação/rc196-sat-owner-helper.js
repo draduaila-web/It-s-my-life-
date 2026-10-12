@@ -359,9 +359,9 @@
     html body dialog.sat-modal .sat-permissions, html body dialog.sat-modal .sat-kids-settings{gap:12px!important}
     html body dialog.sat-modal .sat-permission{display:grid!important;grid-template-columns:28px minmax(0,1fr)!important;align-items:center!important;gap:14px!important;padding:16px!important;min-height:0!important;border-radius:22px!important;background:rgba(255,253,249,.90)!important;border:1px solid rgba(122,108,128,.10)!important;box-shadow:none!important}
     html body dialog.sat-modal .sat-permission.is-checked{background:linear-gradient(135deg,rgba(251,247,239,.98),rgba(248,237,240,.55) 42%,rgba(237,246,252,.42) 100%)!important;border-color:rgba(201,170,176,.24)!important}
-    /* RC354: the native field stores state; the button is the keyboard control.
+    /* RC355: the native field stores state; the button is the keyboard control.
        casa-dialog's input display rules must not create a third grid item. */
-    html body dialog.sat-modal .sat-permission > input[type="checkbox"]{display:none!important}
+    html body dialog.sat-modal :is(#satForm,#inviteForm) .sat-permission > input[type="checkbox"]{display:none!important}
     html body dialog.sat-modal .sat-checkbox{width:24px!important;height:24px!important;margin:0!important;display:grid!important;place-items:center!important;border:1.5px solid rgba(126,115,132,.28)!important;border-radius:7px!important;box-sizing:border-box!important}
     html body dialog.sat-modal .sat-permission.is-checked .sat-checkbox{border-color:transparent!important}
     html body dialog.sat-modal .sat-permission.is-checked .sat-checkbox::after{content:"";width:6px;height:11px;border-right:2px solid #fff;border-bottom:2px solid #fff;transform:rotate(45deg);margin-top:-3px}
