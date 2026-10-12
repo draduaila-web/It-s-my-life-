@@ -364,7 +364,7 @@
     html body dialog.sat-modal :is(#satForm,#inviteForm) .sat-permission > input[type="checkbox"]{display:none!important}
     html body dialog.sat-modal .sat-checkbox{width:24px!important;height:24px!important;margin:0!important;display:grid!important;place-items:center!important;border:1.5px solid rgba(126,115,132,.28)!important;border-radius:7px!important;box-sizing:border-box!important}
     html body dialog.sat-modal .sat-permission.is-checked .sat-checkbox{border-color:transparent!important}
-    html body dialog.sat-modal .sat-permission.is-checked .sat-checkbox::after{content:"";width:6px;height:11px;border-right:2px solid #fff;border-bottom:2px solid #fff;transform:rotate(45deg);margin-top:-3px}
+    html body dialog.sat-modal .sat-permission.is-checked .sat-checkbox::after{content:""!important;width:6px;height:11px;border-right:2px solid #fff;border-bottom:2px solid #fff;transform:rotate(45deg);margin-top:-3px}
     html body dialog.sat-modal .sat-permission:focus-visible{outline:2px solid rgba(126,115,132,.55)!important;outline-offset:3px!important}
     html body dialog.sat-modal .sat-permission-copy{display:grid!important;gap:4px!important;min-width:0!important;width:100%!important}
     html body dialog.sat-modal .sat-permission-copy strong, html body dialog.sat-modal .sat-permission strong{display:block!important;font-size:14px!important;line-height:1.25!important;font-weight:520!important;color:#4d4550!important;white-space:normal!important}
