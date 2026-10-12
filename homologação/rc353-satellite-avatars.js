@@ -7,10 +7,10 @@
  function normalize(img){const raw=img.getAttribute('src')||'',next=resolve(raw),file=next.split('?')[0].split('/').pop(),m=metrics[file];if(!m)return;if(next!==raw)img.setAttribute('src',next);img.dataset.rc353Avatar='1';if(!listening.has(img)){listening.add(img);img.addEventListener('load',()=>normalize(img));resize?.observe(img);}const w=img.clientWidth,h=img.clientHeight;if(!w||!h)return;const f=fit(m,w,h),value=`translate(${f.x.toFixed(3)}px,${f.y.toFixed(3)}px) scale(${f.scale.toFixed(6)})`;if(img.style.getPropertyValue('transform')!==value||img.style.getPropertyPriority('transform')!=='important')img.style.setProperty('transform',value,'important');}
  const resize=typeof ResizeObserver==='function'?new ResizeObserver(es=>es.forEach(e=>normalize(e.target))):null;
  const style=document.createElement('style');style.id='rc353-satellite-avatar-style';style.textContent=`
- body.bertha-hml::before{content:"HML · RC356"!important}
+ body.bertha-hml::before{content:"HML · RC357"!important}
  img[data-rc353-avatar]{object-fit:contain!important;object-position:50% 50%!important;transform-origin:center!important;background:transparent!important;border-radius:0!important;filter:none!important}
  `;document.head.appendChild(style);
- function stamp(){document.documentElement.dataset.berthaBuild='RC356';document.documentElement.dataset.berthaIndex='RC356';document.querySelectorAll('#rc157IndexBadge').forEach(e=>{if(e.textContent!=='INDEX · RC356')e.textContent='INDEX · RC356';});if(document.title!=='BERTH.A · Homologação RC356')document.title='BERTH.A · Homologação RC356';}
+ function stamp(){document.documentElement.dataset.berthaBuild='RC357';document.documentElement.dataset.berthaIndex='RC357';document.querySelectorAll('#rc157IndexBadge').forEach(e=>{if(e.textContent!=='INDEX · RC357')e.textContent='INDEX · RC357';});if(document.title!=='BERTH.A · Homologação RC357')document.title='BERTH.A · Homologação RC357';}
  let badge=null,badgeObserver=null;
  function watchBadge(){const next=document.querySelector('#rc157IndexBadge');if(next===badge)return;badgeObserver?.disconnect();badge=next;if(badge){badgeObserver=new MutationObserver(stamp);badgeObserver.observe(badge,{subtree:true,childList:true,characterData:true});stamp();}}
  function scan(root){if(root.nodeType!==1&&root.nodeType!==9)return;if(root.matches?.('img'))normalize(root);root.querySelectorAll('img').forEach(normalize);}
