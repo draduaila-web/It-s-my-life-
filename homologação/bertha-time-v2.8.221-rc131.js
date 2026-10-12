@@ -303,7 +303,7 @@
     if(!x.date||x.date>date)return false;
     if(x.repeatUntil&&date>x.repeatUntil)return false;
     const start=new Date(x.date+'T12:00:00'),d=new Date(date+'T12:00:00');
-    const days=Math.round((Date.UTC(d.getFullYear(),d.getMonth(),d.getDate())-Date.UTC(start.getFullYear(),start.getMonth(),start.getDate()))/86400000);
+    const days=calendarDayDistance(start,d);
     if(days<0)return false;
     if(x.repeat==='daily')return true;
     if(x.repeat==='weekly')return days%7===0;
@@ -2260,6 +2260,8 @@
   }
   function capillaryCycleTotal(){ return Math.floor((CAPILLARY_END-CAPILLARY_START)/86400000)+1; }
   function dayStart(d){ return new Date(d.getFullYear(),d.getMonth(),d.getDate()); }
+  function calendarDayDistance(from,to){return Math.round((Date.UTC(to.getFullYear(),to.getMonth(),to.getDate())-Date.UTC(from.getFullYear(),from.getMonth(),from.getDate()))/86400000);}
+  function ritualCycleEndedForDate(id,date){const state=currentCycleState(id);if(state.status!=='ended')return false;const ended=new Date(state.endedAt||'');return Number.isNaN(ended.getTime())||dayStart(date)>=dayStart(ended);}
   function capillaryDay(d){
     const target=iso(dayStart(d)),hits=[];for(let i=0;i<capillaryCycleTotal();i++)if(iso(ritualOccurrenceDate('capilar',i))===target)hits.push(i+1);
     if(hits.length)return hits[0];
@@ -2282,7 +2284,7 @@
     const n=i+1,saved=capillaryTemplateStore()[String(n)]||{};
     return {...base,...saved,date:ritualOccurrenceDate('capilar',i),type:base.type,cycleDay:n,_occurrence:i,tasks:Array.isArray(saved.tasks)?saved.tasks:(base.tasks||[]),products:Array.isArray(saved.products)?saved.products:undefined,includeInMyDay:saved.includeInMyDay!==false};
   }
-  function capillaryEventsOn(d){const target=iso(dayStart(d)),out=[];for(let i=0;i<capillaryCycleTotal();i++){const ev=capillaryEventForIndex(i);if(ev&&iso(ev.date)===target)out.push(ev)}return out}
+  function capillaryEventsOn(d){if(ritualCycleEndedForDate('capilar',d))return[];const target=iso(dayStart(d)),out=[];for(let i=0;i<capillaryCycleTotal();i++){const ev=capillaryEventForIndex(i);if(ev&&iso(ev.date)===target)out.push(ev)}return out}
   function capillaryEvent(d){return capillaryEventsOn(d)[0]||null}
   const SELFCARE_TEMPLATE_KEY='bertha.ritual.autocuidado.template.v1';
   function selfcareTemplateStore(){ return read(SELFCARE_TEMPLATE_KEY,{}); }
@@ -2296,12 +2298,13 @@
     return {...base,date:ritualOccurrenceDate('autocuidado',i),cycleDay:day,_occurrence:i,type:'selfcare',period:base.period||'night',subtitle:`Dia ${day} / 14`};
   }
   function selfcareEventsOn(d){
+    if(ritualCycleEndedForDate('autocuidado',d))return[];
     const target=iso(dayStart(d)),st=ritualScheduleState('autocuidado'),estimate=Math.floor((dayStart(d)-addRitualDays(SELFCARE_START,st.shift))/86400000),keys=new Set();
     for(let i=Math.max(0,estimate-3);i<=estimate+3;i++)keys.add(i);Object.keys(st.overrides).forEach(k=>keys.add(Number(k)));
     return [...keys].filter(i=>i>=0).map(selfcareEventForIndex).filter(ev=>iso(ev.date)===target).sort((a,b)=>a._occurrence-b._occurrence);
   }
   function selfcareEvent(d){return selfcareEventsOn(d)[0]||null}
-  function selfcareCurrentCycleStartIndex(){const st=ritualScheduleState('autocuidado'),n=Math.max(0,Math.floor((dayStart(new Date())-addRitualDays(SELFCARE_START,st.shift))/86400000));return Math.floor(n/14)*14}
+  function selfcareCurrentCycleStartIndex(){const st=ritualScheduleState('autocuidado'),n=Math.max(0,calendarDayDistance(addRitualDays(SELFCARE_START,st.shift),dayStart(new Date())));return Math.floor(n/14)*14}
   function ritualDefaultSettings(ritualId,type){
     if(ritualId==='capilar'){
       if(type==='color') return {period:'night',time:'',priority:'Importante',notify:false,notifyOffset:'at-time',notifyTime:''};
@@ -2506,9 +2509,17 @@
     return all[id]||{number:1,status:'active',mode:'template',revisions:[]};
   }
   function cloneCycle(id,review=false){
-    const all=ritualCycles(), prev=currentCycleState(id);
-    all[id]={...prev,number:(prev.number||1)+1,status:'active',mode:review?'review':'same',
-      revisions:[...(prev.revisions||[]),{from:prev.number||1,at:new Date().toISOString(),review}]};
+    const all=ritualCycles(), prev=currentCycleState(id),schedule=ritualScheduleState(id),today=dayStart(new Date());
+    const first=id==='autocuidado'?selfcareCurrentCycleStartIndex():0,total=id==='capilar'?capillaryCycleTotal():14;
+    const dates=Array.from({length:total},(_,i)=>ritualOccurrenceDate(id,first+i));
+    const last=new Date(Math.max(...dates.map(d=>d.getTime()))),next=addRitualDays(last,1);
+    if(next<today)next.setTime(today.getTime());
+    const origin=ritualOccurrenceDate(id,0),delta=calendarDayDistance(origin,next),snapshot={shift:schedule.shift,overrides:{...schedule.overrides}};
+    schedule.shift+=delta;
+    Object.keys(schedule.overrides).forEach(k=>{schedule.overrides[k]=iso(addRitualDays(new Date(schedule.overrides[k]+'T00:00:00'),delta));});
+    const schedules=ritualScheduleStore();schedules[id]=schedule;saveRitualScheduleStore(schedules);
+    all[id]={...prev,number:(prev.number||1)+1,status:'active',mode:review?'review':'same',startedAt:iso(next),endedAt:null,
+      revisions:[...(prev.revisions||[]),{from:prev.number||1,at:new Date().toISOString(),review,schedule:snapshot}]};
     saveRitualCycles(all);
     if(review){
       alert('Novo ciclo criado como cópia do anterior. Você pode alterar apenas o que quiser em Cuidados & Extras e nas configurações do ritual.');
@@ -2523,12 +2534,10 @@
     saveRitualCycles(all); rerender();
   }
   function shouldShowCycleActions(id){
+    if(currentCycleState(id).status==='ended')return true;
     const today=dayStart(new Date());
-    if(id==='autocuidado'){
-      const diff=Math.floor((today-SELFCARE_START)/86400000);
-      return diff>=13; // only on/after final day of the 14-day cycle
-    }
-    if(id==='capilar') return today>=dayStart(CAPILLARY_END);
+    if(id==='autocuidado')return today>=ritualOccurrenceDate(id,selfcareCurrentCycleStartIndex()+13);
+    if(id==='capilar'){const last=Math.max(...Array.from({length:capillaryCycleTotal()},(_,i)=>ritualOccurrenceDate(id,i).getTime()));return today.getTime()>=last;}
     return false;
   }
   function cycleActionsHtml(id){
