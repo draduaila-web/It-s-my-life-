@@ -66,6 +66,8 @@
     (data.sessions||[]).slice().sort((a,b)=>(+a.createdAt||0)-(+b.createdAt||0)).forEach(s=>{
       const cycle=cycles.get(String(s.cycleId||'')),id=String(s.progressItemId||''),sessionKey=String(s.id||JSON.stringify([id,s.date,s.createdAt]));
       if(!cycle||!id||!/^\d{4}-\d{2}-\d{2}$/.test(s.date||'')||s.date>day(now)||sessionsSeen.has(sessionKey))return;sessionsSeen.add(sessionKey);
+      const date=new Date(s.date+'T12:00:00');if(!Number.isFinite(date.getTime())||day(date.getTime())!==s.date)return;
+      if(id.startsWith('cycle:')){if(id!=='cycle:'+cycle.id)return;}else{const plan=(data.plans||[]).find(p=>String(p.id)===String(s.planId||''));if(!plan||String(plan.cycleId)!==String(cycle.id)||!(id.startsWith('exercise-manual:')||id==='exercise:'+plan.id))return;}
       const proof=history.filter(h=>String(h.itemId||'')===id&&(h.day||day(stamp(h)))===s.date&&stamp(h)<=now&&!used.has(eventKey(h))).sort((a,b)=>Math.abs(stamp(a)-(+s.createdAt||0))-Math.abs(stamp(b)-(+s.createdAt||0)))[0];
       if(!proof)return;used.add(eventKey(proof));const week=period(new Date(s.date+'T12:00:00').getTime(),'weekly'),key=String(cycle.id)+':'+week;
       if(!groups.has(key))groups.set(key,{cycle,week,proof:[]});groups.get(key).proof.push(proof);
