@@ -186,6 +186,7 @@
     const earned=window.BerthaOwnerAchievements?.history?.()||[];
     const historyHtml='<section class="rc193-owner-room-note"><strong>Histórico de conquistas</strong>'+(earned.length?earned.slice().reverse().map(a=>'<p>'+String(a.name||'Conquista').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))+' · '+new Date(a.at).toLocaleDateString('pt-BR')+' · '+a.occurrence+'ª medalha</p>').join(''):'<p>As novas conquistas serão registradas a partir das ações concluídas e dos critérios configurados. Seu histórico de atividades permanece preservado.</p>')+'</section>';
     const dlg=r147Dialog('Sala de Troféus',html+historyHtml);
+    if(dlg)dlg.classList.add('rc361-owner-collection');
     return dlg;
   }
 
@@ -347,6 +348,7 @@
   const style=document.createElement('style');
   style.id='rc192-owner-helper-style';
   style.textContent=`
+    .rc361-owner-collection .r147-dialog-head{position:sticky;top:0;z-index:2;background:#fffaf5;padding-bottom:10px}
     .sat-avatar-art{display:block;width:100%;height:100%;object-fit:contain!important;object-position:center!important;filter:drop-shadow(0 6px 14px rgba(106,84,106,.10))}
     .sat-member>.sat-avatar,.r147-helper-context .sat-avatar,.r147-kid-avatar{overflow:visible!important;background:transparent!important}
     .sat-member>.sat-avatar .sat-avatar-art,.r147-helper-context .sat-avatar-art,.r147-kid-avatar .sat-avatar-art{width:100%!important;height:100%!important}
