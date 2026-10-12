@@ -2372,7 +2372,7 @@
   function ritualDetailData(id,d=new Date()){
     if(read('bertha.ritual.hidden.v1',[]).includes(id)) return null;
     if(id==='capilar') return capillaryEvent(d);
-    if(id==='autocuidado') return selfcareProcedure(selfcareEvent(d));
+    if(id==='autocuidado'){const event=selfcareEvent(d);return event?selfcareProcedure(event):null;}
     return null;
   }
 
@@ -2391,6 +2391,7 @@
     return `<section class="bertha-ritual-page">
       <a class="bertha-back-link" href="#rituais" data-back-rituals>‹ Rituais</a>
       <section class="bertha-ritual-detail-hero tone-${Math.abs(String(id).length)%3}"><span class="bertha-line-icon large">${ritualIcon(r.icon)}</span><div><div class="bertha-task-kicker">${isCustom?'RITUAIS':esc(r.title).toUpperCase()}</div><h1>${id==='capilar'?'Seu cronograma, no lugar certo.':(isCustom||id==='autocuidado')?esc(r.title):esc(phrase)}</h1>${r.subtitle?`<p>${esc(r.subtitle)}</p>`:''}</div></section>
+      ${!ev&&!isCustom?`<div class="bertha-empty-soft">${currentCycleState(id).status==='ended'?'Ciclo encerrado. Seu cronograma e histórico foram preservados.':'Nenhum cuidado programado para hoje.'}</div>`:''}
       ${isCustom?`<div class="bertha-section-row"><span>COMO FAZER</span><button type="button" data-edit-custom-ritual="${id}">Editar ritual</button></div><section class="bertha-ritual-today custom-how">${customSteps.length?`${ritualChecklistHtml(id,checklistContext,customSteps)}`:`<div class="bertha-free-note">Nenhuma etapa cadastrada. Toque em Editar ritual para adicionar.</div>`}</section>`:''}
       ${ev?`<section class="bertha-ritual-today"><div class="bertha-ritual-head"><div><span>HOJE · ${dateLabelLong(new Date())}</span><h2>${esc(ev.title)}</h2><p>${esc(ev.subtitle||'')}</p><small class="bertha-cycle-position">${id==='capilar'?`Dia ${capillaryDay(new Date())} de ${capillaryCycleTotal()}`:`Dia ${ev.cycleDay} de 14`}</small></div><button type="button" ${id==='autocuidado'?'data-edit-selfcare-procedure':'data-config-ritual="'+id+'"'}>${id==='autocuidado'?'Editar cuidado':'Editar'}</button></div>
         ${ev.optional?`<div class="bertha-free-note">Hoje é um espaço livre. A BERTH.A não transforma descanso em pendência.</div>`:`<div class="bertha-ritual-time">${durationText(ev.minutes)} · ${taskLabelPeriod(ritualSetting(id,ev.type).period||ev.period)}</div>`}
