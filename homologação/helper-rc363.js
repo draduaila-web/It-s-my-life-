@@ -3,7 +3,7 @@
 var H=window.BerthaHelper,owner=document.body.dataset.helperMode==='owner',app=document.getElementById('helperApp');
 var client=H.createClient({base:'https://ouxellokvigbdeeyvvfv.supabase.co',key:'sb_publishable_2lmnQX4WD-s343sEZoFERA_B4URTnip',storage:sessionStorage,sessionKey:'bertha.helper.hml.'+(owner?'owner':'adult')+'.auth.v1'});
 var user=null,members=[],tasks=[],network=null,sources=null,view='all',period='today',search='',loading=false,generation=0,interval=null;
-var labels={today:'Hoje',yesterday:'Ontem',earlier:'Antes de ontem',upcoming:'Próximas',all:'Todas'};
+var labels={today:'Hoje',yesterday:'Ontem',earlier:'Anteriores',upcoming:'Próximas',all:'Todas'};
 var states={available:'Disponível para ajudar',assigned:'Delegada',accepted:'Assumida',in_progress:'Em andamento',completed:'Aguardando validação',validated:'Concluída'};
 function el(id){return document.getElementById(id);}function safe(s){return H.escape(s);}
 function notice(s,error){var node=el('notice');if(node){node.textContent=s||'';node.classList.toggle('error',!!error);}}
@@ -15,18 +15,18 @@ function shell(content){
  if(el('allView')){el('allView').onclick=function(){view='all';render();};el('mineView').onclick=function(){view='mine';render();};el('accountBottom').onclick=account;}
 }
 function authContent(){
- return '<section class="panel auth"><div class="eyebrow">Seu acesso</div><h2>Entre na sua BERTH.A</h2><p>'+(owner?'Use sua conta para conectar a rede. Seus cadastros locais continuam na BERTH.A principal.':'Use o e-mail que o Owner escolheu para seu vínculo.')+'</p><form id="authForm"><div class="fields"><label>E-mail<input id="email" type="email" autocomplete="username" required maxlength="254"></label><label>Senha<input id="password" type="password" autocomplete="current-password" required minlength="8" maxlength="128"></label></div><div class="row"><button class="primary" type="submit">Entrar</button><button id="signup" type="button">Criar minha conta</button></div></form><p class="note">Ao criar a conta, confira o e-mail de confirmação e depois entre aqui.</p></section>';
+ return '<section class="panel auth"><div class="eyebrow">Seu acesso</div><h2>Entre na sua BERTH.A</h2><p>'+(owner?'Use sua conta para conectar a rede. Seus cadastros locais continuam na BERTH.A principal.':'Use o e-mail que o Owner escolheu para seu vínculo.')+'</p><form id="authForm"><div class="fields"><label>E-mail<input id="email" type="email" autocomplete="username" required maxlength="254"></label><label>Senha<input id="password" type="password" autocomplete="current-password" required minlength="1" maxlength="128"></label></div><div class="row"><button class="primary" type="submit">Entrar</button><button id="signup" type="button">Criar minha conta</button></div></form><p class="note">Ao criar a conta, confira o e-mail de confirmação e depois entre aqui.</p></section>';
 }
 function bindAuth(){
  var f=el('authForm');if(!f)return;
- async function submit(signup){if(!f.reportValidity())return;var email=el('email').value.trim(),password=el('password').value;f.querySelectorAll('button').forEach(function(b){b.disabled=true;});notice('Conectando…');
+ async function submit(signup){if(!f.reportValidity())return;var email=el('email').value.trim(),password=el('password').value;if(signup&&password.length<8){notice('Use pelo menos oito caracteres para criar sua senha.',true);return;}f.querySelectorAll('button').forEach(function(b){b.disabled=true;});notice('Conectando…');
   try{if(signup){await client.signUp(email,password);if(!client.session()){notice('Confira seu e-mail para confirmar a conta. Depois entre com sua senha.');return;}}else await client.signIn(email,password);await initialize();}
   catch(e){fail(e);}finally{var p=el('password');if(p)p.value='';if(f.isConnected)f.querySelectorAll('button').forEach(function(b){b.disabled=false;});}
  }
  f.onsubmit=function(e){e.preventDefault();submit(false);};el('signup').onclick=function(){submit(true);};
 }
 function modal(title,body,onSubmit){
- var dlg=document.createElement('dialog');dlg.innerHTML='<form><div class="modal-head"><div><div class="eyebrow">'+(owner?'Conexão Helper':'Sua conta')+'</div><h2>'+safe(title)+'</h2></div><button class="close" type="button" aria-label="Fechar">×</button></div>'+body+'<div class="status modal-status" role="status" aria-live="polite"></div><div class="modal-actions"><button type="button" class="cancel">Cancelar</button>'+(onSubmit?'<button class="primary" type="submit">Confirmar</button>':'')+'</div></form>';
+ var dlg=document.createElement('dialog');dlg.innerHTML='<form><div class="modal-head"><div><div class="eyebrow">'+(owner?'Conexão Helper':onSubmit?'Colaboração':'Sua conta')+'</div><h2>'+safe(title)+'</h2></div><button class="close" type="button" aria-label="Fechar">×</button></div>'+body+'<div class="status modal-status" role="status" aria-live="polite"></div><div class="modal-actions"><button type="button" class="cancel">Cancelar</button>'+(onSubmit?'<button class="primary" type="submit">Confirmar</button>':'')+'</div></form>';
  document.body.appendChild(dlg);var form=dlg.querySelector('form');
  dlg.querySelector('.close').onclick=dlg.querySelector('.cancel').onclick=function(){dlg.close();};
  dlg.addEventListener('close',function(){dlg.remove();});
@@ -101,17 +101,19 @@ function bindOwner(){
 function drawShare(){
  var adults=sources.members.filter(function(m){return m.permissions&&m.permissions.casa===true&&members.some(function(r){return r.local_id===String(m.id)&&r.active;});});
  var area=el('shareArea');if(!adults.length){area.innerHTML='<p>Leia os cadastros e escolha adultos com permissão para tarefas na BERTH.A principal.</p>';return;}
- area.innerHTML='<div class="fields"><label>Compartilhar com<select id="shareMember">'+adults.map(function(m){return '<option value="'+safe(String(m.id))+'">'+safe(m.name)+'</option>';}).join('')+'</select></label></div><form id="shareForm"><div id="sourceList"></div><button type="submit" class="primary">Compartilhar atividades escolhidas</button></form>';
- function showSources(){var m=adults.find(function(x){return String(x.id)===el('shareMember').value;}),available=sources.tasks.filter(function(x){return H.eligibleSource(x,m);});el('sourceList').innerHTML=available.length?available.map(function(x,i){return '<div class="share-row"><input type="checkbox" id="pick-'+i+'" data-source="'+i+'" aria-label="Compartilhar '+safe(x.task.name)+'"><label for="pick-'+i+'">'+safe(x.task.name)+'<small>'+safe(x.area)+' · '+(x.task.responsibility==='help'?'Disponível para ajuda':'Delegada')+'</small></label><label>Dia combinado<input type="date" data-date="'+i+'" required value="'+H.localDay()+'"></label></div>';}).join(''):'<p>Nenhuma atividade disponível para este adulto. Revise ajuda/delegação em Casa.</p>';
+ area.innerHTML='<div class="fields"><label>Compartilhar com<select id="shareMember">'+adults.map(function(m){return '<option value="'+safe(String(m.id))+'">'+safe(m.name)+'</option>';}).join('')+'<option value="__all">Todos os adultos autorizados</option></select></label></div><form id="shareForm"><div id="sourceList"></div><div class="row"><button type="submit" class="primary">Compartilhar atividades escolhidas</button><button type="button" id="cancelShare">Cancelar seleção</button></div></form>';
+ function showSources(){var choice=el('shareMember').value,chosen=choice==='__all'?adults:adults.filter(function(x){return String(x.id)===choice;}),available=sources.tasks.filter(function(x){return chosen.some(function(m){return H.eligibleSource(x,m);});});el('sourceList').innerHTML=available.length?available.map(function(x,i){return '<div class="share-row"><input type="checkbox" id="pick-'+i+'" data-source="'+i+'" aria-label="Compartilhar '+safe(x.task.name)+'"><label for="pick-'+i+'">'+safe(x.task.name)+'<small>'+safe(x.area)+' · '+(x.task.responsibility==='help'?'Disponível para ajuda':'Delegada')+'</small></label><label>Dia combinado<input type="date" data-date="'+i+'" value="'+H.localDay()+'"></label></div>';}).join(''):'<p>Nenhuma atividade disponível para este adulto. Revise ajuda/delegação em Casa.</p>';
+  el('cancelShare').onclick=function(){area.innerHTML='';};el('sourceList').querySelectorAll('[data-source]').forEach(function(c){c.onchange=function(){el('sourceList').querySelector('[data-date="'+c.dataset.source+'"]').required=c.checked;};});
   el('shareForm').onsubmit=async function(e){e.preventDefault();var selected=[...this.querySelectorAll('[data-source]:checked')];if(!selected.length){notice('Escolha pelo menos uma atividade.',true);return;}this.querySelector('button').disabled=true;
    try{
     // Refresh the current local permissions and responsibility before each explicit publish.
-    var current=H.ownerSources(localStorage),live=current.members.find(function(x){return String(x.id)===String(m.id);});
-    if(!live||live.permissions?.casa!==true)throw new Error('A permissão mudou. Atualize os cadastros antes de compartilhar.');
-    var remote=await client.action('member',{network_id:network.id,local_id:String(live.id),name:live.name,avatar_key:live.avatarKey,permissions:{tasks:true},requires_validation:live.requiresValidation===true});
+    var current=H.ownerSources(localStorage),liveMembers=chosen.map(function(m){return current.members.find(function(x){return String(x.id)===String(m.id);});}),remoteByLocal={};
+    if(liveMembers.some(function(m){return !m||m.permissions?.casa!==true;}))throw new Error('A permissão mudou. Atualize os cadastros antes de compartilhar.');
+    for(var live of liveMembers)remoteByLocal[String(live.id)]=await client.action('member',{network_id:network.id,local_id:String(live.id),name:live.name,avatar_key:live.avatarKey,permissions:{tasks:true},requires_validation:live.requiresValidation===true});
     for(var checkbox of selected){var i=Number(checkbox.dataset.source),source=available[i],nowSource=current.tasks.find(function(x){return x.kind===source.kind&&String(x.task.id)===String(source.task.id);}),date=el('shareForm').querySelector('[data-date="'+i+'"]').value;
-     if(!nowSource||!H.eligibleSource(nowSource,live)||!H.dateValid(date))throw new Error('A atividade ou seu destinatário mudou. Leia novamente.');
-     await client.action('share',{network_id:network.id,source_ref:source.kind+'|'+source.task.id+'|'+date,title:nowSource.task.name,area:nowSource.area,task_date:date,targets:[remote.id],responsibility:nowSource.task.responsibility,requires_validation:live.requiresValidation===true||nowSource.task.requiresValidation===true});
+     var recipients=nowSource?liveMembers.filter(function(m){return H.eligibleSource(nowSource,m);}):[];
+     if(!nowSource||!recipients.length||!H.dateValid(date))throw new Error('A atividade ou seu destinatário mudou. Leia novamente.');
+     await client.action('share',{network_id:network.id,source_ref:source.kind+'|'+source.task.id+'|'+date,title:nowSource.task.name,area:nowSource.area,task_date:date,targets:recipients.map(function(m){return remoteByLocal[String(m.id)].id;}),responsibility:nowSource.task.responsibility,requires_validation:false});
     }
     await loadRemote();notice('Atividades compartilhadas. Repetir o mesmo envio não duplica a atividade.');
    }catch(err){fail(err);}finally{if(this.isConnected)this.querySelector('button').disabled=false;}
