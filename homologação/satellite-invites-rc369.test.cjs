@@ -1,0 +1,9 @@
+const assert=require('node:assert/strict'),vm=require('node:vm'),fs=require('node:fs');
+let rows=[{id:'existing',name:'Original',role:'kids',art:'approved',progress:{points:91}}],form,events=[],calls=0;
+const document={head:{appendChild(){}},body:{},createElement:()=>({}),getElementById:()=>null,querySelector:()=>form,querySelectorAll:()=>[]};
+const storage={getItem:()=>null,setItem(){},removeItem(){}};
+const window={BerthaHelper:{sessionStorageFor:()=>({storage}),createClient:()=>({session:()=>null})},addEventListener(){},dispatchEvent:e=>events.push(e),openSatelliteEditor(id){form={querySelector:()=>({value:'New name'}),onsubmit(){calls++;if(id)rows[0].name='Updated';else rows.push({id:'new',name:'New name',role:'adult'});}};}};
+vm.runInNewContext(fs.readFileSync(__dirname+'/satellite-invites-rc369.js','utf8'),{window,document,localStorage:storage,sessionStorage:storage,loadSatellites:()=>structuredClone({members:rows}),MutationObserver:class{observe(){}},queueMicrotask:fn=>fn(),CustomEvent:class{constructor(type,opts){this.type=type;this.detail=opts.detail;}}});
+window.openSatelliteEditor();form.onsubmit({});assert.equal(calls,1);assert.equal(events.length,1);assert.equal(events[0].detail.created,true);assert.equal(events[0].detail.member.id,'new');assert.deepEqual(rows[0],{id:'existing',name:'Original',role:'kids',art:'approved',progress:{points:91}});
+window.openSatelliteEditor('existing');form.onsubmit({});assert.equal(calls,2);assert.equal(events[1].detail.created,false);assert.equal(events[1].detail.member.id,'existing');assert.equal(rows[0].art,'approved');assert.equal(rows[0].progress.points,91);
+console.log('PASS RC369 integração: salvar chama editor original uma vez, evento após cadastro, editar não reemite convite, identificadores/arte/progresso preservados.');
