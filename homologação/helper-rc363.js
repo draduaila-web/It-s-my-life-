@@ -34,7 +34,7 @@ function bindAuth(){
  var cf=el('codeForm');if(cf){cf.onsubmit=async function(e){e.preventDefault();if(!cf.reportValidity())return;var b=cf.querySelector('button');b.disabled=true;notice('Conectando seu espaço…');try{await client.enterCode(el('inviteCode').value,kidsMode?'kids':'adult',claimNonce);sessionStorage.removeItem('bertha.code.claim.nonce');await initialize();notice('Seu espaço está conectado.');}catch(err){fail(err);}finally{if(b.isConnected)b.disabled=false;}};var legacy=el('legacyAccess');if(legacy)legacy.onclick=function(){shell(emailContent());bindAuth();};return;}
  var f=el('authForm');if(!f)return;try{el('email').value=authStorage.storage.getItem(pendingEmailKey)||'';}catch(_){}
  f.onsubmit=async function(e){e.preventDefault();if(!f.reportValidity())return;if(Date.now()-lastEmailRequest<60000){notice('Aguarde um minuto antes de pedir outro link.',true);return;}var email=el('email').value.trim(),button=f.querySelector('button');button.disabled=true;notice('Solicitando seu link…');
-  try{var url=new URL(location.pathname,location.origin);url.searchParams.set('v','371');var invite;try{invite=sessionStorage.getItem(inviteKey);}catch(_){}if(!owner&&invite)url.searchParams.set('invite',invite);await client.requestEmailLink(email,url.href);authStorage.storage.setItem(pendingEmailKey,email.toLowerCase());lastEmailRequest=Date.now();notice('Solicitação recebida. Procure o e-mail do remetente Supabase, inclusive na pasta de spam.');}catch(err){fail(err);}finally{button.disabled=false;}
+  try{var url=new URL(location.pathname,location.origin);url.searchParams.set('v','372');if(owner&&new URLSearchParams(location.search).get('return')==='main')url.searchParams.set('return','main');var invite;try{invite=sessionStorage.getItem(inviteKey);}catch(_){}if(!owner&&invite)url.searchParams.set('invite',invite);await client.requestEmailLink(email,url.href);authStorage.storage.setItem(pendingEmailKey,email.toLowerCase());lastEmailRequest=Date.now();notice('Solicitação recebida. Procure o e-mail do remetente Supabase, inclusive na pasta de spam.');}catch(err){fail(err);}finally{button.disabled=false;}
  };
 }
 async function restoreEmailLink(){
@@ -176,7 +176,7 @@ async function loadRemote(){
  }finally{loading=false;}
 }
 async function initialize(){
- try{user=await client.user();await loadRemote();if(owner&&localStorage.getItem('bertha.hml.invite.pending.v369')){location.replace('./?v=371#satelites');return;}clearInterval(interval);interval=setInterval(function(){if(document.visibilityState==='visible'&&user&&!owner&&!document.querySelector('dialog[open]')&&document.activeElement?.id!=='search')loadRemote().catch(fail);},20000);}
+ try{user=await client.user();await loadRemote();if(owner&&(localStorage.getItem('bertha.hml.invite.pending.v369')||new URLSearchParams(location.search).get('return')==='main')){location.replace('./?v=372#satelites');return;}clearInterval(interval);interval=setInterval(function(){if(document.visibilityState==='visible'&&user&&!owner&&!document.querySelector('dialog[open]')&&document.activeElement?.id!=='search')loadRemote().catch(fail);},20000);}
  catch(e){user=null;render();fail(e);}
 }
 window.addEventListener('storage',function(e){if(e.key!==authKey)return;generation++;user=null;members=[];tasks=[];network=null;clearInterval(interval);render();restoreEmailLink().then(function(handled){if(!handled&&client.session())initialize();});});
