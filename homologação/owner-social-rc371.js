@@ -10,9 +10,9 @@ var transport=null,panel=null,panelEpoch=0;
 function closePanel(){panelEpoch++;if(transport)transport.destroy();transport=null;if(panel)panel.remove();panel=null;}
 async function openPanel(mode){
  closePanel();var actions=document.querySelector('.s156-actions');if(!actions)return;
- var generation=panelEpoch;panel=document.createElement('section');panel.className='owner-social-embedded';panel.setAttribute('aria-label',mode==='messages'?'Mensagens':'Comunicação');
+ var generation=panelEpoch;panel=document.createElement('section');panel.className='owner-social-embedded';panel.setAttribute('aria-label',mode==='messages'?'Mensagens':mode==='guides'?'Como fazer':'Comunicação');
  var toolbar=document.createElement('div');toolbar.className='owner-social-toolbar';
- [['Mensagens','messages'],['Comunicação','privacy'],['Fechar',null]].forEach(function(entry){var b=document.createElement('button');b.type='button';b.className='s156-btn';b.textContent=entry[0];b.setAttribute('aria-pressed',String(entry[1]===mode));b.onclick=function(){if(entry[1])openPanel(entry[1]);else closePanel();};toolbar.appendChild(b);});
+ [['Mensagens','messages'],['Comunicação','privacy'],['Como fazer','guides'],['Fechar',null]].forEach(function(entry){var b=document.createElement('button');b.type='button';b.className='s156-btn';b.textContent=entry[0];b.setAttribute('aria-pressed',String(entry[1]===mode));b.onclick=function(){if(entry[1])openPanel(entry[1]);else closePanel();};toolbar.appendChild(b);});
  var content=document.createElement('div');content.className='owner-social-content';content.setAttribute('role','status');content.textContent='Conectando sua rede…';panel.append(toolbar,content);actions.after(panel);
  try{
   if(!client.session())throw new Error('Conecte sua conta do Owner uma vez para acessar sua rede.');
