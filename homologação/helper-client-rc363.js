@@ -66,12 +66,13 @@ function createClient(options){
   action:async function(op,arg){return raw('/rest/v1/rpc/bertha_hml_action','POST',{op:op,arg:arg},await token());}
  };
 }
+function inviteCodeValue(value){var code=String(value||'').toUpperCase().replace(/[\s-]/g,'');return /^[ABCDEFGHJKLMNPQRSTUVWXYZ23456789]{12}$/.test(code)?code:null;}
 function inviteToken(value){
  var text=String(value||'').trim(),uuid=/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
  if(uuid.test(text))return text;
  try{var url=new URL(text);if(url.origin!=='https://draduaila-web.github.io'||decodeURIComponent(url.pathname)!=='/It-s-my-life-/homologação/helper.html')return null;
  var token=url.searchParams.get('invite')||new URLSearchParams(url.hash.slice(1)).get('link');return uuid.test(token||'')?token:null;}catch(_){return null;}
 }
-var api={inviteToken:inviteToken,dateValid:dateValid,localDay:localDay,bucket:bucket,escape:escape,ownerSources:ownerSources,eligibleSource:eligibleSource,sessionStorageFor:sessionStorageFor,createClient:createClient};
+var api={inviteCodeValue:inviteCodeValue,inviteToken:inviteToken,dateValid:dateValid,localDay:localDay,bucket:bucket,escape:escape,ownerSources:ownerSources,eligibleSource:eligibleSource,sessionStorageFor:sessionStorageFor,createClient:createClient};
 if(typeof module==='object'&&module.exports)module.exports=api;else root.BerthaHelper=api;
 })(typeof window==='object'?window:globalThis);
