@@ -1,7 +1,10 @@
 (function(){
 'use strict';
 var H=window.BerthaHelper,owner=document.body.dataset.helperMode==='owner',app=document.getElementById('helperApp');
-var client=H.createClient({base:'https://ouxellokvigbdeeyvvfv.supabase.co',key:'sb_publishable_2lmnQX4WD-s343sEZoFERA_B4URTnip',storage:sessionStorage,sessionKey:'bertha.helper.hml.'+(owner?'owner':'adult')+'.auth.v1'});
+var authKey='bertha.helper.hml.'+(owner?'owner':'adult')+'.auth.v1',persistentStorage=null;
+try{persistentStorage=window.localStorage;}catch(_){}
+var authStorage=H.sessionStorageFor(persistentStorage,sessionStorage,authKey);
+var client=H.createClient({base:'https://ouxellokvigbdeeyvvfv.supabase.co',key:'sb_publishable_2lmnQX4WD-s343sEZoFERA_B4URTnip',storage:authStorage.storage,sessionKey:authKey});
 var user=null,members=[],tasks=[],network=null,sources=null,view='all',period='today',search='',loading=false,generation=0,interval=null;
 var labels={today:'Hoje',yesterday:'Ontem',earlier:'Anteriores',upcoming:'Próximas',all:'Todas'};
 var states={available:'Disponível para ajudar',assigned:'Delegada',accepted:'Assumida',in_progress:'Em andamento',completed:'Aguardando validação',validated:'Concluída'};
@@ -14,16 +17,30 @@ function shell(content){
  el('account').onclick=account;
  if(el('allView')){el('allView').onclick=function(){view='all';render();};el('mineView').onclick=function(){view='mine';render();};el('accountBottom').onclick=account;}
 }
+var pendingEmailKey=authKey+'.email',inviteKey='bertha.helper.hml.pendingInvite.v1',lastEmailRequest=0;
 function authContent(){
- return '<section class="panel auth"><div class="eyebrow">Seu acesso</div><h2>Entre na sua BERTH.A</h2><p>'+(owner?'Use sua conta para conectar a rede. Seus cadastros locais continuam na BERTH.A principal.':'Use o e-mail que o Owner escolheu para seu vínculo.')+'</p><form id="authForm"><div class="fields"><label>E-mail<input id="email" type="email" autocomplete="username" required maxlength="254"></label><label>Senha<input id="password" type="password" autocomplete="current-password" required minlength="1" maxlength="128"></label></div><div class="row"><button class="primary" type="submit">Entrar</button><button id="signup" type="button">Criar minha conta</button></div></form><p class="note">Ao criar a conta, confira o e-mail de confirmação e depois entre aqui.</p></section>';
+ return '<section class="panel auth"><div class="eyebrow">Seu acesso</div><h2>Um link para entrar.</h2><p>'+(owner?'Receba seu acesso no e-mail.':'Use o e-mail que o Owner escolheu para seu convite.')+'</p><form id="authForm"><div class="fields"><label>E-mail<input id="email" type="email" autocomplete="email" required maxlength="254"></label></div><button class="primary" type="submit">Receber meu link</button></form><p class="note">Abra o link no seu e-mail para entrar sem senha. Depois, seu acesso fica salvo neste aparelho até você sair ou precisar entrar novamente.</p><p class="note">O link de acesso é pessoal. Não encaminhe para outra pessoa.</p></section>';
 }
 function bindAuth(){
- var f=el('authForm');if(!f)return;
- async function submit(signup){if(!f.reportValidity())return;var email=el('email').value.trim(),password=el('password').value;if(signup&&password.length<8){notice('Use pelo menos oito caracteres para criar sua senha.',true);return;}f.querySelectorAll('button').forEach(function(b){b.disabled=true;});notice('Conectando…');
-  try{if(signup){await client.signUp(email,password);if(!client.session()){notice('Confira seu e-mail para confirmar a conta. Depois entre com sua senha.');return;}}else await client.signIn(email,password);await initialize();}
-  catch(e){fail(e);}finally{var p=el('password');if(p)p.value='';if(f.isConnected)f.querySelectorAll('button').forEach(function(b){b.disabled=false;});}
- }
- f.onsubmit=function(e){e.preventDefault();submit(false);};el('signup').onclick=function(){submit(true);};
+ var f=el('authForm');if(!f)return;try{el('email').value=authStorage.storage.getItem(pendingEmailKey)||'';}catch(_){}
+ f.onsubmit=async function(e){e.preventDefault();if(!f.reportValidity())return;if(Date.now()-lastEmailRequest<60000){notice('Aguarde um minuto antes de pedir outro link.',true);return;}var email=el('email').value.trim(),button=f.querySelector('button');button.disabled=true;notice('Solicitando seu link…');
+  try{var url=new URL(location.pathname,location.origin);url.searchParams.set('v','367');var invite;try{invite=sessionStorage.getItem(inviteKey);}catch(_){}if(!owner&&invite)url.searchParams.set('invite',invite);await client.requestEmailLink(email,url.href);authStorage.storage.setItem(pendingEmailKey,email.toLowerCase());lastEmailRequest=Date.now();notice('Solicitação recebida. Confira seu e-mail, inclusive a pasta de spam.');}catch(err){fail(err);}finally{button.disabled=false;}
+ };
+}
+async function restoreEmailLink(){
+ var fragment=new URLSearchParams(location.hash.slice(1)),query=new URLSearchParams(location.search),invite=query.get('invite')||fragment.get('link');
+ if(invite&&/^[0-9a-f-]{36}$/i.test(invite)){try{sessionStorage.setItem(inviteKey,invite);}catch(_){}}
+ var hasAuth=fragment.has('access_token')||fragment.has('error');
+ if(!hasAuth){if(query.has('invite')){query.delete('invite');history.replaceState(null,'',location.pathname+'?'+query.toString());}return false;}
+ var access=fragment.get('access_token'),refresh=fragment.get('refresh_token'),expires=Number(fragment.get('expires_in')||3600),failed=fragment.has('error');
+ // Remove sensitive fragment before rendering/account confirmation. No token logging.
+ history.replaceState(null,'',location.pathname+'?v=367');
+ if(failed){notice('Este link expirou ou já foi utilizado. Solicite um novo link.',true);return true;}
+ try{var candidate=await client.inspectEmailSession({access_token:access,refresh_token:refresh,expires_in:Number.isFinite(expires)&&expires>0?expires:3600});
+  var requested=authStorage.storage.getItem(pendingEmailKey),same=requested&&requested.toLowerCase()===candidate.user.email.toLowerCase();
+  async function accept(){client.acceptEmailSession(candidate);authStorage.storage.removeItem(pendingEmailKey);await initialize();}
+  if(same)await accept();else{modal('Confirmar meu acesso','<p>Entrar como <strong>'+safe(candidate.user.email)+'</strong>?</p><p class="note">Confirme que este é o seu e-mail. O vínculo com a rede segue o convite do Owner.</p>',accept);}
+ }catch(err){fail(err);}return true;
 }
 function modal(title,body,onSubmit){
  var dlg=document.createElement('dialog');dlg.innerHTML='<form><div class="modal-head"><div><div class="eyebrow">'+(owner?'Conexão Helper':onSubmit?'Colaboração':'Sua conta')+'</div><h2>'+safe(title)+'</h2></div><button class="close" type="button" aria-label="Fechar">×</button></div>'+body+'<div class="status modal-status" role="status" aria-live="polite"></div><div class="modal-actions"><button type="button" class="cancel">Cancelar</button>'+(onSubmit?'<button class="primary" type="submit">Confirmar</button>':'')+'</div></form>';
@@ -35,8 +52,8 @@ function modal(title,body,onSubmit){
 }
 function account(){
  if(!user){el('email')?.scrollIntoView({block:'center'});return;}
- var d=modal('Minha conta','<p>'+safe(user.email)+'</p><p class="note">O acesso às atividades depende do vínculo e das permissões do Owner.</p><button type="button" id="signout">Sair desta conta</button>',null);
- d.querySelector('#signout').onclick=async function(){try{await client.signOut();}catch(_){}user=null;members=[];tasks=[];network=null;generation++;clearInterval(interval);d.close();render();};
+ var d=modal('Minha conta','<p>'+safe(user.email)+'</p><p class="note">O acesso às atividades depende do vínculo e das permissões do Owner.</p><p class="note">'+(authStorage.persistent?'Acesso salvo neste aparelho.':'Acesso mantido somente nesta aba.')+'</p><button type="button" id="signout">Sair desta conta</button>',null);
+ d.querySelector('#signout').onclick=async function(){try{await client.signOut();}catch(_){}authStorage.storage.removeItem(pendingEmailKey);sessionStorage.removeItem(inviteKey);user=null;members=[];tasks=[];network=null;generation++;clearInterval(interval);d.close();render();};
 }
 function taskHtml(t){
  var mine=members.some(function(m){return m.id===t.actor_id;});
@@ -73,8 +90,8 @@ function render(){
  if(!user){shell(authContent());bindAuth();return;}
  if(owner){shell(ownerPanel());bindOwner();if(network)bindTasks();return;}
  if(!members.length){shell('<section class="panel"><h2>Vamos conectar seu espaço</h2><p>Peça ao Owner seu vínculo de acesso e use o mesmo e-mail escolhido por ele.</p><form id="linkForm"><div class="fields"><label>Código de vínculo<input id="linkCode" required pattern="[0-9a-fA-F-]{36}" maxlength="36" autocomplete="off"></label></div><button class="primary" type="submit">Conectar com o Owner</button></form></section>');
-  var hash=new URLSearchParams(location.hash.slice(1)),code=hash.get('link');if(code&&/^[0-9a-f-]{36}$/i.test(code))el('linkCode').value=code;
-  el('linkForm').onsubmit=async function(e){e.preventDefault();var f=this;if(!f.reportValidity())return;f.querySelector('button').disabled=true;try{await client.action('link_accept',{token:el('linkCode').value.trim()});history.replaceState(null,'',location.pathname+location.search);await loadRemote();notice('Seu espaço foi conectado.');}catch(err){fail(err);}finally{if(f.isConnected)f.querySelector('button').disabled=false;}};return;
+  var hash=new URLSearchParams(location.hash.slice(1)),code=hash.get('link');try{code=code||sessionStorage.getItem(inviteKey);}catch(_){}if(code&&/^[0-9a-f-]{36}$/i.test(code))el('linkCode').value=code;
+  el('linkForm').onsubmit=async function(e){e.preventDefault();var f=this;if(!f.reportValidity())return;f.querySelector('button').disabled=true;try{await client.action('link_accept',{token:el('linkCode').value.trim()});sessionStorage.removeItem(inviteKey);history.replaceState(null,'',location.pathname+location.search);await loadRemote();notice('Seu espaço foi conectado.');}catch(err){fail(err);}finally{if(f.isConnected)f.querySelector('button').disabled=false;}};return;
  }
  shell(taskPanel());bindTasks();
 }
@@ -92,7 +109,7 @@ function bindOwner(){
   modal('Vincular '+m.name,'<p>Informe o e-mail que esta pessoa usará no Helper.</p><div class="fields"><label>E-mail do adulto<input name="email" type="email" required maxlength="254" autocomplete="off"></label></div>',async function(d){
    var link=await client.action('link',{network_id:network.id,member_id:m.id,email:d.querySelector('input').value.trim()});
    var url=new URL('helper.html',location.href);url.hash='link='+link.token;
-   var result=modal('Vínculo pronto','<p>Válido por sete dias e apenas para o e-mail informado. Compartilhe pessoalmente com '+safe(m.name)+'.</p><label>Link de acesso<input readonly value="'+safe(url.href)+'"></label><p class="note">Nenhuma mensagem foi enviada automaticamente.</p><button type="button" id="copyLink">Copiar vínculo</button>',null);
+   var result=modal('Vínculo pronto','<p>Válido por sete dias e apenas para o e-mail informado. Compartilhe pessoalmente com '+safe(m.name)+'.</p><label>Link de convite<input readonly value="'+safe(url.href)+'"></label><p class="note">Nenhuma mensagem foi enviada automaticamente.</p><button type="button" id="copyLink">Copiar vínculo</button>',null);
    result.querySelector('#copyLink').onclick=async function(){try{await navigator.clipboard.writeText(url.href);result.querySelector('.modal-status').textContent='Vínculo copiado.';}catch(_){result.querySelector('.modal-status').textContent='Selecione e copie o link acima.';}};
   });
  };});
@@ -138,7 +155,8 @@ async function initialize(){
  try{user=await client.user();await loadRemote();clearInterval(interval);interval=setInterval(function(){if(document.visibilityState==='visible'&&user&&!owner&&!document.querySelector('dialog[open]')&&document.activeElement?.id!=='search')loadRemote().catch(fail);},20000);}
  catch(e){user=null;render();fail(e);}
 }
+window.addEventListener('storage',function(e){if(e.key!==authKey)return;generation++;user=null;members=[];tasks=[];network=null;clearInterval(interval);render();restoreEmailLink().then(function(handled){if(!handled&&client.session())initialize();});});
 window.addEventListener('offline',function(){notice('Você está sem conexão. Aguarde antes de confirmar atividades.',true);});
 window.addEventListener('online',function(){if(user)loadRemote().then(function(){notice('Conexão retomada.');}).catch(fail);});
-render();if(client.session())initialize();
+render();restoreEmailLink().then(function(handled){if(!handled&&client.session())initialize();});
 })();
