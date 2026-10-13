@@ -1,0 +1,14 @@
+(function(root){
+'use strict';
+var ready=null,subscription=null,os=null;
+function sdk(){if(ready)return ready;ready=new Promise(function(resolve,reject){var timer=setTimeout(function(){reject(new Error('O serviço de notificações demorou a responder.'));},30000);root.OneSignalDeferred=root.OneSignalDeferred||[];root.OneSignalDeferred.push(async function(OS){try{await OS.init({appId:'18d49ac6-cdad-4780-8437-cbdcd025a680',serviceWorkerPath:'/It-s-my-life-/OneSignalSDKWorker.js',serviceWorkerParam:{scope:'/It-s-my-life-/'},notifyButton:{enable:false},welcomeNotification:{disable:true},promptOptions:{slidedown:{prompts:[{type:'push',autoPrompt:false}]}}});clearTimeout(timer);os=OS;resolve(OS);}catch(e){clearTimeout(timer);reject(e);}});if(!document.querySelector('script[data-bertha-social-push]')){var s=document.createElement('script');s.src='https://cdn.onesignal.com/sdks/web/v16/OneSignalSDK.page.js';s.async=true;s.dataset.berthaSocialPush='true';s.onerror=function(){clearTimeout(timer);reject(new Error('Não foi possível carregar as notificações.'));};document.head.appendChild(s);}}).catch(function(e){ready=null;throw e;});return ready;}
+async function bind(client,OS,user){if(!OS.User.PushSubscription.optedIn)return false;var id=OS.User.PushSubscription.id,token=OS.User.PushSubscription.token,onesignal=OS.User.onesignalId;if(!id||!token||!onesignal)throw new Error('Aguarde a inscrição deste aparelho ficar pronta e tente novamente.');await client.push('bind',{subscription_id:id,token:token,onesignal_id:onesignal},user.id);subscription=id;localStorage.setItem('bertha.social.push.subscription.'+user.id,id);return true;}
+async function activate(client,user){
+ var OS=os;
+ if(!OS){var config=await client.push('config',{},user.id);if(!config.configured)throw new Error('O serviço de notificações ainda não está configurado.');OS=await sdk();if(!OS.Notifications.isPushSupported())throw new Error('No iPhone, abra o app adicionado à Tela de Início para ativar notificações.');if(!OS.Notifications.permission)return {enabled:false,needsTap:true};}
+ if(!OS.Notifications.isPushSupported())throw new Error('Este navegador não oferece notificações. No iPhone, use o app adicionado à Tela de Início.');
+ await OS.Notifications.requestPermission();if(!OS.Notifications.permission)throw new Error('A permissão de notificações não foi concedida.');await OS.User.PushSubscription.optIn();await bind(client,OS,user);return {enabled:true};
+}
+async function stop(client,user){var id=subscription||localStorage.getItem('bertha.social.push.subscription.'+user.id);if(id)await client.push('unbind',{subscription_id:id},user.id);localStorage.removeItem('bertha.social.push.subscription.'+user.id);subscription=null;}
+root.BerthaHelperPush={activate:activate,stop:stop};
+})(window);

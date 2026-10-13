@@ -6,7 +6,9 @@ try{persistentStorage=window.localStorage;}catch(_){}
 var authStorage=H.sessionStorageFor(persistentStorage,sessionStorage,authKey);
 var client=H.createClient({base:'https://ouxellokvigbdeeyvvfv.supabase.co',key:'sb_publishable_2lmnQX4WD-s343sEZoFERA_B4URTnip',storage:authStorage.storage,sessionKey:authKey});
 var claimNonce=null;try{claimNonce=sessionStorage.getItem('bertha.code.claim.nonce');}catch(_){}if(!claimNonce){claimNonce=crypto.randomUUID();try{sessionStorage.setItem('bertha.code.claim.nonce',claimNonce);}catch(_){}}
-var user=null,members=[],tasks=[],network=null,sources=null,view='all',period='today',search='',loading=false,generation=0,interval=null;
+var social=null,inviteUI=null,transportKey=null;
+function clearTransport(clear){if(social){social.destroy(clear);social=null;}if(inviteUI){inviteUI.destroy();inviteUI=null;}transportKey=null;}
+var user=null,members=[],tasks=[],network=null,sources=null,view=['messages','invitations','privacy'].includes(location.hash.slice(1))?location.hash.slice(1):'all',period='today',search='',loading=false,generation=0,interval=null;
 var labels={today:'Hoje',yesterday:'Ontem',earlier:'Anteriores',upcoming:'Próximas',all:'Todas'};
 var states={available:'Disponível para ajudar',assigned:'Delegada',accepted:'Assumida',in_progress:'Em andamento',completed:'Aguardando validação',validated:'Concluída'};
 function el(id){return document.getElementById(id);}function safe(s){return H.escape(s);}
@@ -14,8 +16,10 @@ function notice(s,error){var node=el('notice');if(node){node.textContent=s||'';n
 function fail(e){notice(navigator.onLine===false?'Você está sem conexão. Nenhuma ação foi confirmada.':e.message||'Não foi possível concluir.',true);}
 function shell(content){
  document.body.classList.toggle('owner',owner);
- app.innerHTML='<div class="shell"><header class="top"><img class="logo" src="'+(owner||kidsMode?'bertha-icon-512.png':'helper-icon-512-rc365.png')+'" alt="'+(owner?'BERTH.A':(kidsMode?'BERTH.A Kids':'BERTH.A Helper — azul, verde e coral'))+'"><div><div class="brand">BERTH.A'+(owner?'':' <span class="helper-brand-label">'+(kidsMode?'Kids':'Helper')+'</span>')+'</div><div class="eyebrow">'+(owner?'Owner · conectar adultos':(kidsMode?'Kids · meu espaço':'Helper · colaboração adulta'))+'</div></div><button class="account" id="account">'+(user?'Minha conta':'Entrar')+'</button></header><section class="hero"><div class="eyebrow">'+(owner?'Homologação · RC369':'SEU ESPAÇO NA REDE')+'</div><h1>'+(owner?'Um vínculo simples.<br>Uma rede que coopera.':'Your life, with<br>somewhere to land.')+'</h1><p>'+(owner?'Escolha o adulto, conecte a conta dele e compartilhe as atividades que vocês querem cuidar juntos.':'Você se importa. A BERTH.A conecta.')+'</p></section><div id="notice" class="status" role="status" aria-live="polite"></div><div id="content">'+content+'</div><footer><p class="note">BERTH.A · Homologação. Compartilhe apenas o que faz sentido.</p><a href="./?v=362#satelites">Abrir BERTH.A principal</a></footer></div>'+(!owner&&!kidsMode&&user?'<nav class="bottom" aria-label="Navegação Helper"><button id="allView" aria-pressed="'+(view==='all')+'">Colaborar</button><button id="mineView" aria-pressed="'+(view==='mine')+'">Minhas tarefas</button><button id="accountBottom">Conta</button></nav>':'');
+ app.innerHTML='<div class="shell"><header class="top"><img class="logo" src="'+(owner||kidsMode?'bertha-icon-512.png':'helper-icon-512-rc365.png')+'" alt="'+(owner?'BERTH.A':(kidsMode?'BERTH.A Kids':'BERTH.A Helper — azul, verde e coral'))+'"><div><div class="brand">BERTH.A'+(owner?'':' <span class="helper-brand-label">'+(kidsMode?'Kids':'Helper')+'</span>')+'</div><div class="eyebrow">'+(owner?'Owner · conectar adultos':(kidsMode?'Kids · meu espaço':'Helper · colaboração adulta'))+'</div></div><button class="account" id="account">'+(user?'Minha conta':'Entrar')+'</button></header><section class="hero"><div class="eyebrow">'+(owner?'Homologação · RC369':'SEU ESPAÇO NA REDE')+'</div><h1>'+(owner?'Um vínculo simples.<br>Uma rede que coopera.':'Your life, with<br>somewhere to land.')+'</h1><p>'+(owner?'Escolha o adulto, conecte a conta dele e compartilhe as atividades que vocês querem cuidar juntos.':'Você se importa. A BERTH.A conecta.')+'</p></section><div id="notice" class="status" role="status" aria-live="polite"></div><div id="content">'+content+'</div><footer><p class="note">BERTH.A · Homologação. Compartilhe apenas o que faz sentido.</p><a href="./?v=371#satelites">Abrir BERTH.A principal</a></footer></div>'+(!owner&&!kidsMode&&user?'<nav class="bottom" aria-label="Navegação Helper"><button id="allView" aria-pressed="'+(view==='all')+'">Colaborar</button><button id="mineView" aria-pressed="'+(view==='mine')+'">Minhas tarefas</button><button id="accountBottom">Conta</button></nav>':'');
  el('account').onclick=account;
+ if(user&&(owner?network:members.length)&&!kidsMode){var nav=document.createElement('div');nav.className='row social-tabs';nav.innerHTML=['all','messages','invitations'].concat(owner?['privacy']:[]).map(function(v){return '<button type="button" data-helper-tab="'+v+'" aria-pressed="'+(view===v)+'">'+({all:'Meu Dia',messages:'Mensagens',invitations:'Convites',privacy:'Comunicação'})[v]+'</button>';}).join('');el('content').before(nav);nav.querySelectorAll('[data-helper-tab]').forEach(function(b){b.onclick=function(){view=b.dataset.helperTab;render();};});}
+
  if(el('allView')){el('allView').onclick=function(){view='all';render();};el('mineView').onclick=function(){view='mine';render();};el('accountBottom').onclick=account;}
 }
 var pendingEmailKey=authKey+'.email',inviteKey='bertha.helper.hml.pendingInvite.v1',lastEmailRequest=0;
@@ -30,7 +34,7 @@ function bindAuth(){
  var cf=el('codeForm');if(cf){cf.onsubmit=async function(e){e.preventDefault();if(!cf.reportValidity())return;var b=cf.querySelector('button');b.disabled=true;notice('Conectando seu espaço…');try{await client.enterCode(el('inviteCode').value,kidsMode?'kids':'adult',claimNonce);sessionStorage.removeItem('bertha.code.claim.nonce');await initialize();notice('Seu espaço está conectado.');}catch(err){fail(err);}finally{if(b.isConnected)b.disabled=false;}};var legacy=el('legacyAccess');if(legacy)legacy.onclick=function(){shell(emailContent());bindAuth();};return;}
  var f=el('authForm');if(!f)return;try{el('email').value=authStorage.storage.getItem(pendingEmailKey)||'';}catch(_){}
  f.onsubmit=async function(e){e.preventDefault();if(!f.reportValidity())return;if(Date.now()-lastEmailRequest<60000){notice('Aguarde um minuto antes de pedir outro link.',true);return;}var email=el('email').value.trim(),button=f.querySelector('button');button.disabled=true;notice('Solicitando seu link…');
-  try{var url=new URL(location.pathname,location.origin);url.searchParams.set('v','370');var invite;try{invite=sessionStorage.getItem(inviteKey);}catch(_){}if(!owner&&invite)url.searchParams.set('invite',invite);await client.requestEmailLink(email,url.href);authStorage.storage.setItem(pendingEmailKey,email.toLowerCase());lastEmailRequest=Date.now();notice('Solicitação recebida. Procure o e-mail do remetente Supabase, inclusive na pasta de spam.');}catch(err){fail(err);}finally{button.disabled=false;}
+  try{var url=new URL(location.pathname,location.origin);url.searchParams.set('v','371');var invite;try{invite=sessionStorage.getItem(inviteKey);}catch(_){}if(!owner&&invite)url.searchParams.set('invite',invite);await client.requestEmailLink(email,url.href);authStorage.storage.setItem(pendingEmailKey,email.toLowerCase());lastEmailRequest=Date.now();notice('Solicitação recebida. Procure o e-mail do remetente Supabase, inclusive na pasta de spam.');}catch(err){fail(err);}finally{button.disabled=false;}
  };
 }
 async function restoreEmailLink(){
@@ -40,7 +44,7 @@ async function restoreEmailLink(){
  if(!hasAuth){if(query.has('invite')){query.delete('invite');history.replaceState(null,'',location.pathname+'?'+query.toString());}return false;}
  var access=fragment.get('access_token'),refresh=fragment.get('refresh_token'),expires=Number(fragment.get('expires_in')||3600),failed=fragment.has('error');
  // Remove sensitive fragment before rendering/account confirmation. No token logging.
- history.replaceState(null,'',location.pathname+'?v=370');
+ history.replaceState(null,'',location.pathname+'?v=371');
  if(failed){notice('Este link expirou ou já foi utilizado. Solicite um novo link.',true);return true;}
  try{var candidate=await client.inspectEmailSession({access_token:access,refresh_token:refresh,expires_in:Number.isFinite(expires)&&expires>0?expires:3600});
   var requested=authStorage.storage.getItem(pendingEmailKey),same=requested&&requested.toLowerCase()===candidate.user.email.toLowerCase();
@@ -58,8 +62,12 @@ function modal(title,body,onSubmit){
 }
 function account(){
  if(!user){(el('inviteCode')||el('email'))?.scrollIntoView({block:'center'});return;}
- var d=modal('Minha conta','<p>'+safe(user.app_metadata?.bertha_code_member?(members[0]?.name||'Seu espaço'):user.email)+'</p><p class="note">O acesso às atividades depende do vínculo e das permissões do Owner.</p><p class="note">'+(authStorage.persistent?'Acesso salvo neste aparelho.':'Acesso mantido somente nesta aba.')+'</p><button type="button" id="signout">Sair desta conta</button>',null);
- d.querySelector('#signout').onclick=async function(){try{await client.signOut();}catch(_){}authStorage.storage.removeItem(pendingEmailKey);sessionStorage.removeItem(inviteKey);user=null;members=[];tasks=[];network=null;generation++;clearInterval(interval);d.close();render();};
+ var d=modal('Minha conta','<p>'+safe(user.app_metadata?.bertha_code_member?(members[0]?.name||'Seu espaço'):user.email)+'</p><p class="note">O acesso às atividades depende do vínculo e das permissões do Owner.</p><p class="note">'+(authStorage.persistent?'Acesso salvo neste aparelho.':'Acesso mantido somente nesta aba.')+'</p><div class="row"><button type="button" id="activateSocialPush">Ativar notificações de mensagens e convites</button><button type="button" id="stopSocialPush">Parar esses avisos neste aparelho</button></div><p class="note" id="pushState" role="status">A ativação é voluntária neste aparelho. Estes controles valem apenas para mensagens e convites.</p><button type="button" id="signout">Sair desta conta</button>',null);
+ if(kidsMode){d.querySelector('#activateSocialPush').parentElement.remove();d.querySelector('#pushState').remove();}
+ if(!kidsMode){d.querySelector('#activateSocialPush').onclick=async function(){this.disabled=true;try{var result=await window.BerthaHelperPush.activate(client,user);this.textContent=result.enabled?'Avisos ativados':'Permitir avisos neste aparelho';d.querySelector('#pushState').textContent=result.enabled?'Notificações de mensagens e convites ativadas neste aparelho.':'Serviço pronto. Toque novamente em Ativar para permitir os avisos neste aparelho.';}catch(e){d.querySelector('#pushState').textContent=e.message;}finally{this.disabled=false;}};
+ d.querySelector('#stopSocialPush').onclick=async function(){try{await window.BerthaHelperPush.stop(client,user);d.querySelector('#pushState').textContent='Avisos de mensagens e convites interrompidos neste aparelho.';}catch(e){d.querySelector('#pushState').textContent=e.message;}};
+ }
+ d.querySelector('#signout').onclick=async function(){await window.BerthaHelperPush.stop(client,user).catch(function(){});clearTransport(true);try{await client.signOut();}catch(_){}authStorage.storage.removeItem(pendingEmailKey);sessionStorage.removeItem(inviteKey);user=null;members=[];tasks=[];network=null;generation++;clearInterval(interval);d.close();render();};
 }
 function taskHtml(t){
  var mine=members.some(function(m){return m.id===t.actor_id;});
@@ -93,6 +101,12 @@ function ownerPanel(){
  return '<section class="panel"><div class="row" style="justify-content:space-between"><div><h2>Pessoas da minha rede</h2><p class="note">Cada pessoa recebe apenas os conteúdos autorizados para seu perfil.</p></div><button id="syncMembers">Ler cadastros e atualizar permissões</button></div><div id="memberList">'+members.map(function(m){return '<div class="member"><div class="grow"><strong>'+safe(m.name)+'</strong><p class="note">'+(!m.active?'Acesso pausado':m.user_id?'Conta vinculada':'Aguardando vínculo')+' · '+(m.permissions.tasks===true?'tarefas autorizadas':'tarefas não autorizadas')+'</p></div><div class="row">'+(!m.active?'<button data-resume="'+safe(m.id)+'">Retomar acesso</button>':(!m.user_id?'<button data-link="'+safe(m.id)+'">Vincular conta</button>':'')+'<button data-pause="'+safe(m.id)+'">Pausar acesso</button>')+'</div></div>';}).join('')+'</div><div id="ownerEmpty"></div></section><section class="panel"><h2>Escolher atividades para compartilhar</h2><p class="note">Somente rotinas e manutenções já disponíveis para ajuda ou delegação. Os registros da BERTH.A principal permanecem preservados.</p><button id="readTasks">Ler atividades deste navegador</button><div id="shareArea"></div></section>'+taskPanel();
 }
 function render(){
+ if(user&&['messages','privacy','invitations'].includes(view)&&(owner?network:members.length)&&!kidsMode){
+  var nid=owner?network.id:members[0].network_id,key=user.id+'|'+nid+'|'+view;
+  if(transportKey!==key){clearTransport();transportKey=key;if(view==='invitations')inviteUI=window.BerthaInvitations.create({client:client,user:user,network:{id:nid},owner:owner,escape:safe});else social=window.BerthaSocial.create({client:client,user:user,network:{id:nid},owner:owner,escape:safe});}
+  shell('<section class="panel" id="transportPanel"></section>');(inviteUI?inviteUI.mount(el('transportPanel')):social.mount(el('transportPanel'),view)).catch(fail);return;
+ }
+ clearTransport();
  if(!user){shell(authContent());bindAuth();return;}
  if(owner){shell(ownerPanel());bindOwner();if(network)bindTasks();return;}
  if(!members.length&&user.app_metadata?.bertha_code_member){shell('<section class="panel"><h2>Seu acesso à rede está indisponível.</h2><p>Converse com o Owner para conferir seu vínculo e as permissões. Seu histórico permanece preservado.</p></section>');return;}
@@ -158,11 +172,11 @@ async function loadRemote(){
   members=fetchedMembers;
   if(owner){network=fetchedNetworks.find(function(n){return n.owner_id===user.id;})||null;members=members.filter(function(m){return network&&m.network_id===network.id;});tasks=fetchedTasks.filter(function(t){return network&&t.network_id===network.id;});}
   else{members=members.filter(function(m){return m.user_id===user.id&&m.active&&m.kind===(kidsMode?'kids':'adult');});var networks=members.map(function(m){return m.network_id;});tasks=fetchedTasks.filter(function(t){return networks.includes(t.network_id);});}
-  render();
+  if(!transportKey||!['messages','privacy','invitations'].includes(view)||!(owner?network:members.length))render();
  }finally{loading=false;}
 }
 async function initialize(){
- try{user=await client.user();await loadRemote();if(owner&&localStorage.getItem('bertha.hml.invite.pending.v369')){location.replace('./?v=370#satelites');return;}clearInterval(interval);interval=setInterval(function(){if(document.visibilityState==='visible'&&user&&!owner&&!document.querySelector('dialog[open]')&&document.activeElement?.id!=='search')loadRemote().catch(fail);},20000);}
+ try{user=await client.user();await loadRemote();if(owner&&localStorage.getItem('bertha.hml.invite.pending.v369')){location.replace('./?v=371#satelites');return;}clearInterval(interval);interval=setInterval(function(){if(document.visibilityState==='visible'&&user&&!owner&&!document.querySelector('dialog[open]')&&document.activeElement?.id!=='search')loadRemote().catch(fail);},20000);}
  catch(e){user=null;render();fail(e);}
 }
 window.addEventListener('storage',function(e){if(e.key!==authKey)return;generation++;user=null;members=[];tasks=[];network=null;clearInterval(interval);render();restoreEmailLink().then(function(handled){if(!handled&&client.session())initialize();});});
