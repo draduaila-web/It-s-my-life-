@@ -1,0 +1,10 @@
+const assert=require('node:assert/strict'),S=require('./helper-messages-rc371.js');
+const now=Date.parse('2026-10-13T12:00:00Z'),session={expires_at:'2026-10-13T13:00:00Z',updated_at:'2026-10-13T11:59:50Z',state:'current'};
+assert.equal(S.locationState(session,now),'current');
+assert.equal(S.locationState({...session,updated_at:'2026-10-13T11:58:00Z'},now),'stale');
+assert.equal(S.locationState({...session,updated_at:null},now),'unavailable');
+assert.equal(S.locationState({...session,expires_at:'2026-10-13T11:00:00Z'},now),'ended');
+assert.equal(S.locationState({...session,state:'ended'},now),'ended');
+assert.equal(S.locationState({...session,updated_at:'bad'},now),'stale');
+assert.deepEqual(S.mergeMessages([{client_id:'same',body:'remote'}],[{client_id:'same',body:'pending'},{client_id:'other',body:'failed'}]),[{client_id:'same',body:'remote'},{client_id:'other',body:'failed'}]);
+console.log('PASS RC364: status aging and reconnection merge. These unit tests do not validate device GPS or server permissions.');

@@ -52,6 +52,9 @@ function createClient(options){
  }
  return {
   session:syncSession,
+  push:async function(op,arg,expected){var t=await token();if(expected&&syncSession()?.user?.id!==expected)throw new Error('A conta mudou. Confira suas notificações.');return raw('/functions/v1/bertha-social-push','POST',Object.assign({op:op},arg),t);},
+  social:async function(op,arg,expected){var t=await token();if(expected&&syncSession()?.user?.id!==expected)throw new Error('A conta mudou. Confira antes de enviar.');return raw('/rest/v1/rpc/bertha_hml_social','POST',{op:op,arg:arg},t);},
+  invitation:async function(op,arg,expected){var t=await token();if(expected&&syncSession()?.user?.id!==expected)throw new Error('A conta mudou. Confira antes de responder.');return raw('/rest/v1/rpc/bertha_hml_invitation','POST',{op:op,arg:arg},t);},
   inviteCode:async function(member,op){return raw('/functions/v1/bertha-code-access','POST',{op:op||'issue',member:member},await token());},
   prepareInvite:async function(member){return raw('/rest/v1/rpc/bertha_hml_invite_prepare','POST',{arg:member},await token());},
   enterCode:async function(code,kind,nonce){var version=authVersion;code=String(code||'').toUpperCase().replace(/[\s-]/g,'');if(!/^[ABCDEFGHJKLMNPQRSTUVWXYZ23456789]{12}$/.test(code)||!['adult','kids'].includes(kind))throw new Error('Confira o código enviado pelo Owner.');var result=await raw('/functions/v1/bertha-code-access','POST',{op:'claim',code:code,kind:kind,nonce:nonce});if(!result?.session?.access_token||!result.session.refresh_token||result.member?.kind!==kind||result.session.user?.id!==result.member.user_id)throw new Error('Não foi possível confirmar este acesso.');var found=await raw('/auth/v1/user','GET',null,result.session.access_token);if(found?.id!==result.member.user_id||version!==authVersion)throw new Error('A conta mudou. Confira antes de entrar.');authVersion++;storeSession(Object.assign({},result.session,{user:found}));return result.member;},
@@ -62,7 +65,7 @@ function createClient(options){
   signUp:async function(email,password){var v=++authVersion,data=await raw('/auth/v1/signup','POST',{email:email,password:password});if(v!==authVersion)throw new Error('A conta mudou. Entre novamente.');if(data&&data.access_token)storeSession(data);return data;},
   signOut:async function(){var tokenAtLogout=session&&session.access_token;authVersion++;save(null);if(tokenAtLogout)await raw('/auth/v1/logout?scope=local','POST',{},tokenAtLogout);},
   user:async function(){return raw('/auth/v1/user','GET',null,await token());},
-  query:async function(table,query){if(!/^bertha_hml_(networks|members|links|tasks|events)$/.test(table))throw new Error('Fonte não autorizada.');return raw('/rest/v1/'+table+'?'+query,'GET',null,await token());},
+  query:async function(table,query){if(!/^bertha_hml_(networks|members|links|tasks|events|conversations|messages|invitations|invitation_responses)$/.test(table))throw new Error('Fonte não autorizada.');return raw('/rest/v1/'+table+'?'+query,'GET',null,await token());},
   action:async function(op,arg){return raw('/rest/v1/rpc/bertha_hml_action','POST',{op:op,arg:arg},await token());}
  };
 }

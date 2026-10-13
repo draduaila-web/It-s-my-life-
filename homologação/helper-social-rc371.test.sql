@@ -1,0 +1,30 @@
+begin;
+do $$
+declare own uuid:=gen_random_uuid();a uuid:=gen_random_uuid();b uuid:=gen_random_uuid();outside uuid:=gen_random_uuid();n uuid;ma uuid;mb uuid;i jsonb;c jsonb;ab jsonb;msg uuid:=gen_random_uuid();blocked boolean;num int;
+begin
+ insert into auth.users(id,email,email_confirmed_at) values(own,'qa-social-owner@example.invalid',now()),(a,'qa-social-a@example.invalid',now()),(b,'qa-social-b@example.invalid',now()),(outside,'qa-social-outside@example.invalid',now());
+ perform set_config('request.jwt.claims',jsonb_build_object('sub',own,'role','authenticated')::text,true);
+ n:=(public.bertha_hml_action('network','{}')->>'id')::uuid;
+ ma:=(public.bertha_hml_invite_prepare('{"local_id":"qa-a","name":"QA A","kind":"adult","permissions":{"convites":true}}')->>'id')::uuid;
+ mb:=(public.bertha_hml_invite_prepare('{"local_id":"qa-b","name":"QA B","kind":"adult","permissions":{"convites":false}}')->>'id')::uuid;
+ update public.bertha_hml_members set user_id=a where id=ma;update public.bertha_hml_members set user_id=b where id=mb;
+ i:=public.bertha_hml_invitation('share',jsonb_build_object('network_id',n,'source_ref','qa-local-id','title','QA encontro','targets',jsonb_build_array(ma)));
+ perform public.bertha_hml_invitation('share',jsonb_build_object('network_id',n,'source_ref','qa-local-id','title','QA encontro editado','targets',jsonb_build_array(ma)));
+ select count(*) into num from public.bertha_hml_invitations where network_id=n;if num<>1 then raise exception 'FAIL convite duplicado';end if;
+ perform set_config('request.jwt.claims',jsonb_build_object('sub',a,'role','authenticated')::text,true);
+ perform public.bertha_hml_invitation('respond',jsonb_build_object('invitation_id',i->>'id','status','yes'));perform public.bertha_hml_invitation('respond',jsonb_build_object('invitation_id',i->>'id','status','maybe'));
+ select count(*) into num from public.bertha_hml_invitation_responses where invitation_id=(i->>'id')::uuid;if num<>1 then raise exception 'FAIL resposta duplicada';end if;
+ blocked:=false;begin perform public.bertha_hml_social('open',jsonb_build_object('network_id',n,'user_a',a,'user_b',b));exception when insufficient_privilege then blocked:=true;end;if not blocked then raise exception 'FAIL dupla liberada por padrão';end if;
+ c:=public.bertha_hml_social('open',jsonb_build_object('network_id',n,'user_a',a,'user_b',own));
+ perform public.bertha_hml_social('send',jsonb_build_object('conversation_id',c->>'id','client_id',msg,'body','QA texto'));perform public.bertha_hml_social('send',jsonb_build_object('conversation_id',c->>'id','client_id',msg,'body','QA texto'));
+ select count(*) into num from public.bertha_hml_messages where client_id=msg;if num<>1 then raise exception 'FAIL mensagem duplicada';end if;
+ perform set_config('request.jwt.claims',jsonb_build_object('sub',b,'role','authenticated')::text,true);blocked:=false;begin perform public.bertha_hml_invitation('respond',jsonb_build_object('invitation_id',i->>'id','status','yes'));exception when insufficient_privilege then blocked:=true;end;if not blocked then raise exception 'FAIL convite não autorizado';end if;
+ perform set_config('request.jwt.claims',jsonb_build_object('sub',own,'role','authenticated')::text,true);perform public.bertha_hml_social('communication',jsonb_build_object('network_id',n,'user_a',a,'user_b',b,'allowed',true));
+ perform set_config('request.jwt.claims',jsonb_build_object('sub',a,'role','authenticated')::text,true);ab:=public.bertha_hml_social('open',jsonb_build_object('network_id',n,'user_a',a,'user_b',b));perform public.bertha_hml_social('send',jsonb_build_object('conversation_id',ab->>'id','client_id',gen_random_uuid(),'body','QA privado'));
+ perform set_config('request.jwt.claims',jsonb_build_object('sub',own,'role','authenticated')::text,true);if private.bertha_hml_conversation_reader((ab->>'id')::uuid) then raise exception 'FAIL Owner lê adultos';end if;perform public.bertha_hml_social('communication',jsonb_build_object('network_id',n,'user_a',a,'user_b',b,'allowed',false));
+ perform set_config('request.jwt.claims',jsonb_build_object('sub',a,'role','authenticated')::text,true);if not private.bertha_hml_conversation_reader((ab->>'id')::uuid) then raise exception 'FAIL histórico revogado sumiu';end if;blocked:=false;begin perform public.bertha_hml_social('send',jsonb_build_object('conversation_id',ab->>'id','client_id',gen_random_uuid(),'body','QA bloqueado'));exception when insufficient_privilege then blocked:=true;end;if not blocked then raise exception 'FAIL revogação ignorada';end if;
+ update public.bertha_hml_members set permissions='{"invites":false}' where id=ma;blocked:=false;begin perform public.bertha_hml_invitation('respond',jsonb_build_object('invitation_id',i->>'id','status','yes'));exception when insufficient_privilege then blocked:=true;end;if not blocked then raise exception 'FAIL permissão convite revogada';end if;
+ perform set_config('request.jwt.claims',jsonb_build_object('sub',outside,'role','authenticated')::text,true);if private.bertha_hml_invitation_reader((i->>'id')::uuid) or private.bertha_hml_conversation_reader((c->>'id')::uuid) then raise exception 'FAIL outra rede lê conteúdo';end if;
+ raise notice 'PASS convites, edição idempotente, respostas individuais, revogação, mensagens idempotentes, default bloqueado, privacidade de adultos e histórico';
+end;$$;
+rollback;
