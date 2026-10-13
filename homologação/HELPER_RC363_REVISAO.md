@@ -12,7 +12,7 @@ Helper é o adulto colaborador, não uma categoria separada de Adulto. Família 
 
 ## Implementação desta etapa
 
-- helper.html: app Adulto/Helper independente, conta, vínculo, busca, Hoje/Ontem/Antes de ontem/Próximas/Todas, minhas tarefas, assumir/iniciar/concluir.
+- helper.html: app Adulto/Helper independente, conta, vínculo, busca, Hoje/Ontem/Anteriores/Próximas/Todas, minhas tarefas, assumir/iniciar/concluir.
 - helper-owner.html: Owner conecta conta, lê adultos já cadastrados neste navegador HML, atualiza permissão Casa→tarefas e exigência de validação, gera vínculo por email, seleciona atividades e data combinada, acompanha/valida e pausa acesso.
 - Owner principal permanece RC362. Nenhuma gravação em seu storage/timers/pontuação ou notificações. **Conclusões remotas desta etapa ainda não alimentam automaticamente Meu Dia/Meu Progresso, recorrências ou reconhecimentos Helper. O retorno ao motor aprovado é etapa pendente, não validada por estes testes.**
 - Cinco tabelas novas bertha_hml_*, separadas das tabelas antigas e de produção. Nenhuma política antiga, Auth setting ou push OneSignal alterado.
@@ -38,16 +38,29 @@ Helper é o adulto colaborador, não uma categoria separada de Adulto. Família 
 
 Duas tentativas multicomando interrompidas pelo MCP com Invalid or expired requestState; contagens0 confirmadas. Teste final reproduzível helper-rls-rc363.test.sql usa um único DO com subtransação e rollback deliberado apenas após todos os assertions. Executado sem erro após correção de alvos múltiplos; contagens0 confirmadas separadamente. Fixtures Auth temporários apenas dentro da transação, sem Auth API/email enviados.
 
-Migrations aplicadas: bertha_hml_helper_rc363 e bertha_hml_helper_targets_rc363. Security advisors inicial: lints=[]; repetir ao concluir. Changelog HTML corrente consultado (índice.md indisponível); RLS/Password-based Auth via search_docs; endpoints Auth em documentação/OpenAPI oficial. Teste de banco não valida SMTP ou login real.
+Migrations aplicadas: bertha_hml_helper_rc363 e bertha_hml_helper_targets_rc363 e bertha_hml_helper_resume_rc363. Security advisors inicial: lints=[]; repetir ao concluir. Changelog HTML corrente consultado (índice.md indisponível); RLS/Password-based Auth via search_docs; endpoints Auth em documentação/OpenAPI oficial. Teste de banco não valida SMTP ou login real.
 
 ## Limites e próxima etapa
 
 - Login/vínculo de duas contas reais e entrega de confirmação de email ainda precisam de validação. Nenhuma credencial inventada. SMTP/redirect atual ainda não verificados; não presumir entrega.
 - Alterações posteriores de permissão no Owner são sincronizadas explicitamente por “Ler cadastros e atualizar permissões”. Pausa remota já revoga acesso. Retorno automático ao motor Owner pendente.
 - Compras, convites bidirecionais, reconhecimentos/gamificação adulto, conversas, Kids↔adultos, Realtime/GPS não implementados.
-- Safari/iPhone físico, teclado virtual, safe areas reais, instalação PWA/ícone iOS, background/Watch não testados. Manifest sem service worker/offline; íconeSVG, sem garantia de instalação iOS.
+- Safari/iPhone físico, teclado virtual, safe areas reais, instalação PWA/ícone iOS, background/Watch não testados. Manifest sem service worker/offline; ícones SVG e PNG192/512, sem garantia de instalação iOS.
 - Raiz não promovida; nenhum dado HML migrado. Problema de prefixo da raiz segue na matriz anterior.
 
 Rollback de código: branch acima. Backend aditivo; desativação preservando dados pode revogar EXECUTE da RPC public.bertha_hml_action e retirar o acesso às páginas novas. Não executar DROP/limpeza como rollback automático.
 
 Páginas QA separadas usam exclusivamente bertha.helper.qa.rc363 e transport simulado, sem criar pessoas no backend. Seus testes validam UI, não transporte entre aparelhos reais. Não são carregadas por helper.html/helper-owner.html.
+
+
+## Publicação inicial e testes de UI
+
+PR50: merge338cb4a66e6837a8e8dc524183d56e40042ed21d. Pages1349/run38323513155 Success.
+Diff integral:15arquivos novos;14textos integralmente iguais ao preparado, SVG em diff visual. Nenhum arquivo anterior modificado/excluído.
+App real helper.html?v=363 aberto: titleRC363, íconeSVG carregado, campos16px, sem autofocus/overflow; apenas cliente/app363 carregados, nenhum módulo QA.
+QA publicado: recortes Hoje/Ontem/anteriores/próximas/Todas, busca positiva/vazia; assumir, recarregar e manter responsável; Minhas tarefas; começar; concluir/cancelar preservou Em andamento; Escape fecha; confirmar exibiu Aguardando validação; Owner QA validou e exibiu Concluída. Leitura explícita, seleção zero bloqueada, selecionar por Space e compartilhar; repetir manteve duas atividades visíveis do dia, sem duplicar.
+Owner e Helper em390/320: áreas úteis375/305px, scrollWidth=clientWidth; imagens carregadas, barra inferior77px e padding100px. Não equivale a Safari/teclado virtual.
+Ajustes finais preparados após esse teste: label Colaboração no modal, cancelar seleção, data obrigatória só para itens selecionados, login não impõe tamanho mínimo de criação de senha, “Todos os adultos autorizados” com elegibilidade por tarefa; regra de validação permanece por pessoa (não copiada globalmente para os demais alvos). PNG192/512 exportados do SVG novo e apple-touch-icon configurado. Teste SQL ampliado confirmou conclusão sem validação para o adulto com essa permissão individual; fixtures revertidos.
+Revalidação desta etapa final registrada após seu deploy.
+
+Ajuste adicional: Pausar agora tem Retomar acesso, pelo Owner, para a mesma conta e com nova conferência da permissão do cadastro local. Links revogados não são reativados. Retomada testada na mesma subtransação após revogação;0fixtures persistidos.

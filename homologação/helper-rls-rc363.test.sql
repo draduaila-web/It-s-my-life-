@@ -1,7 +1,7 @@
 -- One statement, one subtransaction. Fixtures always roll back, including Auth rows.
 do $test$
 declare o uuid:=gen_random_uuid(); a uuid:=gen_random_uuid(); b uuid:=gen_random_uuid(); c uuid:=gen_random_uuid();
- n uuid; ma uuid; mb uuid; tok uuid; tokb uuid; tid uuid; r jsonb; cnt int;
+ n uuid; ma uuid; mb uuid; tok uuid; tokb uuid; tid uuid; ta uuid; r jsonb; cnt int;
 begin
  begin
   insert into auth.users(id,email,email_confirmed_at) values
@@ -60,10 +60,21 @@ begin
   r:=public.bertha_hml_action('validate',jsonb_build_object('network_id',n,'task_id',tid));if r->>'state'<>'validated' then raise exception 'FAIL Owner validate';end if;
   perform public.bertha_hml_action('validate',jsonb_build_object('network_id',n,'task_id',tid));
   select count(*) into cnt from public.bertha_hml_events;if cnt<>4 then raise exception 'FAIL validation duplicate';end if;
+  ta:=tid;
+  tid:=(public.bertha_hml_action('share',jsonb_build_object('network_id',n,'source_ref','qa-b-no-validation','title','QA B task','task_date','2026-10-12','targets',jsonb_build_array(mb),'responsibility','help'))->>'id')::uuid;
+  perform set_config('request.jwt.claim.sub',b::text,true);
+  perform public.bertha_hml_action('claim',jsonb_build_object('task_id',tid));
+  perform public.bertha_hml_action('start',jsonb_build_object('task_id',tid));
+  r:=public.bertha_hml_action('complete',jsonb_build_object('task_id',tid));if r->>'state'<>'validated' then raise exception 'FAIL individual optional validation';end if;
+  perform set_config('request.jwt.claim.sub',o::text,true);
   perform public.bertha_hml_action('pause',jsonb_build_object('network_id',n,'member_id',ma));
   perform set_config('request.jwt.claim.sub',a::text,true);
   select count(*) into cnt from public.bertha_hml_tasks;if cnt<>0 then raise exception 'FAIL revoke read';end if;
-  begin perform public.bertha_hml_action('claim',jsonb_build_object('task_id',tid));raise exception 'FAIL revoke write';exception when insufficient_privilege then null;end;
+  begin perform public.bertha_hml_action('claim',jsonb_build_object('task_id',ta));raise exception 'FAIL revoke write';exception when insufficient_privilege then null;end;
+  perform set_config('request.jwt.claim.sub',o::text,true);
+  perform public.bertha_hml_action('resume',jsonb_build_object('network_id',n,'member_id',ma));
+  perform set_config('request.jwt.claim.sub',a::text,true);
+  select count(*) into cnt from public.bertha_hml_tasks;if cnt<>1 then raise exception 'FAIL Owner authorized resume';end if;
   perform set_config('role','postgres',true);
   raise exception using errcode='PZ001',message='Tests passed; rollback fixtures';
  exception when sqlstate 'PZ001' then

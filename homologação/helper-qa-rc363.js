@@ -1,5 +1,6 @@
 // Dedicated QA only. This file is never loaded by helper.html or helper-owner.html.
 (function(){
+document.getElementById('backendProbe').onclick=async function(){this.disabled=true;try{var r=await fetch('https://ouxellokvigbdeeyvvfv.supabase.co/rest/v1/bertha_hml_tasks?select=id',{headers:{apikey:'sb_publishable_2lmnQX4WD-s343sEZoFERA_B4URTnip'},cache:'no-store'});document.getElementById('probeResult').textContent=r.status===401||r.status===403?'PASS: acesso anônimo bloqueado HTTP'+r.status:'PENDENTE: resposta HTTP'+r.status;}catch(e){document.getElementById('probeResult').textContent='PENDENTE: conexão indisponível';}finally{this.disabled=false;}};
 var H=window.BerthaHelper,key='bertha.helper.qa.rc363',owner=new URLSearchParams(location.search).get('mode')==='owner';
 document.body.dataset.helperMode=owner?'owner':'adult';
 function offset(n){var d=new Date();d.setDate(d.getDate()+n);return H.localDay(d);}
@@ -17,6 +18,7 @@ action:async function(op,arg){var d=read(),t=d.tasks.find(function(x){return x.i
  if(op==='network')return d.network;
  if(op==='member'){m=d.members.find(function(x){return x.local_id===arg.local_id;});if(!m)throw new Error('QA member unavailable');m.permissions=arg.permissions;save(d);return m;}
  if(op==='pause'){m.active=false;save(d);return m;}
+ if(op==='resume'){m.active=true;save(d);return m;}
  if(op==='share'){t=d.tasks.find(function(x){return x.source_ref===arg.source_ref;});if(!t){t=Object.assign({id:'qa-shared-'+d.tasks.length,state:'available'},arg);d.tasks.push(t);}else t.targets=Array.from(new Set(t.targets.concat(arg.targets)));save(d);return t;}
  if(!t)throw new Error('QA task unavailable');
  if(op==='claim'){if(!t.actor_id){t.actor_id='qa-a';t.state='accepted';d.events.push(op);}else if(t.actor_id!=='qa-a')throw new Error('Outra pessoa assumiu.');}
