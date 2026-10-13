@@ -1,0 +1,60 @@
+/* RC365 — approved Helper icon and palette. Scoped to Helper, no Owner module changes.
+   Hero typography mirrors the approved sat-member-hero: 27px, 400, 1.05, -.03em.
+   Phrase is reused from the existing satellite hero. No auth/permission changes. */
+body:not(.owner){
+ --helper-blue:#63c7e9;
+ --helper-green:#8fdeb2;
+ --helper-coral:#ffa780;
+ --helper-ink:#3f5159;
+ --helper-muted:#65777b;
+ --mint:#e7f5ef;
+ --ink:var(--helper-ink);
+ --line:#dde8e4;
+ font-family:-apple-system,BlinkMacSystemFont,"SF Pro Display","Helvetica Neue",Arial,sans-serif;
+ color:var(--helper-ink);
+ background:#fffaf5;
+}
+body:not(.owner) .hero{
+ background:
+  radial-gradient(ellipse at 3% 98%,rgba(255,167,128,.64),transparent 53%),
+  radial-gradient(ellipse at 98% 98%,rgba(143,222,178,.72),transparent 65%),
+  radial-gradient(ellipse at 96% 3%,rgba(99,199,233,.72),transparent 68%),
+  linear-gradient(125deg,#d2f0df,#ceeef1 57%,#d5f2e3);
+ border:1px solid rgba(91,147,150,.12);
+ border-radius:28px;
+ padding:28px 30px;
+ box-shadow:0 10px 30px rgba(75,116,122,.045);
+}
+body:not(.owner) .hero h1{
+ font-family:-apple-system,BlinkMacSystemFont,"SF Pro Display","Helvetica Neue",Arial,sans-serif;
+ font-size:27px;
+ font-weight:400;
+ line-height:1.05;
+ letter-spacing:-.03em;
+ margin:10px 0 14px;
+ max-width:330px;
+ color:#3f5159;
+}
+body:not(.owner) .hero .eyebrow{font-size:11px;letter-spacing:.19em;font-weight:500;color:#58777b;}
+body:not(.owner) .hero p{font-size:13px;line-height:1.45;font-weight:400;max-width:350px;color:#526d74;margin:0;}
+body:not(.owner) .brand{font-family:Didot,"Bodoni 72",BodoniMT,Georgia,"Times New Roman",serif;font-weight:400;letter-spacing:-.025em;font-size:27px;color:#3f5159;}
+body:not(.owner) .helper-brand-label{display:block;font-family:-apple-system,BlinkMacSystemFont,"SF Pro Text","Helvetica Neue",Arial,sans-serif;font-size:10px;font-weight:400;letter-spacing:.19em;text-transform:uppercase;margin-top:3px;color:#657d82;}
+body:not(.owner) .top .eyebrow{font-size:10px;letter-spacing:.05em;margin-top:5px;text-transform:none;color:#65777b;}
+body:not(.owner) .logo{border-radius:15px;object-fit:contain;}
+body:not(.owner) .primary{
+ background:radial-gradient(ellipse at 0% 100%,rgba(255,167,128,.32),transparent 60%),linear-gradient(110deg,#d2eee1,#ccebf3 65%,#d9f1e2);
+ border-color:#c8ddd8;color:#405f65;
+}
+body:not(.owner) :is(.filters,.bottom) button[aria-pressed=true]{background:linear-gradient(110deg,#e1f2e9,#e0f1f5);border-color:#caddd7;color:#405f65;}
+body:not(.owner) .pill{background:linear-gradient(110deg,#e8f4ed,#e8f3f7);color:#58767b;}
+body:not(.owner) input[type=checkbox]{accent-color:#679e91;}
+body:not(.owner) :is(button,a,input,select,textarea):focus-visible{outline-color:#679e91;}
+body:not(.owner) :is(.status,.note){color:#65777b;}
+body:not(.owner) .status.error{color:#9a6252;}
+body:not(.owner) .message.mine{background:linear-gradient(125deg,#ebf6ee,#e8f4f8);}
+body:not(.owner) .gps-banner{background:linear-gradient(110deg,#d5efe1,#d6eff5);color:#405f65;}
+@media(max-width:650px){
+ body:not(.owner) .hero{padding:25px 24px;}
+ body:not(.owner) .brand{font-size:24px;}
+ body:not(.owner) .logo{width:54px;height:54px;}
+}
