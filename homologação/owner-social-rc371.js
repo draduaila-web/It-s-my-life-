@@ -11,8 +11,8 @@ function closePanel(){panelEpoch++;if(transport)transport.destroy();transport=nu
 async function openPanel(mode){
  closePanel();var actions=document.querySelector('.s156-actions');if(!actions)return;
  var generation=panelEpoch;panel=document.createElement('section');panel.className='owner-social-embedded';panel.setAttribute('aria-label',mode==='messages'?'Mensagens':mode==='guides'?'Como fazer':'Comunicação');
- var toolbar=document.createElement('div');toolbar.className='owner-social-toolbar';
- [['Mensagens','messages'],['Comunicação','privacy'],['Fechar',null]].forEach(function(entry){var b=document.createElement('button');b.type='button';b.className='s156-btn';b.textContent=entry[0];b.setAttribute('aria-pressed',String(entry[1]===mode));b.onclick=function(){if(entry[1])openPanel(entry[1]);else closePanel();};toolbar.appendChild(b);});
+ var toolbar=document.createElement('div');toolbar.className='owner-social-toolbar owner-panel-header';
+ var close=document.createElement('button');close.type='button';close.className='owner-panel-close';close.textContent='×';close.setAttribute('aria-label','Fechar painel');close.onclick=closePanel;toolbar.appendChild(close);
  var content=document.createElement('div');content.className='owner-social-content';content.setAttribute('role','status');content.textContent='Conectando sua rede…';panel.append(toolbar,content);actions.after(panel);
  try{
   if(!client.session())throw new Error('Conecte sua conta do Owner uma vez para acessar sua rede.');
@@ -24,19 +24,19 @@ async function openPanel(mode){
 }
 function openNotifications(){
  closePanel();var actions=document.querySelector('.s156-actions');if(!actions)return;
- panel=document.createElement('section');panel.className='owner-social-embedded';panel.setAttribute('aria-label','Notificações');
- var content=document.createElement('div');content.className='owner-social-content';var title=document.createElement('h2');title.textContent='Notificações';content.appendChild(title);
- var description=document.createElement('p');description.textContent='Receba avisos de mensagens, convites e respostas neste aparelho. Este controle afeta apenas esses avisos da rede.';content.appendChild(description);
- var ios=document.createElement('p');ios.textContent='No iPhone, abra a BERTH.A adicionada à Tela de Início para permitir notificações. Se a permissão estiver bloqueada, confira os Ajustes do aparelho.';content.appendChild(ios);
+ panel=document.createElement('section');panel.className='owner-social-embedded';panel.setAttribute('aria-label','Notificações');panel.classList.add('owner-notifications');
+ var content=document.createElement('div');content.className='owner-social-content';var title=document.createElement('h2');title.textContent='Notificações';
+ var description=document.createElement('p');description.textContent='Avisos de mensagens, convites e respostas neste aparelho.';content.appendChild(description);
+ var ios=document.createElement('details');var iosTitle=document.createElement('summary');iosTitle.textContent='Como permitir no iPhone';ios.appendChild(iosTitle);var iosText=document.createElement('p');iosText.textContent='No iPhone, abra a BERTH.A adicionada à Tela de Início para permitir notificações. Se a permissão estiver bloqueada, confira os Ajustes do aparelho.';ios.appendChild(iosText);content.appendChild(ios);
  var feedback=document.createElement('p');feedback.setAttribute('role','status');feedback.setAttribute('aria-live','polite');
  var user=client.session()?.user;
  feedback.textContent=!user?'Conecte a conta do Owner para configurar os avisos.':localStorage.getItem('bertha.social.push.subscription.'+user.id)?'Há uma inscrição salva neste aparelho. Use Ativar ou conferir para verificar a permissão e registrar os avisos.':'Os avisos da rede ainda não foram registrados neste aparelho.';content.appendChild(feedback);
- var activate=document.createElement('button');activate.type='button';activate.className='primary';activate.textContent='Ativar ou conferir';activate.disabled=!user;
- var stop=document.createElement('button');stop.type='button';stop.textContent='Desativar estes avisos';stop.disabled=!user;
- activate.onclick=async function(){activate.disabled=true;stop.disabled=true;feedback.textContent='Conferindo notificações…';try{var result=await window.BerthaHelperPush.activate(client,user);feedback.textContent=result.enabled?'Avisos de mensagens e convites ativados neste aparelho.':'Serviço preparado. Toque em Permitir notificações para continuar.';activate.textContent=result.enabled?'Ativar ou conferir':'Permitir notificações';}catch(e){feedback.textContent=e.message;}finally{activate.disabled=false;stop.disabled=false;}};
+ var activate=document.createElement('button');activate.type='button';activate.className='primary';activate.textContent='Ativar avisos';activate.disabled=!user;
+ var stop=document.createElement('button');stop.type='button';stop.textContent='Desativar avisos';stop.disabled=!user;
+ activate.onclick=async function(){activate.disabled=true;stop.disabled=true;feedback.textContent='Conferindo notificações…';try{var result=await window.BerthaHelperPush.activate(client,user);feedback.textContent=result.enabled?'Avisos de mensagens e convites ativados neste aparelho.':'Serviço preparado. Toque em Permitir notificações para continuar.';activate.textContent=result.enabled?'Conferir ativação':'Permitir notificações';}catch(e){feedback.textContent=e.message;}finally{activate.disabled=false;stop.disabled=false;}};
  stop.onclick=async function(){activate.disabled=true;stop.disabled=true;feedback.textContent='Desativando estes avisos…';try{await window.BerthaHelperPush.stop(client,user);feedback.textContent='Avisos de mensagens e convites desativados neste aparelho.';}catch(e){feedback.textContent=e.message;}finally{activate.disabled=false;stop.disabled=false;}};
- content.append(activate,stop);if(!user){var link=document.createElement('a');link.className='s156-btn';link.href='helper-owner.html?v=372&return=main';link.textContent='Conectar minha conta';content.appendChild(link);}
- var close=document.createElement('button');close.type='button';close.className='s156-btn';close.textContent='Fechar';close.onclick=closePanel;panel.append(close,content);actions.after(panel);
+ var buttons=document.createElement('div');buttons.className='owner-notification-actions';buttons.append(activate,stop);content.appendChild(buttons);if(!user){var link=document.createElement('a');link.className='s156-btn';link.href='helper-owner.html?v=372&return=main';link.textContent='Conectar minha conta';content.appendChild(link);}
+ var close=document.createElement('button');close.type='button';close.className='owner-panel-close';close.textContent='×';close.setAttribute('aria-label','Fechar painel');close.onclick=closePanel;var head=document.createElement('div');head.className='owner-panel-header';head.append(title,close);panel.append(head,content);actions.after(panel);
 }
 function decorate(){
  if(panel&&!panel.isConnected)closePanel();
