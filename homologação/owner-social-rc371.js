@@ -22,11 +22,27 @@ async function openPanel(mode){
   content.removeAttribute('role');transport=window.BerthaSocial.create({client:client,user:user,network:network,owner:true,escape:H.escape});await transport.mount(content,mode);
  }catch(e){if(generation!==panelEpoch||!panel?.isConnected)return;content.textContent=e.message;if(!client.session()){var link=document.createElement('a');link.className='s156-btn';link.href='helper-owner.html?v=372&return=main';link.textContent='Conectar minha conta';content.appendChild(link);}}
 }
+function openNotifications(){
+ closePanel();var actions=document.querySelector('.s156-actions');if(!actions)return;
+ panel=document.createElement('section');panel.className='owner-social-embedded';panel.setAttribute('aria-label','Notificações');
+ var content=document.createElement('div');content.className='owner-social-content';var title=document.createElement('h2');title.textContent='Notificações';content.appendChild(title);
+ var description=document.createElement('p');description.textContent='Receba avisos de mensagens, convites e respostas neste aparelho. Este controle afeta apenas esses avisos da rede.';content.appendChild(description);
+ var ios=document.createElement('p');ios.textContent='No iPhone, abra a BERTH.A adicionada à Tela de Início para permitir notificações. Se a permissão estiver bloqueada, confira os Ajustes do aparelho.';content.appendChild(ios);
+ var feedback=document.createElement('p');feedback.setAttribute('role','status');feedback.setAttribute('aria-live','polite');
+ var user=client.session()?.user;
+ feedback.textContent=!user?'Conecte a conta do Owner para configurar os avisos.':localStorage.getItem('bertha.social.push.subscription.'+user.id)?'Há uma inscrição salva neste aparelho. Use Ativar ou conferir para verificar a permissão e registrar os avisos.':'Os avisos da rede ainda não foram registrados neste aparelho.';content.appendChild(feedback);
+ var activate=document.createElement('button');activate.type='button';activate.className='primary';activate.textContent='Ativar ou conferir';activate.disabled=!user;
+ var stop=document.createElement('button');stop.type='button';stop.textContent='Desativar estes avisos';stop.disabled=!user;
+ activate.onclick=async function(){activate.disabled=true;stop.disabled=true;feedback.textContent='Conferindo notificações…';try{var result=await window.BerthaHelperPush.activate(client,user);feedback.textContent=result.enabled?'Avisos de mensagens e convites ativados neste aparelho.':'Serviço preparado. Toque em Permitir notificações para continuar.';activate.textContent=result.enabled?'Ativar ou conferir':'Permitir notificações';}catch(e){feedback.textContent=e.message;}finally{activate.disabled=false;stop.disabled=false;}};
+ stop.onclick=async function(){activate.disabled=true;stop.disabled=true;feedback.textContent='Desativando estes avisos…';try{await window.BerthaHelperPush.stop(client,user);feedback.textContent='Avisos de mensagens e convites desativados neste aparelho.';}catch(e){feedback.textContent=e.message;}finally{activate.disabled=false;stop.disabled=false;}};
+ content.append(activate,stop);if(!user){var link=document.createElement('a');link.className='s156-btn';link.href='helper-owner.html?v=372&return=main';link.textContent='Conectar minha conta';content.appendChild(link);}
+ var close=document.createElement('button');close.type='button';close.className='s156-btn';close.textContent='Fechar';close.onclick=closePanel;panel.append(close,content);actions.after(panel);
+}
 function decorate(){
  if(panel&&!panel.isConnected)closePanel();
  var actions=document.querySelector('.s156-actions');if(actions&&!document.getElementById('ownerMessages')){
  [['Mensagens','messages','ownerMessages'],['Comunicação','privacy','ownerCommunication'],['Convites','invitations','ownerInvitations']].forEach(function(entry){var b=document.createElement('button');b.id=entry[2];b.className='s156-btn';b.type='button';b.textContent=entry[0];b.onclick=function(){if(entry[1]==='invitations'){closePanel();location.hash='#convites';}else return openPanel(entry[1]);};actions.appendChild(b);});
- var push=document.createElement('button');push.className='s156-btn';push.type='button';push.textContent='Avisos de mensagens e convites';push.onclick=async function(){push.disabled=true;try{var user=client.session()?.user;if(!user)throw new Error('Conecte a conta do Owner.');var result=await window.BerthaHelperPush.activate(client,user);status(result.enabled?'Avisos de mensagens e convites ativados neste aparelho.':'Serviço pronto. Toque novamente no botão de avisos para permitir as notificações.');}catch(e){status(e.message);}finally{push.disabled=false;}};actions.appendChild(push);}
+ var push=document.createElement('button');push.id='ownerNotifications';push.className='s156-btn';push.type='button';push.textContent='Configurar notificações';push.onclick=openNotifications;actions.appendChild(push);}
  document.querySelectorAll('[data-edit-invite]').forEach(function(b){if(b.parentElement.querySelector('[data-share-invite]'))return;var send=document.createElement('button');send.type='button';send.className='secondary';send.dataset.shareInvite=b.dataset.editInvite;send.textContent='Compartilhar com Helpers';send.onclick=function(){var i=items().find(function(i){return String(i.id)===send.dataset.shareInvite;});if(i)share(i);};b.parentElement.appendChild(send);});
 }
 new MutationObserver(decorate).observe(document.getElementById('app')||document.body,{childList:true,subtree:true});decorate();
