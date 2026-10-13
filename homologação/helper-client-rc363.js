@@ -18,6 +18,19 @@ function eligibleSource(x,m){
  if(t.claimedById&&String(t.claimedById)!==String(m.id))return false;
  return t.responsibility==='help'||targets.map(String).includes(String(m.id));
 }
+function normalizePhone(value){
+ var raw=String(value||'').trim();if(!/^[+0-9() .-]+$/.test(raw))throw new Error('Informe seu número de celular com DDD.');
+ var digits=raw.replace(/\D/g,'');
+ if(!raw.startsWith('+')){if(/^[1-9]\d9\d{8}$/.test(digits))digits='55'+digits;else if(!/^55[1-9]\d9\d{8}$/.test(digits))throw new Error('Informe seu número de celular com DDD.');}
+ if(!/^[1-9]\d{7,14}$/.test(digits))throw new Error('Confira o código do país e o número de celular.');
+ return '+'+digits;
+}
+function sessionStorageFor(primary,fallback,key){
+ var selected=fallback,persistent=false;
+ try{var probe=key+'.probe';primary.setItem(probe,'1');primary.removeItem(probe);selected=primary;persistent=true;}catch(_){}
+ if(persistent){try{if(!selected.getItem(key)&&fallback.getItem(key)){selected.setItem(key,fallback.getItem(key));fallback.removeItem(key);}}catch(_){}}
+ return {storage:selected,persistent:persistent};
+}
 function createClient(options){
  var storage=options.storage,fetcher=options.fetch||root.fetch.bind(root),key=options.key,
  base=options.base,sessionKey=options.sessionKey,session=null,refreshing=null,authVersion=0;
@@ -36,14 +49,22 @@ function createClient(options){
   finally{clearTimeout(timer);}
  }
  function storeSession(s){if(!s||!s.access_token||!s.refresh_token)throw new Error('Entre novamente na sua conta.');save(Object.assign({},s,{expires_at:s.expires_at||Math.floor(Date.now()/1000)+(s.expires_in||3600)}));return session;}
+ function syncSession(){try{session=JSON.parse(storage.getItem(sessionKey)||'null');}catch(_){session=null;}return session;}
  async function token(){
+  syncSession();
   if(!session)throw new Error('Entre na sua conta.');
   if(session.expires_at>Math.floor(Date.now()/1000)+60)return session.access_token;
-  if(!refreshing){var version=authVersion;refreshing=raw('/auth/v1/token?grant_type=refresh_token','POST',{refresh_token:session.refresh_token}).then(function(s){if(version!==authVersion)throw new Error('A conta mudou. Entre novamente.');return storeSession(s);}).catch(function(e){if(version===authVersion&&(e.status===400||e.status===401))save(null);throw e;}).finally(function(){refreshing=null;});}
+  if(!refreshing){var version=authVersion,refreshToken=session.refresh_token;refreshing=raw('/auth/v1/token?grant_type=refresh_token','POST',{refresh_token:session.refresh_token}).then(function(s){if(version!==authVersion||!syncSession()||session.refresh_token!==refreshToken)throw new Error('A conta mudou. Entre novamente.');return storeSession(s);}).catch(function(e){if(version===authVersion&&(e.status===400||e.status===401))save(null);throw e;}).finally(function(){refreshing=null;});}
   await refreshing;return session.access_token;
  }
  return {
-  session:function(){return session;},
+  session:syncSession,
+  phoneReady:async function(){var config=await raw('/auth/v1/settings','GET');if(config?.external?.phone!==true)return false;try{return await raw('/rest/v1/rpc/bertha_hml_phone_ready','POST',{});}catch(_){return false;}},
+  settings:async function(){return raw('/auth/v1/settings','GET');},
+  requestPhoneCode:async function(phone){var normalized=normalizePhone(phone),settings=await raw('/auth/v1/settings','GET');if(settings?.external?.phone!==true)throw new Error('O envio de SMS ainda não está configurado.');await raw('/auth/v1/otp','POST',{phone:normalized,channel:'sms',create_user:true});return {phone:normalized};},
+  requestPhoneChange:async function(phone){var normalized=normalizePhone(phone),config=await raw('/auth/v1/settings','GET');if(config?.external?.phone!==true)throw new Error('O envio de SMS ainda não está configurado.');await raw('/auth/v1/user','PUT',{phone:normalized},await token());return {phone:normalized};},
+  verifyPhoneChange:async function(phone,code){if(!/^\d{6}$/.test(String(code||'')))throw new Error('Digite os seis números do código.');var version=++authVersion,existing=await raw('/auth/v1/user','GET',null,await token());if(version!==authVersion)throw new Error('A conta mudou. Entre novamente.');var data=await raw('/auth/v1/verify','POST',{phone:normalizePhone(phone),token:String(code),type:'phone_change'});if(version!==authVersion)throw new Error('A conta mudou. Entre novamente.');if(data?.user?.id!==existing.id)throw new Error('Não foi possível confirmar o celular na mesma conta.');if(data.access_token)storeSession(data);return data.user;},
+  verifyPhoneCode:async function(phone,code){var normalized=normalizePhone(phone);if(!/^\d{6}$/.test(String(code||'')))throw new Error('Digite os seis números do código.');var version=++authVersion,data=await raw('/auth/v1/verify','POST',{phone:normalized,token:String(code),type:'sms'});if(version!==authVersion)throw new Error('A conta mudou. Entre novamente.');return storeSession(data);},
   signIn:async function(email,password){var v=++authVersion,s=await raw('/auth/v1/token?grant_type=password','POST',{email:email,password:password});if(v!==authVersion)throw new Error('A conta mudou. Entre novamente.');return storeSession(s);},
   signUp:async function(email,password){var v=++authVersion,data=await raw('/auth/v1/signup','POST',{email:email,password:password});if(v!==authVersion)throw new Error('A conta mudou. Entre novamente.');if(data&&data.access_token)storeSession(data);return data;},
   signOut:async function(){var tokenAtLogout=session&&session.access_token;authVersion++;save(null);if(tokenAtLogout)await raw('/auth/v1/logout?scope=local','POST',{},tokenAtLogout);},
@@ -52,6 +73,6 @@ function createClient(options){
   action:async function(op,arg){return raw('/rest/v1/rpc/bertha_hml_action','POST',{op:op,arg:arg},await token());}
  };
 }
-var api={dateValid:dateValid,localDay:localDay,bucket:bucket,escape:escape,ownerSources:ownerSources,eligibleSource:eligibleSource,createClient:createClient};
+var api={dateValid:dateValid,localDay:localDay,bucket:bucket,escape:escape,ownerSources:ownerSources,eligibleSource:eligibleSource,normalizePhone:normalizePhone,sessionStorageFor:sessionStorageFor,createClient:createClient};
 if(typeof module==='object'&&module.exports)module.exports=api;else root.BerthaHelper=api;
 })(typeof window==='object'?window:globalThis);

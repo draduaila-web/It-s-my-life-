@@ -1,8 +1,12 @@
 (function(){
 'use strict';
 var H=window.BerthaHelper,owner=document.body.dataset.helperMode==='owner',app=document.getElementById('helperApp');
-var client=H.createClient({base:'https://ouxellokvigbdeeyvvfv.supabase.co',key:'sb_publishable_2lmnQX4WD-s343sEZoFERA_B4URTnip',storage:sessionStorage,sessionKey:'bertha.helper.hml.'+(owner?'owner':'adult')+'.auth.v1'});
+var authKey='bertha.helper.hml.'+(owner?'owner':'adult')+'.auth.v1',persistentStorage=null;
+try{persistentStorage=window.localStorage;}catch(_){}
+var authStorage=H.sessionStorageFor(persistentStorage,sessionStorage,authKey);
+var client=H.createClient({base:'https://ouxellokvigbdeeyvvfv.supabase.co',key:'sb_publishable_2lmnQX4WD-s343sEZoFERA_B4URTnip',storage:authStorage.storage,sessionKey:authKey});
 var user=null,members=[],tasks=[],network=null,sources=null,view='all',period='today',search='',loading=false,generation=0,interval=null;
+var phoneEnabled=false,legacyAccess=false,otpPhone='',resendAt=0;
 var labels={today:'Hoje',yesterday:'Ontem',earlier:'Anteriores',upcoming:'Próximas',all:'Todas'};
 var states={available:'Disponível para ajudar',assigned:'Delegada',accepted:'Assumida',in_progress:'Em andamento',completed:'Aguardando validação',validated:'Concluída'};
 function el(id){return document.getElementById(id);}function safe(s){return H.escape(s);}
@@ -14,10 +18,23 @@ function shell(content){
  el('account').onclick=account;
  if(el('allView')){el('allView').onclick=function(){view='all';render();};el('mineView').onclick=function(){view='mine';render();};el('accountBottom').onclick=account;}
 }
+function phoneContent(){
+ return '<section class="panel auth"><div class="eyebrow">Seu acesso</div><h2>Entre com seu celular</h2><p>Use o número escolhido para seu convite. O código confirma seu acesso.</p><form id="phoneForm"><div class="fields"><label>Celular com DDD<input id="phone" type="tel" autocomplete="tel" required maxlength="24" placeholder="(11) 99999-9999"></label><label id="otpField" hidden>Código recebido por SMS<input id="otp" inputmode="numeric" autocomplete="one-time-code" pattern="[0-9]{6}" maxlength="6"></label></div><div class="row"><button class="primary" type="submit" id="phoneSubmit">Receber código</button><button id="resendCode" type="button" hidden>Reenviar código</button></div></form><p class="note">Depois da confirmação, seu acesso fica salvo neste aparelho até você sair ou precisar entrar novamente.</p><button id="legacyAccess" type="button">Já tenho uma conta na BERTH.A</button></section>';
+}
+function bindPhone(){
+ var form=el('phoneForm');if(!form)return;otpPhone='';
+ el('legacyAccess').onclick=function(){legacyAccess=true;render();};
+ el('phone').oninput=function(){otpPhone='';el('otpField').hidden=true;el('otp').required=false;el('otp').value='';el('resendCode').hidden=true;el('phoneSubmit').textContent='Receber código';};
+ async function request(){if(Date.now()<resendAt)throw new Error('Aguarde um minuto antes de pedir outro código.');var result=await client.requestPhoneCode(el('phone').value);otpPhone=result.phone;resendAt=Date.now()+60000;el('otpField').hidden=false;el('otp').required=true;el('resendCode').hidden=false;el('phoneSubmit').textContent='Confirmar e entrar';notice('Confira o código enviado ao seu celular.');}
+ form.onsubmit=async function(e){e.preventDefault();if(!form.reportValidity())return;var buttons=form.querySelectorAll('button');buttons.forEach(function(b){b.disabled=true;});try{if(!otpPhone){await request();}else{await client.verifyPhoneCode(otpPhone,el('otp').value);el('otp').value='';await initialize();}}catch(err){fail(err);}finally{buttons.forEach(function(b){b.disabled=false;});}};
+ el('resendCode').onclick=async function(){this.disabled=true;try{el('otp').value='';await request();}catch(err){fail(err);}finally{if(this.isConnected)this.disabled=false;}};
+}
 function authContent(){
- return '<section class="panel auth"><div class="eyebrow">Seu acesso</div><h2>Entre na sua BERTH.A</h2><p>'+(owner?'Use sua conta para conectar a rede. Seus cadastros locais continuam na BERTH.A principal.':'Use o e-mail que o Owner escolheu para seu vínculo.')+'</p><form id="authForm"><div class="fields"><label>E-mail<input id="email" type="email" autocomplete="username" required maxlength="254"></label><label>Senha<input id="password" type="password" autocomplete="current-password" required minlength="1" maxlength="128"></label></div><div class="row"><button class="primary" type="submit">Entrar</button><button id="signup" type="button">Criar minha conta</button></div></form><p class="note">Ao criar a conta, confira o e-mail de confirmação e depois entre aqui.</p></section>';
+ if(phoneEnabled&&!legacyAccess)return phoneContent();
+ return '<section class="panel auth"><div class="eyebrow">Seu acesso</div><h2>Entre na sua BERTH.A</h2><p>'+(owner?'Use sua conta para conectar a rede. Seus cadastros locais continuam na BERTH.A principal.':'Use sua conta existente para manter seus vínculos.')+'</p><form id="authForm"><div class="fields"><label>E-mail<input id="email" type="email" autocomplete="username" required maxlength="254"></label><label>Senha<input id="password" type="password" autocomplete="current-password" required minlength="1" maxlength="128"></label></div><div class="row"><button class="primary" type="submit">Entrar</button><button id="signup" type="button">Criar minha conta</button></div></form><p class="note">Ao criar a conta, confira o e-mail de confirmação e depois entre aqui.</p></section>';
 }
 function bindAuth(){
+ if(el('phoneForm')){bindPhone();return;}
  var f=el('authForm');if(!f)return;
  async function submit(signup){if(!f.reportValidity())return;var email=el('email').value.trim(),password=el('password').value;if(signup&&password.length<8){notice('Use pelo menos oito caracteres para criar sua senha.',true);return;}f.querySelectorAll('button').forEach(function(b){b.disabled=true;});notice('Conectando…');
   try{if(signup){await client.signUp(email,password);if(!client.session()){notice('Confira seu e-mail para confirmar a conta. Depois entre com sua senha.');return;}}else await client.signIn(email,password);await initialize();}
@@ -34,8 +51,9 @@ function modal(title,body,onSubmit){
  dlg.showModal();return dlg;
 }
 function account(){
- if(!user){el('email')?.scrollIntoView({block:'center'});return;}
- var d=modal('Minha conta','<p>'+safe(user.email)+'</p><p class="note">O acesso às atividades depende do vínculo e das permissões do Owner.</p><button type="button" id="signout">Sair desta conta</button>',null);
+ if(!user){(el('phone')||el('email'))?.scrollIntoView({block:'center'});return;}
+ var d=modal('Minha conta','<p>'+safe(user.phone||user.email)+'</p><p class="note">O acesso às atividades depende do vínculo e das permissões do Owner.</p><p class="note">'+(authStorage.persistent?'Seu acesso fica salvo neste aparelho até você sair ou a sessão precisar ser renovada.':'Este navegador só permite manter o acesso nesta aba.')+'</p><button type="button" id="signout">Sair desta conta</button>',null);
+ if(phoneEnabled){var phoneForm=document.createElement('form');phoneForm.innerHTML='<h3>Meu celular</h3><p class="note">Confirme seu celular nesta conta para manter as atividades e os vínculos que você já tem.</p><div class="fields"><label>Celular com DDD<input name="accountPhone" type="tel" required autocomplete="tel" maxlength="24"></label><label hidden id="accountCodeField">Código recebido<input name="accountCode" inputmode="numeric" autocomplete="one-time-code" pattern="[0-9]{6}" maxlength="6"></label></div><button type="submit">Confirmar meu celular</button><p role="status" class="note" id="accountPhoneStatus"></p>';d.querySelector('form').after(phoneForm);var confirmedPhone='';phoneForm.querySelector('[name=accountPhone]').oninput=function(){confirmedPhone='';phoneForm.querySelector('#accountCodeField').hidden=true;phoneForm.querySelector('[name=accountCode]').required=false;};phoneForm.onsubmit=async function(e){e.preventDefault();e.stopPropagation();if(!phoneForm.reportValidity())return;var b=phoneForm.querySelector('button');b.disabled=true;try{if(!confirmedPhone){var sent=await client.requestPhoneChange(phoneForm.querySelector('[name=accountPhone]').value);confirmedPhone=sent.phone;phoneForm.querySelector('#accountCodeField').hidden=false;phoneForm.querySelector('[name=accountCode]').required=true;phoneForm.querySelector('#accountPhoneStatus').textContent='Confira seu SMS e confirme o código.';}else{user=await client.verifyPhoneChange(confirmedPhone,phoneForm.querySelector('[name=accountCode]').value);d.close();notice('Celular confirmado na sua conta. Seus vínculos foram mantidos.');}}catch(err){phoneForm.querySelector('#accountPhoneStatus').textContent=err.message;}finally{b.disabled=false;}};}
  d.querySelector('#signout').onclick=async function(){try{await client.signOut();}catch(_){}user=null;members=[];tasks=[];network=null;generation++;clearInterval(interval);d.close();render();};
 }
 function taskHtml(t){
@@ -89,10 +107,10 @@ function bindOwner(){
  el('readTasks').onclick=function(){sources=H.ownerSources(localStorage);drawShare();};
  document.querySelectorAll('[data-link]').forEach(function(b){b.onclick=function(){
   var m=members.find(function(x){return x.id===b.dataset.link;});
-  modal('Vincular '+m.name,'<p>Informe o e-mail que esta pessoa usará no Helper.</p><div class="fields"><label>E-mail do adulto<input name="email" type="email" required maxlength="254" autocomplete="off"></label></div>',async function(d){
-   var link=await client.action('link',{network_id:network.id,member_id:m.id,email:d.querySelector('input').value.trim()});
+  modal('Vincular '+m.name,phoneEnabled?'<p>Informe o celular que esta pessoa usará no Helper.</p><div class="fields"><label>Celular com DDD<input name="phone" type="tel" required maxlength="24" autocomplete="off"></label></div>':'<p>Informe o e-mail que esta pessoa usará no Helper.</p><div class="fields"><label>E-mail do adulto<input name="email" type="email" required maxlength="254" autocomplete="off"></label></div>',async function(d){
+   var link=await client.action('link',Object.assign({network_id:network.id,member_id:m.id},phoneEnabled?{phone:H.normalizePhone(d.querySelector('input').value)}:{email:d.querySelector('input').value.trim()}));
    var url=new URL('helper.html',location.href);url.hash='link='+link.token;
-   var result=modal('Vínculo pronto','<p>Válido por sete dias e apenas para o e-mail informado. Compartilhe pessoalmente com '+safe(m.name)+'.</p><label>Link de acesso<input readonly value="'+safe(url.href)+'"></label><p class="note">Nenhuma mensagem foi enviada automaticamente.</p><button type="button" id="copyLink">Copiar vínculo</button>',null);
+   var result=modal('Vínculo pronto','<p>Válido por sete dias e apenas para o contato informado. Compartilhe pessoalmente com '+safe(m.name)+'.</p><label>Link de acesso<input readonly value="'+safe(url.href)+'"></label><p class="note">Nenhuma mensagem foi enviada automaticamente.</p><button type="button" id="copyLink">Copiar vínculo</button>',null);
    result.querySelector('#copyLink').onclick=async function(){try{await navigator.clipboard.writeText(url.href);result.querySelector('.modal-status').textContent='Vínculo copiado.';}catch(_){result.querySelector('.modal-status').textContent='Selecione e copie o link acima.';}};
   });
  };});
@@ -138,7 +156,10 @@ async function initialize(){
  try{user=await client.user();await loadRemote();clearInterval(interval);interval=setInterval(function(){if(document.visibilityState==='visible'&&user&&!owner&&!document.querySelector('dialog[open]')&&document.activeElement?.id!=='search')loadRemote().catch(fail);},20000);}
  catch(e){user=null;render();fail(e);}
 }
+window.addEventListener('storage',function(e){if(e.key!==authKey)return;generation++;user=null;members=[];tasks=[];network=null;clearInterval(interval);render();if(client.session())initialize();
+client.phoneReady().then(function(ready){phoneEnabled=ready===true;if(phoneEnabled&&!user&&!["email","password"].includes(document.activeElement?.id))render();}).catch(function(){});});
 window.addEventListener('offline',function(){notice('Você está sem conexão. Aguarde antes de confirmar atividades.',true);});
 window.addEventListener('online',function(){if(user)loadRemote().then(function(){notice('Conexão retomada.');}).catch(fail);});
 render();if(client.session())initialize();
+client.phoneReady().then(function(ready){phoneEnabled=ready===true;if(phoneEnabled&&!user&&!["email","password"].includes(document.activeElement?.id))render();}).catch(function(){});
 })();
