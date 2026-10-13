@@ -10,16 +10,16 @@ var transport=null,panel=null,panelEpoch=0;
 function closePanel(){panelEpoch++;if(transport)transport.destroy();transport=null;if(panel)panel.remove();panel=null;}
 async function openPanel(mode){
  closePanel();var actions=document.querySelector('.s156-actions');if(!actions)return;
- var generation=panelEpoch;panel=document.createElement('section');panel.className='owner-social-embedded';panel.setAttribute('aria-label',mode==='messages'?'Mensagens':'Comunicação');
+ var generation=panelEpoch;panel=document.createElement('section');panel.className='owner-social-embedded';panel.setAttribute('aria-label',mode==='messages'?'Mensagens':mode==='guides'?'Como fazer':'Comunicação');
  var toolbar=document.createElement('div');toolbar.className='owner-social-toolbar';
- [['Mensagens','messages'],['Comunicação','privacy'],['Fechar',null]].forEach(function(entry){var b=document.createElement('button');b.type='button';b.className='s156-btn';b.textContent=entry[0];b.setAttribute('aria-pressed',String(entry[1]===mode));b.onclick=function(){if(entry[1])openPanel(entry[1]);else closePanel();};toolbar.appendChild(b);});
+ [['Mensagens','messages'],['Comunicação','privacy'],['Como fazer','guides'],['Fechar',null]].forEach(function(entry){var b=document.createElement('button');b.type='button';b.className='s156-btn';b.textContent=entry[0];b.setAttribute('aria-pressed',String(entry[1]===mode));b.onclick=function(){if(entry[1])openPanel(entry[1]);else closePanel();};toolbar.appendChild(b);});
  var content=document.createElement('div');content.className='owner-social-content';content.setAttribute('role','status');content.textContent='Conectando sua rede…';panel.append(toolbar,content);actions.after(panel);
  try{
   if(!client.session())throw new Error('Conecte sua conta do Owner uma vez para acessar sua rede.');
   var user=await client.user(),networks=await client.query('bertha_hml_networks','select=*'),network=networks.find(function(n){return n.owner_id===user.id;});
   if(generation!==panelEpoch||!panel?.isConnected)return;
   if(!network)throw new Error('Conecte um satélite para criar sua rede.');
-  content.removeAttribute('role');transport=window.BerthaSocial.create({client:client,user:user,network:network,owner:true,escape:H.escape});await transport.mount(content,mode);
+  content.removeAttribute('role');if(mode==='guides'){await window.BerthaGuides.mountOwner(content,{client:client,user:user,network:network,people:people});return;}transport=window.BerthaSocial.create({client:client,user:user,network:network,owner:true,escape:H.escape});await transport.mount(content,mode);
  }catch(e){if(generation!==panelEpoch||!panel?.isConnected)return;content.textContent=e.message;if(!client.session()){var link=document.createElement('a');link.className='s156-btn';link.href='helper-owner.html?v=372&return=main';link.textContent='Conectar minha conta';content.appendChild(link);}}
 }
 function openNotifications(){
@@ -41,7 +41,7 @@ function openNotifications(){
 function decorate(){
  if(panel&&!panel.isConnected)closePanel();
  var actions=document.querySelector('.s156-actions');if(actions&&!document.getElementById('ownerMessages')){
- [['Mensagens','messages','ownerMessages'],['Comunicação','privacy','ownerCommunication'],['Convites','invitations','ownerInvitations']].forEach(function(entry){var b=document.createElement('button');b.id=entry[2];b.className='s156-btn';b.type='button';b.textContent=entry[0];b.onclick=function(){if(entry[1]==='invitations'){closePanel();location.hash='#convites';}else return openPanel(entry[1]);};actions.appendChild(b);});
+ [['Mensagens','messages','ownerMessages'],['Comunicação','privacy','ownerCommunication'],['Convites','invitations','ownerInvitations'],['Como fazer','guides','ownerGuides']].forEach(function(entry){var b=document.createElement('button');b.id=entry[2];b.className='s156-btn';b.type='button';b.textContent=entry[0];b.onclick=function(){if(entry[1]==='invitations'){closePanel();location.hash='#convites';}else return openPanel(entry[1]);};actions.appendChild(b);});
  var push=document.createElement('button');push.id='ownerNotifications';push.className='s156-btn';push.type='button';push.textContent='Configurar notificações';push.onclick=openNotifications;actions.appendChild(push);}
  document.querySelectorAll('[data-edit-invite]').forEach(function(b){if(b.parentElement.querySelector('[data-share-invite]'))return;var send=document.createElement('button');send.type='button';send.className='secondary';send.dataset.shareInvite=b.dataset.editInvite;send.textContent='Compartilhar com Helpers';send.onclick=function(){var i=items().find(function(i){return String(i.id)===send.dataset.shareInvite;});if(i)share(i);};b.parentElement.appendChild(send);});
 }

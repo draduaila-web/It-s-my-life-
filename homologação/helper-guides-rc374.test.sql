@@ -1,0 +1,18 @@
+begin;
+update public.bertha_hml_members set active=true,permissions='{"tasks":true}',kind='kids' where id='67419616-6bda-4990-9eb0-2634ab69ce03';
+update public.bertha_hml_members set active=true,permissions='{"tasks":true}' where id='3b9075fe-9aa8-441f-8477-dbbfa4ddd803';
+set local role authenticated;
+select set_config('request.jwt.claims','{"sub":"939e5f62-0ddf-472d-a612-26f09a229e7e","role":"authenticated"}',true);
+select public.bertha_hml_guide_share('{"network_id":"3e83740b-f9f8-47ee-a01c-d52936b5081d","source_ref":"qa-guide-374","title":"QA procedimento","body":{"steps":["QA texto"]},"targets":["67419616-6bda-4990-9eb0-2634ab69ce03","3b9075fe-9aa8-441f-8477-dbbfa4ddd803"]}');
+select set_config('request.jwt.claims','{"sub":"2f854f51-abf6-47cb-8aeb-3869fb5f5bb6","role":"authenticated"}',true);
+do $$begin if (select count(*) from public.bertha_hml_guides where source_ref='qa-guide-374')<>1 then raise exception 'FAIL Kids';end if;begin perform public.bertha_hml_guide_share('{"network_id":"3e83740b-f9f8-47ee-a01c-d52936b5081d"}');raise exception 'FAIL Kids writes';exception when insufficient_privilege then null;end;end;$$;
+select set_config('request.jwt.claims','{"sub":"c949268d-2d19-44ee-8854-7aeef2f366d2","role":"authenticated"}',true);
+do $$begin if (select count(*) from public.bertha_hml_guides where source_ref='qa-guide-374')<>1 then raise exception 'FAIL Helper';end if;end;$$;
+select set_config('request.jwt.claims','{"sub":"5bf84533-1444-4c39-8278-6b1bcc75a01f","role":"authenticated"}',true);
+do $$begin if exists(select 1 from public.bertha_hml_guides where source_ref='qa-guide-374') then raise exception 'FAIL outsider';end if;end;$$;
+reset role;
+update public.bertha_hml_members set permissions='{"tasks":false}' where id='67419616-6bda-4990-9eb0-2634ab69ce03';
+set local role authenticated;
+select set_config('request.jwt.claims','{"sub":"2f854f51-abf6-47cb-8aeb-3869fb5f5bb6","role":"authenticated"}',true);
+do $$begin if exists(select 1 from public.bertha_hml_guides where source_ref='qa-guide-374') then raise exception 'FAIL revoked';end if;end;$$;
+rollback;
