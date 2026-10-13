@@ -1,0 +1,31 @@
+begin;
+do $$
+declare oa uuid:=gen_random_uuid();ob uuid:=gen_random_uuid();cu uuid:=gen_random_uuid();m jsonb;code jsonb;got jsonb;mid uuid;blocked boolean;
+begin
+ insert into auth.users(id,email,email_confirmed_at) values(oa,'qa-owner-a-369@example.invalid',now()),(ob,'qa-owner-b-369@example.invalid',now());
+ perform set_config('request.jwt.claims',jsonb_build_object('sub',oa,'role','authenticated')::text,true);
+ m:=public.bertha_hml_invite_prepare(jsonb_build_object('local_id','QA-only-369','name','QA Helper','kind','adult','permissions',jsonb_build_object('casa',true)));mid:=(m->>'id')::uuid;
+ insert into auth.users(id,email,email_confirmed_at,raw_app_meta_data) values(cu,'qa-code-369@example.invalid',now(),jsonb_build_object('bertha_code_member',mid));
+ perform set_config('request.jwt.claims',jsonb_build_object('role','service_role')::text,true);
+ blocked:=false;begin perform public.bertha_hml_code_service('issue',jsonb_build_object('owner_id',ob,'member_id',mid,'user_id',cu,'code_hash',repeat('a',64)));exception when insufficient_privilege then blocked:=true;end;if not blocked then raise exception 'FAIL foreign Owner';end if;
+ code:=public.bertha_hml_code_service('issue',jsonb_build_object('owner_id',oa,'member_id',mid,'user_id',cu,'code_hash',repeat('a',64)));
+ got:=public.bertha_hml_code_service('claim',jsonb_build_object('kind','kids','code_hash',repeat('a',64),'nonce_hash',repeat('b',64),'ip_hash',repeat('c',64)));if got is not null then raise exception 'FAIL wrong app';end if;
+ got:=public.bertha_hml_code_service('claim',jsonb_build_object('kind','adult','code_hash',repeat('a',64),'nonce_hash',repeat('b',64),'ip_hash',repeat('c',64)));if got->>'user_id'<>cu::text then raise exception 'FAIL actual link';end if;
+ got:=public.bertha_hml_code_service('claim',jsonb_build_object('kind','adult','code_hash',repeat('a',64),'nonce_hash',repeat('b',64),'ip_hash',repeat('c',64)));if got->>'user_id'<>cu::text then raise exception 'FAIL reconnect nonce';end if;
+ got:=public.bertha_hml_code_service('claim',jsonb_build_object('kind','adult','code_hash',repeat('a',64),'nonce_hash',repeat('d',64),'ip_hash',repeat('c',64)));if got is not null then raise exception 'FAIL reused on another device';end if;
+ perform set_config('request.jwt.claims',jsonb_build_object('sub',cu,'role','authenticated')::text,true);
+ blocked:=false;begin perform public.bertha_hml_action('network','{}');exception when insufficient_privilege then blocked:=true;end;if not blocked then raise exception 'FAIL code account promoted Owner';end if;
+ blocked:=false;begin perform public.bertha_hml_invite_prepare(jsonb_build_object('local_id','forbidden','name','No','kind','adult'));exception when insufficient_privilege then blocked:=true;end;if not blocked then raise exception 'FAIL code principal issuing invites';end if;
+ perform set_config('request.jwt.claims',jsonb_build_object('role','service_role')::text,true);
+ perform public.bertha_hml_code_service('revoke',jsonb_build_object('owner_id',oa,'member_id',mid));
+ got:=public.bertha_hml_code_service('claim',jsonb_build_object('kind','adult','code_hash',repeat('a',64),'nonce_hash',repeat('b',64),'ip_hash',repeat('c',64)));if got is not null then raise exception 'FAIL revoked code';end if;
+ perform public.bertha_hml_code_service('issue',jsonb_build_object('owner_id',oa,'member_id',mid,'user_id',cu,'code_hash',repeat('e',64)));
+ update private.bertha_hml_codes set expires_at=now()-interval '1 second' where code_hash=repeat('e',64);
+ got:=public.bertha_hml_code_service('claim',jsonb_build_object('kind','adult','code_hash',repeat('e',64),'nonce_hash',repeat('b',64),'ip_hash',repeat('c',64)));if got is not null then raise exception 'FAIL expired code';end if;
+ perform public.bertha_hml_code_service('issue',jsonb_build_object('owner_id',oa,'member_id',mid,'user_id',cu,'code_hash',repeat('f',64)));
+ update public.bertha_hml_members set active=false where id=mid;
+ got:=public.bertha_hml_code_service('claim',jsonb_build_object('kind','adult','code_hash',repeat('f',64),'nonce_hash',repeat('b',64),'ip_hash',repeat('c',64)));if got is not null then raise exception 'FAIL paused member';end if;
+ if has_function_privilege('anon','public.bertha_hml_code_service(text,jsonb)','EXECUTE') or has_function_privilege('authenticated','public.bertha_hml_code_service(text,jsonb)','EXECUTE') then raise exception 'FAIL exposed code service';end if;
+ raise notice 'PASS code generation, network isolation, app isolation, retry, one-use, revoked/expired/paused grants, Owner privilege restrictions, service-only API';
+end;$$;
+rollback;
