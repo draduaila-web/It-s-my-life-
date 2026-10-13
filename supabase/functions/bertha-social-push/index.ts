@@ -18,7 +18,7 @@ Deno.serve(async(req:Request)=>{
    return reply({accepted:ok});
   }
   const token=req.headers.get('Authorization')?.replace(/^Bearer /i,'');if(!token||token===SERVICE)return reply({message:'Entre na sua conta.'},401);const user=await api('/auth/v1/user',undefined,token);
-  if(input.op==='config')return reply({configured:!!KEY});
+  if(input.op==='config'){if(!KEY)return reply({configured:false,verificationReady:false});const check=await fetch('https://api.onesignal.com/apps/'+APP+'/users/by/onesignal_id/'+crypto.randomUUID(),{headers:{Authorization:'Key '+KEY},signal:AbortSignal.timeout(15000)});return reply({configured:true,verificationReady:check.status!==401&&check.status!==403,verificationStatus:check.status});}
   if(!uuid(input.subscription_id))return reply({message:'A inscrição deste aparelho ainda não está pronta.'},400);
   if(input.op==='unbind')return reply(await rpc('unbind',{user_id:user.id,subscription_id:input.subscription_id}));
   if(input.op!=='bind'||!uuid(input.onesignal_id)||typeof input.token!=='string'||input.token.length<20||input.token.length>4096)return reply({message:'Inscrição inválida.'},400);
