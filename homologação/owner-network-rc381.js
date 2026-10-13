@@ -12,7 +12,7 @@ var H=root.BerthaHelper,storage=H.sessionStorageFor(localStorage,sessionStorage,
 function feedback(text){var actions=document.querySelector('.s156-actions');if(!actions)return;var node=document.getElementById('networkSync381');if(!node){node=document.createElement('p');node.id='networkSync381';node.className='note';node.setAttribute('role','status');actions.after(node);}node.textContent=text;}
 function rawRead(key){try{return JSON.parse(root.berthaHmlStorage.getItem(key)||'[]');}catch(_){return [];}}
 async function sync(){
- if(busy||!client.session()||document.visibilityState==='hidden')return;busy=true;
+ if(busy||!client.session()||document.visibilityState==='hidden'||document.querySelector('dialog[open]'))return;busy=true;
  try{
  var user=await client.user(),networks=await client.query('bertha_hml_networks','select=*'),network=networks.find(function(n){return n.owner_id===user.id;});if(!network)return;
  var sources=H.ownerSources(localStorage),remoteMembers=await client.query('bertha_hml_members','select=*');
@@ -28,10 +28,11 @@ async function sync(){
  if(['accepted','in_progress','completed'].includes(localState)&&(local.satelliteStatus!==localState||String(local.claimedById)!==member.local_id)){local.claimedById=member.local_id;local.satelliteStatus=localState;if(['completed','validated'].includes(t.state)){local.completedById=member.local_id;local.completedAt=Date.parse(t.completed_at)||Date.now();}changed=true;}
  }
  if(changed)saveCasa(data);
- for(var completed of remoteTasks.filter(function(t){return t.state==='validated'&&!t.withdrawn;})){var pieces=completed.source_ref.split('|'),d=loadCasa(),task=pieces[0]==='maintenance'?(d.maintenance||[]).find(function(x){return String(x.id)===pieces[1];}):(d.areas||[]).flatMap(function(a){return a.tasks||[];}).find(function(x){return String(x.id)===pieces[1];});if(task?.satelliteStatus==='completed'&&task.networkCompletedRef!==completed.source_ref){task.networkCompletedRef=completed.source_ref;saveCasa(d);validateSatelliteCasaTask(task.id);}}
+ for(var completed of remoteTasks.filter(function(t){return t.state==='validated'&&!t.withdrawn;})){var pieces=completed.source_ref.split('|'),d=loadCasa(),task=pieces[0]==='maintenance'?(d.maintenance||[]).find(function(x){return String(x.id)===pieces[1];}):(d.areas||[]).flatMap(function(a){return a.tasks||[];}).find(function(x){return String(x.id)===pieces[1];});if(task?.satelliteStatus==='completed'&&task.networkCompletedRef!==completed.source_ref){task.networkCompletedRef=completed.source_ref;saveCasa(d);validateSatelliteCasaTask(task.id);render();}}
  sources=H.ownerSources(localStorage);var tasks=plan(H,sources,remoteMembers,remoteTasks),signature=JSON.stringify([user.id,tasks]);if(signature!==lastSignature){await client.syncTasks({network_id:network.id,tasks:tasks});lastSignature=signature;}
  var sent=await client.query('bertha_hml_recognitions','select=source_ref&network_id=eq.'+network.id),known=new Set(sent.map(function(r){return r.source_ref;}));
  for(var rec of rawRead('bertha.recognitions.v1')){if(known.has(String(rec.id)))continue;var member=remoteMembers.find(function(m){return m.local_id===String(rec.memberId)&&m.active&&m.kind==='adult';});if(!member)continue;var match=String(rec.icon||'').match(/recognition_(thanks|flower|coffee|pause|reward|saved|hug|care|arrasou).*?([ab])?$/),art=match?match[1]:/flor/i.test(rec.name)?'flower':/salvou/i.test(rec.name)?'saved':/incrível|arrasou/i.test(rec.name)?'arrasou':'thanks';await client.recognize({network_id:network.id,member_id:member.id,source_ref:String(rec.id),name:rec.name||'Reconhecimento',message:rec.message||'',icon:match?'':rec.icon||'',art_key:art,palette:/_b$/.test(rec.icon||'')?'brisa':'rose',sent_at:new Date(rec.at||Date.now()).toISOString()});}
+ if(changed&&location.hash==='#satelites')renderSatellites();
  feedback('Atividades e reconhecimentos sincronizados com os Helpers.');
  }catch(e){lastSignature='';feedback('A rede ainda não sincronizou: '+e.message);}finally{busy=false;}
 }
