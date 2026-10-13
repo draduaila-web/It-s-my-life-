@@ -19,12 +19,12 @@ function shell(content){
 }
 var pendingEmailKey=authKey+'.email',inviteKey='bertha.helper.hml.pendingInvite.v1',lastEmailRequest=0;
 function authContent(){
- return '<section class="panel auth"><div class="eyebrow">Seu acesso</div><h2>Um link para entrar.</h2><p>'+(owner?'Receba seu acesso no e-mail.':'Use o e-mail que o Owner escolheu para seu convite.')+'</p><form id="authForm"><div class="fields"><label>E-mail<input id="email" type="email" autocomplete="email" required maxlength="254"></label></div><button class="primary" type="submit">Receber meu link</button></form><p class="note">Abra o link no seu e-mail para entrar sem senha. Depois, seu acesso fica salvo neste aparelho até você sair ou precisar entrar novamente.</p><p class="note">O link de acesso é pessoal. Não encaminhe para outra pessoa.</p></section>';
+ return '<section class="panel auth"><div class="eyebrow">Seu acesso</div><h2>Um link para entrar.</h2><p>'+(owner?'Receba seu acesso no e-mail.':'Use o e-mail que o Owner escolheu para seu convite.')+'</p><form id="authForm"><div class="fields"><label>E-mail<input id="email" type="email" autocomplete="email" required maxlength="254"></label></div><button class="primary" type="submit">Receber meu link</button></form><p class="note">Nesta homologação, o e-mail de acesso chega com o remetente Supabase, serviço que envia o link para a BERTH.A.</p><p class="note">Abra o link no seu e-mail para entrar sem senha. Depois, seu acesso fica salvo neste aparelho até você sair ou precisar entrar novamente.</p><p class="note">O link de acesso é pessoal. Não encaminhe para outra pessoa.</p></section>';
 }
 function bindAuth(){
  var f=el('authForm');if(!f)return;try{el('email').value=authStorage.storage.getItem(pendingEmailKey)||'';}catch(_){}
  f.onsubmit=async function(e){e.preventDefault();if(!f.reportValidity())return;if(Date.now()-lastEmailRequest<60000){notice('Aguarde um minuto antes de pedir outro link.',true);return;}var email=el('email').value.trim(),button=f.querySelector('button');button.disabled=true;notice('Solicitando seu link…');
-  try{var url=new URL(location.pathname,location.origin);url.searchParams.set('v','367');var invite;try{invite=sessionStorage.getItem(inviteKey);}catch(_){}if(!owner&&invite)url.searchParams.set('invite',invite);await client.requestEmailLink(email,url.href);authStorage.storage.setItem(pendingEmailKey,email.toLowerCase());lastEmailRequest=Date.now();notice('Solicitação recebida. Confira seu e-mail, inclusive a pasta de spam.');}catch(err){fail(err);}finally{button.disabled=false;}
+  try{var url=new URL(location.pathname,location.origin);url.searchParams.set('v','368');var invite;try{invite=sessionStorage.getItem(inviteKey);}catch(_){}if(!owner&&invite)url.searchParams.set('invite',invite);await client.requestEmailLink(email,url.href);authStorage.storage.setItem(pendingEmailKey,email.toLowerCase());lastEmailRequest=Date.now();notice('Solicitação recebida. Procure o e-mail do remetente Supabase, inclusive na pasta de spam.');}catch(err){fail(err);}finally{button.disabled=false;}
  };
 }
 async function restoreEmailLink(){
@@ -34,12 +34,12 @@ async function restoreEmailLink(){
  if(!hasAuth){if(query.has('invite')){query.delete('invite');history.replaceState(null,'',location.pathname+'?'+query.toString());}return false;}
  var access=fragment.get('access_token'),refresh=fragment.get('refresh_token'),expires=Number(fragment.get('expires_in')||3600),failed=fragment.has('error');
  // Remove sensitive fragment before rendering/account confirmation. No token logging.
- history.replaceState(null,'',location.pathname+'?v=367');
+ history.replaceState(null,'',location.pathname+'?v=368');
  if(failed){notice('Este link expirou ou já foi utilizado. Solicite um novo link.',true);return true;}
  try{var candidate=await client.inspectEmailSession({access_token:access,refresh_token:refresh,expires_in:Number.isFinite(expires)&&expires>0?expires:3600});
   var requested=authStorage.storage.getItem(pendingEmailKey),same=requested&&requested.toLowerCase()===candidate.user.email.toLowerCase();
   async function accept(){client.acceptEmailSession(candidate);authStorage.storage.removeItem(pendingEmailKey);await initialize();}
-  if(same)await accept();else{modal('Confirmar meu acesso','<p>Entrar como <strong>'+safe(candidate.user.email)+'</strong>?</p><p class="note">Confirme que este é o seu e-mail. O vínculo com a rede segue o convite do Owner.</p>',accept);}
+  if(same)await accept();else{modal('Confirmar meu acesso','<p>Entrar como <strong>'+safe(candidate.user.email)+'</strong>?</p><p class="note">O link abriu em outro navegador ou aparelho. Confirme que este é o seu e-mail para entrar com segurança. Depois, você poderá aceitar o convite do Owner.</p>',accept);}
  }catch(err){fail(err);}return true;
 }
 function modal(title,body,onSubmit){
@@ -89,9 +89,9 @@ function ownerPanel(){
 function render(){
  if(!user){shell(authContent());bindAuth();return;}
  if(owner){shell(ownerPanel());bindOwner();if(network)bindTasks();return;}
- if(!members.length){shell('<section class="panel"><h2>Vamos conectar seu espaço</h2><p>Peça ao Owner seu vínculo de acesso e use o mesmo e-mail escolhido por ele.</p><form id="linkForm"><div class="fields"><label>Código de vínculo<input id="linkCode" required pattern="[0-9a-fA-F-]{36}" maxlength="36" autocomplete="off"></label></div><button class="primary" type="submit">Conectar com o Owner</button></form></section>');
+ if(!members.length){shell('<section class="panel"><div class="eyebrow">Acesso confirmado</div><h2>Falta conectar sua rede.</h2><p>Você já entrou como <strong>'+safe(user.email)+'</strong>. Para receber as atividades compartilhadas, abra o convite que o Owner enviou pelo WhatsApp ou cole o link abaixo.</p><p class="note">O convite é diferente do link de acesso recebido por e-mail e deve ter sido criado para este mesmo e-mail.</p><form id="linkForm"><div class="fields"><label>Link de convite ou código<input id="linkCode" required maxlength="2048" autocomplete="off" placeholder="Cole aqui o convite do Owner"></label></div><button class="primary" type="submit">Conectar com o Owner</button></form></section>');
   var hash=new URLSearchParams(location.hash.slice(1)),code=hash.get('link');try{code=code||sessionStorage.getItem(inviteKey);}catch(_){}if(code&&/^[0-9a-f-]{36}$/i.test(code))el('linkCode').value=code;
-  el('linkForm').onsubmit=async function(e){e.preventDefault();var f=this;if(!f.reportValidity())return;f.querySelector('button').disabled=true;try{await client.action('link_accept',{token:el('linkCode').value.trim()});sessionStorage.removeItem(inviteKey);history.replaceState(null,'',location.pathname+location.search);await loadRemote();notice('Seu espaço foi conectado.');}catch(err){fail(err);}finally{if(f.isConnected)f.querySelector('button').disabled=false;}};return;
+  el('linkForm').onsubmit=async function(e){e.preventDefault();var f=this;if(!f.reportValidity())return;var token=H.inviteToken(el('linkCode').value);if(!token){notice('Cole o link de convite da BERTH.A ou o código enviado pelo Owner.',true);return;}f.querySelector('button').disabled=true;try{await client.action('link_accept',{token:token});sessionStorage.removeItem(inviteKey);history.replaceState(null,'',location.pathname+location.search);await loadRemote();notice('Seu espaço foi conectado.');}catch(err){fail(err);}finally{if(f.isConnected)f.querySelector('button').disabled=false;}};return;
  }
  shell(taskPanel());bindTasks();
 }
@@ -109,8 +109,8 @@ function bindOwner(){
   modal('Vincular '+m.name,'<p>Informe o e-mail que esta pessoa usará no Helper.</p><div class="fields"><label>E-mail do adulto<input name="email" type="email" required maxlength="254" autocomplete="off"></label></div>',async function(d){
    var link=await client.action('link',{network_id:network.id,member_id:m.id,email:d.querySelector('input').value.trim()});
    var url=new URL('helper.html',location.href);url.hash='link='+link.token;
-   var result=modal('Vínculo pronto','<p>Válido por sete dias e apenas para o e-mail informado. Compartilhe pessoalmente com '+safe(m.name)+'.</p><label>Link de convite<input readonly value="'+safe(url.href)+'"></label><p class="note">Nenhuma mensagem foi enviada automaticamente.</p><button type="button" id="copyLink">Copiar vínculo</button>',null);
-   result.querySelector('#copyLink').onclick=async function(){try{await navigator.clipboard.writeText(url.href);result.querySelector('.modal-status').textContent='Vínculo copiado.';}catch(_){result.querySelector('.modal-status').textContent='Selecione e copie o link acima.';}};
+   var result=modal('Vínculo pronto','<p>Válido por sete dias e apenas para o e-mail informado. Compartilhe pessoalmente com '+safe(m.name)+'.</p><label>Link de convite<input readonly value="'+safe(url.href)+'"></label><p class="note">Nenhuma mensagem foi enviada automaticamente.</p><button type="button" id="copyLink">Copiar convite</button>',null);
+   result.querySelector('#copyLink').onclick=async function(){try{await navigator.clipboard.writeText(url.href);result.querySelector('.modal-status').textContent='Convite copiado. Envie pelo WhatsApp para esta pessoa.';}catch(_){result.querySelector('.modal-status').textContent='Selecione e copie o link acima.';}};
   });
  };});
  document.querySelectorAll('[data-resume]').forEach(function(b){b.onclick=function(){modal('Retomar acesso?','<p>A mesma conta volta a acessar as atividades autorizadas. Vínculos antigos revogados continuam inválidos.</p>',async function(){var remote=members.find(function(m){return m.id===b.dataset.resume;}),local=H.ownerSources(localStorage).members.find(function(m){return remote&&String(m.id)===remote.local_id;});if(!local||local.permissions?.casa!==true)throw new Error('Confira o cadastro e a permissão para tarefas na BERTH.A principal antes de retomar.');await client.action('member',{network_id:network.id,local_id:String(local.id),name:local.name,avatar_key:local.avatarKey,permissions:{tasks:true},requires_validation:local.requiresValidation===true});await client.action('resume',{network_id:network.id,member_id:b.dataset.resume});await loadRemote();notice('Acesso retomado.');});};});
