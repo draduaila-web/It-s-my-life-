@@ -2,7 +2,7 @@
 'use strict';
 var H=root.BerthaHelper,app=document.getElementById('kidsApp'),key='bertha.helper.hml.kids.auth.v1',local=null;try{local=root.localStorage;}catch(_){}
 var store=H.sessionStorageFor(local,sessionStorage,key),client=H.createClient({base:'https://ouxellokvigbdeeyvvfv.supabase.co',key:'sb_publishable_2lmnQX4WD-s343sEZoFERA_B4URTnip',storage:store.storage,sessionKey:key});
-var user=null,member=null,tasks=[],guides=[],profile=null,view='missions',filter='pending',loading=false,notice='',error=false,epoch=0,chat=null,chatRows=[],chatPeers=[],lastProgress=null;
+var user=null,member=null,tasks=[],guides=[],profile=null,view=location.hash==='#messages'?'messages':'missions',filter='pending',loading=false,notice='',error=false,epoch=0,chat=null,chatRows=[],chatPeers=[],lastProgress=null;
 var svgs={missions:'<path d="M8 5h12v15H4V5h4M8 3h8v4H8zM8 12l2 2 5-5M8 18h8"/>',world:'<path d="M12 3l3 6 6 1-4 5 1 6-6-3-6 3 1-6-4-5 6-1z"/>',messages:'<path d="M4 4h16v13H9l-5 4zM8 9h8M8 13h5"/>',more:'<circle cx="5" cy="12" r="1.5"/><circle cx="12" cy="12" r="1.5"/><circle cx="19" cy="12" r="1.5"/>'};
 var labels={missions:'Missões',world:'Meu mundo',messages:'Mensagens',more:'Mais'},states={available:'Para ajudar',assigned:'Para você',accepted:'Escolhida',in_progress:'Em andamento',completed:'Esperando confirmação',validated:'Concluída'};
 function safe(s){return H.escape(s);}function el(id){return document.getElementById(id);}function feedback(s,bad){notice=s;error=!!bad;var n=el('notice');if(n){n.textContent=s;n.classList.toggle('error',error);}}
