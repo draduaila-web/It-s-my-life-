@@ -1,0 +1,50 @@
+
+> test
+> TZ=America/Sao_Paulo node regression.cjs .. && TZ=America/Sao_Paulo node push-account-race.cjs .. && TZ=America/Sao_Paulo node owner-progress-rc362.test.cjs .. && TZ=America/Sao_Paulo node owner-tempo-rc360.cjs .. && TZ=America/New_York node owner-tempo-rc360.cjs .. && TZ=UTC node owner-tempo-rc360.cjs .. && TZ=America/Sao_Paulo node qa-dom-rc393.cjs .. && TZ=America/Sao_Paulo node qa-kids-rc393.cjs .. && TZ=America/Sao_Paulo node qa-push-rc393.cjs ..
+
+PASS FIN01 saved income unchanged even equal to source sum
+PASS O2 edit older exercise keeps newer occurrence and stable activity ID
+PASS O3 delete one session preserves other date and proof
+PASS O2/O3 ambiguous legacy proof blocks mutation
+PASS O4 exercise uses local civil date and local week
+PASS SHOP01 mass conversion keeps prior stock
+PASS SHOP01 volume conversion and incompatible units preserve separate balances
+PASS SHOP01 suggested replenishment converts stock to target units
+PASS SHOP02 close purchase preserves base target
+PASS FOOD01 explicit empty menus survive load; legacy absent field migrates
+PASS FOOD03 unknown macros remain unknown; explicit zero is valid
+PASS FOOD02 alternative without registered recipe does not inherit planned macros
+PASS HEALTH02 today and yesterday use civil dates
+PASS FIN02 stable ID survives rename; ambiguous legacy label counted once
+PASS FIN03 privacy mask covers inserted wishlist
+PASS O6 Casa fallback never removes recipe store
+PASS O1 resume/edit amends exercise origin and learning sample without duplicate
+PASS O1 project duration amendments apply delta only
+PASS O5 occupied block prevents flexible suggestion and bounds next window
+PASS IDEA01 new project and renamed project keep one pending material with stable link
+PASS I02 unstarted single mission reschedules; started occurrence keeps history
+PASS I01 validation passes exact clicked occurrence to RPC
+PASS I04 slow prior conversation cannot overwrite latest selection
+PASS I03 latest 100 messages displayed chronologically
+PASS I04 composer sends to selected conversation
+PASS I05 early start matches server one-day window
+PASS Work lists all open tasks; empty health keeps add action
+PASS Backup snapshot excludes auth and production; second load preserves first copy
+PASS O1 actual finish and resume keep single history, origin session and learning sample
+TOTAL 29 regression scenarios; all JavaScript parsed.
+PASS: account B binds even while account A had enabled status.
+PASS: delayed old bind finishes before new bind and cannot paint new account state.
+PASS: offline unbind keeps local opt-out; login B still binds. Server revocation offline remains pending.
+PASS: 65 verificações de métricas, deduplicação, ciclos, recorrência, baseline, seis cores e armazenamento isolado; nenhum armazenamento real acessado.
+{"result":"PASS","checks":22,"timezone":"America/Sao_Paulo","scope":"reinício/ revisão/ override/ fim capilar33dias e autocuidado14dias; relógio exclusivamente simulado"}
+PASS: 9 verificações de recorrência, incluindo virada de ano e horário de verão.
+PASS: 2 verificações de evento ausente sem procedimento undefined.
+{"result":"PASS","checks":22,"timezone":"America/New_York","scope":"reinício/ revisão/ override/ fim capilar33dias e autocuidado14dias; relógio exclusivamente simulado"}
+PASS: 9 verificações de recorrência, incluindo virada de ano e horário de verão.
+PASS: 2 verificações de evento ausente sem procedimento undefined.
+{"result":"PASS","checks":22,"timezone":"UTC","scope":"reinício/ revisão/ override/ fim capilar33dias e autocuidado14dias; relógio exclusivamente simulado"}
+PASS: 9 verificações de recorrência, incluindo virada de ano e horário de verão.
+PASS: 2 verificações de evento ausente sem procedimento undefined.
+PASS: personal mission create/edit, weekday/time/reminder persistence, Casa area preserved, shared configurable progression, recurring plan after done, per-occurrence Owner validation and points deduplication.
+PASS: Kids date groups, other-child isolation, tomorrow locked by default, optional anticipation, actions continue in acompanhamento.
+PASS: granted push subscription restored and persisted without another permission prompt; explicit opt-out is respected.

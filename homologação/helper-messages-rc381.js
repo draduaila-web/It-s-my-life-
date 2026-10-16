@@ -58,7 +58,7 @@ function create(options){
   if(!owner){host.innerHTML='<h2>Privacidade</h2><p>Você pode bloquear uma pessoa na conversa. Revogar uma dupla impede novos envios e preserva o histórico para os participantes ativos.</p>';return;}
   var peers=directory.filter(function(p){return !p.is_owner;}),permissions=await rpc('permissions',{});
   if(!alive||generation!==epoch||!host.isConnected)return;var pairs=[];peers.forEach(function(a,i){peers.slice(i+1).forEach(function(b){pairs.push({a:a,b:b,allowed:permissions.some(function(p){return p.allowed&&[p.user_a,p.user_b].includes(a.user_id)&&[p.user_a,p.user_b].includes(b.user_id);})});});});
-  host.innerHTML='<h2>Comunicação da rede</h2><p>Novas conversas entre satélites ficam bloqueadas por padrão. Autorizar uma dupla não dá acesso às conversas privadas dos adultos.</p>'+pairs.map(function(p,i){return '<label class="check privacy-row"><input type="checkbox" data-pair="'+i+'" '+(p.allowed?'checked':'')+'>'+safe(p.a.name)+' ↔ '+safe(p.b.name)+'</label>';}).join('')+(!pairs.length?'<p>Para autorizar uma dupla, conecte pelo menos dois Helpers à rede usando os códigos individuais. Cadastros ainda sem vínculo não aparecem aqui. A comunicação Kids está em implementação.</p>':'')+'<div id="socialStatus" class="status" role="status"></div>';
+  host.innerHTML='<h2>Comunicação da rede</h2><p>Novas conversas entre satélites ficam bloqueadas por padrão. Autorizar uma dupla não dá acesso às conversas privadas dos adultos.</p>'+pairs.map(function(p,i){return '<label class="check privacy-row"><input type="checkbox" data-pair="'+i+'" '+(p.allowed?'checked':'')+'>'+safe(p.a.name)+' ↔ '+safe(p.b.name)+'</label>';}).join('')+(!pairs.length?'<p>Para autorizar uma dupla, conecte pelo menos duas pessoas à rede usando os códigos individuais. Cadastros ainda sem vínculo não aparecem aqui.</p>':'')+'<div id="socialStatus" class="status" role="status"></div>';
   host.querySelectorAll('[data-pair]').forEach(function(b){b.onchange=async function(){var p=pairs[Number(b.dataset.pair)],value=b.checked;b.disabled=true;try{await rpc('communication',{user_a:p.a.user_id,user_b:p.b.user_id,allowed:value});status(value?'Comunicação autorizada.':'Novos envios bloqueados. Histórico preservado para os participantes ativos.');}catch(e){b.checked=!value;status(e.message);}finally{b.disabled=false;}};});
  }
  async function refresh(){if(view==='messages')await refreshMessages();}
@@ -67,4 +67,5 @@ function create(options){
 var api={create:create,locationState:locationState,mergeMessages:mergeMessages};
 if(typeof module==='object'&&module.exports)module.exports=api;else root.BerthaSocial=api;
 })(typeof window==='object'?window:globalThis);
+
 

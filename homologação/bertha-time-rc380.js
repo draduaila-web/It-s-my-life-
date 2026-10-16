@@ -183,7 +183,7 @@
     current.configuredMinutes=configured;
     current.samples=Array.isArray(current.samples)?current.samples:[];
     current.samples.push({
-      at:new Date().toISOString(),
+      at:new Date().toISOString(),evidenceId:item.evidenceId||null,
       realMinutes:real,
       configuredMinutes:configured
     });
@@ -574,10 +574,14 @@
     const e=engine(); const actives=e.actives||[];
     const list=candidates().filter(x=>!actives.some(a=>String(a.id)===String(x.id)));
     const fixed=list.filter(x=>x.time).sort((a,b)=>timeToM(a.time)-timeToM(b.time));
-    if(fixed.length && timeToM(fixed[0].time)<=minsNow()) return {actives,item:fixed[0]};
+    const dueFixed=fixed.find(x=>timeToM(x.time)<=minsNow());
+    if(dueFixed?.kind==='commitment')return {actives,item:dueFixed};
 
-    const allSources=sourcesToday();
-    const available=nextFixedMinutes(allSources);
+    const allSources=sourcesToday(),now=minsNow(),blocks=dayBlocks().filter(b=>b.enabled!==false).map(blockToMinutes);
+    if(blocks.some(b=>now>=b.a&&now<b.b))return {actives,free:true};
+    if(dueFixed)return {actives,item:dueFixed};
+    const nextBlock=blocks.filter(b=>b.a>now).reduce((n,b)=>Math.min(n,b.a-now),Infinity),fixedAvailable=nextFixedMinutes(allSources);
+    const available=Number.isFinite(nextBlock)?Math.min(fixedAvailable??Infinity,nextBlock):fixedAvailable;
     const ranked=[...list].sort((a,b)=>suggestionScore(b,available)-suggestionScore(a,available));
     const fitting=ranked.find(x=>available===null||(+x.minutes||30)<=available);
     if(fitting)return {actives,item:fitting};
@@ -633,7 +637,7 @@
     write('minha-vida.casa.v1',casa);write('minha-vida.casa.executions.v1',executions);
   }
 
-  function syncExerciseCompletion(active,real,end){
+  function syncExerciseCompletion(active,real,end,evidenceId){
     if(!(active?.selectedPlanId || active?.selectedCycleId || String(active?.id||'').startsWith('exercise:') || String(active?.id||'').startsWith('cycle:'))) return;
     const data=read('minha-vida.exercicios.v1',{plans:[],sessions:[]})||{plans:[],sessions:[]};
     data.sessions=Array.isArray(data.sessions)?data.sessions:[];
@@ -651,7 +655,7 @@
       substituted:!!active.plannedItemId,
       planId:active.selectedPlanId||'',
       cycleId:active.selectedCycleId||(data.plans||[]).find(p=>String(p.id)===String(active.selectedPlanId||String(active.id||'').replace(/^exercise:/,'')))?.cycleId||'',
-      progressItemId:active.id||'',
+      progressItemId:active.id||'',progressExecutionId:evidenceId||'',
       createdAt:end
     });
     write('minha-vida.exercicios.v1',data);
@@ -708,6 +712,22 @@
     arr[i]=x;write(COMMITMENTS_KEY,arr);
   }
 
+  // Amend one execution without completing it again or adding another learning sample.
+  function amendDuration395(h,oldMinutes,oldEnd){
+    const id=String(h.itemId||''),real=Math.max(1,+h.realMinutes||1),delta=real-(+oldMinutes||0);
+    if(h.source==='Exercícios'){
+      const data=read('minha-vida.exercicios.v1',null);if(data){const rows=(data.sessions||[]).filter(x=>x.progressExecutionId?String(x.progressExecutionId)===String(h.id):String(x.progressItemId)===id&&x.date===h.day&&+x.createdAt===+oldEnd);if(rows.length===1){const x=rows[0];x.minutes=real;x.duration=`${real} min`;x.progressExecutionId=h.id||x.progressExecutionId;x.createdAt=h.endedAt;write('minha-vida.exercicios.v1',data);}}
+    }
+    if(id.startsWith('study:')){const data=read('minha-vida.estudos.v1',null);if(data){const rows=(data.sessions||[]).filter(x=>String(x.engineItemId)===id&&x.date===h.day&&+x.createdAt===+oldEnd);if(rows.length===1){rows[0].minutes=real;rows[0].createdAt=h.endedAt;write('minha-vida.estudos.v1',data);}}}
+    if(h.projectId||id.startsWith('project:')){const data=read('minha-vida.ideias.v1',[]),x=data.find(x=>String(x.id)===String(h.projectId||id.slice(8)));if(x){x.progressMinutes=Math.max(0,(+x.progressMinutes||0)+delta);if(+x.lastWorkedAt===+oldEnd)x.lastWorkedAt=h.endedAt;write('minha-vida.ideias.v1',data);}}
+    let key=h.workStorageKey,ref=h.workTaskId;
+    if(id.startsWith('task:')){key='minha-vida.pendencias.v1';ref=id.slice(5);}
+    if(id.startsWith('crefito:')){key='minha-vida.trabalho.crefito.v1';ref=id.slice(8);}
+    const match=id.match(/^(minha-vida\.trabalho\.[^:]+\.v1):(.*)$/);if(!key&&match){key=match[1];ref=match[2];}
+    if(key&&ref){const data=read(key,[]),x=data.find(x=>String(x.id)===String(ref));if(x&&+x.completedAt===+oldEnd){x.actualMinutes=real;x.completedAt=h.endedAt;write(key,data);}}
+    const keyLearning=h.learningKey||durationLearningKey({...h,id:h.itemId}),store=durationLearningStore(),rec=store.items?.[keyLearning];
+    if(rec){const samples=(rec.samples||[]).filter(x=>x.evidenceId&&h.id?String(x.evidenceId)===String(h.id):Math.abs(new Date(x.at).getTime()-(+oldEnd))<1000);if(samples.length===1){samples[0].realMinutes=real;samples[0].evidenceId=h.id||null;samples[0].at=new Date(h.endedAt).toISOString();const calc=computeDurationLearning(rec.samples,rec.configuredMinutes||h.configuredMinutes||30);Object.assign(rec,calc,{updatedAt:new Date().toISOString()});store.items[keyLearning]=rec;saveDurationLearningStore(store);}}
+  }
   function finishActive(activeId=null,realOverride=null){
     const e=engine(),list=Array.isArray(e.actives)?e.actives:[]; if(!list.length)return;
     const idx=activeId?list.findIndex(a=>String(a.id)===String(activeId)):0; if(idx<0)return;
@@ -715,19 +735,19 @@
     if(active.resumeHistoryEndedAt){
       const h=(e.history||[]).find(x=>String(x.endedAt)===String(active.resumeHistoryEndedAt));
       const total=Math.max(1,(+h?.realMinutes||0)+real);
-      if(h){h.realMinutes=total;h.endedAt=end;h.resumed=true;h.updatedAt=end;}
-      recordDurationLearning(active,total);
+      if(h){if(!h.id)h.id=JSON.stringify([h.itemId||h.plannedItemId||h.learningKey,h.day||iso(),typeof h.endedAt==='number'?h.endedAt:Date.parse(h.endedAt)||Number(h.endedAt)||0]);const previous=h.realMinutes,previousEnd=h.endedAt;h.realMinutes=total;h.endedAt=end;h.resumed=true;h.updatedAt=end;amendDuration395(h,previous,previousEnd);}
       e.actives.splice(idx,1);e.active=e.actives[0]||null;saveEngine(e);rerender();
       setTimeout(()=>repeatAfterFinishDialog({...active,id:h?.itemId||active.id,title:h?.title||active.title,source:h?.source||active.source},total),80);
       return;
     }
-    e.history.unshift({itemId:active.id,learningKey:active.learningKey||durationLearningKey(active),
+    const evidenceId='execution:'+String(active.startedAt)+':'+String(end)+':'+String(active.id);active.evidenceId=evidenceId;
+    e.history.unshift({id:evidenceId,itemId:active.id,projectId:active.projectId||null,workStorageKey:active.workStorageKey||null,workTaskId:active.workTaskId||null,selectedCycleId:active.selectedCycleId||null,learningKey:active.learningKey||durationLearningKey(active),
       title:active.title,source:active.source,day:iso(),startedAt:active.startedAt,endedAt:end,
       configuredMinutes:+active.configuredMinutes||+active.plannedMinutes||30,
       plannedMinutes:active.plannedMinutes,plannedItemId:active.plannedItemId||null,
       plannedName:active.plannedName||null,selectedPlanId:active.selectedPlanId||null,category:active.category||null,
       kind:active.kind||null,ritualId:active.ritualId||null,ritualChecklistContext:active.ritualChecklistContext||null,checklistSessionKey:active.checklistSessionKey||null,learnedMinutes:active.learnedMinutes||null,realMinutes:real,status:'done'});
-    recordDurationLearning(active,real); syncTaskCompletion(active,real,end); syncCasaCompletion(active,end); syncExerciseCompletion(active,real,end);
+    recordDurationLearning(active,real); syncTaskCompletion(active,real,end); syncCasaCompletion(active,end); syncExerciseCompletion(active,real,end,evidenceId);
     syncStudyCompletion(active,real,end); syncWorkCompletion(active,real,end); syncProjectCompletion(active,real,end);
     syncCommitmentCompletion(active,real,end); markRepeatConsumed(active);
     e.actives.splice(idx,1); e.active=e.actives[0]||null; saveEngine(e); rerender();
@@ -770,7 +790,7 @@
     const d=dialogBase('Ajustar tempo real',`<p class="bertha-muted">A BERTH.A registrou <strong>${durationText(realMinutes)}</strong> para <strong>${esc(item.title||'Atividade')}</strong>.</p><label class="bertha-field">Tempo real (min)<input type="number" min="1" inputmode="numeric" data-real value="${Math.max(1,+realMinutes||1)}"></label><div class="bertha-actions"><button class="bertha-secondary" data-cancel>Cancelar</button><button class="bertha-primary" data-save-real>Salvar tempo</button></div>`); d.classList.add('bertha-finish-dialog');
     d.classList.add('bertha-meudia-dialog','bertha-finish-dialog');
     d.querySelector('[data-cancel]').onclick=()=>{d.close();d.remove()};
-    d.querySelector('[data-save-real]').onclick=()=>{const real=Math.max(1,+d.querySelector('[data-real]').value||realMinutes);const e=engine();const h=(e.history||[]).find(x=>x.status==='done'&&((item.historyEndedAt&&String(x.endedAt)===String(item.historyEndedAt))||(!item.historyEndedAt&&String(x.itemId)===String(item.id))));if(h){h.realMinutes=real;h.editedRealMinutes=true;h.updatedAt=Date.now();saveEngine(e)}const key=durationLearningKey(item),store=durationLearningStore(),rec=store.items?.[key];if(rec&&Array.isArray(rec.samples)&&rec.samples.length){rec.samples[rec.samples.length-1].realMinutes=real;const calc=computeDurationLearning(rec.samples,rec.configuredMinutes||item.configuredMinutes||item.plannedMinutes||30);Object.assign(rec,{count:calc.count,learned:calc.learned,learnedMinutes:calc.learnedMinutes,suggestedMinutes:calc.suggestedMinutes,confidence:calc.confidence,lastMinutes:calc.lastMinutes,updatedAt:new Date().toISOString()});store.items[key]=rec;saveDurationLearningStore(store)}d.close();d.remove();rerender();};
+    d.querySelector('[data-save-real]').onclick=()=>{const real=Math.max(1,+d.querySelector('[data-real]').value||realMinutes);const e=engine();const h=(e.history||[]).find(x=>x.status==='done'&&((item.historyEndedAt&&String(x.endedAt)===String(item.historyEndedAt))||(!item.historyEndedAt&&String(x.itemId)===String(item.id))));if(h){if(!h.id)h.id=JSON.stringify([h.itemId||h.plannedItemId||h.learningKey,h.day||iso(),typeof h.endedAt==='number'?h.endedAt:Date.parse(h.endedAt)||Number(h.endedAt)||0]);const previous=h.realMinutes,previousEnd=h.endedAt;h.realMinutes=real;h.editedRealMinutes=true;h.updatedAt=Date.now();amendDuration395(h,previous,previousEnd);saveEngine(e)}d.close();d.remove();rerender();};
   }
   function recentCompleted(){
     const h=(engine().history||[]).find(x=>x.status==='done'&&x.day===iso()&&Date.now()-(+x.endedAt||0)<6*60*60*1000);
@@ -1548,7 +1568,7 @@
 
   function renderHome(){ ensureHomeUtilityStyles(); ensureMeuDiaV168Styles(); const d=new Date(), greet=d.getHours()<12?'Bom dia':d.getHours()<18?'Boa tarde':'Boa noite'; const today=new Intl.DateTimeFormat('pt-BR',{weekday:'long',day:'numeric',month:'long'}).format(d); const raw=sourcesToday().filter(x=>!doneToday(x.id)); const scheduled=raw.filter(x=>x.time); const smartCasa=candidates().filter(x=>x.kind==='home-routine'||x.kind==='home-maintenance'); const nonCasa=raw.filter(x=>x.kind!=='home-routine'&&x.kind!=='home-maintenance'&&!x.time).sort((a,b)=>(Number(!!b.repeated)-Number(!!a.repeated))||((+b.repeatRequestedAt||0)-(+a.repeatRequestedAt||0))); const current=currentSuggestion(); const currentId=current?.item?.id||''; const activeIds=new Set((current?.actives||[]).map(a=>String(a.id))); const flexPool=nonCasa.filter(x=>x.id!==currentId&&!activeIds.has(String(x.id))); const tasks=(smartCasa.length?[...flexPool.slice(0,3),smartCasa[0]]:flexPool.slice(0,4)); const free=current.free;
     const financeReminders = renderFinanceRemindersHome();
-    const shopCount=window.BerthaShopping?.pendingCount?.()||0; const healthRaw=window.BerthaShopping?.renderHealthMini?.()||''; const health=/Nenhum item cadastrado/i.test(healthRaw)?'':healthRaw;
+    const shopCount=window.BerthaShopping?.pendingCount?.()||0; const healthRaw=window.BerthaShopping?.renderHealthMini?.()||''; const health=healthRaw;
     const utility=`<section class="home-utility-grid"><a class="home-utility-card" href="#compras"><span class="home-utility-icon">${homeUtilityIcon('bag')}</span><span class="home-utility-copy"><strong>Lista de Compras</strong><small>O que preciso adquirir?</small></span><span class="home-utility-count">${shopCount}</span></a><a class="home-utility-card" href="#progresso"><span class="home-utility-icon">${homeUtilityIcon('trend')}</span><span class="home-utility-copy"><strong>Meu Progresso</strong><small>Como estou caminhando?</small></span><span aria-hidden="true">›</span></a><a class="home-utility-card" href="#satelites"><span class="home-utility-icon">${homeUtilityIcon('network')}</span><span class="home-utility-copy"><strong>Minha rede</strong><small>Atividades e validações</small></span><span aria-hidden="true">›</span></a></section>`;
     return `<section class="day-hero"><div class="eyebrow">MEU DIA</div><h1>${greet}, Duaila.</h1><p class="day-date">${today}</p></section>${nowCard()}<section class="day-section home-day-structure"><div class="section-head"><div><h2>Seu dia</h2><small class="home-day-helper">Compromissos e sugestões nas janelas livres.</small></div><button type="button" class="home-edit-hours" data-edit-day-hours>Editar horários</button></div><div class="timeline bertha-timeline">${renderHomeTimeline()}</div></section><section class="day-section"><div class="section-head"><h2>O que importa hoje</h2><span class="soft-count">${tasks.length}</span></div>${tasks.length?tasks.map(x=>`<div class="focus-row bertha-focus"><div><strong>${esc(x.title)}</strong><small>${esc(x.source)} · ${durationText(+x.minutes||30)}</small></div><button data-start="${esc(x.id)}">Começar</button></div>`).join(''):`<div class="bertha-empty">Seu essencial está em dia.</div>`}</section>${renderFoodHomeMini()}${financeReminders}${health}${free?`<section class="free-space"><strong>Espaço livre também faz parte do dia.</strong><p>Se nada precisa ser resolvido agora, não resolva.</p></section>`:''}${utility}`;
   }
@@ -5477,4 +5497,5 @@ html body dialog.bertha-dialog[open]:has(.bertha-ideal-modal-form) button{font-w
   `;
   document.head.appendChild(st);
 })();
+
 

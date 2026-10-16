@@ -1,0 +1,10 @@
+{
+  "private": true,
+  "scripts": {
+    "test": "TZ=America/Sao_Paulo node regression.cjs .. && TZ=America/Sao_Paulo node push-account-race.cjs .. && TZ=America/Sao_Paulo node owner-progress-rc362.test.cjs .. && TZ=America/Sao_Paulo node owner-tempo-rc360.cjs .. && TZ=America/New_York node owner-tempo-rc360.cjs .. && TZ=UTC node owner-tempo-rc360.cjs .. && TZ=America/Sao_Paulo node qa-dom-rc393.cjs .. && TZ=America/Sao_Paulo node qa-kids-rc393.cjs .. && TZ=America/Sao_Paulo node qa-push-rc393.cjs .."
+  },
+  "devDependencies": {
+    "acorn": "8.15.0",
+    "jsdom": "26.1.0"
+  }
+}

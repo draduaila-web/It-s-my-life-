@@ -390,7 +390,7 @@
         <div class="work12-list">${ns.length?ns.map(n=>`<article class="card work12-notequick"><div><strong>${esc(n.title||'Nota')}</strong>${n.text?`<p>${esc(n.text)}</p>`:''}<div class="work12-note-actions"><button class="work12-mini" data-note-task="${esc(n.id)}">Transformar em tarefa</button><button class="work12-mini danger" data-note-del="${esc(n.id)}">Excluir</button></div></div></article>`).join(''):`<div class="work12-empty">Nada para carregar na cabeça agora.</div>`}</div>
       </section>
       <section class="work12-section"><div class="work12-section-head"><h3>O que preciso fazer</h3><button class="work12-add" id="work12Add">+ adicionar</button></div>
-        <div class="work12-list">${open.length?open.sort((x,y)=>(x.date||'9999').localeCompare(y.date||'9999')).slice(0,30).map(x=>taskCard(x,cfg)).join(''):`<div class="work12-empty">Nenhuma tarefa em aberto.</div>`}</div>
+        <div class="work12-list">${open.length?open.sort((x,y)=>(x.date||'9999').localeCompare(y.date||'9999')).map(x=>taskCard(x,cfg)).join(''):`<div class="work12-empty">Nenhuma tarefa em aberto.</div>`}</div>
       </section>
       ${done.length?`<section class="work12-history"><details><summary>Concluídas · ${done.length}</summary><div class="work12-history-list">${done.slice().sort((a,b)=>(b.completedAt||b.updatedAt||0)-(a.completedAt||a.updatedAt||0)).map(x=>`<div class="work12-history-item"><strong>${esc(x.title)}</strong><small>${x.actualMinutes?` · ${x.actualMinutes} min reais`:''}</small><div class="work12-history-actions"><button class="work12-mini" data-work12-repeat="${esc(x.id)}">Repetir</button><button class="work12-mini danger" data-work12-delete="${esc(x.id)}">Excluir</button></div></div>`).join('')}</div></details></section>`:''}
       <section class="work12-section"><div class="work12-section-head"><h3>Áreas</h3></div><div class="work12-actions">
@@ -738,3 +738,4 @@
  dialog.work12-dialog .work12-note-day>span{display:flex!important;flex-direction:column!important;gap:2px!important;min-width:0!important}
  `; document.head.appendChild(s);
 })();
+
