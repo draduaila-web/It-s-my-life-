@@ -28,8 +28,11 @@ html body dialog#berthaOwnerIntroduction[open] {
 #berthaMore .bertha-introduction-help button { min-width:0!important; min-height:46px!important; padding:11px 14px!important; border:1px solid rgba(108,88,113,.12)!important; border-radius:15px!important; background:#fffdfa!important; color:#706972!important; font-family:inherit!important; font-size:14px!important; font-weight:500!important; line-height:1.3!important; box-shadow:none!important; }
 #berthaOwnerIntroduction .bertha-introduction-actions .bertha-introduction-primary { background:rgba(244,206,188,.46)!important; color:#6d5a61!important; border-color:rgba(108,88,113,.075)!important; }
 #berthaOwnerIntroduction button:disabled { opacity:.45!important; cursor:default; }
-#berthaOwnerIntroduction :is(h2,button):focus-visible,
+#berthaOwnerIntroduction button:focus-visible,
 #berthaMore .bertha-introduction-help button:focus-visible { outline:2px solid #877d75!important; outline-offset:3px!important; }
 #berthaMore .bertha-introduction-help { margin-top:18px; padding-top:15px; border-top:1px solid rgba(112,96,104,.10); }
 #berthaMore .bertha-introduction-help h3 { margin:0 0 10px; color:#625b64; font-size:14px; font-weight:500; line-height:1.4; }
 #berthaMore .bertha-introduction-help button { width:100%; background:rgba(244,206,188,.30)!important; }
+
+/* The heading is programmatic focus for screen-reader context, not a tab stop. */
+#berthaOwnerIntroduction #berthaIntroductionTitle:focus { outline:none!important; }
