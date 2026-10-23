@@ -1,0 +1,35 @@
+/* Owner introduction only. Cream, spacing and neutral X follow approved Health modal. */
+html body dialog#berthaOwnerIntroduction[open] {
+  position:fixed!important; inset:0!important; transform:none!important;
+  display:grid!important; place-items:center!important;
+  width:100%!important; max-width:none!important; height:100vh!important; height:100dvh!important; max-height:none!important;
+  box-sizing:border-box!important; margin:0!important;
+  padding:max(12px,env(safe-area-inset-top,0px)) 12px max(12px,env(safe-area-inset-bottom,0px))!important;
+  border:0!important; border-radius:0!important; background:transparent!important;
+  overflow:hidden!important; overscroll-behavior:contain!important;
+}
+#berthaOwnerIntroduction::backdrop { background:rgba(55,43,67,.22); }
+#berthaOwnerIntroduction .bertha-introduction-card {
+  box-sizing:border-box!important; width:min(100%,520px)!important; min-width:0!important; max-width:520px!important; max-height:100%!important;
+  margin:0!important; padding:22px!important;
+  border:1px solid rgba(121,108,124,.14)!important; border-radius:28px!important;
+  background:#fbf7f0!important; color:#504752!important; box-shadow:0 22px 54px rgba(55,43,67,.14)!important;
+  overflow-y:auto!important; overflow-x:hidden!important; overscroll-behavior:contain!important; -webkit-overflow-scrolling:touch!important;
+}
+#berthaOwnerIntroduction .bertha-introduction-head { display:flex!important; align-items:flex-start!important; justify-content:space-between!important; gap:14px!important; margin:0 0 20px!important; padding:0!important; background:transparent!important; border:0!important; }
+#berthaOwnerIntroduction .bertha-introduction-head>div { min-width:0!important; }
+#berthaOwnerIntroduction .bertha-introduction-eyebrow { margin:0!important; font-size:10px!important; font-weight:500!important; letter-spacing:.18em!important; color:#817782!important; }
+#berthaOwnerIntroduction h2 { margin:6px 0 0!important; font-size:22px!important; font-weight:500!important; line-height:1.2!important; letter-spacing:-.02em!important; color:#443e47!important; overflow-wrap:anywhere; }
+#berthaOwnerIntroduction .bertha-introduction-close { display:grid!important; place-items:center!important; flex:0 0 44px!important; width:44px!important; height:44px!important; min-height:44px!important; padding:0!important; border:1px solid rgba(121,108,124,.14)!important; border-radius:50%!important; background:#f5f1ec!important; color:#777078!important; font-family:inherit!important; font-size:27px!important; font-weight:400!important; line-height:1!important; box-shadow:none!important; }
+#berthaOwnerIntroduction .bertha-introduction-count { margin:0 0 10px!important; font-size:12px!important; line-height:1.4!important; color:#817782!important; }
+#berthaIntroductionBody { margin:0!important; font-size:16px!important; line-height:1.55!important; color:#625b64!important; overflow-wrap:anywhere; }
+#berthaOwnerIntroduction .bertha-introduction-actions { display:grid!important; grid-template-columns:repeat(2,minmax(0,1fr))!important; gap:10px!important; position:static!important; margin:22px 0 0!important; padding:0!important; background:transparent!important; border:0!important; }
+#berthaOwnerIntroduction .bertha-introduction-actions button,
+#berthaMore .bertha-introduction-help button { min-width:0!important; min-height:46px!important; padding:11px 14px!important; border:1px solid rgba(108,88,113,.12)!important; border-radius:15px!important; background:#fffdfa!important; color:#706972!important; font-family:inherit!important; font-size:14px!important; font-weight:500!important; line-height:1.3!important; box-shadow:none!important; }
+#berthaOwnerIntroduction .bertha-introduction-actions .bertha-introduction-primary { background:rgba(244,206,188,.46)!important; color:#6d5a61!important; border-color:rgba(108,88,113,.075)!important; }
+#berthaOwnerIntroduction button:disabled { opacity:.45!important; cursor:default; }
+#berthaOwnerIntroduction :is(h2,button):focus-visible,
+#berthaMore .bertha-introduction-help button:focus-visible { outline:2px solid #877d75!important; outline-offset:3px!important; }
+#berthaMore .bertha-introduction-help { margin-top:18px; padding-top:15px; border-top:1px solid rgba(112,96,104,.10); }
+#berthaMore .bertha-introduction-help h3 { margin:0 0 10px; color:#625b64; font-size:14px; font-weight:500; line-height:1.4; }
+#berthaMore .bertha-introduction-help button { width:100%; background:rgba(244,206,188,.30)!important; }
