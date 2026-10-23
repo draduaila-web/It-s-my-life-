@@ -185,3 +185,157 @@ html body #app:has(.finance-hero) #addCovered {
     padding-inline: 16px!important;
   }
 }
+
+/* Health create/edit only: Modal System v1, independent of lazy Shopping styles.
+   No DOM, IDs, handlers, validation, persistence or other modal styles change. */
+html body dialog.study-v10-dialog:has(> #healthForm)[open] {
+  position: fixed!important;
+  inset: 0!important;
+  transform: none!important;
+  display: grid!important;
+  place-items: center!important;
+  width: 100%!important;
+  max-width: none!important;
+  height: 100vh!important;
+  height: 100dvh!important;
+  max-height: none!important;
+  box-sizing: border-box!important;
+  margin: 0!important;
+  padding: max(12px,env(safe-area-inset-top,0px)) 12px max(12px,env(safe-area-inset-bottom,0px))!important;
+  border: 0!important;
+  border-radius: 0!important;
+  background: transparent!important;
+  overflow: hidden!important;
+  overscroll-behavior: contain!important;
+}
+html body dialog.study-v10-dialog > #healthForm.study-v10-modal {
+  box-sizing: border-box!important;
+  width: min(100%,520px)!important;
+  min-width: 0!important;
+  max-width: 520px!important;
+  max-height: 100%!important;
+  margin: 0!important;
+  padding: 22px!important;
+  border: 1px solid rgba(121,108,124,.14)!important;
+  border-radius: 28px!important;
+  background: #fbf7f0!important;
+  color: #504752!important;
+  box-shadow: 0 22px 54px rgba(55,43,67,.14)!important;
+  overflow-y: auto!important;
+  overflow-x: hidden!important;
+  overscroll-behavior: contain!important;
+  -webkit-overflow-scrolling: touch!important;
+}
+#healthForm .study-v10-head {
+  display: flex!important;
+  align-items: flex-start!important;
+  justify-content: space-between!important;
+  gap: 14px!important;
+  margin: 0 0 20px!important;
+  padding: 0!important;
+  background: transparent!important;
+  border: 0!important;
+}
+#healthForm .study-v10-head > div { min-width: 0!important; }
+#healthForm .eyebrow { font-size: 10px!important; font-weight: 500!important; letter-spacing: .18em!important; color: #817782!important; }
+#healthForm h2 { margin: 6px 0 0!important; font-size: 22px!important; font-weight: 500!important; line-height: 1.2!important; letter-spacing: -.02em!important; color: #443e47!important; }
+#healthForm .study-v10-x {
+  display: grid!important;
+  place-items: center!important;
+  flex: 0 0 44px!important;
+  width: 44px!important;
+  height: 44px!important;
+  min-height: 44px!important;
+  padding: 0!important;
+  border: 1px solid rgba(121,108,124,.14)!important;
+  border-radius: 50%!important;
+  background: #f5f1ec!important;
+  color: #777078!important;
+  font-family: inherit!important;
+  font-size: 27px!important;
+  font-weight: 400!important;
+  line-height: 1!important;
+  box-shadow: none!important;
+}
+#healthForm > label,
+#healthForm .shopping-modal-grid > label {
+  display: grid!important;
+  grid-template-columns: minmax(0,1fr)!important;
+  gap: 7px!important;
+  min-width: 0!important;
+  margin: 0!important;
+  font-size: 13px!important;
+  font-weight: 500!important;
+  line-height: 1.4!important;
+  color: #625b64!important;
+}
+#healthForm .shopping-modal-grid {
+  display: grid!important;
+  grid-template-columns: minmax(0,1fr)!important;
+  gap: 14px 12px!important;
+  margin-top: 14px!important;
+}
+#healthForm :is(input,select) {
+  box-sizing: border-box!important;
+  display: block!important;
+  width: 100%!important;
+  min-width: 0!important;
+  max-width: 100%!important;
+  min-height: 46px!important;
+  margin: 0!important;
+  padding: 11px 13px!important;
+  border: 1.5px solid rgba(125,105,135,.22)!important;
+  border-radius: 15px!important;
+  background: #fffdfa!important;
+  color: #504752!important;
+  font-family: inherit!important;
+  font-size: 16px!important;
+  font-weight: 400!important;
+  line-height: 1.4!important;
+  box-shadow: none!important;
+  -webkit-appearance: none!important;
+  appearance: none!important;
+}
+#healthForm select {
+  padding-right: 36px!important;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 16 16'%3E%3Cpath d='m4 6 4 4 4-4' fill='none' stroke='%23817782' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E")!important;
+  background-repeat: no-repeat!important;
+  background-position: right 12px center!important;
+}
+#healthForm input[type="date"]::-webkit-date-and-time-value { text-align: left; }
+#healthForm .modal-actions {
+  display: grid!important;
+  grid-template-columns: repeat(2,minmax(0,1fr))!important;
+  gap: 10px!important;
+  position: static!important;
+  margin: 20px 0 0!important;
+  padding: 0!important;
+  background: transparent!important;
+  border: 0!important;
+  box-shadow: none!important;
+}
+#healthForm .modal-actions .grow { display: none!important; }
+#healthForm .modal-actions button {
+  min-width: 0!important;
+  min-height: 46px!important;
+  padding: 11px 14px!important;
+  border: 1px solid rgba(108,88,113,.12)!important;
+  border-radius: 15px!important;
+  background: #fffdfa!important;
+  color: #706972!important;
+  font-family: inherit!important;
+  font-size: 14px!important;
+  font-weight: 500!important;
+  line-height: 1.3!important;
+  box-shadow: none!important;
+}
+#healthForm .modal-actions .primary {
+  background: rgba(244,206,188,.46)!important;
+  color: #6d5a61!important;
+  border-color: rgba(108,88,113,.075)!important;
+}
+#healthForm #healthDelete { grid-column: 1 / -1!important; }
+#healthForm :is(input,select,button):focus-visible { outline: 2px solid #877d75!important; outline-offset: 3px!important; }
+@media(min-width:560px) {
+  #healthForm .shopping-modal-grid { grid-template-columns: repeat(2,minmax(0,1fr))!important; }
+}
