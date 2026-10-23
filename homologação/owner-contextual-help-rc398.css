@@ -1,0 +1,54 @@
+/* Opt-in Owner guides only; cream modal and neutral close control follow Saúde. */
+html body dialog#berthaOwnerContextualHelp[open] {
+  position:fixed!important; inset:0!important; transform:none!important;
+  display:grid!important; place-items:center!important;
+  width:100%!important; max-width:none!important; height:100vh!important; height:100dvh!important; max-height:none!important;
+  box-sizing:border-box!important; margin:0!important;
+  padding:max(12px,env(safe-area-inset-top,0px)) 12px max(12px,env(safe-area-inset-bottom,0px))!important;
+  border:0!important; border-radius:0!important; background:transparent!important;
+  overflow:hidden!important; overscroll-behavior:contain!important;
+}
+#berthaOwnerContextualHelp::backdrop { background:rgba(55,43,67,.22); }
+#berthaOwnerContextualHelp .bertha-owner-guide-card {
+  box-sizing:border-box!important; width:min(100%,540px)!important; min-width:0!important; max-width:540px!important; max-height:100%!important;
+  margin:0!important; padding:22px!important;
+  border:1px solid rgba(121,108,124,.14)!important; border-radius:28px!important;
+  background:#fbf7f0!important; color:#504752!important; box-shadow:0 22px 54px rgba(55,43,67,.14)!important;
+  overflow-y:auto!important; overflow-x:hidden!important; overscroll-behavior:contain!important; -webkit-overflow-scrolling:touch!important;
+}
+#berthaOwnerContextualHelp .bertha-owner-guide-head { display:flex!important; align-items:flex-start!important; justify-content:space-between!important; gap:14px!important; margin:0 0 14px!important; padding:0!important; background:transparent!important; border:0!important; }
+#berthaOwnerContextualHelp .bertha-owner-guide-head>div { min-width:0!important; }
+#berthaOwnerContextualHelp .bertha-owner-guide-eyebrow { margin:0!important; font-size:10px!important; font-weight:500!important; letter-spacing:.14em!important; color:#817782!important; }
+#berthaOwnerContextualHelp h2 { margin:6px 0 0!important; font-size:22px!important; font-weight:500!important; line-height:1.2!important; letter-spacing:-.02em!important; color:#443e47!important; overflow-wrap:anywhere; }
+/* Programmatic heading focus is quiet. Keyboard button focus stays visible. */
+#berthaOwnerContextualHelp h2:focus,
+#berthaOwnerContextualHelp h2:focus-visible { outline:none!important; box-shadow:none!important; }
+#berthaOwnerContextualHelp .bertha-owner-guide-x { display:grid!important; place-items:center!important; flex:0 0 44px!important; width:44px!important; height:44px!important; min-height:44px!important; padding:0!important; border:1px solid rgba(121,108,124,.14)!important; border-radius:50%!important; background:#f5f1ec!important; color:#777078!important; font-family:inherit!important; font-size:27px!important; font-weight:400!important; line-height:1!important; box-shadow:none!important; }
+#berthaOwnerContextualHelp .bertha-owner-guide-description { margin:0 0 18px!important; color:#817782!important; font-size:13px!important; line-height:1.5!important; }
+#berthaOwnerContextualHelp .bertha-owner-guide-content { color:#625b64!important; font-size:15px!important; line-height:1.55!important; overflow-wrap:anywhere; }
+#berthaOwnerContextualHelp .bertha-owner-guide-steps { margin:0!important; padding:0 0 0 22px!important; }
+#berthaOwnerContextualHelp .bertha-owner-guide-steps li { margin:0 0 12px!important; padding-left:3px!important; }
+#berthaOwnerContextualHelp .bertha-owner-guide-steps li::marker { color:#877378!important; font-weight:600!important; }
+#berthaOwnerContextualHelp .bertha-owner-guide-example { margin:18px 0 0!important; padding:14px!important; border:1px solid rgba(121,108,124,.10)!important; border-radius:16px!important; background:rgba(255,253,250,.7)!important; }
+#berthaOwnerContextualHelp .bertha-owner-guide-example h3 { margin:0 0 5px!important; font-size:12px!important; font-weight:600!important; line-height:1.4!important; color:#817378!important; }
+#berthaOwnerContextualHelp .bertha-owner-guide-example p { margin:0!important; font-size:14px!important; line-height:1.55!important; }
+#berthaOwnerContextualHelp .bertha-owner-guide-note { margin:14px 0 0!important; font-size:12px!important; line-height:1.5!important; color:#817782!important; }
+#berthaOwnerContextualHelp .bertha-owner-guide-catalog { display:grid!important; grid-template-columns:repeat(2,minmax(0,1fr))!important; gap:9px!important; margin:0!important; padding:0!important; list-style:none!important; }
+#berthaOwnerContextualHelp .bertha-owner-guide-catalog li { min-width:0!important; margin:0!important; padding:0!important; }
+#berthaOwnerContextualHelp .bertha-owner-guide-actions { display:flex!important; flex-wrap:wrap!important; gap:10px!important; position:static!important; margin:22px 0 0!important; padding:0!important; background:transparent!important; border:0!important; }
+#berthaOwnerContextualHelp .bertha-owner-guide-actions button,
+#berthaOwnerContextualHelp .bertha-owner-guide-catalog button,
+#berthaMore [data-owner-guide-catalog-open] { min-width:0!important; min-height:46px!important; padding:11px 14px!important; border:1px solid rgba(108,88,113,.12)!important; border-radius:15px!important; background:#fffdfa!important; color:#706972!important; font-family:inherit!important; font-size:14px!important; font-weight:500!important; line-height:1.3!important; box-shadow:none!important; cursor:pointer; }
+#berthaOwnerContextualHelp .bertha-owner-guide-actions button { flex:1 1 160px!important; }
+#berthaOwnerContextualHelp .bertha-owner-guide-catalog button { width:100%!important; height:100%!important; text-align:left!important; }
+#berthaOwnerContextualHelp [data-owner-guide-close] { background:rgba(244,206,188,.46)!important; color:#6d5a61!important; border-color:rgba(108,88,113,.075)!important; }
+#berthaMore [data-owner-guide-catalog-open] { width:100%!important; margin-top:8px!important; background:rgba(244,206,188,.30)!important; }
+#app button[data-owner-contextual-guide] { display:inline-flex!important; align-items:center!important; justify-content:center!important; flex:0 1 auto!important; align-self:center!important; max-width:100%!important; min-width:0!important; min-height:36px!important; margin:6px 0!important; padding:7px 11px!important; border:1px solid rgba(112,96,104,.16)!important; border-radius:999px!important; background:#fbf7f0!important; color:#766a74!important; font-family:inherit!important; font-size:12px!important; font-weight:500!important; line-height:1.3!important; white-space:normal!important; box-shadow:none!important; cursor:pointer; }
+#app :has(>button[data-owner-contextual-guide]) { flex-wrap:wrap; }
+#berthaOwnerContextualHelp button:focus-visible,
+#berthaMore [data-owner-guide-catalog-open]:focus-visible,
+#app button[data-owner-contextual-guide]:focus-visible { outline:2px solid #877d75!important; outline-offset:3px!important; }
+@media (max-width:360px) {
+  #berthaOwnerContextualHelp .bertha-owner-guide-card { padding:18px!important; }
+  #berthaOwnerContextualHelp .bertha-owner-guide-catalog { grid-template-columns:1fr!important; }
+}
