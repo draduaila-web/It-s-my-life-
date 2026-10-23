@@ -1,6 +1,6 @@
 {
-  "name": "BERTH.A · Homologação",
-  "short_name": "BERTH.A HML",
+  "name": "BERTH.A",
+  "short_name": "BERTH.A",
   "start_url": "./",
   "scope": "./",
   "display": "standalone",
@@ -8,7 +8,7 @@
   "theme_color": "#fbf7f0",
   "icons": [
     {
-      "src": "../bertha-icon-512.png",
+      "src": "./bertha-icon-512.png",
       "sizes": "512x512",
       "type": "image/png"
     }

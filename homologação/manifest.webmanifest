@@ -1,6 +1,6 @@
 {
-  "name": "BERTH.A · Homologação",
-  "short_name": "BERTH.A HML",
+  "name": "BERTH.A",
+  "short_name": "BERTH.A",
   "start_url": "./",
   "scope": "./",
   "display": "standalone",
