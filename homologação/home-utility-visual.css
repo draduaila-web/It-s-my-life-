@@ -1,0 +1,130 @@
+/* Presentation only. Existing IDs, data attributes, routes and handlers stay unchanged.
+   Load after the existing styles. ID-scoped selectors also outrank lazy legacy CSS. */
+#app {
+  --utility-surface: rgba(255,249,240,.93);
+  --utility-line: rgba(113,96,130,.10);
+  --utility-ink: #504752;
+  --utility-muted: #817782;
+  --utility-accent: #806b83;
+  --utility-hero: radial-gradient(circle at 18% 12%,rgba(255,255,255,.45),transparent 46%),linear-gradient(132deg,rgba(250,226,219,.78),rgba(247,226,235,.76) 36%,rgba(233,228,248,.76) 68%,rgba(221,238,248,.76));
+  --utility-action: linear-gradient(115deg,#edd0d9,#f2e3cf 48%,#d2e5ee);
+}
+
+/* Home: section headers sit outside a single rounded cream surface. */
+#app :is(.home-health-mini,.home-fin-reminders) {
+  margin: 20px 0!important;
+  padding: 0!important;
+  border: 0!important;
+  border-radius: 0!important;
+  background: transparent!important;
+  box-shadow: none!important;
+  backdrop-filter: none!important;
+  -webkit-backdrop-filter: none!important;
+}
+#app :is(.home-health-mini,.home-fin-reminders) > .section-head {
+  display: flex!important;
+  align-items: center!important;
+  justify-content: space-between!important;
+  gap: 12px!important;
+  margin: 0 1px 10px!important;
+}
+#app :is(.home-health-mini,.home-fin-reminders) > .section-head h2 {
+  margin: 0!important;
+  font-size: 16px!important;
+  font-weight: 400!important;
+  line-height: 1.3!important;
+  color: var(--utility-ink)!important;
+}
+#app .home-fin-reminders > .section-head a,
+#app .home-health-mini #healthAddHome {
+  display: inline-flex!important;
+  align-items: center!important;
+  justify-content: center!important;
+  flex: 0 0 auto;
+  min-height: 44px!important;
+  padding: 8px 12px!important;
+  border: 1px solid var(--utility-line)!important;
+  border-radius: 999px!important;
+  background: var(--utility-surface)!important;
+  color: var(--utility-accent)!important;
+  font: inherit!important;
+  font-size: 12px!important;
+  font-weight: 500!important;
+  text-decoration: none!important;
+  opacity: 1!important;
+  box-shadow: none!important;
+}
+#app .home-fin-reminder-row,
+#app .home-health-mini > .health-mini-list {
+  background: var(--utility-surface)!important;
+  border: 1px solid var(--utility-line)!important;
+  border-radius: 20px!important;
+  padding: 14px 16px!important;
+  box-shadow: 0 5px 16px rgba(66,52,69,.025)!important;
+}
+#app .home-fin-reminder-row {
+  display: grid!important;
+  grid-template-columns: 24px minmax(0,1fr) 16px!important;
+  align-items: center!important;
+  gap: 12px!important;
+  min-height: 64px!important;
+  color: var(--utility-ink)!important;
+  text-decoration: none!important;
+}
+#app .home-fin-reminder-row + .home-fin-reminder-row { margin-top: 8px!important; }
+#app .home-fin-reminder-row > span:nth-child(2) { min-width: 0; }
+#app .home-fin-reminder-row strong,
+#app .home-fin-reminder-row small,
+#app .health-mini-row strong,
+#app .health-mini-row small { display: block!important; overflow-wrap: anywhere; }
+#app .home-fin-reminder-row strong,
+#app .health-mini-row strong { font-size: 14px!important; line-height: 1.4!important; font-weight: 500!important; }
+#app .home-fin-reminder-row small,
+#app .health-mini-row small { margin-top: 4px!important; font-size: 12px!important; line-height: 1.45!important; color: var(--utility-muted)!important; }
+#app .home-fin-reminder-row > b { color: var(--utility-accent)!important; font-size: 20px!important; font-weight: 400!important; }
+#app .home-fin-reminder-icon { width: 24px!important; height: 24px!important; display: grid!important; place-items: center!important; }
+#app .home-fin-reminder-icon svg { width: 20px!important; height: 20px!important; }
+#app .home-health-mini .empty.compact { padding: 8px 0!important; text-align: left!important; font-size: 14px!important; line-height: 1.5!important; }
+#app .home-health-mini .empty.compact strong { margin-bottom: 4px!important; font-size: 14px!important; font-weight: 500!important; }
+#app .home-health-mini .empty.compact span { display: block; font-size: 13px!important; color: var(--utility-muted)!important; }
+#app .health-mini-row { display: flex; align-items: flex-start; justify-content: space-between; flex-wrap: wrap; gap: 10px 12px; }
+#app .health-mini-row + .health-mini-row { border-top: 1px solid var(--utility-line); margin-top: 12px; padding-top: 12px; }
+#app .health-mini-row > div:first-child { flex: 1 1 180px; min-width: 0; }
+#app .health-mini-actions { display: flex; flex-wrap: wrap; gap: 8px; }
+#app .health-mini-actions button { min-height: 44px; padding: 8px 12px; border: 1px solid var(--utility-line); border-radius: 14px; background: transparent; color: var(--utility-accent); font: inherit; font-size: 12px; }
+
+/* The three Home shortcuts lead to one visual family, not three themes. */
+#app :is(.shop-page,.progress-page,.s156-page) { color: var(--utility-ink); }
+#app :is(.shop-page > .shop-hero,.progress-page > .progress-hero,.s156-page > .s156-hero) {
+  position: relative!important;
+  margin: 4px 0 18px!important;
+  padding: 22px!important;
+  min-height: 0!important;
+  border: 1px solid var(--utility-line)!important;
+  border-radius: 28px!important;
+  background: var(--utility-hero)!important;
+  box-shadow: 0 8px 26px rgba(67,55,73,.025)!important;
+}
+#app :is(.shop-hero,.progress-hero,.s156-hero)::after { display: none!important; }
+#app :is(.shop-hero,.progress-hero) > div:first-child { max-width: none!important; width: 100%; padding-right: 0!important; }
+#app :is(.shop-hero,.progress-hero,.s156-hero) .eyebrow { padding-right: 42px; font-size: 10px!important; font-weight: 500!important; letter-spacing: .18em!important; color: #947685!important; }
+#app :is(.shop-hero,.progress-hero,.s156-hero) h2 { max-width: 100%!important; margin: 8px 0 10px!important; font-family: inherit!important; font-size: 25px!important; font-weight: 400!important; line-height: 1.12!important; letter-spacing: -.032em!important; color: #443e47!important; }
+#app :is(.shop-hero,.progress-hero,.s156-hero) p { max-width: 100%!important; margin: 0!important; font-size: 14px!important; font-weight: 400!important; line-height: 1.5!important; color: var(--utility-muted)!important; }
+#app :is(.shop-hero-mark,.progress-hero-mark,.s156-network) { position: absolute!important; top: 19px!important; right: 20px!important; width: 30px!important; height: 30px!important; color: #a49aa8!important; opacity: .55!important; }
+#app :is(.shop-hero-mark,.progress-hero-mark,.s156-network) svg { width: 28px!important; height: 28px!important; }
+#app .s156-page { gap: 14px!important; }
+#app .s156-page > .s156-hero { margin-bottom: 4px!important; }
+#app :is(.shop-summary > .card,.shop-stock-card,.shop-section > .card,.progress-life-card46,.s156-card,.s156-note) { background: var(--utility-surface)!important; border-color: var(--utility-line)!important; box-shadow: 0 5px 16px rgba(66,52,69,.025)!important; }
+#app :is(.shop-main-actions .primary,.s156-main) { min-height: 48px!important; padding: 12px 16px!important; border: 1px solid var(--utility-line)!important; border-radius: 18px!important; background: var(--utility-action)!important; color: #665b66!important; font: inherit!important; font-size: 14px!important; font-weight: 500!important; box-shadow: none!important; }
+#app :is(.shop-main-actions .secondary,.shop-add,.s156-actions .s156-btn) { min-height: 44px!important; padding: 10px 14px!important; border: 1px solid var(--utility-line)!important; border-radius: 18px!important; background: var(--utility-surface)!important; color: var(--utility-accent)!important; font: inherit!important; font-size: 13px!important; font-weight: 500!important; box-shadow: none!important; }
+#app :is(.shop-filter button.active,.progress-period46 button.active) { background: linear-gradient(135deg,rgba(232,221,244,.92),rgba(220,239,233,.90))!important; color: #62596b!important; }
+#app .s156-actions { gap: 9px!important; }
+#app .s156-actions .s156-main { flex: 1 1 100%!important; }
+#app .s156-actions .s156-btn { flex: 1 1 auto; }
+html body #app .s156-actions :is(#ownerMessages,#ownerInvitations,#ownerNotifications) { background: var(--utility-surface)!important; color: var(--utility-accent)!important; border-color: var(--utility-line)!important; }
+#app :is(.home-health-mini,.home-fin-reminders,.shop-page,.progress-page,.s156-page) :is(a,button):focus-visible { outline: 2px solid #80628f!important; outline-offset: 3px!important; }
+@media(max-width:360px) {
+  #app :is(.shop-page > .shop-hero,.progress-page > .progress-hero,.s156-page > .s156-hero) { padding: 18px!important; }
+  #app :is(.shop-hero,.progress-hero,.s156-hero) h2 { font-size: 23px!important; }
+  #app .home-fin-reminders > .section-head { flex-wrap: wrap; }
+}

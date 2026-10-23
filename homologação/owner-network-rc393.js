@@ -16,7 +16,8 @@ function plan(H,sources,remoteMembers,remoteTasks){
 root.BerthaNetworkPlan=plan;
 if(!root.document)return;
 var H=root.BerthaHelper,storage=H.sessionStorageFor(localStorage,sessionStorage,'bertha.helper.hml.owner.auth.v1').storage,client=H.createClient({base:'https://ouxellokvigbdeeyvvfv.supabase.co',key:'sb_publishable_2lmnQX4WD-s343sEZoFERA_B4URTnip',storage:storage,sessionKey:'bertha.helper.hml.owner.auth.v1'}),busy=false,scheduled=null,lastSignature='';
-function feedback(text){var actions=document.querySelector('.s156-actions'),host=document.getElementById('app');if(!actions&&!host)return;var node=document.getElementById('networkSync381');if(!node){node=document.createElement('p');node.id='networkSync381';node.className='note';node.setAttribute('role','status');if(actions)actions.after(node);else host.prepend(node);}node.textContent=text;}
+function clearAutomaticFeedback(){var node=document.getElementById('networkSync381');if(node&&node.getAttribute('data-network-sync')==='automatic'&&(location.hash!=='#satelites'||!document.querySelector('#app .s156-page .s156-actions')))node.remove();}
+function feedback(text,automatic){var actions=document.querySelector(automatic?'#app .s156-page .s156-actions':'.s156-actions'),host=document.getElementById('app');if(automatic&&(location.hash!=='#satelites'||!actions)){clearAutomaticFeedback();return;}if(!actions&&!host)return;var node=document.getElementById('networkSync381');if(!node){node=document.createElement('p');node.id='networkSync381';node.className='note';node.setAttribute('role','status');if(actions)actions.after(node);else host.prepend(node);}node.setAttribute('data-network-sync',automatic?'automatic':'manual');node.textContent=text;}
 function ownerSources390(){var s=H.ownerSources(localStorage),all=rawRead('bertha.satellites.v1');var casa=loadCasa();s.tasks=personal393().filter(function(t){return !t.paused;}).map(function(t){return {task:t,area:'Missões Kids',kind:'mission'};});(casa.areas||[]).forEach(function(a){(a.tasks||[]).forEach(function(t){if(['help','delegated'].includes(t.responsibility))s.tasks.push({task:t,area:a.title||'Casa',kind:'routine'});});});(casa.maintenance||[]).forEach(function(t){if(['help','delegated'].includes(t.responsibility))s.tasks.push({task:t,area:t.area||'Manutenção',kind:'maintenance'});});s.members=(all.members||[]).filter(function(m){return ['adult','kids'].includes(m.role)&&!['removed','paused'].includes(m.status);}).map(function(m){return Object.assign({},m,{permissions:Object.assign({},m.permissions,{missions:personal393().some(function(t){return (t.assigneeIds||[]).map(String).includes(String(m.id));})})});});return s;}
 function art390(asset,mid,palette){if(typeof root.r147img!=='function')return '';var previousMember=root.__rc209Member,previousPalette=root.__rc208Palette;root.__rc209Member=mid;root.__rc208Palette=palette;try{var d=document.createElement('div');d.innerHTML=root.r147img(asset);return d.querySelector('img')?.getAttribute('src')||'';}finally{root.__rc209Member=previousMember;root.__rc208Palette=previousPalette;}}
 function kidsSnapshot390(member){var id=member.id,p=(typeof root.loadKidsProgress==='function'?root.loadKidsProgress():{})[id]||{},c=typeof root.r152EnsureCycle==='function'?root.r152EnsureCycle(id):null,box=typeof root.r152Box==='function'?root.r152Box(id).box:{history:[]};if(!c)return {progress:p};
@@ -70,13 +71,15 @@ async function sync(){
  if(changed&&location.hash==='#satelites')renderSatellites();
  root.BerthaMissionPending393=remoteTasks.filter(function(t){return t.state==='completed'&&t.source_ref.startsWith('mission|');}).map(function(t){return Object.assign({},t,{memberName:remoteMembers.find(function(m){return m.id===t.actor_id;})?.name||'Kids'});});root.dispatchEvent(new Event('bertha-mission-pending'));
  if(window.BerthaCollaborationHistory)window.BerthaCollaborationHistory.render(remoteTasks,remoteMembers);
- feedback('Atividades, reconhecimentos e progresso Kids sincronizados com a rede.');
+ feedback('Atividades, reconhecimentos e progresso Kids sincronizados com a rede.',true);
  }catch(e){lastSignature='';feedback('A rede ainda não sincronizou: '+e.message);}finally{busy=false;}
 }
 function schedule(){clearTimeout(scheduled);scheduled=setTimeout(sync,800);}
 var original=root.berthaHmlStorage.setItem;root.berthaHmlStorage.setItem=function(key,value){var previous=this.getItem(key),result=original.call(this,key,value);if(previous!==String(value)&&(['minha-vida.casa.v1','bertha.satellites.v1','bertha.recognitions.v1','bertha.kids.progress.v1','bertha.kids.cycles.v2','bertha.kids.missions.v1'].includes(key)))schedule();return result;};
 root.addEventListener('bertha-missions-changed',schedule);root.addEventListener('storage',schedule);root.addEventListener('online',schedule);root.addEventListener('hashchange',schedule);document.addEventListener('visibilitychange',schedule);setInterval(sync,20000);schedule();
+root.addEventListener('hashchange',clearAutomaticFeedback);
 })(typeof window==='object'?window:globalThis);
+
 
 
 
