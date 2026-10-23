@@ -10,8 +10,7 @@
   --utility-action: linear-gradient(135deg,rgba(232,221,244,.92),rgba(220,239,233,.90));
 }
 
-/* Home: section headers sit outside a single rounded cream surface. */
-#app .day-section.home-health-mini,
+/* Home: Finance retains its rows; Health groups its heading and content in one card. */
 #app .home-fin-reminders {
   margin: 20px 0!important;
   padding: 0!important;
@@ -21,6 +20,24 @@
   box-shadow: none!important;
   backdrop-filter: none!important;
   -webkit-backdrop-filter: none!important;
+}
+#app .day-section.home-health-mini {
+  margin: 20px 0!important;
+  padding: 16px!important;
+  border: 1px solid var(--utility-line)!important;
+  border-radius: 24px!important;
+  background: var(--utility-surface)!important;
+  box-shadow: 0 5px 16px rgba(66,52,69,.025)!important;
+  backdrop-filter: none!important;
+  -webkit-backdrop-filter: none!important;
+}
+#app .day-section.home-health-mini > .health-mini-list {
+  margin: 0!important;
+  padding: 0!important;
+  border: 0!important;
+  border-radius: 0!important;
+  background: transparent!important;
+  box-shadow: none!important;
 }
 #app :is(.home-health-mini,.home-fin-reminders) > .section-head {
   display: flex!important;
