@@ -159,3 +159,29 @@ html body #app .s156-actions :is(#ownerMessages,#ownerInvitations,#ownerNotifica
   padding: 10px 14px!important;
   box-shadow: none!important;
 }
+
+/* Finance: only the covered-expense action joins the existing RC103 primary palette.
+   Its full-width layout and enabled/disabled state remain owned by the existing app. */
+html body #app:has(.finance-hero) #addCovered {
+  display: inline-flex!important;
+  align-items: center!important;
+  justify-content: center!important;
+  gap: 7px!important;
+  min-height: 44px!important;
+  padding: 10px 18px!important;
+  border-radius: 16px!important;
+  border: 1px solid rgba(135,112,158,.10)!important;
+  background: linear-gradient(135deg,#c7b2dc 0%,#b9c9df 48%,#a9d2c9 100%)!important;
+  color: #fff!important;
+  font-size: 15px!important;
+  line-height: 1.25!important;
+  font-weight: 500!important;
+  letter-spacing: 0!important;
+  box-shadow: none!important;
+}
+@media(max-width:480px) {
+  html body #app:has(.finance-hero) #addCovered {
+    font-size: 14px!important;
+    padding-inline: 16px!important;
+  }
+}
