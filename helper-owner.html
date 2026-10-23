@@ -1,0 +1,21 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>BERTH.A</title>
+</head>
+<body>
+<p>Abrindo a BERTH.A… <a id="continue" href="./homologa%C3%A7%C3%A3o/helper-owner.html">Continuar</a></p>
+<script>
+(function () {
+  'use strict';
+  var target = new URL('./homologa%C3%A7%C3%A3o/helper-owner.html', window.location.href);
+  target.search = window.location.search;
+  target.hash = window.location.hash;
+  document.getElementById('continue').href = target.href;
+  window.location.replace(target.href);
+})();
+</script>
+</body>
+</html>
