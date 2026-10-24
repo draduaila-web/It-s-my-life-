@@ -36,3 +36,121 @@ html body dialog#berthaOwnerIntroduction[open] {
 
 /* The heading is programmatic focus for screen-reader context, not a tab stop. */
 #berthaOwnerIntroduction #berthaIntroductionTitle:focus { outline:none!important; }
+
+/* Read-only, fictional miniatures. Every new style is scoped to this dialog. */
+#berthaOwnerIntroduction .bertha-introduction-illustration,
+#berthaOwnerIntroduction .bertha-introduction-illustration * { box-sizing:border-box!important; }
+#berthaOwnerIntroduction .bertha-introduction-illustration { margin:20px 0 0!important; padding:0!important; border:0!important; min-width:0!important; }
+#berthaOwnerIntroduction .bertha-introduction-illustration figcaption { margin:8px 0 0!important; padding:0 4px!important; color:#756b76!important; font-size:11px!important; line-height:1.5!important; text-align:center!important; }
+#berthaOwnerIntroduction .bertha-introduction-scene { position:relative!important; isolation:isolate!important; min-width:0!important; min-height:232px!important; padding:20px!important; border:1px solid rgba(121,108,124,.10)!important; border-radius:22px!important; background:#f0ebe7!important; color:#504752!important; font-family:inherit!important; line-height:1.4!important; overflow:hidden!important; }
+#berthaOwnerIntroduction .bertha-introduction-scene div,
+#berthaOwnerIntroduction .bertha-introduction-scene span { min-width:0!important; }
+#berthaOwnerIntroduction .bertha-introduction-scene strong { display:block!important; margin:0!important; color:#504752!important; font-size:15px!important; font-weight:600!important; line-height:1.35!important; overflow-wrap:anywhere!important; }
+#berthaOwnerIntroduction .bertha-introduction-scene svg { display:block!important; width:24px!important; height:24px!important; flex:0 0 24px!important; fill:none!important; stroke:currentColor!important; stroke-width:1.8!important; stroke-linecap:round!important; stroke-linejoin:round!important; overflow:visible!important; }
+#berthaOwnerIntroduction .bertha-introduction-scene-kicker { display:block!important; margin:0 0 6px!important; color:#6b5d6f!important; font-size:10px!important; font-weight:600!important; letter-spacing:.12em!important; line-height:1.5!important; text-transform:uppercase!important; }
+#berthaOwnerIntroduction .bertha-introduction-small-label { display:block!important; margin:0 0 4px!important; color:#695d6d!important; font-size:11px!important; font-weight:500!important; line-height:1.5!important; }
+#berthaOwnerIntroduction .bertha-introduction-icon { display:grid!important; place-items:center!important; flex:0 0 40px!important; width:40px!important; height:40px!important; border-radius:13px!important; background:rgba(255,253,250,.72)!important; color:#816c80!important; }
+#berthaOwnerIntroduction .bertha-introduction-scene-note { position:relative!important; margin:14px 0 0!important; padding:0!important; color:#6b606e!important; font-size:12px!important; line-height:1.5!important; text-align:center!important; }
+
+/* A small composition of preferences, routine and real-life records. */
+#berthaOwnerIntroduction .bertha-introduction-scene-overview { display:flex!important; flex-direction:column!important; justify-content:center!important; gap:12px!important; background:#f1eae5!important; }
+#berthaOwnerIntroduction .bertha-introduction-overview-orbit { position:absolute!important; z-index:-1!important; width:228px!important; height:228px!important; right:-34px!important; top:-17px!important; border:1px solid rgba(139,114,143,.15)!important; border-radius:50%!important; box-shadow:0 0 0 24px rgba(255,253,250,.23),0 0 0 48px rgba(255,253,250,.17)!important; }
+#berthaOwnerIntroduction .bertha-introduction-overview-note { display:flex!important; align-items:center!important; gap:12px!important; width:85%!important; padding:12px 14px!important; border:1px solid rgba(121,108,124,.09)!important; border-radius:17px!important; background:#fffaf4!important; box-shadow:0 5px 12px rgba(83,63,83,.035)!important; }
+#berthaOwnerIntroduction .bertha-introduction-overview-note>div>span { display:block!important; margin:3px 0 0!important; color:#6c606d!important; font-size:12px!important; line-height:1.4!important; }
+#berthaOwnerIntroduction .bertha-introduction-preferences { align-self:flex-start!important; }
+#berthaOwnerIntroduction .bertha-introduction-preferences .bertha-introduction-icon { background:#f6e4d8!important; color:#936f5d!important; }
+#berthaOwnerIntroduction .bertha-introduction-routine { align-self:flex-end!important; background:#eee5f0!important; }
+#berthaOwnerIntroduction .bertha-introduction-routine .bertha-introduction-icon { color:#80628d!important; }
+#berthaOwnerIntroduction .bertha-introduction-records { align-self:center!important; background:#e7eee5!important; }
+#berthaOwnerIntroduction .bertha-introduction-records .bertha-introduction-icon { color:#6e806c!important; }
+
+/* An evening preference, not an appointment or an interactive form. */
+#berthaOwnerIntroduction .bertha-introduction-scene-ideal { background:linear-gradient(135deg,#eee5ef,#f3ece7)!important; }
+#berthaOwnerIntroduction .bertha-introduction-night { display:flex!important; align-items:center!important; justify-content:space-between!important; gap:16px!important; padding:0 6px!important; }
+#berthaOwnerIntroduction .bertha-introduction-night strong { font-size:23px!important; font-weight:500!important; }
+#berthaOwnerIntroduction .bertha-introduction-moon { display:grid!important; place-items:center!important; flex:0 0 64px!important; width:64px!important; height:64px!important; border-radius:50%!important; background:rgba(255,253,250,.6)!important; color:#89718f!important; }
+#berthaOwnerIntroduction .bertha-introduction-moon svg { width:36px!important; height:36px!important; stroke-width:1.4!important; }
+#berthaOwnerIntroduction .bertha-introduction-reading-card { display:flex!important; align-items:center!important; gap:16px!important; margin:18px 0 0!important; padding:18px!important; border:1px solid rgba(121,108,124,.10)!important; border-radius:17px!important; background:#fffbf5!important; box-shadow:0 8px 20px rgba(84,61,88,.04)!important; }
+#berthaOwnerIntroduction .bertha-introduction-reading-card>div>span { display:block!important; margin-top:4px!important; color:#7c6d7d!important; font-size:14px!important; }
+#berthaOwnerIntroduction .bertha-introduction-book { display:grid!important; place-items:center!important; flex:0 0 56px!important; width:56px!important; height:64px!important; border-radius:14px!important; background:#efe2d7!important; color:#8a7162!important; }
+#berthaOwnerIntroduction .bertha-introduction-book svg { width:32px!important; height:32px!important; stroke-width:1.4!important; }
+
+/* Two distinct Planos cards on a quiet paper agenda. */
+#berthaOwnerIntroduction .bertha-introduction-scene-plans { background:#ece9e3!important; }
+#berthaOwnerIntroduction .bertha-introduction-agenda { position:relative!important; padding:0 0 0 17px!important; }
+#berthaOwnerIntroduction .bertha-introduction-agenda-line { position:absolute!important; top:29px!important; bottom:13px!important; left:0!important; width:1px!important; background:#cfc3ce!important; }
+#berthaOwnerIntroduction .bertha-introduction-plan-card { position:relative!important; display:flex!important; align-items:center!important; gap:12px!important; padding:16px!important; margin-top:12px!important; border:1px solid rgba(121,108,124,.10)!important; border-radius:16px!important; background:#fffbf5!important; box-shadow:0 5px 12px rgba(83,63,83,.035)!important; }
+#berthaOwnerIntroduction .bertha-introduction-plan-card::before { content:""!important; position:absolute!important; width:7px!important; height:7px!important; left:-22px!important; top:calc(50% - 4px)!important; border:2px solid #ece9e3!important; border-radius:50%!important; background:#a695aa!important; }
+#berthaOwnerIntroduction .bertha-introduction-task-card { margin-right:17px!important; }
+#berthaOwnerIntroduction .bertha-introduction-task-card .bertha-introduction-icon { background:#efe8df!important; color:#8c7969!important; }
+#berthaOwnerIntroduction .bertha-introduction-appointment-card { background:#ece4ef!important; margin-left:8px!important; }
+#berthaOwnerIntroduction .bertha-introduction-appointment-card::before { left:-30px!important; }
+
+/* A finished time record, with no timer or simulated application action. */
+#berthaOwnerIntroduction .bertha-introduction-scene-record { background:#efe9e1!important; }
+#berthaOwnerIntroduction .bertha-introduction-record-heading { display:flex!important; align-items:center!important; gap:14px!important; }
+#berthaOwnerIntroduction .bertha-introduction-record-heading .bertha-introduction-book { flex-basis:48px!important; width:48px!important; height:48px!important; background:#fff9f1!important; }
+#berthaOwnerIntroduction .bertha-introduction-record-heading .bertha-introduction-book svg { width:27px!important; height:27px!important; }
+#berthaOwnerIntroduction .bertha-introduction-record-heading strong { font-size:19px!important; font-weight:500!important; }
+#berthaOwnerIntroduction .bertha-introduction-record-heading .bertha-introduction-scene-kicker { margin-bottom:2px!important; }
+#berthaOwnerIntroduction .bertha-introduction-time-cards { display:grid!important; grid-template-columns:repeat(2,minmax(0,1fr))!important; align-items:start!important; gap:12px!important; margin-top:18px!important; }
+#berthaOwnerIntroduction .bertha-introduction-time-card { padding:14px!important; border:1px solid rgba(121,108,124,.08)!important; border-radius:15px!important; background:#fffaf3!important; }
+#berthaOwnerIntroduction .bertha-introduction-time-card>strong { white-space:nowrap!important; font-size:30px!important; font-weight:500!important; letter-spacing:-.035em!important; }
+#berthaOwnerIntroduction .bertha-introduction-time-card>strong>span { font-size:13px!important; font-weight:400!important; letter-spacing:normal!important; }
+#berthaOwnerIntroduction .bertha-introduction-time-actual { margin-top:10px!important; background:#e4ecdf!important; }
+#berthaOwnerIntroduction .bertha-introduction-time-line { width:100%!important; height:4px!important; margin-top:12px!important; border-radius:4px!important; background:#a1b394!important; }
+#berthaOwnerIntroduction .bertha-introduction-time-planned { width:80%!important; background:#ceb7a2!important; }
+
+/* A person and an unshared invitation. Nothing here sends or connects. */
+#berthaOwnerIntroduction .bertha-introduction-scene-network { background:#eee8ee!important; }
+#berthaOwnerIntroduction .bertha-introduction-person-card { display:grid!important; grid-template-columns:48px minmax(0,1fr) auto!important; align-items:center!important; gap:12px!important; padding:16px!important; border:1px solid rgba(121,108,124,.09)!important; border-radius:17px!important; background:#fffbf5!important; }
+#berthaOwnerIntroduction .bertha-introduction-person-card>div>span { display:block!important; margin-top:3px!important; color:#756b76!important; font-size:12px!important; line-height:1.4!important; }
+#berthaOwnerIntroduction .bertha-introduction-person-icon { display:grid!important; place-items:center!important; width:48px!important; height:48px!important; border-radius:50%!important; color:#8a7293!important; background:#eee4f0!important; }
+#berthaOwnerIntroduction .bertha-introduction-person-icon svg { width:29px!important; height:29px!important; }
+#berthaOwnerIntroduction .bertha-introduction-permission { display:flex!important; align-items:center!important; gap:6px!important; padding-left:12px!important; border-left:1px solid #e9e0e5!important; color:#877482!important; }
+#berthaOwnerIntroduction .bertha-introduction-permission svg { width:20px!important; height:20px!important; flex-basis:20px!important; }
+#berthaOwnerIntroduction .bertha-introduction-permission>span { margin:0!important; font-size:10px!important; line-height:1.4!important; }
+#berthaOwnerIntroduction .bertha-introduction-permission strong { margin-top:2px!important; font-size:12px!important; }
+#berthaOwnerIntroduction .bertha-introduction-invitation { display:flex!important; align-items:center!important; gap:12px!important; margin:14px 0 0 16px!important; padding:15px!important; border:1px dashed #cabbcf!important; border-radius:16px!important; background:rgba(255,251,245,.55)!important; }
+#berthaOwnerIntroduction .bertha-introduction-invitation strong { font-size:14px!important; }
+#berthaOwnerIntroduction .bertha-introduction-invitation>div>span:last-child { display:block!important; margin-top:4px!important; color:#6b5f70!important; font-size:11px!important; }
+#berthaOwnerIntroduction .bertha-introduction-invitation .bertha-introduction-small-label { font-size:10px!important; }
+
+/* Recorded totals and the user's own preference adjustment stay separate. */
+#berthaOwnerIntroduction .bertha-introduction-scene-progress { background:#eaece4!important; }
+#berthaOwnerIntroduction .bertha-introduction-progress-sheet { display:flex!important; align-items:center!important; justify-content:space-between!important; gap:16px!important; margin:0 7px!important; padding:20px!important; border:1px solid rgba(121,108,124,.10)!important; border-radius:17px!important; background:#fffbf5!important; box-shadow:0 6px 0 -2px #e0e5d8,0 12px 0 -4px rgba(202,213,193,.65)!important; }
+#berthaOwnerIntroduction .bertha-introduction-progress-sheet .bertha-introduction-small-label { margin-top:11px!important; font-size:12px!important; }
+#berthaOwnerIntroduction .bertha-introduction-scene .bertha-introduction-total { color:#6a7d60!important; font-size:48px!important; font-weight:500!important; line-height:1.15!important; letter-spacing:-.05em!important; }
+#berthaOwnerIntroduction .bertha-introduction-progress-icon { display:grid!important; place-items:center!important; flex:0 0 66px!important; width:66px!important; height:66px!important; border-radius:50%!important; color:#7d9272!important; background:#e9efdf!important; }
+#berthaOwnerIntroduction .bertha-introduction-progress-icon svg { width:32px!important; height:32px!important; stroke-width:1.5!important; }
+#berthaOwnerIntroduction .bertha-introduction-adjust { display:flex!important; align-items:center!important; gap:12px!important; margin-top:29px!important; padding:16px 7px 0!important; border-top:1px solid #d4d7ce!important; }
+#berthaOwnerIntroduction .bertha-introduction-adjust .bertha-introduction-icon { background:rgba(255,251,245,.65)!important; color:#8e7a69!important; }
+#berthaOwnerIntroduction .bertha-introduction-adjust strong { font-size:13px!important; }
+#berthaOwnerIntroduction .bertha-introduction-adjust>div>span { display:block!important; margin-top:3px!important; color:#5e6858!important; font-size:11px!important; line-height:1.5!important; }
+
+@media (max-width:420px) {
+  #berthaOwnerIntroduction .bertha-introduction-scene { padding:16px!important; }
+  #berthaOwnerIntroduction .bertha-introduction-overview-note { width:94%!important; gap:10px!important; padding:11px!important; }
+  #berthaOwnerIntroduction .bertha-introduction-person-card { grid-template-columns:42px minmax(0,1fr)!important; gap:10px!important; padding:13px!important; }
+  #berthaOwnerIntroduction .bertha-introduction-person-icon { width:42px!important; height:42px!important; }
+  #berthaOwnerIntroduction .bertha-introduction-permission { grid-column:1 / -1!important; padding:9px 0 0!important; border-left:0!important; border-top:1px solid #e9e0e5!important; }
+  #berthaOwnerIntroduction .bertha-introduction-permission>span { display:flex!important; align-items:baseline!important; gap:7px!important; }
+  #berthaOwnerIntroduction .bertha-introduction-permission strong { margin:0!important; }
+  #berthaOwnerIntroduction .bertha-introduction-invitation { margin-left:8px!important; padding:12px!important; gap:9px!important; }
+  #berthaOwnerIntroduction .bertha-introduction-plan-card { padding:12px!important; gap:9px!important; }
+  #berthaOwnerIntroduction .bertha-introduction-task-card { margin-right:7px!important; }
+  #berthaOwnerIntroduction .bertha-introduction-progress-sheet { margin:0!important; padding:16px!important; gap:10px!important; }
+  #berthaOwnerIntroduction .bertha-introduction-progress-icon { flex-basis:48px!important; width:48px!important; height:48px!important; }
+}
+
+@media (max-width:340px) {
+  #berthaOwnerIntroduction .bertha-introduction-scene { padding:13px!important; }
+  #berthaOwnerIntroduction .bertha-introduction-overview-note { width:100%!important; }
+  #berthaOwnerIntroduction .bertha-introduction-reading-card { gap:10px!important; padding:13px!important; }
+  #berthaOwnerIntroduction .bertha-introduction-book { flex-basis:42px!important; width:42px!important; height:54px!important; }
+  #berthaOwnerIntroduction .bertha-introduction-time-cards { gap:8px!important; }
+  #berthaOwnerIntroduction .bertha-introduction-time-card { padding:11px!important; }
+  #berthaOwnerIntroduction .bertha-introduction-time-card>strong { font-size:27px!important; }
+  #berthaOwnerIntroduction .bertha-introduction-icon { flex-basis:32px!important; width:32px!important; height:36px!important; }
+  #berthaOwnerIntroduction .bertha-introduction-plan-card strong { font-size:13px!important; }
+}
