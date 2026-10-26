@@ -1,3 +1,5 @@
+> **Current status: DO NOT MERGE.** R2 adds coordinated login commits and queue migration, but real two-tab QA still fails intermittently. See [REVISION-R2.md](REVISION-R2.md). Historical results below are not a current cross-tab approval.
+
 # Satellite session recovery review
 
 Base: `5ada7251d3a825a79c422e9182627b597ba6f0f1`. Scope: homologação client and Helper/Kids consumers only. No backend, schema, production-root files or existing accounts changed.

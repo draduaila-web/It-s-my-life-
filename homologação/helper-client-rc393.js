@@ -19,10 +19,30 @@ function eligibleSource(x,m){
  return t.responsibility==='help'||targets.map(String).includes(String(m.id));
 }
 function sessionStorageFor(primary,fallback,key){
- var selected=fallback,persistent=false;
- try{var probe=key+'.probe';primary.setItem(probe,'1');primary.removeItem(probe);selected=primary;persistent=true;}catch(_){}
- if(persistent){try{if(!selected.getItem(key)&&fallback.getItem(key)){selected.setItem(key,fallback.getItem(key));fallback.removeItem(key);}}catch(_){}}
- return {storage:selected,persistent:persistent};
+ var persistent=false,queueKey=key+'.pendingLogout.v1';
+ try{var probe=key+'.probe';primary.setItem(probe,'1');primary.removeItem(probe);persistent=true;}catch(_){}
+ if(!persistent||primary===fallback)return {storage:persistent?primary:fallback,persistent:persistent};
+ function rows(store){var value=JSON.parse(store.getItem(queueKey)||'[]');if(!Array.isArray(value))throw new Error('Não foi possível conferir a saída pendente.');return value;}
+ function merged(){var all=rows(primary);rows(fallback).forEach(function(row){if(!all.some(function(x){return x.id===row.id;}))all.push(row);});return all;}
+ // Reads include both stores. Mutation/migration occurs only under the client's lock.
+ var bridge={
+  getItem:function(k){if(k===queueKey){var all=merged();return all.length?JSON.stringify(all):null;}return k===key?primary.getItem(k)||fallback.getItem(k):primary.getItem(k);},
+  setItem:function(k,v){primary.setItem(k,v);},removeItem:function(k){primary.removeItem(k);},
+  prepare:function(){
+   var login=fallback.getItem(key),pending=fallback.getItem(queueKey);
+   if(!login&&!pending)return;
+   var all=merged(),encoded=all.length?JSON.stringify(all):null;
+   if(encoded){primary.setItem(queueKey,encoded);if(primary.getItem(queueKey)!==encoded)throw new Error('Não foi possível preservar a saída pendente.');}
+   if(login&&!primary.getItem(key)){
+    var candidate=JSON.parse(login),blocked=all.some(function(row){return candidate&&(candidate.berthaAuthId?candidate.berthaAuthId===row.authId:candidate.refresh_token===row.refresh_token||candidate.access_token===row.access_token);});
+    if(!blocked){primary.setItem(key,login);if(primary.getItem(key)!==login)throw new Error('Não foi possível preservar o acesso.');}
+   }
+   // Delete source login first. Never leave an unguarded login behind on interruption.
+   fallback.removeItem(key);if(fallback.getItem(key))throw new Error('Não foi possível concluir a transferência do acesso.');
+   fallback.removeItem(queueKey);if(fallback.getItem(queueKey))throw new Error('Não foi possível concluir a transferência da saída.');
+  }
+ };
+ return {storage:bridge,persistent:true};
 }
 function createClient(options){
  var storage=options.storage,fetcher=options.fetch||root.fetch.bind(root),key=options.key,
@@ -46,13 +66,17 @@ function createClient(options){
   var locks=options.locks||(root.navigator&&root.navigator.locks);
   if(!locks||typeof locks.request!=='function')return Promise.reject(new Error('Este navegador não oferece a coordenação segura de acesso. Use um navegador atualizado.'));
   var controller=new AbortController(),timer=setTimeout(function(){controller.abort();},25000);
-  return locks.request('bertha-auth:'+base+':'+sessionKey,{mode:'exclusive',signal:controller.signal},function(){clearTimeout(timer);return action();}).finally(function(){clearTimeout(timer);});
+  return locks.request('bertha-auth:'+base+':'+sessionKey,{mode:'exclusive',signal:controller.signal},function(){clearTimeout(timer);if(storage.prepare)storage.prepare();return action();}).finally(function(){clearTimeout(timer);});
  }
  async function identity(s){
   if(!s)return null;if(s.berthaAuthId)return s.berthaAuthId;
   var digest=await root.crypto.subtle.digest('SHA-256',new TextEncoder().encode(s.refresh_token||''));
   return Array.from(new Uint8Array(digest),function(x){return x.toString(16).padStart(2,'0');}).join('');
  }
+ function sameSession(a,b){return !!a&&!!b&&(a.berthaAuthId&&b.berthaAuthId?a.berthaAuthId===b.berthaAuthId:a.refresh_token===b.refresh_token);}
+ function loginState(){return JSON.stringify([storage.getItem(sessionKey),storage.getItem(logoutKey)]);}
+ function beginLogin(){return {version:++authVersion,state:loginState()};}
+ function commitLogin(s,attempt){return coordinated(function(){if(attempt.version!==authVersion||attempt.state!==loginState())throw new Error('A conta mudou. Confira antes de entrar.');return storeSession(s);});}
  function storeSession(s,id){if(!s||!s.access_token||!s.refresh_token)throw new Error('Entre novamente na sua conta.');save(Object.assign({},s,{berthaAuthId:id||root.crypto.randomUUID(),expires_at:s.expires_at||Math.floor(Date.now()/1000)+(s.expires_in||3600)}));return session;}
  function queuedSession(s,row){return !!s&&(s.berthaAuthId?s.berthaAuthId===row.authId:s.refresh_token===row.refresh_token||s.access_token===row.access_token);}
  function syncSession(){try{session=JSON.parse(storage.getItem(sessionKey)||'null');if(pendingLogouts().some(function(row){return queuedSession(session,row);}))session=null;}catch(_){session=null;}return session;}
@@ -82,7 +106,7 @@ function createClient(options){
  }
  function resumeLogout(){return coordinated(drainLogouts);}
  async function token(){
-  syncSession();if(!session)throw new Error('Entre na sua conta.');
+  await coordinated(function(){});syncSession();if(!session)throw new Error('Entre na sua conta.');
   if(session.expires_at>Math.floor(Date.now()/1000)+60)return session.access_token;
   if(!refreshing){var version=authVersion;refreshing=coordinated(async function(){
    syncSession();if(version!==authVersion||!session)throw new Error('A conta mudou. Entre novamente.');
@@ -92,11 +116,11 @@ function createClient(options){
     var renewed=await raw('/auth/v1/token?grant_type=refresh_token','POST',{refresh_token:refreshToken});
     if(renewed?.user?.id!==captured.user?.id)throw new Error('Não foi possível confirmar a renovação desta conta.');
     var current=syncSession();
-    if(version!==authVersion||!current||await identity(current)!==id||current.refresh_token!==refreshToken)throw new Error('A conta mudou. Entre novamente.');
+    if(version!==authVersion||!current||!sameSession(current,captured)||current.refresh_token!==refreshToken)throw new Error('A conta mudou. Entre novamente.');
     return storeSession(renewed,id).access_token;
    }catch(e){
     var current=syncSession();
-    if(version===authVersion&&(e.status===400||e.status===401)&&current&&await identity(current)===id&&current.refresh_token===refreshToken)save(null);
+    if(version===authVersion&&(e.status===400||e.status===401)&&current&&sameSession(current,captured)&&current.refresh_token===refreshToken)save(null);
     throw e;
    }
   }).finally(function(){refreshing=null;});}
@@ -115,20 +139,20 @@ function createClient(options){
   invitation:async function(op,arg,expected){var t=await token();if(expected&&syncSession()?.user?.id!==expected)throw new Error('A conta mudou. Confira antes de responder.');return raw('/rest/v1/rpc/bertha_hml_invitation','POST',{op:op,arg:arg},t);},
   inviteCode:async function(member,op){return raw('/functions/v1/bertha-code-access','POST',{op:op||'issue',member:member},await token());},
   prepareInvite:async function(member){return raw('/rest/v1/rpc/bertha_hml_invite_prepare','POST',{arg:member},await token());},
-  enterCode:async function(code,kind,nonce){var version=authVersion;code=String(code||'').toUpperCase().replace(/[\s-]/g,'');if(!/^[ABCDEFGHJKLMNPQRSTUVWXYZ23456789]{12}$/.test(code)||!['adult','kids'].includes(kind))throw new Error('Confira o código enviado pelo Owner.');var result=await raw('/functions/v1/bertha-code-access','POST',{op:'claim',code:code,kind:kind,nonce:nonce});if(!result?.session?.access_token||!result.session.refresh_token||result.member?.kind!==kind||result.session.user?.id!==result.member.user_id)throw new Error('Não foi possível confirmar este acesso.');var found=await raw('/auth/v1/user','GET',null,result.session.access_token);if(found?.id!==result.member.user_id||version!==authVersion)throw new Error('A conta mudou. Confira antes de entrar.');authVersion++;storeSession(Object.assign({},result.session,{user:found}));return result.member;},
-  verifyEmailOtp:async function(email,code){var version=authVersion;email=String(email||'').trim().toLowerCase();code=String(code||'').trim();if(!/^[^\s@]+@[^\s@]+[.][^\s@]+$/.test(email)||!/^\d{6,10}$/.test(code))throw new Error('Confira o e-mail e digite o código completo recebido.');var data;try{data=await raw('/auth/v1/verify','POST',{email:email,token:code,type:'email'});}catch(e){if(e.status===400||e.status===403)throw new Error('Código inválido ou expirado. Confira o código completo do último e-mail.');throw e;}if(!data?.access_token||!data.refresh_token)throw new Error('Não foi possível confirmar este acesso.');var found=await raw('/auth/v1/user','GET',null,data.access_token);if(!found?.email_confirmed_at||found.email.toLowerCase()!==email||version!==authVersion)throw new Error('Este código não corresponde à conta informada.');authVersion++;return storeSession(Object.assign({},data,{user:found}));},
-  verifyEmailLink:async function(link,email){var version=authVersion,url;try{url=new URL(String(link||'').trim());}catch(_){throw new Error('Copie o link completo do e-mail.');}email=String(email||'').trim().toLowerCase();if(!/^[^\s@]+@[^\s@]+[.][^\s@]+$/.test(email))throw new Error('Informe o e-mail usado para pedir este acesso.');if(url.origin!==new URL(base).origin||url.pathname!=='/auth/v1/verify'||url.username||url.password||!['magiclink','signup','email'].includes(url.searchParams.get('type')))throw new Error('Use o link original de acesso recebido no e-mail da BERTH.A.');var hash=url.searchParams.get('token')||url.searchParams.get('token_hash');if(!hash||hash.length>512)throw new Error('O link não contém uma confirmação válida.');var data;try{data=await raw('/auth/v1/verify','POST',{token_hash:hash,type:'email'});}catch(e){if(e.status===400||e.status===403)throw new Error('Este link já foi usado ou expirou. Peça um novo e copie sem abrir no Safari.');throw e;}if(!data?.access_token||!data.refresh_token)throw new Error('Não foi possível confirmar este acesso.');var found=await raw('/auth/v1/user','GET',null,data.access_token);if(!found?.email_confirmed_at||found.email.toLowerCase()!==email||version!==authVersion)throw new Error('Este acesso não corresponde ao e-mail informado.');authVersion++;return storeSession(Object.assign({},data,{user:found}));},
+  enterCode:async function(code,kind,nonce){var attempt=beginLogin(),version=attempt.version;code=String(code||'').toUpperCase().replace(/[\s-]/g,'');if(!/^[ABCDEFGHJKLMNPQRSTUVWXYZ23456789]{12}$/.test(code)||!['adult','kids'].includes(kind))throw new Error('Confira o código enviado pelo Owner.');var result=await raw('/functions/v1/bertha-code-access','POST',{op:'claim',code:code,kind:kind,nonce:nonce});if(!result?.session?.access_token||!result.session.refresh_token||result.member?.kind!==kind||result.session.user?.id!==result.member.user_id)throw new Error('Não foi possível confirmar este acesso.');var found=await raw('/auth/v1/user','GET',null,result.session.access_token);if(found?.id!==result.member.user_id||version!==authVersion)throw new Error('A conta mudou. Confira antes de entrar.');await commitLogin(Object.assign({},result.session,{user:found}),attempt);return result.member;},
+  verifyEmailOtp:async function(email,code){var attempt=beginLogin(),version=attempt.version;email=String(email||'').trim().toLowerCase();code=String(code||'').trim();if(!/^[^\s@]+@[^\s@]+[.][^\s@]+$/.test(email)||!/^\d{6,10}$/.test(code))throw new Error('Confira o e-mail e digite o código completo recebido.');var data;try{data=await raw('/auth/v1/verify','POST',{email:email,token:code,type:'email'});}catch(e){if(e.status===400||e.status===403)throw new Error('Código inválido ou expirado. Confira o código completo do último e-mail.');throw e;}if(!data?.access_token||!data.refresh_token)throw new Error('Não foi possível confirmar este acesso.');var found=await raw('/auth/v1/user','GET',null,data.access_token);if(!found?.email_confirmed_at||found.email.toLowerCase()!==email||version!==authVersion)throw new Error('Este código não corresponde à conta informada.');return commitLogin(Object.assign({},data,{user:found}),attempt);},
+  verifyEmailLink:async function(link,email){var attempt=beginLogin(),version=attempt.version,url;try{url=new URL(String(link||'').trim());}catch(_){throw new Error('Copie o link completo do e-mail.');}email=String(email||'').trim().toLowerCase();if(!/^[^\s@]+@[^\s@]+[.][^\s@]+$/.test(email))throw new Error('Informe o e-mail usado para pedir este acesso.');if(url.origin!==new URL(base).origin||url.pathname!=='/auth/v1/verify'||url.username||url.password||!['magiclink','signup','email'].includes(url.searchParams.get('type')))throw new Error('Use o link original de acesso recebido no e-mail da BERTH.A.');var hash=url.searchParams.get('token')||url.searchParams.get('token_hash');if(!hash||hash.length>512)throw new Error('O link não contém uma confirmação válida.');var data;try{data=await raw('/auth/v1/verify','POST',{token_hash:hash,type:'email'});}catch(e){if(e.status===400||e.status===403)throw new Error('Este link já foi usado ou expirou. Peça um novo e copie sem abrir no Safari.');throw e;}if(!data?.access_token||!data.refresh_token)throw new Error('Não foi possível confirmar este acesso.');var found=await raw('/auth/v1/user','GET',null,data.access_token);if(!found?.email_confirmed_at||found.email.toLowerCase()!==email||version!==authVersion)throw new Error('Este acesso não corresponde ao e-mail informado.');return commitLogin(Object.assign({},data,{user:found}),attempt);},
   requestEmailLink:async function(email,redirect){email=String(email||'').trim().toLowerCase();if(!/^[^\s@]+@[^\s@]+[.][^\s@]+$/.test(email))throw new Error('Confira seu e-mail.');var url=new URL(redirect);if(url.origin!=='https://draduaila-web.github.io'||!/^\/It-s-my-life-\/homologa(?:%C3%A7%C3%A3|çã)o\/helper(?:-owner)?[.]html$/i.test(url.pathname))throw new Error('Destino de acesso não autorizado.');url.hash='';await raw('/auth/v1/otp?redirect_to='+encodeURIComponent(url.href),'POST',{email:email,create_user:true});return {email:email};},
   inspectEmailSession:async function(input){if(!input||!input.access_token||!input.refresh_token)throw new Error('O link não trouxe um acesso válido. Solicite outro.');var version=authVersion,found=await raw('/auth/v1/user','GET',null,input.access_token);if(!found||!found.id||!found.email_confirmed_at)throw new Error('Confirme seu e-mail para entrar.');var renewed=await raw('/auth/v1/token?grant_type=refresh_token','POST',{refresh_token:input.refresh_token});if(version!==authVersion)throw new Error('A conta mudou. Entre novamente.');if(renewed?.user?.id!==found.id||!renewed.access_token||!renewed.refresh_token)throw new Error('O link não corresponde à mesma conta. Solicite outro.');return Object.assign({},renewed,{user:found});},
-  acceptEmailSession:function(checked){if(!checked?.user?.id)throw new Error('Confira sua conta antes de entrar.');authVersion++;return storeSession(checked);},
-  signIn:async function(email,password){var v=++authVersion,s=await raw('/auth/v1/token?grant_type=password','POST',{email:email,password:password});if(v!==authVersion)throw new Error('A conta mudou. Entre novamente.');return storeSession(s);},
-  signUp:async function(email,password){var v=++authVersion,data=await raw('/auth/v1/signup','POST',{email:email,password:password});if(v!==authVersion)throw new Error('A conta mudou. Entre novamente.');if(data&&data.access_token)storeSession(data);return data;},
+  acceptEmailSession:function(checked){if(!checked?.user?.id)throw new Error('Confira sua conta antes de entrar.');return commitLogin(checked,beginLogin());},
+  signIn:async function(email,password){var attempt=beginLogin(),v=attempt.version,s=await raw('/auth/v1/token?grant_type=password','POST',{email:email,password:password});if(v!==authVersion)throw new Error('A conta mudou. Entre novamente.');return commitLogin(s,attempt);},
+  signUp:async function(email,password){var attempt=beginLogin(),v=attempt.version,data=await raw('/auth/v1/signup','POST',{email:email,password:password});if(v!==authVersion)throw new Error('A conta mudou. Entre novamente.');if(data&&data.access_token)await commitLogin(data,attempt);return data;},
   signOut:async function(){
    var captured=syncSession();authVersion++;var id=await identity(captured);
    return coordinated(async function(){
     var current=syncSession();
     if(captured){
-     var same=current&&await identity(current)===id,revoked=same?current:captured,rows=pendingLogouts();
+     var same=current&&sameSession(current,captured),revoked=same?current:captured,rows=pendingLogouts();
      if(!rows.some(function(x){return x.authId===id;}))rows.push({id:root.crypto.randomUUID(),authId:id,userId:revoked.user?.id,access_token:revoked.access_token,refresh_token:revoked.refresh_token});
      // Persist before removing the login. A storage failure must not silently lose revocation.
      writeLogouts(rows);if(same)save(null);

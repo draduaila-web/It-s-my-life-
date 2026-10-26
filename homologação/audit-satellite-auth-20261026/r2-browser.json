@@ -1,0 +1,135 @@
+{
+  "locks": true,
+  "passed": 32,
+  "failed": 0,
+  "results": [
+    {
+      "name": "Offline logout persists revocation and removes login; reopening drains it",
+      "ok": true
+    },
+    {
+      "name": "Lost logout response retries idempotently without restoring access",
+      "ok": true
+    },
+    {
+      "name": "Expired pending logout renews only captured identity and revokes it",
+      "ok": true
+    },
+    {
+      "name": "Pending logout cannot install a different identity from renewal",
+      "ok": true
+    },
+    {
+      "name": "Storage failure before queue write preserves login and makes no request",
+      "ok": true
+    },
+    {
+      "name": "Failed login removal remains blocked by pending logout tombstone",
+      "ok": true
+    },
+    {
+      "name": "Same-instance refresh requests collapse",
+      "ok": true
+    },
+    {
+      "name": "Two clients sharing a lock renew once and both succeed",
+      "ok": true
+    },
+    {
+      "name": "Late refresh rejection does not erase a replacement session",
+      "ok": true
+    },
+    {
+      "name": "Late successful refresh does not overwrite replacement session",
+      "ok": true
+    },
+    {
+      "name": "Logout during in-flight renewal never resurrects login",
+      "ok": true
+    },
+    {
+      "name": "Pending old logout leaves new login intact",
+      "ok": true
+    },
+    {
+      "name": "Lost refresh response remains retryable with token-parent recovery",
+      "ok": true
+    },
+    {
+      "name": "Real rejection of unchanged refresh clears only that login",
+      "ok": true
+    },
+    {
+      "name": "No lock capability fails closed on renewal and preserves login",
+      "ok": true
+    },
+    {
+      "name": "Retry invitation uses same caller nonce and verifies member identity",
+      "ok": true
+    },
+    {
+      "name": "Account-bound social call blocks after account changes",
+      "ok": true
+    },
+    {
+      "name": "Concurrent login waits for renewal; stale intent cannot overwrite committed session",
+      "ok": true
+    },
+    {
+      "name": "Concurrent login waits for logout; retry remains installed after old revocation",
+      "ok": true
+    },
+    {
+      "name": "Login response arriving after logout cannot reopen old account",
+      "ok": true
+    },
+    {
+      "name": "Two login responses cannot silently overwrite the winning login",
+      "ok": true
+    },
+    {
+      "name": "Pending expired old logout never replaces or removes new login",
+      "ok": true
+    },
+    {
+      "name": "Expired and rejected pending credentials stay blocked, not falsely confirmed",
+      "ok": true
+    },
+    {
+      "name": "Migration preserves pending logout",
+      "ok": true
+    },
+    {
+      "name": "Migration preserves pending logout and never resurrects failed-removal login",
+      "ok": true
+    },
+    {
+      "name": "Migration keeps destination login and merges distinct queues",
+      "ok": true
+    },
+    {
+      "name": "Interrupted migration queue-write preserves source and retries safely",
+      "ok": true
+    },
+    {
+      "name": "Interrupted migration login-write preserves source and retries safely",
+      "ok": true
+    },
+    {
+      "name": "Interrupted migration source-remove preserves source and retries safely",
+      "ok": true
+    },
+    {
+      "name": "Unavailable primary uses fallback; reopening retains pending logout",
+      "ok": true
+    },
+    {
+      "name": "Malformed migration queue fails closed without any request",
+      "ok": true
+    },
+    {
+      "name": "Accepted email session waits for coordination and survives old revocation",
+      "ok": true
+    }
+  ]
+}

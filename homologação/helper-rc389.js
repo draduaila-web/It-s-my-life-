@@ -50,7 +50,7 @@ async function restoreEmailLink(){
  if(failed){notice('Este link expirou ou já foi utilizado. Solicite um novo link.',true);return true;}
  try{var candidate=await client.inspectEmailSession({access_token:access,refresh_token:refresh,expires_in:Number.isFinite(expires)&&expires>0?expires:3600});
   var requested=authStorage.storage.getItem(pendingEmailKey),same=requested&&requested.toLowerCase()===candidate.user.email.toLowerCase();
-  async function accept(){client.acceptEmailSession(candidate);authStorage.storage.removeItem(pendingEmailKey);await initialize();}
+  async function accept(){await client.acceptEmailSession(candidate);authStorage.storage.removeItem(pendingEmailKey);await initialize();}
   if(same)await accept();else{modal('Confirmar meu acesso','<p>Entrar como <strong>'+safe(candidate.user.email)+'</strong>?</p><p class="note">O link abriu em outro navegador ou aparelho. Confirme que este é o seu e-mail para entrar com segurança. Depois, você poderá aceitar o convite do Owner.</p>',accept);}
  }catch(err){fail(err);}return true;
 }

@@ -1,0 +1,15 @@
+{
+  "rounds": [
+    {
+      "round": 1,
+      "left": "Consulta concluída; sessão renovada",
+      "right": "Consulta concluída; sessão renovada"
+    },
+    {
+      "round": 2,
+      "left": "Consulta concluída; sessão renovada",
+      "right": "Renovação pendente nesta aba"
+    }
+  ],
+  "observation": "Native lock serializes, but second tab may issue refresh from stale storage view. Task-boundary workaround failed and was reverted."
+}
