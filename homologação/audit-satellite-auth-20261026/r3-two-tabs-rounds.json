@@ -1,0 +1,65 @@
+{
+  "rounds": [
+    {
+      "round": 1,
+      "a": "Consulta concluída; sessão renovada",
+      "b": "Consulta concluída; sessão renovada"
+    },
+    {
+      "round": 2,
+      "a": "Consulta concluída; sessão renovada",
+      "b": "Consulta concluída; sessão renovada"
+    },
+    {
+      "round": 3,
+      "a": "Consulta concluída; sessão renovada",
+      "b": "Consulta concluída; sessão renovada"
+    },
+    {
+      "round": 4,
+      "a": "Consulta concluída; sessão renovada",
+      "b": "Consulta concluída; sessão renovada"
+    },
+    {
+      "round": 5,
+      "a": "Consulta concluída; sessão renovada",
+      "b": "Consulta concluída; sessão renovada"
+    },
+    {
+      "round": 6,
+      "a": "Consulta concluída; sessão renovada",
+      "b": "Consulta concluída; sessão renovada"
+    },
+    {
+      "round": 7,
+      "a": "Consulta concluída; sessão renovada",
+      "b": "Consulta concluída; sessão renovada"
+    },
+    {
+      "round": 8,
+      "a": "Consulta concluída; sessão renovada",
+      "b": "Consulta concluída; sessão renovada"
+    },
+    {
+      "round": 9,
+      "a": "Consulta concluída; sessão renovada",
+      "b": "Consulta concluída; sessão renovada"
+    },
+    {
+      "round": 10,
+      "a": "Consulta concluída; sessão renovada",
+      "b": "Consulta concluída; sessão renovada"
+    },
+    {
+      "round": 11,
+      "a": "Consulta concluída; sessão renovada",
+      "b": "Consulta concluída; sessão renovada"
+    },
+    {
+      "round": 12,
+      "a": "Consulta concluída; sessão renovada",
+      "b": "Consulta concluída; sessão renovada"
+    }
+  ],
+  "secondTab": "{\"locks\":{\"held\":[],\"pending\":[]},\"history\":[{\"event\":\"storage\",\"at\":354,\"fresh\":false},{\"event\":\"storage\",\"at\":1321.7000000001863,\"fresh\":true},{\"event\":\"storage\",\"at\":13472.30000000028,\"fresh\":false},{\"event\":\"storage\",\"at\":14303,\"fresh\":true},{\"event\":\"storage\",\"at\":14605.700000000186,\"fresh\":false},{\"event\":\"storage\",\"at\":15436.900000000373,\"fresh\":true},{\"event\":\"storage\",\"at\":15745.80000000028,\"fresh\":false},{\"event\":\"storage\",\"at\":16573.100000000093,\"fresh\":true},{\"event\":\"storage\",\"at\":16896.600000000093,\"fresh\":false},{\"event\":\"storage\",\"at\":17688.600000000093,\"fresh\":true},{\"event\":\"storage\",\"at\":18000.400000000373,\"fresh\":false},{\"event\":\"storage\",\"at\":18814.30000000028,\"fresh\":true},{\"event\":\"storage\",\"at\":19105.400000000373,\"fresh\":false},{\"event\":\"storage\",\"at\":19934.900000000373,\"fresh\":true},{\"event\":\"storage\",\"at\":20241.30000000028,\"fresh\":false},{\"event\":\"storage\",\"at\":21044,\"fresh\":true},{\"event\":\"storage\",\"at\":21341.400000000373,\"fresh\":false},{\"event\":\"storage\",\"at\":22173.700000000186,\"fresh\":true},{\"event\":\"storage\",\"at\":22493.400000000373,\"fresh\":false},{\"event\":\"storage\",\"at\":23287.5,\"fresh\":true},{\"event\":\"storage\",\"at\":23602.900000000373,\"fresh\":false},{\"event\":\"storage\",\"at\":24442.5,\"fresh\":true},{\"event\":\"storage\",\"at\":24736.700000000186,\"fresh\":false},{\"event\":\"storage\",\"at\":25548.400000000373,\"fresh\":true},{\"event\":\"storage\",\"at\":25870.100000000093,\"fresh\":false},{\"event\":\"storage\",\"at\":26642.30000000028,\"fresh\":true}]}"
+}

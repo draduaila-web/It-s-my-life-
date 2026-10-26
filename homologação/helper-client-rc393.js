@@ -25,7 +25,8 @@ function sessionStorageFor(primary,fallback,key){
  function rows(store){var value=JSON.parse(store.getItem(queueKey)||'[]');if(!Array.isArray(value))throw new Error('Não foi possível conferir a saída pendente.');return value;}
  function merged(){var all=rows(primary);rows(fallback).forEach(function(row){if(!all.some(function(x){return x.id===row.id;}))all.push(row);});return all;}
  // Reads include both stores. Mutation/migration occurs only under the client's lock.
- var bridge={
+ var nativePrimary=false;try{nativePrimary=primary===root.localStorage;}catch(_){}
+ var bridge={coherenceStorage:nativePrimary?primary:null,
   getItem:function(k){if(k===queueKey){var all=merged();return all.length?JSON.stringify(all):null;}return k===key?primary.getItem(k)||fallback.getItem(k):primary.getItem(k);},
   setItem:function(k,v){primary.setItem(k,v);},removeItem:function(k){primary.removeItem(k);},
   prepare:function(){
@@ -44,9 +45,44 @@ function sessionStorageFor(primary,fallback,key){
  };
  return {storage:bridge,persistent:true};
 }
+// Non-secret commit fingerprints provide a visibility fence across storage caches.
+// No tokens, user IDs or session contents are stored in this IndexedDB database.
+function coherenceJournal(){
+ var opening;
+ function open(){if(!opening)opening=new Promise(function(resolve,reject){
+  if(!root.indexedDB){reject(new Error('Não foi possível sincronizar o acesso entre abas.'));return;}
+  var request=root.indexedDB.open('bertha-auth-coherence-v1',1),timer=setTimeout(function(){reject(new Error('A sincronização do acesso demorou. Tente novamente.'));},3000);
+  request.onupgradeneeded=function(){request.result.createObjectStore('states');};
+  request.onerror=request.onblocked=function(){clearTimeout(timer);reject(new Error('Não foi possível sincronizar o acesso entre abas.'));};
+  request.onsuccess=function(){clearTimeout(timer);var db=request.result;db.onversionchange=function(){db.close();opening=null;};resolve(db);};
+ }).catch(function(e){opening=null;throw e;});return opening;}
+ async function transaction(key,value,write){var db=await open();return new Promise(function(resolve,reject){
+  var tx=db.transaction('states',write?'readwrite':'readonly'),store=tx.objectStore('states'),request=write?store.put(value,key):store.get(key),result;
+  var timer=setTimeout(function(){try{tx.abort();}catch(_){}reject(new Error('A sincronização do acesso demorou. Tente novamente.'));},3000);
+  request.onsuccess=function(){result=request.result;};tx.oncomplete=function(){clearTimeout(timer);resolve(result);};tx.onerror=tx.onabort=function(){clearTimeout(timer);reject(new Error('Não foi possível confirmar a sincronização do acesso.'));};
+ });}
+ return {read:function(key){return transaction(key,null,false);},write:function(key,value){return transaction(key,value,true);}};
+}
 function createClient(options){
  var storage=options.storage,fetcher=options.fetch||root.fetch.bind(root),key=options.key,
  base=options.base,sessionKey=options.sessionKey,session=null,refreshing=null,authVersion=0,logoutKey=options.sessionKey+'.pendingLogout.v1';
+ var sharedStorage=storage.coherenceStorage;
+ try{if(!sharedStorage&&storage===root.localStorage)sharedStorage=storage;}catch(_){}
+ var journal=options.coherenceJournal||(sharedStorage?coherenceJournal():null),journalKey=base+':'+sessionKey;
+ async function fingerprint(){var target=sharedStorage||storage,value=JSON.stringify([target.getItem(sessionKey),target.getItem(logoutKey)]),digest=await root.crypto.subtle.digest('SHA-256',new TextEncoder().encode(value));return Array.from(new Uint8Array(digest),function(x){return x.toString(16).padStart(2,'0');}).join('');}
+ async function visibleCommit(){
+  if(!journal)return;
+  var expected=await journal.read(journalKey),actual=await fingerprint();
+  if(!expected){await journal.write(journalKey,actual);return;}
+  if(expected===actual)return;
+  // Wait for evidence of the committed state, never for an arbitrary sleep interval.
+  await new Promise(function(resolve,reject){
+   var done=false,timer=setTimeout(function(){finish(new Error('O acesso mudou em outra aba e ainda não foi sincronizado. Atualize antes de tentar novamente.'));},3000);
+   function finish(error){if(done)return;done=true;clearTimeout(timer);root.removeEventListener?.('storage',check);error?reject(error):resolve();}
+   async function check(){try{if(await fingerprint()===expected)finish();}catch(e){finish(e);}}
+   root.addEventListener?.('storage',check);check();
+  });
+ }
  try{session=JSON.parse(storage.getItem(sessionKey)||'null');}catch(_){}
  function save(s){session=s;if(s)storage.setItem(sessionKey,JSON.stringify(s));else storage.removeItem(sessionKey);}
  async function raw(path,method,body,token){
@@ -66,7 +102,7 @@ function createClient(options){
   var locks=options.locks||(root.navigator&&root.navigator.locks);
   if(!locks||typeof locks.request!=='function')return Promise.reject(new Error('Este navegador não oferece a coordenação segura de acesso. Use um navegador atualizado.'));
   var controller=new AbortController(),timer=setTimeout(function(){controller.abort();},25000);
-  return locks.request('bertha-auth:'+base+':'+sessionKey,{mode:'exclusive',signal:controller.signal},function(){clearTimeout(timer);if(storage.prepare)storage.prepare();return action();}).finally(function(){clearTimeout(timer);});
+  return locks.request('bertha-auth:'+base+':'+sessionKey,{mode:'exclusive',signal:controller.signal},async function(){clearTimeout(timer);await visibleCommit();try{if(storage.prepare)storage.prepare();return await action();}finally{if(journal)await journal.write(journalKey,await fingerprint());}}).finally(function(){clearTimeout(timer);});
  }
  async function identity(s){
   if(!s)return null;if(s.berthaAuthId)return s.berthaAuthId;

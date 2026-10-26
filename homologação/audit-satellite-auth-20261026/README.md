@@ -1,4 +1,4 @@
-> **Current status: DO NOT MERGE.** R2 adds coordinated login commits and queue migration, but real two-tab QA still fails intermittently. See [REVISION-R2.md](REVISION-R2.md). Historical results below are not a current cross-tab approval.
+> **Current revision: R3.** The observed two-tab duplicate refresh is resolved in the local reproducer (12 repeated handoffs). See [REVISION-R3.md](REVISION-R3.md) for evidence, failure modes and remote validation still required. Keep this PR in draft; no deployment or family-pilot approval. Historical observations below remain preserved.
 
 # Satellite session recovery review
 
