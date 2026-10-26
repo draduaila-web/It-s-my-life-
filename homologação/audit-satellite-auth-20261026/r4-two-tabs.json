@@ -1,0 +1,45 @@
+{
+  "rounds": [
+    {
+      "round": 1,
+      "left": "Consulta concluída; sessão renovada",
+      "right": "Consulta concluída; sessão renovada"
+    },
+    {
+      "round": 2,
+      "left": "Consulta concluída; sessão renovada",
+      "right": "Consulta concluída; sessão renovada"
+    },
+    {
+      "round": 3,
+      "left": "Consulta concluída; sessão renovada",
+      "right": "Consulta concluída; sessão renovada"
+    },
+    {
+      "round": 4,
+      "left": "Consulta concluída; sessão renovada",
+      "right": "Consulta concluída; sessão renovada"
+    },
+    {
+      "round": 5,
+      "left": "Consulta concluída; sessão renovada",
+      "right": "Consulta concluída; sessão renovada"
+    },
+    {
+      "round": 6,
+      "left": "Consulta concluída; sessão renovada",
+      "right": "Consulta concluída; sessão renovada"
+    },
+    {
+      "round": 7,
+      "left": "Consulta concluída; sessão renovada",
+      "right": "Consulta concluída; sessão renovada"
+    },
+    {
+      "round": 8,
+      "left": "Consulta concluída; sessão renovada",
+      "right": "Consulta concluída; sessão renovada"
+    }
+  ],
+  "secondTab": "{\"locks\":{\"held\":[],\"pending\":[]},\"history\":[{\"event\":\"storage\",\"at\":9507.899999999907,\"fresh\":false},{\"event\":\"storage\",\"at\":10419.69999999972,\"fresh\":true},{\"event\":\"storage\",\"at\":10718.69999999972,\"fresh\":false},{\"event\":\"storage\",\"at\":11586.799999999814,\"fresh\":true},{\"event\":\"storage\",\"at\":12059,\"fresh\":false},{\"event\":\"storage\",\"at\":12987.19999999972,\"fresh\":true},{\"event\":\"storage\",\"at\":13271,\"fresh\":false},{\"event\":\"storage\",\"at\":14315.099999999627,\"fresh\":true},{\"event\":\"storage\",\"at\":14648.899999999907,\"fresh\":false},{\"event\":\"storage\",\"at\":15465.399999999907,\"fresh\":true},{\"event\":\"storage\",\"at\":15804.399999999907,\"fresh\":false},{\"event\":\"storage\",\"at\":16705,\"fresh\":true},{\"event\":\"storage\",\"at\":17058.5,\"fresh\":false},{\"event\":\"storage\",\"at\":17853.599999999627,\"fresh\":true},{\"event\":\"storage\",\"at\":18137.200000000186,\"fresh\":false},{\"event\":\"storage\",\"at\":19129.200000000186,\"fresh\":true}]}"
+}

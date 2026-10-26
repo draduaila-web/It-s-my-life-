@@ -190,6 +190,7 @@ async function initialize(){
 }
 window.addEventListener('storage',function(e){if(e.key!==authKey&&e.key!==authKey+'.pendingLogout.v1')return;clearTransport(true);generation++;user=null;members=[];tasks=[];network=null;clearInterval(interval);function resumePendingLogout(){if(!client.logoutStatus().pending)return;client.resumeLogout().then(function(r){if(!user)notice(r.pending?'Acesso removido deste aparelho. A confirmação da saída ainda está pendente.':'Saída confirmada.');}).catch(fail);}
 render();resumePendingLogout();restoreEmailLink().then(function(handled){if(!handled&&client.session())initialize();});});
+window.addEventListener('bertha-auth-required',function(e){if(e.detail?.sessionKey!==authKey)return;clearTransport(false);generation++;user=null;members=[];tasks=[];network=null;clearInterval(interval);document.querySelectorAll('dialog[open]').forEach(function(d){d.close();});render();notice('Seu acesso foi interrompido. Entre novamente; saídas pendentes serão preservadas.',true);});
 window.addEventListener('offline',function(){notice('Você está sem conexão. Aguarde antes de confirmar atividades.',true);});
 window.addEventListener('online',function(){resumePendingLogout();if(user)loadRemote().then(function(){notice('Conexão retomada.');}).catch(fail);});
 function resumePendingLogout(){if(!client.logoutStatus().pending)return;client.resumeLogout().then(function(r){if(!user)notice(r.pending?'Acesso removido deste aparelho. A confirmação da saída ainda está pendente.':'Saída confirmada.');}).catch(fail);}

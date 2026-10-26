@@ -29,14 +29,14 @@ function sessionStorageFor(primary,fallback,key){
  var bridge={coherenceStorage:nativePrimary?primary:null,
   getItem:function(k){if(k===queueKey){var all=merged();return all.length?JSON.stringify(all):null;}return k===key?primary.getItem(k)||fallback.getItem(k):primary.getItem(k);},
   setItem:function(k,v){primary.setItem(k,v);},removeItem:function(k){primary.removeItem(k);},
-  prepare:function(){
+  prepare:async function(checkpoint){
    var login=fallback.getItem(key),pending=fallback.getItem(queueKey);
    if(!login&&!pending)return;
    var all=merged(),encoded=all.length?JSON.stringify(all):null;
-   if(encoded){primary.setItem(queueKey,encoded);if(primary.getItem(queueKey)!==encoded)throw new Error('Não foi possível preservar a saída pendente.');}
+   if(encoded){await checkpoint(queueKey,encoded);if(primary.getItem(queueKey)!==encoded)throw new Error('Não foi possível preservar a saída pendente.');}
    if(login&&!primary.getItem(key)){
     var candidate=JSON.parse(login),blocked=all.some(function(row){return candidate&&(candidate.berthaAuthId?candidate.berthaAuthId===row.authId:candidate.refresh_token===row.refresh_token||candidate.access_token===row.access_token);});
-    if(!blocked){primary.setItem(key,login);if(primary.getItem(key)!==login)throw new Error('Não foi possível preservar o acesso.');}
+    if(!blocked){await checkpoint(key,login);if(primary.getItem(key)!==login)throw new Error('Não foi possível preservar o acesso.');}
    }
    // Delete source login first. Never leave an unguarded login behind on interruption.
    fallback.removeItem(key);if(fallback.getItem(key))throw new Error('Não foi possível concluir a transferência do acesso.');
@@ -65,26 +65,45 @@ function coherenceJournal(){
 }
 function createClient(options){
  var storage=options.storage,fetcher=options.fetch||root.fetch.bind(root),key=options.key,
- base=options.base,sessionKey=options.sessionKey,session=null,refreshing=null,authVersion=0,logoutKey=options.sessionKey+'.pendingLogout.v1';
+ base=options.base,sessionKey=options.sessionKey,session=null,refreshing=null,authVersion=0,reauthRequired=false,logoutKey=options.sessionKey+'.pendingLogout.v1';
  var sharedStorage=storage.coherenceStorage;
  try{if(!sharedStorage&&storage===root.localStorage)sharedStorage=storage;}catch(_){}
  var journal=options.coherenceJournal||(sharedStorage?coherenceJournal():null),journalKey=base+':'+sessionKey;
- async function fingerprint(){var target=sharedStorage||storage,value=JSON.stringify([target.getItem(sessionKey),target.getItem(logoutKey)]),digest=await root.crypto.subtle.digest('SHA-256',new TextEncoder().encode(value));return Array.from(new Uint8Array(digest),function(x){return x.toString(16).padStart(2,'0');}).join('');}
- async function visibleCommit(){
+ function storedState(){var target=sharedStorage||storage;return [target.getItem(sessionKey),target.getItem(logoutKey)];}
+ async function fingerprint(state){var digest=await root.crypto.subtle.digest('SHA-256',new TextEncoder().encode(JSON.stringify(state||storedState())));return Array.from(new Uint8Array(digest),function(x){return x.toString(16).padStart(2,'0');}).join('');}
+ function interruptedAccess(){var error=new Error('O acesso foi interrompido. Entre novamente para continuar; saídas pendentes serão preservadas.');error.code='AUTH_REAUTH_REQUIRED';reauthRequired=true;try{root.dispatchEvent(new CustomEvent('bertha-auth-required',{detail:{sessionKey:sessionKey}}));}catch(_){}return error;}
+ async function visibleCommit(reauth){
   if(!journal)return;
-  var expected=await journal.read(journalKey),actual=await fingerprint();
-  if(!expected){await journal.write(journalKey,actual);return;}
-  if(expected===actual)return;
-  // Wait for evidence of the committed state, never for an arbitrary sleep interval.
-  await new Promise(function(resolve,reject){
-   var done=false,timer=setTimeout(function(){finish(new Error('O acesso mudou em outra aba e ainda não foi sincronizado. Atualize antes de tentar novamente.'));},3000);
-   function finish(error){if(done)return;done=true;clearTimeout(timer);root.removeEventListener?.('storage',check);error?reject(error):resolve();}
-   async function check(){try{if(await fingerprint()===expected)finish();}catch(e){finish(e);}}
+  var record=await journal.read(journalKey),actual=await fingerprint(),pending=record&&typeof record==='object'?record.pending:null;
+  var expected=pending?pending.after:record;
+  if(!record){await journal.write(journalKey,actual);reauthRequired=false;return;}
+  if(typeof expected!=='string'||!/^[0-9a-f]{64}$/.test(expected)||(pending&&(record.version!==2||!/^[0-9a-f]{64}$/.test(pending.before)))){if(reauth)return;throw interruptedAccess();}
+  if(expected===actual){reauthRequired=false;if(pending)await journal.write(journalKey,actual);return;}
+  // Recover only the exact intended state; never bless an arbitrary stale snapshot.
+  var matched=await new Promise(function(resolve,reject){
+   var done=false,timer=setTimeout(function(){finish(null,false);},3000);
+   function finish(error,value){if(done)return;done=true;clearTimeout(timer);root.removeEventListener?.('storage',check);error?reject(error):resolve(value);}
+   async function check(){try{if(await fingerprint()===expected)finish(null,true);}catch(e){finish(e);}}
    root.addEventListener?.('storage',check);check();
   });
+  if(matched){reauthRequired=false;if(pending)await journal.write(journalKey,expected);return;}
+  if(reauth)return; // Fresh, verified login may supersede an ambiguous commit, preserving the queue.
+  throw interruptedAccess();
+ }
+ async function mutate(k,value){
+  var beforeState=storedState(),afterState=beforeState.slice(),index=k===sessionKey?0:k===logoutKey?1:-1;
+  if(index<0)throw new Error('Registro de acesso inválido.');afterState[index]=value;
+  if(journal){
+   var before=await fingerprint(beforeState),after=await fingerprint(afterState);
+   if(await fingerprint()!==before)throw new Error('A conta mudou. Confira antes de continuar.');
+   await journal.write(journalKey,{version:2,pending:{before:before,after:after}});
+   if(await fingerprint()!==before)throw new Error('A conta mudou. Confira antes de continuar.');
+  }
+  if(value===null)storage.removeItem(k);else storage.setItem(k,value);
+  if(journal)await journal.write(journalKey,after);
  }
  try{session=JSON.parse(storage.getItem(sessionKey)||'null');}catch(_){}
- function save(s){session=s;if(s)storage.setItem(sessionKey,JSON.stringify(s));else storage.removeItem(sessionKey);}
+ async function save(s){await mutate(sessionKey,s?JSON.stringify(s):null);session=s;reauthRequired=false;}
  async function raw(path,method,body,token){
   var controller=new AbortController(),timer=setTimeout(function(){controller.abort();},20000);
   try{
@@ -98,11 +117,11 @@ function createClient(options){
   finally{clearTimeout(timer);}
  }
  // Lock names and diagnostics never contain credentials. Web Locks release on tab closure.
- function coordinated(action){
+ function coordinated(action,reauth){
   var locks=options.locks||(root.navigator&&root.navigator.locks);
   if(!locks||typeof locks.request!=='function')return Promise.reject(new Error('Este navegador não oferece a coordenação segura de acesso. Use um navegador atualizado.'));
   var controller=new AbortController(),timer=setTimeout(function(){controller.abort();},25000);
-  return locks.request('bertha-auth:'+base+':'+sessionKey,{mode:'exclusive',signal:controller.signal},async function(){clearTimeout(timer);await visibleCommit();try{if(storage.prepare)storage.prepare();return await action();}finally{if(journal)await journal.write(journalKey,await fingerprint());}}).finally(function(){clearTimeout(timer);});
+  return locks.request('bertha-auth:'+base+':'+sessionKey,{mode:'exclusive',signal:controller.signal},async function(){clearTimeout(timer);await visibleCommit(reauth);if(storage.prepare)await storage.prepare(mutate);return await action();}).finally(function(){clearTimeout(timer);});
  }
  async function identity(s){
   if(!s)return null;if(s.berthaAuthId)return s.berthaAuthId;
@@ -112,12 +131,12 @@ function createClient(options){
  function sameSession(a,b){return !!a&&!!b&&(a.berthaAuthId&&b.berthaAuthId?a.berthaAuthId===b.berthaAuthId:a.refresh_token===b.refresh_token);}
  function loginState(){return JSON.stringify([storage.getItem(sessionKey),storage.getItem(logoutKey)]);}
  function beginLogin(){return {version:++authVersion,state:loginState()};}
- function commitLogin(s,attempt){return coordinated(function(){if(attempt.version!==authVersion||attempt.state!==loginState())throw new Error('A conta mudou. Confira antes de entrar.');return storeSession(s);});}
- function storeSession(s,id){if(!s||!s.access_token||!s.refresh_token)throw new Error('Entre novamente na sua conta.');save(Object.assign({},s,{berthaAuthId:id||root.crypto.randomUUID(),expires_at:s.expires_at||Math.floor(Date.now()/1000)+(s.expires_in||3600)}));return session;}
+ function commitLogin(s,attempt){return coordinated(function(){if(attempt.version!==authVersion||attempt.state!==loginState())throw new Error('A conta mudou. Confira antes de entrar.');return storeSession(s);},true);}
+ async function storeSession(s,id){if(!s||!s.access_token||!s.refresh_token)throw new Error('Entre novamente na sua conta.');await save(Object.assign({},s,{berthaAuthId:id||root.crypto.randomUUID(),expires_at:s.expires_at||Math.floor(Date.now()/1000)+(s.expires_in||3600)}));return session;}
  function queuedSession(s,row){return !!s&&(s.berthaAuthId?s.berthaAuthId===row.authId:s.refresh_token===row.refresh_token||s.access_token===row.access_token);}
- function syncSession(){try{session=JSON.parse(storage.getItem(sessionKey)||'null');if(pendingLogouts().some(function(row){return queuedSession(session,row);}))session=null;}catch(_){session=null;}return session;}
+ function syncSession(){if(reauthRequired)return null;try{session=JSON.parse(storage.getItem(sessionKey)||'null');if(pendingLogouts().some(function(row){return queuedSession(session,row);}))session=null;}catch(_){session=null;}return session;}
  function pendingLogouts(){var rows=JSON.parse(storage.getItem(logoutKey)||'[]');if(!Array.isArray(rows))throw new Error('Não foi possível conferir a saída pendente.');return rows;}
- function writeLogouts(rows){if(rows.length)storage.setItem(logoutKey,JSON.stringify(rows));else storage.removeItem(logoutKey);}
+ async function writeLogouts(rows){await mutate(logoutKey,rows.length?JSON.stringify(rows):null);}
  async function drainLogouts(){
   var rows=pendingLogouts();
   for(var row of rows){
@@ -130,12 +149,12 @@ function createClient(options){
      var renewed=await raw('/auth/v1/token?grant_type=refresh_token','POST',{refresh_token:row.refresh_token});
      if(!renewed?.access_token||!renewed.refresh_token||renewed.user?.id!==row.userId)throw new Error('Não foi possível confirmar a saída pendente.');
      row.access_token=renewed.access_token;row.refresh_token=renewed.refresh_token;
-     writeLogouts(pendingLogouts().map(function(x){return x.id===row.id?row:x;}));
+     await writeLogouts(pendingLogouts().map(function(x){return x.id===row.id?row:x;}));
      await raw('/auth/v1/logout?scope=local','POST',{},row.access_token);
     }
     var stored=JSON.parse(storage.getItem(sessionKey)||'null');
-    if(queuedSession(stored,row))storage.removeItem(sessionKey);
-    writeLogouts(pendingLogouts().filter(function(x){return x.id!==row.id;}));
+    if(queuedSession(stored,row))await save(null);
+    await writeLogouts(pendingLogouts().filter(function(x){return x.id!==row.id;}));
    }catch(_){/* Retain the captured operation, including on ambiguous/auth failures. */}
   }
   return {pending:pendingLogouts().length};
@@ -153,10 +172,10 @@ function createClient(options){
     if(renewed?.user?.id!==captured.user?.id)throw new Error('Não foi possível confirmar a renovação desta conta.');
     var current=syncSession();
     if(version!==authVersion||!current||!sameSession(current,captured)||current.refresh_token!==refreshToken)throw new Error('A conta mudou. Entre novamente.');
-    return storeSession(renewed,id).access_token;
+    return (await storeSession(renewed,id)).access_token;
    }catch(e){
     var current=syncSession();
-    if(version===authVersion&&(e.status===400||e.status===401)&&current&&sameSession(current,captured)&&current.refresh_token===refreshToken)save(null);
+    if(version===authVersion&&(e.status===400||e.status===401)&&current&&sameSession(current,captured)&&current.refresh_token===refreshToken)await save(null);
     throw e;
    }
   }).finally(function(){refreshing=null;});}
@@ -191,7 +210,7 @@ function createClient(options){
      var same=current&&sameSession(current,captured),revoked=same?current:captured,rows=pendingLogouts();
      if(!rows.some(function(x){return x.authId===id;}))rows.push({id:root.crypto.randomUUID(),authId:id,userId:revoked.user?.id,access_token:revoked.access_token,refresh_token:revoked.refresh_token});
      // Persist before removing the login. A storage failure must not silently lose revocation.
-     writeLogouts(rows);if(same)save(null);
+     await writeLogouts(rows);if(same)await save(null);
     }
     return drainLogouts();
    });

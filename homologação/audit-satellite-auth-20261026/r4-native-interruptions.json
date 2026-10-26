@@ -1,0 +1,5 @@
+{
+  "afterWriteReopen": "Acesso conferido",
+  "beforeWriteReopen": "AUTH_REAUTH_REQUIRED",
+  "explicitLogin": "Novo acesso confirmado"
+}
