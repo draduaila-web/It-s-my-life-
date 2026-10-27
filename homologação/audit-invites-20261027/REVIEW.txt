@@ -19,7 +19,7 @@ Mudança
 Resultados executados, somente fictícios
 - Baseline exato: três defeitos antigos reproduzidos com handler real e transporte modelado; fontes e resultados preservados.
 - Edge corrigido: 34 passou / 0 falhou. Perdas antes/depois de owner, prepare, reserve, lookup, create, finish; resposta final perdida; 20 requisições concorrentes; substituição explícita concorrente; predecessor obsoleto; usado/expirado/revogado; Owner/tipo; rotação; cancelamento antigo; criação interrompida e novo handler; conclusão antiga atrasada; metadados Auth divergentes; claim/link/verify interrompidos e nonce.
-- Cliente: 6 passou / 0 falhou. Retomada, predecessor, cancelamento cercado, mudança de Owner antes/durante token, ação da conta atual.
+- Cliente: 7 passou / 0 falhou. Retomada, predecessor, cancelamento cercado, mudança de Owner antes/durante token ou durante a resposta, ação da conta atual.
 - Sessão #66 sobre cliente final: 51 passou / 0 falhou, transporte/armazenamento simulados.
 - Navegador real no Mac via IAB, arquivos reais do cliente/interface e Auth/RPC simulados por fixture: 10 observações persistidas, sem falha observada. Duas abas convergem para mesma operação/código; cancelamento; reabertura de cancelado/usado; substituição explícita; Escape/clique repetido; perda de resposta; fechamento/reabertura; reteste final com vínculo Owner. Igualdade entre abas e entre abertura/reabertura confirmada também nos registros salvos. Não é campanha E2E contra Supabase, teste iPhone ou RLS.
 - A desconexão temporária do Mac não executou o clique pendente. Estado foi inspecionado antes de retomar; servidor e abas próprios encerrados ao final. Sessões da usuária não alteradas.

@@ -1,6 +1,6 @@
 {
   "type": "Actual client, synthetic transport/storage",
-  "passed": 6,
+  "passed": 7,
   "failed": 0,
   "results": [
     "default resume carries no new intent",
@@ -8,6 +8,7 @@
     "revoke fenced to observed operation",
     "stale Owner action blocked before network",
     "current Owner can issue independently",
-    "Owner changes while awaiting token blocked"
+    "Owner changes while awaiting token blocked",
+    "response from previous Owner withheld after account switch"
   ]
 }
