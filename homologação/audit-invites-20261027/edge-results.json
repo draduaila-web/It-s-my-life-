@@ -1,0 +1,143 @@
+{
+  "type": "Actual Edge source; synthetic Auth/RPC model, not executed SQL or remote RLS",
+  "passed": 34,
+  "failed": 0,
+  "results": [
+    {
+      "name": "lost response before-owner",
+      "status": "passed"
+    },
+    {
+      "name": "lost response after-owner",
+      "status": "passed"
+    },
+    {
+      "name": "lost response before-prepare",
+      "status": "passed"
+    },
+    {
+      "name": "lost response after-prepare",
+      "status": "passed"
+    },
+    {
+      "name": "lost response before-reserve",
+      "status": "passed"
+    },
+    {
+      "name": "lost response after-reserve",
+      "status": "passed"
+    },
+    {
+      "name": "lost response before-lookup",
+      "status": "passed"
+    },
+    {
+      "name": "lost response after-lookup",
+      "status": "passed"
+    },
+    {
+      "name": "lost response before-create",
+      "status": "passed"
+    },
+    {
+      "name": "lost response after-create",
+      "status": "passed"
+    },
+    {
+      "name": "lost response before-finish",
+      "status": "passed"
+    },
+    {
+      "name": "lost response after-finish",
+      "status": "passed"
+    },
+    {
+      "name": "lost final response and reopen",
+      "status": "passed"
+    },
+    {
+      "name": "20 concurrent requests one account and code",
+      "status": "passed"
+    },
+    {
+      "name": "explicit replacement duplicate requests converges",
+      "status": "passed"
+    },
+    {
+      "name": "stale replacement rejected after next generation",
+      "status": "passed"
+    },
+    {
+      "name": "expired does not silently issue new code",
+      "status": "passed"
+    },
+    {
+      "name": "used does not silently issue new code",
+      "status": "passed"
+    },
+    {
+      "name": "revoked does not silently issue new code",
+      "status": "passed"
+    },
+    {
+      "name": "Owner isolation",
+      "status": "passed"
+    },
+    {
+      "name": "type change cannot reuse reserved identity",
+      "status": "passed"
+    },
+    {
+      "name": "key rotation fails closed and explicit replacement recovers",
+      "status": "passed"
+    },
+    {
+      "name": "stale revoke cannot cancel replacement",
+      "status": "passed"
+    },
+    {
+      "name": "unexpected Auth error does not create account",
+      "status": "passed"
+    },
+    {
+      "name": "claim retry before-claim",
+      "status": "passed"
+    },
+    {
+      "name": "claim retry after-claim",
+      "status": "passed"
+    },
+    {
+      "name": "claim retry before-link",
+      "status": "passed"
+    },
+    {
+      "name": "claim retry after-link",
+      "status": "passed"
+    },
+    {
+      "name": "claim retry before-verify",
+      "status": "passed"
+    },
+    {
+      "name": "claim retry after-verify",
+      "status": "passed"
+    },
+    {
+      "name": "claim invalid format and wrong type",
+      "status": "passed"
+    },
+    {
+      "name": "worker termination after Auth creation and fresh handler recovery",
+      "status": "passed"
+    },
+    {
+      "name": "late old completion cannot overwrite explicit replacement",
+      "status": "passed"
+    },
+    {
+      "name": "foreign Auth metadata never binds reserved account",
+      "status": "passed"
+    }
+  ]
+}

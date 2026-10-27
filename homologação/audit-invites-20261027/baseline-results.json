@@ -1,0 +1,31 @@
+{
+  "type": "Actual Edge handler; simulated Auth/RPC behavior; no network or real accounts",
+  "findings": [
+    {
+      "case": "response lost after committed issue, then retry",
+      "result": "reproduced",
+      "accountsCreated": 1,
+      "codeRecords": 2,
+      "previousCodeRevoked": true,
+      "sameResultReturned": false
+    },
+    {
+      "case": "Auth account created but response lost before member binding, then retry",
+      "result": "reproduced",
+      "accountsCreated": 2,
+      "linkedAccounts": 1,
+      "orphanAccounts": 1
+    },
+    {
+      "case": "concurrent issue calls before member has account",
+      "result": "reproduced",
+      "responses": [
+        200,
+        400
+      ],
+      "accountsCreated": 2,
+      "linkedAccounts": 1,
+      "orphanAccounts": 1
+    }
+  ]
+}
