@@ -1,0 +1,27 @@
+[
+  {
+    "file": "helper-targets-rc363.sql",
+    "passed": true,
+    "error": null
+  },
+  {
+    "file": "helper-invitations-rc371.sql",
+    "passed": true,
+    "error": null
+  },
+  {
+    "file": "helper-guides-rc374.sql",
+    "passed": true,
+    "error": null
+  },
+  {
+    "file": "network-integration-rc381.sql",
+    "passed": true,
+    "error": null
+  },
+  {
+    "file": "kids-integration-rc390.sql",
+    "passed": false,
+    "error": "psql:qa-20261026-satellites/review-source/homologa\u00e7\u00e3o/kids-integration-rc390.sql:174: ERROR:  type \"public.bertha_hml_conversations\" does not exist\nLINE 8:  n public.bertha_hml_networks; c public.bertha_hml_conversat...\n                                         ^\n"
+  }
+]

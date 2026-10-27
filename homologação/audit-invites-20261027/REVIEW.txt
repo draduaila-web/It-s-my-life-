@@ -1,0 +1,59 @@
+UPDATE: see local/RESULTS-R2.txt for subsequent real PostgreSQL/Auth/Deno validation and lock-order correction. The report below is historical.
+
+BERTH.A — convite idempotente — revisão local 27/10/2026
+STATUS: rascunho para revisão, NÃO liberar piloto/deploy com esta evidência.
+
+Base e dependência
+Base exata: PR #66, codex/satellite-session-recovery, 071f82971458987e098287e5d5ea4aeb8cd3b009.
+Este PR deve ter essa branch como base; não inclui merge nem modifica #66.
+O cliente usa a coordenação de sessão do #66. Depois de #66 aprovado/mesclado, rebase/retarget e repetir checks. Não publicar nenhum dos dois automaticamente.
+Árvore base completa verificada: nenhum .github/workflows; branch nova fora de main.
+
+Mudança
+- Reserva durável por membro com UUID Auth antes de qualquer criação de conta. O mesmo UUID/email é usado em toda retomada, inclusive após perda da resposta Auth.
+- Registro de operações por membro e comparação com a operação anterior. Abrir Convite recupera a atual; Gerar novo código exige confirmação e um predecessor observado. Dois pedidos com esse mesmo predecessor convergem.
+- Finish transacional vincula conta, revoga código anterior, insere um código e registra seu resultado. Repetição retorna o mesmo resultado. Conclusão/revogação antiga não altera a operação nova.
+- Código de 60 bits derivado por HMAC-SHA256, com separação de domínio, da chave de serviço já existente e UUID aleatório da operação. Nenhuma chave nova ou código em texto puro no banco. Somente hash do código e identificador da chave. Rotação exige substituição explícita; não emite automaticamente nem usa chave antiga.
+- Códigos usados/expirados/cancelados não são ressuscitados nem substituídos ao reabrir. A mensagem mostra a validade original, não promete mais sete dias.
+- Interface e cliente vinculam ações ao Owner verificado, inclusive se a conta mudar com a janela aberta. Aguarda acceptEmailSession do #66.
+- Uma conta criada antes de uma interrupção pode ficar pendente de vínculo; permanece rastreável pela reserva anterior à criação. Retomada conclui o vínculo. Não há exclusão automática de contas nem compensação destrutiva. Não confundir reserva pendente rastreável com transação distribuída Auth/SQL atomicamente concluída.
+
+Resultados executados, somente fictícios
+- Baseline exato: três defeitos antigos reproduzidos com handler real e transporte modelado; fontes e resultados preservados.
+- Edge corrigido: 34 passou / 0 falhou. Perdas antes/depois de owner, prepare, reserve, lookup, create, finish; resposta final perdida; 20 requisições concorrentes; substituição explícita concorrente; predecessor obsoleto; usado/expirado/revogado; Owner/tipo; rotação; cancelamento antigo; criação interrompida e novo handler; conclusão antiga atrasada; metadados Auth divergentes; claim/link/verify interrompidos e nonce.
+- Cliente: 7 passou / 0 falhou. Retomada, predecessor, cancelamento cercado, mudança de Owner antes/durante token ou durante a resposta, ação da conta atual.
+- Sessão #66 sobre cliente final: 51 passou / 0 falhou, transporte/armazenamento simulados.
+- Navegador real no Mac via IAB, arquivos reais do cliente/interface e Auth/RPC simulados por fixture: 10 observações persistidas, sem falha observada. Duas abas convergem para mesma operação/código; cancelamento; reabertura de cancelado/usado; substituição explícita; Escape/clique repetido; perda de resposta; fechamento/reabertura; reteste final com vínculo Owner. Igualdade entre abas e entre abertura/reabertura confirmada também nos registros salvos. Não é campanha E2E contra Supabase, teste iPhone ou RLS.
+- A desconexão temporária do Mac não executou o clique pendente. Estado foi inspecionado antes de retomar; servidor e abas próprios encerrados ao final. Sessões da usuária não alteradas.
+
+Revisão adversarial de fonte
+1. Tabelas privadas, RLS habilitada, sem políticas de acesso cliente; privilégios PUBLIC/anon/authenticated removidos.
+2. RPC wrapper SECURITY INVOKER, implementação SECURITY DEFINER com search_path vazio e objetos qualificados. Apenas service_role pode executar; legado issue não pode contornar reserva.
+3. Owner, membro ativo, rede, tipo, conta reservada e app_metadata conferidos; nenhuma autorização baseada em user_metadata. Wrapper original claim preserva limites/nonce/expiração.
+4. Trava de linha do membro serializa reserve/finish/revoke; restrições únicas protegem conta por membro e sucessor de cada operação. Trigger preserva tipo/rede/local_id após reserva.
+5. A antiga ordem de locks claim(código->membro) pode disputar com finish(membro->código): PostgreSQL pode abortar uma transação por deadlock, que deve ser repetida com a MESMA operação. Não afrouxar locks. Isso precisa de teste real de duas conexões.
+6. Erro/404 Auth distinguido: apenas 404 permite criação com ID reservado. Nunca procurar/alterar outra conta nem remover conta desconhecida.
+7. Estado intermediário após Auth create é rastreável e recuperável; não há garantia de limpeza automática de reservas abandonadas. Manter tombstones/histórico: apagar ledger pode quebrar idempotência.
+8. Sem logs de códigos, senhas ou sessões na aplicação. Evidências contêm apenas valores explicitamente sintéticos. Nenhum segredo existente foi lido.
+9. A mudança de Owner durante emissão foi encontrada e corrigida nesta revisão; regressões incluídas.
+
+Não executados / requisitos mínimos restantes
+- PostgreSQL/Supabase Auth reais: psql, postgres e supabase CLI não disponíveis no Mac; nenhum software instalado. SQL fornecido como fonte de revisão, não como migração aplicada. idempotency.test.sql está preparado, NÃO executado.
+- Deno typecheck não executado (Deno não instalado). Handler TypeScript transpila e executa em Node 24.22.1 com APIs Web e Deno simulado.
+- Banco descartável local com schema HML completo, auth.users/roles reais, Postgres concorrente e versão Auth que aceite custom id no admin create. Confirmar versões e executar rollback assertions, permissões como anon/authenticated/service_role e corridas em conexões distintas. A fonte oficial atual aceita id; a versão hospedada NÃO foi testada.
+- Para publicar depois: revisão humana, migração gerada pelo CLI do projeto (não inventar sequência), QA local SQL/Auth, aprovação separada de implantação; aplicar SQL/Edge compatíveis em janela coordenada e só então cliente com cache-busting. SQL novo recusa issue legado, portanto não implantar isoladamente em produção. Não fazer rollback apenas da Edge contra SQL novo.
+- A versão antiga não guardava operação/código recuperável; seu primeiro uso no protocolo novo cria uma operação nova uma única vez. Não é possível reconstruir o código antigo a partir do hash. Não migrar emitindo convites em lote.
+- Teste físico iPhone e integração de notificações/permissões continuam pendentes; nenhum convite real enviado. Não há liberação do piloto.
+
+Comandos (raiz do repositório, Node >=24)
+node homologação/audit-invites-20261027/baseline-regression.cjs
+node homologação/audit-invites-20261027/edge-regression.cjs
+node homologação/audit-invites-20261027/client-regression.cjs
+node homologação/audit-invites-20261027/session-regression.cjs
+Browser: servir cópia isolada em localhost e abrir homologação/audit-invites-20261027/browser.html. Essa página substitui fetch APENAS na fixture e não deve ser usada como produto.
+SQL futuro: somente DB descartável local, bertha.test_only=synthetic-local e transação com ROLLBACK. Executar schema existente + fonte nova antes do teste. Nenhum comando remoto neste relatório.
+
+Fontes oficiais consultadas
+https://supabase.com/docs/reference/javascript/auth-admin-createuser
+https://github.com/supabase/auth/blob/master/internal/api/admin.go — AdminUserParams.Id e validação UUID no admin create. Compatibilidade exata do servidor a confirmar localmente.
+https://supabase.com/changelog.md — tentativa de leitura recusada pelo leitor web por formato Markdown não suportado; não usada como prova de compatibilidade.

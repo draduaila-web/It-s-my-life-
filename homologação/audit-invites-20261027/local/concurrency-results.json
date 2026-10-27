@@ -1,0 +1,13 @@
+{
+  "type": "Real PostgreSQL connections; manually seeded synthetic auth.users, not Auth HTTP creation",
+  "passed": 6,
+  "failed": 0,
+  "results": [
+    "24 concurrent reserves produce one operation and reserved Auth UUID",
+    "24 concurrent finalizations produce one code, one account binding",
+    "16 replacements with same predecessor converge",
+    "stale completion and cancellation rejected",
+    "terminated connection rolls back uncommitted replacement",
+    "lost committed reserve response recovered on fresh connection"
+  ]
+}

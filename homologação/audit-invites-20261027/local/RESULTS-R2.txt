@@ -1,0 +1,22 @@
+LOCAL R2 — 27 October 2026
+No hosted deployment, migration, real users or invitations. PR66 unchanged.
+
+Environment: macOS Intel; PostgreSQL 17.11 compiled from official source, Deno 2.9.8 official Intel binary, Go 1.27.3 official distribution, Supabase Auth v2.197.0 compiled from upstream tag 4eee58f296d9698a1c2c0ae14d7a0b379c7622d3. Go module verification passed. All tools installed inside the task; no system Python/security changes. About 3.0 GiB free before final evidence packaging.
+PostgreSQL private Unix socket only; Auth 127.0.0.1:8871; SQL/Auth adapter 127.0.0.1:8872; Deno handler 127.0.0.1:8873. Adapter is NOT PostgREST. Credentials are ephemeral local-only and excluded from this repository.
+
+REAL LOCAL RESULTS:
+- SQL idempotency assertions and actual role/RLS battery: passed, transactions rolled back.
+- Six concurrency cases: passed on current Auth-migrated database; 24 reserves, 24 finishes, 16 replacements, stale actions, interrupted transaction, committed response recovery.
+- Thirteen Deno + Auth + SQL integration scenarios: passed, including lost responses at prepare/reserve/create/finish, concurrent emission/replacement, Owner/type boundaries, real Auth sessions and nonce replay.
+- Auth creation worker exits after commit before binding: passed. Edge resumes the reserved account; one account remains. This is a worker-stage crash, not termination of the full Edge runtime.
+- Claim versus replacement: real deadlock reproduced before fix; same operation recovered. After fix, no deadlock and obsolete code rejected. Fix acquires member before code for claim, matching finish/revoke. Existing legacy validation, rate limit, expiry, nonce and permission checks remain.
+
+REGRESSIONS: 34 Edge model tests, 7 client model tests, 51 session model tests passed again. Existing ten real-browser observations used simulated transport and remain separate; no new browser run for this SQL-only application change.
+
+Preparation issues resolved: initial Auth database was initialized without required auth search_path; preserved it and created fresh bertha_runtime with all Auth migrations. The adapter originally returned empty HTTP body for SQL NULL; corrected to JSON null. SQL fixture reused global code hashes; now unique per run. These are test-environment fixes, not production defects. Services stopped by disconnection were checked before restart; PostgreSQL recovered its existing data. No uncertain operation was blindly replayed.
+
+LIMITS: this is not hosted Supabase/PostgREST/gateway validation, nor a full migration of every RC schema. App SQL dependencies were helper-backend-rc363.sql + satellite-code-rc369.sql plus current review SQL; Auth used official complete migrations. Full Edge-process kill, hosted key rotation, actual browser against this local Auth stack, iPhone, push/location and end-to-end family use are NOT validated here. Earlier browser/model evidence does not substitute for these.
+
+Minimum next step: review PR66/67 together, package SQL using target deployment migration tooling, then validate a separately authorized disposable hosted/staging integration with its exact schema/runtime and test identities. No existing family accounts or credentials should be reused for destructive failure tests. Production deployment/merge remains unauthorized.
+
+Reproduction: prepare isolated PostgreSQL and official Auth as described above; start-auth.py reads private.json generated locally (never commit it), database-name.txt and private socket. Apply exact base SQL then review SQL once. Run psql with ON_ERROR_STOP and bertha.test_only=synthetic-local for idempotency.test.sql and roles.test.sql. Run concurrency.py, claim-race.py <local-db> after, integration.py and orphan-recovery.py. bridge.py and edge-runtime.ts are loopback test adapters only. Preserve original baseline results; claim-race before requires the original PR SQL function.

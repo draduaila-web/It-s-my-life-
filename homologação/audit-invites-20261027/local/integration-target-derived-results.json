@@ -1,0 +1,59 @@
+{
+  "type": "Real Deno 2.9.8, Supabase Auth 2.197.0 and PostgreSQL 17.11 over loopback test adapter (not PostgREST)",
+  "passed": 13,
+  "failed": 0,
+  "results": [
+    {
+      "name": "lost real prepare response, retry one account/code",
+      "status": "passed"
+    },
+    {
+      "name": "lost real reserve response, retry one account/code",
+      "status": "passed"
+    },
+    {
+      "name": "lost real create response, retry one account/code",
+      "status": "passed"
+    },
+    {
+      "name": "lost real finish response, retry one account/code",
+      "status": "passed"
+    },
+    {
+      "name": "8 concurrent real Auth/SQL emissions converge",
+      "status": "passed"
+    },
+    {
+      "name": "8 concurrent explicit replacements reuse Auth account",
+      "status": "passed"
+    },
+    {
+      "name": "stale revoke cannot cancel new real operation",
+      "status": "passed"
+    },
+    {
+      "name": "foreign Owner cannot resume another operation",
+      "status": "passed"
+    },
+    {
+      "name": "wrong type rejected by real SQL",
+      "status": "passed"
+    },
+    {
+      "name": "real Auth session from claimed code",
+      "status": "passed"
+    },
+    {
+      "name": "lost claim response same nonce recovers real Auth access",
+      "status": "passed"
+    },
+    {
+      "name": "different nonce rejected; used result never reissued",
+      "status": "passed"
+    },
+    {
+      "name": "code principal cannot issue as Owner",
+      "status": "passed"
+    }
+  ]
+}

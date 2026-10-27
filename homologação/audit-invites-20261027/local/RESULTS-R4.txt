@@ -1,0 +1,13 @@
+R4 — target-derived local compatibility, 27 October 2026
+Existing authorized connector used only for migration metadata and schema/function definitions. No real rows, tokens, credentials or secrets read. Recovered private definitions remain ONLY in local-db/target-schema, excluded from GitHub. No remote write/deploy.
+
+The missing conversations table is present in the target, originating in migration 20261013101320 (helper social RC364). Its tables/functions and later relevant hardening were reproduced in bertha_target_qa, a separate clone of the synthetic local database. Original prior databases preserved.
+Six final local function bodies match target catalog MD5 exactly: operation_rc363, operation, social_operation, kids_action, sync_tasks and invite_prepare. Current invite_prepare is RC393. The deployed legacy member operation merges existing permissions with edited permissions; the historical migration replaced them. The exact deployed function was used in final tests; PR67 does not overwrite it.
+
+Final PASS: 13 real local Deno/Auth/PostgreSQL HTTP integration scenarios; six real concurrent-connection scenarios; SQL idempotency and role/RLS rollback batteries; RC393 independent missions permission, mandatory Kids Owner validation, permission edit and paused-profile prepare/reserve rejection. Claim/replacement race remains deadlock-free on expanded schema. Auth creation interruption recovered one reserved account. No application defect requiring a new patch was found in this round.
+
+This is scoped compatibility evidence, not identical-environment certification: local PostgreSQL 17.11 versus target 17.6; local HTTP adapter versus hosted gateway/PostgREST. GPS purge cron tail was deliberately omitted; no location data collected. Push SQL/remote calls excluded. Duplicate deny policies already present in source were verified equivalent, not dropped. Full target schema, push/location, hosted infrastructure and iPhone remain unvalidated. Previous browser and full Edge crash results are separate R3 evidence; browser was not repeated on R4 schema.
+
+PR67 application source unchanged. Services stopped cleanly, 2.9 GiB free, tools and previous versions preserved. Target definitions were NOT uploaded.
+
+Readiness: suitable for next isolated destination integration validation; not family/production release. Next authorization must identify an isolated staging destination and explicitly permit applying reviewed SQL/Edge/client candidates there, creating synthetic test identities and an iPhone test invitation. No permission to modify the existing production database or publish/merge is implied. Any new project/cost/credential requires its own explicit approval.
