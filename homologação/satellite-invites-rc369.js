@@ -13,12 +13,12 @@ async function ownerAccess(m){
   return await new Promise(function(resolve){var d=modal('Conectar a rede do Owner','<p>Usar <strong>'+H.escape(existing.user?.email||'sua conta')+'</strong> para organizar esta rede?</p><p class="note">Essa conta será a responsável pelos convites e conteúdos compartilhados. Seus cadastros locais serão preservados.</p><button class="primary" id="useOwner" type="button">Conectar minha rede</button>');var done=false;d.addEventListener('close',function(){if(!done)resolve(false);});d.querySelector('#useOwner').onclick=async function(){this.disabled=true;try{var checked=await client.inspectEmailSession(existing);if(checked.user.app_metadata?.bertha_code_member)throw new Error('Use a conta do Owner.');await client.acceptEmailSession(checked);localStorage.setItem(adultKey,JSON.stringify(checked));done=true;d.close();resolve(checked.user.id);}catch(e){d.querySelector('.sat-invite-status').textContent=e.message;this.disabled=false;}};});
  }
  if(m)localStorage.setItem(pendingKey,String(m.id));
- modal('Conectar a rede do Owner','<p>Seu satélite já está salvo. Para emitir códigos válidos, conecte sua conta do Owner uma vez neste aparelho.</p><p class="note">O convidado entrará apenas com o código, sem e-mail ou senha. Ao voltar, a BERTH.A gera o convite deste cadastro.</p><a class="primary" href="helper-owner.html?v=369">Conectar minha conta do Owner</a>');return false;
+ modal('Conectar a rede do Owner','<p>O cadastro dessa pessoa já está salvo. Para emitir códigos válidos, conecte sua conta do Owner uma vez neste aparelho.</p><p class="note">O convidado entrará apenas com o código, sem e-mail ou senha. Ao voltar, a BERTH.A gera o convite deste cadastro.</p><a class="primary" href="helper-owner.html?v=369">Conectar minha conta do Owner</a>');return false;
 }
 async function issue(m,previousOperation,expectedOwner){
  if(busy)return;busy=true;var d;
  try{
-  if(!m||['removed','paused'].includes(m.status))throw new Error('Escolha um satélite ativo.');
+  if(!m||['removed','paused'].includes(m.status))throw new Error('Escolha um membro ativo da rede.');
   var ownerId=await ownerAccess(m);if(!ownerId)return;if(expectedOwner&&expectedOwner!==ownerId)throw new Error('A conta mudou. Reabra o convite na rede do Owner.');
   d=modal('Preparando o convite','<p>Conectando o cadastro à sua rede…</p>');
   var result=await client.inviteCode(payload(m),'issue',previousOperation,ownerId);d.close();

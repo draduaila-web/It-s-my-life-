@@ -21,7 +21,7 @@ async function openPanel(mode){
   if(!client.session())throw new Error('Conecte sua conta do Owner uma vez para acessar sua rede.');
   var user=await client.user(),networks=await client.query('bertha_hml_networks','select=*'),network=networks.find(function(n){return n.owner_id===user.id;});
   if(generation!==panelEpoch||!panel?.isConnected)return;
-  if(!network)throw new Error('Conecte um satélite para criar sua rede.');
+  if(!network)throw new Error('Conecte uma pessoa para criar sua rede.');
   content.removeAttribute('role');if(mode==='guides'){await window.BerthaGuides.mountOwner(content,{client:client,user:user,network:network,people:people});return;}transport=window.BerthaSocial.create({client:client,user:user,network:network,owner:true,escape:H.escape});await transport.mount(content,mode);
  }catch(e){if(generation!==panelEpoch||!panel?.isConnected)return;content.textContent=e.message;if(!client.session()){var link=document.createElement('a');link.className='s156-btn';link.href='helper-owner.html?v=372&return=main';link.textContent='Conectar minha conta';content.appendChild(link);}}
 }
