@@ -1,0 +1,7 @@
+{
+  "mode": "after",
+  "deadlock_reproduced": false,
+  "recovery_same_operation": "passed",
+  "passed": true,
+  "real_postgresql": true
+}

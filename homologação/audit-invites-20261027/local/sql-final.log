@@ -1,0 +1,20 @@
+SET
+BEGIN
+psql:qa-20261027-invites/source/homologação/audit-invites-20261027/idempotency.test.sql:41: NOTICE:  PASS local idempotency/authorization assertions
+DO
+ROLLBACK
+BEGIN
+SET
+CREATE TABLE
+GRANT
+DO
+SET
+DO
+RESET
+SET
+DO
+RESET
+SET
+DO
+RESET
+ROLLBACK

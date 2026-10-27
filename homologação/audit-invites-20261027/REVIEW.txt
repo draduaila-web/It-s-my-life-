@@ -1,3 +1,5 @@
+UPDATE: see local/RESULTS-R2.txt for subsequent real PostgreSQL/Auth/Deno validation and lock-order correction. The report below is historical.
+
 BERTH.A — convite idempotente — revisão local 27/10/2026
 STATUS: rascunho para revisão, NÃO liberar piloto/deploy com esta evidência.
 

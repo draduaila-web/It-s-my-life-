@@ -1,0 +1,6 @@
+{
+  "passed": 1,
+  "failed": 0,
+  "scenario": "Real Auth creation worker exits after commit before binding; unchanged Edge resumes reserved UUID without duplicate account",
+  "limit": "Worker-stage interruption, not kill of Edge runtime process"
+}

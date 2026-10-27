@@ -34,7 +34,14 @@ declare m public.bertha_hml_members;a private.bertha_hml_invite_accounts;o priva
  c private.bertha_hml_codes;owner uuid;previous uuid;uid uuid;result jsonb;state text;
 begin
  if coalesce(auth.jwt()->>'role','')<>'service_role' then raise exception 'Acesso indisponível.' using errcode='42501';end if;
- if op='claim' then return private.bertha_hml_code_service_rc369(op,arg);end if;
+ if op='claim' then
+  -- Match finish/revoke lock order: member before code. The legacy claim still
+  -- validates hashes, rate limits, expiry, revocation, kind and nonce under lock.
+  perform 1 from public.bertha_hml_members members
+   where members.id=(select codes.member_id from private.bertha_hml_codes codes
+    where codes.code_hash=arg->>'code_hash' limit 1) for update;
+  return private.bertha_hml_code_service_rc369(op,arg);
+ end if;
  -- Legacy issue is intentionally disabled; it must not bypass the durable reservation.
  if op is null or op not in ('reserve','finish','revoke') then raise exception 'Atualize o serviço de convites.';end if;
  owner:=(arg->>'owner_id')::uuid;
