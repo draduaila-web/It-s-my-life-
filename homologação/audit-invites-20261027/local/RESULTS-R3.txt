@@ -1,0 +1,16 @@
+LOCAL R3 — closure after reconnect 27 October 2026
+No application source change after 7b75c3ed2781a9e6f926f977b2ec687fd9ce5384. This update adds fixtures and evidence only.
+
+PASS: actual Deno process killed after prepare, reserve, Auth creation and finish. Four restarts recovered one account and code each; same completed operation/code recovered again. This supersedes R2 full-Edge-kill pending status.
+PASS: real Mac in-app browser confirmed Owner via local Auth; production invite UI showed error after dropped actual response, preserved one account/code/operation, reopened successfully, and recovered identical code after page reload. Production client enterCode obtained and verified a Kids Auth session. This uses an isolated harness, not the complete Kids app or iPhone. Fetch only redirects production URLs to loopback; API results are real local Auth/SQL.
+PASS: after reconnect, preserved DOM showed Kids confirmation, database independently showed 1 member/account/code/claimed-code/session. Did not repeat claim. Integration run completed before disconnect: 13 passed / 0 failed, verified from complete saved JSON.
+INCOMPLETE: re-opening used invitation after reconnection encountered stopped HTTP servers, so is not classified as an application failure. Earlier model and HTTP integration cover used-code behavior, separately.
+
+Schema expansion: helper-targets-rc363.sql, helper-invitations-rc371.sql, helper-guides-rc374.sql and network-integration-rc381.sql applied locally. kids-integration-rc390.sql failed transactionally because public.bertha_hml_conversations is absent. Creation SQL for this dependency is absent from available repository SQL; audit-rc395/network-backend.sql is a rollback test, not the missing schema. Later dependent scripts were not applied. Existing target schema/version remains unverified; no remote database queried or changed.
+Push SQL deliberately not applied: helper-push-rc371.sql schedules pg_net calls to the real hosted function. No stubs were substituted.
+
+PostgREST v16.5 official Intel archive 2,707,116 bytes verified SHA256 dd4d346cd65dba4863ae02686fd09d2e34bbb6889e05d8ff7f1ac42ba0939515, downloaded from official GitHub release. Binary requires macOS 15 versus this macOS 14 and /usr/local/opt/libpq/lib/libpq.5.dylib. Execution failed in dynamic loader. No compatibility workaround, downgrade or system modification. PostgreSQL/Auth/Deno through adapter does not validate this gateway.
+
+Final: 2.9 GiB free; HTTP fixture/Auth/Edge processes were already absent after disconnect; only this test PostgreSQL was stopped cleanly at closure. Tools, databases, personal files and older versions preserved. No remote credentials, real invitation, merge or deploy.
+
+Single next minimum step: obtain the complete target schema/version via authorized read-only inspection/export of schema and migration metadata (no row data or secrets). This establishes the missing conversations dependency and compatible gateway/runtime before proposing an isolated destination/iPhone validation. No remote staging creation or deployment is authorized by this report.

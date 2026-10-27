@@ -1,0 +1,35 @@
+{
+  "passed": 4,
+  "failed": 0,
+  "transport": "real Auth/PostgreSQL through local fault adapter, not PostgREST",
+  "results": [
+    {
+      "stage": "prepare",
+      "status": "passed",
+      "actual_deno_process_killed": true,
+      "accounts": 1,
+      "codes": 1
+    },
+    {
+      "stage": "reserve",
+      "status": "passed",
+      "actual_deno_process_killed": true,
+      "accounts": 1,
+      "codes": 1
+    },
+    {
+      "stage": "create",
+      "status": "passed",
+      "actual_deno_process_killed": true,
+      "accounts": 1,
+      "codes": 1
+    },
+    {
+      "stage": "finish",
+      "status": "passed",
+      "actual_deno_process_killed": true,
+      "accounts": 1,
+      "codes": 1
+    }
+  ]
+}

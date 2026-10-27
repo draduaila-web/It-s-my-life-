@@ -3,7 +3,7 @@
 from http.server import ThreadingHTTPServer,BaseHTTPRequestHandler
 from pathlib import Path
 import urllib.request,urllib.error,json,subprocess,sys,threading
-r=Path(sys.argv[1]).resolve();cfg=json.loads((r/'private.json').read_text());fault=None;lock=threading.Lock()
+r=Path(sys.argv[1]).resolve();cfg=json.loads((r/'private.json').read_text());fault=None;lock=threading.Lock();release=threading.Event()
 def sql(query):
  p=subprocess.run([str(r/'pg17/bin/psql'),'-X','-qAt','-v','ON_ERROR_STOP=1','-h',str(r/'socket'),'-p','55467','-d',(r/'database-name.txt').read_text().strip()],input=query,text=True,capture_output=True)
  if p.returncode:raise RuntimeError('Local SQL operation failed: '+p.stderr.splitlines()[0][:180])
@@ -22,9 +22,12 @@ class Handler(BaseHTTPRequestHandler):
   global fault
   try:
    token=self.headers.get('Authorization','')
+   if self.path=='/__release':
+    if token!='Bearer '+cfg['service']:self.reply(403,b'{}');return
+    release.set();self.reply(200,b'{}');return
    if self.path=='/__fault':
     if token!='Bearer '+cfg['service']:self.reply(403,b'{}');return
-    with lock:fault=json.loads(body)['stage']
+    with lock:fault=json.loads(body)['stage'];release.clear()
     self.reply(200,b'{}');return
    stage=''
    if self.path.startswith('/auth/v1/'):
@@ -42,7 +45,11 @@ class Handler(BaseHTTPRequestHandler):
    else:self.reply(404,b'{}');return
    with lock:
     drop=status==200 and fault==stage
-    if drop:fault=None
+    hold=status==200 and fault==stage+'-hold'
+    if drop or hold:fault=None
+   if hold:
+    (r/'hold-marker.txt').write_text(stage)
+    release.wait(60)
    if drop:self.connection.shutdown(2);self.connection.close();return
    self.reply(status,result or b'null')
   except Exception:self.reply(500,b'{"message":"Local test adapter error"}')

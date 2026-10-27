@@ -1,0 +1,22 @@
+{
+  "type": "Actual Mac in-app browser, unchanged client/invite UI, real local Auth and Deno/PostgreSQL through a loopback adapter; NOT PostgREST or full Kids app/iPhone",
+  "passed": [
+    "Owner session verified by Auth",
+    "Lost final response reports recoverable error",
+    "Lost response leaves one account/code/operation",
+    "Reopen returns completed invitation",
+    "Page reload recovers same code",
+    "Kids enterCode obtains session and verifies user against Auth"
+  ],
+  "database_after_reconnect": {
+    "members": 1,
+    "accounts": 1,
+    "codes": 1,
+    "claimed": 1,
+    "sessions": 1
+  },
+  "not_completed": [
+    "Reopen used invitation after disconnect: HTTP fixture had stopped; no app failure inferred"
+  ],
+  "screenshot": "browser-kids-confirmed.png retained locally; no token/code shown"
+}
