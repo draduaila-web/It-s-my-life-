@@ -65,8 +65,8 @@
     },
     {
       title:'Conte com sua rede',
-      body:'Em Mais → Satélites, toque em Adicionar satélite, cadastre a pessoa e confira as permissões. Quando o convite estiver disponível, compartilhe-o para a pessoa se conectar e participar da sua rotina.',
-      visual:introductionScene('network', 'Satélite de exemplo: Alex, Adulto, permissão Casa. Convite para compartilhar quando disponível, ainda não enviado. Emitir o convite exige conexão. Copiar não envia o convite.',
+      body:'Em Mais → Rede, toque em Adicionar pessoa, cadastre a pessoa e confira as permissões. Quando o convite estiver disponível, compartilhe-o para a pessoa se conectar e participar da sua rotina.',
+      visual:introductionScene('network', 'Pessoa de exemplo: Alex, Adulto, permissão Casa. Convite para compartilhar quando disponível, ainda não enviado. Emitir o convite exige conexão. Copiar não envia o convite.',
         '<div class="bertha-introduction-person-card"><span class="bertha-introduction-person-icon">' + introductionIcon('network') + '</span><div><strong>Alex</strong><span>Adulto</span></div><div class="bertha-introduction-permission">' + introductionIcon('home') + '<span>Permissão<strong>Casa</strong></span></div></div>' +
         '<div class="bertha-introduction-invitation"><span class="bertha-introduction-icon">' + introductionIcon('invite') + '</span><div><span class="bertha-introduction-small-label">Quando disponível</span><strong>Convite para compartilhar</strong><span>Ainda não enviado</span></div></div>' +
         '<p class="bertha-introduction-scene-note">Emitir o convite exige conexão.<br>Copiar não envia o convite.</p>')

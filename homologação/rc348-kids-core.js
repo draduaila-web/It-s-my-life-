@@ -427,7 +427,7 @@ window.BerthaKidsAccessoriesRC347={"mist_mist_v1_cat_head_0": "rc347_acc_mist_mi
   window.r152KidsPanel=function(mid){
     const kids=(window.loadSatellites?.().members||[]).filter(m=>m.status!=='removed'&&m.role==='kids');
     const member=kids.find(k=>String(k.id)===String(mid))||kids[0];
-    if(!member)return '<section class="r147-card"><div class="sat-empty">Cadastre um satélite como Kids para configurar a trilha.</div></section>';
+    if(!member)return '<section class="r147-card"><div class="sat-empty">Cadastre um perfil Kids na Rede para configurar a trilha.</div></section>';
     const mode=paletteMode(member); window.__rc208Palette=mode; window.__rc209Member=member.id;
     const c=window.r152EnsureCycle(member.id), col=COLLECTIONS[c.theme], box=window.r152Box(member.id).box, hist=box.history||[], sd=stageData(member.id,c), pet=PET_MAP[c.pet];
     const trail=[['bronze','Medalha Bronze'],['prata','Medalha Prata'],['ouro','Medalha Ouro'],['trofeu','Troféu'],['super','Super Troféu']];

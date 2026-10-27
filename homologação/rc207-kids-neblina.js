@@ -134,7 +134,7 @@
     const kids=(loadSatellites().members||[]).filter(m=>m.status!=='removed'&&m.role==='kids');
     const member=kids.find(k=>String(k.id)===String(mid))||kids[0];
     ACTIVE_KID_PALETTE=kidsPaletteFor(member);
-    if(!member)return '<section class="r147-card"><div class="sat-empty">Cadastre um satélite como Kids para configurar um Ciclo de Progressão.</div></section>';
+    if(!member)return '<section class="r147-card"><div class="sat-empty">Cadastre um perfil Kids na Rede para configurar um Ciclo de Progressão.</div></section>';
     const c=r152EnsureCycle(member.id), box=r152Box(member.id).box, hist=box.history||[], p=loadKidsProgress()[member.id]||{lifetime:0,season:0,log:[]};
     const units=Math.floor((+p.lifetime||0)/Math.max(1,+c.pointsPerStep||20)),idx=Math.min(5,units),after=Math.max(0,units-6),unlocked=Math.min(5,Math.floor(after/Math.max(1,+c.medalsPerAccessory||3))),used=new Set(hist.map(h=>h.pet));
     const trail=[['medal_bronze','Bronze'],['medal_silver','Prata'],['medal_gold','Ouro'],['trophy','Troféu'],['super_trophy','Super Troféu'],[COLLECTION.capsule,'Cápsula']];

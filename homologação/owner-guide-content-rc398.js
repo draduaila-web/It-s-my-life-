@@ -320,15 +320,15 @@
     },
     {
       "id": "satelites",
-      "title": "Satélites",
+      "title": "Rede",
       "steps": [
-        "Use Adicionar satélite, informe nome e tipo e revise as permissões antes de Salvar.",
+        "Use Adicionar pessoa, informe nome e tipo e revise as permissões antes de Salvar.",
         "Para conectar essa pessoa em outro aparelho, siga o Convite do cadastro. Se solicitado, conecte a conta do Owner e confira o código e o link exibidos.",
         "Copiar convite completo apenas copia o texto. Compartilhe com a pessoa; essa mensagem de acesso não é enviada automaticamente.",
         "Em Pendências do Owner, use Ver atividade para revisar e Validar conclusão quando a conclusão estiver pendente."
       ],
       "example": "“Alex”, Adulto, recebe somente a permissão Casa e tarefas compartilhadas. Nenhum cadastro, código ou mensagem é criado pelo guia.",
-      "note": "Salvar um novo satélite já inicia a emissão do código ou o fluxo de conexão. Revise nome, tipo e permissões antes de salvar.",
+      "note": "Salvar uma nova pessoa já inicia a emissão do código ou o fluxo de conexão. Revise nome, tipo e permissões antes de salvar.",
       "placements": [
         {
           "route": "#satelites",
@@ -361,7 +361,7 @@
         "Escolha Owner, Kids ou Reconhecimentos conforme o que quer consultar.",
         "Em Owner, abra Sala de Troféus para ver registros. Personalizar conquistas do Owner permite ajustar critérios e recorrência.",
         "Em Kids, selecione a criança e consulte pontos e acessórios. Concluir pet só fica disponível ao chegar a 5/5 acessórios.",
-        "Para agradecer a alguém específico, vá ao cartão da pessoa em Satélites e toque em Reconhecer. Confira a mensagem antes de Enviar reconhecimento."
+        "Para agradecer a alguém específico, vá ao cartão da pessoa em Rede e toque em Reconhecer. Confira a mensagem antes de Enviar reconhecimento."
       ],
       "example": "Um reconhecimento para “Alex”: “Obrigada pela ajuda de hoje”. O guia não envia a mensagem nem concede prêmios.",
       "note": "Em Kids, mudanças de Coleção e Pet são salvas imediatamente. Ver uma imagem na Sala de Troféus não significa conquista obtida; envio de reconhecimento não comprova leitura.",

@@ -4271,7 +4271,7 @@
       ['receitas','recipe','Receitas','Seu repertório'],
       ['financeiro','wallet','Financeiro','Entradas, saídas e atenção'],
       ['ideias','idea','Criação & Ideias','Projetos e inspirações'],
-      ['satelites','network','Satélites','Família, ajuda e Kids'],
+      ['satelites','network','Rede','Família, ajuda e Kids'],
       ['convites','invite','Convites','Almoço, academia e momentos juntos'],
       ['premiacoes','award','Premiações','Conquistas, Kids e reconhecimentos']
     ];
