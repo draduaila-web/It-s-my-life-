@@ -1,0 +1,3 @@
+const events=new EventTarget();globalThis.addEventListener=events.addEventListener.bind(events);globalThis.removeEventListener=events.removeEventListener.bind(events);globalThis.dispatchEvent=events.dispatchEvent.bind(events);
+const H=require(process.env.BERTHA_CLIENT||'../helper-client-rc393.js'),{serialLocks}=require('./session-cases.js');
+require('./session-r3-cases.js').run(H,serialLocks()).then(results=>{for(const r of results)console.log((r.ok?'PASS ':'FAIL ')+r.name);console.log(JSON.stringify({passed:results.filter(r=>r.ok).length,failed:results.filter(r=>!r.ok).length}));if(results.some(r=>!r.ok))process.exitCode=1;});

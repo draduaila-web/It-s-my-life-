@@ -50,7 +50,7 @@ async function restoreEmailLink(){
  if(failed){notice('Este link expirou ou já foi utilizado. Solicite um novo link.',true);return true;}
  try{var candidate=await client.inspectEmailSession({access_token:access,refresh_token:refresh,expires_in:Number.isFinite(expires)&&expires>0?expires:3600});
   var requested=authStorage.storage.getItem(pendingEmailKey),same=requested&&requested.toLowerCase()===candidate.user.email.toLowerCase();
-  async function accept(){client.acceptEmailSession(candidate);authStorage.storage.removeItem(pendingEmailKey);await initialize();}
+  async function accept(){await client.acceptEmailSession(candidate);authStorage.storage.removeItem(pendingEmailKey);await initialize();}
   if(same)await accept();else{modal('Confirmar meu acesso','<p>Entrar como <strong>'+safe(candidate.user.email)+'</strong>?</p><p class="note">O link abriu em outro navegador ou aparelho. Confirme que este é o seu e-mail para entrar com segurança. Depois, você poderá aceitar o convite do Owner.</p>',accept);}
  }catch(err){fail(err);}return true;
 }
@@ -69,7 +69,7 @@ function account(){
  if(!kidsMode){d.querySelector('#activateSocialPush').onclick=async function(){this.disabled=true;try{var result=await window.BerthaHelperPush.activate(client,user);this.textContent=result.enabled?'Avisos ativados':'Permitir avisos neste aparelho';d.querySelector('#pushState').textContent=result.enabled?'Notificações de mensagens e convites ativadas neste aparelho.':'Serviço pronto. Toque novamente em Ativar para permitir os avisos neste aparelho.';}catch(e){d.querySelector('#pushState').textContent=e.message;}finally{this.disabled=false;}};
  d.querySelector('#stopSocialPush').onclick=async function(){try{await window.BerthaHelperPush.stop(client,user);d.querySelector('#pushState').textContent='Avisos de mensagens e convites interrompidos neste aparelho.';}catch(e){d.querySelector('#pushState').textContent=e.message;}};
  }
- d.querySelector('#signout').onclick=async function(){await window.BerthaHelperPush.stop(client,user).catch(function(){});clearTransport(true);try{await client.signOut();}catch(_){}authStorage.storage.removeItem(pendingEmailKey);sessionStorage.removeItem(inviteKey);user=null;members=[];tasks=[];network=null;generation++;clearInterval(interval);d.close();render();};
+ d.querySelector('#signout').onclick=async function(){await window.BerthaHelperPush.stop(client,user).catch(function(){});var exit;try{exit=await client.signOut();}catch(e){fail(e);return;}clearTransport(true);authStorage.storage.removeItem(pendingEmailKey);sessionStorage.removeItem(inviteKey);user=null;members=[];tasks=[];network=null;generation++;clearInterval(interval);d.close();render();notice(exit.pending?'Acesso removido deste aparelho. A confirmação da saída está pendente e será tentada quando a conexão voltar.':'Você saiu desta conta.');};
 }
 function taskHtml(t){
  var guide=guides.find(function(g){return g.source_ref===String(t.source_ref||'').split('|').slice(0,2).join('|');});
@@ -188,10 +188,13 @@ async function initialize(){
  try{user=await client.user();await loadRemote();if(owner&&(localStorage.getItem('bertha.hml.invite.pending.v369')||new URLSearchParams(location.search).get('return')==='main')){location.replace('./?v=372#satelites');return;}clearInterval(interval);interval=setInterval(function(){if(document.visibilityState==='visible'&&user&&!owner&&!document.querySelector('dialog[open]')&&document.activeElement?.id!=='search')loadRemote().catch(fail);},20000);}
  catch(e){user=null;render();fail(e);}
 }
-window.addEventListener('storage',function(e){if(e.key!==authKey)return;generation++;user=null;members=[];tasks=[];network=null;clearInterval(interval);render();restoreEmailLink().then(function(handled){if(!handled&&client.session())initialize();});});
+window.addEventListener('storage',function(e){if(e.key!==authKey&&e.key!==authKey+'.pendingLogout.v1')return;clearTransport(true);generation++;user=null;members=[];tasks=[];network=null;clearInterval(interval);function resumePendingLogout(){if(!client.logoutStatus().pending)return;client.resumeLogout().then(function(r){if(!user)notice(r.pending?'Acesso removido deste aparelho. A confirmação da saída ainda está pendente.':'Saída confirmada.');}).catch(fail);}
+render();resumePendingLogout();restoreEmailLink().then(function(handled){if(!handled&&client.session())initialize();});});
+window.addEventListener('bertha-auth-required',function(e){if(e.detail?.sessionKey!==authKey)return;clearTransport(false);generation++;user=null;members=[];tasks=[];network=null;clearInterval(interval);document.querySelectorAll('dialog[open]').forEach(function(d){d.close();});render();notice('Seu acesso foi interrompido. Entre novamente; saídas pendentes serão preservadas.',true);});
 window.addEventListener('offline',function(){notice('Você está sem conexão. Aguarde antes de confirmar atividades.',true);});
-window.addEventListener('online',function(){if(user)loadRemote().then(function(){notice('Conexão retomada.');}).catch(fail);});
-render();restoreEmailLink().then(function(handled){if(!handled&&client.session())initialize();});
+window.addEventListener('online',function(){resumePendingLogout();if(user)loadRemote().then(function(){notice('Conexão retomada.');}).catch(fail);});
+function resumePendingLogout(){if(!client.logoutStatus().pending)return;client.resumeLogout().then(function(r){if(!user)notice(r.pending?'Acesso removido deste aparelho. A confirmação da saída ainda está pendente.':'Saída confirmada.');}).catch(fail);}
+render();resumePendingLogout();restoreEmailLink().then(function(handled){if(!handled&&client.session())initialize();});
 })();
 
 

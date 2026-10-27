@@ -1,0 +1,14 @@
+PASS Crash after intent but before login write requires explicit reauthentication, then recovers
+PASS Crash after login write before hash publication recovers exact new login automatically
+PASS Lost response of hash publication accepts already committed fingerprint on reopening
+PASS Interruption before logout queue write cannot silently resume access; explicit login recovers
+PASS Interruption after logout queue write never resurrects captured session
+PASS Interruption before removing login keeps tombstone; explicit login preserves queued revocation
+PASS Interruption after removing login recovers logout without restoring old login
+PASS Interruption after confirmed queue removal recovers empty state
+PASS Legacy R3 mismatch can be superseded only by fresh explicit login, retaining queue
+PASS Reopening old client after recovery does not invalidate newer login
+PASS Interrupted migration queue checkpoint reopens without losing source or revocations
+PASS Interrupted migration login checkpoint reopens without losing source or revocations
+PASS Malformed coherence metadata requires fresh login without discarding pending queue
+{"passed":13,"failed":0}

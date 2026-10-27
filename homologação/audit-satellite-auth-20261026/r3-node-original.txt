@@ -1,0 +1,18 @@
+PASS Offline logout persists revocation and removes login; reopening drains it
+PASS Lost logout response retries idempotently without restoring access
+PASS Expired pending logout renews only captured identity and revokes it
+PASS Pending logout cannot install a different identity from renewal
+PASS Storage failure before queue write preserves login and makes no request
+PASS Failed login removal remains blocked by pending logout tombstone
+PASS Same-instance refresh requests collapse
+PASS Two clients sharing a lock renew once and both succeed
+PASS Late refresh rejection does not erase a replacement session
+PASS Late successful refresh does not overwrite replacement session
+PASS Logout during in-flight renewal never resurrects login
+PASS Pending old logout leaves new login intact
+PASS Lost refresh response remains retryable with token-parent recovery
+PASS Real rejection of unchanged refresh clears only that login
+PASS No lock capability fails closed on renewal and preserves login
+PASS Retry invitation uses same caller nonce and verifies member identity
+PASS Account-bound social call blocks after account changes
+{"passed":17,"failed":0}

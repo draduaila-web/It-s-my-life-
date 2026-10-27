@@ -1,0 +1,7 @@
+PASS Stale storage waits for committed fingerprint before reading token
+PASS Unresolved stale state fails closed without refresh or journal overwrite
+PASS Unavailable journal prevents auth action without deleting login
+PASS Initial journal write failure prevents network and preserves session
+PASS Journal stores only fingerprints and non-secret scope, never credential contents
+PASS Failure publishing completed logout preserves pending revocation for inspection
+{"passed":6,"failed":0}

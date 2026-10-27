@@ -1,0 +1,2 @@
+Old request: Consulta rejeitada: old refresh rejected
+New intent rejected on state change, explicit retry: Sessão fictícia expirada preparada

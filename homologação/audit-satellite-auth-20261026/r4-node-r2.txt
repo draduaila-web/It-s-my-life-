@@ -1,0 +1,16 @@
+PASS Concurrent login waits for renewal; stale intent cannot overwrite committed session
+PASS Concurrent login waits for logout; retry remains installed after old revocation
+PASS Login response arriving after logout cannot reopen old account
+PASS Two login responses cannot silently overwrite the winning login
+PASS Pending expired old logout never replaces or removes new login
+PASS Expired and rejected pending credentials stay blocked, not falsely confirmed
+PASS Migration preserves pending logout
+PASS Migration preserves pending logout and never resurrects failed-removal login
+PASS Migration keeps destination login and merges distinct queues
+PASS Interrupted migration queue-write preserves source and retries safely
+PASS Interrupted migration login-write preserves source and retries safely
+PASS Interrupted migration source-remove preserves source and retries safely
+PASS Unavailable primary uses fallback; reopening retains pending logout
+PASS Malformed migration queue fails closed without any request
+PASS Accepted email session waits for coordination and survives old revocation
+{"passed":15,"failed":0}
