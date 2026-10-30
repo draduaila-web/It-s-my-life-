@@ -353,7 +353,7 @@
       const eyebrow=hero.querySelector('.eyebrow');
       const h=hero.querySelector('h2');
       const p=hero.querySelector('p');
-      if(eyebrow)eyebrow.textContent='PREMIAÇÕES';
+      if(eyebrow)eyebrow.textContent='RECONHECIMENTOS';
       if(h)h.textContent='Progress worth celebrating.';
       if(p)p.textContent='Conquistas para você. Gamificação para Kids. Reconhecimento para quem caminha junto.';
       hero.querySelector('.r147-hero-orbit,.r163-reward-hero-icon,.r162-reward-hero-icon,.r164-hero-icon')?.remove();
