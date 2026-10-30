@@ -356,7 +356,7 @@
     },
     {
       "id": "premiacoes",
-      "title": "Premiações",
+      "title": "Reconhecimentos",
       "steps": [
         "Escolha Owner, Kids ou Reconhecimentos conforme o que quer consultar.",
         "Em Owner, abra Sala de Troféus para ver registros. Personalizar conquistas do Owner permite ajustar critérios e recorrência.",
